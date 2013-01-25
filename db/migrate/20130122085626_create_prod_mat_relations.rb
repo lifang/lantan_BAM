@@ -6,7 +6,6 @@ class CreateProdMatRelations < ActiveRecord::Migration
       t.number :material_num
       t.integer :material_id
 
-      t.timestamps
     end
   end
 end

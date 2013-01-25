@@ -16,7 +16,7 @@ class CreateStaffs < ActiveRecord::Migration
       t.number :phone
       t.string :address
       t.string :photo
-      t.number :base_salary
+      t.float :base_salary
       t.integer :deduct_at   #提成开始数量
       t.interger :deduct_end  #提成结束数量
       t.float :deduct_percent

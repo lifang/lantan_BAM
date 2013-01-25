@@ -5,7 +5,6 @@ class CreateStaffRoleRelations < ActiveRecord::Migration
       t.integer :role_id
       t.integer :staff_id
 
-      t.timestamps
     end
   end
 end

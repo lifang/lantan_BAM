@@ -6,7 +6,6 @@ class CreateSaleProdRelations < ActiveRecord::Migration
       t.integer :product_id
       t.number :prod_num
 
-      t.timestamps
     end
   end
 end

@@ -5,7 +5,6 @@ class CreateTrainStaffRelations < ActiveRecord::Migration
       t.integer :staff_id
       t.boolean :status
 
-      t.timestamps
     end
   end
 end

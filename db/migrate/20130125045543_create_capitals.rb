@@ -3,7 +3,6 @@ class CreateCapitals < ActiveRecord::Migration
     create_table :capitals do |t|
       t.string :name
 
-      t.timestamps
     end
   end
 end

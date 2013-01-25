@@ -9,7 +9,7 @@ class CreateComplaints < ActiveRecord::Migration
       t.integer :types
       t.integer :staff_id_1  #投诉技师
       t.integer :staff_id_2
-      t.number :process_at   #处理时间
+      t.datetime :process_at   #处理时间
       t.boolean :is_violation   #是否违规
       t.integer :customer_id
 

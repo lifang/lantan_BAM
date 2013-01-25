@@ -4,10 +4,10 @@ class CreateSvcardUseRecords < ActiveRecord::Migration
     create_table :svcard_use_records do |t|
       t.integer :c_svc_relation_id
       t.integer :types
-      t.integer :use_price
-      t.integer :left_price
+      t.float :use_price
+      t.float :left_price
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

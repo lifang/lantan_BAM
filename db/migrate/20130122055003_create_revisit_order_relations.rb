@@ -4,7 +4,6 @@ class CreateRevisitOrderRelations < ActiveRecord::Migration
       t.integer :revisit_id
       t.integer :order_id
 
-      t.timestamps
     end
   end
 end

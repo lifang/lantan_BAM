@@ -8,10 +8,11 @@ class CreateStores < ActiveRecord::Migration
       t.string :contact   #门店联系人
       t.string :email
       t.string :position   #门店坐标
-      t.text :introduction #门店介绍
+      t.string :introduction #门店介绍
       t.string :img_url
       t.datetime :opened_at
-      t.string :account
+      t.float :account  #门店账户余额
+
 
       t.timestamps
     end

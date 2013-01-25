@@ -9,7 +9,7 @@ class CreateSvcReturnRecords < ActiveRecord::Migration
       t.integer :target_id
       t.float :total_price
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

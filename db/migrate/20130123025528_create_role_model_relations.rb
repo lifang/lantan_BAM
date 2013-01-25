@@ -5,7 +5,6 @@ class CreateRoleModelRelations < ActiveRecord::Migration
       t.integer :role_id
       t.number :num
 
-      t.timestamps
     end
   end
 end

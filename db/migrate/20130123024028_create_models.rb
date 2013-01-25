@@ -5,7 +5,6 @@ class CreateModels < ActiveRecord::Migration
       t.string :name
       t.number :num
 
-      t.timestamps
     end
   end
 end

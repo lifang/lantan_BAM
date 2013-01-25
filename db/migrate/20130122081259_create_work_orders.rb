@@ -15,7 +15,7 @@ class CreateWorkOrders < ActiveRecord::Migration
       t.number :electricity_num
       t.integer :store_id
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

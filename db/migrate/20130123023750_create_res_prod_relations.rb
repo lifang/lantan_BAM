@@ -5,7 +5,6 @@ class CreateResProdRelations < ActiveRecord::Migration
       t.integer :product_id
       t.integer :reservation_id
 
-      t.timestamps
     end
   end
 end

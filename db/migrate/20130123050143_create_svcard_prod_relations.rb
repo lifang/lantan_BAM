@@ -6,7 +6,6 @@ class CreateSvcardProdRelations < ActiveRecord::Migration
       t.number :product_num
       t.integer :sv_card_id
 
-      t.timestamps
     end
   end
 end

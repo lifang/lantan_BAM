@@ -6,7 +6,6 @@ class CreatePcardProdRelations < ActiveRecord::Migration
       t.number :product_num
       t.integer :package_card_id
 
-      t.timestamps
     end
   end
 end

@@ -8,7 +8,7 @@ class CreateSalaries < ActiveRecord::Migration
       t.integer :staff_id 
       t.number :satisfied_perc  #满意程度
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

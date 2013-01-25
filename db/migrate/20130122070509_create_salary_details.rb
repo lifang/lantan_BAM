@@ -8,7 +8,7 @@ class CreateSalaryDetails < ActiveRecord::Migration
       t.integer :staff_id
       t.integer :voilation_reward_id 
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

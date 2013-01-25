@@ -9,7 +9,7 @@ class CreateStaffGrRecords < ActiveRecord::Migration
       t.interger :deduct_end  #提成结束数量
       t.float :deduct_percent
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end
