@@ -1,3 +1,5 @@
+#encoding: utf-8
 class SvCard < ActiveRecord::Base
-  attr_accessible :discount, :img_url, :name, :price, :types
+  has_many :svcard_prod_relations
+  has_many :c_svc_relations
 end

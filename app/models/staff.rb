@@ -1,3 +1,12 @@
+#encoding: utf-8
 class Staff < ActiveRecord::Base
-  attr_accessible :address, :base_salary, :birthday, :deduct_at, :deduct_end, :deduct_percent, :education, :hometown, :id_card, :level, :name, :nation, :phone, :photo, :political, :position, :sex, :status, :store_id, :type_of_w
+  has_many :staff_role_relations
+  has_many :salary_details
+  has_many :work_records
+  has_many :salaries
+  has_many :station_staff_relations
+  has_many :train_staff_relations
+  has_many :violation_rwards
+  has_many :staff_gr_records
+  has_many :month_scores
 end

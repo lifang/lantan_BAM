@@ -1,3 +1,6 @@
+#encoding: utf-8
 class Customer < ActiveRecord::Base
-  attr_accessible :address, :is_vip, :mark, :mobilephone, :name, :other_way, :sex, :sirthday, :status, :types
+  has_many :customer_num_relations
+  has_many :c_svc_relations
+  has_many :revisits, :foreign_key => "user_id"
 end

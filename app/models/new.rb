@@ -1,3 +1,4 @@
+#encoding: utf-8
 class New < ActiveRecord::Base
-  attr_accessible :content, :status, :title
+  
 end

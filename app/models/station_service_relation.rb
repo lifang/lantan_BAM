@@ -1,3 +1,5 @@
+#encoding: utf-8
 class StationServiceRelation < ActiveRecord::Base
-  attr_accessible :product_id, :station_id
+  belongs_to :station
+  belongs_to :product
 end

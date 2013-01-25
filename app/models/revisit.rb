@@ -1,3 +1,5 @@
+#encoding: utf-8
 class Revisit < ActiveRecord::Base
-  attr_accessible :answer, :compianint, :content, :title, :types, :user_id
+  belongs_to :customer
+  has_many :revisit_order_relations
 end

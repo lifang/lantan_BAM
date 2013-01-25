@@ -1,3 +1,4 @@
+#encoding: utf-8
 class Train < ActiveRecord::Base
-  attr_accessible :certificate, :content, :end_at, :start_at
+  has_many :train_staff_relations
 end

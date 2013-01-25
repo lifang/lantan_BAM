@@ -1,3 +1,4 @@
+#encoding: utf-8
 class SvcReturnRecord < ActiveRecord::Base
-  attr_accessible :content, :price, :store_id, :target_id, :total_price, :types
+  belongs_to :store
 end

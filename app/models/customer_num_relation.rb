@@ -1,3 +1,5 @@
+#encoding: utf-8
 class CustomerNumRelation < ActiveRecord::Base
-  attr_accessible :car_num_id, :customer_id
+  belongs_to :customer
+  belongs_to :car_num
 end

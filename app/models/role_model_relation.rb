@@ -1,3 +1,4 @@
+#encoding: utf-8
 class RoleModelRelation < ActiveRecord::Base
-  attr_accessible :num, :role_id
+  belongs_to :role
 end

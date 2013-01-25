@@ -1,3 +1,4 @@
+#encoding: utf-8
 class Supplier < ActiveRecord::Base
-  attr_accessible :address, :contact, :email, :name, :phone
+  has_many :material_orders
 end

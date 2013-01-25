@@ -1,3 +1,5 @@
+#encoding: utf-8
 class Reservation < ActiveRecord::Base
-  attr_accessible :car_num_id, :res_time, :status, :store_id
+  belongs_to :store
+  has_many :res_prod_relation
 end

@@ -1,3 +1,5 @@
 class CarNum < ActiveRecord::Base
-  attr_accessible :car_model_id, :id, :num
+  belongs_to :car_model
+  has_many :customer_num_relations
+  
 end

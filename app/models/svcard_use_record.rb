@@ -1,3 +1,4 @@
+#encoding: utf-8
 class SvcardUseRecord < ActiveRecord::Base
-  attr_accessible :c_svc_relation_id, :left_price, :types, :use_price
+  belongs_to :c_svc_relation
 end

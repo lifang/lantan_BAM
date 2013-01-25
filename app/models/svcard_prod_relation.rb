@@ -1,3 +1,5 @@
+#encoding: utf-8
 class SvcardProdRelation < ActiveRecord::Base
-  attr_accessible :product_id, :product_num, :sv_card_id
+  belongs_to :product
+  belongs_to :sv_card
 end

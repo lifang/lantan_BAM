@@ -1,3 +1,4 @@
+#encoding: utf-8
 class Capital < ActiveRecord::Base
-  attr_accessible :name
+  has_many :car_brands
 end

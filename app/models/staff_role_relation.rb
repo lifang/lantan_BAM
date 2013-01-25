@@ -1,3 +1,5 @@
+#encoding: utf-8
 class StaffRoleRelation < ActiveRecord::Base
-  attr_accessible :role_id, :staff_id
+  belongs_to :staff
+  belongs_to  :role
 end

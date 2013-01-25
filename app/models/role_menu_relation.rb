@@ -1,3 +1,5 @@
+#encoding: utf-8
 class RoleMenuRelation < ActiveRecord::Base
-  attr_accessible :menu_id, :role_id
+ belongs_to :role
+ belongs_to :menu
 end

@@ -1,3 +1,8 @@
+#encoding: utf-8
 class MaterialOrder < ActiveRecord::Base
-  attr_accessible :arrival_at, :carrier, :code, :logistics_code, :price, :remark, :staff_id, :status, :store_id, :supplier_id, :supplier_type
+  has_many :mat_order_items
+  has_many :mat_out_orders
+  has_many  :mat_in_orders
+  has_many :m_order_types
+  belongs_to :supplier
 end

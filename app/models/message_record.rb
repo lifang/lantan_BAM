@@ -1,3 +1,4 @@
+#encoding: utf-8
 class MessageRecord < ActiveRecord::Base
-  attr_accessible :content, :send_at, :status
+  has_many :send_messages
 end

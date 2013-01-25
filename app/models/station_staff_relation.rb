@@ -1,3 +1,5 @@
+#encoding: utf-8
 class StationStaffRelation < ActiveRecord::Base
-  attr_accessible :current_day, :staff_id, :station_id
+  belongs_to :station
+  belongs_to :staff
 end

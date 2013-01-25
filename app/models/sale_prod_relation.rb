@@ -1,3 +1,5 @@
+#encoding: utf-8
 class SaleProdRelation < ActiveRecord::Base
-  attr_accessible :prod_num, :product_id, :sale_id
+ belongs_to :sale
+ belongs_to  :product
 end

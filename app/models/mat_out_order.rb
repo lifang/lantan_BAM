@@ -1,3 +1,5 @@
+#encoding: utf-8
 class MatOutOrder < ActiveRecord::Base
-  attr_accessible :material_id, :material_num, :material_order_id, :price, :staff_id
+  belongs_to :material
+  belongs_to :material_order
 end

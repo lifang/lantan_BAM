@@ -1,3 +1,6 @@
+#encoding: utf-8
 class Sale < ActiveRecord::Base
-  attr_accessible :car_num, :disc_time_types, :disc_types, :discount, :ended_at, :everycar_times, :img_url, :introduction, :name, :started_at, :status, :store_id
+  has_many :sale_prod_relations
+  belongs_to :store
+  
 end

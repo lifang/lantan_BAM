@@ -1,3 +1,6 @@
+#encoding: utf-8
 class Product < ActiveRecord::Base
-  attr_accessible :base_price, :cost_time, :description, :img_url, :introduction, :is_service, :name, :sale_price, :service_code, :staff_level, :staff_level_1, :status, :store_id, :types
+  has_many :sale_prod_relations
+  has_many :res_prod_relations
+  has_many :station_service_relations
 end

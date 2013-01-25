@@ -1,3 +1,5 @@
+#encoding: utf-8
 class PackageCard < ActiveRecord::Base
-  attr_accessible :ended_at, :img_url, :name, :price, :started_at, :status, :store_id
+  has_many :pcard_prod_relations
+  has_many  :c_pcard_relations
 end

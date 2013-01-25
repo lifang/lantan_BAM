@@ -1,3 +1,4 @@
+#encoding: utf-8
 class PcardProdRelation < ActiveRecord::Base
-  attr_accessible :package_card_id, :product_id, :product_num
+  belongs_to :package_card
 end

@@ -1,3 +1,4 @@
+#encoding: utf-8
 class OrderPayType < ActiveRecord::Base
-  attr_accessible :order_id, :pay_type, :price
+ belongs_to :order
 end

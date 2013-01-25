@@ -1,3 +1,5 @@
+#encoding: utf-8
 class CSvcRelation < ActiveRecord::Base
-  attr_accessible :customer_id, :id_card, :left_price, :sv_card_id, :total_price
+ has_many :svcard_use_records
+ belongs_to :sv_card
 end

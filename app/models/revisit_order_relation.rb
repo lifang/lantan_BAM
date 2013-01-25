@@ -1,3 +1,5 @@
+#encoding: utf-8
 class RevisitOrderRelation < ActiveRecord::Base
-  attr_accessible :order_id, :revist_id
+  belongs_to :order
+  belongs_to :revisit
 end

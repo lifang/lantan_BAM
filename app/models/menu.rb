@@ -1,3 +1,4 @@
+#encoding: utf-8
 class Menu < ActiveRecord::Base
-  attr_accessible :controller
+ has_many :role_menu_relations
 end

@@ -1,3 +1,5 @@
+#encoding: utf-8
 class TrainStaffRelation < ActiveRecord::Base
-  attr_accessible :staff_id, :status, :train_id
+belongs_to :train
+belongs_to :staff
 end
