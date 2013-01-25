@@ -4,4 +4,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-LantanBam::Application.load_tasks
+LantanBAM::Application.load_tasks
