@@ -6,7 +6,7 @@ class CreateOrders < ActiveRecord::Migration
       t.boolean :status
       t.datetime :started_at
       t.datetime :ended_at
-      t.integer :price
+      t.float :price
       t.boolean :is_visited  #是否回访
       t.boolean :is_pleased  #是否满意
       t.boolean :is_billing  #是否要发票
@@ -15,10 +15,11 @@ class CreateOrders < ActiveRecord::Migration
       t.string :cons_staff_id_2  #施工乙编号
       t.integer :station_id      #工位编号
       t.integer :sale_id         #参加活动
-      t.integer :c_pcard_relation_id  #储值卡
+      t.integer :c_pcard_relation_id  #套餐卡
       t.integer :c_svc_relation_id    #优惠卡
       t.boolean :is_free      #是否免单
-      t.number :types     
+      t.integer :types    
+      t.integer :store_id
 
       t.timestamps
     end

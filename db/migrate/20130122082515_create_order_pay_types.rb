@@ -6,7 +6,6 @@ class CreateOrderPayTypes < ActiveRecord::Migration
       t.integer :pay_type  #付款方式
       t.float :price
 
-      t.timestamps
     end
   end
 end

@@ -8,7 +8,7 @@ class CreateWOTimes < ActiveRecord::Migration
       t.integer :worked_num   #已工作次数
       t.integer :wait_num     #目前等待数量
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

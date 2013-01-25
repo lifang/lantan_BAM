@@ -2,8 +2,8 @@ class CreateProducts < ActiveRecord::Migration
   def change
     create_table :products do |t|
       t.string :name
-      t.integer :base_price
-      t.integer :sale_price  #销售价格
+      t.float :base_price
+      t.float :sale_price  #销售价格
       t.text :description   #产品介绍
       t.integer :types
       t.string :service_code   #服务代码
@@ -15,6 +15,7 @@ class CreateProducts < ActiveRecord::Migration
       t.string :img_url
       t.integer :cost_time   #花费时长
       t.integer :store_id
+      t.string :standard #规格
 
       t.timestamps
     end

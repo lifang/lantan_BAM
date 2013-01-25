@@ -9,7 +9,7 @@ class CreateGoalSales < ActiveRecord::Migration
       t.float :current_price  
       t.integer :store_id
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

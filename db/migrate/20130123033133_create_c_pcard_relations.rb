@@ -8,7 +8,7 @@ class CreateCPcardRelations < ActiveRecord::Migration
       t.boolean :status
       t.text :content
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

@@ -10,7 +10,7 @@ class CreatePackageCards < ActiveRecord::Migration
       t.boolean :status
       t.integer :price
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

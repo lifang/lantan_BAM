@@ -5,10 +5,10 @@ class CreateMatOutOrders < ActiveRecord::Migration
       t.integer :material_id
       t.integer :staff_id
       t.number :material_num
-      t.number :price
+      t.float :price
       t.integer :material_order_id
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

@@ -8,7 +8,7 @@ class CreateCSvcRelations < ActiveRecord::Migration
       t.float :left_price
       t.string :id_card  #客户身份证
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

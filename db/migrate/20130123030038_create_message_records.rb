@@ -6,7 +6,7 @@ class CreateMessageRecords < ActiveRecord::Migration
       t.datetime :send_at
       t.boolean :status
       t.integer :store_id
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

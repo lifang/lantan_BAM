@@ -9,7 +9,6 @@ class CreateSendMessages < ActiveRecord::Migration
       t.datetime :send_at
       t.boolean :status
 
-      t.timestamps
     end
   end
 end

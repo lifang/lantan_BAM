@@ -4,7 +4,7 @@ class CreateMaterials < ActiveRecord::Migration
     create_table :materials do |t|
       t.string :name
       t.string :code  #物料编号
-      t.integer :price
+      t.float :price
       t.number :storage  #库存量
       t.integer :types   #是否有库存
       t.boolean :status

@@ -5,7 +5,7 @@ class CreateStationStaffRelations < ActiveRecord::Migration
       t.integer :staff_id     #员工编号
       t.number :current_day   #日期  年月日
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end

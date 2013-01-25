@@ -1,5 +1,5 @@
 class CreateNotices < ActiveRecord::Migration
-  #消息提醒比偶
+  #消息提醒
   def change
     create_table :notices do |t|
       t.integer :target_id   #相关订单
@@ -8,7 +8,7 @@ class CreateNotices < ActiveRecord::Migration
       t.boolean :status
       t.integer :store_id
 
-      t.timestamps
+      t.datetime :created_at
     end
   end
 end
