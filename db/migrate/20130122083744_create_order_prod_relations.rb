@@ -4,7 +4,7 @@ class CreateOrderProdRelations < ActiveRecord::Migration
     create_table :order_prod_relations do |t|
       t.integer :order_id
       t.integer :product_id
-      t.number :pro_num   #产品数量
+      t.integer :pro_num   #产品数量
       t.float :price   #价格
 
     end

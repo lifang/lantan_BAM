@@ -6,7 +6,7 @@ class CreateStaffGrRecords < ActiveRecord::Migration
       t.integer :level        #等级
       t.integer :base_salary   #基本薪水
       t.integer :deduct_at   #提成开始数量
-      t.interger :deduct_end  #提成结束数量
+      t.integer :deduct_end  #提成结束数量
       t.float :deduct_percent
 
       t.datetime :created_at

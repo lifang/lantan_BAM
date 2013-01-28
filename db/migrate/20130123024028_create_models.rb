@@ -3,7 +3,7 @@ class CreateModels < ActiveRecord::Migration
   def change
     create_table :models do |t|
       t.string :name
-      t.number :num
+      t.integer :num
 
     end
   end

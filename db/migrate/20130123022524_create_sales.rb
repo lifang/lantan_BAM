@@ -10,7 +10,7 @@ class CreateSales < ActiveRecord::Migration
       t.float :discount    #折扣
       t.integer :store_id
       t.integer :disc_time_types  #打折时间方式
-      t.number :car_num           #折扣数量
+      t.integer :car_num           #折扣数量
       t.integer :everycar_times   #每辆车的打折次数
       t.string :img_url
 

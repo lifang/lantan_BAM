@@ -3,7 +3,7 @@ class CreateProdMatRelations < ActiveRecord::Migration
   def change
     create_table :prod_mat_relations do |t|
       t.integer :product_id
-      t.number :material_num
+      t.integer :material_num
       t.integer :material_id
 
     end
