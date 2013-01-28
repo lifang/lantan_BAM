@@ -1,5 +1,5 @@
 class CarNum < ActiveRecord::Base
   belongs_to :car_model
-  has_many :customer_num_relations
-  
+  has_one :customer_num_relation
+  has_many :orders
 end

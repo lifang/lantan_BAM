@@ -6,4 +6,9 @@ class Store < ActiveRecord::Base
   has_many :sales
   has_many :work_orders
   has_many :svc_return_records
+  has_many :goal_sales
+  has_many :message_records
+  has_many :notices
+  has_many :package_cards
+  has_many :staffs
 end

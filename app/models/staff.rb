@@ -9,4 +9,5 @@ class Staff < ActiveRecord::Base
   has_many :violation_rwards
   has_many :staff_gr_records
   has_many :month_scores
+  belongs_to :store
 end

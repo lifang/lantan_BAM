@@ -4,4 +4,5 @@ class Material < ActiveRecord::Base
   has_many :mat_order_items
   has_many :mat_out_orders
   has_many  :mat_in_orders
+  has_many :prod_mat_relations
 end
