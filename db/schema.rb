@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130125045543) do
+ActiveRecord::Schema.define(:version => 20130129015203) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -364,6 +364,8 @@ ActiveRecord::Schema.define(:version => 20130125045543) do
     t.string   "img_url"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "is_subsidy"
+    t.string   "sub_content"
   end
 
   create_table "send_messages", :force => true do |t|
@@ -413,6 +415,9 @@ ActiveRecord::Schema.define(:version => 20130125045543) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "encrypt_password"
+    t.string   "username"
+    t.string   "salt"
   end
 
   create_table "station_service_relations", :force => true do |t|
