@@ -7,5 +7,6 @@ class Material < ActiveRecord::Base
   has_many :prod_mat_relations
 
   STATUS = {:normal => 0, :delete => 1}
-  TYPES = [["施工耗材类",0],["劳动保护",1],["工具类",2]]
+  TYPES_NAMES = {1 => "施工耗材",2 => "辅助工具", 3 => "劳动保护", 4 =>"一次性用品", 5=>"产品"}
+  TYPES = { :cost_m=>1,:help_tool=>2,:protected_l=>3,:one_use=>4,:product=>5}
 end

@@ -4,7 +4,7 @@ class CreateMatInOrders < ActiveRecord::Migration
     create_table :mat_in_orders do |t|
       t.integer :material_order_id
       t.integer :material_id
-      t.number :material_num
+      t.integer :material_num
       t.float :price
       t.integer :staff_id
 

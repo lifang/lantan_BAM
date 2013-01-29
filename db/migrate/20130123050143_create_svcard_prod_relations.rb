@@ -3,7 +3,7 @@ class CreateSvcardProdRelations < ActiveRecord::Migration
   def change
     create_table :svcard_prod_relations do |t|
       t.integer :product_id
-      t.number :product_num
+      t.integer :product_num
       t.integer :sv_card_id
 
     end

@@ -3,7 +3,7 @@ class CreateRoleModelRelations < ActiveRecord::Migration
   def change
     create_table :role_model_relations do |t|
       t.integer :role_id
-      t.number :num
+      t.integer :num
 
     end
   end

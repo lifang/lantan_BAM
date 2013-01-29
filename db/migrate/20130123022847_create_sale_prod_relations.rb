@@ -4,7 +4,7 @@ class CreateSaleProdRelations < ActiveRecord::Migration
     create_table :sale_prod_relations do |t|
       t.integer :sale_id
       t.integer :product_id
-      t.number :prod_num
+      t.integer :prod_num
 
     end
   end
