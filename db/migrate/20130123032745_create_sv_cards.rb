@@ -1,5 +1,5 @@
 class CreateSvCards < ActiveRecord::Migration
-  #套餐卡
+  #打折卡
   def change
     create_table :sv_cards do |t|
       t.string :name
