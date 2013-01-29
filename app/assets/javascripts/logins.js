@@ -1,2 +1,8 @@
-// Place all the behaviors and hooks related to the matching controller here.
-// All this logic will automatically be available in application.js.
+function check_login() {
+    if ($.trim($("#user_name").val()) == null || $.trim($("#user_name").val()) == ""
+        || $.trim($("#user_password").val()) == null || $.trim($("#user_password").val()) == "") {
+        alert("请输入用户名密码");
+        return false;
+    }
+    return true;
+}

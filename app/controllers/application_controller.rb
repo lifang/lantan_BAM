@@ -1,6 +1,7 @@
 #encoding: utf-8
 class ApplicationController < ActionController::Base
   protect_from_forgery
+  include ApplicationHelper
 
   before_filter :set_charset
   before_filter :configure_charsets

@@ -1,6 +1,9 @@
 LantanBAM::Application.routes.draw do
-
+  root :to => 'logins#index'
+  resources :logins  
   resources :stores do
+    resources :welcomes
+    resources :customers
     resources :materials
   end
 
@@ -13,4 +16,6 @@ LantanBAM::Application.routes.draw do
        get "out"
     end
   end
+
+
 end

@@ -1,6 +1,7 @@
 #encoding: utf-8
 class Staff < ActiveRecord::Base
-  has_many :staff_role_relations
+  has_many :staff_role_relations, :dependent=>:destroy
+  has_many :roles, :through => :staff_role_relations, :foreign_key => "role_id"
   has_many :salary_details
   has_many :work_records
   has_many :salaries
@@ -12,7 +13,7 @@ class Staff < ActiveRecord::Base
   belongs_to :store
 
   attr_accessor :password
-  validates:password, :allow_nil => true #:confirmation=>true,:length=>{:within=>6..20}
+  validates:password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
 
     #门店员工职务
   S_COMPANY = {:boss=>1,:chic=>2,:front=>3,:technician=>4} #1 老板 2 店长 3接待 4 技师
