@@ -1,0 +1,39 @@
+<%= javascript_include_tag "kucun" %>
+index 库存<br/>
+<div>
+  <%= link_to "入库",new_store_material_path(params[:store_id]) %> <%= link_to "出库","/stores/#{params[:store_id]}/materials/out" %> <%= link_to "订货", "/materials/order" %>
+  <%= link_to_function "打印库存清单","alert('打印库存清单')" %>  <br/>
+  <div>
+    <h1>库存列表</h1>
+    条形码&nbsp;&nbsp;物料名称&nbsp;&nbsp;物料类别&nbsp;&nbsp;库存状态&nbsp;&nbsp;库存量&nbsp;&nbsp;成本价（元）&nbsp;&nbsp;盘点实数&nbsp;&nbsp;&nbsp;&nbsp;操作<br/>
+    <% (@materails_storages || []).each do |material| %>
+        <%= material.code %>&nbsp;&nbsp;
+        <%= material.name %>&nbsp;&nbsp;
+        <%= Material::TYPES[material.types.to_i][0] %>&nbsp;&nbsp;
+        <%= material.storage.to_i > 0 ? "存货" : "缺货" %>&nbsp;&nbsp;
+        <%= material.price %>&nbsp;&nbsp;
+
+        <%= link_to_function "备注", "add_material_remark(#{material.id})" %>
+        <%= link_to_function "核实","alert('核实')" %>
+        <br/>
+    <% end %>
+    <%= will_paginate @materails_storages if @materails_storages.size > 0 %>
+  </div>
+<div>
+  <h1>出库记录</h1>
+
+</div>
+  <div>
+    <h1>入库记录<br/></h1>
+
+  </div>
+  <div>
+    <h1>向总部订货记录</h1>
+
+  </div>
+  <div>
+    <h1>向供应商订货信息<br/></h1>
+
+  </div>
+</div>
+

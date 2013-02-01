@@ -2,7 +2,7 @@ class CreateRevisits < ActiveRecord::Migration
 #  回访表
   def change
     create_table :revisits do |t|
-      t.integer :user_id
+      t.integer :customer_id
       t.integer :types
       t.string :title  #投诉标题
       t.string :answer  #投诉回答

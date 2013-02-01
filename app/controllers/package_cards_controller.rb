@@ -4,7 +4,7 @@ class PackageCardsController < ApplicationController
 
   def index
     cards=PackageCard.paginate_by_sql("select started_at,ended_at,id from package_cards where store_id=2
-         and status=#{PackageCard::STAT[:normal]}", :page => params[:page], :per_page => 5)  #store_id 为硬写
+         and status=#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => 5)  #store_id 为硬写
     @card_hash={}
     cards.each do |card|
       @card_hash[card.id]=Product.find_by_sql("select s.name,p.product_num from products s inner join
@@ -14,7 +14,7 @@ class PackageCardsController < ApplicationController
 
   def create
     parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],:ended_at=>params[:ended_at],
-      :store_id=>params[:store_id],:status=>PackageCard::STAT[:normal],:price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d")
+      :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL],:price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d")
     }
     pcard=PackageCard.create(parms)
     params[:products].each do |key,value|
@@ -23,7 +23,7 @@ class PackageCardsController < ApplicationController
   end #添加套餐卡
 
   def sale_reords
-    cards=PackageCard.find_by_sql("select started_at,ended_at,id from package_cards where store_id=2 and status=#{PackageCard::STAT[:normal]}")
+    cards=PackageCard.find_by_sql("select started_at,ended_at,id from package_cards where store_id=2 and status=#{PackageCard::STAT[:NORMAL]}")
     #store_id 为硬写
     @card_hash={}
     cards.each do |card|

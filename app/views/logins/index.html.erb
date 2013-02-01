@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LantanBAM</title>
+    <%= stylesheet_link_tag    "application" %>
+    <%= javascript_include_tag  "application" %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
+    <div class="login_area">
+      <div><%= flash[:error] %></div>
+      <h1>澜泰后台管理系统</h1>
+      <div class="login_box">
+        <%= form_for :user, :url=>"/logins/", :method => "post", :html => {:onsubmit => "return check_login()"} do %>
+          <div>用户名</div>
+          <div><input id="user_name" name="user_name" type="text" /></div>
+          <div>密 码</div>
+          <div><input id="user_password" name="user_password" type="password" /></div>
+          <div class="login_btn"><button type="submit" id="login_exam">登录</button></div>
+        <% end %>        
+      </div>
+    </div>
+  </body>
+</html>
+
