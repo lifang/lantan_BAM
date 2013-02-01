@@ -11,9 +11,9 @@ class Staff < ActiveRecord::Base
   has_many :month_scores
   belongs_to :store
   #门店员工职务
-  S_COMPANY = {:boss=>1,:chic=>2,:front=>3,:technician=>4} #1 老板 2 店长 3接待 4 技师
-  N_COMPANY = {1=>"老板",2=>"店长",3=>"接待",4=>"技师"}
+  S_COMPANY = {:BOSS=>0,:CHIC=>2,:FRONT=>3,:TECHNICIAN=>1} #0 老板 2 店长 3接待 1 技师
+  N_COMPANY = {0=>"老板",2=>"店长",3=>"接待",1=>"技师"}
   #总部员工职务
-  S_HEAD = {:boss=>1,:manager=>2,:normal=>3} #1 老板 2 部门经理 3 员工
-  N_HEAD = {1=>"老板", 2=>"部门经理",3=>"员工"}
+  S_HEAD = {:BOSS=>0,:MANAGER=>2,:NORMAL=>1} #0老板 2 部门经理 1员工
+  N_HEAD = {0=>"老板", 2=>"部门经理",1=>"员工"}
 end

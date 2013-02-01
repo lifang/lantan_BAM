@@ -9,5 +9,5 @@ class Customer < ActiveRecord::Base
  #客户类型
   IS_VIP = {:normal=>0,:vip=>1} #0 常态客户 1 会员卡客户
 
-  TYPES = {:good=>1,:normal=>2,:key=>3} #1优质客户 2一般客户 3 重点客户
+  TYPES = {:good=>1,:normal=>2,:key=>0} #1优质客户 2一般客户 0重点客户
 end
