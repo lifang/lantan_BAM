@@ -3,7 +3,24 @@ LantanBAM::Application.routes.draw do
   resources :logins  
   resources :stores do
     resources :welcomes
-    resources :customers
+    resources :customers do
+      collection do
+        post "search"
+        get "search_list"
+      end
+    end
+    resources :revisits do
+      collection do
+        post "search"
+        get "search_list"
+      end
+    end
+    resources :messages do
+      collection do
+        post "search"
+        get "search_list"
+      end
+    end
     resources :materials
   end
 

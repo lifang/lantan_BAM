@@ -7,9 +7,9 @@ class CreateCustomers < ActiveRecord::Migration
       t.boolean :sex
       t.datetime :birthday
       t.string :address
-      t.boolean :is_vip
+      t.boolean :is_vip, :default => 0
       t.string :mark  
-      t.boolean :status
+      t.boolean :status, :default => 0
       t.integer :types
 
       t.timestamps

@@ -5,7 +5,7 @@ class CreateComplaints < ActiveRecord::Migration
       t.text :reason
       t.text :suggstion
       t.text :remark
-      t.boolean :status
+      t.boolean :status, :default => 0
       t.integer :types
       t.integer :staff_id_1  #投诉技师
       t.integer :staff_id_2
