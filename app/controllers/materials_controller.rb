@@ -3,7 +3,7 @@ class MaterialsController < ApplicationController
   respond_to :json, :xml, :html
 
   def index
-    cookies[:current_user] = "1"
+    #cookies[:current_user] = "1"
     @materails_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
                                                    :per_page => 10, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],10, params[:store_id]
@@ -43,7 +43,7 @@ class MaterialsController < ApplicationController
   end
 
   def remark
-    puts params[:remark],"ssss:#{params[:id]}"
+    #puts params[:remark],"ssss:#{params[:id]}"
     @material = Material.find_by_id(params[:id])
     @material.update_attribute(:remark,params[:remark]) if @material
     render :json => {:status => 1}.to_json
@@ -72,7 +72,6 @@ class MaterialsController < ApplicationController
       end
     end
     @search_materials = Material.normal.all(:conditions => str)
-    puts  @search_materials.size,"------------=======-------------"
     @type = params[:type].to_i == 0 ? 0 : 1
     respond_with(@search_materials,@type) do |format|
       format.html
@@ -92,7 +91,7 @@ class MaterialsController < ApplicationController
   end
 
   def material_order
-    puts params[:store_id],params[:selected_items],params[:supplier],params[:use_count],params[:sale_id]
+    #puts params[:store_id],params[:selected_items],params[:supplier],params[:use_count],params[:sale_id]
     status = MaterialOrder.make_order
     MaterialOrder.transaction do
       #begin
@@ -138,7 +137,7 @@ class MaterialsController < ApplicationController
   end
 
   def get_act_count
-    puts params[:code]
+    #puts params[:code]
     sale = Sale.find_by_code params[:code]
     text = sale.nil? ? "" : sale.sub_content
     sale_id = sale.nil? ? "" : sale.id
@@ -146,14 +145,14 @@ class MaterialsController < ApplicationController
   end
 
   def add
-    puts params[:store_id]
+    #puts params[:store_id]
     material = Material.find_by_code params[:code]
       material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
                                  :price => params[:price].strip, :storage => params[:count].strip,
                                  :status => Material::STATUS[:normal],:store_id => params[:store_id],
                                  :types => params[:types],:check_num => params[:count].strip}) if material.nil?
     x = {:status => 1, :material => material}.to_json
-    puts x
+    #puts x
     render :json => x
   end
 end
