@@ -16,7 +16,7 @@ class MaterialsController < ApplicationController
   end
 
   def create
-    @material = Material.find_by_code_and_status_and_store_id params[:barcode].strip,Material::STATUS[:normal],params[:store_id]
+    @material = Material.find_by_code_and_status_and_store_id params[:barcode].strip,Material::STATUS[:NORMAL],params[:store_id]
     @material_order = MaterialOrder.find_by_code params[:code].strip
     Material.transaction do
       begin

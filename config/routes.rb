@@ -1,5 +1,10 @@
 LantanBAM::Application.routes.draw do
-
+  resources :sales
+  resources :stations
+  # The priority is based upon order of creation:
+  # first created -> highest priority.
+  root :to => 'logins#index'
+  resources :logins
   resources :stores do
     resources :materials do
       collection do
@@ -8,24 +13,35 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-    resources :suppliers do
-       member do
-
-       end
+    resources :suppliers
+    resources :welcomes
+    resources :customers do
+      collection do
+        post "search"
+        get "search_list"
+      end
+    end
+    resources :revisits do
+      collection do
+        post "search"
+        get "search_list"
+      end
+    end
+    resources :messages do
+      collection do
+        post "search"
+        get "search_list"
+      end
     end
   end
 
   resources :materials do
     member do
-       get "remark","check"
+      get "remark","check"
     end
     collection do
-      get "get_act_count"
+      get "get_act_count", "out"
     end
-  end
-
-  resources :suppliers do
-
   end
 
 end

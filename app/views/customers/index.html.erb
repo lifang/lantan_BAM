@@ -1,0 +1,36 @@
+<%= render :partial => "/customers/show_tips" %>
+<script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
+<%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/search", :method => "post" do %>
+  客户类别：<select id="c_types" name="c_types">
+    <option value="-1">全部</option>
+    <% Customer::C_TYPES.each do |k, v| %>
+      <option value="<%= k %>" <% if session[:c_types] and k.to_i == session[:c_types].to_i %>selected<% end %>><%= v %></option>
+    <% end %>
+  </select>
+  姓名：<input type="text" name="name" id="name" value="<%= session[:name] %>"/>
+  车牌号码：<input type="text" name="car_num" id="car_num" value="<%= session[:car_num] %>"/>
+  手机号码：<input type="text" name="phone" id="phone" value="<%= session[:phone] %>"/><br/>
+  最近消费客户：<input type="text" name="started_at" id="started_at" value="<%= session[:started_at] %>"
+                class="Wdate" readonly onClick="WdatePicker();"/>到
+  <input type="text" name="ended_at" id="ended_at" value="<%= session[:ended_at] %>"
+         class="Wdate" readonly onClick="WdatePicker();"/>
+  <input type="checkbox" name="is_vip" id="is_vip" value="1" <% if session[:is_vip] %>checked<% end %>/>会员
+  <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
+  <button type="submit">查询</button>
+<% end %>
+<br/>
+客户总数：<%= @customers.total_entries %><br/>
+<% @customers.each do |customer| %>
+<%= customer.num %>
+<%= customer.name %>
+<%= customer.mobilephone %>
+<%= customer.is_vip ? "是" : "否"  %>
+<a href="#">详情</a>
+<a href="#">备注</a>
+<a href="#">发短信</a>
+<%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
+  :confirm => "您确认要删除 #{customer.name} 信息么？" %>
+<br/>
+<% end %>
+
+<%=  will_paginate @customers ,:previous_label=>" &lt;", :next_label=>" &gt;" %>

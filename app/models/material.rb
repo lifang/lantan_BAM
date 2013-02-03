@@ -6,10 +6,10 @@ class Material < ActiveRecord::Base
   has_many  :mat_in_orders
   has_many :prod_mat_relations
 
-  STATUS = {:normal => 0, :delete => 1}
+  STATUS = {:NORMAL => 0, :DELETE => 1}
   TYPES_NAMES = {1 => "施工耗材",2 => "辅助工具", 3 => "劳动保护", 4 =>"一次性用品", 5=>"产品"}
-  TYPES = { :cost_m=>1,:help_tool=>2,:protected_l=>3,:one_use=>4,:product=>5}
+  TYPES = { :COST_M =>1,:HELP_TOOL =>2,:PROTECTED_L =>3,:ONE_USE =>4,:PRODUCT =>5}
 
-  scope :normal, where(:status => STATUS[:normal])
+  scope :normal, where(:status => STATUS[:NORMAL])
 
 end
