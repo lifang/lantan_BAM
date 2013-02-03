@@ -1,0 +1,7 @@
+<%= label_tag "name","物料名称" %>     <%= text_field_tag "name" %>
+<%= label_tag "types","物料类型" %><span id="select_types"><%= select(:material,:types,material_types,{:include_blank => false}) %></span>
+<%= button_to_function "查询","submit_search_form(#{params[:store_id]},#{@type})" %>
+<div id="search_result" style="display: none;">
+  <hr>查询结果</hr>
+  <div id="search_material"><%= render :partial => "/common/search_material" %></div>
+</div>

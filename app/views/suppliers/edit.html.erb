@@ -1,0 +1,9 @@
+编辑供应商<br/>
+<%= form_tag "/stores/#{params[:store_id]}/suppliers/#{params[:id]}", :method => "PUT" do %>
+  <%= label_tag "name", "名称" %><%= text_field_tag "name",@supplier.name %><br/>
+  <%= label_tag "contact","联系人" %><%= text_field_tag "contact",@supplier.contact %><br/>
+  <%= label_tag "phone","联系电话" %><%= phone_field_tag "phone",@supplier.phone %>  <br/>
+  <%= label_tag "email","其他联系方式" %><%= text_field_tag "email",@supplier.email %> <br/>
+  <%= label_tag "address","地址" %><%= text_area_tag "address",@supplier.address %><br/>
+  <%= submit_tag "提交" %>
+<% end %>

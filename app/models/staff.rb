@@ -16,4 +16,9 @@ class Staff < ActiveRecord::Base
   #总部员工职务
   S_HEAD = {:boss=>1,:manager=>2,:normal=>3} #1 老板 2 部门经理 3 员工
   N_HEAD = {1=>"老板", 2=>"部门经理",3=>"员工"}
+
+  STATUS = {:normal => 0, :delete => 1}
+
+  scope :normal, where(:status => STATUS[:normal])
+
 end

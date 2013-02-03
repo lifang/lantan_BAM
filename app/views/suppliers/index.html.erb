@@ -1,0 +1,17 @@
+<%= link_to "库存", store_materials_url(params[:store_id]) %>   供应商<br/>
+<%= link_to "添加供应商", new_store_supplier_url(params[:store_id]) %>  <br/>
+<ul>
+<% (@suppliers || []).each do |s| %>
+      <li>
+  <%= s.name %>
+    <%= s.contact %>
+    <%= s.phone %>
+    <%= s.email %>
+    <%= s.address %>
+    <%= link_to "订货",order_store_materials_url(params[:store_id]) %>
+    <%= link_to "修改","/stores/#{params[:store_id]}/suppliers/#{s.id}/edit" %>
+    <%= link_to_function "删除","delete_supplier(this,'#{s.id}')" %>
+      </li>
+<% end %>
+    </ul>
+<%= will_paginate @suppliers if @suppliers.size > 0 %>

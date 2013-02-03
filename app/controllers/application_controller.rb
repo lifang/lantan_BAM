@@ -1,9 +1,11 @@
 #encoding:utf-8
 class ApplicationController < ActionController::Base
+  require 'constant'
+  include Constant
   protect_from_forgery
 
-  before_filter :set_charset
-  before_filter :configure_charsets
+  #before_filter :set_charset
+  #before_filter :configure_charsets
 
 #中文乱码解决方案
   def set_charset

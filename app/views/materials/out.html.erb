@@ -1,10 +1,10 @@
 出库
-<%= form_tag store_materials_url(1) do |f| %>
-  <%= label_tag "name","物料名称" %>     <%= text_field_tag "name" %>
-  <%= label_tag "types","物料类型" %><%= select(:material,:types,Material::TYPES,{:include_blank => false}) %><br/>
-    <%= label_tag "","订货单号" %><%= text_field_tag "code" %>
-    <%= label_tag "","条形码" %><%= text_field_tag "barcode" %>  <br/>
-    <%= label_tag "","单价" %><%= text_field_tag "price" %>
-    <%= label_tag "","数量" %><%= text_field_tag "num" %> <br/>
-    <%= submit_tag "提交" %>
+<%= form_tag out_order_store_materials_url(params[:store_id]), :id => "out_order_form" do |f| %>
+    <%= render :partial => "/common/search_panel", :object => @type %>
+<div>
+物料名称&nbsp;&nbsp;物料类别&nbsp;&nbsp;库存量&nbsp;&nbsp;出库量&nbsp;&nbsp;&nbsp;&nbsp;操作<br/>
+<ul id="selected_materials"></ul>
+</div><%= hidden_field_tag "selected_items" %>
+<%= label_tag "staff","申请人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %><br/>
+    <%= button_to_function "提交","submit_out_order('out_order_form')" %>
 <% end %>

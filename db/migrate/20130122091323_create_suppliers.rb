@@ -7,7 +7,8 @@ class CreateSuppliers < ActiveRecord::Migration
       t.string :phone
       t.string :address
       t.string :contact  #联系人
-
+      t.integer :store_id
+      t.integer :status
       t.timestamps
     end
   end

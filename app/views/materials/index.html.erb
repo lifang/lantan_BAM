@@ -1,31 +1,64 @@
 <%= javascript_include_tag "kucun" %>
-index 库存<br/>
+库存   <%= link_to "供应商", store_suppliers_url(params[:store_id]) %> <br/>
 <div>
-  <%= link_to "入库",new_store_material_path(params[:store_id]) %> <%= link_to "出库","/stores/#{params[:store_id]}/materials/out" %> <%= link_to "订货", "/materials/order" %>
+  <%= link_to "入库",new_store_material_path(params[:store_id]) %> <%= link_to "出库",out_store_materials_url(params[:store_id]) %>
+  <%= link_to "订货", order_store_materials_url(params[:store_id]) %>
   <%= link_to_function "打印库存清单","alert('打印库存清单')" %>  <br/>
   <div>
     <h1>库存列表</h1>
     条形码&nbsp;&nbsp;物料名称&nbsp;&nbsp;物料类别&nbsp;&nbsp;库存状态&nbsp;&nbsp;库存量&nbsp;&nbsp;成本价（元）&nbsp;&nbsp;盘点实数&nbsp;&nbsp;&nbsp;&nbsp;操作<br/>
-    <% (@materails_storages || []).each do |material| %>
-        <%= material.code %>&nbsp;&nbsp;
-        <%= material.name %>&nbsp;&nbsp;
-        <%= Material::TYPES[material.types.to_i][0] %>&nbsp;&nbsp;
-        <%= material.storage.to_i > 0 ? "存货" : "缺货" %>&nbsp;&nbsp;
-        <%= material.price %>&nbsp;&nbsp;
-
-        <%= link_to_function "备注", "add_material_remark(#{material.id})" %>
-        <%= link_to_function "核实","alert('核实')" %>
-        <br/>
-    <% end %>
-    <%= will_paginate @materails_storages if @materails_storages.size > 0 %>
+    <ur>
+      <% (@materails_storages || []).each do |material| %>
+          <li style="list-style-type: none;background-color: <%if material.storage.to_i == 0 %>red;<% end %>">
+            <%= material.code %>&nbsp;&nbsp;
+            <%= material.name %>&nbsp;&nbsp;
+            <%= Material::TYPES_NAMES.to_a[material.types.to_i][1] %>&nbsp;&nbsp;
+            <%= material.storage.to_i > 0 ? "存货" : "缺货" %>&nbsp;&nbsp;
+            <%= material.storage.to_i %>&nbsp;&nbsp;
+            <%= material.price %>&nbsp;&nbsp;
+            <%= text_field_tag "check_num_#{material.id}",material.check_num.to_i,{:style =>"width:50px;"} %>&nbsp;&nbsp;
+            <%= link_to_function "备注", "add_material_remark(#{material.id},'#{material.remark}')" %>
+            <%= link_to_function "核实","check_material_num(#{material.id},#{material.storage.to_i})" %>
+          </li>
+      <% end %>
+      </ul>
+      <%= will_paginate @materails_storages if @materails_storages.size > 0 %>
   </div>
-<div>
-  <h1>出库记录</h1>
-
-</div>
+  <div>
+    <h1>出库记录</h1>
+    条形码&nbsp;&nbsp;物料名称&nbsp;&nbsp;物料类别&nbsp;&nbsp;申请人&nbsp;&nbsp;出库量&nbsp;&nbsp;成本价（元）&nbsp;&nbsp;出库时间<br/>
+    <ur>
+      <% (@out_records || []).each do |out| %>
+          <li style="list-style-type: none;">
+            <%= out.code %>&nbsp;&nbsp;
+            <%= out.name %>&nbsp;&nbsp;
+            <%= Material::TYPES_NAMES.to_a[out.types.to_i][1] %>&nbsp;&nbsp;
+            <%= out.staff_name %>&nbsp;&nbsp;
+            <%= out.material_num.to_i %>&nbsp;&nbsp;
+            <%= out.out_price %>&nbsp;&nbsp;
+            <%= out.out_time.strftime("%Y-%m-%d %H:%M") %>
+          </li>
+      <% end %>
+      </ul>
+      <%= will_paginate @out_records if @out_records.size > 0 %>
+  </div>
   <div>
     <h1>入库记录<br/></h1>
-
+    条形码&nbsp;&nbsp;物料名称&nbsp;&nbsp;物料类别&nbsp;&nbsp;入库人&nbsp;&nbsp;入库量&nbsp;&nbsp;成本价（元）&nbsp;&nbsp;入库时间<br/>
+    <ur>
+      <% (@in_records || []).each do |record| %>
+          <li style="list-style-type: none;">
+            <%= record.code %>&nbsp;&nbsp;
+            <%= record.name %>&nbsp;&nbsp;
+            <%= Material::TYPES_NAMES.to_a[record.types.to_i][1] %>&nbsp;&nbsp;
+            <%= record.staff_name %>&nbsp;&nbsp;
+            <%= record.material_num.to_i %>&nbsp;&nbsp;
+            <%= record.out_price %>&nbsp;&nbsp;
+            <%= record.out_time.strftime("%Y-%m-%d %H:%M") %>
+          </li>
+      <% end %>
+      </ul>
+      <%= will_paginate @in_records if @in_records.size > 0 %>
   </div>
   <div>
     <h1>向总部订货记录</h1>
@@ -35,5 +68,11 @@ index 库存<br/>
     <h1>向供应商订货信息<br/></h1>
 
   </div>
+</div>
+<div id="remark_div" style="display: none;">
+  备注<br/>
+  <%= hidden_field_tag "material_id" %>
+  <%= text_area_tag "remark","",{:rows => 7,:cols => 30} %>
+  <%= button_to_function "保存","save_material_remark()" %>
 </div>
 
