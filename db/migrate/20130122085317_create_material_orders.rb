@@ -13,6 +13,7 @@ class CreateMaterialOrders < ActiveRecord::Migration
       t.string :carrier     #托运人姓名
       t.integer :store_id
       t.string :remark
+      t.integer :sale_id #活动代码对应的活动
 
       t.timestamps
     end

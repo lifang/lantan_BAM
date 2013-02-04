@@ -22,4 +22,7 @@ module Constant
   MANAGER = "3" #店长
   STAFF = "4" #员工
 
+  #总店id
+  STORE_ID = 1
+
 end
