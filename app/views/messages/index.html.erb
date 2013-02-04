@@ -1,4 +1,5 @@
 <script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
+<script type="text/javascript" src="/assets/messages.js" ></script>
 <%= form_for :customer ,:url=>"/stores/#{@store.id}/messages/search", :method => "post" do %>
   消费时间：<input type="text" name="started_at" id="started_at"
               value="<%= session[:started_at] ? session[:started_at] : (Time.now - 15.days).to_date  %>"
@@ -25,12 +26,16 @@
 <% end %>
 <br/>
 <div id="search_div" style="border: 1px #ccc solid;">
-  <% @customers.each_with_index do |customer, index| %>
-  <input type="checkbox" id="<%= index %>" name="<%= index %>" value="<%= customer.id %>" onclick="" />
-    <label id="label_<%= customer.id %>"><%= customer.name %></label>
+  <% @customers.each do |customer| %>
+  <input type="checkbox" id="c_<%= customer.cu_id %>" name="c_<%= customer.cu_id %>"
+         value="<%= customer.cu_id %>" onclick="select_customers()" />
+    <label id="label_<%= customer.cu_id %>"><%= customer.name %></label>
   <% end %>
 </div>
 <br/>
-<div id="send_div" style="border:1px #ccc solid;">
-  
-</div>
+<div id="send_div" style="border:1px #ccc solid;height: 100px;"></div>
+
+<a href="javascript:void(0)" onclick="show_name()">%name%</a>&nbsp;&nbsp;
+<a href="javascript:void(0)" onclick="javascript:show_store_name('<%= @store.name %>')" >门店名称</a><br/>
+<textarea id="content" name="content"  cols="60" rows="10" ></textarea>
+<button type="submit">确定</button>
