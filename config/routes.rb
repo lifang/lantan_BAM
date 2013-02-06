@@ -17,7 +17,7 @@ LantanBAM::Application.routes.draw do
     resources :welcomes
     resources :customers do
       collection do
-        post "search"
+        post "search", "customer_mark", "single_send_message"
         get "search_list"
       end
     end

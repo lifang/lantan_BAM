@@ -37,5 +37,9 @@
 
 <a href="javascript:void(0)" onclick="show_name()">%name%</a>&nbsp;&nbsp;
 <a href="javascript:void(0)" onclick="javascript:show_store_name('<%= @store.name %>')" >门店名称</a><br/>
+<%= form_for :customer ,:url=>"/stores/#{@store.id}/messages/", :method => "post",
+  :html => {:onsubmit => "return check_message()"} do %>
+<input type="hidden" id="customer_ids" name="customer_ids" value=""/>
 <textarea id="content" name="content"  cols="60" rows="10" ></textarea>
 <button type="submit">确定</button>
+<% end %>

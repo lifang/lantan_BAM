@@ -39,4 +39,21 @@ class MessagesController < ApplicationController
       session[:is_time], session[:time], session[:is_price], session[:price], session[:is_vip], session[:is_birthday])
     render "index"
   end
+
+  def create
+    unless params[:content].strip.empty? or params[:customer_ids].nil?
+      MessageRecord.transaction do
+        message_record = MessageRecord.create(:store_id => params[:store_id].to_i, :content => params[:content].strip,
+          :status => MessageRecord::STATUS[:NOMAL], :send_at => Time.now)
+        customers = Customer.find_all_by_id(params[:customer_ids].split(","))
+        customers.each do |customer|
+          SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id, 
+            :content => params[:content].strip.gsub("%name%", customer.name), :phone => customer.mobilephone,
+            :send_at => Time.now, :status => MessageRecord::STATUS[:NOMAL])
+        end
+        flash[:notice] = "短信发送成功。"
+      end
+    end
+    redirect_to "/stores/#{params[:store_id]}/messages/search_list"
+  end
 end
