@@ -3,8 +3,8 @@ class PackageCardsController < ApplicationController
   # 营销管理 -- 套餐卡
 
   def index
-    cards=PackageCard.paginate_by_sql("select started_at,ended_at,id from package_cards where store_id=2
-         and status=#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => 5)  #store_id 为硬写
+    cards=PackageCard.paginate_by_sql("select started_at,ended_at,id from package_cards where store_id=#{params[:store_id]}
+         and status=#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => 5) 
     @card_hash={}
     cards.each do |card|
       @card_hash[card.id]=Product.find_by_sql("select s.name,p.product_num from products s inner join
@@ -23,8 +23,7 @@ class PackageCardsController < ApplicationController
   end #添加套餐卡
 
   def sale_reords
-    cards=PackageCard.find_by_sql("select started_at,ended_at,id from package_cards where store_id=2 and status=#{PackageCard::STAT[:NORMAL]}")
-    #store_id 为硬写
+    cards=PackageCard.find_by_sql("select started_at,ended_at,id from package_cards where store_id=#{params[:store_id]} and status=#{PackageCard::STAT[:NORMAL]}")
     @card_hash={}
     cards.each do |card|
       unless card.c_pcard_relations.blank?
