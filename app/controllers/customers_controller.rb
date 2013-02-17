@@ -41,10 +41,6 @@ class CustomersController < ApplicationController
     redirect_to request.referer
   end
 
-  def new
-    @store = Store.find(params[:store_id].to_i)
-  end
-
   def create
     if params[:name] and params[:mobilephone]
       Customer.create(:name => params[:name].strip, :mobilephone => params[:mobilephone].strip, 

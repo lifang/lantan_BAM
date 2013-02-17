@@ -24,11 +24,11 @@
         <div>
           <input type="checkbox" name="is_time" id="is_time" value="1" <% unless session[:is_time].nil? %>checked<% end %>/>
           &nbsp;消费满&nbsp;
-          <input type="text" name="time" id="time" value="<%= session[:time] ? session[:time] : 3 %>"/>&nbsp;次</div>
+          <input type="text" name="time" id="time" class="input_s" value="<%= session[:time] ? session[:time] : 3 %>"/>&nbsp;次</div>
         <div>
           <input type="checkbox" name="is_price" id="is_price" value="1" <% unless session[:is_price].nil? %>checked<% end %>/>
           &nbsp;消费金额满&nbsp;
-          <input type="text" name="price" id="price" value="<%= session[:price] ? session[:price] : 500 %>"/>&nbsp;元</div>
+          <input type="text" name="price" id="price" class="input_s" value="<%= session[:price] ? session[:price] : 500 %>"/>&nbsp;元</div>
         <div>
           <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
           <button type="submit">查询</button>

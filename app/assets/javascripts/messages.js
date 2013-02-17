@@ -3,8 +3,8 @@ function select_customers() {
     var send_html = "";
     var customer_ids = "";
     for (var i=0; i<checkboxes.length; i++) {
-        send_html += "<div id='cus_"+ checkboxes[i].value +"'>"+ $("#label_" + checkboxes[i].value).html()
-            + "<a href='javascript:void(0);' onclick='delete_cus("+ checkboxes[i].value +")'>删除</a></div>";
+        send_html += "<div id='cus_"+ checkboxes[i].value +"'><em>"+ $("#label_" + checkboxes[i].value).html()
+            + "</em><a href='javascript:void(0);' class='remove_a' onclick='delete_cus("+ checkboxes[i].value +")'>删除</a></div>";
         customer_ids == "" ? (customer_ids += checkboxes[i].value) : (customer_ids += "," + checkboxes[i].value);
     }
     $("#customer_ids").val(customer_ids);
