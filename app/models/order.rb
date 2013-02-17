@@ -97,9 +97,6 @@ class Order < ActiveRecord::Base
     condition_arr = customer_condition_sql[0]
     condition_sql = customer_condition_sql[1]
     condition_arr[0] = customer_sql + condition_sql
-    puts "=================================="
-    puts customer_condition_sql[2].blank?
-    puts "--------------------"
     return customer_condition_sql[2].blank? ? [] : Customer.find_by_sql(condition_arr)
     
   end

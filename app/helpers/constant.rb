@@ -24,4 +24,7 @@ module Constant
 
   #活动code码生成文件路径
   CODE_PATH="#{Rails.root}/public/code_file.txt"
+  #总店id
+  STORE_ID = 1
+
 end

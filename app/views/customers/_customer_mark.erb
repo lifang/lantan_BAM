@@ -1,0 +1,7 @@
+<div id="mark_div" style="display: none;">
+  <%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/customer_mark", :method => "post" do %>
+    <input type="hidden" name="c_customer_id" id="c_customer_id" value="" />
+    <textarea id="mark" name="mark" cols="60" rows="6"></textarea>
+    <button type="submit">保存</button>
+  <% end %>
+</div>

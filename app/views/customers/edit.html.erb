@@ -1,0 +1,15 @@
+<script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
+<script type="text/javascript" src="/assets/customers.js" ></script>
+新建客户
+<%= form_for :customer, :url=>"/stores/#{@store.id}/customers/#{@customer.id}", :method => "put",
+  :html => {:onsubmit => "return check_customer()"} do %>
+  姓名：<input type="text" id="name" name="name" value="<%= @customer.name %>"/>
+  手机号码：<input type="text" id="mobilephone" name="mobilephone" value="<%= @customer.mobilephone %>"/>
+  其他联系方式：<input type="text" id="other_way" name="other_way" value="<%= @customer.other_way %>"/>
+  性别: <input type="radio" name="sex" value="1" <% if @customer.sex %>checked<% end %> />男 &nbsp;
+  <input type="radio" name="sex" value="0" <% unless @customer.sex %>checked<% end %> />女
+  生日：<input type="text" id="birthday" name="birthday" value="<%= @customer.birthday %>"
+            readonly onClick="WdatePicker();" class="Wdate" />
+  地址<input type="text" name="address" id="address" value="<%= @customer.address %>"/>
+  <button type="submit">提交</button>
+<% end %>
