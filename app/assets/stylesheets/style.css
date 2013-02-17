@@ -1,6 +1,6 @@
 @charset "utf-8";
 * { padding: 0; margin: 0;}
-body { background: #FFF; font-family: "微软雅黑", "宋体", Arial; color: #333; font-size: 14px; position: relative; overflow: hidden;}
+body { background: #FFF; font-family: "微软雅黑", "宋体", Arial; color: #333; font-size: 14px; position: relative; overflow-x: hidden;}
 a { text-decoration: none;}
 ul { list-style: none;}
 img { border: none;}
@@ -239,14 +239,14 @@ textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;}
 
 
 /*+ -*/
-.data_tab_table td .addre_input { width: 30px;}
+.data_tab_table td .addre_input { width: 30px; text-align: center;}
 .data_tab_table td a.addre_a { font-size: 21px; background:none; color: #333; margin: 0;}
 
-.popup_body_result input[type="text"].addre_input { width: 30px;}
+.popup_body_result input[type="text"].addre_input { width: 30px; text-align: center;}
 .popup_body_result .addre_a { font-size: 21px; background:none; color: #333; margin: 0;}
 .popup_body_result em { margin-right: 10px;}
 
-.addre_input { width: 30px;}
+.addre_input { width: 30px; text-align: center;}
 
 /*search*/
 .search { padding-top: 8px; overflow: hidden; margin-bottom: 5px;}
