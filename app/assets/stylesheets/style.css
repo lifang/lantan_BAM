@@ -291,7 +291,7 @@ textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;}
 	padding-left: 20px;
 	position: relative;
 }
-.popup_body { overflow: hidden; padding: 10px;}
+.popup_body { overflow: hidden; padding: 10px; position: relative;}
 .popup_body_area { overflow: hidden;}
 
 .popup_body_fieldset { border: 1px #CCCCCC solid;}
@@ -332,6 +332,11 @@ input.file { width: 100px; _width: 90px; float: left;}
 
 .item_textarea { margin: 20px 10px; float: left; overflow: hidden; width: 590px;}
 .width_textarea { width: 460px;}
+
+/*suggest*/
+.suggest { width: 160px; border:1px solid #CCC; background: #FFF; position: absolute; top: 45px; left: 120px;}
+.suggest a { display: block; height: 24px; line-height: 24px; font-size: 12px; color: #333; padding: 0 10px;}
+.suggest a:hover { background: #f5f5f5;}
 
 
 
