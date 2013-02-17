@@ -6,7 +6,11 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins
   resources :stores do
-    resources :sales
+    resources :sales do 
+      collection do
+        post "load_types"
+      end
+    end
     resources :materials do
       collection do
         get "out","search","order"
