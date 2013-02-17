@@ -1,6 +1,6 @@
 #encoding: utf-8
 module Constant
- #权限
+  #权限
   ROLES = {
     #客户
     :customer => {
@@ -22,4 +22,6 @@ module Constant
   MANAGER = "3" #店长
   STAFF = "4" #员工
 
+  #活动code码生成文件路径
+  CODE_PATH="#{Rails.root}/public/code_file.txt"
 end

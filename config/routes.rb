@@ -6,6 +6,7 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins
   resources :stores do
+    resources :sales
     resources :welcomes
     resources :customers do
       collection do

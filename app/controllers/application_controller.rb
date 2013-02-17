@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   before_filter :set_charset
   before_filter :configure_charsets
 
-#中文乱码解决方案
+  #中文乱码解决方案
   def set_charset
     headers["Content-Type"] = "text/html; charset=utf-8"
   end
@@ -17,5 +17,4 @@ class ApplicationController < ActionController::Base
       ActiveRecord::Base.connection.execute 'SET NAMES UTF8'
     end
   end
-
 end
