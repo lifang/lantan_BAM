@@ -27,3 +27,20 @@ function check_single_send() {
     }
     return true;
 }
+
+//弹出层关闭
+$(function(){
+    $(".message .x").click(function(){
+        $(this).parent().hide();
+    });
+})
+
+function show_complaint() {
+    $("#complaint_s").show();
+    $("#complaint_h").hide();
+}
+
+function hide_complaint() {
+    $("#complaint_s").hide();
+    $("#complaint_h").show();
+}

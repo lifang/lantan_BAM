@@ -1,5 +1,7 @@
 #encoding: utf-8
 class MessagesController < ApplicationController
+  layout "customer"
+  
   def index
     session[:started_at] = nil
     session[:ended_at] = nil

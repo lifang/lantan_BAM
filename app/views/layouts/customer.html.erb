@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>客户管理</title>
+    <%= stylesheet_link_tag    "application" %>
+    <%= javascript_include_tag "application" %>
+    <script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
+    <script type="text/javascript" src="/assets/customers.js" ></script>
+    <!--[if IE 6]>
+    <script src="/assets/DD_belatedPNG_0.0.8a-min.js"></script>
+    <script>
+      DD_belatedPNG.fix('*');
+    </script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <div class="head">
+      <div class="box">
+        <div class="logo">澜泰门店后台管理系统</div>
+        <div class="login">你好：<%= cookies[:user_name] %> | <a href="#">退出</a></div>
+        <div class="clear"></div>
+        <div class="nav">
+          <ul>
+            <li><a href="/stores/<%= @store.id %>/customers" class="hover">客户列表</a></li>
+            <li><a href="/stores/<%= @store.id %>/revisits">客户回访</a></li>
+            <li><a href="/stores/<%= @store.id %>/messages" <% if controller.controller_name=="messages" %>class="hover"<% end %>>群发短信</a></li>
+          </ul>
+        </div>
+        <div class="back"><a href="/stores/<%= @store.id %>/welcomes" title="返回">Back</a>客户管理</div>
+      </div>
+    </div>
+    <div class="main">
+      <%= yield %>
+    </div>
+    <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+  </body>
+</html>

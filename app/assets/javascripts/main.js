@@ -28,7 +28,7 @@ $(function() {
         $('div.data_body > div').eq(index).show().siblings().hide();
     });
 })
- 
+
 //偶数行变色
 $(function(){
     $(".data_table > tbody > tr:odd").addClass("tbg");
@@ -41,10 +41,10 @@ function popup(t,b){
     var doc_width = $(document).width();
     //var win_height = $(window).height();
     //var win_width = $(window).width();
-	
+
     var layer_height = $(t).height();
     var layer_width = $(t).width();
-	
+
     //tab
     $(b).bind('click',function(){
         $(".mask").css({
@@ -68,25 +68,15 @@ function popup(t,b){
     })
 }
 
-//入库弹出层
-$(function(){
-    popup(".ruku_tab",".rk_btn");//入库
-    popup(".chuku_tab",".ck_btn");//出库
-    popup(".dinghuo_tab",".dh_btn");//订货
-    popup(".beizhu_tab",".bz_btn");//备注
-    popup(".add_tab",".add_btn");//添加XXX
-    popup(".see_tab",".see_btn");//查看XXX
-})
-
 
 //现场施工
 $(function(){
     var sitePayHeight = $(".site_pay").height();
     $(".site_pay > h1").css("height",sitePayHeight);
-	
+
     var siteWorkHeight = $(".site_work").height();
     $(".site_work > h1").css("height",siteWorkHeight);
-	
+
     var siteInfoHeight = $(".site_info").height();
     $(".site_info > h1").css("height",siteInfoHeight);
 })
@@ -113,8 +103,38 @@ function load_types(store_id){
 }
 
 //向选择框添加产品服务
-function add_this(e){
-    var child="<div ><em>"+$(e).html() +"</em><a href='#' class='addre_a'>+</a><span><input name='product["+e.value +"]' type='text' class='addre_input' value='1' />\n\
-               </span><a href='#' class='addre_a'>-</a><a href='#' class='remove_a'>删除</a></div></div>";
-    $(".popup_body_fieldset #add_products").append(child);
+function add_this(e,name){
+    var child="<div id='"+e.value+"'><em>"+name +"</em><a href='javascript:void(0)' class='addre_a' \n\
+    onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a><span><input name='product["+e.value +"]' \n\
+    type='text' class='addre_input' value='1' id='add_p"+e.value +"' /></span><a href='javascript:void(0)' class='addre_a' \n\
+    id='delete_one"+e.value+"'>-</a><a href='javascript:void(0)' class='remove_a' \n\
+    onclick='$(this).parent().remove();if($(\"#prod_"+ e.value+"\").length!=0){$(\"#prod_"+ e.value+"\")[0].checked=false;}'>删除</a></div></div>";
+    if ($(e)[0].checked){
+        if ($("#add_products #"+e.value).length==0){
+            $(".popup_body_fieldset #add_products").append(child);
+        }else{
+            var num=parseInt($("#add_products #add_p"+e.value).val())+1+1;
+            $("#add_products #add_p"+e.value).val(num);
+            $("#add_products #delete_one"+e.value).attr("onclick","delete_one('"+ e.value+"')");
+        }
+    }else{
+        $("#add_products #"+e.value).remove();
+    }
+}
+
+
+
+function add_one(id){
+    var num=parseInt($("#add_products #add_p"+id).val())+1;
+    $("#add_products #add_p"+id).val(num);
+    if (num>=2)
+        $("#add_products #delete_one"+id).attr("onclick","delete_one('"+ id+"')");
+}
+
+function delete_one(id){
+    var num=parseInt($("#add_products #add_p"+id).val())-1;
+    if (num==1){
+        $("#add_products #delete_one"+id).attr("onclick","");
+    }
+    $("#add_products #add_p"+id).val(num);
 }

@@ -2,10 +2,10 @@
   <a href="/stores/<%= params[:store_id] %>/sales/new" <% if params[:action] == "new"  %> class="hover"<%end%>>发布活动</a></div>
 <div class="clear"></div>
 <div class="data_body">
-  <div>
-    <%#= form_for :sale,:url=>"/stores/#{params[:store_id]}/sales",:method=>:post do  %>
+  <%= form_for :sale,:url=>"/stores/#{params[:store_id]}/sales",:method=>:post do  %>
+    <div>
       <%= render 'form' %>
-    <%# end %>
-  </div>
-  <div class="btn_box"><button class="confirm_btn" type="commit">发布</button><button class="cancel_btn">取消</button></div>
+    </div>
+    <div class="btn_box"><button class="confirm_btn" type="submit" onclick="">发布</button></div>
+  <% end %>
 </div>

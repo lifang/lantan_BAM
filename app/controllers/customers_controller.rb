@@ -1,7 +1,7 @@
 #encoding: utf-8
 class CustomersController < ApplicationController
   include RemotePaginateHelper
-  
+  layout "customer"
   before_filter :customer_tips
 
   def index
@@ -93,6 +93,7 @@ class CustomersController < ApplicationController
   end
 
   def show
+    @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
     @orders = Order.paginate_by_sql(["select * from orders where status != ? and store_id = ? and customer_id = ?
         order by created_at desc", Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id],

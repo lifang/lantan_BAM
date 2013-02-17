@@ -3,7 +3,7 @@
   <div class="releaseDiv_r rdTop">
     <div class="search">
       <div><label>类别：</label>
-        <select name="sale_types" id="sale_types">
+        <select  id="sale_types">
           <option value="">请选择</option>
           <% Product::PRODUCT_TYPES.each do |key,value| %>
             <option value="<%= key %>"><%= value %></option>
@@ -11,7 +11,7 @@
         </select>
       </div>
       <div><label>名称：</label><input id="sale_name" type="text" /></div>
-      <div><button class="search_btn" onclick="load_types('<%= params[:store_id] %>')">查询</button></div>
+      <div><input type="button" class="search_btn" value="查询" onclick="load_types('<%= params[:store_id] %>')" /></div>
     </div>
     <fieldset class="popup_body_fieldset">
       <legend class="popup_body_title">查询结果</legend>

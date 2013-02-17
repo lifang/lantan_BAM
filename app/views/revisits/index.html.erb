@@ -1,34 +1,69 @@
-<script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
-<%= form_for :customer ,:url=>"/stores/#{@store.id}/revisits/search", :method => "post" do %>
-  消费时间：<input type="text" name="started_at" id="started_at"
-              value="<%= session[:started_at] ? session[:started_at] : (Time.now - 15.days).to_date  %>"
-              class="Wdate" readonly onClick="WdatePicker();"/>到
-  <input type="text" name="ended_at" id="ended_at" value="<%= session[:ended_at] ? session[:ended_at] : Time.now.to_date %>"
-         class="Wdate" readonly onClick="WdatePicker();"/>
-  会员：<select id="is_vip" name="is_vip">
-    <option value="-1" <% if session[:is_vip].nil? or session[:is_vip] == "-1" %>selected<% end %>>全部</option>
-    <option value="<%= Customer::IS_VIP[:VIP] %>" <% if session[:is_vip] == "1" %>selected<% end %>>是</option>
-    <option value="<%= Customer::IS_VIP[:NORMAL] %>" <% if session[:is_vip] == "0" %>selected<% end %>>否</option>
-  </select>
-  <select id="is_visited" name="is_visited">
-    <option value="-1" <% if session[:is_visited].nil? or session[:is_visited] == "-1" %>selected<% end %>>全部</option>
-    <option value="<%= Order::IS_VISITED[:YES] %>" <% if session[:is_visited] == "1" %>selected<% end %>>已回访</option>
-    <option value="<%= Order::IS_VISITED[:NO] %>" <% if session[:is_visited] == "0" %>selected<% end %>>未回访</option>
-  </select>
-  <input type="checkbox" name="is_time" id="is_time" value="1" <% unless session[:is_time].nil? %>checked<% end %>/>
-  消费满<input type="text" name="time" id="time" value="<%= session[:time] ? session[:time] : 3 %>"/>次
-  <input type="checkbox" name="is_price" id="is_price" value="1" <% unless session[:is_price].nil? %>checked<% end %>/>
-  金额满<input type="text" name="price" id="price" value="<%= session[:price] ? session[:price] : 500 %>"/>元
-  <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
-  <button type="submit">查询</button>
-<% end %>
-<br/>
+<div class="box">
+  <div class="data_box">
+    <div class="search">
+      <%= form_for :customer ,:url=>"/stores/#{@store.id}/revisits/search", :method => "post" do %>
+        <div><label>消费时间：</label>
+          <input type="text" name="started_at" id="started_at"
+                 value="<%= session[:started_at] ? session[:started_at] : (Time.now - 15.days).to_date  %>"
+                 class="Wdate" readonly onClick="WdatePicker();"/>&nbsp;到&nbsp;
+          <input type="text" name="ended_at" id="ended_at"
+                 value="<%= session[:ended_at] ? session[:ended_at] : Time.now.to_date %>"
+                 class="Wdate" readonly onClick="WdatePicker();"/></div>
+        <div><label>会员：</label>
+          <select id="is_vip" name="is_vip" class="select_marginRight">
+            <option value="-1" <% if session[:is_vip].nil? or session[:is_vip] == "-1" %>selected<% end %>>全部</option>
+            <option value="<%= Customer::IS_VIP[:VIP] %>" <% if session[:is_vip] == "1" %>selected<% end %>>是</option>
+            <option value="<%= Customer::IS_VIP[:NORMAL] %>" <% if session[:is_vip] == "0" %>selected<% end %>>否</option>
+          </select>&nbsp;
+          <select id="is_visited" name="is_visited">
+            <option value="-1" <% if session[:is_visited].nil? or session[:is_visited] == "-1" %>selected<% end %>>全部</option>
+            <option value="<%= Order::IS_VISITED[:YES] %>" <% if session[:is_visited] == "1" %>selected<% end %>>已回访</option>
+            <option value="<%= Order::IS_VISITED[:NO] %>" <% if session[:is_visited] == "0" %>selected<% end %>>未回访</option>
+          </select>
+        </div>
+        <div>
+          <input type="checkbox" name="is_time" id="is_time" value="1" <% unless session[:is_time].nil? %>checked<% end %>/>
+          &nbsp;消费满&nbsp;
+          <input type="text" name="time" id="time" value="<%= session[:time] ? session[:time] : 3 %>"/>&nbsp;次</div>
+        <div>
+          <input type="checkbox" name="is_price" id="is_price" value="1" <% unless session[:is_price].nil? %>checked<% end %>/>
+          &nbsp;消费金额满&nbsp;
+          <input type="text" name="price" id="price" value="<%= session[:price] ? session[:price] : 500 %>"/>&nbsp;元</div>
+        <div>
+          <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
+          <button type="submit">查询</button>
+        </div>
+      <% end %>
+    </div>
 
-<% @customers.each do |customer| %>
-<%= customer.num %>
-<%= customer.name %>
-<%= customer.mobilephone %>
-<a href="#"><%= customer.code %></a>
-<a href="#">回访</a>
-<% end %>
-<%=  will_paginate @customers ,:previous_label=>" &lt;", :next_label=>" &gt;" unless @customers.blank?  %>
+    <div class="clear"></div>
+    <div class="data_body">
+      <div>
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+          <thead>
+            <tr class="hbg">
+              <td>车牌号码</td>
+              <td>客户姓名</td>
+              <td>手机号码</td>
+              <td>订单信息</td>
+              <td>操作</td>
+            </tr>
+          </thead>
+          <tbody>
+            <% @customers.each do |customer| %>
+              <tr>
+                <td><%= customer.num %></td>
+                <td><%= customer.name %></td>
+                <td><%= customer.mobilephone %></td>
+                <td><a href="#" class="other_a"><%= customer.code %></a></td>
+                <td><a href="#">回访</a></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <%= will_paginate @customers , :previous_label=>" &lt;", :next_label=>" &gt;",
+          :class=>"pageTurn" unless @customers.blank?  %>
+      </div>
+    </div>
+  </div>
+</div>

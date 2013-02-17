@@ -1,3 +1,5 @@
+<%= javascript_include_tag "/assets/kindEditor/kindeditor-min.js" %>
+<%= javascript_include_tag "/assets/kindEditor/zh_CN.js" %>
 <div class="releaseDiv">
   <div class="releaseDiv_l">标题：</div>
   <div class="releaseDiv_r"><input name="" type="text" class="title_input" value="<%= @sale.name %>" /></div>
@@ -50,6 +52,14 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">活动介绍：</div>
   <div class="releaseDiv_r">
-    <textarea name="" cols="" rows=""></textarea>
+    <textarea  cols=""  name="content"></textarea>
   </div>
 </div>
+<script type="text/javascript">
+  var editor;
+  KindEditor.ready(function(K) {
+    editor = K.create('textarea[name="content"]', {
+     allowFileManager : true
+    });
+  });
+</script>

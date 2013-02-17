@@ -1,39 +1,68 @@
-<%= render :partial => "/customers/show_tips" %>
-<script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
-<script type="text/javascript" src="/assets/customers.js" ></script>
-<%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/search", :method => "post" do %>
-  客户类别：<select id="c_types" name="c_types">
-    <option value="-1">全部</option>
-    <% Customer::C_TYPES.each do |k, v| %>
-      <option value="<%= k %>" <% if session[:c_types] and k.to_i == session[:c_types].to_i %>selected<% end %>><%= v %></option>
-    <% end %>
-  </select>
-  姓名：<input type="text" name="name" id="name" value="<%= session[:name] %>"/>
-  车牌号码：<input type="text" name="car_num" id="car_num" value="<%= session[:car_num] %>"/>
-  手机号码：<input type="text" name="phone" id="phone" value="<%= session[:phone] %>"/><br/>
-  最近消费客户：<input type="text" name="started_at" id="started_at" value="<%= session[:started_at] %>"
-                class="Wdate" readonly onClick="WdatePicker();"/>到
-  <input type="text" name="ended_at" id="ended_at" value="<%= session[:ended_at] %>"
-         class="Wdate" readonly onClick="WdatePicker();"/>
-  <input type="checkbox" name="is_vip" id="is_vip" value="1" <% if session[:is_vip] %>checked<% end %>/>会员
-  <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
-  <button type="submit">查询</button>
-<% end %>
-<br/>
-客户总数：<%= @customers.total_entries %><br/>
-<% @customers.each do |customer| %>
-<%= customer.num %>
-<%= customer.name %>
-<%= customer.mobilephone %>
-<%= customer.is_vip ? "是" : "否"  %>
-<a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a>
-<a href="javascript:void(0)" onclick="customer_mark(<%= customer.id %>)">备注</a>
-<a href="javascript:void(0)" onclick="single_send_message(<%= customer.id %>)">发短信</a>
-<%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
-  :confirm => "您确认要删除 #{customer.name} 信息么？" %>
-<br/>
-<% end %>
+<div class="box">
+  <%= render :partial => "/customers/show_tips" %>
+  <%= render :partial => "customer_mark" %>
+  <%= render :partial => "single_send_message" %>
+  <div class="data_box">
+    <div class="search">
+      <%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/search", :method => "post" do %>
+        <div><label>客户类型：</label>
+          <select id="c_types" name="c_types">
+            <option value="-1">全部</option>
+            <% Customer::C_TYPES.each do |k, v| %>
+              <option value="<%= k %>" <% if session[:c_types] and k.to_i == session[:c_types].to_i %>selected<% end %>><%= v %></option>
+            <% end %>
+          </select>
+        </div>
+        <div><label>客户名称：</label><input type="text" name="name" id="name" value="<%= session[:name] %>"/></div>
+        <div><label>车牌号码：</label><input type="text" name="car_num" id="car_num" value="<%= session[:car_num] %>"/></div>
+        <div><label>手机号码：</label><input type="text" name="phone" id="phone" value="<%= session[:phone] %>"/></div>
+        <div><label>最近消费客户：</label>
+          <input type="text" name="started_at" id="started_at" value="<%= session[:started_at] %>"
+                 class="Wdate" readonly onClick="WdatePicker();"/>&nbsp;到&nbsp;
+          <input type="text" name="ended_at" id="ended_at" value="<%= session[:ended_at] %>"
+                 class="Wdate" readonly onClick="WdatePicker();"/></div>
+        <input type="checkbox" name="is_vip" id="is_vip" value="1" <% if session[:is_vip] %>checked<% end %>/>会员
+        <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
+        <div><button type="submit" class="search_btn">查询</button></div>
+      <% end %>
+    </div>
 
-<%=  will_paginate @customers ,:previous_label=>" &lt;", :next_label=>" &gt;" %>
-<%= render :partial => "customer_mark" %>
-<%= render :partial => "single_send_message" %>
+    <div class="data_body_title">
+      <h2 class="data_body_h">当月门店满意度 ：<a href="#">100%</a></h2>
+      <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries %></span>位</p>
+    </div>
+    <div class="data_menu"><a href="/stores/<%= @store.id %>/customers/new" class="add_btn">新建客户</a></div>
+    <div class="clear"></div>
+    <div class="data_body">
+      <div>
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+          <thead>
+            <tr class="hbg">
+              <td>车牌号码</td>
+              <td>客户姓名</td>
+              <td>手机号码</td>
+              <td>是否会员</td>
+              <td>操作</td>
+            </tr>
+          </thead>
+          <tbody>
+            <% @customers.each do |customer| %>
+              <tr>
+                <td><%= customer.num %></td>
+                <td><%= customer.name %></td>
+                <td><%= customer.mobilephone %></td>
+                <td><%= customer.is_vip ? "是" : "否"  %></td>
+                <td><a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a>
+                  <a href="javascript:void(0)" onclick="customer_mark(<%= customer.id %>)">备注</a>
+                  <a href="javascript:void(0)" onclick="single_send_message(<%= customer.id %>)">发短信</a>
+                  <%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
+                    :confirm => "您确认要删除 #{customer.name} 信息么？" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <%=  will_paginate @customers , :previous_label=>" &lt;", :next_label=>" &gt;", :class => "pageTurn" %>
+      </div>
+    </div>
+  </div>
+</div>

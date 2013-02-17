@@ -1,13 +1,43 @@
-<% @complaints.each do |complaint| %>
-  <%= complaint.reason %>
-  <%= complaint.suggstion %>
-  <%= complaint.remark %>
-  <a href="#">处理</a>
-  <br/>
-<% end %>
+<% unless @complaints.blank? %>
+  <div class="message" id="complaint_h">
+    有 <span class="red"><%= @complaints.size %></span> 条投诉
+    <a href="javascript:void(0)" onclick="javascript:show_complaint()">点击查看</a><span class="x">Close</span>
+  </div>
+  <div class="message" id="complaint_s" style="display: none;">
+    <a href="javascript:void(0)" onclick="javascript:hide_complaint()" >隐藏</a><span class="x">Close</span>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+      <thead>
+        <tr class="hbg">
+          <td>车牌号码</td>
+          <td>客户姓名</td>
+          <td>相关订单</td>
+          <td>投诉理由</td>
+          <td>投诉要求</td>
+          <td>操作</td>
+        </tr>
+      </thead>
+      <tbody>
+        <% @complaints.each do |complaint| %>
+          <tr>
+            <td><%= complaint.num %></td>
+            <td><%= complaint.name %></td>
+            <td><a href="#" class="other_a"><%= complaint.code %></a></td>
+            <td><%= complaint.reason %></td>
+            <td><%= complaint.suggstion %></td>
+            <td><a href="#">处理</a></td>
+          </tr>
+        <% end %>
 
-<% @notices.each do |notice| %>
-  <%= notice.content %>
-  <a href="#">短信问候</a>
+      </tbody>
+    </table>
+  </div>
 <% end %>
-<br/><br/>
+<% unless @notices.blank? %>
+  <div class="message">
+    <% @notices.each do |notice| %>
+      <%= notice.content %>
+      <a href="#">短信问候</a>
+    <% end %>
+    <span class="x">Close</span>
+  </div>
+<% end %>
