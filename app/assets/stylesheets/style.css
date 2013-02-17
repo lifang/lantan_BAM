@@ -419,7 +419,7 @@ input.file { width: 100px; _width: 90px; float: left;}
 .releaseDiv_r input[type="text"].title_input { width: 200px;}
 .rdTop { margin-top: 24px;}
 .releaseDiv_r em { margin-right: 10px;}
-.releaseDiv_r textarea { width: 98%;}
+.releaseDiv_r textarea { width: 98%; height: 200px;}
 
 /*查看*/
 .seeProDiv { padding: 10px 0; overflow: hidden; float: left;}
