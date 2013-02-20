@@ -17,7 +17,7 @@ function focusBlur(e){
 
 $(function(){
     focusBlur('.login_box input');//用户信息input默认值
-    focusBlur('.item input');//用户信息input默认值
+   // focusBlur('.item input');//用户信息input默认值
 })
 
 //切换
