@@ -8,7 +8,7 @@
       </div>
       <div class="seeProDiv">
         <div class="seeProDiv_l">产品名称：</div>
-        <div class="seeProDiv_r"><%=  %></div>
+        <div class="seeProDiv_r"><%=@product.name  %></div>
       </div>
 
       <div class="seeProDiv">
@@ -30,13 +30,12 @@
       <div class="clear"></div>
       <div class="seeProDiv_p">
         <div class="seeProDiv_l">简介：</div>
-        <div class="seeProDiv_r"><p><%=  %></p></div>
+        <div class="seeProDiv_r"><p><%= @product.introduction %></p></div>
       </div>
       <div class="seeProDiv_p">
         <div class="seeProDiv_l">描述：</div>
-        <div class="seeProDiv_r"><p>这是描述XXXXXXXXXXX</p></div>
+        <div class="seeProDiv_r"><p><%= @product.description %></p></div>
       </div>
     </div>
-    <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
   </div>
 </div>

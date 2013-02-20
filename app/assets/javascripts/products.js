@@ -1,4 +1,3 @@
-
 function add_prod(){
     $.ajax({
         async:true,
@@ -24,4 +23,8 @@ function show_prod(id){
         dataType : 'script',
         url : "/products/"+ id+"/show_prod"
     });
+}
+
+function add_product(){
+    $("#add_prod").submit();
 }
