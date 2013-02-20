@@ -6,8 +6,8 @@ class Complaint < ActiveRecord::Base
 
   #投诉类型
   TYPES = { :wash => 1, :waxing => 2, :dirt => 3, :inner_wash => 4, :inner_waxing => 5, :polish => 6, :silver => 7, :glass => 8,
-    :accident => 9, :service => 10, :rest => 11, :bad => 12, :part => 13, :timeout => 14,
-    :adviser => 15, :technician => 16, :invalid => 17}
+    :accident => 9, :technician => 10, :service => 11,:adviser => 12, :rest => 13, :bad => 14, :part => 15, :timeout => 16,
+     :technician => 16, :invalid => 17}
          
   TYPES_NAMES = {1 => "精洗施工质量", 2 => "打蜡施工质量", 3 => "去污施工质量", 4 => "内饰清洗施工质量", 5 => "内饰护理施工质量",
     6 => "抛光施工质量", 7 => "镀晶施工质量", 8 => "玻璃清洗护理施工质量", 9 => "施工事故（施工过程中导致车辆受损）",
