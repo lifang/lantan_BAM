@@ -30,5 +30,8 @@ module ApplicationHelper
     suppliers
   end
 
-
+  def cover_div controller_name
+    return request.url.include?(controller_name) ? "hover" : ""
+    #puts self.action_name,self.controller_path,self.controller,self.controller_name,request.url
+  end
 end
