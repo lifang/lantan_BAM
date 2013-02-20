@@ -1,5 +1,17 @@
 LantanBAM::Application.routes.draw do
-  resources :sales
+  resources :sales do
+    collection do
+      post :delete_sale,:public_sale
+    end
+  end
+  resources :products do
+    collection do
+      post "add_prod"
+    end
+    member do
+      post "edit_prod","show_prod"
+    end
+  end
   resources :stations
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -10,6 +22,11 @@ LantanBAM::Application.routes.draw do
       collection do
         post "load_types"
       end
+      member do
+        post "update_sale"
+      end
+    end
+    resources :products do
     end
     resources :materials do
       collection do

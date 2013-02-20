@@ -1,3 +1,4 @@
+<%= javascript_include_tag "/assets/sales.js" %>
 <div class="second_menu"><a href="/stores/<%= params[:store_id] %>/sales" <% if params[:action] == "index"  %> class="hover"<%end%>>活动列表</a>
   <a href="/stores/<%= params[:store_id] %>/sales/new" <% if params[:action] == "new"  %> class="hover"<%end%>>发布活动</a></div>
 <div class="clear"></div>
@@ -20,11 +21,20 @@
             <tr>
               <td><%= sale.name %></td>
               <td><%=  sale.code %></td>
-              <td><%= sale.started_at.nil?? "截止日期为" : sale.started_at.strftime("%Y.%m.%d") %>-
-                <%=  sale.ended_at.nil?? "暂未定" : sale.ended_at.strftime("%Y.%m.%d")  %></td>
+              <td><%= if sale.disc_time_types == Sale::DISC_TIME[:TIME]
+                  "#{sale.started_at.nil?? "截止日期为" : sale.started_at.strftime("%Y.%m.%d")}-#{ sale.ended_at.nil?? "暂未定" : sale.ended_at.strftime("%Y.%m.%d")}"
+                else
+                  "#{Sale::DISC_TIME_NAME[sale.disc_time_types]}#{sale.everycar_times}次"
+                end
+              %></td>
               <td><%=Sale::STATUS_NAME[sale.status] %></td>
               <td><%= sale.reported_num %></td>
-              <td style="text-align: right;"><%if sale.status==0 %><a href="#">发布</a><%end%><a href="#">修改</a><a href="#">删除</a></td>
+              <td style="text-align: right;">
+                <%if sale.status==0 %>
+                  <a href="javascript:void(0)" onclick="public_sale('<%= sale.id %>')">发布</a>
+                <%end%>
+                <a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">修改</a>
+                <a href="javascript:void(0)" onclick="delete_sale('<%= sale.id %>')">删除</a></td>
             </tr>
           <% end %>
         <% else %>
@@ -32,7 +42,7 @@
       </tbody>
     </table>
     <div class="pageTurn">
-    <%= will_paginate @sales,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+      <%= will_paginate @sales,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
     </div>
   </div>
 </div>

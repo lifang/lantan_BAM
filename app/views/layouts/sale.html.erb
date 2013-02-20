@@ -15,8 +15,10 @@
         <div class="clear"></div>
         <div class="nav">
           <ul>
-            <li><a href="#" class="hover">活动</a></li>
-            <li><a href="#">产品</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/sales" 
+                   <% if  controller.controller_name=="sales" %> class="hover" <%end%>>活动</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/products" 
+                   <% if controller.controller_name=="products" %> class="hover" <%end%>>产品</a></li>
             <li><a href="#">服务</a></li>
             <li><a href="#">套餐卡</a></li>
           </ul>

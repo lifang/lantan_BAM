@@ -1,12 +1,17 @@
 #encoding: utf-8
 class ProductsController < ApplicationController
   # 营销管理 -- 产品
-
+  layout 'sale'
 
   def index
-    @products = Product.paginate_by_sql("select service_code code,name,types,sale_price from products where  store_id=#{params[:store_id]} and
+    @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,id from products where  store_id=#{params[:store_id]} and
     is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]}", :page => params[:page], :per_page => 5)
   end  #产品列表页
+
+  #新建
+  def add_prod
+    @product=Product.new
+  end
 
   def create
     set_product("PRODUCT")
@@ -17,7 +22,7 @@ class ProductsController < ApplicationController
   def services
     @services = Product.paginate_by_sql("select id, service_code code,name,types,sale_price,cost_time,staff_level level1,staff_level_1
     level2 from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}",
-     :page => params[:page], :per_page => 5)
+      :page => params[:page], :per_page => 5)
     @materials={}
     @services.each do |service|
       @materials[service.id]=Material.find_by_sql("select name,code from materials where id in (#{service.prod_mat_relations.map(&:material_id).join(",")})
@@ -46,4 +51,12 @@ class ProductsController < ApplicationController
       ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
     end
   end   #为新建产品或者服务提供参数
+
+  def edit_prod
+    @product=Product.find(params[:id])
+  end
+
+  def show_prod
+    @product=Product.find(params[:id])
+  end
 end

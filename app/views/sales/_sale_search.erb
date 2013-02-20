@@ -24,6 +24,15 @@
     <fieldset class="popup_body_fieldset">
       <legend class="popup_body_title">已选择</legend>
       <div class="popup_body_result" id="add_products">
+        <% if @sale_prods %>
+          <% @sale_prods.each do |prod| %>
+            <div id='<%= prod.id %>'><em><%=prod.name  %></em>
+              <a href='javascript:void(0)' class='addre_a'  onclick="add_one('<%= prod.id %>')" id='add_one<%= prod.id %>'>+</a>
+              <span><input name='sale_prod[<%= prod.id %>]' type='text' class='addre_input' value='<%= prod.prod_num %>' id='add_p<%=prod.id  %>' /></span>
+              <a href='javascript:void(0)' class='addre_a' id='delete_one<%=prod.id  %>'>-</a>
+              <a href='javascript:void(0)' class='remove_a' onclick='$(this).parent().remove();if($("#prod_<%=prod.id  %>").length!=0){$("#prod_<%= prod.id %>")[0].checked=false;}'>删除</a></div>
+            <% end %>
+          <% end %>
       </div>
     </fieldset>
 

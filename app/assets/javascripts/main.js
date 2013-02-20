@@ -39,19 +39,13 @@ $(function(){
 function popup(t,b){
     var doc_height = $(document).height();
     var doc_width = $(document).width();
-    //var win_height = $(window).height();
-    //var win_width = $(window).width();
-
     var layer_height = $(t).height();
     var layer_width = $(t).width();
-
-    //tab
     $(b).bind('click',function(){
         $(".mask").css({
             display:'block',
             height:doc_height
         });
-        //$(t).css('top',(doc_height-layer_height)/2);
         $(t).css('top',"50px");
         $(t).css('left',(doc_width-layer_width)/2);
         $(t).css('display','block');
@@ -105,7 +99,7 @@ function load_types(store_id){
 //向选择框添加产品服务
 function add_this(e,name){
     var child="<div id='"+e.value+"'><em>"+name +"</em><a href='javascript:void(0)' class='addre_a' \n\
-    onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a><span><input name='product["+e.value +"]' \n\
+    onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a><span><input name='sale_prod["+e.value +"]' \n\
     type='text' class='addre_input' value='1' id='add_p"+e.value +"' /></span><a href='javascript:void(0)' class='addre_a' \n\
     id='delete_one"+e.value+"'>-</a><a href='javascript:void(0)' class='remove_a' \n\
     onclick='$(this).parent().remove();if($(\"#prod_"+ e.value+"\").length!=0){$(\"#prod_"+ e.value+"\")[0].checked=false;}'>删除</a></div></div>";
@@ -113,7 +107,7 @@ function add_this(e,name){
         if ($("#add_products #"+e.value).length==0){
             $(".popup_body_fieldset #add_products").append(child);
         }else{
-            var num=parseInt($("#add_products #add_p"+e.value).val())+1+1;
+            var num=parseInt($("#add_products #add_p"+e.value).val())+1;
             $("#add_products #add_p"+e.value).val(num);
             $("#add_products #delete_one"+e.value).attr("onclick","delete_one('"+ e.value+"')");
         }
@@ -137,4 +131,22 @@ function delete_one(id){
         $("#add_products #delete_one"+id).attr("onclick","");
     }
     $("#add_products #add_p"+id).val(num);
+}
+
+function show_center(t){
+    var doc_height = $(document).height();
+    var doc_width = $(document).width();
+    var layer_height = $(t).height();
+    var layer_width = $(t).width();
+    $(".mask").css({
+        display:'block',
+        height:doc_height
+    });
+    $(t).css('top',"50px");
+    $(t).css('left',(doc_width-layer_width)/2);
+    $(t).css('display','block');
+    $(t + " .close").click(function(){
+        $(t).css('display','none');
+        $(".mask").css('display','none');
+    })
 }

@@ -1,0 +1,42 @@
+<div class="popup_box">
+  <h1>添加产品<a href="#" class="close">关闭</a></h1>
+  <div class="popup_body">
+    <%= form_for :add_prod,:url=>"/stores/#{params[:store_id]}/products",:method=>:post,:html=>{:id=>"add_prod",:multipart=>true} do %>
+      <div class="popup_body_area">
+        <div class="item">
+          <label>名称：</label><input name="name" type="text" value="<%= @product.name %>" />
+        </div>
+        <div class="item">
+          <label>全国零售价：</label><input name="base_price" type="text" value="<%= @product.base_price %>" />
+        </div>
+        <div class="item">
+          <label>全国促销价：</label><input name="sale_price" type="text" value="<%= @product.sale_price %>" />
+        </div>
+        <div class="item">
+          <label>类别：</label><select  id="sale_types" name="sale_types">
+            <option>请选择</option>
+            <% Product::PRODUCT_TYPES.each do |key,value| %>
+              <option value="<%= key %>" <%if @product.types==key%> selected<%end%> ><%= value %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="item">
+          <label>配图：</label><input type=file name=j style="display: none;" onchange="ye.value=value" />
+          <input name=ye type="text" class="file" /><input type="button" class="file_btn" value="浏览" onclick=j.click()  />
+        </div>
+        <div class="item">
+          <label>规格：</label><input name="" type="text" value="<%= @product.standard %>" />
+        </div>
+        <div class="item_textarea">
+          <label>简介：</label><textarea name="desc" cols="" rows="" class="width_textarea"><%=@product.introduction  %></textarea>
+        </div>
+        <div class="item_textarea">
+          <label>描述：</label><textarea name="intro" cols="" rows="" class="width_textarea"><%=@product.description  %></textarea>
+        </div>
+      </div>
+    <% end %>
+    <div class="btn_box"><button class="confirm_btn">确定</button></div>
+  </div>
+</div>
+
+
