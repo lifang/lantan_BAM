@@ -448,10 +448,14 @@ input.file { width: 100px; _width: 90px; float: left;}
 	color: #930205;
 }
 .seeProDiv_r { margin-left: 110px;  width: 180px; line-height: 24px;}
-.seeProDiv_r p { text-indent: 24px; line-height: 24px; margin: 0 5px;}
+.seeProDiv_rWidth { margin-left: 110px;  width: 460px; line-height: 24px;}
+.seeProDiv_rWidth p { text-indent: 24px; line-height: 24px; margin: 0 5px;}
 .seeProDiv_p { padding: 10px 0; overflow: hidden;}
 
 .seeProDiv_textarea { margin: 20px 10px; float: left; overflow: hidden; width: 590px;}
+
+.srw_ul { padding: 5px;}
+.srw_ul li { margin: 0 5px; display: inline;}
 
 /*发送短消息*/
 .shortMessage { padding: 10px; border: 1px #CCCCCC solid; margin-top: 30px;}
