@@ -18,7 +18,15 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-    resources :suppliers
+    resources :staffs
+    resources :violation_rewards
+    resources :trains
+
+    resources :suppliers do
+      member do
+        post "change"
+      end
+    end
     resources :welcomes
     resources :customers do
       collection do

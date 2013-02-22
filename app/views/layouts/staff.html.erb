@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>员工管理--员工一览</title>
+    <%= stylesheet_link_tag    "application" %>
+    <%= javascript_include_tag "application","staffs" %>
+
+
+    <!--[if IE 6]>
+    <script src="js/DD_belatedPNG_0.0.8a-min.js"></script>
+    <script>
+      DD_belatedPNG.fix('*');
+    </script>
+    <![endif]-->
+  </head>
+
+  <body>
+       <div class="head">
+            <div class="box">
+                 <div class="logo">澜泰门店后台管理系统</div>
+                 <div class="login">你好：<%= @store.contact %> | <a href="#">退出</a></div>
+                 <div class="clear"></div>
+                 <div class="nav">
+                      <ul>
+                          <li><a href="#" class="hover">员工一览</a></li>
+                          <li><a href="#">本月工资</a></li>
+                      </ul>
+                 </div>
+                 <div class="back"><a href="#" title="返回">Back</a>员工管理</div>
+            </div>
+       </div>
+       <%= yield %>
+  </body>
+</html>

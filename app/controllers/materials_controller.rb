@@ -1,14 +1,17 @@
 #encoding:utf-8
 class MaterialsController < ApplicationController
+  layout "storage"
   respond_to :json, :xml, :html
 
   def index
-    #cookies[:current_user] = "1"
+    cookies[:current_user] = "1"
     @materails_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
                                                    :per_page => 10, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],10, params[:store_id]
     @in_records = MatInOrder.in_list params[:page],10, params[:store_id]
-
+    @type = 0
+    @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
+                        :conditions => "s.store_id=#{params[:store_id]} and s.status=#{Staff::STATUS[:normal]}")
   end
 
   def new
@@ -25,7 +28,7 @@ class MaterialsController < ApplicationController
         else
           @material = Material.create({:code => params[:barcode].strip,:name => params[:name].strip,
                                        :price => params[:price].strip, :storage => params[:num].strip,
-                                       :status => Material::STATUS[:normal],:store_id => params[:store_id],
+                                       :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
                                        :types => params[:material][:types],:check_num => params[:num].strip})
         end
         if @material_order
@@ -149,7 +152,7 @@ class MaterialsController < ApplicationController
     material = Material.find_by_code params[:code]
       material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
                                  :price => params[:price].strip, :storage => params[:count].strip,
-                                 :status => Material::STATUS[:normal],:store_id => params[:store_id],
+                                 :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
                                  :types => params[:types],:check_num => params[:count].strip}) if material.nil?
     x = {:status => 1, :material => material}.to_json
     #puts x

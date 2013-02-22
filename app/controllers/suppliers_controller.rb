@@ -1,4 +1,5 @@
 class SuppliersController < ApplicationController
+   layout "storage"
 
   def index
     @suppliers = Supplier.paginate(:conditions => "status= #{Supplier::STATUS[:normal]} and store_id=#{params[:store_id]}",
@@ -10,6 +11,7 @@ class SuppliersController < ApplicationController
   end
 
   def create
+    puts params[:store_id],"--------------"
     Supplier.create({
         :name => params[:name],:contact => params[:contact],:phone => params[:phone],
         :email => params[:email],:address => params[:address],:store_id => params[:store_id],
@@ -26,11 +28,7 @@ class SuppliersController < ApplicationController
     render :json => {:status => 1}
   end
 
-  def edit
-    @supplier = Supplier.find_by_id_and_status params[:id], Supplier::STATUS[:normal]
-  end
-
-  def update
+  def change
     supplier = Supplier.find_by_id_and_status params[:id], Supplier::STATUS[:normal]
     if supplier
       supplier.update_attributes({
