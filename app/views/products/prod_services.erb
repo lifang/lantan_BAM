@@ -1,0 +1,76 @@
+<%= javascript_include_tag "/assets/products.js" %>
+<%= javascript_include_tag "/assets/kindEditor/kindeditor-min.js" %>
+<%= javascript_include_tag "/assets/kindEditor/zh_CN.js" %>
+<div class="main">
+  <div class="box">
+    <div class="data_box">
+      <div class="data_menu"><a href="javascript:void(0)" class="add_btn" onclick="add_service('<%= params[:store_id] %>')">添加服务</a></div>
+      <div class="clear"></div>
+      <div class="data_body">
+        <div>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+            <thead>
+              <tr class="hbg">
+                <td>服务代码</td>
+                <td>服务名称</td>
+                <td>价格</td>
+                <td>施工时间（分钟）</td>
+                <td>类别</td>
+                <td>技师</td>
+                <td>所需物料</td>
+                <td>操作</td>
+              </tr>
+            </thead>
+            <tbody>
+              <% unless @services.blank? %>
+                <% @services.each do |service| %>
+                  <tr>
+                    <td><%= service.code %></td>
+                    <td><%= service.name %></td>
+                    <td><%= service.base_price %></td>
+                    <td><%= service.cost_time %></td>
+                    <td><%= Product::PRODUCT_TYPES[service.types] %></td>
+                    <td><%= "#{Staff::LEVELS[service.level1]} - #{Staff::LEVELS[service.level2]}" %></td>
+                    <td>
+                      <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                        <%unless @materials[service.id].blank? %>
+                          <tr class="fws">
+                            <td>名称</td>
+                            <td>条形码</td>
+                            <td>数量</td>
+                          </tr>
+                          <%@materials[service.id].each do |mat|%>
+                            <tr>
+                              <td><%= mat.name %></td>
+                              <td><%= mat.code %></td>
+                              <td><%= mat.num %></td>
+                            </tr>
+                          <%end%>
+                        <%else%>
+                          <tr class="fws">
+                            <td>暂无</td>
+                          </tr>
+                        <% end %>
+                      </table>
+                    </td>
+                    <td><a href="javascript:void(0)" onclick="edit_service('<%= params[:store_id] %>','<%=  service.id %>')">编辑</a>
+                      <a href="javascript:void(0)" class="see_btn" onclick="show_service('<%=  service.id %>')">查看</a></td>
+                  </tr>
+                <% end %>
+              <%else%>
+                <tr><td>目前没有服务</td></tr>
+              <% end %>
+            </tbody>
+          </table>
+          <div class="pageTurn">
+            <%= will_paginate @services,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+<div class="mask"></div>
+<div class="tab_popup see_tab"></div>
+<div id="serv_add_edit"></div>

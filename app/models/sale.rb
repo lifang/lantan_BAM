@@ -28,8 +28,8 @@ class Sale < ActiveRecord::Base
 
   def self.upload_img(img_url,sale_id)
     file=img_url.original_filename
-    filename="#{file.split(".")[0]}_#{sale_id}"+"."+ file.split(".").reverse[0]
-    File.open("#{Rails.root}/public/upload_images/#{filename}", "wb") do |f|
+    filename="/upload_images/#{file.split(".")[0]}_#{sale_id}."+ file.split(".").reverse[0]
+    File.open("#{Rails.root}/public/#{filename}", "wb") do |f|
       f.write(img_url.read)
     end
     return filename

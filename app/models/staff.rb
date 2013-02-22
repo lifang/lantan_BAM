@@ -14,6 +14,7 @@ class Staff < ActiveRecord::Base
   #门店员工职务
   S_COMPANY = {:BOSS=>0,:CHIC=>2,:FRONT=>3,:TECHNICIAN=>1} #0 老板 2 店长 3接待 1 技师
   N_COMPANY = {0=>"老板",2=>"店长",3=>"接待",1=>"技师"}
+  LEVELS = {0=>"高级",1=>"中级",2=>"初级"}  #技师等级
   #总部员工职务
 
   STATUS = {:normal => 0, :delete => 1}

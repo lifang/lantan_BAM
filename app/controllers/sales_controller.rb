@@ -43,7 +43,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
 
   #加载产品或服务类别
   def load_types
-    sql = "select id,name from products where  store_id=#{params[:store_id]}"
+    sql = "select id,name from products where  store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]}"
     sql += " and types=#{params[:sale_types]}" if params[:sale_types] != "" || params[:sale_types].length !=0
     sql += " and name like '%#{params[:sale_name]}%'" if params[:sale_name] != "" || params[:sale_name].length !=0
     @products=Product.find_by_sql(sql)
@@ -64,8 +64,8 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     @sale=Sale.find(params[:id])
     filename=Sale.upload_img(params[:img_url],@sale.id) if params[:img_url]
     pams={:name=>params[:name],:car_num=>params[:car_num],:everycar_times=>params[:every_car], :introduction=>params[:intro],
-      :discount=>params["disc_"+params[:discount]],:is_subsidy =>params[:subsidy], :store_id=>params[:store_id],
-      :disc_types=>params[:discount],:img_url=>filename,:disc_time_types=>params[:disc_time]
+      :discount=>params["disc_"+params[:discount]],:is_subsidy =>params[:subsidy], :disc_types=>params[:discount],:img_url=>filename,
+      :disc_time_types=>params[:disc_time]
     }
     pams.merge!({:started_at=>params[:started_at],:ended_at=>params[:ended_at]})  if params[:disc_time].to_i == Sale::DISC_TIME[:TIME]
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]

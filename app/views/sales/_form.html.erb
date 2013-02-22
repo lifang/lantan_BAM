@@ -62,7 +62,7 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">活动介绍：</div>
   <div class="releaseDiv_r">
-    <textarea  cols="" rows="" id="content" id=""><%= @sale.introduction %></textarea>
+    <textarea  cols="" rows="" id="content"><%= @sale.introduction %></textarea>
     <input type="hidden" name="intro"  id="intro"/>
   </div>
 </div>
@@ -73,7 +73,6 @@
       allowFileManager : true,
       resize : false
     });
-
   });
 <% if @sale %>
   <% if @sale.disc_time_types == Sale::DISC_TIME[:TIME]%>

@@ -17,7 +17,7 @@ function focusBlur(e){
 
 $(function(){
     focusBlur('.login_box input');//用户信息input默认值
-   // focusBlur('.item input');//用户信息input默认值
+// focusBlur('.item input');//用户信息input默认值
 })
 
 //切换
@@ -140,7 +140,7 @@ function show_center(t){
     var layer_width = $(t).width();
     $(".mask").css({
         display:'block',
-        height:doc_height
+        height:($(t).height()+50)>doc_height?　$(t).height()+180 : doc_height
     });
     $(t).css('top',"50px");
     $(t).css('left',(doc_width-layer_width)/2);

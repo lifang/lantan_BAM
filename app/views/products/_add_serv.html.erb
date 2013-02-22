@@ -1,0 +1,13 @@
+<%= form_for :add_prod,:url=>"/stores/#{params[:store_id]}/products/serv_create",:method=>:post,:html=>{:id=>"edit_serv",:multipart=>true} do %>
+  <div class="tab_popup add_tab"><div class="popup_box">
+      <h1>添加服务<a href="#" class="close">关闭</a></h1>
+      <div class="popup_body">
+        <div class="popup_body_area">
+          <%= render "serv_form" %>
+        </div>
+        <div class="btn_box_s"><input value="确定" class="confirm_btn" onclick="edit_serv()" type="button" href="javascript:void(0)" /></div>
+      </div>
+    </div>
+  </div>
+  <%= render "material" %> 
+<% end %>

@@ -1,4 +1,4 @@
-<h1>添加产品<a href="#" class="close">关闭</a></h1>
+<h1>添加产品<a href="javascript:void(0)" class="close">关闭</a></h1>
 <div class="popup_body">
   <%= form_for :add_prod,:url=>"/stores/#{params[:store_id]}/products",:method=>:post,:html=>{:id=>"add_prod",:multipart=>true} do %>
     <div class="popup_body_area">

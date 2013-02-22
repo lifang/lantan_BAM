@@ -6,10 +6,10 @@ LantanBAM::Application.routes.draw do
   end
   resources :products do
     collection do
-      post "add_prod"
+
     end
     member do
-      post "edit_prod","show_prod"
+      post "show_prod","show_serv"
     end
   end
   resources :stations
@@ -27,6 +27,13 @@ LantanBAM::Application.routes.draw do
       end
     end
     resources :products do
+      collection do
+        post "edit_prod","add_prod","add_serv","serv_create","load_material"
+        get "prod_services"
+      end
+      member do
+        post "edit_prod","update_prod","serv_update","edit_serv"
+      end
     end
     resources :materials do
       collection do

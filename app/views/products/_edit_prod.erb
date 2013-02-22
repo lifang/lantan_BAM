@@ -1,9 +1,9 @@
-<h1>编辑产品<a href="#" class="close">关闭</a></h1>
+<h1>编辑产品<a href="javascript:void(0)" class="close">关闭</a></h1>
 <div class="popup_body">
-  <%= form_for :add_prod,:url=>"/stores/#{params[:store_id]}/products/#{@product.id}/edit_prod",:method=>:post,:html=>{:id=>"edit_prod",:multipart=>true} do %>
+  <%= form_for :add_prod,:url=>"/stores/#{params[:store_id]}/products/#{@product.id}/update_prod",:method=>:post,:html=>{:id=>"add_prod",:multipart=>true} do %>
     <div class="popup_body_area">
       <%= render "form" %>
     </div>
   <% end %>
-  <div class="btn_box"><button class="confirm_btn" onclick="edit_product()">确定</button></div>
+  <div class="btn_box"><button class="confirm_btn" onclick="add_product()">确定</button></div>
 </div>
