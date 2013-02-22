@@ -113,8 +113,8 @@ function edit_serv(){
 
 //请求加载产品或服务类别
 function load_material(store_id){
-    var types=$("#mat_types option:checked").val();
-    var name=$("#mat_name").val();
+    var types=$("#sale_types option:checked").val();
+    var name=$("#sale_name").val();
     if (types != "" || name != ""){
         $.ajax({
             async:true,
@@ -154,7 +154,7 @@ function add_mat(e,name){
 function show_mat(){
     var mats=""
     $("#add_products div").each(function(index,div){
-        mats += "<li>"+$("#"+div.id+" em").html()+"  "+$("#add_p"+div.id).val()+"</li>"
+        mats += "<li>"+$("#"+div.id+" em").html()+"<span>/"+$("#add_p"+div.id).val()+"</span></li>"
     })
     $(".seeProDiv_rWidth .srw_ul").html(mats);
     $('.mat_tab').css('display','none');

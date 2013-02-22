@@ -4,6 +4,11 @@ LantanBAM::Application.routes.draw do
       post :delete_sale,:public_sale
     end
   end
+  resources :package_cards do
+    member do
+      post :delete_pcard
+    end
+  end
   resources :products do
     collection do
 
@@ -24,6 +29,15 @@ LantanBAM::Application.routes.draw do
       end
       member do
         post "update_sale"
+      end
+    end
+    resources :package_cards do
+      collection do
+        post "pcard_types","add_pcard"
+        get "sale_records"
+      end
+      member do
+        post "edit_pcard","update_pcard"
       end
     end
     resources :products do

@@ -1,5 +1,5 @@
 <div class="popup_box">
-  <h1>查看服务<a href="#" class="close">关闭</a></h1>
+  <h1>查看服务<a href="javascript:void(0)" class="close">关闭</a></h1>
   <div class="popup_body">
     <div class="popup_body_area">
       <div class="seeProDiv">
@@ -41,11 +41,11 @@
       <div class="clear"></div>
       <div class="seeProDiv_p">
         <div class="seeProDiv_l">简介：</div>
-        <div class="seeProDiv_r"><p><%= @serv.introduction %></p></div>
+        <div class="seeProDiv_rWidth"><p><%= @serv.introduction %></p></div>
       </div>
       <div class="seeProDiv_p">
         <div class="seeProDiv_l">描述：</div>
-        <div class="seeProDiv_r"><p><%= @serv.description.nil?? "" : @serv.description.html_safe %></p></div>
+        <div class="seeProDiv_rWidth"><p><%= @serv.description.nil?? "" : @serv.description.html_safe %></p></div>
       </div>
     </div>
   </div>

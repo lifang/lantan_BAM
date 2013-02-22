@@ -38,14 +38,14 @@ class ProductsController < ApplicationController
 
   def set_product(types)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:desc],
-      :types=>params[:sale_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:intro], :store_id=>params[:store_id],
+      :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:intro], :store_id=>params[:store_id],
       :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"),:img_url=>params[:img_url],
       :service_code=>"#{types[0]}#{Sale.set_code(3)}"
     }
     product=Product.create(parms)
     if types == "SERVICE"
       product.update_attributes({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
-      params[:material].each do |key,value|
+      params[:sale_prod].each do |key,value|
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
       end
     else
@@ -63,12 +63,12 @@ class ProductsController < ApplicationController
 
   def update_product(types,product)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:desc],
-      :types=>params[:sale_types],:introduction=>params[:intro],:img_url=>params[:img_url]
+      :types=>params[:prod_types],:introduction=>params[:intro],:img_url=>params[:img_url]
     }
     if types == "SERVICE"
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
       product.prod_mat_relations.inject(Array.new) {|arr,mat| mat.destroy}
-      params[:material].each do |key,value|
+      params[:sale_prod].each do |key,value|
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
       end
     else
@@ -94,7 +94,7 @@ class ProductsController < ApplicationController
 
   def edit_serv
     @service=Product.find(params[:id])
-    @materials =ProdMatRelation.find_by_sql("select m.name,s.material_num,m.id from materials m inner join prod_mat_relations s on s.material_id=m.id
+    @sale_prods =ProdMatRelation.find_by_sql("select m.name,s.material_num num,m.id from materials m inner join prod_mat_relations s on s.material_id=m.id
       where s.product_id=#{params[:id]}")
   end
 

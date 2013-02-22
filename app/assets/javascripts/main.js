@@ -76,25 +76,7 @@ $(function(){
 })
 
 
-//请求加载产品或服务类别
-function load_types(store_id){
-    var types=$("#sale_types option:checked").val();
-    var name=$("#sale_name").val();
-    if (types != "" || name != ""){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/sales/load_types",
-            data : {
-                sale_types : types,
-                sale_name : name
-            }
-        });
-    }else{
-        alert("请选择类型或填写名称！");
-    }
-}
+
 
 //向选择框添加产品服务
 function add_this(e,name){

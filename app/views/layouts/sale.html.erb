@@ -21,7 +21,8 @@
                    <% if controller.controller_name=="products" and (controller.action_name =~/service/) == nil %> class="hover" <%end%>>产品</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/products/prod_services"
                    <% if controller.controller_name=="products" and controller.action_name =~/service/ %> class="hover" <%end%>>服务</a></li>
-            <li><a href="#">套餐卡</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/package_cards"
+                    <% if  controller.controller_name=="package_cards" %> class="hover" <%end%> >套餐卡</a></li>
           </ul>
         </div>
         <div class="back"><a href="#" title="返回">Back</a>营销管理</div>

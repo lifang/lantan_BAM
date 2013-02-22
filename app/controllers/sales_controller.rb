@@ -37,7 +37,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   #编辑发布活动
   def edit
     @sale=Sale.find(params[:id])
-    @sale_prods=SaleProdRelation.find_by_sql("select p.name,s.prod_num,p.id from sale_prod_relations s inner join products p on s.product_id=p.id
+    @sale_prods=SaleProdRelation.find_by_sql("select p.name,s.prod_num num,p.id from sale_prod_relations s inner join products p on s.product_id=p.id
       where s.sale_id=#{params[:id]}")
   end
 

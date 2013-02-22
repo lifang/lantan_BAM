@@ -25,19 +25,19 @@
   </select>
 </div>
 <div class="item">
-  <label>类别：</label><select  id="sale_types" name="sale_types">
+  <label>类别：</label><select  id="prod_types" name="prod_types">
     <% Product::PRODUCT_TYPES.select {|k,v| k >=Product::PRODUCT_END}.each do |key,value| %>
       <option value="<%= key %>" <%if @service.types==key%> selected<%end%> ><%= value %></option>
     <% end %>
   </select>
 </div>
-<div class="item">
+<div class="item_textarea">
   <label>相关物料：</label><input type="button" value="选择物料" class="other_btn" onclick="show_center('.mat_tab');" />
   <div class="seeProDiv_rWidth">
     <ul class="srw_ul">
-      <%if @materials && !@materials.blank? %>
-        <% @materials.each do |mat| %>
-          <li><%= "#{mat.name}  #{mat.material_num}" %></li>
+      <%if @sale_prods && !@sale_prods.blank? %>
+        <% @sale_prods.each do |mat| %>
+          <li><%= mat.name %><span>/<%= mat.num %></span></li>
         <% end %>
       <% end %>
     </ul>

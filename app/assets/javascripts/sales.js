@@ -99,4 +99,99 @@ function public_sale(sale_id){
     }
 }
 
+//向活动加载产品或服务类别
+function load_types(store_id){
+    var types=$("#sale_types option:checked").val();
+    var name=$("#sale_name").val();
+    if (types != "" || name != ""){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/sales/load_types",
+            data : {
+                sale_types : types,
+                sale_name : name
+            }
+        });
+    }else{
+        alert("请选择类型或填写名称！");
+    }
+}
 
+//为套餐卡加载产品和服务
+function pcard_types(store_id){
+    var types=$("#sale_types option:checked").val();
+    var name=$("#sale_name").val();
+    if (types != "" || name != ""){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/package_cards/pcard_types",
+            data : {
+                sale_types : types,
+                sale_name : name
+            }
+        });
+    }else{
+        alert("请选择类型或填写名称！");
+    }
+}
+
+//添加套餐卡
+function add_pcard(store_id){
+    $.ajax({
+        async:true,
+        type : 'post',
+        dataType : 'script',
+        url : "/stores/"+ store_id+"/package_cards/add_pcard"
+    });
+}
+
+//编辑套餐卡
+function edit_pcard(id,store_id){
+    $.ajax({
+        async:true,
+        type : 'post',
+        dataType : 'script',
+        url : "/stores/"+store_id+"/package_cards/"+ id+"/edit_pcard"
+    });
+}
+function check_add(){
+    var name=$("#name").val();
+    var base=$("#price").val();
+    if (name=="" || name.length==0){
+        alert("请输入套餐卡的名称");
+        return false;
+    }
+    if ( ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0)){
+        alert("请输入套餐卡有效时间和失效时间时间");
+        return false;
+    }
+    if(base == "" || base.length==0 || isNaN(parseFloat(base))){
+        alert("请输入套餐卡的价格");
+        return false;
+    }
+    if($("#add_products").children().length == 0){
+        alert("请选择产品或服务");
+        return false;
+    }
+    $("#add_pcard").submit();
+}
+
+//删除套餐卡
+function delete_pcard(pcard_id){
+    if(confirm("确定要删除此套餐卡吗？")){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'json',
+            url : "/package_cards/"+pcard_id+"/delete_pcard",
+            success:function(data){
+                alert(data.message);
+                window.location.reload();
+            }
+        });
+    }
+}

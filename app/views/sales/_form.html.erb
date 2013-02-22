@@ -8,7 +8,12 @@
     <input name="name" type="text" class="title_input" id="sale_title" value="<%= @sale.name %>" />
   </div>
 </div>
-<%= render 'sale_search' %>
+<div class="releaseDiv">
+  <div class="releaseDiv_l">选择产品/服务项目：</div>
+  <div class="releaseDiv_r rdTop">
+    <%= render :partial=>"/sales/sale_search",:object=>[Product::PRODUCT_TYPES,"load_types"] %>
+  </div>
+</div>
 <div class="releaseDiv">
   <div class="releaseDiv_l">优惠：</div>
   <div class="releaseDiv_r" id="s_disc">
