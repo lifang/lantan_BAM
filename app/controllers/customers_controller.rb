@@ -110,4 +110,12 @@ class CustomersController < ApplicationController
     
   end
 
+  def get_car_brands
+    respond_to do |format|
+      format.json {
+        render :json => CarBrand.get_brand_by_capital(params[:capital_id].to_i)
+      }
+    end
+  end
+
 end

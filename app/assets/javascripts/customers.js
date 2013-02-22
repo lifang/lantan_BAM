@@ -44,3 +44,28 @@ function hide_complaint() {
     $("#complaint_s").hide();
     $("#complaint_h").show();
 }
+
+
+function choose_brand() {
+    if ($.trim($("#capital_div").val()) != "") {
+        alert($.trim($("#capital_div").val()));
+        $.ajax({
+            async:true,
+            dataType:'json',
+            data:{
+                capital_id : $("#capital_div").val()
+            },
+            url:"/customers/get_car_brands",
+            type:'post',
+            success : function(data) {
+                alert(data);
+                if (data != null && data != undefined) {
+                    for (var i=0; i<data.length; i++) {
+                        
+                    }
+                }
+            }
+        })
+    }
+    
+}

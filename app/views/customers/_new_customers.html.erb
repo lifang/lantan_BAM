@@ -9,11 +9,18 @@
             <label>车牌号：</label><input name="car_num" id="car_num" type="text" value="" />
           </div>
           <div class="item">
-            <label>品牌：</label>
-            <select>
+            <label>品牌型号：</label>
+            <select class="ymd" id="capital_div" onchange="choose_brand()">
+              <option value="">--</option>
               <% Capital.all.each do |ca| %>
-
+                <option value="<%= ca.id %>"><%= ca.name %></option>
               <% end %>
+            </select>&nbsp;
+            <select class="ymd" id="car_brands">
+              <option value="">--</option>
+            </select>
+            <select class="ymd" id="car_models">
+              <option value="">--</option>
             </select>
           </div>
           <div class="item">
