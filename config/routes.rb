@@ -13,7 +13,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :materials do
       collection do
-        get "out","search","order"
+        get "out","search","order","page_materials","search_head_orders","search_supplier_orders"
         post "out_order","material_order","add"
       end
     end
