@@ -1,0 +1,255 @@
+<div class="main">
+    <div class="box">
+         <div class="data_box">
+              <div class="search">
+                   <div>统计时间：2012-12</div>
+              </div>
+              <div class="data_menu">
+                   <a href="javascript:void(0)" id="new_staff">新建员工</a>
+                   <a href="javascript:void(1)" id="new_reward">新建奖励</a>
+                   <a href="javascript:void(2)" id="new_violation">新建违规</a>
+                   <a href="javascript:void(3)" id="new_train">新建培训</a>
+              </div>
+              <div class="clear"></div>
+              <div class="data_body">
+                   <div>
+                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+                           <thead>
+                                <tr class="hbg">
+                                  <td><span class="sort_u">姓名</span></td>
+                                  <td>工作岗位</td>
+                                  <td>职务</td>
+                                  <td><span class="sort_u">系统得分</span></td>
+                                  <td><span class="sort_d">店长打分</span></td>
+                                  <td>本月评估</td>
+                                  <td>操作</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                              <% @staffs.each do |staff| %>
+                                <tr>
+                                  <td><%= staff.name %></td>
+                                  <td><%= staff.type_of_w %></td>
+                                  <td><%= staff.position %></td>
+                                  <td><input name="" type="text" value="40" class="data_input_s"></td>
+                                  <td>30</td>
+                                  <td>一般</td>
+                                  <td>
+                                    <a href="#" class="bz_btn" id="<%= staff.id %>" name="<%= @store.id %>">编辑</a>
+                                    <%= link_to "详细", store_staff_path(@store, staff.id) %>
+                                  </td>
+                                </tr>
+                              <% end %>
+                                <tr>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                </tr>
+                            </tbody>
+                      </table>
+                      <%= will_paginate @posts, :class => "pageTurn", :previous_label => "上一页",
+                          :next_label => "下一页" %>
+                   </div>
+              </div>
+         </div>
+    </div>
+</div>
+<div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+<div class="mask"></div>
+<div class="tab_popup" style="display:none;" id="new_staff_area">
+    <div class="popup_box">
+         <h1>新建员工<a href="javascript:void(0)" class="close">关闭</a></h1>
+         <%= form_for(@staff, :url => store_staffs_path(@store), :html => {:multipart => true}) do |f| %>
+         <div class="popup_body">
+              <div class="popup_body_area">
+                  <div class="item">
+                       <label>名称：</label>
+                       <%= f.text_field :name %>
+                  </div>
+                  <div class="item">
+                       <label>岗位：</label>
+                       <%= f.select :type_of_w, [["岗位1", "岗位1"], ["岗位2", "岗位2"], ["岗位3", "岗位3"]] %>
+                  </div>
+                  <div class="item">
+                       <label>性别：</label>
+                       <%= f.radio_button :sex, 'man', :checked => true %> 男&nbsp;&nbsp;
+                       <%= f.radio_button :sex, 'women' %> 女
+                  </div>
+                  <div class="item">
+                       <label>等级职称：</label>
+                       <%= f.select :level, [["等级职称1", "等级职称1"], ["等级职称2", "等级职称2"], ["等级职称3", "等级职称3"]] %>
+                  </div>
+                  <div class="item">
+                       <label>职务：</label>
+                       <%= f.select :position, [["职务1", "职务1"], ["职务2", "职务2"], ["职务3", "职务3"]] %>
+                  </div>
+                  <div class="item">
+                       <label>教育程度：</label>
+                       <%= f.select :education, [["小学", "小学"], ["初中", "初中"], ["高中", "高中"], ["大学", "大学"]] %>
+                  </div>
+                  <div class="item">
+                       <label>出生年月：</label>
+                       <%= f.date_select :birthday, {}, {:class => "ymd"} %>
+                  </div>
+                  <div class="item">
+                       <label>联系方式：</label>
+                       <%= f.text_field :phone %>
+                  </div>
+                  <div class="item">
+                       <label>籍贯：</label>
+                       <%= f.text_field :hometown %>
+                  </div>
+                  <div class="item">
+                       <label>身份证：</label>
+                       <%= f.text_field :id_card %>
+                  </div>
+                  <div class="item">
+                       <label>民族：</label>
+                       <%= f.text_field :nation %>
+                  </div>
+                  <div class="item">
+                       <label>政治面貌：</label>
+                       <%= f.text_field :political %>
+                  </div>
+                  <div class="item">
+                       <label>地址：</label>
+                       <%= f.text_field :address %>
+                  </div>
+                  <div class="item">
+                       <label>薪资标准：</label>
+                       <%= f.text_field :base_salary %>
+                  </div>
+                  <div class="item">
+                       <label>上传照片：</label>
+                       <input type="file" name="staff[photo]" style="display: none;" onchange="ye.value=value" id="staff_photo" />
+                       <input name="ye" type="text" class="file" id="sale_img" />
+                       <input type="button" class="file_btn" value="浏览" onclick="staff_photo.click()" />
+                  </div>
+                  <div class="item">
+                       <label>提成起始额：</label>
+                       <%= f.text_field :deduct_at %>
+                  </div>
+                  <div class="item">
+                       <label>结束额度：</label>
+                       <%= f.text_field :deduct_end %>
+                  </div>
+                  <div class="item">
+                       <label>提成率：</label>
+                       <%= f.text_field :deduct_percent %>
+                  </div>
+              </div>
+              <div class="btn_box">
+                <button class="confirm_btn" id="new_staff_btn">确定</button>
+                <button class="cancel_btn">取消</button></div>
+              <div class="clear"></div>
+         </div>
+         <% end %>
+    </div>
+</div>
+
+<div class="tab_popup" style="display:none;" id="new_reward_area">
+    <div class="popup_box">
+         <h1>新建奖励<a href="javascript:void(1)" class="close">关闭</a></h1>
+         <%= form_for(@violation_reward, :url => store_violation_rewards_path(@store)) do |f| %>
+         <div class="popup_body">
+              <div class="popup_body_area">
+                  <div class="item_textarea">
+                       <label>奖励人员：</label>
+                       <% @staffs_names.each do |staff| %>
+                         <input type="checkbox" value="<%= staff.id %>" name="staff[id][]"/>&nbsp;<%= staff.name %>&nbsp;&nbsp;&nbsp;&nbsp;
+                       <% end %>
+                  </div>
+                  <div class="item_textarea">
+                       <label>奖励原因：</label>
+                       <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
+                  </div>
+                   <div class="item">
+                       <label>奖励方法：</label>
+                       <%= f.select :process_types, [["奖励1", "奖励1"], ["奖励2", "奖励2"]] %>
+                  </div>
+                  <div class="item_textarea">
+                       <label>补充说明：</label>
+                       <%= f.text_area(:mark, :cols => "", :rows => "", :class => "width_textarea") %>
+                  </div>
+                  <%= f.hidden_field :types, :value => 1 %>
+              </div>
+              <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+         </div>
+         <% end %>
+    </div>
+</div>
+
+<div class="tab_popup" style="display:none;" id="new_violation_area">
+    <div class="popup_box">
+         <h1>新建违规<a href="javascript:void(2)" class="close">关闭</a></h1>
+         <%= form_for(@violation_reward, :url => store_violation_rewards_path(@store)) do |f| %>
+         <div class="popup_body">
+              <div class="popup_body_area">
+                  <div class="item_textarea">
+                       <label>违规人员：</label>
+                       <% @staffs_names.each do |staff| %>
+                         <input type="checkbox" value="<%= staff.id %>" name="staff[id][]"/>&nbsp;<%= staff.name %>&nbsp;&nbsp;&nbsp;&nbsp;
+                       <% end %>
+                  </div>
+                  <div class="item_textarea">
+                       <label>违规原因：</label>
+                       <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
+                  </div>
+                   <div class="item">
+                       <label>处罚方法：</label>
+                       <%= f.select :process_types, [["处罚1", "处罚1"], ["处罚2", "处罚2"]] %>
+                  </div>
+                  <div class="item_textarea">
+                       <label>补充说明：</label>
+                       <%= f.text_area(:mark, :cols => "", :rows => "", :class => "width_textarea") %>
+                  </div>
+                  <%= f.hidden_field :types, :value => 0 %>
+              </div>
+              <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+         </div>
+         <% end %>
+    </div>
+</div>
+
+<div class="tab_popup" style="display:none;" id="new_train_area">
+    <div class="popup_box">
+         <h1>新建培训<a href="javascript:void(3)" class="close">关闭</a></h1>
+         <%= form_for(@train, :url => store_trains_path(@store)) do |f| %>
+         <div class="popup_body">
+              <div class="popup_body_area">
+                   <div class="search paddin_left">
+                          <div><label>培训时间：</label>
+                            <%= f.text_field :start_at %>  到 <%= f.text_field :end_at %>
+                          </div>
+                    </div>
+                  <div class="item_textarea">
+                       <label>培训人员：</label>
+                       <% @staffs_names.each do |staff| %>
+                         <input type="checkbox" value="<%= staff.id %>" name="staff[id][]"/>&nbsp;<%= staff.name %>&nbsp;&nbsp;&nbsp;&nbsp;
+                       <% end %>
+                  </div>
+                  <div class="item_textarea">
+                       <label>培训原因：</label>
+                       <%= f.text_area(:content, :cols => "", :rows => "", :class => "width_textarea") %>
+                  </div>
+
+              </div>
+              <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+         </div>
+         <% end %>
+    </div>
+</div>
+<div id="staff_edit"></div>
