@@ -28,6 +28,9 @@ class Staff < ActiveRecord::Base
   N_EDUCATION = {0 => "研究生", 1 => "本科", 2 => "专科", 3 => "高中", 4 => "初中",
     5 => "小学", 6 => "无"}
   S_EDUCATION = {:GRADUATE => 0,  :UNIVERSITY => 1, :COLLEGE => 2, :SENIOR => 3, :JUNIOR => 4, :PRIMARY => 5, :NONE => 6}
+
+  #员工性别
+  N_SEX = {0 => "男", 1 => "女"}
   
 
   attr_accessor :password

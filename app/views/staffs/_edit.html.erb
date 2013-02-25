@@ -15,8 +15,8 @@
                   </div>
                   <div class="item">
                        <label>性别：</label>
-                       <%= f.radio_button :sex, 'man', :checked => true %> 男&nbsp;&nbsp;
-                       <%= f.radio_button :sex, 'women' %> 女
+                       <%= f.radio_button :sex, 0, :checked => f.object.sex ? false : true %> 男&nbsp;&nbsp;
+                       <%= f.radio_button :sex, 1, :checked => f.object.sex ? true : false %> 女
                   </div>
                   <div class="item">
                        <label>等级职称：</label>

@@ -18,5 +18,13 @@ class ViolationRewardsController < ApplicationController
     end
     redirect_to store_staffs_path(@store)
   end
+
+  def edit
+    @store = Store.find_by_id(params[:store_id])
+    @staff = Staff.find_by_id(params[:staff_id])
+    respond_to do |format|
+      format.js
+    end
+  end
   
 end

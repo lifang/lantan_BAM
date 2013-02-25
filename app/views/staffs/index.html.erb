@@ -2,7 +2,7 @@
     <div class="box">
          <div class="data_box">
               <div class="search">
-                   <div>统计时间：2012-12</div>
+                   <div>统计时间：<%= Time.now().strftime("%Y-%m") %></div>
               </div>
               <div class="data_menu">
                    <a href="javascript:void(0)" id="new_staff">新建员工</a>
@@ -29,8 +29,8 @@
                               <% @staffs.each do |staff| %>
                                 <tr>
                                   <td><%= staff.name %></td>
-                                  <td><%= staff.type_of_w %></td>
-                                  <td><%= staff.position %></td>
+                                  <td><%= Staff::N_HEAD[staff.type_of_w] %></td>
+                                  <td><%= Staff::N_COMPANY[staff.position] %></td>
                                   <td><input name="" type="text" value="40" class="data_input_s"></td>
                                   <td>30</td>
                                   <td>一般</td>
@@ -86,8 +86,8 @@
                   </div>
                   <div class="item">
                        <label>性别：</label>
-                       <%= f.radio_button :sex, 'man', :checked => true %> 男&nbsp;&nbsp;
-                       <%= f.radio_button :sex, 'women' %> 女
+                       <%= f.radio_button :sex, 0, :checked => true %> 男&nbsp;&nbsp;
+                       <%= f.radio_button :sex, 1 %> 女
                   </div>
                   <div class="item">
                        <label>等级职称：</label>

@@ -131,4 +131,21 @@ $(document).ready(function(){
        return false;
     });
 
+    $(".process_reward").click(function(){
+       //popup("#reward_area");
+       var store_id = $(this).attr("name");
+       var reward_id = $(this).attr("id");
+       $.ajax({
+            async:true,
+            type : 'get',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/violation_rewards/"+ reward_id +"/edit",
+            data : {
+                reward_id : reward_id,
+                store_id : store_id
+            }
+        });
+       return false;
+    });
+
 });
