@@ -31,10 +31,26 @@ function remove_area(parent, close, cancel){
 }
 
 $(document).ready(function(){
-    popup("#new_staff_area", "#new_staff");
-    popup("#new_violation_area", "#new_violation");
-    popup("#new_reward_area", "#new_reward");
-    popup("#new_train_area", "#new_train");
+
+    $("#new_staff").click(function(){
+        popup("#new_staff_area");
+        return false;
+    });
+
+    $("#new_violation").click(function(){
+        popup("#new_violation_area");
+        return false;
+    });
+
+    $("#new_reward").click(function(){
+        popup("#new_reward_area");
+        return false;
+    });
+
+    $("#new_train").click(function(){
+        popup("#new_train_area");
+        return false;
+    });
 
     $("#new_staff_btn").click(function(){
        if($(this).parents('form').find("#staff_name").val() == ""){
