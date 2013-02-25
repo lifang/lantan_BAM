@@ -66,10 +66,18 @@
 
                    <div style="display:none;">
                         <div class="search">
-                             <div>本月评估：<input name="" type="text" value="未评估" disabled></div>
-                             <div>系统打分：<input name="" type="text" value="40" disabled></div>
-                             <div><button class="search_btn">编辑</button></div>
-                             <div><button class="search_btn">店长打分</button></div>
+                             <div>本月评估：
+                               <input name="" type="text" value="<%= current_month_access_result(@current_month_score) %>" disabled/>
+                             </div>
+                             <div>系统打分：
+                               <input name="" type="text" value="<%= @current_month_score.sys_score %>" disabled/>
+                             </div>
+                             <div>
+                               <button class="search_btn">编辑</button>
+                             </div>
+                             <div>
+                               <button class="search_btn" id="manage_score_btn">店长打分</button>
+                             </div>
                         </div>
                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
                            <thead>
@@ -83,10 +91,10 @@
                             <tbody>
                               <% @month_scores.each do |month_score| %>
                                 <tr>
-                                  <td><%= month_score.created_at.strftime("%Y.%m.%d") %></td>
+                                  <td><%= month_score.current_month %></td>
                                   <td><%= month_score.sys_score %></td>
-                                  <td><%= month_score.manage_score %></td>
-                                  <td>良好</td>
+                                  <td><%= month_score.manage_score.nil? ? "未打分" : month_score.manage_score %></td>
+                                  <td><%= current_month_access_result(month_score) %></td>
                                 </tr>
                               <% end %>
                             </tbody>
@@ -271,27 +279,31 @@
 <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
 <div class="mask"></div>
 
-<div class="tab_popup" style="display:none;">
+<div class="tab_popup" style="display:none;" id="manage_score_area">
+  <%= form_for(@month_scores.first, :url => store_month_score_path(@store, @month_scores.first), :html => {:method => :put, :multipart => true}) do |f| %>
     <div class="popup_box">
-         <h1>店长打分<a href="#" class="close">关闭</a></h1>
+         <h1>店长打分<a href="javascript:void(0)" class="close">关闭</a></h1>
          <div class="popup_body">
               <div class="popup_body_area">
                   <div class="item">
-                       <label>分数：</label><input name="" type="text">
+                       <label>分数：</label>
+                       <%= f.text_field :manage_score %>
                   </div>
                   <div class="clear"></div>
                   <div class="item_textarea">
-                      <label>理由：</label><textarea name="" cols="" rows="" class="width_textarea"></textarea>
+                      <label>理由：</label>
+                      <%= f.text_area :reason, :cols => "", :rows => "", :class => "width_textarea" %>
                   </div>
                   <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
               </div>
-                  </div>
+        </div>
     </div>
+  <% end %>
 </div>
 
 <div class="tab_popup" style="display:none;">
     <div class="popup_box">
-         <h1>奖励处理<a href="#" class="close">关闭</a></h1>
+         <h1>奖励处理<a href="javascript:void(0)" class="close">关闭</a></h1>
          <div class="popup_body">
               <div class="popup_body_area">
                   <div class="item">
@@ -311,7 +323,7 @@
 
 <div class="tab_popup" style="display:none;">
     <div class="popup_box">
-         <h1>违规处理<a href="#" class="close">关闭</a></h1>
+         <h1>违规处理<a href="javascript:void(0)" class="close">关闭</a></h1>
          <div class="popup_body">
               <div class="popup_body_area">
                   <div class="item">

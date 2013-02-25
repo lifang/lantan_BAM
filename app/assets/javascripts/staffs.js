@@ -106,6 +106,7 @@ $(document).ready(function(){
 
     $(".cancel_btn").click(function(){
        $(".tab_popup").hide();
+       $(".mask").hide();
        return false;
     });
 
@@ -123,6 +124,11 @@ $(document).ready(function(){
             }
         });
         return false;
+    });
+
+    $("#manage_score_btn").click(function(){
+       popup("#manage_score_area");
+       return false;
     });
 
 });
