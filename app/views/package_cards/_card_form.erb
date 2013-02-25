@@ -1,0 +1,28 @@
+<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
+<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
+<div class="item">
+  <label>套餐卡名称：</label><input name="name" id="name" type="text" value="<%= @pcard.name %>" />
+</div>
+<div class="item">
+  <label>套餐卡配图：</label>
+  <input type=file name=j style="display: none;"  onchange="ye.value=value" />
+  <input name=ye type="text" class="file"  id="sale_img" />
+  <input type="button" class="file_btn" value="浏览" onclick=j.click()  />
+</div>
+<div class="item">
+  <label>开始时间：</label>
+  <input name="started_at" id="started_at"  value="<%= @pcard.started_at.nil?? "" : @pcard.started_at.strftime("%Y-%m-%d") %>"
+         type="text" onclick="WdatePicker()" />
+</div>
+<div class="item">
+  <label>结束时间：</label>
+  <input name="ended_at" id="ended_at" type="text" value="<%= @pcard.ended_at.nil?? "" : @pcard.ended_at.strftime("%Y-%m-%d") %>"
+         onclick="WdatePicker()" />
+</div>
+<div class="item">
+  <label>套餐价格：</label><input name="price" id="price" type="text" value="<%= @pcard.price %>" />
+</div>
+<div class="clear"></div>
+<div class="card_content">
+  <%= render :partial=>"/sales/sale_search",:object=>[Product::PRODUCT_TYPES,"pcard_types"] %>
+</div>

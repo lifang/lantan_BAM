@@ -1,39 +1,56 @@
-<div class="second_menu"><a href="/stores/<%= params[:store_id] %>/sales" <% if params[:action] == "index"  %> class="hover"<%end%>>活动列表</a>
-  <a href="/stores/<%= params[:store_id] %>/sales/new" <% if params[:action] == "new"  %> class="hover"<%end%>>发布活动</a></div>
-<div class="clear"></div>
-<div class="data_body">
-  <div>
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-      <thead>
-        <tr class="hbg">
-          <td>活动名称</td>
-          <td>代码</td>
-          <td>活动时间</td>
-          <td>状态</td>
-          <td>已报名人数</td>
-          <td>操作</td>
-        </tr>
-      </thead>
-      <tbody>
-        <% unless @sales.blank? %>
-          <% @sales.each do |sale| %>
-            <tr>
-              <td><%= sale.name %></td>
-              <td><%=  sale.code %></td>
-              <td><%= sale.started_at.nil?? "截止日期为" : sale.started_at.strftime("%Y.%m.%d") %>-
-                <%=  sale.ended_at.nil?? "暂未定" : sale.ended_at.strftime("%Y.%m.%d")  %></td>
-              <td><%=Sale::STATUS_NAME[sale.status] %></td>
-              <td><%= sale.reported_num %></td>
-              <td style="text-align: right;"><%if sale.status==0 %><a href="#">发布</a><%end%><a href="#">修改</a><a href="#">删除</a></td>
-            </tr>
+<%= javascript_include_tag "/assets/sales.js" %>
+<div class="main">
+  <div class="box">
+    <div class="data_box">
+      <div class="second_menu"><a href="/stores/<%= params[:store_id] %>/sales" <% if params[:action] == "index"  %> class="hover"<%end%>>活动列表</a>
+        <a href="/stores/<%= params[:store_id] %>/sales/new" <% if params[:action] == "new"  %> class="hover"<%end%>>发布活动</a></div>
+      <div class="clear"></div>
+      <div class="data_body">
+        <div>
+          <% unless @sales.blank? %>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+              <thead>
+                <tr class="hbg">
+                  <td>活动名称</td>
+                  <td>代码</td>
+                  <td>活动时间</td>
+                  <td>状态</td>
+                  <td>已报名人数</td>
+                  <td>操作</td>
+                </tr>
+              </thead>
+              <tbody>
+                <% @sales.each do |sale| %>
+                  <tr>
+                    <td><%= sale.name %></td>
+                    <td><%=  sale.code %></td>
+                    <td><%= if sale.disc_time_types == Sale::DISC_TIME[:TIME]
+                        "#{sale.started_at.nil?? "截止日期为" : sale.started_at.strftime("%Y.%m.%d")}-#{ sale.ended_at.nil?? "暂未定" : sale.ended_at.strftime("%Y.%m.%d")}"
+                      else
+                        "#{Sale::DISC_TIME_NAME[sale.disc_time_types]}#{sale.everycar_times}次"
+                      end
+                    %></td>
+                    <td><%=Sale::STATUS_NAME[sale.status] %></td>
+                    <td><%= sale.reported_num %></td>
+                    <td style="text-align: right;">
+                      <%if sale.status==0 %>
+                        <a href="javascript:void(0)" onclick="public_sale('<%= sale.id %>')">发布</a>
+                      <%end%>
+                      <a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">修改</a>
+                      <a href="javascript:void(0)" onclick="delete_sale('<%= sale.id %>')">删除</a></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+            <div class="pageTurn">
+              <%= will_paginate @sales,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+            </div>
+          <% else %>
+            暂无活动
           <% end %>
-        <% else %>
-        <% end %>
-      </tbody>
-    </table>
-    <div class="pageTurn">
-    <%= will_paginate @sales,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-
+<div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>

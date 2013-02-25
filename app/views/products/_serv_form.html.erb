@@ -1,0 +1,65 @@
+<div class="item">
+  <label>名称：</label><input name="name" id="name" type="text" value="<%= @service.name %>" />
+</div>
+<div class="item">
+  <label>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @service.base_price %>" />
+</div>
+<div class="item">
+  <label>全国促销价：</label><input name="sale_price" id="sale_price" type="text" value="<%= @service.sale_price %>" />
+</div>
+<div class="item">
+  <label>施工时间(分)：</label><input name="cost_time" id="cost_time" type="text" value="<%= @service.cost_time %>" />
+</div>
+
+<div class="item">
+  <label>技师：</label>
+  <select name="level1" id="level1" class="staff">
+    <% Staff::LEVELS.each do |key,value| %>
+      <option value="<%= key %>" <%if @service.staff_level==key%> selected<%end%> ><%= value %></option>
+    <% end %>
+  </select>
+  <select name="level2" id="level2" class="staff">
+    <% Staff::LEVELS.each do |key,value| %>
+      <option value="<%= key %>" <%if @service.staff_level_1==key%> selected<%end%> ><%= value %></option>
+    <% end %>
+  </select>
+</div>
+<div class="item">
+  <label>类别：</label><select  id="prod_types" name="prod_types">
+    <% Product::PRODUCT_TYPES.select {|k,v| k >=Product::PRODUCT_END}.each do |key,value| %>
+      <option value="<%= key %>" <%if @service.types==key%> selected<%end%> ><%= value %></option>
+    <% end %>
+  </select>
+</div>
+<div class="item_textarea">
+  <label>相关物料：</label><input type="button" value="选择物料" class="other_btn" onclick="show_center('.mat_tab');" />
+  <div class="seeProDiv_rWidth">
+    <ul class="srw_ul">
+      <%if @sale_prods && !@sale_prods.blank? %>
+        <% @sale_prods.each do |mat| %>
+          <li><%= mat.name %><span>/<%= mat.num %></span></li>
+        <% end %>
+      <% end %>
+    </ul>
+  </div>
+
+</div>
+<div class="item">
+  <label>配图：</label><input type=file name=j style="display: none;"  onchange="ye.value=value" />
+  <input name=ye type="text" class="file"  id="sale_img" value="<%= @service.img_url %>" /><input type="button" class="file_btn" value="浏览" onclick=j.click()  />
+</div>
+<div class="item_textarea">
+  <label>简介：</label><textarea name="intro" id="intro" cols="" rows="" class="width_textarea"><%=@service.introduction  %></textarea>
+</div>
+<div class="item_textarea">
+  <label>描述：</label><textarea  id="add_intro" cols="" rows="" class="width_textarea" style="width:480px"><%=@service.description  %></textarea>
+  <input type="hidden" name="desc" id="desc" />
+</div>
+<script type="text/javascript">
+  var serv_editor;
+  $(function() {
+    serv_editor = KindEditor.create('textarea[id="add_intro"]', {
+      allowFileManager : true
+    });
+  });
+</script>

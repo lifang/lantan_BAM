@@ -1,35 +1,82 @@
 #encoding: utf-8
 class PackageCardsController < ApplicationController
   # 营销管理 -- 套餐卡
+  layout 'sale'
 
   def index
-    cards=PackageCard.paginate_by_sql("select started_at,ended_at,id from package_cards where store_id=#{params[:store_id]}
-         and status=#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => 5) 
-    @card_hash={}
-    cards.each do |card|
-      @card_hash[card.id]=Product.find_by_sql("select s.name,p.product_num from products s inner join
+    @cards=PackageCard.paginate_by_sql("select name,img_url,started_at,ended_at,id from package_cards where store_id=#{params[:store_id]}
+         and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => 5)
+    @prods ={}
+    @cards.each do |card|
+      @prods[card.id]=Product.find_by_sql("select s.name,p.product_num num from products s inner join
      pcard_prod_relations p on s.id=p.product_id  where p.package_card_id=#{card.id}")
     end
   end #套餐卡列表
-
+  
   def create
     parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],:ended_at=>params[:ended_at],
       :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL],:price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d")
     }
     pcard=PackageCard.create(parms)
-    params[:products].each do |key,value|
+    params[:sale_prod].each do |key,value|
       PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
     end
+    redirect_to "/stores/#{params[:store_id]}/package_cards"
   end #添加套餐卡
 
-  def sale_reords
-    cards=PackageCard.find_by_sql("select started_at,ended_at,id from package_cards where store_id=#{params[:store_id]} and status=#{PackageCard::STAT[:NORMAL]}")
-    @card_hash={}
-    cards.each do |card|
-      unless card.c_pcard_relations.blank?
-        @card_hash[card.name]= Customer.find_by_sql("select c.name,c.mobilphone,p.content from customers c inner join c_pcard_relations p
-         where p.package_card_id= #{card.id} ")
-      end
-    end  #content中存放使用情况 将所有产品或服务以字符串组合存放，包含 产品id,name,总数和已使用数
+
+  def sale_records
+    @cards=CPcardRelation.find_by_sql("select c.name,c.mobilephone,cp.content,n.num,p.price from c_pcard_relations cp inner join customers c on c.id=cp.customer_id
+    inner join  package_cards p on p.id=cp.package_card_id inner join customer_num_relations  cn on c.id=cn.customer_id inner join car_nums n
+    on n.id=cn.car_num_id where store_id=#{params[:store_id]}")
+    @card_fee =@cards.inject(0) {|num,card| num+card.price }
+    @pcards =PackageCard.where(:status=>PackageCard::STAT[:NORMAL]).inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
+    p @pcards
+    #content中存放使用情况 将所有产品或服务以字符串组合存放，包含 产品id,name,剩余次数
   end #销售记录
+
+  #加载产品或者服务类型
+  def pcard_types
+    sql = "select id,name from products where  store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]}"
+    sql += " and types=#{params[:sale_types]}" if params[:sale_types] != "" || params[:sale_types].length !=0
+    sql += " and name like '%#{params[:sale_name]}%'" if params[:sale_name] != "" || params[:sale_name].length !=0
+    @products=Product.find_by_sql(sql)
+  end
+
+  #添加套餐卡
+  def add_pcard
+    @pcard=PackageCard.new
+  end
+
+  #编辑套餐卡
+  def edit_pcard
+    @pcard=PackageCard.find(params[:id])
+    @sale_prods=Product.find_by_sql("select s.name,p.product_num num,s.id from products s inner join
+     pcard_prod_relations p on s.id=p.product_id  where p.package_card_id=#{params[:id]}")
+  end
+
+  #更新套餐卡
+  def update_pcard
+    pcard=PackageCard.find(params[:id])
+    parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],
+      :ended_at=>params[:ended_at],:price=>params[:price]
+    }
+    pcard.update_attributes(parms)
+    pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
+    params[:sale_prod].each do |key,value|
+      PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
+    end
+    redirect_to "/stores/#{params[:store_id]}/package_cards"
+  end
+
+  #删除活动
+  def delete_pcard
+    PackageCard.find(params[:id]).update_attributes(:status=>PackageCard::STAT[:INVALID])
+    respond_to do |format|
+      format.json {
+        render :json=>{:message=>"删除成功"}
+      }
+    end
+  end
+
 end

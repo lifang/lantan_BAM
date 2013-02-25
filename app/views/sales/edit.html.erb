@@ -7,7 +7,7 @@
       <div class="clear"></div>
       <div class="data_body">
         <div>
-          <%= form_for @sale, :url=>"/stores/#{params[:store_id]}/sales",:method=>:post,:html=>{:multipart => true,:id=>"one_sale"} do  %>
+          <%= form_for @sale,:url=>"/stores/#{params[:store_id]}/sales/#{params[:id]}/update_sale",:method=>:post,:html=>{:multipart => true,:id=>"one_sale"} do  %>
             <%= render 'form' %>
           <% end %>
         </div>
