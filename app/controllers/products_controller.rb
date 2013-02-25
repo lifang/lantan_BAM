@@ -28,7 +28,6 @@ class ProductsController < ApplicationController
       @materials[service.id]=Material.find_by_sql("select name,code,p.material_num num from materials m inner join prod_mat_relations p on
         p.material_id=m.id  where p.product_id=#{service.id} and store_id=#{params[:store_id]}")
     end
-    p @materials
   end   #服务列表
 
   def serv_create
