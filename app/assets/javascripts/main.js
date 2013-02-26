@@ -17,7 +17,7 @@ function focusBlur(e){
 
 $(function(){
     focusBlur('.login_box input');//用户信息input默认值
-   // focusBlur('.item input');//用户信息input默认值
+// focusBlur('.item input');//用户信息input默认值
 })
 
 //切换
@@ -36,33 +36,19 @@ $(function(){
 });
 
 //弹出层
-function popup(t,b){
+function popup(t){
     var doc_height = $(document).height();
     var doc_width = $(document).width();
-    //var win_height = $(window).height();
-    //var win_width = $(window).width();
-
-    var layer_height = $(t).height();
     var layer_width = $(t).width();
+    $(".mask").css({
+        display:'block',
+        height:doc_height
+    });
+    $(t).css('top',"80px");
+    $(t).css('left',(doc_width-layer_width)/2);
+    $(t).css('display','block');
 
-    //tab
-    $(b).bind('click',function(){
-        $(".mask").css({
-            display:'block',
-            height:doc_height
-        });
-        //$(t).css('top',(doc_height-layer_height)/2);
-        $(t).css('top',"50px");
-        $(t).css('left',(doc_width-layer_width)/2);
-        $(t).css('display','block');
-        return false;
-    }
-    )
-    $(".close").click(function(){
-        $(t).css('display','none');
-        $(".mask").css('display','none');
-    })
-    $(".cancel_btn").click(function(){
+    $(t + " .close").click(function(){
         $(t).css('display','none');
         $(".mask").css('display','none');
     })
@@ -82,30 +68,12 @@ $(function(){
 })
 
 
-//请求加载产品或服务类别
-function load_types(store_id){
-    var types=$("#sale_types option:checked").val();
-    var name=$("#sale_name").val();
-    if (types != "" || name != ""){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/sales/load_types",
-            data : {
-                sale_types : types,
-                sale_name : name
-            }
-        });
-    }else{
-        alert("请选择类型或填写名称！");
-    }
-}
+
 
 //向选择框添加产品服务
 function add_this(e,name){
     var child="<div id='"+e.value+"'><em>"+name +"</em><a href='javascript:void(0)' class='addre_a' \n\
-    onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a><span><input name='product["+e.value +"]' \n\
+    onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a><span><input name='sale_prod["+e.value +"]' \n\
     type='text' class='addre_input' value='1' id='add_p"+e.value +"' /></span><a href='javascript:void(0)' class='addre_a' \n\
     id='delete_one"+e.value+"'>-</a><a href='javascript:void(0)' class='remove_a' \n\
     onclick='$(this).parent().remove();if($(\"#prod_"+ e.value+"\").length!=0){$(\"#prod_"+ e.value+"\")[0].checked=false;}'>删除</a></div></div>";
@@ -113,7 +81,7 @@ function add_this(e,name){
         if ($("#add_products #"+e.value).length==0){
             $(".popup_body_fieldset #add_products").append(child);
         }else{
-            var num=parseInt($("#add_products #add_p"+e.value).val())+1+1;
+            var num=parseInt($("#add_products #add_p"+e.value).val())+1;
             $("#add_products #add_p"+e.value).val(num);
             $("#add_products #delete_one"+e.value).attr("onclick","delete_one('"+ e.value+"')");
         }
@@ -138,3 +106,22 @@ function delete_one(id){
     }
     $("#add_products #add_p"+id).val(num);
 }
+
+function show_center(t){
+    var doc_height = $(document).height();
+    var doc_width = $(document).width();
+    var layer_height = $(t).height();
+    var layer_width = $(t).width();
+    $(".mask").css({
+        display:'block',
+        height:($(t).height()+50)>doc_height?　$(t).height()+180 : doc_height
+    });
+    $(t).css('top',"50px");
+    $(t).css('left',(doc_width-layer_width)/2);
+    $(t).css('display','block');
+    $(t + " .close").click(function(){
+        $(t).css('display','none');
+        $(".mask").css('display','none');
+    })
+}
+

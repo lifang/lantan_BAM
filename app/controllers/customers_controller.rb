@@ -41,10 +41,6 @@ class CustomersController < ApplicationController
     redirect_to request.referer
   end
 
-  def new
-    @store = Store.find(params[:store_id].to_i)
-  end
-
   def create
     if params[:name] and params[:mobilephone]
       Customer.create(:name => params[:name].strip, :mobilephone => params[:mobilephone].strip, 
@@ -112,6 +108,14 @@ class CustomersController < ApplicationController
           where c.store_id = ? and c.customer_id = ? ", params[:store_id].to_i, @customer.id],
       :per_page => 1, :page => params[:page])
     
+  end
+
+  def get_car_brands
+    respond_to do |format|
+      format.json {
+        render :json => CarBrand.get_brand_by_capital(params[:capital_id].to_i)
+      }
+    end
   end
 
 end

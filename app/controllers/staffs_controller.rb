@@ -47,6 +47,10 @@ class StaffsController < ApplicationController
 
     @month_scores = @staff.month_scores.paginate(:page => params[:page] ||= 1, :per_page => 1)
 
+    current_month = Time.now().strftime("%Y").to_s << Time.now().strftime("%m")
+
+    @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
+
     @salaries = @staff.salaries.paginate(:page => params[:page] ||= 1, :per_page => 1)
   end
 
@@ -59,11 +63,7 @@ class StaffsController < ApplicationController
 
   def update
     @staff = Staff.find_by_id(params[:id])
-    if @staff.update_attributes(params[:staff])
-      flash[:notice] = "编辑员工信息成功!"
-    else
-      flash[:notice] = "编辑员工信息失败!"
-    end
+    @staff.update_attributes(params[:staff]) if @staff
     redirect_to store_staffs_path(@store)
   end
 

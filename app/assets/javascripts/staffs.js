@@ -31,10 +31,26 @@ function remove_area(parent, close, cancel){
 }
 
 $(document).ready(function(){
-    popup("#new_staff_area", "#new_staff");
-    popup("#new_violation_area", "#new_violation");
-    popup("#new_reward_area", "#new_reward");
-    popup("#new_train_area", "#new_train");
+
+    $("#new_staff").click(function(){
+        popup("#new_staff_area");
+        return false;
+    });
+
+    $("#new_violation").click(function(){
+        popup("#new_violation_area");
+        return false;
+    });
+
+    $("#new_reward").click(function(){
+        popup("#new_reward_area");
+        return false;
+    });
+
+    $("#new_train").click(function(){
+        popup("#new_train_area");
+        return false;
+    });
 
     $("#new_staff_btn").click(function(){
        if($(this).parents('form').find("#staff_name").val() == ""){
@@ -90,6 +106,7 @@ $(document).ready(function(){
 
     $(".cancel_btn").click(function(){
        $(".tab_popup").hide();
+       $(".mask").hide();
        return false;
     });
 
@@ -107,6 +124,28 @@ $(document).ready(function(){
             }
         });
         return false;
+    });
+
+    $("#manage_score_btn").click(function(){
+       popup("#manage_score_area");
+       return false;
+    });
+
+    $(".process_reward").click(function(){
+       //popup("#reward_area");
+       var store_id = $(this).attr("name");
+       var reward_id = $(this).attr("id");
+       $.ajax({
+            async:true,
+            type : 'get',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/violation_rewards/"+ reward_id +"/edit",
+            data : {
+                reward_id : reward_id,
+                store_id : store_id
+            }
+        });
+       return false;
     });
 
 });
