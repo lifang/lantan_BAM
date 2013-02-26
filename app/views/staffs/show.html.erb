@@ -160,12 +160,12 @@
                                 <tr>
                                   <td><%= reward.created_at.strftime("%Y.%m.%d") %></td>
                                   <td><%= reward.situation %></td>
-                                  <td><%= reward.process_types %></td>
+                                  <td><%= ViolationReward::N_REWARD[reward.process_types] %></td>
                                   <td>
-                                    <% if reward.process_types.nil? %>
+                                    <% if reward.status.nil? %>
                                       <%= link_to "处理", "javascript:void(0)", :class => "process_reward", :id => reward.id, :name => @store.id %>
                                     <% else %>
-                                      <%= reward.process_types %>
+                                      <%= reward.status %>
                                     <% end %>
                                   </td>
                                   <td><%= reward.mark %></td>
@@ -207,8 +207,14 @@
                                 <tr>
                                   <td><%= violation.created_at.strftime("%Y.%m.%d") %></td>
                                   <td><%= violation.mark %></td>
-                                  <td><a href="#">处理</a></td>
-                                  <td><%= violation.process_types %></td>
+                                  <td>
+                                    <% if violation.status.nil? %>
+                                      <%= link_to "处理", "javascript:void(0)", :class => "process_violation", :id => violation.id, :name => @store.id %>
+                                    <% else %>
+                                      <%= violation.status %>
+                                    <% end %>
+                                  </td>
+                                  <td><%= ViolationReward::N_VIOLATE[violation.process_types] %></td>
                                   <td><%= violation.situation %></td>
                                 </tr>
                               <% end %>
@@ -306,3 +312,5 @@
     </div>
   <% end %>
 </div>
+
+<div id="process"></div>

@@ -1,0 +1,21 @@
+<div class="tab_popup" style="display:none;" id="process_violation_reward">
+    <div class="popup_box">
+         <h1>违规处理<a href="javascript:void(0)" class="close">关闭</a></h1>
+         <%= form_for(@violation_reward, :url => store_violation_reward_path(@store, @violation_reward), :html => {:method => :put}) do |f| %>
+         <div class="popup_body">
+              <div class="popup_body_area">
+                  <div class="item">
+                       <label>处理方式：</label>
+                       <%= f.select :process_types, ViolationReward::N_VIOLATE.invert %>
+                  </div>
+                  <div class="clear"></div>
+                  <div class="item_textarea">
+                      <label>理由：</label>
+                      <%= f.text_area :mark, :cols => "", :rows => "", :class => "width_textarea" %>
+                  </div>
+                  <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+              </div>
+          </div>
+         <% end %>
+    </div>
+</div>

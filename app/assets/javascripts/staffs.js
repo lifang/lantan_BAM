@@ -132,16 +132,31 @@ $(document).ready(function(){
     });
 
     $(".process_reward").click(function(){
-       //popup("#reward_area");
        var store_id = $(this).attr("name");
-       var reward_id = $(this).attr("id");
+       var id = $(this).attr("id");
        $.ajax({
             async:true,
             type : 'get',
             dataType : 'script',
-            url : "/stores/"+ store_id+"/violation_rewards/"+ reward_id +"/edit",
+            url : "/stores/"+ store_id+"/violation_rewards/"+ id +"/edit",
             data : {
-                reward_id : reward_id,
+                id : id,
+                store_id : store_id
+            }
+        });
+       return false;
+    });
+
+    $(".process_violation").click(function(){
+       var store_id = $(this).attr("name");
+       var id = $(this).attr("id");
+       $.ajax({
+            async:true,
+            type : 'get',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/violation_rewards/"+ id +"/edit",
+            data : {
+                id : id,
                 store_id : store_id
             }
         });
