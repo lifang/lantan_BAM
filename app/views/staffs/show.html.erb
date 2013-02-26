@@ -28,40 +28,9 @@
                              <div><label>统计方式：<input name="" type="radio" value="">日&nbsp;&nbsp;<input name="" type="radio" value="">周&nbsp;&nbsp;<input name="" type="radio" value="">月</label></div>
                              <div><button class="search_btn">查询</button></div>
                         </div>
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-                           <thead>
-                                <tr class="hbg">
-                                  <td><span class="sort_u">时间</span></td>
-                                  <td>出勤</td>
-                                  <td>施工项目</td>
-                                  <td>物品领用</td>
-                                  <td>物品消耗</td>
-                                  <td>水电消耗</td>
-                                  <td>投诉</td>
-                                  <td>培训</td>
-                                  <td>提成</td>
-                                  <td>扣款</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                              <% @work_records.each do |work_record| %>
-                                <tr>
-                                  <td><%= work_record.current_day %></td>
-                                  <td><%= work_record.attendance_num %></td>
-                                  <td><%= work_record.construct_num %></td>
-                                  <td><%= work_record.materials_used_num %></td>
-                                  <td><%= work_record.materials_consume_num %></td>
-                                  <td><%= work_record.water_num %></td>
-                                  <td><%= work_record.complaint_num %></td>
-                                  <td><%= work_record.train_num %></td>
-                                  <td><%= work_record.reward_num %></td>
-                                  <td><%= work_record.violation_num %></td>
-                                </tr>
-                              <% end %>
-                            </tbody>
-                      </table>
-                      <%= will_paginate @work_records, :class => "pageTurn", :previous_label => "上一页",
-                          :next_label => "下一页" %>                     
+                        <div id="work_record_tab">
+                        <%= render :partial => "work_record_tab" %>
+                        </div>
                    </div>
 
                    <div style="display:none;">
@@ -79,208 +48,25 @@
                                <button class="search_btn" id="manage_score_btn">店长打分</button>
                              </div>
                         </div>
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-                           <thead>
-                                <tr class="hbg">
-                                  <td><span class="sort_u">时间</span></td>
-                                  <td>系统打分</td>
-                                  <td>店长打分</td>
-                                  <td>当月评估结果</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                              <% @month_scores.each do |month_score| %>
-                                <tr>
-                                  <td><%= month_score.current_month %></td>
-                                  <td><%= month_score.sys_score %></td>
-                                  <td><%= month_score.manage_score.nil? ? "未打分" : month_score.manage_score %></td>
-                                  <td><%= current_month_access_result(month_score) %></td>
-                                </tr>
-                              <% end %>
-                            </tbody>
-                      </table>
-                      <%= will_paginate @month_scores, :class => "pageTurn", :previous_label => "上一页",
-                          :next_label => "下一页" %>
+                     <div id="month_score_tab">
+                        <%= render :partial => "month_score_tab" %>
+                     </div>
                    </div>
 
-                   <div style="display:none;">
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-                           <thead>
-                                <tr class="hbg">
-                                  <td><span class="sort_u">培训时间</span></td>
-                                  <td>培训类别</td>
-                                  <td>内容</td>
-                                  <td>是否通过考核</td>
-                                  <td>证书</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                              <% @trains.each do |train| %>
-                                <tr>
-                                  <td><%= train.start_at.strftime("%Y.%m.%d") %> - <%= train.end_at.strftime("%Y.%m.%d") %></td>
-                                  <td>洗车</td>
-                                  <td><%= train.content %></td>
-                                  <td>XXXXXX</td>
-                                  <td>XXXXX</td>
-                                </tr>
-                              <% end %>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                      </table>
-                      <%= will_paginate @trains, :class => "pageTurn", :previous_label => "上一页",
-                          :next_label => "下一页" %>
+                   <div style="display:none;" id="train_tab">
+                       <%= render :partial => "train_tab" %>
                    </div>
 
-                   <div style="display:none;">
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-                           <thead>
-                                <tr class="hbg">
-                                  <td><span class="sort_u">时间</span></td>
-                                  <td>原因</td>
-                                  <td>奖励方式</td>
-                                  <td>处理状态</td>
-                                  <td>理由</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                              <% @rewards.each do |reward| %>
-                                <tr>
-                                  <td><%= reward.created_at.strftime("%Y.%m.%d") %></td>
-                                  <td><%= reward.situation %></td>
-                                  <td><%= ViolationReward::N_REWARD[reward.process_types] %></td>
-                                  <td>
-                                    <% if reward.status.nil? %>
-                                      <%= link_to "处理", "javascript:void(0)", :class => "process_reward", :id => reward.id, :name => @store.id %>
-                                    <% else %>
-                                      <%= reward.status %>
-                                    <% end %>
-                                  </td>
-                                  <td><%= reward.mark %></td>
-                                </tr>
-                              <% end %>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                      </table>
-                      <%= will_paginate @rewards, :class => "pageTurn", :previous_label => "上一页",
-                          :next_label => "下一页" %>
+                   <div style="display:none;" id="reward_tab">
+                       <%= render :partial => "reward_tab" %>
                    </div>
 
-                   <div style="display:none;">
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-                           <thead>
-                                <tr class="hbg">
-                                  <td><span class="sort_u">时间</span></td>
-                                  <td>情况描述</td>
-                                  <td>处理状态</td>
-                                  <td>处理结果</td>
-                                  <td>理由</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                              <% @violations.each do |violation| %>
-                                <tr>
-                                  <td><%= violation.created_at.strftime("%Y.%m.%d") %></td>
-                                  <td><%= violation.mark %></td>
-                                  <td>
-                                    <% if violation.status.nil? %>
-                                      <%= link_to "处理", "javascript:void(0)", :class => "process_violation", :id => violation.id, :name => @store.id %>
-                                    <% else %>
-                                      <%= violation.status %>
-                                    <% end %>
-                                  </td>
-                                  <td><%= ViolationReward::N_VIOLATE[violation.process_types] %></td>
-                                  <td><%= violation.situation %></td>
-                                </tr>
-                              <% end %>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                      </table>
-                      <%= will_paginate @violations, :class => "pageTurn", :previous_label => "上一页",
-                          :next_label => "下一页" %>
+                   <div style="display:none;" id="violation_tab">
+                       <%= render :partial => "violation_tab" %>
                    </div>
 
-                   <div style="display:none;">
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-                           <thead>
-                                <tr class="hbg">
-                                  <td><span class="sort_u">时间</span></td>
-                                  <td>底薪</td>
-                                  <td>提成金额</td>
-                                  <td>扣款金额</td>
-                                  <td>总额</td>
-                                  <td>操作</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                              <% @salaries.each do |salary| %>
-                                <tr>
-                                  <td><%= salary.current_month %></td>
-                                  <td><%= salary.staff.base_salary %></td>
-                                  <td><%= salary.reward_num %></td>
-                                  <td><%= salary.deduct_num %></td>
-                                  <td><%= salary.total %></td>
-                                  <td><a href="#">删除</a></td>
-                                </tr>
-                              <% end %>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                      </table>
-                       <%= will_paginate @salaries, :class => "pageTurn", :previous_label => "上一页",
-                          :next_label => "下一页" %>
+                   <div style="display:none;" id="salary_tab">
+                       <%= render :partial => "salary_tab" %>
                    </div>
 
               </div>

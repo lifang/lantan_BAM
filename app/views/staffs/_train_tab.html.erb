@@ -1,0 +1,38 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+     <thead>
+          <tr class="hbg">
+            <td><span class="sort_u">培训时间</span></td>
+            <td>培训类别</td>
+            <td>内容</td>
+            <td>是否通过考核</td>
+            <td>证书</td>
+          </tr>
+      </thead>
+      <tbody>
+        <% @trains.each do |train| %>
+          <tr>
+            <td><%= train.start_at.strftime("%Y.%m.%d") %> - <%= train.end_at.strftime("%Y.%m.%d") %></td>
+            <td>洗车</td>
+            <td><%= train.content %></td>
+            <td>XXXXXX</td>
+            <td>XXXXX</td>
+          </tr>
+        <% end %>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+      </tbody>
+</table>
+<%= will_paginate @trains, :class => "pageTurn", :previous_label => "上一页",
+    :next_label => "下一页" %>

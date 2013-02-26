@@ -33,6 +33,7 @@ class StaffsController < ApplicationController
   end
 
   def show
+    @tab = params[:tab]
     @staff = Staff.find_by_id(params[:id])
     @work_records = @staff.work_records.paginate(:page => params[:page] ||= 1, :per_page => 1)
     @violations = @staff.violation_rewards.where("types = false").
@@ -47,11 +48,16 @@ class StaffsController < ApplicationController
 
     @month_scores = @staff.month_scores.paginate(:page => params[:page] ||= 1, :per_page => 1)
 
+    @salaries = @staff.salaries.paginate(:page => params[:page] ||= 1, :per_page => 1)
+
     current_month = Time.now().strftime("%Y").to_s << Time.now().strftime("%m")
 
     @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
 
-    @salaries = @staff.salaries.paginate(:page => params[:page] ||= 1, :per_page => 1)
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
 
   def edit

@@ -163,4 +163,17 @@ $(document).ready(function(){
        return false;
     });
 
+    $(".pageTurn a").live("click", function(){
+       var href_string = $(this).attr("href");
+       var tab = $(this).parents('.pageTurn').parent().attr("id");
+       $.ajax({
+            async:true,
+            type : 'get',
+            dataType : 'script',
+            url : href_string,
+            data : {tab:tab}
+        });
+       return false;
+    });
+
 });

@@ -1,0 +1,44 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+     <thead>
+          <tr class="hbg">
+            <td><span class="sort_u">时间</span></td>
+            <td>原因</td>
+            <td>奖励方式</td>
+            <td>处理状态</td>
+            <td>理由</td>
+          </tr>
+      </thead>
+      <tbody>
+        <% @rewards.each do |reward| %>
+          <tr>
+            <td><%= reward.created_at.strftime("%Y.%m.%d") %></td>
+            <td><%= reward.situation %></td>
+            <td><%= ViolationReward::N_REWARD[reward.process_types] %></td>
+            <td>
+              <% if reward.status.nil? %>
+                <%= link_to "处理", "javascript:void(0)", :class => "process_reward", :id => reward.id, :name => @store.id %>
+              <% else %>
+                <%= reward.status %>
+              <% end %>
+            </td>
+            <td><%= reward.mark %></td>
+          </tr>
+        <% end %>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+      </tbody>
+</table>
+<%= will_paginate @rewards, :class => "pageTurn", :previous_label => "上一页",
+    :next_label => "下一页" %>
