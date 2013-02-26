@@ -1,27 +1,5 @@
 // Place all the behaviors and hooks related to the matching controller here.
 // All this logic will automatically be available in application.js.
-function center_popup(t){
-    var doc_height = $(document).height();
-    var doc_width = $(document).width();
-    //var win_height = $(window).height();
-    //var win_width = $(window).width();
-
-    var layer_height = $(t).height();
-    var layer_width = $(t).width();
-
-    //tab
-
-    $(".mask").css({
-        display:'block',
-        height:doc_height
-    });
-    //$(t).css('top',(doc_height-layer_height)/2);
-    $(t).css('top',"50px");
-    $(t).css('left',(doc_width-layer_width)/2);
-    $(t).css('display','block');
-    return false;
-}
-
 function remove_area(parent, close, cancel){
     $(close, cancel).bind('click',function(){
         $(".mask").hide();
@@ -173,6 +151,18 @@ $(document).ready(function(){
             url : href_string,
             data : {tab:tab}
         });
+       return false;
+    });
+
+    $("#train_start_at").datepicker({inline:true});
+    $("#train_end_at").datepicker({inline:true});
+    $("#start_at").datepicker({inline:true});
+    $("#end_at").datepicker({inline:true});
+
+    $(".search_btn").click(function(){
+       var start_at = $(this).parents('.search').find("#start_at").val();
+       var end_at = $(this).parents('.search').find("#end_at").val();
+       
        return false;
     });
 
