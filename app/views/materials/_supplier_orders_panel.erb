@@ -1,0 +1,16 @@
+<div class="search">
+  <div><label>状态：</label>
+    <select id="select_s_order">
+      <option value="-1">全部</option>
+      <option value="0">未付款</option>
+      <option value="1">已付款</option>
+      <option value="2">已发货</option>
+      <option value="3">已到货</option>
+    </select>
+  </div>
+  <div><label>时间：</label><input name="" type="text" id="date03"> 到 <input name="" type="text" id="date04"></div>
+  <div><button onclick="search_supplier_order(<%= params[:store_id] %>)" class="search_btn">查询</button></div>
+</div>
+<div id="page_supplier_orders">
+  <%= render :partial => "materials/supplier_orders" %>
+</div>

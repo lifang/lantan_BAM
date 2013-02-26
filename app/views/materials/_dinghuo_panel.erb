@@ -1,0 +1,112 @@
+<style>
+    #add_new_materials input{
+        width:80px;
+    }
+</style>
+<script>
+    $(function() {
+        $( "#date01" ).datepicker({inline: true});
+        $( "#date02" ).datepicker({inline: true});
+        $( "#date03" ).datepicker({inline: true});
+        $( "#date04" ).datepicker({inline: true});
+    })
+</script>
+<%= form_tag material_order_store_materials_url(params[:store_id]), :id => "order_form" do |f| %>
+    <div class="tab_popup dinghuo_tab" id="dinghuo_tab">
+      <div class="popup_box">
+        <h1>订货<a href="#" class="close">关闭</a></h1>
+        <div class="popup_body">
+          <div class="popup_body_area">
+            <div class="search">
+              <div><%= label_tag "from","订货渠道：" %><%= select_tag "from",options_from_collection_for_select(from_s(params[:store_id]),"id","name"),
+                                                                 {:onchange => "change_supplier(this)"} %>
+              </div>
+            </div>
+            <%= render :partial => "materials/dinghuo_search_panel", :object => @type %>
+            <div class="pq pq_mb"></div>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+              <thead>
+              <tr class="hbg">
+                <td>条形码</td>
+                <td>物料名称</td>
+                <td>物料类别</td>
+                <td>单价（元）</td>
+                <td>订货量</td>
+                <td>总价</td>
+                <td>库存量（个）</td>
+                <td>操作</td>
+              </tr>
+              </thead>
+              <tbody id="dinghuo_selected_materials"></tbody>
+            </table>
+            <table id="add_new_materials" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table"></table>
+            <div class="otherWay" id="activity_code" style="display: block;">
+              <ul>
+                <li><%= check_box_tag "use_card",@use_card_count.to_f %>本店累计使用储值卡<%= @use_card_count.to_f() %>元，用来抵货款</li>
+                <li><%= check_box_tag "use_code","",false %>使用活动代码<%= text_field_tag "act_code","",{:onblur => "get_act_count(this)"} %><span id="use_code_count" class="red"></span>
+                </li>
+              </ul>
+            </div>
+            <div class="amount">总计：<span id="total_count">0.0</span></div>
+            <div id="add_material" style="display: none;">
+              <%= link_to_function "添加","add_material(#{params[:store_id]})" %>
+            </div>
+          </div>
+          <div class="btn_box"><%= hidden_field_tag "selected_items_dinghuo" %>
+            <%= button_to_function "确定","confirm_pay('#{params[:store_id]}')", :class => "confirm_btn" %>
+            <%= button_to_function "取消","",:class => "cancel_btn" %>
+          </div>
+          <div class="clear"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tab_popup fukuan_tab" id="fukuan_tab">
+      <div class="popup_box">
+        <h1>付款<a href="#" class="close">关闭</a></h1>
+        <div class="popup_body">
+          <div class="popup_body_area">
+            <h2 class="popup_body_title" id="supplier_from">订货渠道：总部</h2>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+              <thead>
+              <tr class="hbg">
+                <td>条形码</td>
+                <td>物料名称</td>
+                <td>物料类别</td>
+                <td>单价（元）</td>
+                <td>订货量</td>
+                <td>总价</td>
+              </tr>
+              </thead>
+              <tbody id="order_selected_materials">
+              <tr>
+                <td>123654789</td>
+                <td>手套</td>
+                <td>劳动保护</td>
+                <td>1000</td>
+                <td>100</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>123654789</td>
+                <td>手套</td>
+                <td>劳动保护</td>
+                <td>1000</td>
+                <td>100</td>
+                <td>2</td>
+              </tr>
+              </tbody>
+            </table>
+            <div class="otherWay">
+              <div class="amount">总计：<span id="price_total">0.0</span></div>
+            </div>
+          </div>
+          <div class="fukuan_btn">
+            <button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){submit_material_order('order_form',3)}else{submit_material_order('order_form',5)}">现金</button>
+            <span id="mendian_account"><button class="confirm_btn" type="button" onclick="submit_material_order('order_form',4)">门店账户扣款</button><em id="rest_count">（余额：<%= @store_account.to_f %>）</em></span>
+            <span class="zfb" onclick="submit_material_order('order_form',1)"></span>
+          </div>
+          <div class="clear"></div>
+        </div>
+      </div>
+    </div>
+<% end %>
