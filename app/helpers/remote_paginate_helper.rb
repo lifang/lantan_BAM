@@ -77,4 +77,11 @@ module RemotePaginateHelper
       link_to "#{text}", "#{url}&#{param.to_sym}=#{page}", :remote => true
     end
   end
+
+  class LinkRenderer < WillPaginate::ActionView::LinkRenderer
+    def link(text, target, attributes = {})
+      attributes['data-remote'] = true
+      super
+    end
+  end
 end

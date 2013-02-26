@@ -26,5 +26,10 @@ module Constant
   CODE_PATH="#{Rails.root}/public/code_file.txt"
   #总店id
   STORE_ID = 1
+  PER_PAGE = 20
+  #催货提醒
+  URGE_GOODS_CONTENT = "门店订货提醒，请关注下"
+
+  SERVER_PATH = "http://localhost:3000"
 
 end

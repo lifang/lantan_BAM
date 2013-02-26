@@ -34,4 +34,22 @@ module ApplicationHelper
     return request.url.include?(controller_name) ? "hover" : ""
     #puts self.action_name,self.controller_path,self.controller,self.controller_name,request.url
   end
+
+  def material_status status, type
+   str = ""
+   puts status
+   #{:pay_and_send => 0, :pay_not_send => 1, :send_not_pay => 2, :no_send_no_pay => 3}
+    if (status == 0 || status == 1) && type == 0
+      str = "已付款"
+    elsif (status == 2 || status == 3) && type == 0
+      str = "未付款"
+    elsif (status == 2 || status == 0) && type == 1
+     str = "已发货"
+    elsif (status == 3 || status == 1) && type == 1
+     str = "未发货"
+    elsif status == 4
+      str = "已取消"
+    end
+    str
+  end
 end
