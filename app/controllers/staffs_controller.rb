@@ -35,7 +35,16 @@ class StaffsController < ApplicationController
   def show
     @tab = params[:tab]
     @staff = Staff.find_by_id(params[:id])
-    @work_records = @staff.work_records.paginate(:page => params[:page] ||= 1, :per_page => 1)
+
+    start_at = (params[:start_at].nil? || params[:start_at].empty?) ?
+              "1 = 1" : "current_day >= #{(params[:start_at].delete '-').to_i}"
+            
+    end_at = (params[:end_at].nil? || params[:end_at].empty?) ?
+              "1 = 1" : "current_day <= #{(params[:end_at].delete '-').to_i}"
+
+    @work_records = @staff.work_records.where(start_at).where(end_at).
+                  paginate(:page => params[:page] ||= 1, :per_page => 1)
+                
     @violations = @staff.violation_rewards.where("types = false").
                   paginate(:page => params[:page] ||= 1, :per_page => 1)
 

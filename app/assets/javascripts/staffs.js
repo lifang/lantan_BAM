@@ -159,10 +159,25 @@ $(document).ready(function(){
     $("#start_at").datepicker({inline:true});
     $("#end_at").datepicker({inline:true});
 
-    $(".search_btn").click(function(){
+    $("#search_work_record").click(function(){
        var start_at = $(this).parents('.search').find("#start_at").val();
        var end_at = $(this).parents('.search').find("#end_at").val();
-       
+       var staff_id = $(this).parents('.search').find("#staff_id").val();
+       var store_id = $(this).parents('.search').find("#store_id").val();
+       var tab = "work_record_tab";
+       var cal_style = $(".cal_style:checked").val();
+       $.ajax({
+            async:true,
+            type : 'get',
+            dataType : 'script',
+            url : "/stores/"+ store_id + "/staffs/" + staff_id,
+            data : {
+                start_at : start_at,
+                end_at : end_at,
+                tab : tab,
+                cal_style : cal_style
+            }
+        });
        return false;
     });
 
