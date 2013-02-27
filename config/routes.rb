@@ -90,6 +90,8 @@ LantanBAM::Application.routes.draw do
         get "search_list"
       end
     end
+
+    resources :roles
   end
 
   resources :customers do
