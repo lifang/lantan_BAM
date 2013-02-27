@@ -52,7 +52,8 @@ LantanBAM::Application.routes.draw do
     resources :materials do
       collection do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
-            "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders","search_supplier_orders"
+            "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
+            "search_supplier_orders","receive_order","pay_order","update_notices"
         post "out_order","material_order","add","alipay_complete"
       end
     end

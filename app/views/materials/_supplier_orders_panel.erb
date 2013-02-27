@@ -1,11 +1,18 @@
 <div class="search">
-  <div><label>状态：</label>
+  <div><label>物流状态：</label>
     <select id="select_s_order">
+      <option value="-1">全部</option>
+      <option value="0">未发货</option>
+      <option value="1">已发货</option>
+      <option value="2">已收货</option>
+      <option value="3">已入库</option>
+    </select>
+  </div>
+  <div><label>付款状态：</label>
+    <select id="s_pay_status">
       <option value="-1">全部</option>
       <option value="0">未付款</option>
       <option value="1">已付款</option>
-      <option value="2">已发货</option>
-      <option value="3">已到货</option>
     </select>
   </div>
   <div><label>时间：</label><input name="" type="text" id="date03"> 到 <input name="" type="text" id="date04"></div>

@@ -257,7 +257,7 @@ function submit_material_order(form_id,pay_type){
                     alert("订货成功");
                     window.location.reload();
                 }else if(data["status"]== -1){
-                   alert(data["pay_req"]);
+//                   alert(data["pay_req"]);
                     window.open(encodeURI(data["pay_req"]),'支付宝','height=768,width=1024,scrollbars=yes,status =yes');
                 }
             },
@@ -266,6 +266,27 @@ function submit_material_order(form_id,pay_type){
             }
         });
 
+}
+
+function pay_material_order(pay_type,store_id){
+    $.ajax({
+        url:"/stores/"+store_id + "/materials/pay_order",
+        dataType:"json",
+        data:"order_id="+$("#pay_order_id").val()+"&pay_type="+pay_type,
+        type:"GET",
+        success:function(data,status){
+            if(data["status"]==0){
+                alert("支付成功");
+                window.location.reload();
+            }else if(data["status"]== -1){
+//                alert(data["pay_req"]);
+                window.open(encodeURI(data["pay_req"]),'支付宝','height=768,width=1024,scrollbars=yes,status =yes');
+            }
+        },
+        error:function(err){
+            alert("支付失败");
+        }
+    });
 }
 
 function confirm_pay(store_id){
@@ -513,7 +534,7 @@ function search_head_order(store_id){
         url:"/stores/"+store_id+"/materials/search_head_orders",
         dataType:"script",
         type:"GET",
-        data:"from="+$("#date01").val()+"&to="+$("#date02").val()+"&status="+$("#select_h_order").val(),
+        data:"from="+$("#date01").val()+"&to="+$("#date02").val()+"&m_status="+$("#select_h_order").val()+"status="+$("#h_pay_status").val(),
         success:function(){
 //           alert(1);
         },
@@ -528,7 +549,7 @@ function search_supplier_order(store_id){
         url:"/stores/"+store_id+"/materials/search_supplier_orders",
         dataType:"script",
         type:"GET",
-        data:"from="+$("#date03").val()+"&to="+$("#date04").val()+"&status="+$("#select_s_order").val()+"&type=1",
+        data:"from="+$("#date03").val()+"&to="+$("#date04").val()+"&m_status="+$("#select_s_order").val()+"&type=1&status="+$("#s_pay_status").val(),
         success:function(){
 //           alert(1);
         },
@@ -598,4 +619,45 @@ function cancel_order(order_id,type,store_id){
           }
       });
   }
+}
+
+function receive_order(order_id,type,store_id){
+    $.ajax({
+        url:"/stores/"+store_id+"/materials/receive_order",
+        dataType:"json",
+        type:"GET",
+        data:"order_id="+order_id+"&type="+type,
+        success:function(data,status){
+            alert(data["content"]);
+            window.location.reload();
+        },
+        error:function(){
+//              alert("error");
+        }
+    });
+}
+
+function pay_order(order_id,store_id){
+    show_mask_div("zhifu_tab");
+    $("#pay_order_id").attr("value",order_id);
+}
+
+function show_notice(type){
+  if(type == 0){
+    $("#m_notice_div").show();
+  }else{
+      $("#m_notice_div").hide();
+  }
+}
+
+function close_notice(ids,store_id){
+    $.ajax({
+        url:"/stores/"+store_id+"/materials/update_notices",
+        dataType:"json",
+        type:"GET",
+        data:"ids="+ids,
+        success:function(){
+            window.location.reload();
+        }
+    });
 }

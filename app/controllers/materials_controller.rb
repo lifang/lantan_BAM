@@ -17,7 +17,8 @@ class MaterialsController < ApplicationController
     @use_card_count = SvcReturnRecord.store_return_count params[:store_id]
     @current_store = Store.find_by_id params[:store_id]
     @store_account = @current_store.account if @current_store
-    @notices = Notice.find_all_by_store_id params[:store_id]
+    @notices = Notice.kucun_notices params[:store_id]
+    @notice_ids = @notices.collect{ |item| item.n_id}.join(",")
   end
 
   def page_materials
@@ -48,7 +49,8 @@ class MaterialsController < ApplicationController
   def page_head_orders
     @head_order_records =  []
     if params[:from] || params[:to]
-      @head_order_records =  MaterialOrder.search_orders params[:store_id], params[:from],params[:to],params[:status].to_i,0,params[:page],Constant::PER_PAGE
+      @head_order_records =  MaterialOrder.search_orders params[:store_id], params[:from],params[:to],params[:status].to_i,
+                                                         0,params[:page],Constant::PER_PAGE,params[:m_status].to_i
     else
       @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id]
     end
@@ -61,7 +63,8 @@ class MaterialsController < ApplicationController
   def page_supplier_orders
     @supplier_order_records = []
     if params[:from] || params[:to]
-      @supplier_order_records = MaterialOrder.search_orders params[:store_id], params[:from],params[:to],params[:status].to_i,1,params[:page],Constant::PER_PAGE
+      @supplier_order_records = MaterialOrder.search_orders params[:store_id], params[:from],params[:to],params[:status].to_i,
+                                                            1,params[:page],Constant::PER_PAGE,params[:m_status].to_i
     else
       @supplier_order_records =  MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]
     end
@@ -192,7 +195,7 @@ class MaterialsController < ApplicationController
                   material_order.update_attribute(:sale_id,params[:sale_id])
                 end
                 #发送订货提醒给总店
-                Notice.create(:store_id => 0, :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS])
+                Notice.create(:store_id => Constant::STORE_ID, :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS])
                 #支付记录
                 MOrderType.create(:material_order_id => material_order.id,:pay_types => params[:pay_type], :price => price)
                 if params[:pay_type].to_i == MaterialOrder::PAY_TYPES[:STORE_CARD]
@@ -258,7 +261,8 @@ class MaterialsController < ApplicationController
 
   def search_head_orders
     supplier_id = params[:type] && params[:type].to_i == 1 ? 1 : 0
-    @head_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,supplier_id,params[:page],Constant::PER_PAGE
+    @head_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,
+                                                      supplier_id,params[:page],Constant::PER_PAGE,params[:m_status].to_i
     respond_with(@head_order_records) do |f|
       f.html
       f.js
@@ -267,7 +271,8 @@ class MaterialsController < ApplicationController
 
   def search_supplier_orders
     supplier_id = params[:type] && params[:type].to_i == 1 ? 1 : 0
-    @supplier_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,supplier_id,params[:page],Constant::PER_PAGE
+    @supplier_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,
+                                                          supplier_id,params[:page],Constant::PER_PAGE,params[:m_status].to_i
     respond_with(@supplier_order_records) do |f|
       f.html
       f.js
@@ -362,7 +367,7 @@ class MaterialsController < ApplicationController
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
       if order
-        Notice.create(:store_id => 0, :content => URGE_GOODS_CONTENT + ",订单号为：#{order.code}",
+        Notice.create(:store_id => Constant::STORE_ID, :content => URGE_GOODS_CONTENT + ",订单号为：#{order.code}",
                       :target_id => order.id, :types => Notice::TYPES[:URGE_GOODS])
       end
     end
@@ -373,7 +378,7 @@ class MaterialsController < ApplicationController
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
       content = "订单取消成功"
-      if order && order.status == MaterialOrder::STATUS[:no_send_no_pay]
+      if order && order.status == MaterialOrder::STATUS[:no_pay] && order.m_status == MaterialOrder::M_STATUS[:no_send]
         order.update_attribute(:status,MaterialOrder::STATUS[:cancel])
       elsif order.status == MaterialOrder::STATUS[:cancel]
            content = "订单已取消"
@@ -383,4 +388,53 @@ class MaterialsController < ApplicationController
     end
     render :json => {:status => 1,:content => content}.to_json
   end
+
+  def receive_order
+    if params[:order_id]
+      order = MaterialOrder.find_by_id params[:order_id]
+      content = ""
+      if order && order.m_status == MaterialOrder::M_STATUS[:send]
+        order.update_attribute(:m_status,MaterialOrder::M_STATUS[:received])
+        content = "收货成功"
+      elsif order.m_status == MaterialOrder::M_STATUS[:received]
+        content = "订单已收货"
+      else
+        content = "收货失败"
+      end
+    end
+    render :json => {:status => 1,:content => content}.to_json
+  end
+
+  def pay_order
+    @order = nil
+    if params[:order_id]
+      @order = MaterialOrder.find_by_id params[:order_id]
+    end
+    if @order && @order.status == MaterialOrder::STATUS[:no_pay]
+      #支付方式
+      if params[:pay_type].to_i == 1   #支付宝
+        url = "/stores/#{params[:store_id]}/materials/alipay?f="+@order.price.to_s
+        render :json => {:status => -1,:pay_type => params[:pay_type].to_i,:pay_req => url}
+      elsif params[:pay_type].to_i == 3  #现金已支付
+        @order.update_attribute(:status, MaterialOrder::STATUS[:pay])
+        render :json => {:status => 0}
+      end
+    else
+      render :json => {:status => 0}
+    end
+
+  end
+
+  def update_notices
+    if params[:ids]
+      (params[:ids].split(",") || []).each do |id|
+        notice = Notice.find_by_id_and_store_id id.to_i,params[:store_id].to_i
+        if notice && notice.status == Notice::STATUS[:NORMAL]
+          notice.update_attribute(:status,Notice::STATUS[:INVALID])
+        end
+      end
+    end
+    render :json => {:status => 0}
+  end
+
 end
