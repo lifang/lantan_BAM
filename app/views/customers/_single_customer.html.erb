@@ -1,0 +1,20 @@
+<div class="data_body_title">
+  <div class="data_body_p">
+    <span>客户姓名：<%= @customer.name %></span>
+    <span>手机号码：<%= @customer.mobilephone %></span>
+    <span>其他联系方式：<%= @customer.other_way %></span>
+    <span>生日：<%= @customer.birthday.strftime("%Y-%m-%d") %></span>
+    <span>地址：<%= @customer.address %></span>
+    <span><button type="button" class="search_btn">编辑</button></span>
+  </div>
+  <ul class="data_body_ul">
+    <% @car_nums.each do |car| %>
+    <li>
+      <span>车牌号码：<%= car.num %></span>&nbsp;&nbsp;
+      <span>品牌：<%= car.b_name %>——<%= car.m_name %></span>&nbsp;&nbsp;
+      <span>购买年份：<%= car.buy_year %></span>
+      <span><button type="button" class="search_btn">编辑</button></span>
+    </li>
+    <% end %>
+  </ul>
+</div>

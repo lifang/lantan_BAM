@@ -42,11 +42,16 @@ class CustomersController < ApplicationController
   end
 
   def create
-    if params[:name] and params[:mobilephone]
-      Customer.create(:name => params[:name].strip, :mobilephone => params[:mobilephone].strip, 
-        :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
-        :address => params[:address], :status => Customer::STATUS[:NOMAL], 
-        :types => Customer::TYPES[:NORMAL], :is_vip => Customer::IS_VIP[:NORMAL])
+    if params[:new_name] and params[:mobilephone]
+      Customer.transaction do
+        customer = Customer.create(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
+          :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
+          :address => params[:address], :status => Customer::STATUS[:NOMAL],
+          :types => Customer::TYPES[:NORMAL], :is_vip => Customer::IS_VIP[:NORMAL])
+        car_num = CarNum.find_or_create_by_num(params[:new_car_num].strip)
+        CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
+        CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
+      end
     end
     redirect_to "/stores/#{params[:store_id]}/customers"
   end
@@ -91,13 +96,15 @@ class CustomersController < ApplicationController
   def show
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @orders = Order.paginate_by_sql(["select * from orders where status != ? and store_id = ? and customer_id = ?
-        order by created_at desc", Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id],
-      :per_page => 1, :page => params[:page])
-    @order_prods = OrderProdRelation.find_by_sql(["select opr.order_id, opr.pro_num, opr.price, p.name
-        from order_prod_relations opr left join products p on p.id = opr.product_id
-        where opr.order_id in (?)", @orders])
-
+    @car_nums = CarNum.find_by_sql(["select c.num, cb.name b_name, cm.name m_name, c.buy_year from car_nums c
+        left join car_models cm on cm.id = c.car_model_id
+        left join car_brands cb on cb.id = cm.car_brand_id
+        inner join customer_num_relations cr on cr.car_num_id = c.id
+        where cr.customer_id = ?", @customer.id])
+    @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 1, params[:page])
+    @product_hash = OrderProdRelation.order_products(@orders)
+    @order_pay_type = OrderPayType.order_pay_types(@orders)
+    
     @revisits = Revisit.paginate_by_sql(["select r.id r_id, r.created_at, r.types, r.content, r.answer, o.code, o.id o_id
           from revisits r left join revisit_order_relations ror
           on ror.revisit_id = r.id left join orders o on o.id = ror.order_id where o.store_id = ? and r.customer_id = ? ",
@@ -110,10 +117,39 @@ class CustomersController < ApplicationController
     
   end
 
+  def order_prods
+    @store = Store.find(params[:store_id].to_i)
+    @customer = Customer.find(params[:id].to_i)
+    @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 1, params[:page])
+    @product_hash = OrderProdRelation.order_products(@orders)
+    @order_pay_type = OrderPayType.order_pay_types(@orders)
+    respond_to do |format|
+      format.js
+    end
+  end
+  
+
   def get_car_brands
     respond_to do |format|
       format.json {
         render :json => CarBrand.get_brand_by_capital(params[:capital_id].to_i)
+      }
+    end
+  end
+
+  def get_car_models
+    respond_to do |format|
+      format.json {
+        render :json => CarModel.get_model_by_brand(params[:brand_id].to_i)
+      }
+    end
+  end
+
+  def check_car_num
+    car_num = CarNum.find_by_num(params[:car_num].strip)
+    respond_to do |format|
+      format.json {
+        render :json => {:is_has => car_num.nil?}
       }
     end
   end

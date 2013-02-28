@@ -6,7 +6,7 @@
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item">
-            <label>车牌号：</label><input name="car_num" id="car_num" type="text" value="" />
+            <label>车牌号：</label><input name="new_car_num" id="new_car_num" type="text" value="" onblur="check_car_num()" />
           </div>
           <div class="item">
             <label>品牌型号：</label>
@@ -16,7 +16,7 @@
                 <option value="<%= ca.id %>"><%= ca.name %></option>
               <% end %>
             </select>&nbsp;
-            <select class="ymd" id="car_brands">
+            <select class="ymd" id="car_brands" onchange="choose_model()">
               <option value="">--</option>
             </select>
             <select class="ymd" id="car_models">
@@ -24,7 +24,7 @@
             </select>
           </div>
           <div class="item">
-            <label>姓名：</label><input type="text" id="name" name="name" value=""/>
+            <label>姓名：</label><input type="text" id="new_name" name="new_name" value=""/>
           </div>
           <div class="item">
             <label>性别：</label>
@@ -45,11 +45,6 @@
           </div>
         </div>
         <div class="btn_box"><button type="submit" class="confirm_btn">确定</button></div>
-        <div class="suggest">
-          <a href="#">苏A1266</a>
-          <a href="#">苏A1266</a>
-          <a href="#">苏A1266</a>
-        </div>
       </div>
     </div>
   <% end %>

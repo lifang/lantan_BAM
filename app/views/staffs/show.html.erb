@@ -24,9 +24,17 @@
               <div class="data_body">
                    <div>
                         <div class="search">
-                             <div><label>时间：</label><input name="" type="text" id="start_at"> 到 <input name="" type="text" id="end_at"></div>
-                             <div><label>统计方式：<input name="" type="radio" value="">日&nbsp;&nbsp;<input name="" type="radio" value="">周&nbsp;&nbsp;<input name="" type="radio" value="">月</label></div>
-                             <div><button class="search_btn">查询</button></div>
+                             <input type="hidden" id="staff_id" value="<%= @staff.id %>"/>
+                             <input type="hidden" id="store_id" value="<%= @store.id %>"/>
+                             <div><label>时间：</label>
+                               <input name="" type="text" id="start_at"/> 到 <input name="" type="text" id="end_at"/>
+                             </div>
+                             <div><label>统计方式：
+                                 <input name="cal_style" class="cal_style" type="radio" value="day" checked/>日&nbsp;&nbsp;
+                                 <input name="cal_style" class="cal_style" type="radio" value="week"/>周&nbsp;&nbsp;
+                                 <input name="cal_style" class="cal_style" type="radio" value="month"/>月</label>
+                             </div>
+                             <div><button class="search_btn" id="search_work_record">查询</button></div>
                         </div>
                         <div id="work_record_tab">
                         <%= render :partial => "work_record_tab" %>
@@ -78,7 +86,7 @@
 <div class="mask"></div>
 
 <div class="tab_popup" style="display:none;" id="manage_score_area">
-  <%= form_for(@current_month_score, :url => store_month_score_path(@store, @current_month_score), :html => {:method => :put, :multipart => true}) do |f| %>
+  <%= form_for(@current_month_score, :url => store_month_score_path(@store, @current_month_score), :html => {:method => :put, "data-type" => 'script'}, :remote => true) do |f| %>
     <div class="popup_box">
          <h1>店长打分<a href="javascript:void(0)" class="close">关闭</a></h1>
          <div class="popup_body">
@@ -92,6 +100,7 @@
                       <label>理由：</label>
                       <%= f.text_area :reason, :cols => "", :rows => "", :class => "width_textarea" %>
                   </div>
+                  <input type="hidden" name="month_score[is_syss_update]" value="1"/>
                   <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
               </div>
         </div>

@@ -1,5 +1,5 @@
 function check_customer() {
-    if ($.trim($("#name").val()) == "") {
+    if ($.trim($("#new_name").val()) == "") {
         alert("请输入客户姓名");
         return false;
     }
@@ -11,12 +11,13 @@ function check_customer() {
 }
 
 function customer_mark(customer_id) {
-    $("#mark_div").show();
+    popup("#mark_div");
     $("#c_customer_id").val(customer_id);
+    $("#mark").val($("#mark_" + customer_id).html());
 }
 
 function single_send_message(customer_id) {
-    $("#message_div").show();
+    popup("#message_div");
     $("#m_customer_id").val(customer_id);
 }
 
@@ -48,24 +49,60 @@ function hide_complaint() {
 
 function choose_brand() {
     if ($.trim($("#capital_div").val()) != "") {
-        alert($.trim($("#capital_div").val()));
         $.ajax({
             async:true,
             dataType:'json',
-            data:{
-                capital_id : $("#capital_div").val()
-            },
+            data:{ capital_id : $("#capital_div").val() },
             url:"/customers/get_car_brands",
             type:'post',
             success : function(data) {
-                alert(data);
                 if (data != null && data != undefined) {
+                        $("#car_brands option").remove();
+                        $("#car_brands").append("<option value=''>--</option>");
                     for (var i=0; i<data.length; i++) {
-                        
+                        $("#car_brands").append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
+                    }
+                }
+            }
+        })
+    }   
+}
+
+function choose_model() {
+    if ($.trim($("#car_brands").val()) != "") {
+        $.ajax({
+            async:true,
+            dataType:'json',
+            data:{ brand_id : $("#car_brands").val() },
+            url:"/customers/get_car_models",
+            type:'post',
+            success : function(data) {
+                if (data != null && data != undefined) {
+                        $("#car_models option").remove();
+                        $("#car_models").append("<option value=''>--</option>");
+                    for (var i=0; i<data.length; i++) {
+                        $("#car_models").append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
                     }
                 }
             }
         })
     }
-    
+}
+
+function check_car_num() {
+    if ($.trim($("#new_car_num").val()) != "") {
+        $.ajax({
+            async:true,
+            dataType:'json',
+            data:{ car_num : $("#new_car_num").val() },
+            url:"/customers/check_car_num",
+            type:'post',
+            success : function(data) {
+                if (data.is_has == false) {
+                    alert("您输入的车牌号码系统中已经存在，是否更改到当前客户名下？");
+                }                
+            }
+        })
+        return false;
+    }
 }

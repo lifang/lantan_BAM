@@ -1,11 +1,12 @@
 <!doctype html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>员工管理--员工一览</title>
     <%= stylesheet_link_tag    "application" %>
     <%= javascript_include_tag "application", "jquery-ui-1.10.0.custom.min", "jquery.ui.datepicker-zh-CN", "staffs" %>
-
+    <%= csrf_meta_tags %>
+    
 
     <!--[if IE 6]>
     <script src="js/DD_belatedPNG_0.0.8a-min.js"></script>
@@ -23,8 +24,8 @@
                  <div class="clear"></div>
                  <div class="nav">
                       <ul>
-                          <li><%= link_to "员工一览", store_staffs_path(@store), :class => "hover" %></li>
-                          <li><a href="#">本月工资</a></li>
+                          <li><%= link_to "员工一览", store_staffs_path(@store), :class => controller_name == "current_month_salaries" ? "" : "hover" %></li>
+                          <li><%= link_to "本月工资", store_current_month_salaries_path(@store), :class => controller_name == "current_month_salaries" ? "hover" : "" %></li>
                       </ul>
                  </div>
                  <div class="back"><a href="#" title="返回">Back</a>员工管理</div>

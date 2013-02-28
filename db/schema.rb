@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130216072008) do
+ActiveRecord::Schema.define(:version => 20130228015440) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -50,12 +50,17 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.integer "car_model_id"
   end
 
+  create_table "cities", :force => true do |t|
+    t.string  "name"
+    t.integer "parent_id"
+  end
+
   create_table "complaints", :force => true do |t|
     t.integer  "order_id"
     t.text     "reason"
     t.text     "suggstion"
     t.text     "remark"
-    t.boolean  "status"
+    t.boolean  "status",       :default => false
     t.integer  "types"
     t.integer  "staff_id_1"
     t.integer  "staff_id_2"
@@ -79,9 +84,9 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.boolean  "sex"
     t.datetime "birthday"
     t.string   "address"
-    t.boolean  "is_vip"
+    t.boolean  "is_vip",      :default => false
     t.string   "mark"
-    t.boolean  "status"
+    t.boolean  "status",      :default => false
     t.integer  "types"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -140,6 +145,7 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.string   "carrier"
     t.integer  "store_id"
     t.string   "remark"
+    t.integer  "sale_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -154,6 +160,8 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "remark",     :limit => 1000
+    t.integer  "check_num",                  :default => 0
   end
 
   create_table "menus", :force => true do |t|
@@ -163,7 +171,7 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
   create_table "message_records", :force => true do |t|
     t.string   "content"
     t.datetime "send_at"
-    t.boolean  "status"
+    t.boolean  "status",     :default => false
     t.integer  "store_id"
     t.datetime "created_at"
   end
@@ -301,7 +309,7 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
   end
 
   create_table "revisits", :force => true do |t|
-    t.integer  "user_id"
+    t.integer  "customer_id"
     t.integer  "types"
     t.string   "title"
     t.string   "answer"
@@ -334,6 +342,7 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.integer  "staff_id"
     t.integer  "satisfied_perc"
     t.datetime "created_at"
+    t.boolean  "status",         :default => false
   end
 
   create_table "salary_details", :force => true do |t|
@@ -419,7 +428,7 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "encrypt_password"
+    t.string   "encrypted_password"
     t.string   "username"
     t.string   "salt"
   end
@@ -458,6 +467,8 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.float    "account"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "city_id"
+    t.integer  "status"
   end
 
   create_table "suppliers", :force => true do |t|
@@ -466,6 +477,8 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.string   "phone"
     t.string   "address"
     t.string   "contact"
+    t.integer  "store_id"
+    t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

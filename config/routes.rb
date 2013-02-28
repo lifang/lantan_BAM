@@ -62,6 +62,8 @@ LantanBAM::Application.routes.draw do
     resources :violation_rewards
     resources :trains
     resources :month_scores
+    resources :salaries
+    resources :current_month_salaries
 
     resources :suppliers do
       member do
@@ -76,6 +78,9 @@ LantanBAM::Application.routes.draw do
       collection do
         post "search", "customer_mark", "single_send_message"
         get "search_list"
+      end
+      member do
+        get "order_prods"
       end
     end
     resources :revisits do
@@ -101,7 +106,7 @@ LantanBAM::Application.routes.draw do
 
   resources :customers do
     collection do
-      post "get_car_brands"
+      post "get_car_brands", "get_car_models", "check_car_num"
     end
   end
 

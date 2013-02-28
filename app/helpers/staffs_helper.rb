@@ -2,7 +2,7 @@
 module StaffsHelper
   
   def current_month_access_result(month_score)
-    if month_score.manage_score.nil?
+    if month_score.manage_score.nil? || month_score.manage_score == 0
       access_result = "未评估"
     else
       total = month_score.manage_score.to_i + month_score.sys_score.to_i
