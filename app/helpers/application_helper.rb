@@ -58,4 +58,21 @@ module ApplicationHelper
     end
     str
   end
+
+  def role_model relations,func_num,model_name
+    check = false
+    arr = []
+    (relations || []).each do |relation|
+      if relation && relation.model_name == model_name
+        arr << relation
+      end
+    end
+    (arr || []).each do |relation|
+      if relation && relation.num == func_num
+        check = true
+        break
+      end
+    end
+    check
+  end
 end

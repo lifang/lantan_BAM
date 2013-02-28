@@ -3,8 +3,8 @@ module Constant
   #权限
   ROLES = {
     #客户
-    :customer => {
-      :name => "客户",
+    :customers => {
+      :name => ["客户"],
       :show => ["查询、显示客户列表",1],
       :create => ["新建客户",2],
       :modify => ["删除客户",4],
@@ -15,8 +15,7 @@ module Constant
       :import => ["查看客户详细信息", 128]
     },
     #库存
-    :material => {
-        :name => "库存",
+    :materials => {
         :show => ["查看库存列表",1],
         :create => ["入库",2],
         :out => ["出库",4],
@@ -25,6 +24,9 @@ module Constant
         :supplier => ["查看供应商",32],
         :edit_supplier => ["编辑供应商",64],
         :print => ["打印库存清单", 128]
+    },
+    :staffs => {
+
     }
   }
 
