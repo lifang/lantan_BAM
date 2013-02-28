@@ -10,26 +10,31 @@ function remove_area(parent, close, cancel){
 
 $(document).ready(function(){
 
+    //创建员工
     $("#new_staff").click(function(){
         popup("#new_staff_area");
         return false;
     });
 
+    //创建违规
     $("#new_violation").click(function(){
         popup("#new_violation_area");
         return false;
     });
 
+    //创建奖励
     $("#new_reward").click(function(){
         popup("#new_reward_area");
         return false;
     });
 
+    //创建培训
     $("#new_train").click(function(){
         popup("#new_train_area");
         return false;
     });
 
+    //创建员工信息验证
     $("#new_staff_btn").click(function(){
        if($(this).parents('form').find("#staff_name").val() == ""){
            alert("名称不能为空!");
@@ -82,12 +87,14 @@ $(document).ready(function(){
        $(this).parents('form').submit();
     });
 
+    //取消按钮
     $(".cancel_btn").click(function(){
        $(".tab_popup").hide();
        $(".mask").hide();
        return false;
     });
 
+    //编辑员工页面
     $(".bz_btn").click(function(){
         var staff_id = $(this).attr("id");
         var store_id = $(this).attr("name");
@@ -104,11 +111,13 @@ $(document).ready(function(){
         return false;
     });
 
+    //店长打分页面
     $("#manage_score_btn").click(function(){
        popup("#manage_score_area");
        return false;
     });
 
+    //处理奖励
     $(".process_reward").click(function(){
        var store_id = $(this).attr("name");
        var id = $(this).attr("id");
@@ -125,6 +134,7 @@ $(document).ready(function(){
        return false;
     });
 
+    //处理违规
     $(".process_violation").click(function(){
        var store_id = $(this).attr("name");
        var id = $(this).attr("id");
@@ -141,6 +151,7 @@ $(document).ready(function(){
        return false;
     });
 
+    //ajax paginate
     $(".pageTurn a").live("click", function(){
        var params_string = $(this).attr("href").split("?")[1];
        var store_id = $("#store_id").val();
@@ -156,11 +167,13 @@ $(document).ready(function(){
        return false;
     });
 
+    //日期选择
     $("#train_start_at").datepicker({inline:true});
     $("#train_end_at").datepicker({inline:true});
     $("#start_at").datepicker({inline:true});
     $("#end_at").datepicker({inline:true});
 
+    //查询工作记录
     $("#search_work_record").click(function(){
        var start_at = $(this).parents('.search').find("#start_at").val();
        var end_at = $(this).parents('.search').find("#end_at").val();
