@@ -5,7 +5,7 @@ class CreateMaterialOrders < ActiveRecord::Migration
       t.string :code    #订单号
       t.integer :supplier_id  #供货商编号
       t.integer :supplier_type  #供货类型
-      t.boolean :status      #
+      t.integer :status      #
       t.integer :staff_id
       t.float :price
       t.datetime :arrival_at   #到达日期
@@ -14,6 +14,7 @@ class CreateMaterialOrders < ActiveRecord::Migration
       t.integer :store_id
       t.string :remark
       t.integer :sale_id #活动代码对应的活动
+      t.integer :m_status #物流订单状态
 
       t.timestamps
     end

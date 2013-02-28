@@ -1,27 +1,5 @@
 // Place all the behaviors and hooks related to the matching controller here.
 // All this logic will automatically be available in application.js.
-function center_popup(t){
-    var doc_height = $(document).height();
-    var doc_width = $(document).width();
-    //var win_height = $(window).height();
-    //var win_width = $(window).width();
-
-    var layer_height = $(t).height();
-    var layer_width = $(t).width();
-
-    //tab
-
-    $(".mask").css({
-        display:'block',
-        height:doc_height
-    });
-    //$(t).css('top',(doc_height-layer_height)/2);
-    $(t).css('top',"50px");
-    $(t).css('left',(doc_width-layer_width)/2);
-    $(t).css('display','block');
-    return false;
-}
-
 function remove_area(parent, close, cancel){
     $(close, cancel).bind('click',function(){
         $(".mask").hide();
@@ -158,6 +136,46 @@ $(document).ready(function(){
             data : {
                 id : id,
                 store_id : store_id
+            }
+        });
+       return false;
+    });
+
+    $(".pageTurn a").live("click", function(){
+       var href_string = $(this).attr("href");
+       var tab = $(this).parents('.pageTurn').parent().attr("id");
+       $.ajax({
+            async:true,
+            type : 'get',
+            dataType : 'script',
+            url : href_string,
+            data : {tab:tab}
+        });
+       return false;
+    });
+
+    $("#train_start_at").datepicker({inline:true});
+    $("#train_end_at").datepicker({inline:true});
+    $("#start_at").datepicker({inline:true});
+    $("#end_at").datepicker({inline:true});
+
+    $("#search_work_record").click(function(){
+       var start_at = $(this).parents('.search').find("#start_at").val();
+       var end_at = $(this).parents('.search').find("#end_at").val();
+       var staff_id = $(this).parents('.search').find("#staff_id").val();
+       var store_id = $(this).parents('.search').find("#store_id").val();
+       var tab = "work_record_tab";
+       var cal_style = $(".cal_style:checked").val();
+       $.ajax({
+            async:true,
+            type : 'get',
+            dataType : 'script',
+            url : "/stores/"+ store_id + "/staffs/" + staff_id,
+            data : {
+                start_at : start_at,
+                end_at : end_at,
+                tab : tab,
+                cal_style : cal_style
             }
         });
        return false;

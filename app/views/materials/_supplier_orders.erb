@@ -2,7 +2,8 @@
     $(document).ready(function(){
         $(".pageTurn a").unbind("click");
         $(".pageTurn a").bind("click", function() {
-            var url = this.href + "&status="+$("#select_s_order").val()+"&from="+$("#date03").val()+"&to="+$("#date04").val();
+            var url = this.href + "&m_status="+$("#select_s_order").val()+"&from="+$("#date03").val()+"&to="+$("#date04").val();
+            url += "&status="+$("#s_pay_status").val();
             $.ajax({
                 async:true,
                 url:url,
@@ -57,13 +58,16 @@
         <td><%= record.price %></td>
         <td><%= record.created_at.strftime("%Y-%m-%d") if record.created_at %></td>
         <td><%= record.arrival_at.strftime("%Y-%m-%d") if record.arrival_at %></td>
+        <td><%= material_status record.m_status,1 %></td>
         <td><%= material_status record.status,0 %></td>
-        <td><%= material_status record.status,1 %></td>
         <td>
-          <% if record.status == MaterialOrder::STATUS[:send_not_pay] || record.status == MaterialOrder::STATUS[:no_send_no_pay] %>
-              <a href="javascript:void(0)">付款</a>
+          <% if record.status == MaterialOrder::STATUS[:no_pay] %>
+              <a href="javascript:void(0)" onclick="pay_order(<%= record.id %>,<%= params[:store_id] %>)">付款</a>
           <% end %>
-          <% if record.status == MaterialOrder::STATUS[:no_send_no_pay] %>
+          <% if record.m_status == MaterialOrder::M_STATUS[:send] %>
+              <a href="javascript:void(0)" onclick="receive_order(<%= record.id %>,1,<%= params[:store_id] %>)">已收货</a>
+          <% end %>
+          <% if record.status == MaterialOrder::STATUS[:no_pay] && record.m_status == MaterialOrder::M_STATUS[:no_send] %>
               <a href="javascript:void(0)" onclick="cancel_order(<%= record.id %>,1,<%= params[:store_id] %>)">取消</a>
           <% end %>
           <a href="javascript:void(0)" onclick="add_order_remark('<%= record.id %>','<%= record.remark %>')">备注</a>

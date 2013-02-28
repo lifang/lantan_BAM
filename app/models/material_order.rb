@@ -6,7 +6,8 @@ class MaterialOrder < ActiveRecord::Base
   has_many  :m_order_types
   belongs_to :supplier
 
-  STATUS = {:pay_and_send => 0, :pay_not_send => 1, :send_not_pay => 2, :no_send_no_pay => 3, :cancel => 4}
+  STATUS = {:no_pay => 0, :pay => 1, :cancel => 4}
+  M_STATUS = {:no_send => 0,:send => 1, :received => 2, :save_in => 3} #未发货--》已发货 --》已收货 --》已入库
   PAY_TYPES = {:CHARGE => 1,:LICENSE=>2, :CASH => 3, :STORE_CARD => 4 }
   PAY_TYPE_NAME = {1 => "订货付费",2=>"授权码", 3 => "现金", 4 => "门店账户扣款"}
 
@@ -36,7 +37,7 @@ class MaterialOrder < ActiveRecord::Base
                   :page => page, :per_page => per_page)
   end
 
-  def self.search_orders store_id,from_date, to_date, status, supplier_id,page,per_page
+  def self.search_orders store_id,from_date, to_date, status, supplier_id,page,per_page,m_status
     str = "mo.store_id = #{store_id} "
     if supplier_id == 0
       str += " and mo.supplier_id = 0 "
@@ -45,13 +46,20 @@ class MaterialOrder < ActiveRecord::Base
     end
     if status
       if status == 0
-        str += " and (mo.status=#{STATUS[:send_not_pay]} or mo.status=#{STATUS[:no_send_no_pay]}) "
+        str += " and mo.status=#{STATUS[:no_pay]} "
       elsif status == 1
-        str += " and (mo.status=#{STATUS[:pay_and_send]} or mo.status=#{STATUS[:pay_not_send]}) "
-      elsif status == 2
-        str += " and (mo.status=#{STATUS[:no_send_no_pay]} or mo.status=#{STATUS[:pay_not_send]}) "
-      elsif status == 3
-        str += " and (mo.status=#{STATUS[:send_not_pay]} or mo.status=#{STATUS[:pay_and_send]}) "
+        str += " and mo.status=#{STATUS[:pay]} "
+      end
+    end
+    if m_status
+      if m_status == 0
+        str += " and mo.m_status=#{M_STATUS[:no_send]} "
+      elsif m_status == 1
+        str += " and mo.m_status=#{M_STATUS[:send]} "
+      elsif m_status == 2
+        str += " and mo.m_status=#{M_STATUS[:received]} "
+      elsif m_status == 3
+        str += " and mo.m_status=#{M_STATUS[:sav_in]} "
       end
     end
     if from_date && from_date.length > 0

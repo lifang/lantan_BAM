@@ -1,4 +1,4 @@
-<div class="message">XXX订单已经到货，但尚未入库<a href="#">点击查看</a><span class="x">Close</span></div>
+<%= render :partial => "notice_panel" %>
 <div class="data_box">
   <div class="data_menu">
     <%= link_to_function "入库","ruku()", :class => "rk_btn" %>
@@ -92,8 +92,8 @@
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
               <thead>
               <tr class="hbg">
-                <td><span class="sort_u">物料名称</span></td>
-                <td><span class="sort_d">物料类别</span></td>
+                <td>物料名称</td>
+                <td>物料类别</td>
                 <td>库存量（个）</td>
                 <td>出库量（个）</td>
                 <td>操作</td>
@@ -122,6 +122,21 @@
       </div>
       <div class="btn_box"><%= button_to_function "确定","save_order_remark()",{:class => "confirm_btn"} %><button class="cancel_btn">取消</button></div>
     </div>
+  </div>
+</div>
+<div class="tab_popup" id="zhifu_tab">
+  <div class="popup_box">
+    <h1>付款<a href="#" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <div class="popup_body_area">
+      <div class="fukuan_btn">
+        <%= hidden_field_tag "pay_order_id","0" %>
+        <button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order(3,<%= params[:store_id] %>)}">现金</button>
+        <span class="zfb" onclick="pay_material_order(1,<%= params[:store_id] %>)"></span>
+      </div>
+      <div class="clear"></div>
+    </div>
+      </div>
   </div>
 </div>
 <%= render :partial => "dinghuo_panel" %>

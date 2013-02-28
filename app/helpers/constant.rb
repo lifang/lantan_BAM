@@ -13,6 +13,18 @@ module Constant
       :stop => ["群发短信",32],
       :attend => ["编辑客户",64],
       :import => ["查看客户详细信息", 128]
+    },
+    #库存
+    :material => {
+        :name => "库存",
+        :show => ["查看库存列表",1],
+        :create => ["入库",2],
+        :out => ["出库",4],
+        :dinghuo =>["订货",8],
+        :add_supplier => ["添加供应商",16],
+        :supplier => ["查看供应商",32],
+        :edit_supplier => ["编辑供应商",64],
+        :print => ["打印库存清单", 128]
     }
   }
 
