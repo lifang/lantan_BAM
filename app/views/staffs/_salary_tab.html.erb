@@ -17,7 +17,7 @@
             <td><%= salary.reward_num %></td>
             <td><%= salary.deduct_num %></td>
             <td><%= salary.total %></td>
-            <td><a href="#">删除</a></td>
+            <td><%= link_to "删除", "javascript:void(0)", :class => "delete_salary", :id => salary.id, :name => @store.id %></td>
           </tr>
         <% end %>
           <tr>

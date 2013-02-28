@@ -57,7 +57,7 @@ class StaffsController < ApplicationController
 
     @month_scores = @staff.month_scores.paginate(:page => params[:page] ||= 1, :per_page => 1)
 
-    @salaries = @staff.salaries.paginate(:page => params[:page] ||= 1, :per_page => 1)
+    @salaries = @staff.salaries.where("status = false").paginate(:page => params[:page] ||= 1, :per_page => 1)
 
     current_month = Time.now().strftime("%Y").to_s << Time.now().strftime("%m")
 

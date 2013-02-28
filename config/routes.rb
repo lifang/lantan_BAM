@@ -62,6 +62,7 @@ LantanBAM::Application.routes.draw do
     resources :violation_rewards
     resources :trains
     resources :month_scores
+    resources :salaries
 
     resources :suppliers do
       member do

@@ -142,13 +142,15 @@ $(document).ready(function(){
     });
 
     $(".pageTurn a").live("click", function(){
-       var href_string = $(this).attr("href");
+       var params_string = $(this).attr("href").split("?")[1];
+       var store_id = $("#store_id").val();
+       var staff_id = $("#staff_id").val();
        var tab = $(this).parents('.pageTurn').parent().attr("id");
        $.ajax({
             async:true,
             type : 'get',
             dataType : 'script',
-            url : href_string,
+            url : "/stores/" + store_id + "/staffs/" + staff_id + "?" + params_string,
             data : {tab:tab}
         });
        return false;
@@ -178,6 +180,22 @@ $(document).ready(function(){
                 cal_style : cal_style
             }
         });
+       return false;
+    });
+
+    //删除工资记录
+    $(".delete_salary").live("click", function(){
+       if(confirm("确认删除？")){
+           var id = $(this).attr("id");
+           var store_id = $(this).attr("name");
+           $.ajax({
+                async:true,
+                type : 'DELETE',
+                dataType : 'script',
+                url : "/stores/"+ store_id +"/salaries/"+ id,
+                data : {}
+            });
+       }
        return false;
     });
 
