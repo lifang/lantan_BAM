@@ -33,7 +33,7 @@ class Staff < ActiveRecord::Base
   N_SEX = {0 => "男", 1 => "女"}
   
 
-  attr_accessor :password
+  attr_accessor:password
   validates:password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
 
 

@@ -1,0 +1,43 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <thead>
+    <tr class="hbg">
+      <td>订单号</td>
+      <td>消费日期</td>
+      <td>消费项目</td>
+      <td>总价（元）</td>
+      <td>付款方式</td>
+      <td>是否满意</td>
+      <td>是否开票</td>
+      <td>操作</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td><%= order.code %></td>
+        <td><%= order.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+        <td>
+          <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+            <tr class="fws">
+              <td>名称</td>
+              <td>单价</td>
+              <td>数量</td>
+            </tr>
+            <tr>
+              <td><%= @product_hash[order.id].name if @product_hash[order.id] %></td>
+              <td><%= @product_hash[order.id].price if @product_hash[order.id] %></td>
+              <td><%= @product_hash[order.id].pro_num if @product_hash[order.id] %></td>
+            </tr>
+          </table>
+        </td>
+        <td><%= order.price %></td>
+        <td><%= @order_pay_type[order.id] %></td>
+        <td><%= OrderProdRelation::IS_PLEASED_NAME[order.is_pleased] %></td>
+        <td><%= order.is_billing ? "是" : "否" %></td>
+        <td><a href="#">回访</a></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<%=  will_paginate_remote(@orders , "",
+  {:url => "/stores/#{@store.id}/customers/#{@customer.id}/order_prods"}) %>

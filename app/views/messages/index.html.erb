@@ -14,7 +14,7 @@
             <option value="-1" <% if session[:is_vip].nil? or session[:is_vip] == "-1" %>selected<% end %>>全部</option>
             <option value="<%= Customer::IS_VIP[:VIP] %>" <% if session[:is_vip] == "1" %>selected<% end %>>是</option>
             <option value="<%= Customer::IS_VIP[:NORMAL] %>" <% if session[:is_vip] == "0" %>selected<% end %>>否</option>
-          </select>&nbsp;
+          </select>
           <select id="is_visited" name="is_visited">
             <option value="-1" <% if session[:is_visited].nil? or session[:is_visited] == "-1" %>selected<% end %>>全部</option>
             <option value="<%= Order::IS_VISITED[:YES] %>" <% if session[:is_visited] == "1" %>selected<% end %>>已回访客户</option>
@@ -31,7 +31,7 @@
           <input type="text" name="price" id="price" class="input_s" value="<%= session[:price] ? session[:price] : 500 %>"/>&nbsp;元
         </div>
         <div><input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
-          <button type="submit">查询</button>
+          <button type="submit" class="search_btn">查询</button>
         </div>
       <% end %>
     </div>

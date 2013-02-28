@@ -8,7 +8,7 @@ class CreateOrders < ActiveRecord::Migration
       t.datetime :ended_at
       t.float :price
       t.boolean :is_visited  #是否回访
-      t.boolean :is_pleased  #是否满意
+      t.integer :is_pleased  #是否满意
       t.boolean :is_billing  #是否要发票
       t.integer :front_staff_id  #前台
       t.integer :cons_staff_id_1  #施工甲编号
