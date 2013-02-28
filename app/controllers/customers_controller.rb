@@ -105,16 +105,8 @@ class CustomersController < ApplicationController
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
     
-    @revisits = Revisit.paginate_by_sql(["select r.id r_id, r.created_at, r.types, r.content, r.answer, o.code, o.id o_id
-          from revisits r left join revisit_order_relations ror
-          on ror.revisit_id = r.id left join orders o on o.id = ror.order_id where o.store_id = ? and r.customer_id = ? ",
-        params[:store_id].to_i, @customer.id], :per_page => 1, :page => params[:page])
-
-    @complaints = Complaint.paginate_by_sql(["select c.created_at, c.reason, c.suggstion, c.types, c.status,
-          c.staff_id_1, c.staff_id_2, o.code from complaints c left join orders o on o.id = c.order_id
-          where c.store_id = ? and c.customer_id = ? ", params[:store_id].to_i, @customer.id],
-      :per_page => 1, :page => params[:page])
-    
+    @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, 1, params[:page])
+    @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, 1, params[:page])    
   end
 
   def order_prods
@@ -123,6 +115,24 @@ class CustomersController < ApplicationController
     @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 1, params[:page])
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
+    respond_to do |format|
+      format.js
+    end
+  end
+
+  def revisits
+    @store = Store.find(params[:store_id].to_i)
+    @customer = Customer.find(params[:id].to_i)
+    @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, 1, params[:page])
+    respond_to do |format|
+      format.js
+    end
+  end
+
+  def complaints
+    @store = Store.find(params[:store_id].to_i)
+    @customer = Customer.find(params[:id].to_i)
+    @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, 1, params[:page])
     respond_to do |format|
       format.js
     end

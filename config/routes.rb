@@ -78,7 +78,7 @@ LantanBAM::Application.routes.draw do
         get "search_list"
       end
       member do
-        get "order_prods"
+        get "order_prods", "revisits", "complaints"
       end
     end
     resources :revisits do
