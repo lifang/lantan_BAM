@@ -91,7 +91,12 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-    resources :roles
+    resources :roles do
+      collection do
+        get "staff"
+        post "set_role","reset_role"
+      end
+    end
   end
 
   resources :customers do
