@@ -28,9 +28,21 @@ class ViolationRewardsController < ApplicationController
   end
 
   def update
-    @violation_reward = ViolationReward.find_by_id(params[:id])
-    @violation_reward.update_attributes(params[:violation_reward]) if @violation_reward
-    redirect_to store_staff_path(@store, @violation_reward.staff_id)
+    violation_reward = ViolationReward.find_by_id(params[:id])
+    violation_reward.update_attributes(params[:violation_reward]) if violation_reward
+
+    if violation_reward.types
+      @rewards = violation_reward.staff.violation_rewards.where("types = true").
+                paginate(:page => params[:page] ||= 1, :per_page => 1)
+    else
+      @violations = violation_reward.staff.violation_rewards.where("types = false").
+                paginate(:page => params[:page] ||= 1, :per_page => 1)
+    end
+
+
+    respond_to do |format|
+      format.js
+    end
   end
 
   private

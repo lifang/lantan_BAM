@@ -1,0 +1,8 @@
+$(".mask").hide();
+$("#process").html('');
+<% if !@rewards.nil? %>
+  $("#reward_tab").html('<%= escape_javascript(render :partial => '/staffs/reward_tab') %>');
+<% end %>
+<% if !@violations.nil? %>
+  $("#violation_tab").html('<%= escape_javascript(render :partial => '/staffs/violation_tab') %>');
+<% end %>
