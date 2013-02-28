@@ -281,7 +281,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 .search select { float: left; }
 .search select.select_marginRight { margin-right: 10px;}
-.input[type="button"].search_btn, .search_btn {
+.input[type="button"].search_btn, .search_btn, .compile_btn {
     height: 24x;
 	line-height: 24px;
 	text-align: center;
