@@ -86,7 +86,7 @@
 <div class="mask"></div>
 
 <div class="tab_popup" style="display:none;" id="manage_score_area">
-  <%= form_for(@current_month_score, :url => store_month_score_path(@store, @current_month_score), :html => {:method => :put}, :remote => true) do |f| %>
+  <%= form_for(@current_month_score, :url => store_month_score_path(@store, @current_month_score), :html => {:method => :put, "data-type" => 'script'}, :remote => true) do |f| %>
     <div class="popup_box">
          <h1>店长打分<a href="javascript:void(0)" class="close">关闭</a></h1>
          <div class="popup_body">
@@ -100,6 +100,7 @@
                       <label>理由：</label>
                       <%= f.text_area :reason, :cols => "", :rows => "", :class => "width_textarea" %>
                   </div>
+                  <input type="hidden" name="month_score[is_syss_update]" value="1"/>
                   <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
               </div>
         </div>
