@@ -16,6 +16,9 @@ module Constant
     }
   }
 
+  #上传图片的比例
+  PIC_SIZE=[50,100,148,300,700]
+
   #角色
   SYS_ADMIN = "1"  #系统管理员
   BOSS = "2" #老板

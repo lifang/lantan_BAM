@@ -8,15 +8,24 @@
   <label>全国促销价：</label><input name="sale_price" id="sale_price" type="text" value="<%= @product.sale_price %>" />
 </div>
 <div class="item">
-  <label>类别：</label><select  id="sale_types" name="sale_types">
+  <label>类别：</label><select  id="prod_types" name="prod_types">
     <% Product::PRODUCT_TYPES.select {|k,v| k < Product::PRODUCT_END}.each do |key,value| %>
       <option value="<%= key %>" <%if @product.types==key%> selected<%end%> ><%= value %></option>
     <% end %>
   </select>
 </div>
-<div class="item">
-  <label>配图：</label><input type=file name=j style="display: none;"  onchange="ye.value=value" />
-  <input name=ye type="text" class="file"  id="sale_img" /><input type="button" class="file_btn" value="浏览" onclick=j.click()  />
+<div class="seeProDiv">
+  <div class="seeProDiv_l">配图：</div>
+  <div class="seeProDiv_rWidth">
+    <% if @img_urls %>
+      <ul class="seeProPic">
+        <%@img_urls.each do |url|%>
+          <li><img src="<%=url.nil? ? "" : url.gsub("img#{@product.id}","img#{@product.id}_50") %>" /></li>
+        <%end%>
+      </ul>
+    <% end %>
+    <a href="javascript:void(0)" class="compile_btn" onclick="show_center('.add_img');">添加图片</a>
+  </div>
 </div>
 <div class="item">
   <label>规格：</label><input name="standard" id="standard" type="text" value="<%= @product.standard %>" />
@@ -26,7 +35,7 @@
 </div>
 <div class="item_textarea">
   <label>描述：</label><textarea  id="add_intro" cols="" rows="" class="width_textarea" style="width:480px"><%=@product.description  %></textarea>
-<input type="hidden" name="desc" id="desc" />
+  <input type="hidden" name="desc" id="desc" />
 </div>
 <script type="text/javascript">
   var serv_editor;

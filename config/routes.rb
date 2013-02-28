@@ -33,8 +33,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :package_cards do
       collection do
-        post "pcard_types","add_pcard"
-        get "sale_records"
+        post "pcard_types","add_pcard","search"
+        get "sale_records","search_list"
       end
       member do
         post "edit_pcard","update_pcard"

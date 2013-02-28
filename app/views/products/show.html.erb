@@ -1,0 +1,65 @@
+<%= stylesheet_link_tag    "jqzoom" %>
+<%= stylesheet_link_tag    "official_style" %>
+<%= javascript_include_tag "jquery.jqzoom.min" %>
+<div class="main">
+  <div class="box">
+    <div class="rightAera">
+      <div class="rightTitle">
+        <h1><a href="#">产品</a> &gt; 玻璃镀晶</h1>
+        <div class="pro_show">
+          <div class="bigImg jqzoom">
+            <img jqimg="<%= @prod.img_url.nil? ? "" : @prod.img_url.gsub("img#{@prod.id}","img#{@prod.id}")  %>"
+                 src="<%= @prod.img_url.nil? ? "" : @prod.img_url.gsub("img#{@prod.id}","img#{@prod.id}_300")  %>" /></div>
+          <div class="pic_show">
+            <ul>
+              <li><img src="images/lt.jpg" /></li>
+              <li><img src="images/lt01.jpg" /></li>
+              <li><img src="images/lt01.jpg" /></li>
+              <li><img src="images/lt01.jpg" /></li>
+              <li><img src="images/lt01.jpg" /></li>
+            </ul>
+          </div>
+        </div>
+        <div class="pro_price">
+          <h2>保时捷专用玻璃镀晶</h2>
+          <p>价格：<span>88</span>元</p>
+          <p>促销：VIP价格<span>66</span>元</p>
+        </div>
+        <div class="clear"></div>
+        <div class="pro_text">
+          <p>本品含有纳米级微晶填充材料，能迅速与玻璃表面凹陷部分进行有效填充修复，使之与玻璃表面联为一体，在车体玻璃外部形成一层纳米晶体层，呈现绝对平面，使雨滴以及污垢不能在玻璃表面附着，能有效预防雨天安全驾驶，使模糊的视线变得更加清晰，玻璃的抗氧化能力提高三到五倍，提高玻璃的使用寿命。当汽车以时速60公里左右在雨中行驶时，迎面的风会将水珠吹走，甚至不用雨刷也可保持清晰视野，并且雨越大，效果越明显。</p>
+          <img src="images/pro01.jpg" />
+          <p>对于汽车驾驶员朋友来说，雨中驾驶是件艰辛又缺乏安全感的事，雨刷再快视野仍然模糊，附着在两侧玻璃窗和倒后镜上的雨滴，令司机在前进或倒车时只能凭感觉走……。据有关部门统计，雨天及夜晚发生的交通事故约占交通事故总量的70%左右，造成人员生命及财产的巨大损失，可见雨天尤其夜间下雨天由于风挡玻璃视线不好已成为引发交通事故的重大隐患之一。提高雨天尤其是夜间下雨天风挡玻璃的视线是提高行车安全性及扼制交通事故发生的重要途径。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  //产品放大效果
+  $(document).ready(function(){
+    $(".jqzoom").jqueryzoom({
+      xzoom: 300, //zooming div default width(default width value is 200)
+      yzoom: 300, //zooming div default width(default height value is 200)
+      offset: 10, //zooming div default offset(default offset value is 10)
+      position: "right", //zooming div position(default position value is "right")
+      preload:1,
+      lens:1
+    });
+  });
+
+  //jqzoom产品小图点击替换大图效果
+  $(function(){
+    $('.pic_show li img').click(function(){
+      var imgSrc = $(this).attr('src');
+      var i = imgSrc.lastIndexOf('.');
+      var jpg = imgSrc.substring(i);
+      imgSrc = imgSrc.substring(0,i);
+      var imgSrc_big = imgSrc + '_big' + jpg;
+      var imgSrc_show = imgSrc + '_show' + jpg;
+      $('.bigImg img').attr('src',imgSrc_big);
+      $('.bigImg img').attr('jqimg',imgSrc_show);
+      //alert(0);
+    })
+  })
+</script>

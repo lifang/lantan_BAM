@@ -4,7 +4,7 @@ class ProductsController < ApplicationController
   layout 'sale'
 
   def index
-    @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,id from products where  store_id=#{params[:store_id]}
+    @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,id,store_id from products where  store_id in (#{params[:store_id]},1)
     and is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]} order by created_at desc", :page => params[:page], :per_page => 5)
   end  #产品列表页
 
@@ -20,13 +20,13 @@ class ProductsController < ApplicationController
 
 
   def prod_services
-    @services = Product.paginate_by_sql("select id, service_code code,name,types,base_price,cost_time,staff_level level1,staff_level_1
-    level2 from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}
+    @services = Product.paginate_by_sql("select id, service_code code,store_id,name,types,base_price,cost_time,staff_level level1,staff_level_1
+    level2 from products where store_id in (#{params[:store_id]},1) and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}
     order by created_at asc", :page => params[:page], :per_page => 5)
     @materials={}
     @services.each do |service|
       @materials[service.id]=Material.find_by_sql("select name,code,p.material_num num from materials m inner join prod_mat_relations p on
-        p.material_id=m.id  where p.product_id=#{service.id} and store_id=#{params[:store_id]}")
+        p.material_id=m.id  where p.product_id=#{service.id}")
     end
   end   #服务列表
 
@@ -38,10 +38,9 @@ class ProductsController < ApplicationController
   def set_product(types)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:desc],
       :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:intro], :store_id=>params[:store_id],
-      :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"),:img_url=>params[:img_url],
-      :service_code=>"#{types[0]}#{Sale.set_code(3)}"
+      :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3)}"
     }
-    product=Product.create(parms)
+    product =Product.create(parms)
     if types == "SERVICE"
       product.update_attributes({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
       params[:sale_prod].each do |key,value|
@@ -50,6 +49,7 @@ class ProductsController < ApplicationController
     else
       product.update_attributes({:standard=>params[:standard]})
     end
+    product.update_attributes(:img_url=>Sale.upload_img(params[:img_url],product.id,"#{types.downcase}_pics",product.store_id))  if params[:img_url]
   end   #为新建产品或者服务提供参数
 
   def edit_prod
@@ -73,6 +73,7 @@ class ProductsController < ApplicationController
     else
       parms.merge!({:standard=>params[:standard]})
     end
+    parms.merge!({:img_url=>Sale.upload_img(params[:img_url],product.id,"#{types.downcase}_pics",product.store_id)}) if params[:img_url]
     product.update_attributes(parms)
   end
 
@@ -84,7 +85,7 @@ class ProductsController < ApplicationController
   def show_serv
     @serv=Product.find(params[:id])
     @mats=Material.find_by_sql("select name from materials m inner join prod_mat_relations p on
-        p.material_id=m.id  where p.product_id=#{@serv.id} and store_id=#{@serv.store_id}").map(&:name).join("  ")
+        p.material_id=m.id  where p.product_id=#{@serv.id}").map(&:name).join("  ")
   end
 
   def add_serv
@@ -108,5 +109,9 @@ class ProductsController < ApplicationController
     sql += " and types=#{params[:mat_types]}" if params[:mat_types] != "" || params[:mat_types].length !=0
     sql += " and name like '%#{params[:mat_name]}%'" if params[:mat_name] != "" || params[:mat_name].length !=0
     @materials=Material.find_by_sql(sql)
+  end
+
+  def show
+    @prod=Product.find(params[:id])
   end
 end

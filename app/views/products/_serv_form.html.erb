@@ -42,11 +42,19 @@
       <% end %>
     </ul>
   </div>
-
 </div>
-<div class="item">
-  <label>配图：</label><input type=file name=j style="display: none;"  onchange="ye.value=value" />
-  <input name=ye type="text" class="file"  id="sale_img" value="<%= @service.img_url %>" /><input type="button" class="file_btn" value="浏览" onclick=j.click()  />
+<div class="seeProDiv">
+  <div class="seeProDiv_l">配图：</div>
+  <div class="seeProDiv_rWidth">
+    <% if @img_urls %>
+      <ul class="seeProPic">
+        <%@img_urls.each do |url|%>
+          <li><img src="<%=url.nil? ? "" : url.gsub("img#{@product.id}","img#{@product.id}_50") %>" /></li>
+        <%end%>
+      </ul>
+    <% end %>
+    <a href="javascript:void(0)" class="compile_btn" onclick="show_center('.add_img');">添加图片</a>
+  </div>
 </div>
 <div class="item_textarea">
   <label>简介：</label><textarea name="intro" id="intro" cols="" rows="" class="width_textarea"><%=@service.introduction  %></textarea>

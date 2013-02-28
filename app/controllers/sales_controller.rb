@@ -4,8 +4,8 @@ class SalesController < ApplicationController    #营销管理 -- 活动
 
   #活动列表
   def index
-    @sales=Sale.paginate_by_sql("select s.id,name,s.started_at,s.everycar_times,s.disc_time_types,s.ended_at,s.code,s.status,
-    count(o.id) reported_num from sales s left join orders o on s.id=o.sale_id where s.store_id=#{params[:store_id]} and
+    @sales=Sale.paginate_by_sql("select s.id,name,s.store_id,s.started_at,s.everycar_times,s.disc_time_types,s.ended_at,s.code,s.status,
+    count(o.id) reported_num from sales s left join orders o on s.id=o.sale_id where s.store_id in (#{params[:store_id]},1) and
     s.status !=#{Sale::STATUS[:DESTROY]}  group by s.id order by s.started_at desc ", :page => params[:page], :per_page => 5)
   end
 
@@ -25,7 +25,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]
     sale=Sale.create!(pams)
     if params[:img_url]
-      filename=Sale.upload_img(params[:img_url],sale.id)
+      filename=Sale.upload_img(params[:img_url],sale.id,"sale_pics",sale.store_id)
       sale.update_attributes(:img_url=>filename)
     end
     params[:sale_prod].each do |key,value|
@@ -62,11 +62,10 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   #更新活动
   def update_sale
     @sale=Sale.find(params[:id])
-    filename=Sale.upload_img(params[:img_url],@sale.id) if params[:img_url]
     pams={:name=>params[:name],:car_num=>params[:car_num],:everycar_times=>params[:every_car], :introduction=>params[:intro],
-      :discount=>params["disc_"+params[:discount]],:is_subsidy =>params[:subsidy], :disc_types=>params[:discount],:img_url=>filename,
-      :disc_time_types=>params[:disc_time]
+      :discount=>params["disc_"+params[:discount]],:is_subsidy =>params[:subsidy], :disc_types=>params[:discount],:disc_time_types=>params[:disc_time]
     }
+    pams.merge!({:img_url=>Sale.upload_img(params[:img_url],@sale.id,"sale_pics",@sale.store_id)}) if params[:img_url]
     pams.merge!({:started_at=>params[:started_at],:ended_at=>params[:ended_at]})  if params[:disc_time].to_i == Sale::DISC_TIME[:TIME]
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]
     @sale.update_attributes(pams)
@@ -85,5 +84,10 @@ class SalesController < ApplicationController    #营销管理 -- 活动
         render :json=>{:message=>"发布成功"}
       }
     end
+  end
+
+  #活动详细页
+  def show
+    @sale=Sale.find(params[:id])
   end
 end

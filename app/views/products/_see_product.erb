@@ -25,7 +25,7 @@
       </div>
       <div class="seeProDiv">
         <div class="seeProDiv_l">配图：</div>
-        <div class="seeProDiv_r"><img src="<%=@product.img_url  %>" /></div>
+        <div class="seeProDiv_r"><img src="<%= @product.img_url.nil? ? "" : @product.img_url.gsub("img#{@product.id}","img#{@product.id}_50")  %>" /></div>
       </div>
       <div class="seeProDiv">
         <div class="seeProDiv_l">产品规格：</div>

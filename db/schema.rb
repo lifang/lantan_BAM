@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130216072008) do
+ActiveRecord::Schema.define(:version => 20130228092408) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -48,6 +48,11 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
   create_table "car_nums", :force => true do |t|
     t.string  "num"
     t.integer "car_model_id"
+  end
+
+  create_table "cities", :force => true do |t|
+    t.string  "name"
+    t.integer "parent_id"
   end
 
   create_table "complaints", :force => true do |t|
@@ -95,6 +100,11 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.float    "current_price"
     t.integer  "store_id"
     t.datetime "created_at"
+  end
+
+  create_table "image_urls", :force => true do |t|
+    t.integer "product_id"
+    t.string  "img_url"
   end
 
   create_table "m_order_types", :force => true do |t|
@@ -154,6 +164,8 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "remark",     :limit => 1000
+    t.integer  "check_num"
   end
 
   create_table "menus", :force => true do |t|
@@ -458,6 +470,7 @@ ActiveRecord::Schema.define(:version => 20130216072008) do
     t.float    "account"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "city_id"
   end
 
   create_table "suppliers", :force => true do |t|
