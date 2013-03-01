@@ -2,9 +2,15 @@
     <div class="box">
          <div class="data_box">
               <div class="search">
-                   <div>统计时间：<select name="">
-                       <option value="<%= @current_month %>"><%= @current_month %></option>
+                   <div>
+                     <form action="/stores/<%= @store.id %>/current_month_salaries" method="get">
+                     统计时间：<select name="statistics_date" id="statistics_date_select">
+                       <option value="2013-03" <%= @statistics_date.eql?('2013-03') ? "selected" : "" %>>2013-03</option>
+                       <option value="2013-02" <%= @statistics_date.eql?('2013-02') ? "selected" : "" %>>2013-02</option>
+                       <option value="2013-01" <%= @statistics_date.eql?('2013-01') ? "selected" : "" %>>2013-01</option>
+                       <option value="2012-12" <%= @statistics_date.eql?('2012-12') ? "selected" : "" %>>2012-12</option>
                      </select>
+                     </form>
                    </div>
                 <div><button class="search_btn">导出EXCEL</button><%= link_to "导出EXCEL", url_for(:format => 'xls') %></div>
               </div>
@@ -29,7 +35,7 @@
                                   <td><%= staff.name %></td>
                                   <td><%= Staff::N_COMPANY[staff.position] %></td>
                                   <td><%= staff.base_salary.to_i %></td>
-                                  <% salary = staff.salaries.where("current_month = #{(@current_month.delete '-').to_i}").first %>
+                                  <% salary = staff.salaries.where("current_month = #{(@statistics_date.delete '-').to_i}").first %>
                                   <td><input name="" type="text" value="<%= salary.reward_num unless salary.nil? %>" class="data_input_s"/></td>
                                   <td><input name="" type="text" value="<%= salary.deduct_num unless salary.nil? %>" class="data_input_s"/></td>
                                   <td><%= salary.total.to_i unless salary.nil? %></td>

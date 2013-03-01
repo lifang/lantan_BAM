@@ -212,4 +212,10 @@ $(document).ready(function(){
        return false;
     });
 
+    //选择 月份 统计员工工资
+    $("#statistics_date_select").change(function(){
+       $(this).parents('form').submit();
+       return false;
+    });
+
 });

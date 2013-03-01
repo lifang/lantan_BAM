@@ -32,6 +32,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                              <% @salary_details.each do |salary_detail| %>
                                 <tr>
                                   <td>2012.12.12</td>
                                   <td rowspan="2">XXXXXXXXXX</td>
@@ -43,26 +44,9 @@
                                   <td>XXXXX</td>
                                   <td>XXXXXXXX</td>
                                 </tr>
-                                <tr>
-                                  <td>2012.12.12</td>
-                                  <td>XXXXXX</td>
-                                  <td>XXXXXXXX</td>
-                                  <td>XXXXXX</td>
-                                  <td>XXXXX</td>
-                                  <td>XXXXXXXX</td>
-                                </tr>
+                              <% end %>
                             </tbody>
                       </table>
-                       <div class="pageTurn">
-                           <a href="#" class="disabled">上一页</a>
-                           <a href="#" class="current">1</a>
-                           <a href="#?page=2">2</a>
-                           <a href="#?page=3">3</a>
-                           <a href="#?page=4">4</a>
-                           <a href="#?page=5">5</a>...<a href="#?page=199">199</a>
-                           <a href="#?page=200">200</a>
-                           <a href="#?page=2">下一页</a>
-                       </div>
                    </div>
 
               </div>

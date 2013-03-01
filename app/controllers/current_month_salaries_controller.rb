@@ -5,7 +5,8 @@ class CurrentMonthSalariesController < ApplicationController
   before_filter :get_store
 
   def index
-    @current_month = params[:current_month] ||= Time.now.strftime("%Y-%m")
+    @statistics_date = params[:statistics_date] ||= Time.now.strftime("%Y-%m")
+    
     @staffs = @store.staffs
 
     respond_to do |format|
@@ -13,7 +14,7 @@ class CurrentMonthSalariesController < ApplicationController
       format.xls do
         render :xls => @staffs,
                        :columns => [ :name ],
-                       :headers => %w[ Name ]
+                       :headers => %w[ 姓名 ]
       end
       #format.xls { send_data @staffs.to_xls }
     end
@@ -21,6 +22,7 @@ class CurrentMonthSalariesController < ApplicationController
 
   def show
     @staff = Staff.find_by_id(params[:id])
+    @salary_details = @staff.salary_details
   end
 
   private
