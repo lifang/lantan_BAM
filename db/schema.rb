@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
   create_table "car_nums", :force => true do |t|
     t.string  "num"
     t.integer "car_model_id"
+    t.integer "buy_year"
   end
 
   create_table "cities", :force => true do |t|

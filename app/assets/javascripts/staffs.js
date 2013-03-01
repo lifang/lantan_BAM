@@ -152,7 +152,7 @@ $(document).ready(function(){
     });
 
     //ajax paginate
-    $(".pageTurn a").live("click", function(){
+    $("#ajax_paginate .pageTurn a").live("click", function(){
        var params_string = $(this).attr("href").split("?")[1];
        var store_id = $("#store_id").val();
        var staff_id = $("#staff_id").val();
