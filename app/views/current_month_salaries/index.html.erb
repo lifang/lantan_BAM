@@ -6,10 +6,9 @@
                    <div>
                      <form action="/stores/<%= @store.id %>/current_month_salaries" method="get">
                      统计时间：<select name="statistics_date" id="statistics_date_select">
-                       <option value="2013-03" <%= @statistics_date.eql?('2013-03') ? "selected" : "" %>>2013-03</option>
-                       <option value="2013-02" <%= @statistics_date.eql?('2013-02') ? "selected" : "" %>>2013-02</option>
-                       <option value="2013-01" <%= @statistics_date.eql?('2013-01') ? "selected" : "" %>>2013-01</option>
-                       <option value="2012-12" <%= @statistics_date.eql?('2012-12') ? "selected" : "" %>>2012-12</option>
+                       <% get_last_twelve_months.each do |month| %>
+                       <option value="<%= month %>" <%= @statistics_date.eql?(month) ? "selected" : "" %>><%= month %></option>
+                       <% end %>
                      </select>
                      </form>
                    </div>
@@ -49,7 +48,7 @@
                                   <td>
                                     <a href="javascript:void(0)" class="edit_reward_deduct_submit" style="display: none;" id="<%= salary.id unless salary.nil? %>">提交</a>
                                     <a href="javascript:void(0)" class="bz_btn">编辑</a>
-                                    <%= link_to "详细", store_current_month_salary_path(@store, staff) %>
+                                    <%= link_to "详细", store_current_month_salary_path(@store, staff)+"?statistics_date=#{@statistics_date}" %>
                                   </td>
                                 </tr>
                               <% end %>
