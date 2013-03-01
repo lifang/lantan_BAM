@@ -8,7 +8,7 @@
           <span class="site_name"><%= @f_waiting[key][0].name %></span>
           <ul>
             <%@f_waiting[key].each do |num|%>
-              <li><%= num.num %></li>
+              <li><a href="javascript:void(0)" onclick=""><%= num.num %></a></li>
             <% end unless @f_waiting[key].blank? %>
           </ul>
         </div>
@@ -34,13 +34,16 @@
           <% @stations.each do |station| %>
             <div class="site_station">
               <h3>工位: <%= station.name %></h3>
-              <% if station.status== Station::STAT[:LACK]%>
+              <% if  station.status== Station::STAT[:LACK]%>
                 <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
               <% elsif station.status== Station::STAT[:WRONG] %>
                 <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
               <% elsif station.status== Station::STAT[:NO_SERVICE] %>
                 <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
-              <%elsif @t_infos[station.id][1].nil? %>
+              <%elsif @t_infos[station.id].nil?%>
+                <div class="free_station">空闲</div>
+                <p>技师：暂无技师，请分配</p>
+              <%elsif  @t_infos[station.id][1].nil? %>
                 <div class="free_station">空闲</div>
                 <p>技师：<%= @t_infos[station.id][0] %></p>
               <% else %>

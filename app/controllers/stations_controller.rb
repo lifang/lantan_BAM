@@ -18,6 +18,7 @@ class StationsController < ApplicationController
       staff=StationStaffRelation.find_by_sql("select staff_id from station_staff_relations where station_id=#{station.id} and current_day='#{Time.now.strftime("%Y%m%d")}' ")
       @t_infos[station.id]=[Staff.where("id in (#{staff.map(&:staff_id).join(',')})").map(&:name).join("、 "),nums[station.id]] unless staff.blank?
     end
+    p @t_infos
   end
 
   def show_detail
@@ -35,7 +36,7 @@ class StationsController < ApplicationController
     stations.each {|station|
       if params[:"stat#{station.id}"].to_i==Station::STAT[:NORMAL]
         station.update_attributes(:status=>params[:"stat#{station.id}"].to_i)
-        station.station_staff_relations.inject(Array.new) {|arr,mat| mat.destroy}
+        station.station_staff_relations.inject(Array.new) {|arr,mat| mat.destroy if mat.current_day==Time.now.strftime("%Y%m%d")}
         params[:"select#{station.id}"].each {|staff_id|
           StationStaffRelation.create(:station_id=>station.id,:staff_id=>staff_id,:current_day=>Time.now.strftime("%Y%m%d")) }
 
