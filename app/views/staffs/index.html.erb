@@ -2,7 +2,7 @@
     <div class="box">
          <div class="data_box">
               <div class="search">
-                   <div>统计时间：<%= Time.now().strftime("%Y-%m") %></div>
+                   <div>统计时间：<%= Time.now.strftime("%Y-%m") %></div>
               </div>
               <div class="data_menu">
                    <a href="javascript:void(0)" id="new_staff">新建员工</a>
@@ -31,9 +31,10 @@
                                   <td><%= staff.name %></td>
                                   <td><%= Staff::N_HEAD[staff.type_of_w] %></td>
                                   <td><%= Staff::N_COMPANY[staff.position] %></td>
-                                  <td><input name="" type="text" value="40" class="data_input_s"/></td>
-                                  <td>30</td>
-                                  <td>一般</td>
+                                  <% month_score = get_month_score_obj(staff) %>
+                                  <td><input name="" type="text" value="<%= month_score.sys_score unless month_score.nil? %>" class="data_input_s"/></td>
+                                  <td><%= month_score.manage_score unless month_score.nil? %></td>
+                                  <td><%= current_month_access_result(month_score) %></td>
                                   <td>
                                     <a href="#" class="bz_btn" id="<%= staff.id %>" name="<%= @store.id %>">编辑</a>
                                     <%= link_to "详细", store_staff_path(@store, staff.id) %>

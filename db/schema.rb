@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130228015440) do
+ActiveRecord::Schema.define(:version => 20130301075327) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -352,7 +352,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.integer  "reward_num"
     t.float    "satisfied_perc"
     t.integer  "staff_id"
-    t.integer  "voilation_reward_id"
+    t.integer  "violation_reward_id"
     t.datetime "created_at"
   end
 

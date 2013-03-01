@@ -23,6 +23,7 @@ class CurrentMonthSalariesController < ApplicationController
   def show
     @staff = Staff.find_by_id(params[:id])
     @salary_details = @staff.salary_details
+    
   end
 
   private
