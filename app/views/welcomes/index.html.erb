@@ -23,12 +23,15 @@
     <div class="main">
       <div class="module">
         <ul>
-          <li><a href="#" class="m_one">现场管理</a></li>
+          <li><a href="/stores/<%= params[:store_id] %>/stations" class="m_one">现场管理</a></li>
           <li><a href="/stores/<%= params[:store_id] %>/customers" class="m_two">客户管理</a></li>
           <li><a href="/stores/<%= params[:store_id] %>/materials" class="m_three">库存管理</a></li>
           <li><a href="#" class="m_four">统计管理</a></li>
-          <li><a href="#" class="m_five">营销管理</a></li>
+          <li><a href="/stores/<%= params[:store_id] %>/sales" class="m_five">营销管理</a></li>
           <li><a href="/stores/<%= params[:store_id] %>/staffs" class="m_six">员工管理</a></li>
+          <% if is_admin? %>
+          <li><a href="/stores/<%= params[:store_id] %>/roles" class="m_six">基础数据</a></li>
+          <% end %>
         </ul>
         <div class="clear"></div>
         <div class="message">

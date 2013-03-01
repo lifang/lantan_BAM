@@ -21,7 +21,12 @@ LantanBAM::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
   root :to => 'logins#index'
-  resources :logins
+  resources :logins do
+    collection do
+      get "logout"
+    end
+  end
+  match "logout" => "logins#logout"
   resources :stores do
     resources :sales do 
       collection do

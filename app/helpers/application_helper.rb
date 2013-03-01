@@ -75,4 +75,16 @@ module ApplicationHelper
     end
     check
   end
+
+  def sign?
+    deny_access unless signed_in?
+  end
+
+  def deny_access
+    redirect_to root_path
+  end
+
+  def signed_in?
+    return cookies[:user_id] != nil
+  end
 end

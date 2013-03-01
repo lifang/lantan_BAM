@@ -1,6 +1,7 @@
 #encoding: utf-8
 class RolesController < ApplicationController
   layout "role"
+  before_filter :sign?
 
   def index
     @roles = Role.all
