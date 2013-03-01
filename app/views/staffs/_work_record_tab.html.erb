@@ -16,7 +16,7 @@
       <tbody>
         <% @work_records.each do |work_record| %>
           <tr>
-            <td><%= work_record.current_day %></td>
+            <td><%= work_record.current_day.strftime("%Y-%m-%d") %></td>
             <td><%= work_record.attendance_num %></td>
             <td><%= work_record.construct_num %></td>
             <td><%= work_record.materials_used_num %></td>
