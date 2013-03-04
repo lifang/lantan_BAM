@@ -75,7 +75,7 @@ class StaffsController < ApplicationController
   def update
     @staff = Staff.find_by_id(params[:id])
     @staff.update_attributes(params[:staff]) if @staff
-    redirect_to store_staffs_path(@store)
+    redirect_to store_staff_path(@store, @staff)
   end
 
   private

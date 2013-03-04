@@ -95,9 +95,26 @@ $(document).ready(function(){
     });
 
     //编辑员工页面
-    $(".bz_btn").click(function(){
-        var staff_id = $(this).attr("id");
-        var store_id = $(this).attr("name");
+    //$(".bz_btn").click(function(){
+    //    var staff_id = $(this).attr("id");
+    //    var store_id = $(this).attr("name");
+    //    $.ajax({
+    //        async:true,
+    //        type : 'get',
+    //        dataType : 'script',
+    //        url : "/stores/"+ store_id+"/staffs/"+ staff_id +"/edit",
+    //        data : {
+    //            staff_id : staff_id,
+    //            store_id : store_id
+    //        }
+    //    });
+    //    return false;
+    //});
+
+    //员工详情
+    $("#staff_detail").click(function(){
+        var staff_id = $("#staff_id").val();
+        var store_id = $("#store_id").val();
         $.ajax({
             async:true,
             type : 'get',
