@@ -128,6 +128,40 @@ $(document).ready(function(){
         return false;
     });
 
+    //编辑系统打分在绩效记录页面
+    $("#edit_sys_score").click(function(){
+       $(this).hide();
+       $(this).prev().show();
+       $("#sys_score_text").hide();
+       $("#sys_score_input").show();
+       return false;
+    });
+
+    //提交编辑系统打分在绩效记录页面
+    $("#edit_sys_score_submit").click(function(){
+       var this_obj = $(this);
+       var sys_score = $("#sys_score_input").val();
+       var store_id = $("#store_id").val();
+       var month_score_id = $(this).attr("name");
+       $.ajax({
+            type : 'get',
+            url : "/stores/"+ store_id+"/month_scores/update_sys_score",
+            data : {
+                sys_score : sys_score,
+                month_score_id : month_score_id
+            },
+            success: function(data){
+               if(data == "success"){
+                   this_obj.hide();
+                   this_obj.next().show();
+                   $("#sys_score_text").text(sys_score).show();
+                   $("#sys_score_input").hide();
+               }
+            }
+        });
+        return false;
+    });
+
     //员工详情
     $("#staff_detail").click(function(){
         var staff_id = $("#staff_id").val();
