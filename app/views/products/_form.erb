@@ -20,11 +20,11 @@
     <% if @img_urls %>
       <ul class="seeProPic">
         <%@img_urls.each do |url|%>
-          <li><img src="<%=url.nil? ? "" : url.gsub("img#{@product.id}","img#{@product.id}_50") %>" /></li>
-        <%end%>
+          <li><img src="<%=url.img_url.nil? ? "" : url.img_url.gsub("img#{@product.id}","img#{@product.id}_50") %>" /></li>
+        <%end unless @img_urls.blank?%>
       </ul>
     <% end %>
-    <a href="javascript:void(0)" class="compile_btn" onclick="show_center('.add_img');">添加图片</a>
+    <a href="javascript:void(0)" class="compile_btn" onclick="popup('.add_img');">添加图片</a><span>*添加新图片会使已上传图片被删除，请为图片做好备份</span>
   </div>
 </div>
 <div class="item">

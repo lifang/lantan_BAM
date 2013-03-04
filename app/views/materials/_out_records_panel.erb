@@ -1,0 +1,48 @@
+<script>
+    $(document).ready(function(){
+        $(".pageTurn a").unbind("click");
+        $(".pageTurn a").bind("click", function() {
+            var url = this.href;
+            $.ajax({
+                async:true,
+                url:this.href,
+                dataType:"script",
+                type:"GET",
+                success:function(){
+                    // alert(1);
+                },error:function(){
+                    // alert("error");
+                }
+            });
+            /* alert(this.href); */
+            return false;
+        });
+    });
+</script>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <thead>
+  <tr class="hbg">
+    <td>条形码</td>
+    <td>物料名称</td>
+    <td>物料类别</td>
+    <td>申请人</td>
+    <td>出库量</td>
+    <td>成本价（元）</td>
+    <td>出库时间</td>
+  </tr>
+  </thead>
+  <tbody>
+  <% (@out_records || []).each do |out| %>
+      <tr>
+        <td><%= out.code %></td>
+        <td><%= out.name %></td>
+        <td><%= Material::TYPES_NAMES.to_a[out.types.to_i][1] %></td>
+        <td><%= out.staff_name %></td>
+        <td><%= out.material_num.to_i %></td>
+        <td><%= out.out_price %></td>
+        <td><%= out.out_time.strftime("%Y-%m-%d %H:%M") %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+<%= will_paginate_remote(@out_records,"",{:url => page_outs_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @out_records.size > 0 %>

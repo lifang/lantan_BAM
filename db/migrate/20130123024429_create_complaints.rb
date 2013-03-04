@@ -12,6 +12,7 @@ class CreateComplaints < ActiveRecord::Migration
       t.datetime :process_at   #处理时间
       t.boolean :is_violation   #是否违规
       t.integer :customer_id
+      t.integer :store_id
 
       t.timestamps
     end

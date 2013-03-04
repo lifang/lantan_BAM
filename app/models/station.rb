@@ -6,6 +6,7 @@ class Station < ActiveRecord::Base
   has_many :w_o_times
   belongs_to :store
   STAT = {:WRONG =>0,:NORMAL =>2,:LACK =>1,:NO_SERVICE =>3} #0 故障 1 缺少技师 2 正常 3 无服务
+  STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常"}
 
   def self.set_stations(store_id)
     s_levels ={}  #所需技师等级
@@ -65,5 +66,19 @@ class Station < ActiveRecord::Base
         end
       }
     }
+  end
+
+  def self.make_data(store_id)
+    return  "select c.num,w.station_id,o.front_staff_id,s.name,w.status from work_orders w inner join orders o on w.order_id=o.id inner join car_nums c on c.id=o.car_num_id
+    inner join staffs s on s.id=o.front_staff_id where current_day='#{Time.now.strftime("%Y%m%d")}' and
+    w.status in (#{WorkOrder::STAT[:SERVICING]},#{WorkOrder::STAT[:WAIT_PAY]}) and w.store_id=#{store_id}"
+  end
+
+  def self.ruby_to_js(hashs)
+    user_plan={}
+    hashs.each do |k,v|
+      user_plan["#{k}"]="#{v}"
+    end
+    return "#{user_plan}".gsub("=>",":")
   end
 end

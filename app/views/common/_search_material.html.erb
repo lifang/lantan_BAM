@@ -5,7 +5,7 @@
   '#{Material::TYPES_NAMES.to_a[m.types.to_i][1]}',#{@type})"} %><%= m.name %></li>
     <% end %>
         </ul>
-<% else %>
+<% elsif @type == 1 %>
     <ul>
     <% (@search_materials || []).each do |m| %>
         <li><%= check_box_tag "mat_#{m.id}",m.storage.to_i,false,{:onclick=>"select_order_material(this,'#{m.name}',

@@ -13,6 +13,8 @@ class Order < ActiveRecord::Base
   STATUS = {:NOMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5}
   #0 正常未进行  1 服务中  2 等待付款  3 已经付款  4 已结束  5已删除
 
+  TYPES = {:SERVICE => 0, :PRODUCT => 1} #0 服务  1 产品
+
   #组装查询order的sql语句
   def self.generate_order_sql(started_at, ended_at, is_visited)
     condition_sql = ""
@@ -101,4 +103,8 @@ class Order < ActiveRecord::Base
     
   end
 
+  def self.one_customer_orders(status, store_id, customer_id, pre_page, page)
+    @orders = Order.paginate_by_sql(["select * from orders where status != ? and store_id = ? and customer_id = ?
+        order by created_at desc", status, store_id, customer_id], :per_page => pre_page, :page => page)
+  end
 end

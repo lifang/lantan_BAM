@@ -36,27 +36,19 @@ $(function(){
 });
 
 //弹出层
-function popup(t,b){
+function popup(t){
     var doc_height = $(document).height();
     var doc_width = $(document).width();
-    var layer_height = $(t).height();
     var layer_width = $(t).width();
-    $(b).bind('click',function(){
-        $(".mask").css({
-            display:'block',
-            height:doc_height
-        });
-        $(t).css('top',"50px");
-        $(t).css('left',(doc_width-layer_width)/2);
-        $(t).css('display','block');
-        return false;
-    }
-    )
-    $(".close").click(function(){
-        $(t).css('display','none');
-        $(".mask").css('display','none');
-    })
-    $(".cancel_btn").click(function(){
+    $(".mask").css({
+        display:'block',
+        height:doc_height
+    });
+    $(t).css('top',"80px");
+    $(t).css('left',(doc_width-layer_width)/2);
+    $(t).css('display','block');
+
+    $(t + " .close").click(function(){
         $(t).css('display','none');
         $(".mask").css('display','none');
     })
@@ -73,10 +65,7 @@ $(function(){
 
     var siteInfoHeight = $(".site_info").height();
     $(".site_info > h1").css("height",siteInfoHeight);
-})
-
-
-
+});
 
 //向选择框添加产品服务
 function add_this(e,name){
@@ -130,5 +119,15 @@ function show_center(t){
     $(t + " .close").click(function(){
         $(t).css('display','none');
         $(".mask").css('display','none');
-    })
+    });
 }
+
+//基础数据权限配置 切换
+$(function() {
+    $('.groupFunc_h li').bind('click',function(){
+        $(this).addClass('hover').siblings().removeClass('hover');
+        var index = $('.groupFunc_h li').index(this);
+        $('.groupFunc_b > div').eq(index).show().siblings().hide();
+    });
+});
+

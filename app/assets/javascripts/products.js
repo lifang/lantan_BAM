@@ -50,6 +50,9 @@ function add_product(){
         alert("请输入产品的规格");
         return false;
     }
+    $(".add_img #img_div input[name$='img_url']").each(function (){
+        $(this).attr("name","img_url["+this.id+"]");
+    })
     $("#desc").val(serv_editor.html());
     $("#add_prod").submit();
 }
@@ -107,6 +110,9 @@ function edit_serv(){
         alert("请输入服务的施工时间");
         return false;
     }
+    $(".add_img #img_div input[name$='img_url']").each(function (){
+        $(this).attr("name","img_url["+this.id+"]");
+    })
     $("#desc").val(serv_editor.html());
     $("#edit_serv").submit();
 }

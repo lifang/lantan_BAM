@@ -1,0 +1,82 @@
+<script>
+    $(document).ready(function(){
+        $(".pageTurn a").unbind("click");
+        $(".pageTurn a").bind("click", function() {
+            var url = this.href + "&m_status="+$("#select_h_order").val()+"&from="+$("#date01").val()+"&to="+$("#date02").val();
+            url += "&status="+$("#h_pay_status").val();
+            $.ajax({
+                async:true,
+                url:url,
+                dataType:"script",
+                type:"GET",
+                success:function(){
+                    // alert(1);
+                },error:function(){
+                    // alert("error");
+                }
+            });
+            /* alert(this.href); */
+            return false;
+        });
+    });
+</script>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <thead>
+  <tr class="hbg">
+    <td>订货单号</td>
+    <td>详细内容</td>
+    <td>总价</td>
+    <td>订货时间</td>
+    <td>预计到货时间</td>
+    <td>物流状态</td>
+    <td>物流信息</td>
+    <td>付款状态</td>
+    <td>操作</td>
+  </tr>
+  </thead>
+  <tbody>
+  <% (@head_order_records || []).each do |record| %>
+      <tr>
+        <td><%= record.code %></td>
+        <td>
+          <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+            <tr class="fws">
+              <td>名称</td>
+              <td>单价</td>
+              <td>数量</td>
+            </tr>
+            <% (record.mat_order_items || []).each do |item| %>
+                <tr>
+                  <td><%= item.material.name %></td>
+                  <td><%= item.price %></td>
+                  <td><%= item.material_num.to_i %></td>
+                </tr>
+            <% end %>
+          </table>
+        </td>
+        <td><%= record.price %></td>
+        <td><%= record.created_at.strftime("%Y-%m-%d") if record.created_at %></td>
+        <td><%= record.arrival_at.strftime("%Y-%m-%d") if record.arrival_at %></td>
+        <td><%= material_status record.m_status, 1 %></td>
+        <td><%= record.carrier %></td>
+        <td><%= material_status record.status,0 %></td>
+        <td>
+          <% if record.m_status == MaterialOrder::M_STATUS[:no_send] %>
+              <a href="javascript:void(0)" onclick="cuihuo(<%= record.id %>,1,<%= params[:store_id] %>)">催货</a>
+          <% end %>
+          <% if record.m_status == MaterialOrder::M_STATUS[:send] %>
+              <a href="javascript:void(0)" onclick="receive_order(<%= record.id %>,1,<%= params[:store_id] %>)">已收货</a>
+          <% end %>
+          <% if record.status == MaterialOrder::STATUS[:no_pay] %>
+              <a href="javascript:void(0)" onclick="pay_order(<%= record.id %>,<%= params[:store_id] %>)">付款</a>
+          <% end %>
+          <% if record.status == MaterialOrder::STATUS[:no_pay] && record.m_status == MaterialOrder::M_STATUS[:no_send] %>
+              <a href="javascript:void(0)" onclick="cancel_order(<%= record.id %>,1,<%= params[:store_id] %>)">取消</a>
+          <% end %>
+          <a href="javascript:void(0)" onclick="add_order_remark('<%= record.id %>','<%= record.remark %>')">备注</a>
+        </td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+<%= will_paginate_remote(@head_order_records,"",{:url => page_head_orders_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @head_order_records.size > 0 %>

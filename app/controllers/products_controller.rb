@@ -45,35 +45,44 @@ class ProductsController < ApplicationController
       product.update_attributes({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
       params[:sale_prod].each do |key,value|
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
-      end
+      end if params[:sale_prod]
     else
       product.update_attributes({:standard=>params[:standard]})
     end
-    product.update_attributes(:img_url=>Sale.upload_img(params[:img_url],product.id,"#{types.downcase}_pics",product.store_id))  if params[:img_url]
+    if params[:img_url] and !params[:img_url].keys.blank?
+      params[:img_url].each {|key,img| ImageUrl.create(:product_id=>product.id,:img_url=>Sale.upload_img(img,product.id,"#{types.downcase}_pics",product.store_id,key))}
+    end
   end   #为新建产品或者服务提供参数
 
   def edit_prod
     @product=Product.find(params[:id])
+    @img_urls=@product.image_urls
   end
 
   def show_prod
-    @product=Product.find(params[:id])
+    @product =Product.find(params[:id])
+    @img_urls = @product.image_urls
   end
 
   def update_product(types,product)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:desc],
-      :types=>params[:prod_types],:introduction=>params[:intro],:img_url=>params[:img_url]
+      :types=>params[:prod_types],:introduction=>params[:intro]
     }
     if types == "SERVICE"
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
-      product.prod_mat_relations.inject(Array.new) {|arr,mat| mat.destroy}
-      params[:sale_prod].each do |key,value|
-        ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
+      if params[:sale_prod]
+        product.prod_mat_relations.inject(Array.new) {|arr,mat| mat.destroy}
+        params[:sale_prod].each do |key,value|
+          ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
+        end
       end
     else
       parms.merge!({:standard=>params[:standard]})
     end
-    parms.merge!({:img_url=>Sale.upload_img(params[:img_url],product.id,"#{types.downcase}_pics",product.store_id)}) if params[:img_url]
+    if params[:img_url] and !params[:img_url].keys.blank?
+      product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}
+      params[:img_url].each {|key,img| ImageUrl.create(:product_id=>product.id,:img_url=>Sale.upload_img(img,product.id,"#{types.downcase}_pics",product.store_id,key))}
+    end
     product.update_attributes(parms)
   end
 
@@ -86,6 +95,7 @@ class ProductsController < ApplicationController
     @serv=Product.find(params[:id])
     @mats=Material.find_by_sql("select name from materials m inner join prod_mat_relations p on
         p.material_id=m.id  where p.product_id=#{@serv.id}").map(&:name).join("  ")
+    @img_urls = @serv.image_urls
   end
 
   def add_serv
@@ -96,6 +106,7 @@ class ProductsController < ApplicationController
     @service=Product.find(params[:id])
     @sale_prods =ProdMatRelation.find_by_sql("select m.name,s.material_num num,m.id from materials m inner join prod_mat_relations s on s.material_id=m.id
       where s.product_id=#{params[:id]}")
+    @img_urls = @service.image_urls
   end
 
   def serv_update
@@ -112,6 +123,7 @@ class ProductsController < ApplicationController
   end
 
   def show
-    @prod=Product.find(params[:id])
+    @prod =Product.find(params[:id])
+    @img_urls = @prod.image_urls
   end
 end

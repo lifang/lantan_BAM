@@ -2,7 +2,7 @@
     <div class="box">
          <div class="data_box">
               <div class="search">
-                   <div>统计时间：2012-12</div>
+                   <div>统计时间：<%= Time.now().strftime("%Y-%m") %></div>
               </div>
               <div class="data_menu">
                    <a href="javascript:void(0)" id="new_staff">新建员工</a>
@@ -29,8 +29,8 @@
                               <% @staffs.each do |staff| %>
                                 <tr>
                                   <td><%= staff.name %></td>
-                                  <td><%= staff.type_of_w %></td>
-                                  <td><%= staff.position %></td>
+                                  <td><%= Staff::N_HEAD[staff.type_of_w] %></td>
+                                  <td><%= Staff::N_COMPANY[staff.position] %></td>
                                   <td><input name="" type="text" value="40" class="data_input_s"></td>
                                   <td>30</td>
                                   <td>一般</td>
@@ -72,6 +72,7 @@
 <div class="tab_popup" style="display:none;" id="new_staff_area">
     <div class="popup_box">
          <h1>新建员工<a href="javascript:void(0)" class="close">关闭</a></h1>
+   
          <%= form_for(@staff, :url => store_staffs_path(@store), :html => {:multipart => true}) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
@@ -81,28 +82,28 @@
                   </div>
                   <div class="item">
                        <label>岗位：</label>
-                       <%= f.select :type_of_w, [["岗位1", "岗位1"], ["岗位2", "岗位2"], ["岗位3", "岗位3"]] %>
+                       <%= f.select :type_of_w, Staff::N_HEAD.invert %>
                   </div>
                   <div class="item">
                        <label>性别：</label>
-                       <%= f.radio_button :sex, 'man', :checked => true %> 男&nbsp;&nbsp;
-                       <%= f.radio_button :sex, 'women' %> 女
+                       <%= f.radio_button :sex, 0, :checked => true %> 男&nbsp;&nbsp;
+                       <%= f.radio_button :sex, 1 %> 女
                   </div>
                   <div class="item">
                        <label>等级职称：</label>
-                       <%= f.select :level, [["等级职称1", "等级职称1"], ["等级职称2", "等级职称2"], ["等级职称3", "等级职称3"]] %>
+                       <%= f.select :level, Staff::LEVELS.invert %>
                   </div>
                   <div class="item">
                        <label>职务：</label>
-                       <%= f.select :position, [["职务1", "职务1"], ["职务2", "职务2"], ["职务3", "职务3"]] %>
+                       <%= f.select :position, Staff::N_COMPANY.invert %>
                   </div>
                   <div class="item">
                        <label>教育程度：</label>
-                       <%= f.select :education, [["小学", "小学"], ["初中", "初中"], ["高中", "高中"], ["大学", "大学"]] %>
+                       <%= f.select :education, Staff::N_EDUCATION.invert %>
                   </div>
                   <div class="item">
                        <label>出生年月：</label>
-                       <%= f.date_select :birthday, {}, {:class => "ymd"} %>
+                       <%= f.date_select :birthday, {:start_year => 1903, :use_month_numbers => true}, {:class => "ymd"} %>
                   </div>
                   <div class="item">
                        <label>联系方式：</label>
@@ -178,7 +179,7 @@
                   </div>
                    <div class="item">
                        <label>奖励方法：</label>
-                       <%= f.select :process_types, [["奖励1", "奖励1"], ["奖励2", "奖励2"]] %>
+                       <%= f.select :process_types, ViolationReward::N_REWARD.invert %>
                   </div>
                   <div class="item_textarea">
                        <label>补充说明：</label>
@@ -210,7 +211,7 @@
                   </div>
                    <div class="item">
                        <label>处罚方法：</label>
-                       <%= f.select :process_types, [["处罚1", "处罚1"], ["处罚2", "处罚2"]] %>
+                       <%= f.select :process_types, ViolationReward::N_VIOLATE.invert %>
                   </div>
                   <div class="item_textarea">
                        <label>补充说明：</label>

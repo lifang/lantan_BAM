@@ -3,8 +3,9 @@ class ViolationRewardsController < ApplicationController
 
   layout "staff"
 
+  before_filter :get_store
+
   def create
-    @store = Store.find_by_id(params[:store_id])
     ViolationReward.transaction do
       begin
         params[:staff][:id].each do |staff_id|
@@ -17,6 +18,37 @@ class ViolationRewardsController < ApplicationController
       end
     end
     redirect_to store_staffs_path(@store)
+  end
+
+  def edit
+    @violation_reward = ViolationReward.find_by_id(params[:id])
+    respond_to do |format|
+      format.js
+    end
+  end
+
+  def update
+    violation_reward = ViolationReward.find_by_id(params[:id])
+    violation_reward.update_attributes(params[:violation_reward]) if violation_reward
+
+    if violation_reward.types
+      @rewards = violation_reward.staff.violation_rewards.where("types = true").
+                paginate(:page => params[:page] ||= 1, :per_page => 1)
+    else
+      @violations = violation_reward.staff.violation_rewards.where("types = false").
+                paginate(:page => params[:page] ||= 1, :per_page => 1)
+    end
+
+
+    respond_to do |format|
+      format.js
+    end
+  end
+
+  private
+
+  def get_store
+    @store = Store.find_by_id(params[:store_id])
   end
   
 end

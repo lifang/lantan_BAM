@@ -5,7 +5,7 @@ class WelcomesController < ApplicationController
 
   def index
     @material_notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
-      Notice::TYPES[:URGE_PAYMENT], Notice::STATUS[:NOMAL])
+      Notice::TYPES[:URGE_PAYMENT], Notice::STATUS[:NORMAL])
     render :index, :layout => false
   end
 end

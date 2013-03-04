@@ -1,9 +1,9 @@
 # encoding: utf-8
 module RemotePaginateHelper
   @@pagination_options = {
-    :class => 'pagination',
-    :prev_label   => '«',
-    :next_label   => '»',
+    :class => 'pageTurn',
+    :prev_label   => '&lt;',
+    :next_label   => '&gt;',
     :inner_window => 4, # links around the current page
     :outer_window => 1, # links around beginning and end
     :separator    => ' ', # single space is friendly to spiders and non-graphic browsers
@@ -74,7 +74,14 @@ module RemotePaginateHelper
       content_tag(:span, text, :class => span_class)
     else
       #link_to_remote text, :update => update, :url => "#{url}?#{param.to_sym}=#{page}", :method=>:get
-      link_to "#{text}", "#{url}&#{param.to_sym}=#{page}", :remote => true
+      link_to "#{text}", "#{url}&#{param.to_sym}=#{page}", :method => :get, :remote => true, "data-type" => "script"
+    end
+  end
+
+  class LinkRenderer < WillPaginate::ActionView::LinkRenderer
+    def link(text, target, attributes = {})
+      attributes['data-remote'] = true
+      super
     end
   end
 end

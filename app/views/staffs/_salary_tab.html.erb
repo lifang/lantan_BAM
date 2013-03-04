@@ -1,0 +1,42 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+     <thead>
+          <tr class="hbg">
+            <td><span class="sort_u">时间</span></td>
+            <td>底薪</td>
+            <td>提成金额</td>
+            <td>扣款金额</td>
+            <td>总额</td>
+            <td>操作</td>
+          </tr>
+      </thead>
+      <tbody>
+        <% @salaries.each do |salary| %>
+          <tr>
+            <td><%= salary.current_month %></td>
+            <td><%= salary.staff.base_salary %></td>
+            <td><%= salary.reward_num %></td>
+            <td><%= salary.deduct_num %></td>
+            <td><%= salary.total %></td>
+            <td><%= link_to "删除", "javascript:void(0)", :class => "delete_salary", :id => salary.id, :name => @store.id %></td>
+          </tr>
+        <% end %>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+      </tbody>
+</table>
+ <%= will_paginate @salaries, :class => "pageTurn", :previous_label => "上一页",
+    :next_label => "下一页" %>

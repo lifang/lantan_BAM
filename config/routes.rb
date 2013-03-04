@@ -23,6 +23,11 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins
   resources :stores do
+    resources :stations do
+      collection do
+        get "show_detail","show_video"
+      end
+    end
     resources :sales do 
       collection do
         post "load_types"
@@ -51,18 +56,26 @@ LantanBAM::Application.routes.draw do
     end
     resources :materials do
       collection do
-        get "out","search","order"
-        post "out_order","material_order","add"
+        get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
+          "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
+          "search_supplier_orders","receive_order","pay_order","update_notices"
+        post "out_order","material_order","add","alipay_complete"
       end
     end
 
     resources :staffs
     resources :violation_rewards
     resources :trains
+    resources :month_scores
+    resources :salaries
+    resources :current_month_salaries
 
     resources :suppliers do
       member do
         post "change"
+      end
+      collection do
+        get "page_suppliers"
       end
     end
     resources :welcomes
@@ -70,6 +83,9 @@ LantanBAM::Application.routes.draw do
       collection do
         post "search", "customer_mark", "single_send_message"
         get "search_list"
+      end
+      member do
+        get "order_prods"
       end
     end
     resources :revisits do
@@ -84,6 +100,19 @@ LantanBAM::Application.routes.draw do
         get "search_list"
       end
     end
+
+    resources :roles do
+      collection do
+        get "staff"
+        post "set_role","reset_role"
+      end
+    end
+  end
+
+  resources :customers do
+    collection do
+      post "get_car_brands", "get_car_models", "check_car_num"
+    end
   end
 
   resources :materials do
@@ -91,8 +120,7 @@ LantanBAM::Application.routes.draw do
       get "remark","check"
     end
     collection do
-      get "get_act_count", "out"
+      get "get_act_count", "out","order_remark"
     end
   end
-
 end

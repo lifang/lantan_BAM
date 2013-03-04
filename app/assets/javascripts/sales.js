@@ -195,3 +195,19 @@ function delete_pcard(pcard_id){
         });
     }
 }
+
+function check_station(){
+    var status =true
+    $("select[name^=select]").each(function(){
+        var station_id =$("#stat"+this.id.split("_")[1]+" option:selected").val();
+        if(parseInt(station_id)==$("#station_id").val() && $(this).find("option:selected").val()== "0" 　){
+            alert("工位状态正常的必须设置技师");
+            status=false;
+            return false
+        } 
+    })
+    if(status){
+        $("#change_station").submit();
+    }
+
+}

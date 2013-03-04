@@ -24,7 +24,16 @@ class Staff < ActiveRecord::Base
   S_HEAD = {:BOSS=>0,:MANAGER=>2,:NORMAL=>1} #0老板 2 部门经理 1员工
   N_HEAD = {0=>"老板", 2=>"部门经理",1=>"员工"}
 
-  attr_accessor :password
+  #教育程度
+  N_EDUCATION = {0 => "研究生", 1 => "本科", 2 => "专科", 3 => "高中", 4 => "初中",
+    5 => "小学", 6 => "无"}
+  S_EDUCATION = {:GRADUATE => 0,  :UNIVERSITY => 1, :COLLEGE => 2, :SENIOR => 3, :JUNIOR => 4, :PRIMARY => 5, :NONE => 6}
+
+  #员工性别
+  N_SEX = {0 => "男", 1 => "女"}
+  
+
+  attr_accessor:password
   validates:password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
 
 

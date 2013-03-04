@@ -6,7 +6,7 @@
 <div class="item">
   <label>套餐卡配图：</label>
   <input type=file name=img_url style="display: none;"  onchange="ye.value=value" />
-  <input name=ye type="text" class="file"  id="sale_img" />
+  <input name=ye type="text" class="file"  id="sale_img" value="<%= @pcard.img_url %>" />
   <input type="button" class="file_btn" value="浏览" onclick=img_url.click()  />
 </div>
 <div class="item">

@@ -34,4 +34,45 @@ module ApplicationHelper
     return request.url.include?(controller_name) ? "hover" : ""
     #puts self.action_name,self.controller_path,self.controller,self.controller_name,request.url
   end
+
+  def material_status status, type
+   str = ""
+    if type == 0
+     if status == 0
+       str = "未付款"
+     elsif status == 1
+       str = "已付款"
+     elsif status == 4
+       str = "已取消"
+     end
+    elsif type == 1
+      if status == 0
+        str = "未发货"
+      elsif status == 1
+        str = "已发货"
+      elsif status == 2
+        str = "已收货"
+      elsif status == 3
+        str = "已入库"
+      end
+    end
+    str
+  end
+
+  def role_model relations,func_num,model_name
+    check = false
+    arr = []
+    (relations || []).each do |relation|
+      if relation && relation.model_name == model_name
+        arr << relation
+      end
+    end
+    (arr || []).each do |relation|
+      if relation && relation.num == func_num
+        check = true
+        break
+      end
+    end
+    check
+  end
 end

@@ -1,13 +1,10 @@
-<div class="message">最近有 <span class="red">2</span> 条订货相关信息需要您去处理
-  <a href="#">点击查看</a><span class="x">Close</span>
-</div>
-<div class="message">XXX订单已经到货，但尚未入库<a href="#">点击查看</a><span class="x">Close</span></div>
+<%= render :partial => "notice_panel" %>
 <div class="data_box">
   <div class="data_menu">
     <%= link_to_function "入库","ruku()", :class => "rk_btn" %>
     <%= link_to_function "出库","chuku()", :class => "ck_btn" %>
-    <%= link_to "订货", order_store_materials_url(params[:store_id]), :class => "dh_btn" %>
-    <%= link_to_function "打印库存清单","alert('打印库存清单')", :class => "" %>
+    <%= link_to_function "订货", "dinghuo()", :class => "dh_btn" %>
+    <%= link_to "打印库存清单",print_store_materials_path(params[:store]), :class => "",:target => "_blank" %>
   </div>
   <div class="clear"></div>
   <div class="tab_head">
@@ -19,70 +16,22 @@
       <li>向供应商订货记录</li>
     </ul>
   </div>
-
-  <div>
-    <h1>库存列表</h1>
-    条形码&nbsp;&nbsp;物料名称&nbsp;&nbsp;物料类别&nbsp;&nbsp;库存状态&nbsp;&nbsp;库存量&nbsp;&nbsp;成本价（元）&nbsp;&nbsp;盘点实数&nbsp;&nbsp;&nbsp;&nbsp;操作<br/>
-    <ul>
-      <% (@materails_storages || []).each do |material| %>
-          <li style="list-style-type: none;background-color: <%if material.storage.to_i == 0 %>red;<% end %>">
-            <%= material.code %>&nbsp;&nbsp;
-            <%= material.name %>&nbsp;&nbsp;
-            <%= Material::TYPES_NAMES.to_a[material.types.to_i][1] %>&nbsp;&nbsp;
-            <%= material.storage.to_i > 0 ? "存货" : "缺货" %>&nbsp;&nbsp;
-            <%= material.storage.to_i %>&nbsp;&nbsp;
-            <%= material.price %>&nbsp;&nbsp;
-            <%= text_field_tag "check_num_#{material.id}",material.check_num.to_i,{:style =>"width:50px;"} %>&nbsp;&nbsp;
-            <%= link_to_function "备注", "add_material_remark(#{material.id},'#{material.remark}')" %>
-            <%= link_to_function "核实","check_material_num(#{material.id},#{material.storage.to_i})" %>
-          </li>
-      <% end %>
-    </ul>
-    <%= will_paginate @materails_storages if @materails_storages.size > 0 %>
-  </div>
-  <div>
-    <h1>出库记录</h1>
-    条形码&nbsp;&nbsp;物料名称&nbsp;&nbsp;物料类别&nbsp;&nbsp;申请人&nbsp;&nbsp;出库量&nbsp;&nbsp;成本价（元）&nbsp;&nbsp;出库时间<br/>
-    <ul>
-      <% (@out_records || []).each do |out| %>
-          <li style="list-style-type: none;">
-            <%= out.code %>&nbsp;&nbsp;
-            <%= out.name %>&nbsp;&nbsp;
-            <%= Material::TYPES_NAMES.to_a[out.types.to_i][1] %>&nbsp;&nbsp;
-            <%= out.staff_name %>&nbsp;&nbsp;
-            <%= out.material_num.to_i %>&nbsp;&nbsp;
-            <%= out.out_price %>&nbsp;&nbsp;
-            <%= out.out_time.strftime("%Y-%m-%d %H:%M") %>
-          </li>
-      <% end %>
-    </ul>
-    <%= will_paginate @out_records if @out_records.size > 0 %>
-  </div>
-  <div>
-    <h1>入库记录<br/></h1>
-    条形码&nbsp;&nbsp;物料名称&nbsp;&nbsp;物料类别&nbsp;&nbsp;入库人&nbsp;&nbsp;入库量&nbsp;&nbsp;成本价（元）&nbsp;&nbsp;入库时间<br/>
-    <ul>
-      <% (@in_records || []).each do |record| %>
-          <li style="list-style-type: none;">
-            <%= record.code %>&nbsp;&nbsp;
-            <%= record.name %>&nbsp;&nbsp;
-            <%= Material::TYPES_NAMES.to_a[record.types.to_i][1] %>&nbsp;&nbsp;
-            <%= record.staff_name %>&nbsp;&nbsp;
-            <%= record.material_num.to_i %>&nbsp;&nbsp;
-            <%= record.out_price %>&nbsp;&nbsp;
-            <%= record.out_time.strftime("%Y-%m-%d %H:%M") %>
-          </li>
-      <% end %>
-    </ul>
-    <%= will_paginate @in_records if @in_records.size > 0 %>
-  </div>
-  <div>
-    <h1>向总部订货记录</h1>
-
-  </div>
-  <div>
-    <h1>向供应商订货信息<br/></h1>
-
+  <div class="data_body">
+    <div>
+      <%= render :partial => "liebiao_panel" %>
+    </div>
+    <div style="display: none;" id="page_outs">
+      <%= render :partial => "out_records_panel" %>
+    </div>
+    <div style="display: none;" id="page_ins">
+      <%= render :partial => "in_records_panel" %>
+    </div>
+    <div style="display: none;">
+      <%= render :partial => "head_orders_panel" %>
+    </div>
+    <div style="display: none;">
+      <%= render :partial => "supplier_orders_panel" %>
+    </div>
   </div>
 </div>
 <div class="mask"></div>
@@ -138,31 +87,58 @@
     <%= form_tag out_order_store_materials_url(params[:store_id]), :id => "out_order_form" do |f| %>
         <div class="popup_body">
           <div class="popup_body_area">
-            <div class="search">
-              <%= render :partial => "/common/search_panel", :object => @type %>
-              <div class="pq pq_mb"></div>
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
-                <thead>
-                <tr class="hbg">
-                  <td><span class="sort_u">物料名称</span></td>
-                  <td><span class="sort_d">物料类别</span></td>
-                  <td>库存量（个）</td>
-                  <td>出库量（个）</td>
-                  <td>操作</td>
-                </tr>
-                </thead>
-                <tbody id="selected_materials"></tbody>
-              </table>
-              <div class="search"><%= hidden_field_tag "selected_items" %>
-                <div><%= label_tag "staff","申请人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
-              </div>
+            <%= render :partial => "/common/search_panel", :object => @type %>
+            <div class="pq pq_mb"></div>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+              <thead>
+              <tr class="hbg">
+                <td>物料名称</td>
+                <td>物料类别</td>
+                <td>库存量（个）</td>
+                <td>出库量（个）</td>
+                <td>操作</td>
+              </tr>
+              </thead>
+              <tbody id="selected_materials"></tbody>
+            </table>
+            <div class="search"><%= hidden_field_tag "selected_items" %>
+              <div><%= label_tag "staff","申请人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
             </div>
-            <div class="btn_box"><%= button_to_function "确定","submit_out_order('out_order_form')", :class => "confirm_btn" %>
-              <button class="cancel_btn" type="button">取消</button></div>
-            <div class="clear"></div>
           </div>
+          <div class="btn_box"><%= button_to_function "确定","submit_out_order('out_order_form')", :class => "confirm_btn" %>
+            <button class="cancel_btn" type="button">取消</button></div>
+          <div class="clear"></div>
+        </div>
     <% end %>
+  </div>
+</div>
+<div class="tab_popup beizhu_tab" id="order_remark_div">
+  <div class="popup_box">
+    <h1>备注<a href="#" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <div class="popup_body_area">
+        <%= hidden_field_tag "material_order_id" %>
+        <%= text_area_tag "order_remark","",{:rows => 7,:cols => 30, :class => "beizhu_textarea"} %>
+      </div>
+      <div class="btn_box"><%= button_to_function "确定","save_order_remark()",{:class => "confirm_btn"} %><button class="cancel_btn">取消</button></div>
     </div>
   </div>
+</div>
+<div class="tab_popup" id="zhifu_tab">
+  <div class="popup_box">
+    <h1>付款<a href="#" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <div class="popup_body_area">
+      <div class="fukuan_btn">
+        <%= hidden_field_tag "pay_order_id","0" %>
+        <button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order(3,<%= params[:store_id] %>)}">现金</button>
+        <span class="zfb" onclick="pay_material_order(1,<%= params[:store_id] %>)"></span>
+      </div>
+      <div class="clear"></div>
+    </div>
+      </div>
+  </div>
+</div>
+<%= render :partial => "dinghuo_panel" %>
 
 
