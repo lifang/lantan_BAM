@@ -94,22 +94,39 @@ $(document).ready(function(){
        return false;
     });
 
-    //编辑员工页面
-    //$(".bz_btn").click(function(){
-    //    var staff_id = $(this).attr("id");
-    //    var store_id = $(this).attr("name");
-    //    $.ajax({
-    //        async:true,
-    //        type : 'get',
-    //        dataType : 'script',
-    //        url : "/stores/"+ store_id+"/staffs/"+ staff_id +"/edit",
-    //        data : {
-    //            staff_id : staff_id,
-    //            store_id : store_id
-    //        }
-    //    });
-    //    return false;
-    //});
+    //编辑系统打分
+    $(".bz_btn").click(function(){
+        $(this).prev().show();
+        $(this).hide();
+        $(this).parents('tr').find(".sys_score_text").hide();
+        $(this).parents('tr').find(".data_input_s").show();
+        return false;
+    });
+
+    //编辑提交系统打分
+    $(".edit_btn").click(function(){
+        var this_obj = $(this);
+        var store_id = $("#store_id").val();
+        var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
+        var sys_score = $(this).parents('tr').find(".data_input_s").val();
+        $.ajax({
+            type : 'get',
+            url : "/stores/"+ store_id+"/month_scores/update_sys_score",
+            data : {
+                sys_score : sys_score,
+                month_score_id : month_score_id
+            },
+            success: function(data){
+               if(data == "success"){
+                   this_obj.parents('tr').find(".data_input_s").hide();
+                   this_obj.parents('tr').find(".sys_score_text").text(sys_score).show();
+                   this_obj.hide();
+                   this_obj.next().show();
+               }
+            }
+        });
+        return false;
+    });
 
     //员工详情
     $("#staff_detail").click(function(){

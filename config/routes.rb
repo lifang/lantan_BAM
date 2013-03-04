@@ -66,7 +66,11 @@ LantanBAM::Application.routes.draw do
     resources :staffs
     resources :violation_rewards
     resources :trains
-    resources :month_scores
+    resources :month_scores do
+      collection do
+        get "update_sys_score"
+      end
+    end
     resources :salaries
     resources :current_month_salaries
 

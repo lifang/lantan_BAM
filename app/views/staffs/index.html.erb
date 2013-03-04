@@ -10,6 +10,7 @@
                    <a href="javascript:void(2)" id="new_violation">新建违规</a>
                    <a href="javascript:void(3)" id="new_train">新建培训</a>
               </div>
+              <input type="hidden" value="<%= @store.id %>" id="store_id"/>
               <div class="clear"></div>
               <div class="data_body">
                    <div>
@@ -32,11 +33,15 @@
                                   <td><%= Staff::N_HEAD[staff.type_of_w] %></td>
                                   <td><%= Staff::N_COMPANY[staff.position] %></td>
                                   <% month_score = get_month_score_obj(staff) %>
-                                  <td><input name="" type="text" value="<%= month_score.sys_score unless month_score.nil? %>" class="data_input_s"/></td>
+                                  <td>
+                                    <label class="sys_score_text"><%= month_score.sys_score unless month_score.nil? %></label>
+                                    <input name="" type="text" value="<%= month_score.sys_score unless month_score.nil? %>" class="data_input_s" style="display: none;" id="<%= month_score.id unless month_score.nil? %>"/>
+                                  </td>
                                   <td><%= month_score.manage_score unless month_score.nil? %></td>
                                   <td><%= current_month_access_result(month_score) %></td>
                                   <td>
-                                    <a href="#" class="bz_btn" id="<%= staff.id %>" name="<%= @store.id %>">编辑</a>
+                                    <a href="javascript:void(0)" class="edit_btn" style="display: none;">提交</a>
+                                    <a href="javascript:void(0)" class="bz_btn" id="<%= staff.id %>" name="<%= @store.id %>">编辑</a>
                                     <%= link_to "详细", store_staff_path(@store, staff.id) %>
                                   </td>
                                 </tr>
