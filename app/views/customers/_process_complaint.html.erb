@@ -1,0 +1,46 @@
+<div class="tab_popup" id="process_complaint_partial">
+  <div class="popup_box">
+    <h1>投诉处理<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <%= form_for :process, :url=>"/stores/#{@order.store_id}/revisits/process", :method => "post",
+        :html => {:onsubmit => "return check_process()"} do %>
+        <div class="popup_body_area">
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">订单号：</div>
+            <div class="seeProDiv_r" id="process_code"><%= @order.code %></div>
+            <input type="hidden" name="pro_compl_id" id="pro_compl_id" value="<%= @complaint_id %>" />
+            <input type="hidden" name="pc_order_id" id="pc_order_id" value="<%= @order.id %>" />
+          </div>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">投诉类型：</div>
+            <div class="seeProDiv_r">
+              <select id="prod_type" name="prod_type">
+                <option value="">--</option>
+                <% Complaint::TYPES_NAMES.each do |k, v| %>
+                  <option value="<%= k %>"><%= v %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">责任人：</div>
+            <div class="seeProDiv_rWidth">
+              <span><input type="checkbox" id="front_staff_id" name="front_staff_id" value="<%= @order.front_staff_id %>" /> <%= @order.front_s_name %>(接待)</span>
+              <span><input type="checkbox" id="cons_staff_id" name="cons_staff_id"
+                     value="<%= @order.cons_staff_id_1 %>, <%= @order.cons_staff_id_2 %>" /> <%= @order.cons_s_name1 %>、<%= @order.cons_s_name2 %>（技师）</span>
+            </div>
+          </div>          
+          <div class="clear"></div>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">处理意见：</div>
+            <textarea cols="" rows="" id="pro_remark" name="pro_remark" class="width_textarea"></textarea>
+          </div>
+        </div>
+        <div class="btn_box_w">
+          <button class="confirm_btn" type="button" onclick="javascript:void(0);">安排培训</button>
+          <button class="confirm_btn" type="submit">确定</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -10,13 +10,16 @@
   </thead>
   <tbody>
     <% @revisits.each do |revisit| %>
-    <tr>
-      <td><%= revisit.created_at.strftime("%Y-%m-%d %H:%M:%S") if revisit.created_at %></td>
-      <td><%= Revisit::TYPES_NAME[revisit.types] %></td>
-      <td><%= revisit.content %></td>
-      <td><%= revisit.answer %></td>
-      <td><a href="#" class="other_a">12336859874</a></td>
-    </tr>
+      <tr>
+        <td><%= revisit.created_at.strftime("%Y-%m-%d %H:%M:%S") if revisit.created_at %></td>
+        <td><%= Revisit::TYPES_NAME[revisit.types] %></td>
+        <td><%= revisit.content %></td>
+        <td><%= revisit.answer %></td>
+        <td>
+          <%= link_to "#{revisit.code}", "/orders/#{revisit.o_id}/order_info" , 
+            :remote => "true", "data-type" => "script", :class => "other_a" %>
+        </td>
+      </tr>
     <% end %>
   </tbody>
 </table>

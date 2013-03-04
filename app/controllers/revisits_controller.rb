@@ -34,5 +34,32 @@ class RevisitsController < ApplicationController
       session[:is_time], session[:time], session[:is_price], session[:price], session[:is_vip], nil, params[:page])
     render "index"
   end
+
+  def create
+    flash[:notice] = "创建回访失败，请您重新尝试。"
+    if params[:rev_title]
+      Revisit.transaction do
+        complaint = Complaint.create(:order_id => params[:rev_order_id].to_i, :reason => params[:rev_answer],
+          :status => Complaint::STATUS[:UNTREATED], :customer_id => params[:rev_customer_id].to_i,
+          :store_id => params[:store_id].to_i) if params[:is_complaint]
+        revisit = Revisit.create(:customer_id => params[:rev_customer_id].to_i, :types => params[:rev_types].to_i,
+          :title => params[:rev_title], :answer => params[:rev_content], :content => params[:rev_answer],
+          :complaint_id => (complaint.nil? ? nil : complaint.id))
+        RevisitOrderRelation.create(:order_id => params[:rev_order_id].to_i, :revisit_id => revisit.id)
+      end
+      flash[:notice] = "添加回访成功。"
+    end
+    redirect_to request.referer
+  end
+
+  def process
+    flash[:notice] = "处理失败，请您重新尝试。"
+    if params[:prod_type]
+      complaint = Complaint.find(params[:pro_compl_id].to_i)
+      complaint.update_attributes(:types => params[:prod_type].to_i, :remark => params[:pro_remark],
+        :status => Complaint::STATUS[:PROCESSED])
+      
+    end
+  end
   
 end

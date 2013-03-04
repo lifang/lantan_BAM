@@ -84,7 +84,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :revisits do
       collection do
-        post "search"
+        post "search", "process"
         get "search_list"
       end
     end
@@ -101,6 +101,12 @@ LantanBAM::Application.routes.draw do
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num"
+    end
+  end
+
+  resources :orders do
+    member do
+      get "order_info", "order_staff"
     end
   end
 

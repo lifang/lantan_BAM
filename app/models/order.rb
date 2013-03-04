@@ -15,6 +15,10 @@ class Order < ActiveRecord::Base
 
   TYPES = {:SERVICE => 0, :PRODUCT => 1} #0 服务  1 产品
 
+  #是否满意
+  IS_PLEASED = {:BAD => 0, :SOSO => 1, :GOOD => 2, :VERY_GOOD => 3}  #0 不满意  1 一般  2 好  3 很好
+  IS_PLEASED_NAME = {0 => "不满意", 1 => "一般", 2 => "好", 3 => "很好"}
+
   #组装查询order的sql语句
   def self.generate_order_sql(started_at, ended_at, is_visited)
     condition_sql = ""
@@ -107,4 +111,12 @@ class Order < ActiveRecord::Base
     @orders = Order.paginate_by_sql(["select * from orders where status != ? and store_id = ? and customer_id = ?
         order by created_at desc", status, store_id, customer_id], :per_page => pre_page, :page => page)
   end
+
+  def self.one_order_info(order_id)
+    return Order.find_by_sql(["select o.id, o.code, o.created_at, o.sale_id, o.price, o.c_pcard_relation_id, o.store_id,
+      c.name front_s_name, c1.name cons_s_name1, c2.name cons_s_name2, o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2
+      from orders o left join customers c on c.id = o.front_staff_id left join customers c1 on c1.id = o.cons_staff_id_1
+      left join customers c2 on c2.id = o.cons_staff_id_2 where o.id = ?", order_id])
+  end
+
 end

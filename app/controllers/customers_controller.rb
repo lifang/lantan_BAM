@@ -48,7 +48,10 @@ class CustomersController < ApplicationController
           :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
           :address => params[:address], :status => Customer::STATUS[:NOMAL],
           :types => Customer::TYPES[:NORMAL], :is_vip => Customer::IS_VIP[:NORMAL])
-        car_num = CarNum.find_or_create_by_num(params[:new_car_num].strip)
+        car_num = CarNum.find_by_num(params[:new_car_num].strip)
+        car_num = car_num.nil? ? 
+          CarNum.create(:num => params[:new_car_num].strip, :buy_year => params[:buy_year], :car_model_id => params[:car_models]) :
+          car_num.update_attributes(:buy_year => params[:buy_year], :car_model_id => params[:car_models])
         CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
         CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
       end
@@ -56,19 +59,14 @@ class CustomersController < ApplicationController
     redirect_to "/stores/#{params[:store_id]}/customers"
   end
 
-  def edit
-    @store = Store.find(params[:store_id].to_i)
-    @customer = Customer.find(params[:id].to_i)
-  end
-
   def update
-    if params[:name] and params[:mobilephone]
+    if params[:new_name] and params[:mobilephone]
       customer = Customer.find(params[:id].to_i)
-      customer.update_attributes(:name => params[:name].strip, :mobilephone => params[:mobilephone].strip,
+      customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
         :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
         :address => params[:address])
     end
-    redirect_to "/stores/#{params[:store_id]}/customers"
+    redirect_to request.referer
   end
 
   def customer_mark
@@ -136,8 +134,7 @@ class CustomersController < ApplicationController
     respond_to do |format|
       format.js
     end
-  end
-  
+  end  
 
   def get_car_brands
     respond_to do |format|

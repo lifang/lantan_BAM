@@ -7,6 +7,8 @@ class Revisit < ActiveRecord::Base
   TYPES = {:SHOPPING => 0, :COMPLAINT => 1, :OTHER => 3} #回访类别
   TYPES_NAME = {0 => "消费回访", 1 => "投诉回访", 2 => "其他"}
 
+
+
   def self.one_customer_revists(store_id, customer_id, pre_page, page)
     return Revisit.paginate_by_sql(["select r.id r_id, r.created_at, r.types, r.content, r.answer, o.code, o.id o_id
           from revisits r left join revisit_order_relations ror

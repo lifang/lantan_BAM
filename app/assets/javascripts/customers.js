@@ -99,10 +99,47 @@ function check_car_num() {
             type:'post',
             success : function(data) {
                 if (data.is_has == false) {
-                    alert("您输入的车牌号码系统中已经存在，是否更改到当前客户名下？");
+                    alert("您输入的车牌号码系统中已经存在，点击‘确定’，当前车牌号将修改到当前客户名下。");
                 }                
             }
         })
         return false;
     }
+}
+
+function customer_revisit(order_id) {
+    popup("#customer_revisit_div");
+    $("#rev_order_id").val(order_id);
+}
+
+function check_revisit() {
+    if ($.trim($("#rev_title").val()) == "") {
+        alert("请输入回访的标题");
+        return false;
+    }
+    if ($("#rev_types").val() == "") {
+        alert("请选择回访类型");
+        return false;
+    }
+    if ($.trim($("#rev_content").val()) == "") {
+        alert("请输入回访内容");
+        return false;
+    }
+    if ($.trim($("#rev_answer").val()) == "") {
+        alert("请输入客户留言");
+        return false;
+    }
+    return true;
+}
+
+function check_process() {
+    if ($("#prod_type").val() == "") {
+        alert("请选择投诉类型");
+        return false;
+    }
+    if ($.trim($("#pro_remark").val()) == "") {
+        alert("请您填写处理意见");
+        return false;
+    }
+    return true;
 }

@@ -6,6 +6,14 @@
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item">
+            <label>汽车购买年份：</label>
+            <select id="buy_year" name="buy_year">
+              <% ((Time.now.year.to_i - 30)..Time.now.year.to_i).each do |i| %>
+              <option value="<%= i %>"><%= i %></option>
+              <% end %>
+            </select>
+          </div>
+          <div class="item">
             <label>车牌号：</label><input name="new_car_num" id="new_car_num" type="text" value="" onblur="check_car_num()" />
           </div>
           <div class="item">
@@ -16,16 +24,17 @@
                 <option value="<%= ca.id %>"><%= ca.name %></option>
               <% end %>
             </select>&nbsp;
-            <select class="ymd" id="car_brands" onchange="choose_model()">
+            <select class="ymd" id="car_brands" name="car_brands" onchange="choose_model()">
               <option value="">--</option>
             </select>
-            <select class="ymd" id="car_models">
+            <select class="ymd" id="car_models" name="car_models">
               <option value="">--</option>
             </select>
           </div>
           <div class="item">
             <label>姓名：</label><input type="text" id="new_name" name="new_name" value=""/>
           </div>
+
           <div class="item">
             <label>性别：</label>
             <input type="radio" name="sex" value="1" checked />&nbsp;男&nbsp;&nbsp;&nbsp;&nbsp;
