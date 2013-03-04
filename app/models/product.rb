@@ -7,6 +7,7 @@ class Product < ActiveRecord::Base
   has_many :pcard_prod_relations
   has_many :prod_mat_relations
   has_many :svcard_prod_relations
+  has_many :image_urls
   belongs_to :store
   PRODUCT_TYPES = {0 => "汽车清洁用品", 1 => "汽车美容用品", 2 => "汽车装饰产品", 3 => "汽车配件产品", 4 => "汽车电子产品",
     5 => "清洗服务", 6 => "维修服务", 7 => "钣喷服务", 8 => "美容服务", 9 => "安装服务", 10 => "其他"} #产品类别

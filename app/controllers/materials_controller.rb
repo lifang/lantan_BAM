@@ -2,9 +2,9 @@
 class MaterialsController < ApplicationController
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
+  before_filter :sign?
 
   def index
-    #cookies[:current_user] = "1"
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
                                                    :per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]

@@ -42,14 +42,22 @@
       <% end %>
     </ul>
   </div>
-
 </div>
-<div class="item">
-  <label>配图：</label><input type=file name=j style="display: none;"  onchange="ye.value=value" />
-  <input name=ye type="text" class="file"  id="sale_img" value="<%= @service.img_url %>" /><input type="button" class="file_btn" value="浏览" onclick=j.click()  />
+<div class="seeProDiv">
+  <div class="seeProDiv_l">配图：</div>
+  <div class="seeProDiv_rWidth">
+    <% if @img_urls %>
+      <ul class="seeProPic">
+        <%@img_urls.each do |url|%>
+          <li><img src="<%=url.img_url.nil? ? "" : url.img_url.gsub("img#{@service.id}","img#{@service.id}_50") %>" /></li>
+        <%end unless @img_urls.blank?%>
+      </ul>
+    <% end %>
+    <a href="javascript:void(0)" class="compile_btn" onclick="popup('.add_img');">添加图片</a><span>*添加新图片会使已上传图片被删除，请为图片做好备份</span>
+  </div>
 </div>
 <div class="item_textarea">
-  <label>简介：</label><textarea name="intro" id="intro" cols="" rows="" class="width_textarea"><%=@service.introduction  %></textarea>
+  <label>简介：</label><textarea name="intro" id="intro" cols="" rows="" class="width_textarea"><%=  @service.introduction  %></textarea>
 </div>
 <div class="item_textarea">
   <label>描述：</label><textarea  id="add_intro" cols="" rows="" class="width_textarea" style="width:480px"><%=@service.description  %></textarea>

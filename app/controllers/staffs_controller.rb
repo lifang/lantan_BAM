@@ -24,10 +24,6 @@ class StaffsController < ApplicationController
       File.open(Rails.root.join('public', "uploads", "#{@staff.id}", params[:staff][:photo].original_filename), 'wb') do |file|
         file.write(params[:staff][:photo].read)
       end
-
-      flash[:notice] = "创建员工成功！"
-    else
-      flash[:notice] = "创建员工失败！"
     end
     redirect_to store_staffs_path(@store)
   end
@@ -79,7 +75,7 @@ class StaffsController < ApplicationController
   def update
     @staff = Staff.find_by_id(params[:id])
     @staff.update_attributes(params[:staff]) if @staff
-    redirect_to store_staffs_path(@store)
+    redirect_to store_staff_path(@store, @staff)
   end
 
   private

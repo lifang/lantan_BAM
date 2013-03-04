@@ -1,0 +1,64 @@
+<div class="main">
+    <div class="box">
+         <div class="data_box">
+              <div class="way_menu"><%= link_to "本月工资", store_current_month_salaries_path(@store) %> &gt; 工资详情</div>
+              <div class="data_body_title">
+                   <div class="data_body_p">
+                     <span>姓名：<%= @staff.name %></span>
+                     <span>岗位：<%= Staff::N_HEAD[@staff.type_of_w] %></span>
+                     <span>等级职称：<%= Staff::LEVELS[@staff.level] %></span>
+                     <span>职务：<%= Staff::N_COMPANY[@staff.position] %></span>
+                     <span>底薪：<%= @staff.base_salary.to_i %></span>
+                   </div>
+              </div>
+              <div class="search">
+                   <div>统计时间：2012-12</div>
+              </div>
+              <div class="clear"></div>
+              <div class="data_body">
+                   <div>
+                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+                           <thead>
+                                <tr class="hbg">
+                                  <td><span class="sort_u">日期</span></td>
+                                  <td>提成政策</td>
+                                  <td>提成标准</td>
+                                  <td>满意度</td>
+                                  <td>平均满意度</td>
+                                  <td>提成金额</td>
+                                  <td>扣款金额</td>
+                                  <td>扣款说明</td>
+                                  <td>合计</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                              <% flag = true %>
+                              <% @salary_details.each do |salary_detail| %>
+                                <tr>
+                                  <td><%= salary_detail.current_day %></td>
+                                  <% if flag %>
+                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXXXX</td>
+                                  <td rowspan="<%= @salary_details.length %>"><%= @staff.deduct_at %></td>
+                                  <% end %>
+                                  <td>XXXXXX</td>
+                                  <% if flag %>
+                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXXXX</td>
+                                  <% end %>
+                                  <td>XXXXXXXX</td>
+                                  <td>XXXXXX</td>
+                                  <td>XXXXX</td>
+                                  <% if flag %>
+                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXX</td>
+                                  <% end %>
+                                </tr>
+                                <% flag = false %>
+                              <% end %>
+                            </tbody>
+                      </table>
+                   </div>
+
+              </div>
+         </div>
+    </div>
+</div>
+<div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>

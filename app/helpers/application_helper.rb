@@ -58,4 +58,33 @@ module ApplicationHelper
     end
     str
   end
+
+  def role_model relations,func_num,model_name
+    check = false
+    arr = []
+    (relations || []).each do |relation|
+      if relation && relation.model_name == model_name
+        arr << relation
+      end
+    end
+    (arr || []).each do |relation|
+      if relation && relation.num == func_num
+        check = true
+        break
+      end
+    end
+    check
+  end
+
+  def sign?
+    deny_access unless signed_in?
+  end
+
+  def deny_access
+    redirect_to root_path
+  end
+
+  def signed_in?
+    return cookies[:user_id] != nil
+  end
 end

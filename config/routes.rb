@@ -21,8 +21,18 @@ LantanBAM::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
   root :to => 'logins#index'
-  resources :logins
+  resources :logins do
+    collection do
+      get "logout"
+    end
+  end
+  match "logout" => "logins#logout"
   resources :stores do
+    resources :stations do
+      collection do
+        get "show_detail","show_video"
+      end
+    end
     resources :sales do 
       collection do
         post "load_types"
@@ -33,8 +43,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :package_cards do
       collection do
-        post "pcard_types","add_pcard"
-        get "sale_records"
+        post "pcard_types","add_pcard","search"
+        get "sale_records","search_list"
       end
       member do
         post "edit_pcard","update_pcard"
@@ -52,8 +62,8 @@ LantanBAM::Application.routes.draw do
     resources :materials do
       collection do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
-            "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
-            "search_supplier_orders","receive_order","pay_order","update_notices"
+          "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
+          "search_supplier_orders","receive_order","pay_order","update_notices"
         post "out_order","material_order","add","alipay_complete"
       end
     end
@@ -61,8 +71,13 @@ LantanBAM::Application.routes.draw do
     resources :staffs
     resources :violation_rewards
     resources :trains
-    resources :month_scores
+    resources :month_scores do
+      collection do
+        get "update_sys_score"
+      end
+    end
     resources :salaries
+    resources :current_month_salaries
 
     resources :suppliers do
       member do
@@ -95,7 +110,12 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-    resources :roles
+    resources :roles do
+      collection do
+        get "staff"
+        post "set_role","reset_role"
+      end
+    end
   end
 
   resources :customers do
@@ -118,5 +138,4 @@ LantanBAM::Application.routes.draw do
       get "get_act_count", "out","order_remark"
     end
   end
-
 end

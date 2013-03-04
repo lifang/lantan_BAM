@@ -1,0 +1,73 @@
+<div class="main">
+    <div class="box">
+         <div class="data_box">
+              <div class="search">
+                   <div>
+                     <form action="/stores/<%= @store.id %>/current_month_salaries" method="get">
+                     统计时间：<select name="statistics_date" id="statistics_date_select">
+                       <option value="2013-03" <%= @statistics_date.eql?('2013-03') ? "selected" : "" %>>2013-03</option>
+                       <option value="2013-02" <%= @statistics_date.eql?('2013-02') ? "selected" : "" %>>2013-02</option>
+                       <option value="2013-01" <%= @statistics_date.eql?('2013-01') ? "selected" : "" %>>2013-01</option>
+                       <option value="2012-12" <%= @statistics_date.eql?('2012-12') ? "selected" : "" %>>2012-12</option>
+                     </select>
+                     </form>
+                   </div>
+                <div><button class="search_btn">导出EXCEL</button><%= link_to "导出EXCEL", url_for(:format => 'xls') %></div>
+              </div>
+              <div class="clear"></div>
+              <div class="data_body">
+                   <div>
+                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+                           <thead>
+                                <tr class="hbg">
+                                  <td><span class="sort_u">姓名</span></td>
+                                  <td>职务</td>
+                                  <td>底薪</td>
+                                  <td><span class="sort_u">提成金额</span></td>
+                                  <td><span class="sort_d">扣款金额</span></td>
+                                  <td>总额</td>
+                                  <td>操作</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                              <% @staffs.each do |staff| %>
+                                <tr>
+                                  <td><%= staff.name %></td>
+                                  <td><%= Staff::N_COMPANY[staff.position] %></td>
+                                  <td><%= staff.base_salary.to_i %></td>
+                                  <% salary = staff.salaries.where("current_month = #{(@statistics_date.delete '-').to_i}").first %>
+                                  <td><input name="" type="text" value="<%= salary.reward_num unless salary.nil? %>" class="data_input_s"/></td>
+                                  <td><input name="" type="text" value="<%= salary.deduct_num unless salary.nil? %>" class="data_input_s"/></td>
+                                  <td><%= salary.total.to_i unless salary.nil? %></td>
+                                  <td>
+                                    <a href="#" class="bz_btn">编辑</a>
+                                    <%= link_to "详细", store_current_month_salary_path(@store, staff) %>
+                                  </td>
+                                </tr>
+                              <% end %>
+                                <tr>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                  <td>&nbsp;</td>
+                                </tr>
+                            </tbody>
+                      </table>
+                   </div>
+              </div>
+         </div>
+    </div>
+</div>
+<div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>

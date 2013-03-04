@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <%= stylesheet_link_tag    "application" %>
+    <%= javascript_include_tag "application" %>
+    <title><%= @title.nil? ? "现场管理" : @title %></title>
+    <%= csrf_meta_tags %>
+    <!--[if IE 6]>
+    <script src="js/DD_belatedPNG_0.0.8a-min.js"></script>
+    <script>
+      DD_belatedPNG.fix('*');
+    </script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <div class="head">
+      <div class="box">
+        <div class="logo">澜泰门店后台管理系统</div>
+        <div class="login">你好：XXX | <a href="#">退出</a></div>
+        <div class="clear"></div>
+        <div class="nav">
+          <ul>
+            <li><a href="/stores/<%= params[:store_id] %>/stations" <%if params[:action] == "index" %> class="hover"<%end%>>施工现场</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/stations/show_detail" <%if params[:action] == "show_detail" %> class="hover"<%end%>>工位技师分配</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/stations/show_video" <%if params[:action] == "show_video" %> class="hover"<%end%>>施工视频</a></li>
+          </ul>
+        </div>
+        <div class="back"><a href="#" title="返回">Back</a>现场管理</div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="box">      
+        <%= yield %>
+      </div>
+    </div>
+    <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+
+
+
+  </body>
+</html>

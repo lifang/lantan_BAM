@@ -25,4 +25,12 @@ class LoginsController < ApplicationController
       end
     end
   end
+
+  def logout
+    cookies.delete(:user_id)
+    cookies.delete(:user_name)
+    cookies.delete(:user_roles)
+    cookies.delete(:model_role)
+    redirect_to root_path
+  end
 end

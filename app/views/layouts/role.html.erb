@@ -2,8 +2,8 @@
 <html>
   <head>
     <%= stylesheet_link_tag    "application" %>
-    <%= javascript_include_tag "application","kucun","DD_belatedPNG_0.0.8a-min","jquery-ui-1.10.0.custom.min","jquery.ui.datepicker-zh-CN" %>
-    <title><%= @title.nil? ? "库存管理" : @title %></title>
+    <%= javascript_include_tag "application","role","DD_belatedPNG_0.0.8a-min" %>
+    <title><%= @title.nil? ? "基础数据" : @title %></title>
     <%= csrf_meta_tags %>
     <!--[if IE 6]>
     <script>
@@ -16,7 +16,7 @@
     <div class="head">
       <div class="box">
         <%= render :partial => "/common/login_header" %>
-        <%= render :partial => "materials/material_nav" %>
+        <%= render :partial => "/roles/role_nav" %>
       </div>
     </div>
     <div class="main">

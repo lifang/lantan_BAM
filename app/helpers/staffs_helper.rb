@@ -2,7 +2,7 @@
 module StaffsHelper
   
   def current_month_access_result(month_score)
-    if month_score.manage_score.nil? || month_score.manage_score == 0
+    if month_score.nil? || month_score.manage_score.nil? || month_score.manage_score == 0
       access_result = "未评估"
     else
       total = month_score.manage_score.to_i + month_score.sys_score.to_i
@@ -23,6 +23,10 @@ module StaffsHelper
       end
     end
     access_result
+  end
+
+  def get_month_score_obj(staff)
+    staff.month_scores.where("current_month = #{Time.now.strftime("%Y%m")}").first
   end
 
 end

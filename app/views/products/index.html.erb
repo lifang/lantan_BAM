@@ -26,8 +26,12 @@
                     <td><%= prod.name %></td>
                     <td><%= prod.sale_price %></td>
                     <td><%= Product::PRODUCT_TYPES[prod.types] %></td>
-                    <td><a href="javascript:void(0)" onclick="edit_prod('<%=prod.id %>','<%=params[:store_id] %>')">编辑</a>
-                      <a href="javascript:void(0)" class="see_btn" onclick="show_prod('<%=prod.id %>')">查看</a></td>
+                    <td><%if prod.store_id!=Constant::STORE_ID%>
+                        <a href="javascript:void(0)"  onclick="edit_prod('<%=prod.id %>','<%=params[:store_id] %>')">编辑</a>
+                      <% end %>
+                      <a href="javascript:void(0)" class="see_btn" onclick="show_prod('<%=prod.id %>')">查看</a>
+                      <a href="/stores/<%= params[:store_id] %>/products/<%=prod.id %>" target="_blank" class="see_btn"  >预览</a>
+                    </td>
                   </tr>
                 <% end %>
               </tbody>
@@ -45,9 +49,5 @@
 </div>
 <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
 <div class="mask"></div>
-<div class="tab_popup add_tab" style="">
-  <div class="popup_box">
-
-  </div>
-</div>
 <div class="tab_popup see_tab"></div>
+<div id="serv_add_edit"></div>

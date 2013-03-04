@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130228015440) do
+ActiveRecord::Schema.define(:version => 20130301084006) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
   create_table "car_nums", :force => true do |t|
     t.string  "num"
     t.integer "car_model_id"
+    t.integer "buy_year"
   end
 
   create_table "cities", :force => true do |t|
@@ -60,7 +61,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.text     "reason"
     t.text     "suggstion"
     t.text     "remark"
-    t.boolean  "status",       :default => false
+    t.boolean  "status"
     t.integer  "types"
     t.integer  "staff_id_1"
     t.integer  "staff_id_2"
@@ -84,9 +85,9 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.boolean  "sex"
     t.datetime "birthday"
     t.string   "address"
-    t.boolean  "is_vip",      :default => false
+    t.boolean  "is_vip"
     t.string   "mark"
-    t.boolean  "status",      :default => false
+    t.boolean  "status"
     t.integer  "types"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -100,6 +101,11 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.float    "current_price"
     t.integer  "store_id"
     t.datetime "created_at"
+  end
+
+  create_table "image_urls", :force => true do |t|
+    t.integer "product_id"
+    t.string  "img_url"
   end
 
   create_table "m_order_types", :force => true do |t|
@@ -145,7 +151,6 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.string   "carrier"
     t.integer  "store_id"
     t.string   "remark"
-    t.integer  "sale_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -161,7 +166,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "remark",     :limit => 1000
-    t.integer  "check_num",                  :default => 0
+    t.integer  "check_num"
   end
 
   create_table "menus", :force => true do |t|
@@ -171,7 +176,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
   create_table "message_records", :force => true do |t|
     t.string   "content"
     t.datetime "send_at"
-    t.boolean  "status",     :default => false
+    t.boolean  "status"
     t.integer  "store_id"
     t.datetime "created_at"
   end
@@ -309,7 +314,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
   end
 
   create_table "revisits", :force => true do |t|
-    t.integer  "customer_id"
+    t.integer  "user_id"
     t.integer  "types"
     t.string   "title"
     t.string   "answer"
@@ -351,7 +356,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.integer  "reward_num"
     t.float    "satisfied_perc"
     t.integer  "staff_id"
-    t.integer  "voilation_reward_id"
+    t.integer  "violation_reward_id"
     t.datetime "created_at"
   end
 
@@ -428,7 +433,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "encrypted_password"
+    t.string   "encrypt_password"
     t.string   "username"
     t.string   "salt"
   end
@@ -452,6 +457,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "name"
   end
 
   create_table "stores", :force => true do |t|
@@ -477,8 +483,6 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.string   "phone"
     t.string   "address"
     t.string   "contact"
-    t.integer  "store_id"
-    t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

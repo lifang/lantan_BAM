@@ -50,6 +50,9 @@ function add_product(){
         alert("请输入产品的规格");
         return false;
     }
+    $(".add_img #img_div input[name$='img_url']").each(function (){
+        $(this).attr("name","img_url["+this.id+"]");
+    })
     $("#desc").val(serv_editor.html());
     $("#add_prod").submit();
 }
@@ -107,6 +110,9 @@ function edit_serv(){
         alert("请输入服务的施工时间");
         return false;
     }
+    $(".add_img #img_div input[name$='img_url']").each(function (){
+        $(this).attr("name","img_url["+this.id+"]");
+    })
     $("#desc").val(serv_editor.html());
     $("#edit_serv").submit();
 }
@@ -131,25 +137,6 @@ function load_material(store_id){
     }
 }
 
-//向选择框添加产品服务
-function add_mat(e,name){
-    var child="<div id='"+e.value+"'><em>"+name +"</em><a href='javascript:void(0)' class='addre_a' \n\
-    onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a><span><input name='material["+e.value +"]' \n\
-    type='text' class='addre_input' value='1' id='add_p"+e.value +"' /></span><a href='javascript:void(0)' class='addre_a' \n\
-    id='delete_one"+e.value+"'>-</a><a href='javascript:void(0)' class='remove_a' \n\
-    onclick='$(this).parent().remove();if($(\"#prod_"+ e.value+"\").length!=0){$(\"#prod_"+ e.value+"\")[0].checked=false;}'>删除</a></div></div>";
-    if ($(e)[0].checked){
-        if ($("#add_products #"+e.value).length==0){
-            $(".popup_body_fieldset #add_products").append(child);
-        }else{
-            var num=parseInt($("#add_products #add_p"+e.value).val())+1;
-            $("#add_products #add_p"+e.value).val(num);
-            $("#add_products #delete_one"+e.value).attr("onclick","delete_one('"+ e.value+"')");
-        }
-    }else{
-        $("#add_products #"+e.value).remove();
-    }
-}
 
 function show_mat(){
     var mats=""

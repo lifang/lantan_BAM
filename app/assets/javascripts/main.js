@@ -67,27 +67,6 @@ $(function(){
     $(".site_info > h1").css("height",siteInfoHeight);
 });
 
-//car_group car_x
-$(function(){
-    $(".car_group li").hover(
-        function(){$(this).find(".group_x").css("display","block");},
-        function(){$(this).find(".group_x").css("display","none");}
-    )
-    $(".people_group li").hover(
-        function(){
-            $(this).find(".group_func").css("display","block");
-            $(this).find(".group_x").css("display","block");
-        },
-        function(){
-            $(this).find(".group_func").css("display","none");
-            $(this).find(".group_x").css("display","none");
-        }
-    )
-});
-
-
-
-
 //向选择框添加产品服务
 function add_this(e,name){
     var child="<div id='"+e.value+"'><em>"+name +"</em><a href='javascript:void(0)' class='addre_a' \n\

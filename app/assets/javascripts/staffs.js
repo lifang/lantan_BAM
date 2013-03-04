@@ -10,26 +10,31 @@ function remove_area(parent, close, cancel){
 
 $(document).ready(function(){
 
+    //创建员工
     $("#new_staff").click(function(){
         popup("#new_staff_area");
         return false;
     });
 
+    //创建违规
     $("#new_violation").click(function(){
         popup("#new_violation_area");
         return false;
     });
 
+    //创建奖励
     $("#new_reward").click(function(){
         popup("#new_reward_area");
         return false;
     });
 
+    //创建培训
     $("#new_train").click(function(){
         popup("#new_train_area");
         return false;
     });
 
+    //创建员工信息验证
     $("#new_staff_btn").click(function(){
        if($(this).parents('form').find("#staff_name").val() == ""){
            alert("名称不能为空!");
@@ -82,15 +87,85 @@ $(document).ready(function(){
        $(this).parents('form').submit();
     });
 
+    //取消按钮
     $(".cancel_btn").click(function(){
        $(".tab_popup").hide();
        $(".mask").hide();
        return false;
     });
 
+    //编辑系统打分
     $(".bz_btn").click(function(){
-        var staff_id = $(this).attr("id");
-        var store_id = $(this).attr("name");
+        $(this).prev().show();
+        $(this).hide();
+        $(this).parents('tr').find(".sys_score_text").hide();
+        $(this).parents('tr').find(".data_input_s").show();
+        return false;
+    });
+
+    //编辑提交系统打分
+    $(".edit_btn").click(function(){
+        var this_obj = $(this);
+        var store_id = $("#store_id").val();
+        var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
+        var sys_score = $(this).parents('tr').find(".data_input_s").val();
+        $.ajax({
+            type : 'get',
+            url : "/stores/"+ store_id+"/month_scores/update_sys_score",
+            data : {
+                sys_score : sys_score,
+                month_score_id : month_score_id
+            },
+            success: function(data){
+               if(data == "success"){
+                   this_obj.parents('tr').find(".data_input_s").hide();
+                   this_obj.parents('tr').find(".sys_score_text").text(sys_score).show();
+                   this_obj.hide();
+                   this_obj.next().show();
+               }
+            }
+        });
+        return false;
+    });
+
+    //编辑系统打分在绩效记录页面
+    $("#edit_sys_score").click(function(){
+       $(this).hide();
+       $(this).prev().show();
+       $("#sys_score_text").hide();
+       $("#sys_score_input").show();
+       return false;
+    });
+
+    //提交编辑系统打分在绩效记录页面
+    $("#edit_sys_score_submit").click(function(){
+       var this_obj = $(this);
+       var sys_score = $("#sys_score_input").val();
+       var store_id = $("#store_id").val();
+       var month_score_id = $(this).attr("name");
+       $.ajax({
+            type : 'get',
+            url : "/stores/"+ store_id+"/month_scores/update_sys_score",
+            data : {
+                sys_score : sys_score,
+                month_score_id : month_score_id
+            },
+            success: function(data){
+               if(data == "success"){
+                   this_obj.hide();
+                   this_obj.next().show();
+                   $("#sys_score_text").text(sys_score).show();
+                   $("#sys_score_input").hide();
+               }
+            }
+        });
+        return false;
+    });
+
+    //员工详情
+    $("#staff_detail").click(function(){
+        var staff_id = $("#staff_id").val();
+        var store_id = $("#store_id").val();
         $.ajax({
             async:true,
             type : 'get',
@@ -104,11 +179,13 @@ $(document).ready(function(){
         return false;
     });
 
+    //店长打分页面
     $("#manage_score_btn").click(function(){
        popup("#manage_score_area");
        return false;
     });
 
+    //处理奖励
     $(".process_reward").click(function(){
        var store_id = $(this).attr("name");
        var id = $(this).attr("id");
@@ -125,6 +202,7 @@ $(document).ready(function(){
        return false;
     });
 
+    //处理违规
     $(".process_violation").click(function(){
        var store_id = $(this).attr("name");
        var id = $(this).attr("id");
@@ -141,7 +219,8 @@ $(document).ready(function(){
        return false;
     });
 
-    $(".pageTurn a").live("click", function(){
+    //ajax paginate
+    $("#ajax_paginate .pageTurn a").live("click", function(){
        var params_string = $(this).attr("href").split("?")[1];
        var store_id = $("#store_id").val();
        var staff_id = $("#staff_id").val();
@@ -156,11 +235,13 @@ $(document).ready(function(){
        return false;
     });
 
+    //日期选择
     $("#train_start_at").datepicker({inline:true});
     $("#train_end_at").datepicker({inline:true});
     $("#start_at").datepicker({inline:true});
     $("#end_at").datepicker({inline:true});
 
+    //查询工作记录
     $("#search_work_record").click(function(){
        var start_at = $(this).parents('.search').find("#start_at").val();
        var end_at = $(this).parents('.search').find("#end_at").val();
@@ -196,6 +277,12 @@ $(document).ready(function(){
                 data : {}
             });
        }
+       return false;
+    });
+
+    //选择 月份 统计员工工资
+    $("#statistics_date_select").change(function(){
+       $(this).parents('form').submit();
        return false;
     });
 
