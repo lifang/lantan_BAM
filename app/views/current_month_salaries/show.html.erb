@@ -32,37 +32,29 @@
                                 </tr>
                             </thead>
                             <tbody>
+                              <% flag = true %>
+                              <% @salary_details.each do |salary_detail| %>
                                 <tr>
-                                  <td>2012.12.12</td>
-                                  <td rowspan="2">XXXXXXXXXX</td>
-                                  <td rowspan="2">XXXXXXXXXXXX</td>
+                                  <td><%= salary_detail.current_day %></td>
+                                  <% if flag %>
+                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXXXX</td>
+                                  <td rowspan="<%= @salary_details.length %>"><%= @staff.deduct_at %></td>
+                                  <% end %>
                                   <td>XXXXXX</td>
-                                  <td rowspan="2">XXXXXXXXXX</td>
+                                  <% if flag %>
+                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXXXX</td>
+                                  <% end %>
                                   <td>XXXXXXXX</td>
                                   <td>XXXXXX</td>
                                   <td>XXXXX</td>
-                                  <td>XXXXXXXX</td>
+                                  <% if flag %>
+                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXX</td>
+                                  <% end %>
                                 </tr>
-                                <tr>
-                                  <td>2012.12.12</td>
-                                  <td>XXXXXX</td>
-                                  <td>XXXXXXXX</td>
-                                  <td>XXXXXX</td>
-                                  <td>XXXXX</td>
-                                  <td>XXXXXXXX</td>
-                                </tr>
+                                <% flag = false %>
+                              <% end %>
                             </tbody>
                       </table>
-                       <div class="pageTurn">
-                           <a href="#" class="disabled">上一页</a>
-                           <a href="#" class="current">1</a>
-                           <a href="#?page=2">2</a>
-                           <a href="#?page=3">3</a>
-                           <a href="#?page=4">4</a>
-                           <a href="#?page=5">5</a>...<a href="#?page=199">199</a>
-                           <a href="#?page=200">200</a>
-                           <a href="#?page=2">下一页</a>
-                       </div>
                    </div>
 
               </div>

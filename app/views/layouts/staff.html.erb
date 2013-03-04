@@ -28,7 +28,7 @@
                           <li><%= link_to "本月工资", store_current_month_salaries_path(@store), :class => controller_name == "current_month_salaries" ? "hover" : "" %></li>
                       </ul>
                  </div>
-                 <div class="back"><a href="#" title="返回">Back</a>员工管理</div>
+                 <div class="back"><a href="/stores/<%= params[:store_id] %>/welcomes" title="返回">Back</a>员工管理</div>
             </div>
        </div>
        <%= yield %>

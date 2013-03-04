@@ -8,7 +8,7 @@
                      <span>岗位：<%= Staff::N_HEAD[@staff.type_of_w] %></span>
                      <span>等级职称：<%= Staff::LEVELS[@staff.level] %></span>
                      <span>职务：<%= Staff::N_COMPANY[@staff.position] %></span>
-                     <a href="#">详情</a></div>
+                     <a href="javascript:void(0)" id="staff_detail">详情</a></div>
               </div>
               <div class="clear"></div>
               <div class="tab_head">
@@ -21,7 +21,7 @@
                       <li>工资记录</li>
                    </ul>
               </div>
-              <div class="data_body">
+              <div class="data_body" id="ajax_paginate">
                    <div>
                         <div class="search">
                              <input type="hidden" id="staff_id" value="<%= @staff.id %>"/>
@@ -47,10 +47,12 @@
                                <input name="" type="text" value="<%= current_month_access_result(@current_month_score) %>" disabled/>
                              </div>
                              <div>系统打分：
-                               <input name="" type="text" value="<%= @current_month_score.sys_score %>" disabled/>
+                               <span id="sys_score_text"><%= @current_month_score.sys_score unless @current_month_score.nil? %></span>
+                               <input name="" type="text" value="<%= @current_month_score.sys_score unless @current_month_score.nil? %>" style="display: none;" id="sys_score_input"/>
                              </div>
                              <div>
-                               <button class="search_btn">编辑</button>
+                               <button class="search_btn" id="edit_sys_score_submit" style="display: none;" name="<%= @current_month_score.id unless @current_month_score.nil? %>">提交</button>
+                               <button class="search_btn" id="edit_sys_score">编辑</button>
                              </div>
                              <div>
                                <button class="search_btn" id="manage_score_btn">店长打分</button>
@@ -109,3 +111,4 @@
 </div>
 
 <div id="process"></div>
+<div id="staff_edit"></div>

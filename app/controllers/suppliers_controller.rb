@@ -1,5 +1,6 @@
 class SuppliersController < ApplicationController
-   layout "storage"
+  layout "storage"
+  before_filter :sign?
 
   def index
     @suppliers = Supplier.paginate(:conditions => "status= #{Supplier::STATUS[:normal]} and store_id=#{params[:store_id]}",

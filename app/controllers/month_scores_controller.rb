@@ -11,5 +11,11 @@ class MonthScoresController < ApplicationController
       format.js
     end
   end
+
+  def update_sys_score
+    month_score = MonthScore.find_by_id(params[:month_score_id])
+    month_score.update_attribute(:sys_score, params[:sys_score]) if month_score
+    render :text => "success"
+  end
   
 end

@@ -356,7 +356,7 @@ ActiveRecord::Schema.define(:version => 20130301084006) do
     t.integer  "reward_num"
     t.float    "satisfied_perc"
     t.integer  "staff_id"
-    t.integer  "voilation_reward_id"
+    t.integer  "violation_reward_id"
     t.datetime "created_at"
   end
 
