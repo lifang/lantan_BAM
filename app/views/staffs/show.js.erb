@@ -1,5 +1,11 @@
 <% if @tab.eql?("work_record_tab") %>
-  $("#work_record_tab").html('<%= escape_javascript(render :partial => '/staffs/work_record_tab') %>');
+  <% if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day") %>
+    $("#work_record_tab").html('<%= escape_javascript(render :partial => '/staffs/work_record_tab') %>');
+  <% end %>
+
+  <% if @cal_style.eql?("week") || @cal_style.eql?("month") %>
+    $("#work_record_tab").html('<%= escape_javascript(render :partial => '/staffs/work_record_week_month_tab') %>');
+  <% end %>
 <% end %>
 
 <% if @tab.eql?("month_score_tab") %>

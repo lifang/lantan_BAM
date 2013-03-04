@@ -2,6 +2,7 @@
     <div class="box">
          <div class="data_box">
               <div class="search">
+                <input type="hidden" value="<%= @store.id %>" id="store_id"/>
                    <div>
                      <form action="/stores/<%= @store.id %>/current_month_salaries" method="get">
                      统计时间：<select name="statistics_date" id="statistics_date_select">
@@ -15,7 +16,7 @@
                 <div><button class="search_btn">导出EXCEL</button><%= link_to "导出EXCEL", url_for(:format => 'xls') %></div>
               </div>
               <div class="clear"></div>
-              <div class="data_body">
+              <div class="data_body" id="salary_info">
                    <div>
                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
                            <thead>
@@ -36,11 +37,18 @@
                                   <td><%= Staff::N_COMPANY[staff.position] %></td>
                                   <td><%= staff.base_salary.to_i %></td>
                                   <% salary = staff.salaries.where("current_month = #{(@statistics_date.delete '-').to_i}").first %>
-                                  <td><input name="" type="text" value="<%= salary.reward_num unless salary.nil? %>" class="data_input_s"/></td>
-                                  <td><input name="" type="text" value="<%= salary.deduct_num unless salary.nil? %>" class="data_input_s"/></td>
+                                  <td>
+                                    <span class="reward_num_text"><%= salary.reward_num unless salary.nil? %></span>
+                                    <input name="" type="text" value="<%= salary.reward_num unless salary.nil? %>" class="data_input_s reward_num_input" style="display: none;"/>
+                                  </td>
+                                  <td>
+                                    <span class="deduct_num_text"><%= salary.deduct_num unless salary.nil? %></span>
+                                    <input name="" type="text" value="<%= salary.deduct_num unless salary.nil? %>" class="data_input_s deduct_num_input" style="display: none;"/>
+                                  </td>
                                   <td><%= salary.total.to_i unless salary.nil? %></td>
                                   <td>
-                                    <a href="#" class="bz_btn">编辑</a>
+                                    <a href="javascript:void(0)" class="edit_reward_deduct_submit" style="display: none;" id="<%= salary.id unless salary.nil? %>">提交</a>
+                                    <a href="javascript:void(0)" class="bz_btn">编辑</a>
                                     <%= link_to "详细", store_current_month_salary_path(@store, staff) %>
                                   </td>
                                 </tr>
