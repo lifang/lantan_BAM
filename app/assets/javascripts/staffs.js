@@ -87,6 +87,23 @@ $(document).ready(function(){
        $(this).parents('form').submit();
     });
 
+    //新建奖励信息验证
+    $("#new_reward_btn").click(function(){
+       if($("#new_reward_area input:checked").length == 0){
+           alert("至少选择一个奖励人员");
+           return false;
+       }
+       if($("#violation_reward_situation").val() == ""){
+           alert("奖励原因不能为空!");
+           return false;
+       }
+       if($("#violation_reward_mark").val() == ""){
+           alert("补充说明不能为空!");
+           return false;
+       }
+       $(this).parents('form').submit();
+    });
+
     //取消按钮
     $(".cancel_btn").click(function(){
        $(".tab_popup").hide();

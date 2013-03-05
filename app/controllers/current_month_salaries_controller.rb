@@ -5,12 +5,7 @@ class CurrentMonthSalariesController < ApplicationController
   before_filter :get_store
 
   def index
-    @statistics_date = params[:statistics_date] ||= DateTime.now.strftime("%Y-%m")
-
-    puts "11111111111111"
-    puts @statistics_date
-    puts "1111111111111111111"
-    
+    @statistics_date = params[:statistics_date] ||= DateTime.now.strftime("%Y-%m") 
     @staffs = @store.staffs
 
     respond_to do |format|
@@ -38,9 +33,6 @@ class CurrentMonthSalariesController < ApplicationController
   end
 
   def xls_content_for(objs, current_month)
-    puts "&&&&&&&&&&&&&&&"
-    puts current_month
-    puts "&&&&&&&&&&&&&&&&&&&&&"
     xls_report = StringIO.new
     book = Spreadsheet::Workbook.new
     sheet1 = book.create_worksheet :name => "Users"
