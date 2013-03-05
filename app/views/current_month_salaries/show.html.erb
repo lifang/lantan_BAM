@@ -12,7 +12,7 @@
                    </div>
               </div>
               <div class="search">
-                   <div>统计时间：2012-12</div>
+                   <div>统计时间：<%= @statistics_date %></div>
               </div>
               <div class="clear"></div>
               <div class="data_body">
@@ -20,7 +20,7 @@
                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
                            <thead>
                                 <tr class="hbg">
-                                  <td><span class="sort_u">日期</span></td>
+                                  <td><span class="sort_u_s">日期</span></td>
                                   <td>提成政策</td>
                                   <td>提成标准</td>
                                   <td>满意度</td>
@@ -37,18 +37,18 @@
                                 <tr>
                                   <td><%= salary_detail.current_day %></td>
                                   <% if flag %>
-                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXXXX</td>
+                                  <td rowspan="<%= @salary_details.length %>"><p class="td_p">满意度98%以上每低一个百分点，扣底薪200，100%满意度，奖励<%= @staff.deduct_at %>元。</p></td>
                                   <td rowspan="<%= @salary_details.length %>"><%= @staff.deduct_at %></td>
                                   <% end %>
-                                  <td>XXXXXX</td>
+                                  <td><%= salary_detail.satisfied_perc %></td>
                                   <% if flag %>
-                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXXXX</td>
+                                  <td rowspan="<%= @salary_details.length %>"><%= @salary.satisfied_perc unless @salary.nil? %></td>
                                   <% end %>
-                                  <td>XXXXXXXX</td>
-                                  <td>XXXXXX</td>
-                                  <td>XXXXX</td>
+                                  <td><%= salary_detail.reward_num %></td>
+                                  <td><%= salary_detail.deduct_num %></td>
+                                  <td><%= salary_detail.violation_reward.mark %></td>
                                   <% if flag %>
-                                  <td rowspan="<%= @salary_details.length %>">XXXXXXXX</td>
+                                  <td rowspan="<%= @salary_details.length %>"><%= @salary.total.to_i unless @salary.nil? %></td>
                                   <% end %>
                                 </tr>
                                 <% flag = false %>
