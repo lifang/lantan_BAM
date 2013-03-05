@@ -287,6 +287,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 .search select.select_marginRight { margin-right: 10px;}
 .input[type="button"].search_btn, .search_btn, .compile_btn {
+	display: block;
     height: 24x;
 	line-height: 24px;
 	text-align: center;
@@ -294,7 +295,6 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	border: none;
 	padding: 0 10px;
 	color: #FFF;
-	display: block;
 }
 
 .search input[type="text"].input_s { width: 50px;}
