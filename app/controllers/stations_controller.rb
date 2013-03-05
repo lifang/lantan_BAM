@@ -28,7 +28,6 @@ class StationsController < ApplicationController
       @t_infos[station.id]=Staff.where("id in (#{staff.map(&:staff_id).join(',')})").map(&:id)  unless staff.blank?
     end
     @staffs =Staff.find_by_sql("select name,id from staffs where store_id=#{params[:store_id]} and type_of_w=#{Staff::S_COMPANY[:TECHNICIAN]}")
-    p @staffs
   end
 
   def create
@@ -45,5 +44,27 @@ class StationsController < ApplicationController
       end
     }
     redirect_to "/stores/#{params[:store_id]}/stations/show_detail"
+  end
+
+  def show_video
+    @video_hash =@video_hash=Station.filter_dir(params[:store_id])
+  end
+
+
+  def search
+    session[:create_at],session[:end_at]=nil,nil
+    session[:create_at],session[:end_at]=params[:create_at],params[:end_at]
+    redirect_to "/stores/#{params[:store_id]}/stations/search_video"
+  end
+
+  def search_video
+    @video_hash=Station.filter_dir(params[:store_id])
+    @video_hash =@video_hash.select { |key,value| key >= session[:create_at]  } if session[:create_at] != ""
+    @video_hash =@video_hash.select { |key,value| key <= session[:end_at] } if session[:end_at] != ""
+    render "show_video"
+  end
+
+  def see_video
+    @path=params[:url]
   end
 end
