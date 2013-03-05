@@ -4,5 +4,8 @@ class CreateCustomerNumRelations < ActiveRecord::Migration
       t.integer :customer_id
       t.integer :car_num_id
     end
+
+    add_index :customer_num_relations, :customer_id
+    add_index :customer_num_relations, :car_num_id
   end
 end

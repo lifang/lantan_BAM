@@ -16,5 +16,12 @@ class CreateComplaints < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :complaints, :order_id
+    add_index :complaints, :types
+    add_index :complaints, :staff_id_1
+    add_index :complaints, :staff_id_2
+    add_index :complaints, :customer_id
+    add_index :complaints, :store_id
   end
 end

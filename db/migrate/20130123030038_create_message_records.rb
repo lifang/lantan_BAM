@@ -8,5 +8,8 @@ class CreateMessageRecords < ActiveRecord::Migration
       t.integer :store_id
       t.datetime :created_at
     end
+
+    add_index :message_records, :store_id
+    add_index :message_records, :status
   end
 end

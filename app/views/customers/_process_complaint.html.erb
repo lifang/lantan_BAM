@@ -2,7 +2,7 @@
   <div class="popup_box">
     <h1>投诉处理<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
-      <%= form_for :process, :url=>"/stores/#{@order.store_id}/revisits/process", :method => "post",
+      <%= form_for :process, :url=>"/stores/#{@order.store_id}/revisits/process_complaint", :method => "post",
         :html => {:onsubmit => "return check_process()"} do %>
         <div class="popup_body_area">
           <div class="seeProDiv">
@@ -10,6 +10,7 @@
             <div class="seeProDiv_r" id="process_code"><%= @order.code %></div>
             <input type="hidden" name="pro_compl_id" id="pro_compl_id" value="<%= @complaint_id %>" />
             <input type="hidden" name="pc_order_id" id="pc_order_id" value="<%= @order.id %>" />
+            <input type="hidden" name="pc_code" id="pc_code" value="<%= @order.code %>"/>
           </div>
           <div class="seeProDiv">
             <div class="seeProDiv_l">投诉类型：</div>
@@ -25,11 +26,11 @@
           <div class="seeProDiv">
             <div class="seeProDiv_l">责任人：</div>
             <div class="seeProDiv_rWidth">
-              <span><input type="checkbox" id="front_staff_id" name="front_staff_id" value="<%= @order.front_staff_id %>" /> <%= @order.front_s_name %>(接待)</span>
-              <span><input type="checkbox" id="cons_staff_id" name="cons_staff_id"
-                     value="<%= @order.cons_staff_id_1 %>, <%= @order.cons_staff_id_2 %>" /> <%= @order.cons_s_name1 %>、<%= @order.cons_s_name2 %>（技师）</span>
+              <span><input type="radio" id="c_staff_id" name="c_staff_id" value="<%= @order.front_staff_id %>" /> <%= @order.front_s_name %>(接待)</span>
+              <span><input type="radio" id="c_staff_id" name="c_staff_id"
+                           value="<%= @order.cons_staff_id_1 %>,<%= @order.cons_staff_id_2 %>" /> <%= @order.cons_s_name1 %>、<%= @order.cons_s_name2 %>（技师）</span>
             </div>
-          </div>          
+          </div>
           <div class="clear"></div>
           <div class="seeProDiv">
             <div class="seeProDiv_l">处理意见：</div>

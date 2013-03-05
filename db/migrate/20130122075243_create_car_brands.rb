@@ -5,5 +5,8 @@ class CreateCarBrands < ActiveRecord::Migration
       t.string :name
       t.integer :capital_id
     end
+
+    add_index :car_brands, :name
+    add_index :car_brands, :capital_id
   end
 end

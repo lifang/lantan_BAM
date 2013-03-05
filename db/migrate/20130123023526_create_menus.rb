@@ -5,5 +5,7 @@ class CreateMenus < ActiveRecord::Migration
       t.string :controller
       t.string :name
     end
+
+    add_index :menus, :controller
   end
 end

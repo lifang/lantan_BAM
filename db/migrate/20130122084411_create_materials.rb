@@ -12,5 +12,10 @@ class CreateMaterials < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :materials, :name
+    add_index :materials, :types
+    add_index :materials, :status
+    add_index :materials, :store_id
   end
 end

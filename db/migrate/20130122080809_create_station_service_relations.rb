@@ -6,5 +6,8 @@ class CreateStationServiceRelations < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :station_service_relations, :station_id
+    add_index :station_service_relations, :product_id
   end
 end

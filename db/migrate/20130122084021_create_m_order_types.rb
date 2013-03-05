@@ -7,5 +7,8 @@ class CreateMOrderTypes < ActiveRecord::Migration
       t.float :price
 
     end
+
+    add_index :m_order_types, :material_order_id
+    add_index :m_order_types, :pay_types
   end
 end

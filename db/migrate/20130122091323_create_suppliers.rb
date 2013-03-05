@@ -11,5 +11,7 @@ class CreateSuppliers < ActiveRecord::Migration
       t.integer :status
       t.timestamps
     end
+
+    add_index :suppliers, :created_at
   end
 end

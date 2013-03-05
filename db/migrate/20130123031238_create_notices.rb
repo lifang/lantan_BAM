@@ -10,5 +10,9 @@ class CreateNotices < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :notices, :store_id
+    add_index :notices, :status
+    add_index :notices, :types
   end
 end

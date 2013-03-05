@@ -23,5 +23,21 @@ class CreateOrders < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :orders, :code
+    add_index :orders, :car_num_id
+    add_index :orders, :status
+    add_index :orders, :created_at
+    add_index :orders, :price
+    add_index :orders, :front_staff_id
+    add_index :orders, :cons_staff_id_1
+    add_index :orders, :cons_staff_id_2
+    add_index :orders, :station_id
+    add_index :orders, :sale_id
+    add_index :orders, :c_pcard_relation_id
+    add_index :orders, :c_svc_relation_id
+    add_index :orders, :store_id
+    add_index :orders, :types
+    add_index :orders, :is_visited
   end
 end

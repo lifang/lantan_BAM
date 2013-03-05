@@ -6,5 +6,8 @@ class CreateStaffRoleRelations < ActiveRecord::Migration
       t.integer :staff_id
 
     end
+
+    add_index :staff_role_relations, :role_id
+    add_index :staff_role_relations, :staff_id
   end
 end

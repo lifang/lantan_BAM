@@ -5,7 +5,7 @@
       <%= form_for :revisit, :url=>"/stores/#{@store.id}/revisits", :method => "post",
         :html => {:onsubmit => "return check_revisit()"} do %>
         <div class="popup_body_area">
-          <input type="hidden" id="rev_customer_id" name="rev_customer_id" value="<%= @customer.id %>"/>
+          <input type="hidden" id="rev_customer_id" name="rev_customer_id" value=""/>
           <input type="hidden" id="rev_order_id" name="rev_order_id" value=""/>
           <div class="item">
             <label>标题：</label><input name="rev_title" id="rev_title" type="text"/>

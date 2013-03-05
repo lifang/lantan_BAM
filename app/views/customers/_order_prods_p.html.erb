@@ -24,11 +24,11 @@
               <td>数量</td>
             </tr>
             <% @product_hash[order.id].each do |p| %>
-            <tr>
-              <td><%= p.name %></td>
-              <td><%= p.price %></td>
-              <td><%= p.pro_num %></td>
-            </tr>
+              <tr>
+                <td><%= p.name %></td>
+                <td><%= p.price %></td>
+                <td><%= p.pro_num %></td>
+              </tr>
             <% end if @product_hash[order.id] %>
           </table>
         </td>
@@ -36,7 +36,10 @@
         <td><%= @order_pay_type[order.id] %></td>
         <td><%= Order::IS_PLEASED_NAME[order.is_pleased] %></td>
         <td><%= order.is_billing ? "是" : "否" %></td>
-        <td><a href="javascript:void(0)" onclick="javascript:customer_revisit(<%= order.id %>)">回访</a></td>
+        <td>
+          <a href="javascript:void(0)"
+             onclick="javascript:customer_revisit(<%= order.id %>, <%= @customer.id %>)">回访</a>
+        </td>
       </tr>
     <% end %>
   </tbody>

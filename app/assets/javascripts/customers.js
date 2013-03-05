@@ -107,9 +107,10 @@ function check_car_num() {
     }
 }
 
-function customer_revisit(order_id) {
+function customer_revisit(order_id, customer_id) {
     popup("#customer_revisit_div");
     $("#rev_order_id").val(order_id);
+    $("#rev_customer_id").val(customer_id);
 }
 
 function check_revisit() {

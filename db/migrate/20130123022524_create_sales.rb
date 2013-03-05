@@ -16,5 +16,9 @@ class CreateSales < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :sales, :status
+    add_index :sales, :store_id
+    add_index :sales, :created_at
   end
 end

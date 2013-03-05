@@ -11,4 +11,6 @@ class ViolationReward < ActiveRecord::Base
 
   TYPES = {:VIOLATION => 0, :REWARD => 1} #0 处罚  1 奖励
 
+  STATUS = {:NOMAL => 0, :PROCESSED => 1} #0 未处理  1 已处理
+
 end

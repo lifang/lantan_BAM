@@ -7,5 +7,9 @@ class CreateStationStaffRelations < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :station_staff_relations, :station_id
+    add_index :station_staff_relations, :staff_id
+    add_index :station_staff_relations, :current_day
   end
 end

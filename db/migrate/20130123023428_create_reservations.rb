@@ -9,5 +9,10 @@ class CreateReservations < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :reservations, :car_num_id
+    add_index :reservations, :status
+    add_index :reservations, :store_id
+    add_index :reservations, :created_at
   end
 end

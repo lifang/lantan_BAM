@@ -17,5 +17,9 @@ class CreateWorkRecords < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :work_records, :current_day
+    add_index :work_records, :staff_id
+    add_index :work_records, :created_at
   end
 end

@@ -1,7 +1,6 @@
 #encoding: utf-8
 class RevisitsController < ApplicationController
   layout "customer"
-  
   def index
     session[:started_at] = nil
     session[:ended_at] = nil
@@ -52,14 +51,26 @@ class RevisitsController < ApplicationController
     redirect_to request.referer
   end
 
-  def process
+  def process_complaint
     flash[:notice] = "处理失败，请您重新尝试。"
     if params[:prod_type]
+      staff_ids = params[:c_staff_id].split(",") unless params[:c_staff_id].nil?
+      staff_id_1, staff_id_2 = staff_ids[0], staff_ids[1] if staff_ids
+      is_violation = params[:prod_type].to_i < Complaint::TYPES[:invalid] ? true : false
       complaint = Complaint.find(params[:pro_compl_id].to_i)
       complaint.update_attributes(:types => params[:prod_type].to_i, :remark => params[:pro_remark],
-        :status => Complaint::STATUS[:PROCESSED])
-      
+        :status => Complaint::STATUS[:PROCESSED], :is_violation => is_violation, :process_at => Time.now,
+        :staff_id_1 => staff_id_1, :staff_id_2 => staff_id_2)
+
+      violation_hash = {:status => ViolationReward::STATUS[:NOMAL],
+        :situation => "订单#{params[:pc_code]}产生投诉，#{Complaint::TYPES_NAMES[params[:prod_type].to_i]}",
+        :types => ViolationReward::TYPES[:VIOLATION], :target_id => complaint.id}
+      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_1})) if staff_id_1
+      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_2})) if staff_id_2
+      flash[:notice] = "处理投诉成功。"
     end
+    redirect_to request.referer
   end
+
   
 end
