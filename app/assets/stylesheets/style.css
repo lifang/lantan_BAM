@@ -294,6 +294,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	border: none;
 	padding: 0 10px;
 	color: #FFF;
+	display: block;
 }
 
 .search input[type="text"].input_s { width: 50px;}
