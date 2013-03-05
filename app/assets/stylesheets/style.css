@@ -214,9 +214,13 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 .tab_head li.hover { height: 30px; background: #FFF; font-weight: bolder; color: #930205;}
 
-.sort_u, .sort_d { padding: 0 15px; cursor: pointer; background: url(/assets/sort.png) no-repeat}
+
+.sort_u, .sort_d, .sort_u_s, .sort_d_s { padding: 0 15px; cursor: pointer; background: url(/assets/sort.png) no-repeat}
 .sort_u { background-position:74px -26px; _background-position: 74px -20px;}
 .sort_d { background-position: 74px 6px; _background-position: 74px 12px;}
+
+.sort_u_s { background-position: 46px -26px; _background-position: 74px -20px;}
+.sort_d_s { background-position: 46px 6px; _background-position: 74px 12px;}
 
 
 
@@ -234,6 +238,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 .data_table td .data_input_s { width: 50px; height: 24px; line-height: 24px; border: 1px #CCCCCC solid; text-align: center;}
 
+.td_p { width: 100px; margin: 0 auto; text-align: center;}
 
 /*s_table*/
 .s_table { background:#CCC; margin: 5px 0;}
