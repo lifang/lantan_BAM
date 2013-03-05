@@ -87,4 +87,12 @@ module ApplicationHelper
   def signed_in?
     return cookies[:user_id] != nil
   end
+
+  def get_last_twelve_months
+    months = []
+    12.times do |i|
+      months << DateTime.now.months_ago(i).strftime("%Y-%m")
+    end
+    months
+  end
 end
