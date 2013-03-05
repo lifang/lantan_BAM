@@ -10,5 +10,8 @@ class CreateCSvcRelations < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :c_svc_relations, :customer_id
+    add_index :c_svc_relations, :sv_card_id
   end
 end
