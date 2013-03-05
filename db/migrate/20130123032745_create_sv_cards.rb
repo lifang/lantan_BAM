@@ -10,5 +10,7 @@ class CreateSvCards < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :sv_cards, :types
   end
 end

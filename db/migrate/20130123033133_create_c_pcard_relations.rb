@@ -10,5 +10,9 @@ class CreateCPcardRelations < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :c_pcard_relations, :customer_id
+    add_index :c_pcard_relations, :package_card_id
+    add_index :c_pcard_relations, :status
   end
 end

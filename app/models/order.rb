@@ -114,7 +114,8 @@ class Order < ActiveRecord::Base
 
   def self.one_order_info(order_id)
     return Order.find_by_sql(["select o.id, o.code, o.created_at, o.sale_id, o.price, o.c_pcard_relation_id, o.store_id,
-      c.name front_s_name, c1.name cons_s_name1, c2.name cons_s_name2, o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2
+      o.is_free, o.c_svc_relation_id, c.name front_s_name, c1.name cons_s_name1,
+      c2.name cons_s_name2, o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2
       from orders o left join customers c on c.id = o.front_staff_id left join customers c1 on c1.id = o.cons_staff_id_1
       left join customers c2 on c2.id = o.cons_staff_id_2 where o.id = ?", order_id])
   end

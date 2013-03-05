@@ -4,5 +4,7 @@ class ImageUrls < ActiveRecord::Migration
       t.integer :product_id
       t.string  :img_url
     end
+
+    add_index :image_urls, :product_id
   end
 end
