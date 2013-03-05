@@ -30,7 +30,8 @@ LantanBAM::Application.routes.draw do
   resources :stores do
     resources :stations do
       collection do
-        get "show_detail","show_video"
+        get "show_detail","show_video","see_video","search_video"
+        post "search"
       end
     end
     resources :sales do 

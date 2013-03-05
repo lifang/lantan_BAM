@@ -37,10 +37,10 @@
       </table>
     <% end %>
     <input type="hidden" value="<%= Station::STAT[:NORMAL] %>" id="station_id" />
-    <input type="hidden" value="<%= @stats %>" id="status_name" />
     <div class="btn_box">
       <button class="confirm_btn" onclick="check_station()">确定</button>
-      <button class="cancel_btn" onclick="window.location.reload();">还原</button></div>
+      <button class="cancel_btn" onclick="window.location.reload();">还原</button>
+    </div>
   </div>
 </div>
 <script type="text/javascript">

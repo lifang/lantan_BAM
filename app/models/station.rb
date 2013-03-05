@@ -81,4 +81,27 @@ class Station < ActiveRecord::Base
     end
     return "#{user_plan}".gsub("=>",":")
   end
+
+  def self.get_dir_list(path)
+    #获取目录列表
+    list = Dir.entries(path)
+    list.delete('.')
+    list.delete('..')
+    return list
+  end
+
+  def self.filter_dir(store_id)
+    video_path ="/public/#{Constant::VIDEO_DIR}/#{store_id}/"
+    paths=get_dir_list("#{Rails.root}"+video_path)
+    video_hash ={}
+    paths.each do |path|
+      mtime =File.stat("#{Rails.root}"+video_path+path).mtime.strftime("%Y-%m-%d")
+      if video_hash[mtime]
+        video_hash[mtime] << video_path+path
+      else
+        video_hash[mtime] = [video_path+path]
+      end
+    end
+    return video_hash
+  end
 end
