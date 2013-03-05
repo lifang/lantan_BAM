@@ -95,7 +95,7 @@ $(document).ready(function(){
     });
 
     //编辑系统打分
-    $(".bz_btn").click(function(){
+    $("#staff_info .bz_btn").click(function(){
         $(this).prev().show();
         $(this).hide();
         $(this).parents('tr').find(".sys_score_text").hide();
@@ -160,6 +160,45 @@ $(document).ready(function(){
             }
         });
         return false;
+    });
+
+    //编辑提成金额扣款金额
+    $("#salary_info .bz_btn").click(function(){
+       $(this).hide();
+       $(this).prev().show();
+       $(this).parents('tr').find(".reward_num_text").hide();
+       $(this).parents('tr').find(".reward_num_input").show();
+       $(this).parents('tr').find(".deduct_num_text").hide();
+       $(this).parents('tr').find(".deduct_num_input").show();
+       return false;
+    });
+
+    //提交编辑提成金额扣款金额
+    $(".edit_reward_deduct_submit").click(function(){
+       var this_obj = $(this);
+       var store_id = $("#store_id").val();
+       var reward_num = $(this).parents('tr').find(".reward_num_input").val();
+       var deduct_num = $(this).parents('tr').find(".deduct_num_input").val();
+       var salary_id = $(this).attr("id");
+       $.ajax({
+            type : 'put',
+            url : "/stores/"+ store_id+"/salaries/" + salary_id,
+            data : {
+                reward_num : reward_num,
+                deduct_num : deduct_num
+            },
+            success: function(data){
+               if(data == "success"){
+                   this_obj.hide();
+                   this_obj.next().show();
+                   this_obj.parents('tr').find(".reward_num_input").hide();
+                   this_obj.parents('tr').find(".deduct_num_input").hide();
+                   this_obj.parents('tr').find(".deduct_num_text").text(deduct_num).show();
+                   this_obj.parents('tr').find(".reward_num_text").text(reward_num).show();
+               }
+            }
+        });
+       return false;
     });
 
     //员工详情

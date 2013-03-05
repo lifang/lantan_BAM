@@ -463,6 +463,7 @@ input.file { width: 100px; _width: 90px; float: left;}
 .seeProDiv_p { padding: 10px 0; overflow: hidden;}
 
 .seeProDiv_textarea { margin: 20px 10px; float: left; overflow: hidden; width: 590px;}
+.seeProDiv_r select {  height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 
 .srw_ul { padding: 5px;}
 .srw_ul li { margin: 0 5px; display: inline;}
@@ -573,7 +574,7 @@ input.file { width: 100px; _width: 90px; float: left;}
 }
 .gray_table td select { width: 120px; height: 24px; line-height: 24px; border: 1px #CCCCCC solid; margin: 0 5px 11px 5px;}
 .gray_table_error_bg { background: #ffb0b0;font-weight: bold; color: #F00;}
-.gray_table_error { background: url(/assets/alert.png) no-repeat 10px center;}
+.gray_table_error { background: #ffb0b0 url(../images/alert.png) no-repeat 10px center; padding-left: 15px;}
 
 /*work_video施工视频*/
 .work_video {}

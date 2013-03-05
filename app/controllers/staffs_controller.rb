@@ -1,10 +1,12 @@
 #encoding: utf-8
 require 'fileutils'
+require 'will_paginate/array'
 class StaffsController < ApplicationController
 
   layout "staff"
 
   before_filter :get_store
+  before_filter :search_work_record, :only => :show
 
   def index
     @staffs_names = @store.staffs.select("id, name")
@@ -30,17 +32,7 @@ class StaffsController < ApplicationController
 
   def show
     @tab = params[:tab]
-    @staff = Staff.find_by_id(params[:id])
-
-    start_at = (params[:start_at].nil? || params[:start_at].empty?) ?
-              "1 = 1" : "current_day >= #{(params[:start_at].delete '-').to_i}"
-            
-    end_at = (params[:end_at].nil? || params[:end_at].empty?) ?
-              "1 = 1" : "current_day <= #{(params[:end_at].delete '-').to_i}"
-
-    @work_records = @staff.work_records.where(start_at).where(end_at).
-                  paginate(:page => params[:page] ||= 1, :per_page => 1)
-                
+           
     @violations = @staff.violation_rewards.where("types = false").
                   paginate(:page => params[:page] ||= 1, :per_page => 1)
 
@@ -82,6 +74,43 @@ class StaffsController < ApplicationController
 
   def get_store
     @store = Store.find_by_id(params[:store_id])
+  end
+
+  def search_work_record
+    @cal_style = params[:cal_style]
+    @staff = Staff.find_by_id(params[:id])
+    start_at = (params[:start_at].nil? || params[:start_at].empty?) ?
+              "1 = 1" : "current_day >= #{(params[:start_at].delete '-').to_i}"
+
+    end_at = (params[:end_at].nil? || params[:end_at].empty?) ?
+              "1 = 1" : "current_day <= #{(params[:end_at].delete '-').to_i}"
+
+    if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day")
+      @work_records = @staff.work_records.where(start_at).where(end_at).
+                  paginate(:page => params[:page] ||= 1, :per_page => 1)
+    end
+
+    if @cal_style.eql?("week")
+      #@work_records = @staff.work_records.where(start_at).where(end_at).select("current_day").
+      #  group_by{|u| DateTime.strptime(u.current_day.to_s, "%Y%m%d").beginning_of_week}.to_a.
+      #  paginate(:page => params[:page] ||= 1, :per_page => 1)
+
+      @work_records = @staff.work_records.select("*, SUM(attendance_num) as attendance_num_sum").
+        where(start_at).where(end_at).group("date_format('%A', current_day)")
+
+     
+    end
+
+    puts "**************"
+    puts @work_records.inspect
+    puts "******************"
+
+    if @cal_style.eql?("month")
+      @work_records = @staff.work_records.where(start_at).where(end_at).
+        group_by{|u| DateTime.strptime(u.current_day.to_s, "%Y%m%d").beginning_of_month}.to_a.
+        paginate(:page => params[:page] ||= 1, :per_page => 1)
+    end
+
   end
   
 end

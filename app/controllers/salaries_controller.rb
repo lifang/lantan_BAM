@@ -13,5 +13,12 @@ class SalariesController < ApplicationController
       format.js
     end
   end
+
+  def update
+    salary = Salary.find_by_id(params[:id])
+    salary.update_attributes(:reward_num => params[:reward_num],
+      :deduct_num => params[:deduct_num]) if salary
+    render :text => "success"
+  end
   
 end
