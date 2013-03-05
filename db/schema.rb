@@ -498,6 +498,7 @@ ActiveRecord::Schema.define(:version => 20130305012552) do
     t.float    "discount"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "description"
   end
 
   create_table "svc_return_records", :force => true do |t|
@@ -514,6 +515,8 @@ ActiveRecord::Schema.define(:version => 20130305012552) do
     t.integer "product_id"
     t.integer "product_num"
     t.integer "sv_card_id"
+    t.float   "base_price"
+    t.float   "more_price"
   end
 
   create_table "svcard_use_records", :force => true do |t|

@@ -12,7 +12,7 @@
                      </select>
                      </form>
                    </div>
-                <div><button class="search_btn">导出EXCEL</button><%= link_to "导出EXCEL", url_for(:format => 'xls') %></div>
+                <div><%= link_to "导出EXCEL", store_current_month_salaries_path(@store, :format => 'xls') + "?statistics_date=#{@statistics_date}", :class => "search_btn" %></div>
               </div>
               <div class="clear"></div>
               <div class="data_body" id="salary_info">
