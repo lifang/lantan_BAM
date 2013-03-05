@@ -284,7 +284,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	line-height: 24px; 
 	border: 1px #CCCCCC solid;	
 }
-.search select { float: left; }
+
 .search select.select_marginRight { margin-right: 10px;}
 .input[type="button"].search_btn, .search_btn, .compile_btn {
     height: 24x;
