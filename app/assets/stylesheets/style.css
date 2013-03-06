@@ -226,8 +226,8 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 /*table*/
 .data_table { text-align: center; margin-bottom: 30px;}
-.data_table tr.hbg td { background: #c59fa0; color: #FFF; font-weight: bolder; font-size: 14px;}
-.data_table td { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
+.data_table tr.hbg td, .data_table tr.hbg th { background: #c59fa0; color: #FFF; font-weight: bolder; font-size: 14px;}
+.data_table td, .data_table th { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
 .data_table tr.tbg td { background: #fff5f6;}
 .data_table td a { background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
 
