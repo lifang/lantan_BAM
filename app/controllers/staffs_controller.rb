@@ -19,7 +19,7 @@ class StaffsController < ApplicationController
     @staff.photo = params[:staff][:photo].original_filename
     if @staff.save
       #save picture
-      @staff.save_picture(params[:staff][:photo])
+      @staff.operate_picture(params[:staff][:photo], "create")
     end
     redirect_to store_staffs_path(@store)
   end
@@ -60,7 +60,11 @@ class StaffsController < ApplicationController
 
   def update
     @staff = Staff.find_by_id(params[:id])
+    photo = params[:staff][:photo]
+    params[:staff][:photo] = photo.original_filename unless photo.nil?
     @staff.update_attributes(params[:staff]) if @staff
+    #update picture
+    @staff.operate_picture(photo, "update") if !photo.nil? && @staff
     redirect_to store_staff_path(@store, @staff)
   end
 

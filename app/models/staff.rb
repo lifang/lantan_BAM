@@ -49,7 +49,8 @@ class Staff < ActiveRecord::Base
     self.encrypted_password=encrypt(password)
   end
 
-  def save_picture(photo)
+  def operate_picture(photo, status)
+    FileUtils.remove_dir "public/uploads/#{self.id}" if status.eql?("update")
     FileUtils.mkdir_p "public/uploads/#{self.id}"
     File.new(Rails.root.join('public', "uploads", "#{self.id}", photo.original_filename), 'a+')
     File.open(Rails.root.join('public', "uploads", "#{self.id}", photo.original_filename), 'wb') do |file|
