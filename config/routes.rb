@@ -1,4 +1,5 @@
 LantanBAM::Application.routes.draw do
+
   resources :sales do
     collection do
       post :delete_sale,:public_sale
@@ -123,5 +124,14 @@ LantanBAM::Application.routes.draw do
       get "get_act_count", "out","order_remark"
     end
   end
+
+  namespace :api do
+     resources :orders do
+       collection do
+         post "login","add","pay","complaint","search_car","reserve","index_list","brands_products"
+       end
+     end
+  end
+
 
 end

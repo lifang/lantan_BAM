@@ -5,11 +5,11 @@ class CreateProducts < ActiveRecord::Migration
       t.float :base_price
       t.float :sale_price  #销售价格
       t.text :description   #产品介绍
-      t.integer :types
+      t.integer :types  #清洁类，保养类。。。
       t.string :service_code   #服务代码
-      t.boolean :status
+      t.boolean :status     #状态
       t.text :introduction
-      t.boolean :is_service
+      t.boolean :is_service   #判断是产品还是服务
       t.integer :staff_level   #所需技师等级
       t.integer :staff_level_1  
       t.string :img_url

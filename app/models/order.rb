@@ -10,7 +10,7 @@ class Order < ActiveRecord::Base
   has_many :revisit_order_relations
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
-  STATUS = {:NOMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5}
+  STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5}
   #0 正常未进行  1 服务中  2 等待付款  3 已经付款  4 已结束  5已删除
 
   TYPES = {:SERVICE => 0, :PRODUCT => 1} #0 服务  1 产品
@@ -106,5 +106,101 @@ class Order < ActiveRecord::Base
   def self.one_customer_orders(status, store_id, customer_id, pre_page, page)
     @orders = Order.paginate_by_sql(["select * from orders where status != ? and store_id = ? and customer_id = ?
         order by created_at desc", status, store_id, customer_id], :per_page => pre_page, :page => page)
+  end
+
+  #施工中的订单
+  def self.working_orders status,store_id
+    Order.find_by_sql("select o.id,c.num from orders o inner join car_nums c on c.id=o.car_num_id where o.status=#{status}
+      and o.store_id=#{store_id} order by o.created_at")
+  end
+
+  def self.search_by_car_num store_id,car_num
+    customer = nil
+    working_orders = []
+    old_orders = []
+    sql = "select c.id customer_id,c.name,c.mobilephone,cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
+      from customer_num_relations cnr
+      inner join car_nums cn on cn.id=cnr.car_num_id and cn.num='#{car_num}'
+      inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}
+      inner join car_models cm on cm.id=cn.car_model_id
+      inner join car_brands cb on cb.id=cm.car_brand_id "
+    customer = CustomerNumRelation.find_by_sql sql
+    if customer && customer.size > 0
+      customer = customer[0]
+      orders = Order.find_by_sql("select * from orders o where o.car_num_id=#{customer.car_num_id}
+        and o.status!=#{STATUS[:DELETED]} and o.store_id=#{store_id} order by o.created_at desc")
+      (orders || []).each do |order|
+         order_hash = order
+         #puts order_hash
+         order_hash[:products] = order.order_prod_relations.collect{|r|
+           p = Hash.new
+           p[:name] = r.product.name
+           p[:price] = r.price.to_f * r.pro_num.to_i
+           p
+         }
+         order_hash[:pay_type] = order.order_pay_types.collect{|type|
+            OrderProdRelation::PAY_TYPES_NAME[type.pay_type]
+         }.join(",")
+         if order.sale_id
+           s = Hash.new
+           s[:name] = "huodong"
+           s[:price] = 12
+           s[:num] = 22
+           order_hash[:products] << s
+         end
+         if order.c_pcard_relation_id
+
+         end
+         if order.c_svc_relation_id
+
+         end
+         front_staff = Staff.find_by_id_and_store_id order.front_staff_id,store_id
+         order_hash[:staff] = front_staff.name if front_staff
+         if order.status == STATUS[:FINISHED]
+            old_orders << order_hash
+         else
+            working_orders << order_hash
+         end
+      end
+      working_orders = working_orders.first if working_orders.size > 0
+      #puts old_orders.to_json,working_orders.to_json,customer.to_json
+    else
+
+    end
+    [customer,working_orders,old_orders]
+  end
+
+  def self.get_brands_products store_id
+    arr = []
+    brands = CarBrand.all :order => "id"
+    brand_arr = []
+    (brands || []).each do |brand|
+      b = brand
+      b[:models] = brand.car_models
+      brand_arr << b
+    end
+    arr << brand_arr
+    product_arr = []
+    clean_arr = []
+    prod_arr = []
+    maint_arr = []
+    card_arr = []
+    products = Product.find_all_by_store_id_and_status store_id Product::IS_VALIDATE[:YES]
+    (products || []).each do |p|
+       if p.types.to_i <=4
+         prod_arr << p
+       elsif p.types.to_i == 5
+          clean_arr << p
+       elsif p.types.to_i > 5
+          maint_arr << p
+       end
+    end
+    product_arr << clean_arr
+    product_arr << maint_arr
+    product_arr << prod_arr
+    cards = PackageCard.find_all_by_store_id_and_status store_id PackageCard::STAT[:NORMAL]
+    product_arr << cards
+    arr << product_arr
+    arr
   end
 end
