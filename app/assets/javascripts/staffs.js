@@ -10,11 +10,107 @@ function remove_area(parent, close, cancel){
 
 $(document).ready(function(){
 
-    $(".myTable").tablesorter();
-
-    $("table thead tr th").live("click", function(){
-        $(".myTable").tablesorter();
+    $("#staffs_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false }
+        }
     });
+
+    $("#work_record_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false },
+            7: { sorter: false },
+            8: { sorter: false },
+            9: { sorter: false }
+        }
+    });
+    $("#month_score_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false }
+        }
+    });
+    $("#reward_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false }
+        }
+    });
+    $("#salary_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false }
+        }
+    });
+    $("#train_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false }
+        }
+    });
+    $("#violation_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false }
+        }
+    });
+
+    $("#current_month_salary_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false }
+        }
+    });
+
+    $("#current_month_salary_detail_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false },
+            7: { sorter: false },
+            8: { sorter: false }
+        }
+    });
+
+    //$(".sort_u_s, .sort_d_s").click(function(){
+    //    if($(this).attr("class") == "sort_u_s"){
+    //        $(this).attr("class", "sort_d_s");
+    //    }else{
+   //         $(this).attr("class", "sort_u_s");
+   //     }
+   // });
 
     //创建员工
     $("#new_staff").click(function(){
