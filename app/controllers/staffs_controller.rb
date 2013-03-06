@@ -84,7 +84,7 @@ class StaffsController < ApplicationController
 
     if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day")
       @work_records = @staff.work_records.where(start_at).where(end_at).
-                  paginate(:page => params[:page] ||= 1, :per_page => 1)
+                  paginate(:page => params[:page] ||= 1, :per_page => 3)
     end
 
     
@@ -103,7 +103,7 @@ class StaffsController < ApplicationController
 
       @work_records = @staff.work_records.select(base_sql).
         where(start_at).where(end_at).group("#{@cal_style}(current_day)").
-        paginate(:page => params[:page] ||= 1, :per_page => 1)
+        paginate(:page => params[:page] ||= 1, :per_page => 3)
     end
 
   end
