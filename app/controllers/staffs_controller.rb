@@ -1,5 +1,4 @@
 #encoding: utf-8
-require 'fileutils'
 class StaffsController < ApplicationController
 
   layout "staff"
@@ -20,11 +19,7 @@ class StaffsController < ApplicationController
     @staff.photo = params[:staff][:photo].original_filename
     if @staff.save
       #save picture
-      FileUtils.mkdir_p "public/uploads/#{@staff.id}"
-      File.new(Rails.root.join('public', "uploads", "#{@staff.id}", params[:staff][:photo].original_filename), 'a+')
-      File.open(Rails.root.join('public', "uploads", "#{@staff.id}", params[:staff][:photo].original_filename), 'wb') do |file|
-        file.write(params[:staff][:photo].read)
-      end
+      @staff.save_picture(params[:staff][:photo])
     end
     redirect_to store_staffs_path(@store)
   end
@@ -86,21 +81,9 @@ class StaffsController < ApplicationController
       @work_records = @staff.work_records.where(start_at).where(end_at).order("current_day desc").
                   paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     end
-
-    
+ 
     if @cal_style.eql?("week") || @cal_style.eql?("month")
-      base_sql = "current_day,
-                SUM(attendance_num) as attendance_num_sum,
-                SUM(construct_num) as construct_num_sum,
-                SUM(materials_used_num) as materials_used_num_sum,
-                SUM(materials_consume_num) as materials_consume_num_sum,
-                SUM(water_num) as water_num_sum,
-                SUM(complaint_num) as complaint_num_sum,
-                SUM(train_num) as train_num_sum,
-                SUM(reward_num) as reward_num_sum,
-                SUM(violation_num) as violation_num_sum"
-
-
+      base_sql = Staff.search_work_record_sql
       @work_records = @staff.work_records.select(base_sql).
         where(start_at).where(end_at).group("#{@cal_style}(current_day)").order("current_day desc").
         paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)

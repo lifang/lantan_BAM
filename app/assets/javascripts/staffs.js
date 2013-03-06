@@ -104,13 +104,21 @@ $(document).ready(function(){
         }
     });
 
-    //$(".sort_u_s, .sort_d_s").click(function(){
-    //    if($(this).attr("class") == "sort_u_s"){
-    //        $(this).attr("class", "sort_d_s");
-    //    }else{
-   //         $(this).attr("class", "sort_u_s");
-   //     }
-   // });
+    $(".sort_u_s, .sort_d_s").click(function(){
+        if($(this).attr("class") == "sort_u_s"){
+            $(this).attr("class", "sort_d_s");
+        }else{
+            $(this).attr("class", "sort_u_s");
+        }
+    });
+
+    $(".sort_u, .sort_d").click(function(){
+        if($(this).attr("class") == "sort_u"){
+            $(this).attr("class", "sort_d");
+        }else{
+            $(this).attr("class", "sort_u");
+        }
+    });
 
     //创建员工
     $("#new_staff").click(function(){
@@ -136,8 +144,8 @@ $(document).ready(function(){
         return false;
     });
 
-    //创建员工信息验证
-    $("#new_staff_btn").click(function(){
+    //创建员工信息验证, 编辑员工信息验证
+    $("#new_staff_btn, #staff_edit").live("click", function(){
        if($(this).parents('form').find("#staff_name").val() == ''){
            alert("名称不能为空!");
            return false;
