@@ -9,5 +9,10 @@ class CreateMonthScores < ActiveRecord::Migration
       t.string :reason    #原因
       t.timestamps
     end
+
+    add_index :month_scores, :sys_score
+    add_index :month_scores, :manage_score
+    add_index :month_scores, :current_month
+    add_index :month_scores, :staff_id    
   end
 end

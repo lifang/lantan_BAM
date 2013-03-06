@@ -10,5 +10,8 @@ class CreateSalaries < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :salaries, :current_month
+    add_index :salaries, :staff_id
   end
 end

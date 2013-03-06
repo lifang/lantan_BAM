@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130228015440) do
+ActiveRecord::Schema.define(:version => 20130305012552) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
   create_table "car_nums", :force => true do |t|
     t.string  "num"
     t.integer "car_model_id"
+    t.integer "buy_year"
   end
 
   create_table "cities", :force => true do |t|
@@ -100,6 +101,11 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.float    "current_price"
     t.integer  "store_id"
     t.datetime "created_at"
+  end
+
+  create_table "image_urls", :force => true do |t|
+    t.integer "product_id"
+    t.string  "img_url"
   end
 
   create_table "m_order_types", :force => true do |t|
@@ -351,7 +357,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.integer  "reward_num"
     t.float    "satisfied_perc"
     t.integer  "staff_id"
-    t.integer  "voilation_reward_id"
+    t.integer  "violation_reward_id"
     t.datetime "created_at"
   end
 
@@ -452,6 +458,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "name"
   end
 
   create_table "stores", :force => true do |t|
@@ -491,6 +498,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.float    "discount"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "description"
   end
 
   create_table "svc_return_records", :force => true do |t|
@@ -507,6 +515,8 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
     t.integer "product_id"
     t.integer "product_num"
     t.integer "sv_card_id"
+    t.float   "base_price"
+    t.float   "more_price"
   end
 
   create_table "svcard_use_records", :force => true do |t|
@@ -569,7 +579,7 @@ ActiveRecord::Schema.define(:version => 20130228015440) do
   end
 
   create_table "work_records", :force => true do |t|
-    t.integer  "current_day"
+    t.datetime "current_day"
     t.integer  "attendance_num"
     t.integer  "construct_num"
     t.integer  "materials_used_num"

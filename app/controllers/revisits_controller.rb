@@ -1,7 +1,6 @@
 #encoding: utf-8
 class RevisitsController < ApplicationController
   layout "customer"
-  
   def index
     session[:started_at] = nil
     session[:ended_at] = nil
@@ -34,5 +33,44 @@ class RevisitsController < ApplicationController
       session[:is_time], session[:time], session[:is_price], session[:price], session[:is_vip], nil, params[:page])
     render "index"
   end
+
+  def create
+    flash[:notice] = "创建回访失败，请您重新尝试。"
+    if params[:rev_title]
+      Revisit.transaction do
+        complaint = Complaint.create(:order_id => params[:rev_order_id].to_i, :reason => params[:rev_answer],
+          :status => Complaint::STATUS[:UNTREATED], :customer_id => params[:rev_customer_id].to_i,
+          :store_id => params[:store_id].to_i) if params[:is_complaint]
+        revisit = Revisit.create(:customer_id => params[:rev_customer_id].to_i, :types => params[:rev_types].to_i,
+          :title => params[:rev_title], :answer => params[:rev_content], :content => params[:rev_answer],
+          :complaint_id => (complaint.nil? ? nil : complaint.id))
+        RevisitOrderRelation.create(:order_id => params[:rev_order_id].to_i, :revisit_id => revisit.id)
+      end
+      flash[:notice] = "添加回访成功。"
+    end
+    redirect_to request.referer
+  end
+
+  def process_complaint
+    flash[:notice] = "处理失败，请您重新尝试。"
+    if params[:prod_type]
+      staff_ids = params[:c_staff_id].split(",") unless params[:c_staff_id].nil?
+      staff_id_1, staff_id_2 = staff_ids[0], staff_ids[1] if staff_ids
+      is_violation = params[:prod_type].to_i < Complaint::TYPES[:invalid] ? true : false
+      complaint = Complaint.find(params[:pro_compl_id].to_i)
+      complaint.update_attributes(:types => params[:prod_type].to_i, :remark => params[:pro_remark],
+        :status => Complaint::STATUS[:PROCESSED], :is_violation => is_violation, :process_at => Time.now,
+        :staff_id_1 => staff_id_1, :staff_id_2 => staff_id_2)
+
+      violation_hash = {:status => ViolationReward::STATUS[:NOMAL],
+        :situation => "订单#{params[:pc_code]}产生投诉，#{Complaint::TYPES_NAMES[params[:prod_type].to_i]}",
+        :types => ViolationReward::TYPES[:VIOLATION], :target_id => complaint.id}
+      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_1})) if staff_id_1
+      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_2})) if staff_id_2
+      flash[:notice] = "处理投诉成功。"
+    end
+    redirect_to request.referer
+  end
+
   
 end

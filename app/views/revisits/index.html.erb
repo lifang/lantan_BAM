@@ -55,8 +55,14 @@
                 <td><%= customer.num %></td>
                 <td><%= customer.name %></td>
                 <td><%= customer.mobilephone %></td>
-                <td><a href="#" class="other_a"><%= customer.code %></a></td>
-                <td><a href="#">回访</a></td>
+                <td>
+                  <%= link_to "#{customer.code}", "/orders/#{customer.o_id}/order_info" ,
+            :remote => "true", "data-type" => "script", :class => "other_a" %>                  
+                </td>
+                <td>
+                  <a href="javascript:void(0)" 
+                     onclick="javascript:customer_revisit(<%= customer.o_id %>, <%= customer.cu_id %>)">回访</a>
+                </td>
               </tr>
             <% end %>
           </tbody>
@@ -67,3 +73,5 @@
     </div>
   </div>
 </div>
+<%= render :partial => "/customers/customer_revisit" %>
+<div id="related_order_div"></div>

@@ -8,5 +8,8 @@ class CreateMatOrderItems < ActiveRecord::Migration
       t.float :price
 
     end
+
+    add_index :mat_order_items, :material_order_id
+    add_index :mat_order_items, :material_id
   end
 end

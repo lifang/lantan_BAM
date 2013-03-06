@@ -2,7 +2,7 @@
   <div class="popup_box">
     <h1>备注<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
-      <%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/customer_mark", :method => "post" do %>
+      <%= form_for :remark ,:url=>"/stores/#{@store.id}/customers/customer_mark", :method => "post" do %>
         <div class="popup_body_area">
           <input type="hidden" name="c_customer_id" id="c_customer_id" value="" />
           <textarea id="mark" name="mark" cols="" rows="" class="beizhu_textarea"></textarea>

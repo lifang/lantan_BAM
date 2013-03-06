@@ -12,5 +12,9 @@ class CreatePackageCards < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :package_cards, :store_id
+    add_index :package_cards, :status
+    add_index :package_cards, :created_at
   end
 end

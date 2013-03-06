@@ -10,5 +10,10 @@ class CreateMatInOrders < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :mat_in_orders, :material_order_id
+    add_index :mat_in_orders, :material_id
+    add_index :mat_in_orders, :staff_id
+    add_index :mat_in_orders, :created_at
   end
 end

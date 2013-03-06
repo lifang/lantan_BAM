@@ -14,5 +14,12 @@ class CreateCustomers < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :customers, :name
+    add_index :customers, :mobilephone
+    add_index :customers, :birthday
+    add_index :customers, :is_vip
+    add_index :customers, :status
+    add_index :customers, :types
   end
 end

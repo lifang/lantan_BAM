@@ -2,7 +2,7 @@ class CreateWorkRecords < ActiveRecord::Migration
 #  员工考勤
   def change
     create_table :work_records do |t|
-      t.integer :current_day   #年月日
+      t.datetime :current_day   #年月日
       t.integer :attendance_num  #当月出勤
       t.integer :construct_num
       t.integer :materials_used_num   #使用工具
@@ -17,5 +17,9 @@ class CreateWorkRecords < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :work_records, :current_day
+    add_index :work_records, :staff_id
+    add_index :work_records, :created_at
   end
 end

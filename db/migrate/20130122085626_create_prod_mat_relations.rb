@@ -7,5 +7,8 @@ class CreateProdMatRelations < ActiveRecord::Migration
       t.integer :material_id
 
     end
+
+    add_index :prod_mat_relations, :product_id
+    add_index :prod_mat_relations, :product_id
   end
 end

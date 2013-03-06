@@ -6,5 +6,8 @@ class CreateResProdRelations < ActiveRecord::Migration
       t.integer :reservation_id
 
     end
+
+    add_index :res_prod_relations, :product_id
+    add_index :res_prod_relations, :reservation_id
   end
 end

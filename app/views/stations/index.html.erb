@@ -1,0 +1,62 @@
+<meta http-equiv="refresh" content="300" />
+<div class="data_box">
+  <div class="data_body">
+    <div class="siteBox site_pay">
+      <h1>等待付款</h1>
+      <% @f_waiting.each do |key,wait| %>
+        <div class="site_list">
+          <span class="site_name"><%= @f_waiting[key][0].name %></span>
+          <ul>
+            <%@f_waiting[key].each do |num|%>
+              <li><a href="javascript:void(0)" onclick=""><%= num.num %></a></li>
+            <% end unless @f_waiting[key].blank? %>
+          </ul>
+        </div>
+      <% end  unless @f_waiting.blank?%>
+    </div>
+    <div class="siteBox site_work">
+      <h1>正在施工</h1>
+      <% @f_working.each do |key,wait| %>
+        <div class="site_list">
+          <span class="site_name"><%= @f_working[key][0].name %></span>
+          <ul>
+            <%@f_working[key].each do |num|%>
+              <li><%= num.num %></li>
+            <% end unless @f_working[key].blank? %>
+          </ul>
+        </div>
+      <% end  unless @f_working.blank?%>
+    </div>
+    <div class="siteBox site_info">
+      <h1>工位情况</h1>
+      <div class="site_list">
+        <% unless  @stations.blank?%>
+          <% @stations.each do |station| %>
+            <div class="site_station">
+              <h3>工位: <%= station.name %></h3>
+              <% if  station.status== Station::STAT[:LACK]%>
+                <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
+              <% elsif station.status== Station::STAT[:WRONG] %>
+                <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
+              <% elsif station.status== Station::STAT[:NO_SERVICE] %>
+                <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
+              <%elsif @t_infos[station.id].nil?%>
+                <div class="free_station">空闲</div>
+                <p>技师：暂无技师，请分配</p>
+              <%elsif  @t_infos[station.id][1].nil? %>
+                <div class="free_station">空闲</div>
+                <p>技师：<%= @t_infos[station.id][0] %></p>
+              <% else %>
+                <div><%=@t_infos[station.id][1]  %></div>
+                <p>技师：<%= @t_infos[station.id][0] %></p>
+              <% end %>
+            </div>
+          <%end%>
+        <%else%>
+          <%= "暂未创建工位信息" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+

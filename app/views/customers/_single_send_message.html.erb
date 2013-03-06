@@ -2,7 +2,7 @@
   <div class="popup_box">
     <h1>发短信<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
-      <%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/single_send_message",
+      <%= form_for :message ,:url=>"/stores/#{@store.id}/customers/single_send_message",
     :method => "post", :html => {:onsubmit => "return check_single_send()"} do %>
       <div class="popup_body_area">
         <div>

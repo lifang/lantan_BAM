@@ -7,6 +7,7 @@ gem 'rails', '3.1.2'
 
 gem 'mysql2', '0.3.10'
 gem "will_paginate", '3.0.3'
+gem 'mini_magick'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -34,4 +35,8 @@ gem 'spreadsheet', '0.6.5.5'
 group :test do
   # Pretty printed test output
   gem 'turn', '0.8.2', :require => false
+end
+
+group :development do
+  gem "better_errors"
 end

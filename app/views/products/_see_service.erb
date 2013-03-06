@@ -36,7 +36,13 @@
       </div>
       <div class="seeProDiv">
         <div class="seeProDiv_l">配图：</div>
-        <div class="seeProDiv_r"><img src="/assets/pro.jpg" /></div>
+        <div class="seeProDiv_rWidth">
+          <ul class="seeProPic">
+            <%@img_urls.each do |img|%>
+              <li><img src="<%= img.img_url.nil? ? "" : img.img_url.gsub("img#{@serv.id}","img#{@serv.id}_50")  %>" /></li>
+            <% end unless @img_urls.blank? %>
+          </ul>
+        </div>
       </div>
       <div class="clear"></div>
       <div class="seeProDiv_p">

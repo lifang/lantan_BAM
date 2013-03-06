@@ -24,7 +24,7 @@
               <tbody>
                 <%@cards.each do |card|%>
                   <tr>
-                    <td class="data_table_img"><img src="<%= card.img_url %>" /></td>
+                    <td class="data_table_img"><img src="<%= card.img_url.nil? ? "" : card.img_url.gsub("img#{card.id}","img#{card.id}_148")  %>" /></td>
                     <td><%= card.name %></td>
                     <td><%= card.started_at.nil?? "" : card.started_at.strftime("%Y-%m-%d") %></td>
                     <td><%= card.ended_at.nil??  "" : card.ended_at.strftime("%Y-%m-%d") %></td>

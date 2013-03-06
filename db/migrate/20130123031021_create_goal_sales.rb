@@ -11,5 +11,8 @@ class CreateGoalSales < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :goal_sales, :created_at
+    add_index :goal_sales, :store_id
   end
 end

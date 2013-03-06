@@ -10,5 +10,8 @@ class CreateSendMessages < ActiveRecord::Migration
       t.boolean :status
 
     end
+
+    add_index :send_messages, :message_record_id
+    add_index :send_messages, :status
   end
 end

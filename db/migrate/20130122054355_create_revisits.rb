@@ -11,5 +11,10 @@ class CreateRevisits < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :revisits, :customer_id
+    add_index :revisits, :types
+    add_index :revisits, :title
+    add_index :revisits, :complaint_id
   end
 end

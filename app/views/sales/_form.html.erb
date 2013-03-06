@@ -49,7 +49,8 @@
 
 <div class="releaseDiv">
   <div class="releaseDiv_l">活动图片：</div>
-  <div class="releaseDiv_r"><input name="img_url" type="file" class="file" id="img_url" value="<%= @sale.img_url %>"  />
+  <div class="releaseDiv_r"><input type=file name=img_url id="img_url" style="display: none;"  onchange="ye.value=value" />
+  <input name=ye type="text" class="file"  id="sale_img" value="<%= @sale.img_url %>" /><input type="button" class="file_btn" value="浏览" onclick=img_url.click()  />
   </div>
 </div>
 <div class="releaseDiv">

@@ -6,5 +6,8 @@ class CreateRoleMenuRelations < ActiveRecord::Migration
       t.integer :menu_id
 
     end
+
+    add_index :role_menu_relations, :role_id
+    add_index :role_menu_relations, :menu_id
   end
 end

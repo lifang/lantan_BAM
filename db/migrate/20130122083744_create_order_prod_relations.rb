@@ -8,5 +8,8 @@ class CreateOrderProdRelations < ActiveRecord::Migration
       t.float :price   #价格
 
     end
+
+    add_index :order_prod_relations, :order_id
+    add_index :order_prod_relations, :product_id
   end
 end

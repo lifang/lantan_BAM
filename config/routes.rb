@@ -29,6 +29,12 @@ LantanBAM::Application.routes.draw do
   end
   match "logout" => "logins#logout"
   resources :stores do
+    resources :stations do
+      collection do
+        get "show_detail","show_video","see_video","search_video"
+        post "search"
+      end
+    end
     resources :sales do 
       collection do
         post "load_types"
@@ -39,8 +45,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :package_cards do
       collection do
-        post "pcard_types","add_pcard"
-        get "sale_records"
+        post "pcard_types","add_pcard","search"
+        get "sale_records","search_list"
       end
       member do
         post "edit_pcard","update_pcard"
@@ -58,8 +64,8 @@ LantanBAM::Application.routes.draw do
     resources :materials do
       collection do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
-            "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
-            "search_supplier_orders","receive_order","pay_order","update_notices"
+          "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
+          "search_supplier_orders","receive_order","pay_order","update_notices"
         post "out_order","material_order","add","alipay_complete"
       end
     end
@@ -67,7 +73,11 @@ LantanBAM::Application.routes.draw do
     resources :staffs
     resources :violation_rewards
     resources :trains
-    resources :month_scores
+    resources :month_scores do
+      collection do
+        get "update_sys_score"
+      end
+    end
     resources :salaries
     resources :current_month_salaries
 
@@ -86,12 +96,12 @@ LantanBAM::Application.routes.draw do
         get "search_list"
       end
       member do
-        get "order_prods"
+        get "order_prods", "revisits", "complaints"
       end
     end
     resources :revisits do
       collection do
-        post "search"
+        post "search", "process_complaint"
         get "search_list"
       end
     end
@@ -116,6 +126,12 @@ LantanBAM::Application.routes.draw do
     end
   end
 
+  resources :orders do
+    member do
+      get "order_info", "order_staff"
+    end
+  end
+
   resources :materials do
     member do
       get "remark","check"
@@ -132,6 +148,5 @@ LantanBAM::Application.routes.draw do
        end
      end
   end
-
 
 end

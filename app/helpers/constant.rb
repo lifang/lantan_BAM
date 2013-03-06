@@ -16,20 +16,20 @@ module Constant
     },
     #库存
     :materials => {
-        :show => ["查看库存列表",1],
-        :in => ["入库",2],
-        :out => ["出库",4],
-        :dinghuo =>["订货",8],
-        :add_supplier => ["添加供应商",16],
-        :supplier => ["查看供应商",32],
-        :edit_supplier => ["编辑供应商",64],
-        :print => ["打印库存清单", 128],
-        :check => ["盘点核实",256],
-        :cuihuo => ["催货",512],
-        :cancel => ["取消订单",1024],
-        :pay => ["付款",2048],
-        :del_supplier => ["删除供应商",4096],
-        :receive => ["确认已收货",8192]
+      :show => ["查看库存列表",1],
+      :in => ["入库",2],
+      :out => ["出库",4],
+      :dinghuo =>["订货",8],
+      :add_supplier => ["添加供应商",16],
+      :supplier => ["查看供应商",32],
+      :edit_supplier => ["编辑供应商",64],
+      :print => ["打印库存清单", 128],
+      :check => ["盘点核实",256],
+      :cuihuo => ["催货",512],
+      :cancel => ["取消订单",1024],
+      :pay => ["付款",2048],
+      :del_supplier => ["删除供应商",4096],
+      :receive => ["确认已收货",8192]
     },
     :staffs => {
       :add_staff => ["新建员工",1],
@@ -49,12 +49,12 @@ module Constant
 
     },
     :datas => {
-       :add_target => ["制定目标销售额",1],
-       :customer => ["查看客户统计",2],
-       :sale => ["查看营销统计",4],
-       :storage => ["查看库存统计",8],
-       :staff => ["查看员工统计",16],
-       :print => ["打印单据",32]
+      :add_target => ["制定目标销售额",1],
+      :customer => ["查看客户统计",2],
+      :sale => ["查看营销统计",4],
+      :storage => ["查看库存统计",8],
+      :staff => ["查看员工统计",16],
+      :print => ["打印单据",32]
     },
     :stations => {
       :show => ["查看现场",1],
@@ -78,6 +78,9 @@ module Constant
     }
   }
 
+  #上传图片的比例
+  PIC_SIZE=[50,100,148,300,700]
+
   #角色
   SYS_ADMIN = "1"  #系统管理员
   BOSS = "2" #老板
@@ -94,4 +97,6 @@ module Constant
 
   SERVER_PATH = "http://localhost:3000"
 
+  #  施工现场文件目录
+  VIDEO_DIR ="work_videos"
 end

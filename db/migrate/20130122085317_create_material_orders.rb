@@ -18,5 +18,14 @@ class CreateMaterialOrders < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :material_orders, :code
+    add_index :material_orders, :supplier_id
+    add_index :material_orders, :supplier_type
+    add_index :material_orders, :status
+    add_index :material_orders, :staff_id
+    add_index :material_orders, :store_id
+    add_index :material_orders, :sale_id
+    add_index :material_orders, :m_status
   end
 end

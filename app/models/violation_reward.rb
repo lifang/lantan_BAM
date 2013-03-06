@@ -9,6 +9,8 @@ class ViolationReward < ActiveRecord::Base
   REWARD = {:reward=>1,:salary=>2,:reduce=>3,:vocation=>4} #1 奖金 2 加薪 3 缩短升值期限 4 带薪假期
   N_REWARD = {1 => "奖金", 2 => "加薪", 3 => "缩短升值期限", 4 => "带薪假期"}
 
-  #types 值 为1  奖励
-  #types 值 为0  处罚
+  TYPES = {:VIOLATION => 0, :REWARD => 1} #0 处罚  1 奖励
+
+  STATUS = {:NOMAL => 0, :PROCESSED => 1} #0 未处理  1 已处理
+
 end

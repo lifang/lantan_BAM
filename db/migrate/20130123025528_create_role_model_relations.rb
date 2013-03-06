@@ -6,5 +6,7 @@ class CreateRoleModelRelations < ActiveRecord::Migration
       t.integer :num
 
     end
+
+    add_index :role_model_relations, :role_id
   end
 end

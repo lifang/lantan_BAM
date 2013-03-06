@@ -19,5 +19,11 @@ class CreateProducts < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :products, :name
+    add_index :products, :types
+    add_index :products, :status
+    add_index :products, :is_service
+    add_index :products, :store_id
   end
 end

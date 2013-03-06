@@ -11,5 +11,8 @@ class CreateStaffGrRecords < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :staff_gr_records, :staff_id
+    add_index :staff_gr_records, :created_at
   end
 end

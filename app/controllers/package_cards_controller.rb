@@ -17,7 +17,8 @@ class PackageCardsController < ApplicationController
     parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],:ended_at=>params[:ended_at],
       :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL],:price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d")
     }
-    pcard=PackageCard.create(parms)
+    pcard =PackageCard.create(parms)
+    pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,"pcard_pics",pcard.store_id))  if params[:img_url]
     params[:sale_prod].each do |key,value|
       PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
     end
@@ -26,9 +27,7 @@ class PackageCardsController < ApplicationController
 
 
   def sale_records
-    @cards=CPcardRelation.find_by_sql("select c.name,c.mobilephone,cp.content,n.num,p.price from c_pcard_relations cp inner join customers c on c.id=cp.customer_id
-    inner join  package_cards p on p.id=cp.package_card_id inner join customer_num_relations  cn on c.id=cn.customer_id inner join car_nums n
-    on n.id=cn.car_num_id where store_id=#{params[:store_id]}")
+    @cards=PackageCard.search_pcard(params[:store_id],params[:page])
     @card_fee =@cards.inject(0) {|num,card| num+card.price }
     @pcards =PackageCard.where(:status=>PackageCard::STAT[:NORMAL]).inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
     p @pcards
@@ -61,6 +60,7 @@ class PackageCardsController < ApplicationController
     parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],
       :ended_at=>params[:ended_at],:price=>params[:price]
     }
+    parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,"pcard_pics",pcard.store_id))  if params[:img_url]
     pcard.update_attributes(parms)
     pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
     params[:sale_prod].each do |key,value|
@@ -79,4 +79,18 @@ class PackageCardsController < ApplicationController
     end
   end
 
+  def search
+    session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at]=nil,nil,nil,nil,nil
+    session[:pcard],session[:car_num],session[:c_name]=params[:pcard],params[:car_num],params[:c_name]
+    session[:created_at],session[:ended_at]=params[:created_at],params[:ended_at]
+    redirect_to "/stores/#{params[:store_id]}/package_cards/search_list"
+  end
+
+  def search_list
+    @cards=PackageCard.search_pcard(params[:store_id],params[:page],session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at])
+    @card_fee =@cards.inject(0) {|num,card| num+card.price }
+    @pcards =PackageCard.where(:status=>PackageCard::STAT[:NORMAL]).inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
+    render "sale_records"
+  end
+  
 end

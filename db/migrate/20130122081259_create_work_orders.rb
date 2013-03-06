@@ -17,5 +17,11 @@ class CreateWorkOrders < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :work_orders, :station_id
+    add_index :work_orders, :status
+    add_index :work_orders, :order_id
+    add_index :work_orders, :current_day
+    add_index :work_orders, :store_id
   end
 end

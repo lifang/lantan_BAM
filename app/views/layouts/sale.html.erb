@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>LantanBAM</title>
     <%= stylesheet_link_tag    "application" %>
     <%= javascript_include_tag "application" %>
     <title><%= @title.nil? ? "统计管理--营销--营业额汇总表" : @title %></title>
@@ -18,9 +17,9 @@
             <li><a href="/stores/<%= params[:store_id] %>/sales" 
                    <% if  controller.controller_name=="sales" %> class="hover" <%end%>>活动</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/products" 
-                   <% if controller.controller_name=="products" and (controller.action_name =~/service/) == nil %> class="hover" <%end%>>产品</a></li>
+                   <% if controller.controller_name=="products" and (controller.action_name =~/service/) == nil %> class="hover" <%end%> id="product">产品</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/products/prod_services"
-                   <% if controller.controller_name=="products" and controller.action_name =~/service/ %> class="hover" <%end%>>服务</a></li>
+                   <% if controller.controller_name=="products" and controller.action_name =~/service/ %> class="hover" <%end%> id="service">服务</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/package_cards"
                     <% if  controller.controller_name=="package_cards" %> class="hover" <%end%> >套餐卡</a></li>
           </ul>
