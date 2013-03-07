@@ -6,6 +6,7 @@
             <th>内容</th>
             <th>是否通过考核</th>
             <th>证书</th>
+            <th>操作</th>
           </tr>
       </thead>
       <tbody>
@@ -14,8 +15,9 @@
             <td><%= train.start_at.strftime("%Y.%m.%d") %> - <%= train.end_at.strftime("%Y.%m.%d") %></td>
             <td>洗车</td>
             <td><%= train.content %></td>
-            <td>XXXXXX</td>
-            <td>XXXXX</td>
+            <td><%=  %></td>
+            <td><%= train.certificate ? "是" : "否" %></td>
+            <td>操作</td>
           </tr>
         <% end %>
       </tbody>
