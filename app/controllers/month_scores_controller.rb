@@ -7,7 +7,7 @@ class MonthScoresController < ApplicationController
     month_score = MonthScore.find_by_id(params[:id])
     month_score.update_attributes(params[:month_score]) if month_score
     @month_scores = month_score.staff.month_scores.
-                    paginate(:page => params[:page] ||= 1, :per_page => 1)
+                    paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     respond_to do |format|
       format.js
     end

@@ -17,31 +17,32 @@ class StaffsController < ApplicationController
   def create
     @staff = @store.staffs.new(params[:staff])
     @staff.photo = params[:staff][:photo].original_filename
-    if @staff.save
-      #save picture
-      @staff.operate_picture(params[:staff][:photo], "create")
+    if @staff.save && @staff.operate_picture(params[:staff][:photo], "create") #save staff info and picture
+      flash[:notice] = "创建员工成功!"
+    else
+      flash[:notice] = "创建员工失败!"
     end
     redirect_to store_staffs_path(@store)
   end
 
   def show
-    @tab = params[:tab]
+    @tab = params[:tab] 
            
     @violations = @staff.violation_rewards.where("types = false").
-                  paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+                  paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("violation_tab")
 
     @rewards = @staff.violation_rewards.where("types = true").
-                paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+                paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("reward_tab")
               
     @trains = Train.includes(:train_staff_relations).
               where("train_staff_relations.staff_id = #{@staff.id}").
-              paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+              paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("train_tab")
 
-    @month_scores = @staff.month_scores.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @month_scores = @staff.month_scores.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("month_score_tab")
 
-    @salaries = @staff.salaries.where("status = false").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @salaries = @staff.salaries.where("status = false").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("salary_tab")
 
-    current_month = Time.now().strftime("%Y").to_s << Time.now().strftime("%m")
+    current_month = Time.now().strftime("%Y%m")
 
     @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
 
@@ -75,22 +76,26 @@ class StaffsController < ApplicationController
   end
 
   def search_work_record
-    @cal_style = params[:cal_style]
-    @staff = Staff.find_by_id(params[:id])
-    start_at = (params[:start_at].nil? || params[:start_at].empty?) ? "1 = 1" : "current_day >= '#{params[:start_at]}'"
+    if @tab.nil? || @tab.eql?("work_record_tab")
 
-    end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "current_day <= '#{params[:end_at]}'"
+      @cal_style = params[:cal_style]
+      @staff = Staff.find_by_id(params[:id])
+      start_at = (params[:start_at].nil? || params[:start_at].empty?) ? "1 = 1" : "current_day >= '#{params[:start_at]}'"
 
-    if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day")
-      @work_records = @staff.work_records.where(start_at).where(end_at).order("current_day desc").
-                  paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
-    end
- 
-    if @cal_style.eql?("week") || @cal_style.eql?("month")
-      base_sql = Staff.search_work_record_sql
-      @work_records = @staff.work_records.select(base_sql).
-        where(start_at).where(end_at).group("#{@cal_style}(current_day)").order("current_day desc").
-        paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+      end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "current_day <= '#{params[:end_at]}'"
+
+      if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day")
+        @work_records = @staff.work_records.where(start_at).where(end_at).order("current_day desc").
+                    paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+      end
+
+      if @cal_style.eql?("week") || @cal_style.eql?("month")
+        base_sql = Staff.search_work_record_sql
+        @work_records = @staff.work_records.select(base_sql).
+          where(start_at).where(end_at).group("#{@cal_style}(current_day)").order("current_day desc").
+          paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+      end
+
     end
 
   end

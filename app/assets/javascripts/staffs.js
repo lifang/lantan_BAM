@@ -120,6 +120,9 @@ $(document).ready(function(){
         }
     });
 
+    //提示信息居中
+    //popup(".tab_alert");
+
     //创建员工
     $("#new_staff").click(function(){
         popup("#new_staff_area");
@@ -145,7 +148,7 @@ $(document).ready(function(){
     });
 
     //创建员工信息验证, 编辑员工信息验证
-    $("#new_staff_btn, #staff_edit").live("click", function(){
+    $("#new_staff_btn, #edit_staff_btn").live("click", function(){
        if($(this).parents('form').find("#staff_name").val() == ''){
            alert("名称不能为空!");
            return false;
@@ -178,9 +181,11 @@ $(document).ready(function(){
            alert("薪资标准不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_photo").val() == ''){
-           alert("照片不能为空!");
-           return false;
+       if($(this).attr("id") == "new_staff_btn"){
+           if($(this).parents('form').find("#staff_photo").val() == ''){
+               alert("照片不能为空!");
+               return false;
+           }
        }
        if($(this).parents('form').find("#staff_deduct_at").val() == ''){
            alert("提成起始额不能为空!");

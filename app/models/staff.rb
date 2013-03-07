@@ -34,7 +34,7 @@ class Staff < ActiveRecord::Base
   N_SEX = {0 => "男", 1 => "女"}
 
   #分页页数
-  PerPage = 3
+  PerPage = 1
   
 
   attr_accessor:password
