@@ -433,6 +433,31 @@ $(document).ready(function(){
        return false;
     });
 
+    //处理培训
+    $(".process_train").live("click", function(){
+       if(confirm("确认处理？")){
+           var this_obj = $(this);
+           var store_id = $("#store_id").val();
+           var staff_id = $("#staff_id").val();
+           var train_id = $(this).attr("id");
+           $.ajax({
+                type : 'put',
+                url : "/stores/"+ store_id+"/trains/"+ train_id,
+                data : {
+                    staff_id : staff_id
+                },
+                success: function(data){
+                   if(data == "success"){
+                       this_obj.parents('tr').find("span.train_status").text("通过");
+                       this_obj.hide();
+                       this_obj.next().show();
+                   }
+                }
+            });
+           return false;
+       }
+    });
+
     //ajax paginate
     $("#ajax_paginate .pageTurn a").live("click", function(){
        var params_string = $(this).attr("href").split("?")[1];

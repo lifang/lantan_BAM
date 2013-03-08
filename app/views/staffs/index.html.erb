@@ -230,11 +230,20 @@
                          <input type="checkbox" value="<%= staff.id %>" name="staff[id][]"/>&nbsp;<%= staff.name %>&nbsp;&nbsp;&nbsp;&nbsp;
                        <% end %>
                   </div>
+                  <div class="search paddin_left">
+                       <div><label>培训类别：</label>
+                          <%= f.select :train_type, Train::TYPES_NAME.invert %>
+                       </div>
+                  </div>
+                  <div class="search paddin_left">
+                         <div><label>有无证书：</label>
+                            <input type="checkbox" value="0" name="train[certificate]"/>
+                         </div>
+                   </div>
                   <div class="item_textarea">
                        <label>培训原因：</label>
                        <%= f.text_area(:content, :cols => "", :rows => "", :class => "width_textarea") %>
                   </div>
-
               </div>
               <div class="btn_box"><button class="confirm_btn" id="new_train_btn">确定</button><button class="cancel_btn">取消</button></div>
          </div>

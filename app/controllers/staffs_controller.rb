@@ -76,10 +76,9 @@ class StaffsController < ApplicationController
   end
 
   def search_work_record
+    @staff = Staff.find_by_id(params[:id])
     if @tab.nil? || @tab.eql?("work_record_tab")
-
       @cal_style = params[:cal_style]
-      @staff = Staff.find_by_id(params[:id])
       start_at = (params[:start_at].nil? || params[:start_at].empty?) ? "1 = 1" : "current_day >= '#{params[:start_at]}'"
 
       end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "current_day <= '#{params[:end_at]}'"
