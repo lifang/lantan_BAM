@@ -10,11 +10,119 @@ function remove_area(parent, close, cancel){
 
 $(document).ready(function(){
 
-    $(".myTable").tablesorter();
-
-    $("table thead tr th").live("click", function(){
-        $(".myTable").tablesorter();
+    $("#staffs_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false }
+        }
     });
+
+    $("#work_record_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false },
+            7: { sorter: false },
+            8: { sorter: false },
+            9: { sorter: false }
+        }
+    });
+    $("#month_score_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false }
+        }
+    });
+    $("#reward_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false }
+        }
+    });
+    $("#salary_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false }
+        }
+    });
+    $("#train_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false }
+        }
+    });
+    $("#violation_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false }
+        }
+    });
+
+    $("#current_month_salary_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false }
+        }
+    });
+
+    $("#current_month_salary_detail_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false },
+            7: { sorter: false },
+            8: { sorter: false }
+        }
+    });
+
+    $(".sort_u_s, .sort_d_s").click(function(){
+        if($(this).attr("class") == "sort_u_s"){
+            $(this).attr("class", "sort_d_s");
+        }else{
+            $(this).attr("class", "sort_u_s");
+        }
+    });
+
+    $(".sort_u, .sort_d").click(function(){
+        if($(this).attr("class") == "sort_u"){
+            $(this).attr("class", "sort_d");
+        }else{
+            $(this).attr("class", "sort_u");
+        }
+    });
+
+    //提示信息居中
+    //popup(".tab_alert");
 
     //创建员工
     $("#new_staff").click(function(){
@@ -40,8 +148,8 @@ $(document).ready(function(){
         return false;
     });
 
-    //创建员工信息验证
-    $("#new_staff_btn").click(function(){
+    //创建员工信息验证, 编辑员工信息验证
+    $("#new_staff_btn, #edit_staff_btn").live("click", function(){
        if($(this).parents('form').find("#staff_name").val() == ''){
            alert("名称不能为空!");
            return false;
@@ -74,9 +182,11 @@ $(document).ready(function(){
            alert("薪资标准不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_photo").val() == ''){
-           alert("照片不能为空!");
-           return false;
+       if($(this).attr("id") == "new_staff_btn"){
+           if($(this).parents('form').find("#staff_photo").val() == ''){
+               alert("照片不能为空!");
+               return false;
+           }
        }
        if($(this).parents('form').find("#staff_deduct_at").val() == ''){
            alert("提成起始额不能为空!");
@@ -136,6 +246,10 @@ $(document).ready(function(){
        if($("#new_train_area #train_end_at").val() == ''){
             alert("培训结束时间不能为空!");
             return false;
+       }
+       if(new Date($("#new_train_area #train_start_at").val()) > new Date($("#new_train_area #train_end_at").val())){
+           alert("培训开始时间必须在培训结束时间之后!");
+           return false;
        }
        if($("#new_train_area input:checked").length == 0){
            alert("至少选择一个培训人员!");
@@ -345,6 +459,10 @@ $(document).ready(function(){
     $("#search_work_record").click(function(){
        var start_at = $(this).parents('.search').find("#start_at").val();
        var end_at = $(this).parents('.search').find("#end_at").val();
+       if(new Date(start_at) > new Date(end_at)){
+           alert("开始时间必须在结束时间之后!");
+           return false;
+       }
        var staff_id = $(this).parents('.search').find("#staff_id").val();
        var store_id = $(this).parents('.search').find("#store_id").val();
        var tab = "work_record_tab";
