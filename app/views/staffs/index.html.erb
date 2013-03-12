@@ -14,16 +14,16 @@
               <div class="clear"></div>
               <div class="data_body" id="staff_info">
                    <div>
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="staffs_table">
                            <thead>
                                 <tr class="hbg">
-                                  <td><span class="sort_u">姓名</span></td>
-                                  <td>工作岗位</td>
-                                  <td>职务</td>
-                                  <td><span class="sort_u">系统得分</span></td>
-                                  <td><span class="sort_d">店长打分</span></td>
-                                  <td>本月评估</td>
-                                  <td>操作</td>
+                                  <th><span class="sort_u_s">姓名</span></th>
+                                  <th>工作岗位</th>
+                                  <th>职务</th>
+                                  <th><span class="sort_u">系统得分</span></th>
+                                  <th><span class="sort_d">店长打分</span></th>
+                                  <th>本月评估</td>
+                                  <th>操作</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -46,24 +46,6 @@
                                   </td>
                                 </tr>
                               <% end %>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
                             </tbody>
                       </table>
                       <%= will_paginate @posts, :class => "pageTurn", :previous_label => "上一页",
@@ -193,7 +175,7 @@
                   </div>
                   <%= f.hidden_field :types, :value => 1 %>
               </div>
-              <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+              <div class="btn_box"><button class="confirm_btn" id="new_reward_btn">确定</button><button class="cancel_btn">取消</button></div>
          </div>
          <% end %>
     </div>
@@ -225,7 +207,7 @@
                   </div>
                   <%= f.hidden_field :types, :value => 0 %>
               </div>
-              <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+              <div class="btn_box"><a class="confirm_btn" id="new_violation_btn">确定</a><button class="cancel_btn">取消</button></div>
          </div>
          <% end %>
     </div>
@@ -248,13 +230,22 @@
                          <input type="checkbox" value="<%= staff.id %>" name="staff[id][]"/>&nbsp;<%= staff.name %>&nbsp;&nbsp;&nbsp;&nbsp;
                        <% end %>
                   </div>
+                  <div class="search paddin_left">
+                       <div><label>培训类别：</label>
+                          <%= f.select :train_type, Train::TYPES_NAME.invert %>
+                       </div>
+                  </div>
+                  <div class="search paddin_left">
+                         <div><label>有无证书：</label>
+                            <input type="checkbox" value="0" name="train[certificate]"/>
+                         </div>
+                   </div>
                   <div class="item_textarea">
                        <label>培训原因：</label>
                        <%= f.text_area(:content, :cols => "", :rows => "", :class => "width_textarea") %>
                   </div>
-
               </div>
-              <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+              <div class="btn_box"><button class="confirm_btn" id="new_train_btn">确定</button><button class="cancel_btn">取消</button></div>
          </div>
          <% end %>
     </div>

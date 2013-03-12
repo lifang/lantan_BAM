@@ -7,5 +7,8 @@ class CreatePcardProdRelations < ActiveRecord::Migration
       t.integer :package_card_id
 
     end
+
+    add_index :pcard_prod_relations, :product_id
+    add_index :pcard_prod_relations, :package_card_id
   end
 end

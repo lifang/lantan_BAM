@@ -12,21 +12,21 @@
                      </select>
                      </form>
                    </div>
-                <div><button class="search_btn">导出EXCEL</button><%= link_to "导出EXCEL", url_for(:format => 'xls') %></div>
+                <div><%= link_to "导出EXCEL", store_current_month_salaries_path(@store, :format => 'xls') + "?statistics_date=#{@statistics_date}", :class => "search_btn" %></div>
               </div>
               <div class="clear"></div>
               <div class="data_body" id="salary_info">
                    <div>
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="current_month_salary_table">
                            <thead>
                                 <tr class="hbg">
-                                  <td><span class="sort_u">姓名</span></td>
-                                  <td>职务</td>
-                                  <td>底薪</td>
-                                  <td><span class="sort_u">提成金额</span></td>
-                                  <td><span class="sort_d">扣款金额</span></td>
-                                  <td>总额</td>
-                                  <td>操作</td>
+                                  <th><span class="sort_u_s">姓名</span></th>
+                                  <th>职务</th>
+                                  <th>底薪</th>
+                                  <th><span class="sort_u">提成金额</span></th>
+                                  <th><span class="sort_d">扣款金额</span></th>
+                                  <th>总额</th>
+                                  <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -52,24 +52,6 @@
                                   </td>
                                 </tr>
                               <% end %>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                  <td>&nbsp;</td>
-                                </tr>
                             </tbody>
                       </table>
                    </div>

@@ -7,8 +7,11 @@ class CreateCSvcRelations < ActiveRecord::Migration
       t.float :total_price
       t.float :left_price
       t.string :id_card  #客户身份证
-
+      t.boolean :is_billing  #是否已开据发票
       t.datetime :created_at
     end
+
+    add_index :c_svc_relations, :customer_id
+    add_index :c_svc_relations, :sv_card_id
   end
 end

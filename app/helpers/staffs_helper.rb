@@ -29,4 +29,9 @@ module StaffsHelper
     staff.month_scores.where("current_month = #{Time.now.strftime("%Y%m")}").first
   end
 
+  def get_train_status(train_id, staff_id)
+    train_staff_relation = TrainStaffRelation.where("train_id = #{train_id} and staff_id = #{staff_id}").first
+    train_staff_relation.status
+  end
+
 end

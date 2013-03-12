@@ -9,5 +9,8 @@ class CreateSvcardUseRecords < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :svcard_use_records, :c_svc_relation_id
+    add_index :svcard_use_records, :types
   end
 end

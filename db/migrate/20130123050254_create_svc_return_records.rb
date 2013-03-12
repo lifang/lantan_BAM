@@ -11,5 +11,8 @@ class CreateSvcReturnRecords < ActiveRecord::Migration
 
       t.datetime :created_at
     end
+
+    add_index :svc_return_records, :store_id
+    add_index :svc_return_records, :created_at
   end
 end

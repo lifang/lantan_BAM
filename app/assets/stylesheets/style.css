@@ -226,8 +226,8 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 /*table*/
 .data_table { text-align: center; margin-bottom: 30px;}
-.data_table tr.hbg td { background: #c59fa0; color: #FFF; font-weight: bolder; font-size: 14px;}
-.data_table td { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
+.data_table tr.hbg td, .data_table tr.hbg th { background: #c59fa0; color: #FFF; font-weight: bolder; font-size: 14px;}
+.data_table td, .data_table th { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
 .data_table tr.tbg td { background: #fff5f6;}
 .data_table td a { background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
 
@@ -287,6 +287,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 .search select.select_marginRight { margin-right: 10px;}
 .input[type="button"].search_btn, .search_btn, .compile_btn {
+	display: block;
     height: 24x;
 	line-height: 24px;
 	text-align: center;
@@ -319,6 +320,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .popup_body_fieldset { border: 1px #CCCCCC solid;}
 .popup_body_title { font-size: 14px; line-height: 28px; padding: 0 5px; margin-left: 10px; font-weight:bold;}
 .popup_body_result { padding: 10px; height: 80px; overflow:auto;}
+.popup_body_result.resultHeight {padding: 10px; height: inherit; overflow:auto; border: 1px #CCCCCC solid;}
 .popup_body_result li, .popup_body_result div { padding: 6px 10px; margin: 5px 10px; float: left; background: #f0f0f0;}
 .popup_body_result li input { margin-right: 5px; _margin-right: 0px;}
 
@@ -331,6 +333,10 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 /*编辑*/
 .item { margin: 10px; float: left; overflow: hidden; width: 280px; height: 30px; line-height: 24px;}
 .item.item_width { width: 460px;}
+
+.item.show_pic { width: 460px; height: 50px;}
+.item.show_pic img { margin-left: 10px;}
+
 .item_title { font-size: 16px; line-height: 32px; padding-left: 55px;}
 .item_add { float: right; margin-right: 49px;}
 .item label, .item_textarea label {
@@ -347,7 +353,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 .item input.file { width: 100px; _width: 90px; float: left;}
 input.file { width: 100px; _width: 90px; float: left;}
-.file_btn { width: 55px; height: 26px; line-height: 26px; margin-left: 5px; background: #ccc;}
+.file_btn { width: 55px; height: 26px; line-height: 26px; margin-left: 5px; background: #ccc;float: left;}
 .item select {float: left;}
 .item select.staff { width: 70px; margin-right: 20px; _margin-right: 16px;}
 .item select.ymd { width: 50px; margin-right: 5px;}

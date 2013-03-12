@@ -1,37 +1,31 @@
-<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="train_table">
      <thead>
           <tr class="hbg">
-            <td><span class="sort_u">培训时间</span></td>
-            <td>培训类别</td>
-            <td>内容</td>
-            <td>是否通过考核</td>
-            <td>证书</td>
+            <th><span class="sort_u">培训时间</span></th>
+            <th>培训类别</th>
+            <th>内容</th>
+            <th>是否通过考核</th>
+            <th>证书</th>
+            <th>操作</th>
           </tr>
       </thead>
       <tbody>
         <% @trains.each do |train| %>
           <tr>
+            <% status = get_train_status(train.id, @staff.id) %>
             <td><%= train.start_at.strftime("%Y.%m.%d") %> - <%= train.end_at.strftime("%Y.%m.%d") %></td>
-            <td>洗车</td>
+            <td><%= Train::TYPES_NAME[train.train_type] %></td>
             <td><%= train.content %></td>
-            <td>XXXXXX</td>
-            <td>XXXXX</td>
+            <td><span class="train_status"><%=  status ? "没通过" : "通过" %></span></td>
+            <td><%= train.certificate ? "否" : "是" %></td>
+            <td>
+              <% if status %>
+              <a href="javascript:void(0)" class="process_train" id="<%= train.id %>">处理</a>
+              <% end %>
+              <span style="display: <%= status ? "none" : "block" %>">已处理</span>
+            </td>
           </tr>
         <% end %>
-          <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-          </tr>
-          <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-          </tr>
       </tbody>
 </table>
 <%= will_paginate @trains, :class => "pageTurn", :previous_label => "上一页",
