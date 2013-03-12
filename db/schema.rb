@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130305012552) do
+ActiveRecord::Schema.define(:version => 20130307090732) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -539,6 +539,7 @@ ActiveRecord::Schema.define(:version => 20130305012552) do
     t.datetime "end_at"
     t.boolean  "certificate"
     t.datetime "created_at"
+    t.integer  "train_type"
   end
 
   create_table "violation_rewards", :force => true do |t|
