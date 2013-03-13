@@ -10,9 +10,9 @@ class CreateSalaryDetails < ActiveRecord::Migration
 
       t.datetime :created_at
     end
-  end
 
-  add_index :salary_details, :current_day
-  add_index :salary_details, :staff_id
-  add_index :salary_details, :voilation_reward_id
+    add_index :salary_details, :current_day
+    add_index :salary_details, :staff_id
+    add_index :salary_details, :voilation_reward_id
+  end
 end
