@@ -316,6 +316,14 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 .popup_body { overflow: hidden; padding: 10px; position: relative;}
 .popup_body_area { overflow: hidden;}
+.popup_body_area h2 {
+	height: 32px; 
+	line-height: 32px; 
+	color:#930205;
+	display: block;
+	font-size: 18px;
+	padding-left: 30px;
+}
 
 .popup_body_fieldset { border: 1px #CCCCCC solid;}
 .popup_body_title { font-size: 14px; line-height: 28px; padding: 0 5px; margin-left: 10px; font-weight:bold;}
@@ -362,6 +370,18 @@ input.file { width: 100px; _width: 90px; float: left;}
 .width_textarea { width: 460px;}
 
 .width_input { width: 385px; height: 24px;}
+
+.item_addItem { 
+    width: 80px; 
+	height: 30px; 
+	line-height: 22px; 
+	display: block; 
+	text-align: center; 
+	margin: 0 auto; 
+	background: #CCC;
+	color: #FFF;
+	font-size: 35px;
+}
 
 /*suggest*/
 .suggest { width: 160px; border:1px solid #CCC; background: #FFF; position: absolute; top: 45px; left: 120px;}

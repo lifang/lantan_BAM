@@ -8,7 +8,6 @@ gem 'rails', '3.1.2'
 gem 'mysql2', '0.3.10'
 gem "will_paginate", '3.0.3'
 gem 'mini_magick'
-gem 'to_xls', '~> 1.0.0'
 gem 'gchartrb', '0.8'
 
 # Gems used only for assets and not required
