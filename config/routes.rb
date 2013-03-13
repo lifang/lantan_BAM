@@ -81,7 +81,8 @@ LantanBAM::Application.routes.draw do
     resources :trains
     resources :month_scores do
       collection do
-        get "update_sys_score","makets_totals"
+        get "update_sys_score","makets_totals","makets_list","makets_reports","makets_views","makets_goal"
+        post "search_month","search_report"
       end
     end
     resources :salaries

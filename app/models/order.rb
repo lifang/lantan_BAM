@@ -12,9 +12,9 @@ class Order < ActiveRecord::Base
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
   STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5}
   #0 正常未进行  1 服务中  2 等待付款  3 已经付款  4 已结束  5已删除
-
+  IS_FREE = {:YES=>1,:NO=>0} # 1免单 0 不免单
   TYPES = {:SERVICE => 0, :PRODUCT => 1} #0 服务  1 产品
-
+  FREE_TYPE = {:ORDER_FREE =>"免单",:PCARD =>"套餐卡使用"}
   #是否满意
   IS_PLEASED = {:BAD => 0, :SOSO => 1, :GOOD => 2, :VERY_GOOD => 3}  #0 不满意  1 一般  2 好  3 很好
   IS_PLEASED_NAME = {0 => "不满意", 1 => "一般", 2 => "好", 3 => "很好"}
@@ -134,37 +134,37 @@ class Order < ActiveRecord::Base
       orders = Order.find_by_sql("select * from orders o where o.car_num_id=#{customer.car_num_id}
         and o.status!=#{STATUS[:DELETED]} and o.store_id=#{store_id} order by o.created_at desc")
       (orders || []).each do |order|
-         order_hash = order
-         #puts order_hash
-         order_hash[:products] = order.order_prod_relations.collect{|r|
-           p = Hash.new
-           p[:name] = r.product.name
-           p[:price] = r.price.to_f * r.pro_num.to_i
-           p
-         }
-         order_hash[:pay_type] = order.order_pay_types.collect{|type|
-            OrderProdRelation::PAY_TYPES_NAME[type.pay_type]
-         }.join(",")
-         if order.sale_id
-           s = Hash.new
-           s[:name] = "huodong"
-           s[:price] = 12
-           s[:num] = 22
-           order_hash[:products] << s
-         end
-         if order.c_pcard_relation_id
+        order_hash = order
+        #puts order_hash
+        order_hash[:products] = order.order_prod_relations.collect{|r|
+          p = Hash.new
+          p[:name] = r.product.name
+          p[:price] = r.price.to_f * r.pro_num.to_i
+          p
+        }
+        order_hash[:pay_type] = order.order_pay_types.collect{|type|
+          OrderProdRelation::PAY_TYPES_NAME[type.pay_type]
+        }.join(",")
+        if order.sale_id
+          s = Hash.new
+          s[:name] = "huodong"
+          s[:price] = 12
+          s[:num] = 22
+          order_hash[:products] << s
+        end
+        if order.c_pcard_relation_id
 
-         end
-         if order.c_svc_relation_id
+        end
+        if order.c_svc_relation_id
 
-         end
-         front_staff = Staff.find_by_id_and_store_id order.front_staff_id,store_id
-         order_hash[:staff] = front_staff.name if front_staff
-         if order.status == STATUS[:FINISHED]
-            old_orders << order_hash
-         else
-            working_orders << order_hash
-         end
+        end
+        front_staff = Staff.find_by_id_and_store_id order.front_staff_id,store_id
+        order_hash[:staff] = front_staff.name if front_staff
+        if order.status == STATUS[:FINISHED]
+          old_orders << order_hash
+        else
+          working_orders << order_hash
+        end
       end
       working_orders = working_orders.first if working_orders.size > 0
       #puts old_orders.to_json,working_orders.to_json,customer.to_json
@@ -191,13 +191,13 @@ class Order < ActiveRecord::Base
     card_arr = []
     products = Product.find_all_by_store_id_and_status store_id Product::IS_VALIDATE[:YES]
     (products || []).each do |p|
-       if p.types.to_i <=4
-         prod_arr << p
-       elsif p.types.to_i == 5
-          clean_arr << p
-       elsif p.types.to_i > 5
-          maint_arr << p
-       end
+      if p.types.to_i <=4
+        prod_arr << p
+      elsif p.types.to_i == 5
+        clean_arr << p
+      elsif p.types.to_i > 5
+        maint_arr << p
+      end
     end
     product_arr << clean_arr
     product_arr << maint_arr

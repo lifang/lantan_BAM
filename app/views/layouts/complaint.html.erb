@@ -20,8 +20,10 @@
         <div class="clear"></div>
         <div class="nav">
           <ul>
-            <li><a href="#" class="hover">客户</a></li>
-            <li><a href="#">营销</a></li>
+            <li><a href="/stores/<%=params[:store_id]%>/complaints"
+                   <%if controller.controller_name=="complaints"%> class="hover"<%end%>>客户</a></li>
+            <li><a href="/stores/<%=params[:store_id]%>/month_scores"
+                   <%if controller.controller_name=="month_scores"%> class="hover"<%end%>>营销</a></li>
             <li><a href="#">库存</a></li>
             <li><a href="#">员工</a></li>
           </ul>

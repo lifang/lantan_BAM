@@ -1,9 +1,13 @@
-<%render 'second_menu'%>
+<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
+<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
+<%=  render 'second_menu'%>
 <div class="search">
-  <div><label>时间：</label>
-    <input name="" type="text" />&nbsp;到&nbsp;
-    <input name="" type="text" /></div>
-  <div><button class="search_btn">查询</button></div>
+  <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/month_scores/search_month" do%>
+    <div><label>时间：</label>
+      <input name="created" type="text" onclick="WdatePicker()" value="<%= session[:created] %>" />&nbsp;到&nbsp;
+      <input name="ended" type="text" onclick="WdatePicker()" value="<%= session[:ended] %>" /></div>
+    <div><button class="search_btn">查询</button></div>
+  <% end %>
 </div>
 <div class="clear"></div>
 <div class="data_body">
@@ -23,15 +27,18 @@
         <%@months.each do |k,v|%>
           <tr>
             <td><%= k %></td>
-            <td><%= v[OrderPayType::PAY_TYPES[:CASH]] %></td>
-            <td><%= v[OrderPayType::PAY_TYPES[:CREDIT_CARD]] %></td>
-            <td><%= v[OrderPayType::PAY_TYPES[:SV_CARD]] %></td>
-            <td><%= v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]] %></td>
+            <td><%= v[OrderPayType::PAY_TYPES[:CASH]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:CASH]]%></td>
+            <td><%= v[OrderPayType::PAY_TYPES[:CREDIT_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:CREDIT_CARD]] %></td>
+            <td><%= v[OrderPayType::PAY_TYPES[:SV_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:SV_CARD]] %></td>
+            <td><%= v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]] %></td>
             <td><%= v.values.inject(0){|num,price|num+price} %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
-    <div class="amount">总计：100000</div>
+    <div class="pageTurn">
+      <%#= will_paginate @month_goal,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+    </div>
+    <div class="amount">总计：<%=@total_num%></div>
   </div>
 </div>
