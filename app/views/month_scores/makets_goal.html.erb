@@ -1,6 +1,8 @@
-<div class="second_menu"><a href="#" class="hover">目标销售额</a><a href="#">活动订单统计</a><a href="#">销售报表</a>
-  <a href="#">营业额汇总表</a><a href="#">储值卡消费记录</a><a href="#">每日销售单据</a><a href="#">储值卡对账单</a>
-</div>
+<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
+<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
+<%= javascript_include_tag "month_scores" %>
+<%=  render 'second_menu'%>
+<div class="data_menu"><a href="javascript:void(0)" onclick="show_center('.tab_popup');">定制目标销售额</a></div>
 <div class="clear"></div>
 <div class="tab_head">
   <ul>
@@ -123,5 +125,43 @@
       </tbody>
     </table>
   </div>
+</div>
 
+<div class="mask"></div>
+<div class="tab_popup" style="display: none;">
+  <div class="popup_box">
+    <h1>定制目标销售额<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <div class="popup_body_area">
+        <%= form_for :goal,:url=>"/stores/#{params[:store_id]}/month_scores/",:html=>{:id=>"create_goal"},:method=>:POST do%>
+          <div class="item">
+            <label>开始时间：</label><input name="created" type="text" id="created" />
+          </div>
+          <div class="item">
+            <label>结束时间：</label><input name="ended" type="text" id="ended" />
+          </div>
+          <div class="clear"></div>
+          <h2>
+            金额（元）
+          </h2>
+          <div class="item">
+            <label>服务类：</label><input name="service" type="text" id="service" />
+          </div>
+          <div class="item">
+            <label>产品类：</label><input name="product" type="text" id="product" />
+          </div>
+          <div class="item">
+            <label>卡类：</label><input name="card" type="text" id="card" />
+          </div>
+          <div class="item">
+            <label>其他：</label><input name="other" type="text" id="other" />
+          </div>
+          <div class="item">
+            <a href="#" class="item_addItem">+</a>
+          </div>
+        <% end %>
+      </div>
+      <div class="btn_box"><button class="confirm_btn" onclick="check_goal()">确定</button></div>
+    </div>
+  </div>
 </div>

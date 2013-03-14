@@ -118,12 +118,3 @@
   </div>
 
 </div>
-<script type="text/javascript">
-  $(function() {
-    $('div.tab_head li').bind('click',function(){
-      $(this).addClass('hover').siblings().removeClass('hover');
-      var index = $('div.tab_head li').index(this);
-      $('div.data_body > div').eq(index).show().siblings().hide();
-    });
-  })
-</script>
