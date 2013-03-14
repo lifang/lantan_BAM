@@ -93,6 +93,13 @@ LantanBAM::Application.routes.draw do
         get "stored_card_bill"
       end
     end
+    resources :material_order_manages
+    resources :staff_manages do
+      collection do
+        get "get_year_staff_hart"
+        get "average_score_hart"
+      end
+    end
 
     resources :suppliers do
       member do
