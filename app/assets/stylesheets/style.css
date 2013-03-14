@@ -358,6 +358,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	color: #930205;
 }
 .item input[type="text"], .item select {  height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
+.item input[type="text"].input_s { width: 90px;  margin-right:10px;}
 
 .item input.file { width: 100px; _width: 90px; float: left;}
 input.file { width: 100px; _width: 90px; float: left;}
