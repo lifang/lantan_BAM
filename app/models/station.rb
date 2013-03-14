@@ -104,4 +104,30 @@ class Station < ActiveRecord::Base
     end
     return video_hash
   end
+
+  def self.arrange_time store_id, prod_ids
+    #查询所有满足条件的工位
+    stations = Station.find_all_by_store_id_and_status store_id, Station::STAT[:NORMAL]
+    station_arr = []
+    (stations || []).each do |station|
+      if station.station_service_relations
+        prods = station.station_service_relations.collect{|r| r.product_id }
+        station_arr << station if (prods & prod_ids).sort == prod_ids.sort
+      end
+    end
+
+    #按照工位的忙闲获取预计时间
+    time = Time.now.strftime("%H%M")
+    (station_arr || []).each do |station|
+       w_o_time = WOTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
+       if w_o_time && w_o_time.current_time > time
+         time = w_o_time.current_time
+       else
+         time = Time.now.strftime("%H%M")
+         break
+       end
+    end
+    time = (Time.now.strftime("%Y%m%d").to_s + " " + time).to_datetime
+    time_arr = [time.strftime("%Y-%m-%d %H:%M"),(time + Constant::STATION_MIN.minutes).strftime("%Y-%m-%d %H:%M")]
+  end
 end

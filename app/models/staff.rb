@@ -17,7 +17,7 @@ class Staff < ActiveRecord::Base
   LEVELS = {0=>"高级",1=>"中级",2=>"初级"}  #技师等级
   #总部员工职务
 
-  STATUS = {:normal => 0, :delete => 1}
+  STATUS = {:normal => FALSE, :delete => TRUE}
 
   scope :normal, where(:status => STATUS[:normal])
 
@@ -33,8 +33,8 @@ class Staff < ActiveRecord::Base
   N_SEX = {0 => "男", 1 => "女"}
   
 
-  attr_accessor:password
-  validates:password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
+  attr_accessor :password
+  validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
 
 
   def has_password?(submitted_password)
