@@ -1,0 +1,68 @@
+<div class="second_menu">
+  <a href="#">目标销售额</a>
+  <a href="#">活动订单统计</a>
+  <a href="#">销售报表</a>
+  <a href="#">营业额汇总表</a>
+  <%= link_to "储值卡消费记录", store_stored_cards_path(@store) %>
+  <a href="#" class="hover">每日销售单据</a>
+  <a href="/stores/<%= @store.id %>/stored_cards/stored_card_bill">储值卡对账单</a>
+</div>
+<form accept-charset="UTF-8" action="/stores/<%= @store.id %>/stored_cards/daily_consumption_receipt" method="get">
+<div class="search">
+      <div><label>时间：</label>
+        <input name="serach_time" type="text" id="search_time_at" value="<%= @serach_time %>"/></div>
+      <div><button class="search_btn">查询</button></div>
+</div>
+</form>
+<div class="data_body_title">
+     <h2 class="data_body_h">当日销售额：<%= @current_day_total %>（元）</h2>
+</div>
+<div class="data_menu"><a href="#" class="add_btn">打印单据</a></div>
+<div class="clear"></div>
+
+<div class="data_body">
+     <div>
+         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+             <thead>
+                  <tr class="hbg">
+                    <td>日期</td>
+                    <td>相关订单</td>
+                    <td>服务项目</td>
+                    <td>金额（元）</td>
+                  </tr>
+              </thead>
+              <tbody>
+                <% @orders.each do |order| %>
+                  <tr>
+                    <td><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
+                    <td><a href="#" class="other_a"><%= order.code %></a></td>
+                    <td>
+                      <% service_products = get_service_products(order) %>
+                      <% if service_products.length != 0 %>
+                        <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                          <tr class="fws">
+                            <td>服务名称</td>
+                            <td>数量</td>
+                            <td>单价</td>
+                          </tr>
+                          <% service_products.each do |prod| %>
+                          <tr>
+                            <td><%= prod.name %></td>
+                            <% order_prod_relation = get_order_prod_relation(order.id, prod.id) %>
+                            <td><%= order_prod_relation.pro_num unless order_prod_relation.nil? %></td>
+                            <td><%= order_prod_relation.price unless order_prod_relation.nil? %></td>
+                          </tr>
+                          <% end %>
+                        </table>
+                      <% else %>
+                      无服务项目
+                      <% end %>
+                    </td>
+                    <td><%= order.price %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+        </table>
+        <div class="amount">总计：<%= @search_total %></div>
+     </div>
+</div>
