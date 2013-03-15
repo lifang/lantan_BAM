@@ -221,7 +221,8 @@
               <div class="popup_body_area">
                    <div class="search paddin_left">
                           <div><label>培训时间：</label>
-                            <%= f.text_field :start_at %>  到 <%= f.text_field :end_at %>
+                            <%= f.text_field :start_at, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();" %>
+                            到 <%= f.text_field :end_at, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();" %>
                           </div>
                     </div>
                   <div class="item_textarea">
