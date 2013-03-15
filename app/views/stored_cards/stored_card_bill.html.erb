@@ -12,40 +12,21 @@
       <div><button class="search_btn">查询</button></div>
 </div>
 </form>
-<div class="data_menu"><a href="#" class="add_btn">打印单据</a></div>
+<div class="data_menu"><a href="javascript:void(0)" class="add_btn" id="print_bill" started_at="<%= @start_at %>" ended_at="<%= @end_at %>">打印单据</a></div>
 <div class="clear"></div>
-
+<input type="hidden" id="store_id" value="<%= @store.id %>"/>
 <div class="data_body">
-     <div>
-         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-             <thead>
-                  <tr class="hbg">
-                    <td>单号</td>
-                    <td>日期</td>
-                    <td>内容</td>
-                    <td>收入（元）</td>
-                    <td>支出（元）</td>
-                    <td>总店未支付储值卡余额（元）</td>
-                  </tr>
-              </thead>
-              <tbody>
-                <% @orders.each do |order| %>
-                  <tr>
-                    <td>
-                      <%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
-                        :remote => "true", "data-type" => "script" %></td>
-                    <td><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
-                    <td><%= get_products_name(order).join(",") %></td>
-                    <% svc_return_record = get_svc_return_record(order.id, @store.id) %>
-                    <td><%= svc_return_record.total_price unless svc_return_record.nil? %></td>
-                    <td>-<%= svc_return_record.price unless svc_return_record.nil? %></td>
-                    <td><%= (svc_return_record.total_price - svc_return_record.price) unless svc_return_record.nil? %></td>
-                  </tr>
-                <% end %>
-              </tbody>
-        </table>
-        <div class="amount">总店未支付储值卡余额  总计：<%= @total %>（元）</div>
-     </div>
+  <%= render :partial => "/stored_cards/stored_card_bill_partial" %>
 </div>
 <div class="mask"></div>
 <div id="related_order_div"></div>
+<div id="card_bill_div">
+  <div class="tab_popup" id="print_card_bill_partial">
+    <div class="popup_box">
+      <h1>打印单据<a href="javascript:void(0)" class="close">关闭</a></h1>
+      <div class="popup_body">
+        <div class="popup_body_area"></div>
+      </div>
+    </div>
+  </div>
+</div>

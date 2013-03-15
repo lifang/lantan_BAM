@@ -20,15 +20,19 @@ class StoredCardsController < ApplicationController
 
   def daily_consumption_receipt
     @title = "每日销售单据"
-    @serach_time = params[:serach_time]
+    @search_time = params[:search_time]
 
-    search_time_sql = params[:serach_time] ||= Time.now.strftime("%Y-%m-%d")
+    search_time_sql = params[:search_time] ||= Time.now.strftime("%Y-%m-%d")
 
     @orders = Order.where("created_at <= '#{search_time_sql} 23:59:59' and created_at >= '#{search_time_sql} 00:00:00'")
 
     @current_day_total = Order.where("created_at <= '#{Time.now}' and created_at >= '#{Time.now.strftime("%Y-%m-%d")} 00:00:00'").sum(:price)
 
     @search_total = @orders.sum(:price)
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
 
   def stored_card_bill
@@ -45,7 +49,10 @@ class StoredCardsController < ApplicationController
     svc_return_records = @orders.collect{|order|SvcReturnRecord.
         where("types = #{SvcReturnRecord::TYPES[:in]} and target_id = #{order.id} and store_id = #{@store.id}").first}
     @total = svc_return_records.sum(&:total_price) - svc_return_records.sum(&:price)
-
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
 
   private
