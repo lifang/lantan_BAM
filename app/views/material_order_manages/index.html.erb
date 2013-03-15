@@ -27,7 +27,7 @@
                 <% @material_orders.each do |material_order| %>
                   <tr>
                     <td><%= material_order.arrival_at.strftime("%Y-%m") %></td>
-                    <td><a href="#" class="other_a"><%= material_order.logistics_code %></a></td>
+                    <td><%= link_to material_order.logistics_code, store_material_order_manage_path(@store, material_order), :class => "other_a", :remote => true, "data-type" => "script" %></td>
                     <td><%= material_order.price %></td>
                   </tr>
                 <% end %>
@@ -35,4 +35,15 @@
         </table>
         <div class="amount">总计：<%= @total_price %>（元）</div>
      </div>
+</div>
+<div class="mask"></div>
+<div id="material_order_div">
+  <div class="tab_popup" id="material_order_detail">
+    <div class="popup_box">
+      <h1>订货编号<a href="javascript:void(0)" class="close">关闭</a></h1>
+      <div class="popup_body">
+        <div class="popup_body_area"></div>
+      </div>
+    </div>
+  </div>
 </div>

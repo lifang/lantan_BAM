@@ -17,4 +17,12 @@ class MaterialOrderManagesController < ApplicationController
     @total_price = @material_orders.sum(:price)
   end
 
+  def show
+    @store = Store.find_by_id(params[:store_id])
+    @material_order = MaterialOrder.find_by_id(params[:id])
+    respond_to do |format|
+      format.js
+    end
+  end
+
 end

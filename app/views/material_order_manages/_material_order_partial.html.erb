@@ -1,0 +1,22 @@
+<div>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+       <thead>
+            <tr class="hbg">
+              <td>条形码</td>
+              <td><span class="sort_u">物料名称</span></td>
+              <td>单价（元）</td>
+              <td>数量</td>
+            </tr>
+        </thead>
+        <tbody>
+            <% @material_order.mat_in_orders.each_with_index do |met_in_order, index| %>
+              <tr class="<%= index%2 == 0 ? '' : 'tbg' %>">
+                <td><%= @material_order.code %></td>
+                <td><%= met_in_order.material.name %></td>
+                <td><%= met_in_order.price %></td>
+                <td><%= met_in_order.material_num %></td>
+              </tr>
+            <% end %>
+        </tbody>
+  </table>
+</div>
