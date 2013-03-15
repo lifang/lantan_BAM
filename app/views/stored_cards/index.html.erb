@@ -7,7 +7,8 @@
 <form accept-charset="UTF-8" action="/stores/<%= @store.id %>/stored_cards" method="get">
 <div class="search">
       <div><label>时间：</label>
-        <input name="started_at" type="text" id="start_at" value="<%= @start_at %>"/>&nbsp;到&nbsp;<input name="ended_at" type="text" id="end_at" value="<%= @end_at %>"/></div>
+        <input name="started_at" type="text" id="start_at" value="<%= @start_at %>" class="Wdate" readonly onClick="WdatePicker();"/>
+        &nbsp;到&nbsp;<input name="ended_at" type="text" id="end_at" value="<%= @end_at %>" class="Wdate" readonly onClick="WdatePicker();"/></div>
       <div><button class="search_btn">查询</button></div>
 </div>
 </form>
@@ -28,7 +29,8 @@
                 <% @orders.each do |order| %>
                   <tr>
                     <td><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
-                    <td><a href="#" class="other_a"><%= order.code %></a></td>
+                    <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
+                        :remote => "true", "data-type" => "script" %></td>
                     <td><%= get_products_name(order).join(",") %></td>
                     <td><%= order.price %></td>
                   </tr>
@@ -39,3 +41,5 @@
         <div class="amount">总计：<%= @total_price %></div>
      </div>
 </div>
+<div class="mask"></div>
+<div id="related_order_div"></div>

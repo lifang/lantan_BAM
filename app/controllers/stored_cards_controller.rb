@@ -5,7 +5,7 @@ class StoredCardsController < ApplicationController
   before_filter :get_store
 
   def index
-    @title = 'a'
+    @title = "储值卡消费记录"
     @start_at, @end_at = params[:started_at], params[:ended_at]
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "orders.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "orders.ended_at <= '#{@end_at}'"
@@ -19,6 +19,7 @@ class StoredCardsController < ApplicationController
   end
 
   def daily_consumption_receipt
+    @title = "每日销售单据"
     @serach_time = params[:serach_time]
 
     search_time_sql = params[:serach_time] ||= Time.now.strftime("%Y-%m-%d")
@@ -31,6 +32,7 @@ class StoredCardsController < ApplicationController
   end
 
   def stored_card_bill
+    @title = "储值卡对账单"
     @start_at, @end_at = params[:started_at], params[:ended_at]
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "orders.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "orders.ended_at <= '#{@end_at}'"

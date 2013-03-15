@@ -2,11 +2,6 @@
 // All this logic will automatically be available in application.js.
 
 $(document).ready(function(){
-   $("#start_at").datepicker();
-   $("#end_at").datepicker();
-
-   $("#search_time_at").datepicker();
-
 
    //库存成本统计选择月份提交
    $("#statistics_month_select").change(function(){
