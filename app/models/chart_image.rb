@@ -52,18 +52,11 @@ class ChartImage < ActiveRecord::Base
 
     avg_month_scores.each do |store_id, avg_data|
       avg_data.each do |key, value|
-        hart_name = key == Staff::S_COMPANY[:TECHNICIAN] ? "技师平均水平统计" : "接待平均水平统计"
+        chart_name = key == Staff::S_COMPANY[:TECHNICIAN] ? "技师平均水平统计" : "接待平均水平统计"
 
         types = key == Staff::S_COMPANY[:TECHNICIAN] ? 'TECHNICIAN' : 'FRONT'
 
-        lc = GoogleChart::LineChart.new('1000x300', hart_name, false)
-        lc.data hart_name,value , 'ff0000'
-        lc.show_legend = true
-        lc.max_value 100
-
-        lc.axis :x, :labels =>['日期(月)', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], :range => [0,12], :alignment => :center
-        lc.axis :y, :labels => [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], :range => [0,10], :alignment => :center
-        lc.grid :x_step => 100.0/12, :y_step => 100.0/10, :length_segment => 1, :length_blank => 3
+        lc = shared_chart_img_options('1000x300', chart_name, value, 100)
 
         img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),"#{store_id}","chart_images", types)
 
@@ -73,6 +66,18 @@ class ChartImage < ActiveRecord::Base
       end
     end
 
+  end
+
+  def self.shared_chart_img_options(chart_size, chart_name, value, max_value)
+    lc = GoogleChart::LineChart.new(chart_size, chart_name, false)
+    lc.data chart_name, value , 'ff0000'
+    lc.show_legend = true
+    lc.max_value max_value
+
+    lc.axis :x, :labels =>['日期(月)', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], :range => [0,12], :alignment => :center
+    lc.axis :y, :labels => [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], :range => [0,10], :alignment => :center
+    lc.grid :x_step => 100.0/12, :y_step => 100.0/10, :length_segment => 1, :length_blank => 3
+    lc
   end
 
   def self.write_img(url,index,file_n, types)  #上传图片
@@ -117,14 +122,7 @@ class ChartImage < ActiveRecord::Base
     data_array = []
     (0..12).collect{|i|key = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i and data_array << (month_scores[key].nil? ? 0 : (month_scores[key].sum(&:manage_score) + month_scores[key].sum(&:sys_score)))}
 
-    lc = GoogleChart::LineChart.new('600x267', "员工绩效统计表", false)
-    lc.data "绩效分",data_array , 'ff0000'
-    lc.show_legend = true
-    lc.max_value 100
-
-    lc.axis :x, :labels =>['日期(月)', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], :range => [0,12], :alignment => :center
-    lc.axis :y, :labels => [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], :range => [0,10], :alignment => :center
-    lc.grid :x_step => 100.0/12, :y_step => 100.0/10, :length_segment => 1, :length_blank => 3
+    lc = shared_chart_img_options('600x267', "员工绩效统计表", data_array, 100)
 
     store_id = staff.store.id
     types = "STAFFMONTHSCORE"+staff.id.to_s
