@@ -1,0 +1,66 @@
+<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
+<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
+<%= render 'directory' %>
+<div class="search">
+  <div><label>统计月份：</label><%= @complaint.blank??  session[:detail].to_datetime.strftime("%Y-%m") : @complaint[0].created_at.strftime("%Y-%m") %></div>
+  <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/detail_s" do%>
+    <div><label>时间：</label>
+      <input name="detail" type="text" onclick="WdatePicker()" value="<%= session[:detail] %>" /></div>
+    <div><button class="search_btn">查询</button></div>
+  <% end %>
+</div>
+<div class="clear"></div>
+<div class="data_body">
+  <div>
+    <%unless @complaint.blank?%>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+        <thead>
+          <tr class="hbg">
+            <td>投诉时间</td>
+            <td>相关订单</td>
+            <td>相关员工</td>
+            <td>投诉分类</td>
+            <td>投诉原因</td>
+            <td>是否有效</td>
+            <td>是否处理</td>
+            <td>处理时间</td>
+            <td>处理结果</td>
+            <td>是否加入考核</td>
+          </tr>
+        </thead>
+        <tbody>
+          <%@complaint.each do |comp|%>
+            <tr>
+              <td><%= comp.created_at.nil? ? "" : comp.created_at.strftime("%Y.%m.%d--%H:%S") %></td>
+              <td> <%= link_to "#{comp.code}", "/orders/#{comp.o_id}/order_info" ,
+            :remote => "true", "data-type" => "script", :class => "other_a" %></td>
+              <td><%= @staff_name[comp.id] %></td>
+              <td><%=Complaint::CHART_NAMES[comp.types]%></td>
+              <td><%= comp.reason %></td>
+              <td><%= comp.types==Complaint::TYPES[:INVALID]? "否" : "是" %></td>
+              <td><%=Complaint::STATUS_NAME[comp.status]  %></td>
+              <td><%=comp.process_at.nil? ? "" : comp.process_at.strftime("%Y.%m.%d--%H:%S")  %></td>
+              <td><%= comp.suggstion %></td>
+              <td><%= Complaint::VIOLATE_N[comp.is_violation] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <div class="otherWay">
+        <ul>
+          <li>及时率：<span class="load_box"><span class="load_line"></span></span>&nbsp;&nbsp;
+            <em class="red"><%= "#{@non}%" %></em></li>
+          <li>解决率：<span class="load_box"><span class="load_line"></span></span>&nbsp;&nbsp;
+            <em class="red"><%= "#{@undo}%" %></em></li>
+        </ul>
+      </div>
+      <div class="pageTurn">
+        <%= will_paginate @complaint,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+      </div>
+    <%else%>
+      暂无投诉
+    <% end %>
+  </div>
+</div>
+<div id="related_order_div"></div>
+

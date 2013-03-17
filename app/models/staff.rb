@@ -1,4 +1,5 @@
 #encoding: utf-8
+require 'fileutils'
 class Staff < ActiveRecord::Base
   has_many :staff_role_relations, :dependent=>:destroy
   has_many :roles, :through => :staff_role_relations, :foreign_key => "role_id"
@@ -31,6 +32,9 @@ class Staff < ActiveRecord::Base
 
   #员工性别
   N_SEX = {0 => "男", 1 => "女"}
+
+  #分页页数
+  PerPage = 3
   
 
   attr_accessor :password
@@ -45,6 +49,15 @@ class Staff < ActiveRecord::Base
     self.encrypted_password=encrypt(password)
   end
 
+  def operate_picture(photo, status)
+    FileUtils.remove_dir "public/uploads/#{self.id}" if status.eql?("update")
+    FileUtils.mkdir_p "public/uploads/#{self.id}"
+    File.new(Rails.root.join('public', "uploads", "#{self.id}", photo.original_filename), 'a+')
+    File.open(Rails.root.join('public', "uploads", "#{self.id}", photo.original_filename), 'wb') do |file|
+      file.write(photo.read)
+    end
+  end
+
   private
   def encrypt(string)
     self.salt = make_salt if new_record?
@@ -57,6 +70,19 @@ class Staff < ActiveRecord::Base
 
   def secure_hash(string)
     Digest::SHA2.hexdigest(string)
+  end
+
+  def self.search_work_record_sql
+    "current_day,
+      SUM(attendance_num) as attendance_num_sum,
+      SUM(construct_num) as construct_num_sum,
+      SUM(materials_used_num) as materials_used_num_sum,
+      SUM(materials_consume_num) as materials_consume_num_sum,
+      SUM(water_num) as water_num_sum,
+      SUM(complaint_num) as complaint_num_sum,
+      SUM(train_num) as train_num_sum,
+      SUM(reward_num) as reward_num_sum,
+      SUM(violation_num) as violation_num_sum"
   end
 
 end

@@ -80,7 +80,7 @@ module Constant
 
   #上传图片的比例
   PIC_SIZE=[50,100,148,300,700]
-
+ 
   #角色
   SYS_ADMIN = "1"  #系统管理员
   BOSS = "2" #老板
@@ -95,6 +95,7 @@ module Constant
 
   #施工时间（分钟）
   STATION_MIN = 30
+  W_MIN = 10 #休息时间
   #催货提醒
   URGE_GOODS_CONTENT = "门店订货提醒，请关注下"
 

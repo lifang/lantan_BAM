@@ -8,7 +8,7 @@ class SalariesController < ApplicationController
     salary.update_attribute(:status, true) if salary
     
     @salaries = salary.staff.salaries.where("status = false").
-                paginate(:page => params[:page] ||= 1, :per_page => 1)
+      paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     respond_to do |format|
       format.js
     end

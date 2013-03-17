@@ -1,0 +1,20 @@
+<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
+<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
+<%= render 'directory' %>
+<div class="search">
+  <div><label>统计月份：</label>
+    <%=  @degree.nil? ? session[:degree].to_datetime.strftime("%Y-%m") : @degree.created_at.strftime("%Y-%m") %>
+  </div>
+  <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/search_degree" do%>
+    <div><label>时间：</label><input name="degree" type="text" onclick="WdatePicker()" value="<%= session[:degree] %>" /></div>
+    <div><button class="search_btn">查询</button></div>
+  <% end %>
+</div>
+<div class="clear"></div>
+<div class="data_body">
+  <% if @degree.nil?%>
+    暂未当月统计结果
+  <% else%>
+    <img src="<%= @degree.img_url %>" />
+  <% end%>
+</div>

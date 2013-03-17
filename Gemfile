@@ -8,6 +8,7 @@ gem 'rails', '3.1.2'
 gem 'mysql2', '0.3.10'
 gem "will_paginate", '3.0.3'
 gem 'mini_magick'
+gem 'gchartrb', '0.8'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -37,6 +38,6 @@ group :test do
   gem 'turn', '0.8.2', :require => false
 end
 
-group :development do
-  gem "better_errors"
-end
+#group :development do
+#  gem "better_errors"
+#end

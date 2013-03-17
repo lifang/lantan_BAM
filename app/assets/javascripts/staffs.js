@@ -10,6 +10,120 @@ function remove_area(parent, close, cancel){
 
 $(document).ready(function(){
 
+    $("#staffs_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false }
+        }
+    });
+
+    $("#work_record_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false },
+            7: { sorter: false },
+            8: { sorter: false },
+            9: { sorter: false }
+        }
+    });
+    $("#month_score_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false }
+        }
+    });
+    $("#reward_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false }
+        }
+    });
+    $("#salary_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false }
+        }
+    });
+    $("#train_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false }
+        }
+    });
+    $("#violation_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false }
+        }
+    });
+
+    $("#current_month_salary_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false }
+        }
+    });
+
+    $("#current_month_salary_detail_table").tablesorter({
+        headers:
+        {
+            1: { sorter: false },
+            2: { sorter: false },
+            3: { sorter: false },
+            4: { sorter: false },
+            5: { sorter: false },
+            6: { sorter: false },
+            7: { sorter: false },
+            8: { sorter: false }
+        }
+    });
+
+    $(".sort_u_s, .sort_d_s").click(function(){
+        if($(this).attr("class") == "sort_u_s"){
+            $(this).attr("class", "sort_d_s");
+        }else{
+            $(this).attr("class", "sort_u_s");
+        }
+    });
+
+    $(".sort_u, .sort_d").click(function(){
+        if($(this).attr("class") == "sort_u"){
+            $(this).attr("class", "sort_d");
+        }else{
+            $(this).attr("class", "sort_u");
+        }
+    });
+
+    //提示信息居中
+    //popup(".tab_alert");
+
     //创建员工
     $("#new_staff").click(function(){
         popup("#new_staff_area");
@@ -34,53 +148,55 @@ $(document).ready(function(){
         return false;
     });
 
-    //创建员工信息验证
-    $("#new_staff_btn").click(function(){
-       if($(this).parents('form').find("#staff_name").val() == ""){
+    //创建员工信息验证, 编辑员工信息验证
+    $("#new_staff_btn, #edit_staff_btn").live("click", function(){
+       if($(this).parents('form').find("#staff_name").val() == ''){
            alert("名称不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_type_of_w").val() == ""){
+       if($(this).parents('form').find("#staff_type_of_w").val() == ''){
            alert("岗位不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_level").val() == ""){
+       if($(this).parents('form').find("#staff_level").val() == ''){
            alert("等级职称不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_education").val() == ""){
+       if($(this).parents('form').find("#staff_education").val() == ''){
            alert("教育程度不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_phone").val() == ""){
+       if($(this).parents('form').find("#staff_phone").val() == ''){
            alert("联系方式不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_id_card").val() == ""){
+       if($(this).parents('form').find("#staff_id_card").val() == ''){
            alert("身份证不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_address").val() == ""){
+       if($(this).parents('form').find("#staff_address").val() == ''){
            alert("地址不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_base_salary").val() == ""){
+       if($(this).parents('form').find("#staff_base_salary").val() == ''){
            alert("薪资标准不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_photo").val() == ""){
-           alert("照片不能为空!");
-           return false;
+       if($(this).attr("id") == "new_staff_btn"){
+           if($(this).parents('form').find("#staff_photo").val() == ''){
+               alert("照片不能为空!");
+               return false;
+           }
        }
-       if($(this).parents('form').find("#staff_deduct_at").val() == ""){
+       if($(this).parents('form').find("#staff_deduct_at").val() == ''){
            alert("提成起始额不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_deduct_end").val() == ""){
+       if($(this).parents('form').find("#staff_deduct_end").val() == ''){
            alert("结束额度不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_deduct_percent").val() == ""){
+       if($(this).parents('form').find("#staff_deduct_percent").val() == ''){
            alert("提成率不能为空!");
            return false;
        }
@@ -90,15 +206,57 @@ $(document).ready(function(){
     //新建奖励信息验证
     $("#new_reward_btn").click(function(){
        if($("#new_reward_area input:checked").length == 0){
-           alert("至少选择一个奖励人员");
+           alert("至少选择一个奖励人员!");
            return false;
        }
-       if($("#violation_reward_situation").val() == ""){
+       if($("#new_reward_area #violation_reward_situation").val() == ''){
            alert("奖励原因不能为空!");
            return false;
        }
-       if($("#violation_reward_mark").val() == ""){
+       if($("#new_reward_area #violation_reward_mark").val() == ''){
            alert("补充说明不能为空!");
+           return false;
+       }
+       $(this).parents('form').submit();
+    });
+
+    //新建违规信息验证
+    $("#new_violation_btn").click(function(){
+       if($("#new_violation_area input:checked").length == 0){
+           alert("至少选择一个违规人员!");
+           return false;
+       }
+       if($("#new_violation_area #violation_reward_situation").val() == ''){
+           alert("违规原因不能为空!");
+           return false;
+       }
+       if($("#new_violation_area #violation_reward_mark").val() == ''){
+           alert("补充说明不能为空!");
+           return false;
+       }
+       $(this).parents('form').submit();
+    });
+
+    //新建培训信息验证
+    $("#new_train_btn").click(function(){
+       if($("#new_train_area #train_start_at").val() == ''){
+            alert("培训开始时间不能为空!");
+            return false;
+       }
+       if($("#new_train_area #train_end_at").val() == ''){
+            alert("培训结束时间不能为空!");
+            return false;
+       }
+       if(new Date($("#new_train_area #train_start_at").val()) > new Date($("#new_train_area #train_end_at").val())){
+           alert("培训开始时间必须在培训结束时间之后!");
+           return false;
+       }
+       if($("#new_train_area input:checked").length == 0){
+           alert("至少选择一个培训人员!");
+           return false;
+       }
+       if($("#new_train_area #train_content").val() == ''){
+           alert("培训原因不能为空!");
            return false;
        }
        $(this).parents('form').submit();
@@ -275,6 +433,31 @@ $(document).ready(function(){
        return false;
     });
 
+    //处理培训
+    $(".process_train").live("click", function(){
+       if(confirm("确认处理？")){
+           var this_obj = $(this);
+           var store_id = $("#store_id").val();
+           var staff_id = $("#staff_id").val();
+           var train_id = $(this).attr("id");
+           $.ajax({
+                type : 'put',
+                url : "/stores/"+ store_id+"/trains/"+ train_id,
+                data : {
+                    staff_id : staff_id
+                },
+                success: function(data){
+                   if(data == "success"){
+                       this_obj.parents('tr').find("span.train_status").text("通过");
+                       this_obj.hide();
+                       this_obj.next().show();
+                   }
+                }
+            });
+           return false;
+       }
+    });
+
     //ajax paginate
     $("#ajax_paginate .pageTurn a").live("click", function(){
        var params_string = $(this).attr("href").split("?")[1];
@@ -301,6 +484,10 @@ $(document).ready(function(){
     $("#search_work_record").click(function(){
        var start_at = $(this).parents('.search').find("#start_at").val();
        var end_at = $(this).parents('.search').find("#end_at").val();
+       if(new Date(start_at) > new Date(end_at)){
+           alert("开始时间必须在结束时间之后!");
+           return false;
+       }
        var staff_id = $(this).parents('.search').find("#staff_id").val();
        var store_id = $(this).parents('.search').find("#store_id").val();
        var tab = "work_record_tab";

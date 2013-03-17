@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130305012552) do
+ActiveRecord::Schema.define(:version => 20130701051404) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(:version => 20130305012552) do
     t.boolean  "status"
     t.text     "content"
     t.datetime "created_at"
+    t.integer  "price"
   end
 
   create_table "c_svc_relations", :force => true do |t|
@@ -50,6 +51,17 @@ ActiveRecord::Schema.define(:version => 20130305012552) do
     t.integer "car_model_id"
     t.integer "buy_year"
   end
+
+  create_table "chart_images", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "image_url"
+    t.string   "types"
+    t.datetime "created_at"
+  end
+
+  add_index "chart_images", ["created_at"], :name => "index_chart_images_on_created_at"
+  add_index "chart_images", ["store_id"], :name => "index_chart_images_on_store_id"
+  add_index "chart_images", ["types"], :name => "index_chart_images_on_types"
 
   create_table "cities", :force => true do |t|
     t.string  "name"
@@ -461,6 +473,24 @@ ActiveRecord::Schema.define(:version => 20130305012552) do
     t.string   "name"
   end
 
+  create_table "store_complaints", :force => true do |t|
+    t.string   "store_id"
+    t.string   "img_url"
+    t.datetime "created_at"
+  end
+
+  add_index "store_complaints", ["created_at"], :name => "index_store_complaints_on_created_at"
+  add_index "store_complaints", ["store_id"], :name => "index_store_complaints_on_store_id"
+
+  create_table "store_pleasants", :force => true do |t|
+    t.string   "store_id"
+    t.string   "img_url"
+    t.datetime "created_at"
+  end
+
+  add_index "store_pleasants", ["created_at"], :name => "index_store_pleasants_on_created_at"
+  add_index "store_pleasants", ["store_id"], :name => "index_store_pleasants_on_store_id"
+
   create_table "stores", :force => true do |t|
     t.string   "name"
     t.string   "address"
@@ -539,6 +569,7 @@ ActiveRecord::Schema.define(:version => 20130305012552) do
     t.datetime "end_at"
     t.boolean  "certificate"
     t.datetime "created_at"
+    t.integer  "train_type"
   end
 
   create_table "violation_rewards", :force => true do |t|

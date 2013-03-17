@@ -316,10 +316,19 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 .popup_body { overflow: hidden; padding: 10px; position: relative;}
 .popup_body_area { overflow: hidden;}
+.popup_body_area h2 {
+	height: 32px; 
+	line-height: 32px; 
+	color:#930205;
+	display: block;
+	font-size: 18px;
+	padding-left: 30px;
+}
 
 .popup_body_fieldset { border: 1px #CCCCCC solid;}
 .popup_body_title { font-size: 14px; line-height: 28px; padding: 0 5px; margin-left: 10px; font-weight:bold;}
 .popup_body_result { padding: 10px; height: 80px; overflow:auto;}
+.popup_body_result.resultHeight {padding: 10px; height: inherit; overflow:auto; border: 1px #CCCCCC solid;}
 .popup_body_result li, .popup_body_result div { padding: 6px 10px; margin: 5px 10px; float: left; background: #f0f0f0;}
 .popup_body_result li input { margin-right: 5px; _margin-right: 0px;}
 
@@ -332,6 +341,10 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 /*编辑*/
 .item { margin: 10px; float: left; overflow: hidden; width: 280px; height: 30px; line-height: 24px;}
 .item.item_width { width: 460px;}
+
+.item.show_pic { width: 460px; height: 50px;}
+.item.show_pic img { margin-left: 10px;}
+
 .item_title { font-size: 16px; line-height: 32px; padding-left: 55px;}
 .item_add { float: right; margin-right: 49px;}
 .item label, .item_textarea label {
@@ -345,10 +358,11 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	color: #930205;
 }
 .item input[type="text"], .item select {  height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
+.item input[type="text"].input_s { width: 90px;  margin-right:10px;}
 
 .item input.file { width: 100px; _width: 90px; float: left;}
 input.file { width: 100px; _width: 90px; float: left;}
-.file_btn { width: 55px; height: 26px; line-height: 26px; margin-left: 5px; background: #ccc;}
+.file_btn { width: 55px; height: 26px; line-height: 26px; margin-left: 5px; background: #ccc;float: left;}
 .item select {float: left;}
 .item select.staff { width: 70px; margin-right: 20px; _margin-right: 16px;}
 .item select.ymd { width: 50px; margin-right: 5px;}
@@ -357,6 +371,18 @@ input.file { width: 100px; _width: 90px; float: left;}
 .width_textarea { width: 460px;}
 
 .width_input { width: 385px; height: 24px;}
+
+.item_addItem { 
+    width: 80px; 
+	height: 30px; 
+	line-height: 22px; 
+	display: block; 
+	text-align: center; 
+	margin: 0 auto; 
+	background: #CCC;
+	color: #FFF;
+	font-size: 35px;
+}
 
 /*suggest*/
 .suggest { width: 160px; border:1px solid #CCC; background: #FFF; position: absolute; top: 45px; left: 120px;}

@@ -3,7 +3,7 @@ class Station < ActiveRecord::Base
   has_many :word_orders
   has_many :station_staff_relations
   has_many :station_service_relations
-  has_many :w_o_times
+  has_many :wk_or_times
   belongs_to :store
   STAT = {:WRONG =>0,:NORMAL =>2,:LACK =>1,:NO_SERVICE =>3} #0 故障 1 缺少技师 2 正常 3 无服务
   STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常"}
@@ -69,7 +69,7 @@ class Station < ActiveRecord::Base
   end
 
   def self.make_data(store_id)
-    return  "select c.num,w.station_id,o.front_staff_id,s.name,w.status from work_orders w inner join orders o on w.order_id=o.id inner join car_nums c on c.id=o.car_num_id
+    return  "select c.num,w.station_id,o.front_staff_id,s.name,w.status,w.order_id from work_orders w inner join orders o on w.order_id=o.id inner join car_nums c on c.id=o.car_num_id
     inner join staffs s on s.id=o.front_staff_id where current_day='#{Time.now.strftime("%Y%m%d")}' and
     w.status in (#{WorkOrder::STAT[:SERVICING]},#{WorkOrder::STAT[:WAIT_PAY]}) and w.store_id=#{store_id}"
   end
@@ -117,17 +117,24 @@ class Station < ActiveRecord::Base
     end
 
     #按照工位的忙闲获取预计时间
-    time = Time.now.strftime("%H%M")
+    time = Time.now.strftime("%Y%m%d%H%M").to_i
+    station_id = 0
     (station_arr || []).each do |station|
-       w_o_time = WOTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
-       if w_o_time && w_o_time.current_time > time
+       w_o_time = WkOrTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
+       t = w_o_time.current_time.to_s.to_datetime
+       s = time.to_s.to_datetime
+       if w_o_time && (t >= s)
          time = w_o_time.current_time
+         station_id = station.id
        else
-         time = Time.now.strftime("%H%M")
+         station_id = station.id
+         time = Time.now.strftime("%Y%m%d%H%M")
          break
        end
     end
-    time = (Time.now.strftime("%Y%m%d").to_s + " " + time).to_datetime
-    time_arr = [time.strftime("%Y-%m-%d %H:%M"),(time + Constant::STATION_MIN.minutes).strftime("%Y-%m-%d %H:%M")]
+    time = time.to_s.to_datetime
+    time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),
+                (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]
+    time_arr
   end
 end

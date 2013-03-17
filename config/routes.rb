@@ -29,6 +29,12 @@ LantanBAM::Application.routes.draw do
   end
   match "logout" => "logins#logout"
   resources :stores do
+    resources :complaints do
+      collection do
+        post "search","search_degree","detail_s"
+        get "search_list","show_detail","satisfy_degree","degree_list","detail_list"
+      end
+    end
     resources :stations do
       collection do
         get "show_detail","show_video","see_video","search_video"
@@ -75,7 +81,8 @@ LantanBAM::Application.routes.draw do
     resources :trains
     resources :month_scores do
       collection do
-        get "update_sys_score"
+        get "update_sys_score","makets_totals","makets_list","makets_reports","makets_views","makets_goal"
+        post "search_month","search_report"
       end
     end
     resources :salaries

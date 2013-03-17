@@ -8,7 +8,8 @@
           <span class="site_name"><%= @f_waiting[key][0].name %></span>
           <ul>
             <%@f_waiting[key].each do |num|%>
-              <li><a href="javascript:void(0)" onclick=""><%= num.num %></a></li>
+              <li><%= link_to "#{num.num}", "/orders/#{num.order_id}/order_info" ,
+                  :remote => "true", "data-type" => "script", :class => "other_a" %></li>
             <% end unless @f_waiting[key].blank? %>
           </ul>
         </div>
@@ -59,4 +60,4 @@
     </div>
   </div>
 </div>
-
+<div id="related_order_div"></div>
