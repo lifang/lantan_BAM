@@ -87,6 +87,19 @@ LantanBAM::Application.routes.draw do
     end
     resources :salaries
     resources :current_month_salaries
+    resources :stored_cards do
+      collection do
+        get "daily_consumption_receipt"
+        get "stored_card_bill"
+      end
+    end
+    resources :material_order_manages
+    resources :staff_manages do
+      collection do
+        get "get_year_staff_hart"
+        get "average_score_hart"
+      end
+    end
 
     resources :suppliers do
       member do
