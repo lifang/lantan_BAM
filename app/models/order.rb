@@ -240,7 +240,7 @@ class Order < ActiveRecord::Base
   def self.pre_order store_id,car_num,brand,car_year,user_name,phone,email,birth,prod_ids
     arr  = []
      Customer.transaction do
-       #begin
+       begin
          carNum = CarNum.find_by_num car_num
          customer = nil
          total = 0
@@ -389,17 +389,16 @@ class Order < ActiveRecord::Base
          arr << p_cards
          arr << 1
          arr << total
-       #rescue
-       #  arr << []
-       #  arr = [nil,[],[],[],[],0,0]
-       #end
+       rescue
+         arr << []
+         arr = [nil,[],[],[],[],0,0]
+       end
      end
     arr
   end
 
   def self.get_prod_sale_card prods
     arr = prods.split(",")
-    puts prods,"pppppppppppppp"
     prod_arr = []
     sale_arr = []
     svcard_arr = []
@@ -423,12 +422,12 @@ class Order < ActiveRecord::Base
   end
 
   def self.make_record c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id
-   puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
+   #puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
    arr = []
    status = 0
    order = nil
     Order.transaction do
-      #begin
+      begin
         arr = self.get_prod_sale_card prods
         sale_id = arr[1].size > 0 ? arr[1][0][1] : ""
         svcard_id = arr[2].size > 0 ? arr[2][0][1] : ""
@@ -530,13 +529,12 @@ class Order < ActiveRecord::Base
           end
 
         end
-      #rescue
-      #  status = 2
-      #end
+      rescue
+        status = 2
+      end
     end
     arr[0] = status
     arr[1] = order
-   puts arr
     arr
   end
 
