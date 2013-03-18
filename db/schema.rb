@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051409) do
+ActiveRecord::Schema.define(:version => 20130701051411) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -55,9 +55,10 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
   create_table "chart_images", :force => true do |t|
     t.integer  "store_id"
     t.string   "image_url"
-    t.string   "types"
+    t.integer  "types"
     t.datetime "created_at"
     t.datetime "current_day"
+    t.integer  "staff_id"
   end
 
   add_index "chart_images", ["created_at"], :name => "index_chart_images_on_created_at"
@@ -110,8 +111,8 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
   create_table "goal_sale_types", :force => true do |t|
     t.string  "type_name"
     t.integer "goal_sale_id"
-    t.float   "goal_price"
-    t.float   "current_price"
+    t.float   "goal_price",    :default => 0.0
+    t.float   "current_price", :default => 0.0
     t.integer "types"
   end
 
@@ -459,6 +460,7 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
     t.string   "encrypt_password"
     t.string   "username"
     t.string   "salt"
+    t.boolean  "is_score_ge_salary", :default => false
   end
 
   create_table "station_service_relations", :force => true do |t|
