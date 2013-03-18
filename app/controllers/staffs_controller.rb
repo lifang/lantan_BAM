@@ -42,7 +42,7 @@ class StaffsController < ApplicationController
 
     @salaries = @staff.salaries.where("status = false").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("salary_tab")
 
-    current_month = Time.now().strftime("%Y%m")
+    current_month = Time.now().months_ago(1).strftime("%Y%m")
 
     @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
 

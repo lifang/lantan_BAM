@@ -474,12 +474,6 @@ $(document).ready(function(){
        return false;
     });
 
-    //日期选择
-    $("#train_start_at").datepicker({inline:true});
-    $("#train_end_at").datepicker({inline:true});
-    $("#start_at").datepicker({inline:true});
-    $("#end_at").datepicker({inline:true});
-
     //查询工作记录
     $("#search_work_record").click(function(){
        var start_at = $(this).parents('.search').find("#start_at").val();
