@@ -31,7 +31,9 @@ LantanBAM::Application.routes.draw do
   resources :stores do
     resources :market_manages do
       collection do
-        get "makets_totals","makets_list","makets_reports","makets_views","makets_goal","sale_orders","sale_order_list"
+        get "makets_totals","makets_list","makets_reports","makets_views","makets_goal",
+          "sale_orders","sale_order_list","stored_card_record","daily_consumption_receipt",
+          "stored_card_bill"
         post "search_month","search_report","search_sale_order"
       end
     end
@@ -92,12 +94,6 @@ LantanBAM::Application.routes.draw do
     end
     resources :salaries
     resources :current_month_salaries
-    resources :stored_cards do
-      collection do
-        get "daily_consumption_receipt"
-        get "stored_card_bill"
-      end
-    end
     resources :material_order_manages
     resources :staff_manages do
       collection do

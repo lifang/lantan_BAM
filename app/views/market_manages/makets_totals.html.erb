@@ -1,11 +1,9 @@
-<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
-<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
 <%=  render 'second_menu'%>
 <div class="search">
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/market_manages/search_month" do%>
     <div><label>时间：</label>
-      <input name="created" type="text" onclick="WdatePicker()" value="<%= session[:created] %>" />&nbsp;到&nbsp;
-      <input name="ended" type="text" onclick="WdatePicker()" value="<%= session[:ended] %>" /></div>
+      <input name="created" type="text" readonly onclick="WdatePicker()" value="<%= session[:created] %>" class="Wdate"/>&nbsp;到&nbsp;
+      <input name="ended" type="text" readonly onclick="WdatePicker()" value="<%= session[:ended] %>" class="Wdate"/></div>
     <div><button class="search_btn">查询</button></div>
   <% end %>
 </div>

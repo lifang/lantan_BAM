@@ -4,6 +4,8 @@ require 'net/https'
 require 'uri'
 require 'open-uri'
 class ChartImage < ActiveRecord::Base
+  TYPES = {:SATIFY =>0,:COMPLAINT =>1,:MECHINE_LEVEL =>2,:FRONT_LEVEL =>3,:STAFF_LEVEL =>4}
+  # 0 满意度 1 投诉统计 2 技师平均水平 3 前台平均水平 4 员工绩效
 
   #定时生成技师，接待平均水平统计表
   def self.generate_avg_chart_image
@@ -32,7 +34,7 @@ class ChartImage < ActiveRecord::Base
       zero_data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
       return {Staff::S_COMPANY[:TECHNICIAN] => zero_data,
-              Staff::S_COMPANY[:FRONT] => zero_data}
+        Staff::S_COMPANY[:FRONT] => zero_data}
     end
 
     average_score_hart = {}
@@ -80,11 +82,13 @@ class ChartImage < ActiveRecord::Base
     lc
   end
 
-  def self.write_img(url,index,file_n, types)  #上传图片
-    file_name ="#{Time.now.to_i}_#{types}.jpg"
-    dir = "#{File.expand_path(Rails.root)}/public/#{file_n}"
+  def self.write_img(url,store_id,types,object_id)  #上传图片
+    file_name ="#{Time.now.to_i}_#{object_id}.jpg"
+    dir = "#{File.expand_path(Rails.root)}/public/chart_images"
     Dir.mkdir(dir) unless File.directory?(dir)
-    all_dir = "#{dir}/#{index}/"
+    total_dir ="#{dir}/#{store_id}/"
+    Dir.mkdir(total_dir) unless File.directory?(total_dir)
+    all_dir ="#{total_dir}/#{types}/"
     Dir.mkdir(all_dir) unless File.directory?(all_dir)
     file_url ="#{all_dir}#{file_name}"
     open(url) do |fin|
@@ -94,8 +98,8 @@ class ChartImage < ActiveRecord::Base
         end
       end
     end
-    return "/#{file_n}/#{index}/#{file_name}"
-    puts "Chart #{index} success generated"
+    return "/chart_images/#{store_id}/#{types}/#{file_name}"
+    puts "Chart #{object_id} success generated"
   end
 
 
