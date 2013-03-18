@@ -1,11 +1,9 @@
-<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
-<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
 <%=  render 'second_menu'%>
 <div class="search">
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/market_manages/search_report" do%>
     <div><label>时间：</label>
-      <input name="created" type="text" onclick="WdatePicker()" value="<%= session[:r_created] %>"  />&nbsp;到&nbsp;
-      <input name="ended" type="text" onclick="WdatePicker()" value="<%= session[:r_ended] %>" /></div>
+      <input name="created" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_created] %>"  class="Wdate"/>&nbsp;到&nbsp;
+      <input name="ended" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_ended] %>" class="Wdate"/></div>
     <div><input name="time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>"  <%if session[:time]==Sale::DISC_TIME[:DAY]%>checked<%end%> />日&nbsp;&nbsp;
       <input name="time" type="radio" value="<%= Sale::DISC_TIME[:WEEK] %>" <%if session[:time]==Sale::DISC_TIME[:WEEK]%>checked<%end%> />周&nbsp;&nbsp;
       <input name="time" type="radio" value="<%= Sale::DISC_TIME[:MONTH] %>" <%if session[:time]==Sale::DISC_TIME[:MONTH]%>checked<%end%> />月</div>

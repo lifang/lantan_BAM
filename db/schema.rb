@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051409) do
+ActiveRecord::Schema.define(:version => 20130701051411) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -55,9 +55,10 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
   create_table "chart_images", :force => true do |t|
     t.integer  "store_id"
     t.string   "image_url"
-    t.string   "types"
+    t.integer  "types"
     t.datetime "created_at"
     t.datetime "current_day"
+    t.integer  "staff_id"
   end
 
   add_index "chart_images", ["created_at"], :name => "index_chart_images_on_created_at"
@@ -75,7 +76,7 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
     t.text     "reason"
     t.text     "suggstion"
     t.text     "remark"
-    t.boolean  "status"
+    t.boolean  "status",       :default => false
     t.integer  "types"
     t.integer  "staff_id_1"
     t.integer  "staff_id_2"
@@ -99,9 +100,9 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
     t.boolean  "sex"
     t.datetime "birthday"
     t.string   "address"
-    t.boolean  "is_vip"
+    t.boolean  "is_vip",      :default => false
     t.string   "mark"
-    t.boolean  "status"
+    t.boolean  "status",      :default => false
     t.integer  "types"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -110,8 +111,8 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
   create_table "goal_sale_types", :force => true do |t|
     t.string  "type_name"
     t.integer "goal_sale_id"
-    t.float   "goal_price"
-    t.float   "current_price"
+    t.float   "goal_price",    :default => 0.0
+    t.float   "current_price", :default => 0.0
     t.integer "types"
   end
 
@@ -174,6 +175,7 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
     t.string   "carrier"
     t.integer  "store_id"
     t.string   "remark"
+    t.integer  "sale_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -189,7 +191,7 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "remark",     :limit => 1000
-    t.integer  "check_num"
+    t.integer  "check_num",                  :default => 0
   end
 
   create_table "menus", :force => true do |t|
@@ -199,7 +201,7 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
   create_table "message_records", :force => true do |t|
     t.string   "content"
     t.datetime "send_at"
-    t.boolean  "status"
+    t.boolean  "status",     :default => false
     t.integer  "store_id"
     t.datetime "created_at"
   end
@@ -337,7 +339,7 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
   end
 
   create_table "revisits", :force => true do |t|
-    t.integer  "user_id"
+    t.integer  "customer_id"
     t.integer  "types"
     t.string   "title"
     t.string   "answer"
@@ -456,9 +458,10 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "encrypt_password"
+    t.string   "encrypted_password"
     t.string   "username"
     t.string   "salt"
+    t.boolean  "is_score_ge_salary", :default => false
   end
 
   create_table "station_service_relations", :force => true do |t|
@@ -485,9 +488,12 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
 
   create_table "store_complaints", :force => true do |t|
     t.string   "store_id"
-    t.string   "img_url",    :limit => 1000
+    t.string   "img_url"
     t.datetime "created_at"
   end
+
+  add_index "store_complaints", ["created_at"], :name => "index_store_complaints_on_created_at"
+  add_index "store_complaints", ["store_id"], :name => "index_store_complaints_on_store_id"
 
   create_table "store_pleasants", :force => true do |t|
     t.string   "store_id"
@@ -521,6 +527,8 @@ ActiveRecord::Schema.define(:version => 20130701051409) do
     t.string   "phone"
     t.string   "address"
     t.string   "contact"
+    t.integer  "store_id"
+    t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
