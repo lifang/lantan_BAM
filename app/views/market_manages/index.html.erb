@@ -31,7 +31,7 @@
                 <td><%= goal.type_name %></td>
                 <td><%= goal.goal_price %></td>
                 <td><%= goal.current_price %></td>
-                <td><%= "#{format("%.1f",(goal.current_price.nil?? 0 :goal.current_price)*100/goal.goal_price)}%" %></td>
+                <td><%= goal.goal_price==0 ? "0%" :"#{format("%.1f",(goal.current_price.nil?? 0 :goal.current_price)*100/goal.goal_price)}%" %></td>
                 <%if index==0 %> <td rowspan="<%=@goal_hash[sale.id].length%>"><%= ((sale.ended_at-Time.now)/86400.00).to_i%>天</td><%end%>
               </tr>
             <% end unless @goal_hash[sale.id].blank? %>
@@ -83,10 +83,10 @@
       <div class="popup_body_area">
         <%= form_for :goal,:url=>"/stores/#{params[:store_id]}/market_manages/",:html=>{:id=>"create_goal"},:method=>:POST do%>
           <div class="item">
-            <label>开始时间：</label><input class="Wdate" readonly name="created" type="text" id="created" onclick="WdatePicker()" />
+            <label>开始时间：</label><input name="created" type="text" id="created" onclick="WdatePicker()"  class="Wdate" readonly />
           </div>
           <div class="item">
-            <label>结束时间：</label><input class="Wdate" readonly name="ended" type="text" id="ended" onclick="WdatePicker()" />
+            <label>结束时间：</label><input name="ended" type="text" id="ended" onclick="WdatePicker()"  class="Wdate" readonly/>
           </div>
           <div class="clear"></div>
           <h2>

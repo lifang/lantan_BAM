@@ -51,7 +51,7 @@ class Complaint < ActiveRecord::Base
     month = Complaint.get_chart(store_id)
     unless coplaint.keys.blank?
       size =(0..10).inject(Array.new){|arr,int| arr << (coplaint.values.max%10==0 ? coplaint.values.max/10 : coplaint.values.max/10+1)*int} #生成图表的y的坐标
-      GoogleChart::BarChart.new('1000x300', "#{(Time.now-30.days).strftime('%Y-%m')}投诉情况分类表", :vertical, false) do |bc|
+      GoogleChart::BarChart.new('1000x300', "#{Time.now.months_ago(1).strftime('%Y-%m')}投诉情况分类表", :vertical, false) do |bc|
         bc.data "Trend 2", coplaint.values, 'ff0000'
         bc.width_spacing_options :bar_width => 15, :bar_spacing => (1000-(15*coplaint.keys.length))/coplaint.keys.length,
           :group_spacing =>(1000-(15*coplaint.keys.length))/coplaint.keys.length
@@ -59,41 +59,24 @@ class Complaint < ActiveRecord::Base
         bc.axis :x, :labels => coplaint.keys.inject(Array.new) {|pal,key| pal << Complaint::CHART_NAMES[key] }
         bc.axis :y, :labels =>size
         bc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
-        img_url = write_img(URI.escape(URI.unescape(bc.to_url)),"store_#{store_id}","complaint_charts")
-        month=StoreComplaint.create({:store_id=>store_id,:created_at=>(Time.now-30.days).strftime("%Y-%m-%d"),:img_url=>img_url}) if month.blank?
+        img_url = write_img(URI.escape(URI.unescape(bc.to_url)),store_id,ChartImage::TYPES[:COMPLAINT],store_id)
+        month=ChartImage.create({:store_id=>store_id,:types =>ChartImage::TYPES[:COMPLAINT],:created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1)}) if month.blank?
       end
     end
     return month
   end
 
   def self.get_chart(store_id)
-    return StoreComplaint.first(:conditions=>"store_id=#{store_id} and
-   date_format(created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')")
+    return ChartImage.first(:conditions=>"store_id=#{store_id} and
+   date_format(current_day,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') and types=#{ChartImage::TYPES[:COMPLAINT]}")
   end
 
   def self.search_lis(store_id,created_at)
-    sql ="select * from store_complaints where store_id=#{store_id}"
-    sql += " and date_format(created_at,'%Y-%m')=date_format('#{created_at}','%Y-%m') order by created_at desc"  unless created_at=="" || created_at.length==0
-    return StoreComplaint.find_by_sql(sql)[0]
+    sql ="select * from store_complaints where store_id=#{store_id} and types=#{ChartImage::TYPES[:COMPLAINT]}"
+    sql += " and date_format(current_day,'%Y-%m')=date_format('#{created_at}','%Y-%m') order by created_at desc"  unless created_at=="" || created_at.length==0
+    return ChartImage.find_by_sql(sql)[0]
   end
 
-  def self.write_img(url,index,file_n)  #上传图片
-    file_name ="#{Time.now.strftime("%Y%m%d").to_s}_#{index}.jpg"
-    dir = "#{File.expand_path(Rails.root)}/public/#{file_n}"
-    Dir.mkdir(dir) unless File.directory?(dir)
-    all_dir = "#{dir}/#{Time.now.strftime("%Y%m%d").to_s}/"
-    Dir.mkdir(all_dir) unless File.directory?(all_dir)
-    file_url ="#{all_dir}#{file_name}"
-    open(url) do |fin|
-      File.open(file_url, "wb+") do |fout|
-        while buf = fin.read(1024) do
-          fout.write buf
-        end
-      end
-    end
-    return "/#{file_n}/#{Time.now.strftime("%Y%m%d").to_s}/#{file_name}"
-    puts "Chart #{index} success generated"
-  end
 
   def self.degree_chart(store_id)
     month = Complaint.count_pleasant(store_id)
@@ -110,20 +93,20 @@ class Complaint < ActiveRecord::Base
     lc.axis :x, :labels =>orders.keys.inject(Array.new){|arr,mon|arr << "#{mon}月"}
     lc.axis :y, :labels => size
     lc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
-    img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),"chart_#{store_id}","pleased_charts")
-    month=StorePleasant.create({:store_id=>store_id,:created_at=>(Time.now-30.days).strftime("%Y-%m-%d"),:img_url=>img_url})  if month.blank?
+    img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,ChartImage::TYPES[:SATIFY],store_id)
+    month = ChartImage.create({:store_id=>store_id,:types =>ChartImage::TYPES[:SATIFY],:created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1)})  if month.blank?
     return month
   end
 
   def self.count_pleasant(store_id)
-    return StorePleasant.first(:conditions=>"store_id=#{store_id} and
-   date_format(created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')")
+    return ChartImage.first(:conditions=>"store_id=#{store_id} and types=#{ChartImage::TYPES[:SATIFY]} and
+   date_format(current_day,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')")
   end
 
   def self.degree_lis(store_id,created_at)
-    sql ="select * from store_pleasants where store_id=#{store_id}"
-    sql += " and date_format(created_at,'%Y-%m')=date_format('#{created_at}','%Y-%m') order by created_at desc"  unless created_at=="" || created_at.length==0
-    return StorePleasant.find_by_sql(sql)[0]
+    sql ="select * from store_pleasants where store_id=#{store_id} and types=#{ChartImage::TYPES[:SATIFY]}"
+    sql += " and date_format(current_day,'%Y-%m')=date_format('#{created_at}','%Y-%m') order by created_at desc"  unless created_at=="" || created_at.length==0
+    return ChartImage.find_by_sql(sql)[0]
   end
 
   def self.search_detail(store_id,page)
@@ -151,5 +134,25 @@ class Complaint < ActiveRecord::Base
     sql += "and date_format(c.created_at,'%Y-%m')=date_format('#{time}','%Y-%m')" unless time =="" || time.length==0
     sql += " order by created_at desc"
     return Complaint.paginate_by_sql(sql, :page => page, :per_page => 15)
+  end
+
+  def self.write_img(url,store_id,types,object_id)  #上传图片
+    file_name ="#{Time.now.strftime("%Y%m%d").to_s}_#{object_id}.jpg"
+    dir = "#{File.expand_path(Rails.root)}/public/chart_images"
+    Dir.mkdir(dir) unless File.directory?(dir)
+    total_dir ="#{dir}/#{store_id}/"
+    Dir.mkdir(total_dir) unless File.directory?(total_dir)
+    all_dir ="#{total_dir}/#{types}/"
+    Dir.mkdir(all_dir) unless File.directory?(all_dir)
+    file_url ="#{all_dir}#{file_name}"
+    open(url) do |fin|
+      File.open(file_url, "wb+") do |fout|
+        while buf = fin.read(1024) do
+          fout.write buf
+        end
+      end
+    end
+    return "/chart_images/#{store_id}/#{types}/#{file_name}"
+    puts "Chart #{object_id} success generated"
   end
 end
