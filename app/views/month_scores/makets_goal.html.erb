@@ -12,118 +12,69 @@
 </div>
 <div class="data_body">
   <div>
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-      <thead>
-        <tr class="hbg">
-          <td>时间</td>
-          <td>分类</td>
-          <td>目标销售额（元）</td>
-          <td>目前完成销售额（元）</td>
-          <td>目前完成百分比</td>
-          <td>剩余时间（天）</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td rowspan="3">2012.01--2013.01</td>
-          <td>服务类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-          <td rowspan="3">5天</td>
-        </tr>
-        <tr>
-          <td>卡类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-        </tr>
-        <tr>
-          <td>产品类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-        </tr>
-      </tbody>
-    </table>
+    <% unless @new_goals.blank? %>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+        <thead>
+          <tr class="hbg">
+            <td>时间</td>
+            <td>分类</td>
+            <td>目标销售额（元）</td>
+            <td>目前完成销售额（元）</td>
+            <td>目前完成百分比</td>
+            <td>剩余时间（天）</td>
+          </tr>
+        </thead>
+        <tbody>
+          <%  @new_goals.sort.each do |sale|%>
+            <% @goal_hash[sale.id].each_with_index do |goal,index| %>
+              <tr>
+                <%if index==0 %>  <td  rowspan="<%=@goal_hash[sale.id].length%>">
+                    <%="#{sale.started_at.strftime("%Y.%m.%d")}-#{sale.ended_at.strftime("%Y.%m.%d")}" %>
+                  </td> <%end%>
+                <td><%= goal.type_name %></td>
+                <td><%= goal.goal_price %></td>
+                <td><%= goal.current_price %></td>
+                <td><%= "#{format("%.1f",(goal.current_price.nil?? 0 :goal.current_price)*100/goal.goal_price)}%" %></td>
+                <%if index==0 %> <td rowspan="<%=@goal_hash[sale.id].length%>"><%= ((sale.ended_at-Time.now)/86400.00).to_i%>天</td><%end%>
+              </tr>
+            <% end unless @goal_hash[sale.id].blank? %>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      当前暂无记录
+    <% end %>
   </div>
   <div style="display:none;">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-      <thead>
-        <tr class="hbg">
-          <td>时间</td>
-          <td>分类</td>
-          <td>目标销售额（元）</td>
-          <td>目前完成销售额（元）</td>
-          <td>目前完成百分比</td>
-          <td>剩余时间（天）</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td rowspan="3">2012.01--2013.01</td>
-          <td>服务类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-          <td rowspan="3">5天</td>
-        </tr>
-        <tr>
-          <td>卡类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-        </tr>
-        <tr>
-          <td>产品类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-        </tr>
-
-        <tr>
-          <td rowspan="3">2012.01--2013.01</td>
-          <td>服务类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-          <td rowspan="3">5天</td>
-        </tr>
-        <tr>
-          <td>卡类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-        </tr>
-        <tr>
-          <td>产品类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-        </tr>
-
-        <tr>
-          <td rowspan="3">2012.01--2013.01</td>
-          <td>服务类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-          <td rowspan="3">5天</td>
-        </tr>
-        <tr>
-          <td>卡类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-        </tr>
-        <tr>
-          <td>产品类</td>
-          <td>10000</td>
-          <td>5000</td>
-          <td>50%</td>
-        </tr>
-      </tbody>
-    </table>
+    <%unless @old_goals.blank?%>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+        <thead>
+          <tr class="hbg">
+            <td>时间</td>
+            <td>分类</td>
+            <td>目标销售额（元）</td>
+            <td>目前完成销售额（元）</td>
+            <td>目前完成百分比</td>
+          </tr>
+        </thead>
+        <tbody>
+          <%  @old_goals.each do |sale|%>
+            <% @goal_hash[sale.id].each_with_index do |goal,index| %>
+              <tr>
+                <%if index==0 %>  <td  rowspan="<%=@goal_hash[sale.id].length%>">
+                    <%="#{sale.started_at.strftime("%Y.%m.%d")}-#{sale.ended_at.strftime("%Y.%m.%d")}" %></td> <%end%>
+                <td><%= goal.type_name %></td>
+                <td><%= goal.goal_price %></td>
+                <td><%= goal.current_price %></td>
+                <td><%= "#{format("%.1f",(goal.current_price.nil?? 0 :goal.current_price)*100/goal.goal_price)}%" %></td>
+              </tr>
+            <% end unless @goal_hash[sale.id].blank? %>
+          <% end %>
+        </tbody>
+      </table>
+    <%else%>
+      暂无记录
+    <% end %>
   </div>
 </div>
 
@@ -135,29 +86,29 @@
       <div class="popup_body_area">
         <%= form_for :goal,:url=>"/stores/#{params[:store_id]}/month_scores/",:html=>{:id=>"create_goal"},:method=>:POST do%>
           <div class="item">
-            <label>开始时间：</label><input name="created" type="text" id="created" />
+            <label>开始时间：</label><input name="created" type="text" id="created" onclick="WdatePicker()" />
           </div>
           <div class="item">
-            <label>结束时间：</label><input name="ended" type="text" id="ended" />
+            <label>结束时间：</label><input name="ended" type="text" id="ended" onclick="WdatePicker()" />
           </div>
           <div class="clear"></div>
           <h2>
             金额（元）
           </h2>
-          <div class="item">
-            <label>服务类：</label><input name="service" type="text" id="service" />
+          <div class="item" id="item_0">
+            <label>服务类</label>：<input name="goal[<%= GoalSale::TYPES[:SERVICE] %>]" type="text" />
+          </div>
+          <div class="item" id="item_1">
+            <label>产品类</label>：<input name="goal[<%= GoalSale::TYPES[:PRODUCT] %>]" type="text" />
+          </div>
+          <div class="item" id="item_2">
+            <label>卡类</label>：<input name="goal[<%= GoalSale::TYPES[:CARD] %>]" type="text"  />
+          </div>
+          <div class="item" id="item_3">
+            <label>其他</label>：<input name="goal[<%= GoalSale::TYPES[:OTHER] %>]" type="text" />
           </div>
           <div class="item">
-            <label>产品类：</label><input name="product" type="text" id="product" />
-          </div>
-          <div class="item">
-            <label>卡类：</label><input name="card" type="text" id="card" />
-          </div>
-          <div class="item">
-            <label>其他：</label><input name="other" type="text" id="other" />
-          </div>
-          <div class="item">
-            <a href="#" class="item_addItem">+</a>
+            <a href="javascript:void(0)" class="item_addItem" onclick="add_div()">+</a>
           </div>
         <% end %>
       </div>

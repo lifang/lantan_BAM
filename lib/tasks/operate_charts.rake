@@ -7,3 +7,5 @@ task(:operate_satify => :environment) do
   Store.all.each {|store| Complaint.degree_chart(store.id)}
 end
 
+
+

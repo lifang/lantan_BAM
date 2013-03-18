@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051404) do
+ActiveRecord::Schema.define(:version => 20130701051409) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -57,9 +57,11 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
     t.string   "image_url"
     t.string   "types"
     t.datetime "created_at"
+    t.datetime "current_day"
   end
 
   add_index "chart_images", ["created_at"], :name => "index_chart_images_on_created_at"
+  add_index "chart_images", ["current_day"], :name => "index_chart_images_on_current_day"
   add_index "chart_images", ["store_id"], :name => "index_chart_images_on_store_id"
   add_index "chart_images", ["types"], :name => "index_chart_images_on_types"
 
@@ -73,7 +75,7 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
     t.text     "reason"
     t.text     "suggstion"
     t.text     "remark"
-    t.boolean  "status",       :default => false
+    t.boolean  "status"
     t.integer  "types"
     t.integer  "staff_id_1"
     t.integer  "staff_id_2"
@@ -97,20 +99,29 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
     t.boolean  "sex"
     t.datetime "birthday"
     t.string   "address"
-    t.boolean  "is_vip",      :default => false
+    t.boolean  "is_vip"
     t.string   "mark"
-    t.boolean  "status",      :default => false
+    t.boolean  "status"
     t.integer  "types"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
+  create_table "goal_sale_types", :force => true do |t|
+    t.string  "type_name"
+    t.integer "goal_sale_id"
+    t.float   "goal_price"
+    t.float   "current_price"
+    t.integer "types"
+  end
+
+  add_index "goal_sale_types", ["goal_sale_id"], :name => "index_goal_sale_types_on_goal_sale_id"
+  add_index "goal_sale_types", ["type_name"], :name => "index_goal_sale_types_on_type_name"
+  add_index "goal_sale_types", ["types"], :name => "index_goal_sale_types_on_types"
+
   create_table "goal_sales", :force => true do |t|
     t.datetime "started_at"
     t.datetime "ended_at"
-    t.string   "type_name"
-    t.float    "goal_price"
-    t.float    "current_price"
     t.integer  "store_id"
     t.datetime "created_at"
   end
@@ -163,7 +174,6 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
     t.string   "carrier"
     t.integer  "store_id"
     t.string   "remark"
-    t.integer  "sale_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -179,7 +189,7 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "remark",     :limit => 1000
-    t.integer  "check_num",                  :default => 0
+    t.integer  "check_num"
   end
 
   create_table "menus", :force => true do |t|
@@ -189,7 +199,7 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
   create_table "message_records", :force => true do |t|
     t.string   "content"
     t.datetime "send_at"
-    t.boolean  "status",     :default => false
+    t.boolean  "status"
     t.integer  "store_id"
     t.datetime "created_at"
   end
@@ -327,7 +337,7 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
   end
 
   create_table "revisits", :force => true do |t|
-    t.integer  "customer_id"
+    t.integer  "user_id"
     t.integer  "types"
     t.string   "title"
     t.string   "answer"
@@ -446,7 +456,7 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "encrypted_password"
+    t.string   "encrypt_password"
     t.string   "username"
     t.string   "salt"
   end
@@ -475,12 +485,9 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
 
   create_table "store_complaints", :force => true do |t|
     t.string   "store_id"
-    t.string   "img_url"
+    t.string   "img_url",    :limit => 1000
     t.datetime "created_at"
   end
-
-  add_index "store_complaints", ["created_at"], :name => "index_store_complaints_on_created_at"
-  add_index "store_complaints", ["store_id"], :name => "index_store_complaints_on_store_id"
 
   create_table "store_pleasants", :force => true do |t|
     t.string   "store_id"
@@ -514,8 +521,6 @@ ActiveRecord::Schema.define(:version => 20130701051404) do
     t.string   "phone"
     t.string   "address"
     t.string   "contact"
-    t.integer  "store_id"
-    t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
