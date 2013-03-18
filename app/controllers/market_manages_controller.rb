@@ -125,8 +125,10 @@ class MarketManagesController < ApplicationController
 
   def stored_card_record
     @start_at, @end_at = params[:started_at], params[:ended_at]
-    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "orders.started_at >= '#{@start_at}'"
-    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "orders.ended_at <= '#{@end_at}'"
+    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
+                            "orders.started_at >= '#{@start_at}'"
+    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
+                            "orders.ended_at <= '#{@end_at}'"
 
     @orders = Order.includes(:c_svc_relation => :sv_card).
                           where("orders.store_id = #{params[:store_id]}").
@@ -138,13 +140,9 @@ class MarketManagesController < ApplicationController
 
   def daily_consumption_receipt
     @search_time = params[:search_time]
-
     search_time_sql = params[:search_time] ||= Time.now.strftime("%Y-%m-%d")
-
     @orders = Order.where("created_at <= '#{search_time_sql} 23:59:59' and created_at >= '#{search_time_sql} 00:00:00'")
-
     @current_day_total = Order.where("created_at <= '#{Time.now}' and created_at >= '#{Time.now.strftime("%Y-%m-%d")} 00:00:00'").sum(:price)
-
     @search_total = @orders.sum(:price)
     respond_to do |format|
       format.html
@@ -154,8 +152,10 @@ class MarketManagesController < ApplicationController
 
   def stored_card_bill
     @start_at, @end_at = params[:started_at], params[:ended_at]
-    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "orders.started_at >= '#{@start_at}'"
-    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "orders.ended_at <= '#{@end_at}'"
+    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
+                              "orders.started_at >= '#{@start_at}'"
+    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
+                              "orders.ended_at <= '#{@end_at}'"
 
     @orders = Order.includes(:c_svc_relation => :sv_card).
                           where("orders.store_id = #{params[:store_id]}").

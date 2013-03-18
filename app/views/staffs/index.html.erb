@@ -139,6 +139,10 @@
                        <label>提成率：</label>
                        <%= f.text_field :deduct_percent %>
                   </div>
+                  <div class="item">
+                       <label>按考核分发底薪：</label>
+                       <%= f.check_box :is_score_ge_salary, :value => 1 %>
+                  </div>
               </div>
               <div class="btn_box">
                 <button class="confirm_btn" id="new_staff_btn">确定</button>

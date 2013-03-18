@@ -50,7 +50,7 @@ class Staff < ActiveRecord::Base
   end
 
   def operate_picture(photo, status)
-    FileUtils.remove_dir "public/uploads/#{self.id}" if status.eql?("update")
+    FileUtils.remove_dir "public/uploads/#{self.id}" if status.eql?("update") && FileTest.directory?("public/uploads/#{self.id}")
     FileUtils.mkdir_p "public/uploads/#{self.id}"
     File.new(Rails.root.join('public', "uploads", "#{self.id}", photo.original_filename), 'a+')
     File.open(Rails.root.join('public', "uploads", "#{self.id}", photo.original_filename), 'wb') do |file|
