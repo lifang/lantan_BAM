@@ -1,6 +1,3 @@
-<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
-<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
-<%= javascript_include_tag "month_scores" %>
 <%=  render 'second_menu'%>
 <div class="data_menu"><a href="javascript:void(0)" onclick="show_center('.tab_popup');">定制目标销售额</a></div>
 <div class="clear"></div>
@@ -86,10 +83,10 @@
       <div class="popup_body_area">
         <%= form_for :goal,:url=>"/stores/#{params[:store_id]}/market_manages/",:html=>{:id=>"create_goal"},:method=>:POST do%>
           <div class="item">
-            <label>开始时间：</label><input name="created" type="text" id="created" onclick="WdatePicker()" />
+            <label>开始时间：</label><input class="Wdate" readonly name="created" type="text" id="created" onclick="WdatePicker()" />
           </div>
           <div class="item">
-            <label>结束时间：</label><input name="ended" type="text" id="ended" onclick="WdatePicker()" />
+            <label>结束时间：</label><input class="Wdate" readonly name="ended" type="text" id="ended" onclick="WdatePicker()" />
           </div>
           <div class="clear"></div>
           <h2>

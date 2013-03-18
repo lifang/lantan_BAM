@@ -1,10 +1,5 @@
-<div class="second_menu"><a href="#">目标销售额</a><a href="#">活动订单统计</a><a href="#">销售报表</a>
-     <a href="#">营业额汇总表</a>
-     <%= link_to "储值卡消费记录", store_stored_cards_path(@store) %>
-     <a href="/stores/<%= @store.id %>/stored_cards/daily_consumption_receipt">每日销售单据</a>
-     <a href="#" class="hover">储值卡对账单</a>
-</div>
-<form accept-charset="UTF-8" action="/stores/<%= @store.id %>/stored_cards/stored_card_bill" method="get">
+<%= render 'second_menu'%>
+<form accept-charset="UTF-8" action="/stores/<%= @store.id %>/market_manages/stored_card_bill" method="get">
 <div class="search">
       <div><label>时间：</label>
         <input name="started_at" type="text" id="start_at" value="<%= @start_at %>" class="Wdate" readonly onClick="WdatePicker();"/>&nbsp;到&nbsp;
@@ -16,7 +11,7 @@
 <div class="clear"></div>
 <input type="hidden" id="store_id" value="<%= @store.id %>"/>
 <div class="data_body">
-  <%= render :partial => "/stored_cards/stored_card_bill_partial" %>
+  <%= render :partial => "/market_manages/stored_card_bill_partial" %>
 </div>
 <div class="mask"></div>
 <div id="related_order_div"></div>
