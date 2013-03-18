@@ -1,0 +1,21 @@
+<div class="second_menu">
+  <%= link_to "绩效统计", store_staff_manages_path(@store) %>
+  <a href="#" class="hover">平均水平统计</a>
+</div>
+<form action="/stores/<%= @store.id %>/staff_manages/average_score_hart" method="get">
+<div class="search">
+     <div><label>统计年份：</label>
+              <select name="year" id="statistics_year">
+               <option <%= @year.eql?('2013') ? "selected" : "" %>>2013</option>
+               <option <%= @year.eql?('2012') ? "selected" : "" %>>2012</option>
+               <option <%= @year.eql?('2011') ? "selected" : "" %>>2011</option>
+              </select>
+     </div>
+</div>
+</form>
+<div class="clear"></div>
+<div class="data_body">
+     <div><%= image_tag @avg_technician %></div>
+     <div><%= image_tag @avg_front %></div>
+</div>
+      

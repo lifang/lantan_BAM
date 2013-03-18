@@ -92,6 +92,10 @@ module Constant
   #总店id
   STORE_ID = 1
   PER_PAGE = 20
+
+  #施工时间（分钟）
+  STATION_MIN = 30
+  W_MIN = 10 #休息时间
   #催货提醒
   URGE_GOODS_CONTENT = "门店订货提醒，请关注下"
 
@@ -99,4 +103,6 @@ module Constant
 
   #  施工现场文件目录
   VIDEO_DIR ="work_videos"
+
+
 end

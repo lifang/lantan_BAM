@@ -11,8 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-
-ActiveRecord::Schema.define(:version => 20130701051403) do
+ActiveRecord::Schema.define(:version => 20130701051409) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -21,6 +20,7 @@ ActiveRecord::Schema.define(:version => 20130701051403) do
     t.boolean  "status"
     t.text     "content"
     t.datetime "created_at"
+    t.integer  "price"
   end
 
   create_table "c_svc_relations", :force => true do |t|
@@ -51,6 +51,19 @@ ActiveRecord::Schema.define(:version => 20130701051403) do
     t.integer "car_model_id"
     t.integer "buy_year"
   end
+
+  create_table "chart_images", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "image_url"
+    t.string   "types"
+    t.datetime "created_at"
+    t.datetime "current_day"
+  end
+
+  add_index "chart_images", ["created_at"], :name => "index_chart_images_on_created_at"
+  add_index "chart_images", ["current_day"], :name => "index_chart_images_on_current_day"
+  add_index "chart_images", ["store_id"], :name => "index_chart_images_on_store_id"
+  add_index "chart_images", ["types"], :name => "index_chart_images_on_types"
 
   create_table "cities", :force => true do |t|
     t.string  "name"
@@ -94,12 +107,21 @@ ActiveRecord::Schema.define(:version => 20130701051403) do
     t.datetime "updated_at"
   end
 
+  create_table "goal_sale_types", :force => true do |t|
+    t.string  "type_name"
+    t.integer "goal_sale_id"
+    t.float   "goal_price"
+    t.float   "current_price"
+    t.integer "types"
+  end
+
+  add_index "goal_sale_types", ["goal_sale_id"], :name => "index_goal_sale_types_on_goal_sale_id"
+  add_index "goal_sale_types", ["type_name"], :name => "index_goal_sale_types_on_type_name"
+  add_index "goal_sale_types", ["types"], :name => "index_goal_sale_types_on_types"
+
   create_table "goal_sales", :force => true do |t|
     t.datetime "started_at"
     t.datetime "ended_at"
-    t.string   "type_name"
-    t.float    "goal_price"
-    t.float    "current_price"
     t.integer  "store_id"
     t.datetime "created_at"
   end

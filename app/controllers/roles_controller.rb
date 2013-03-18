@@ -57,14 +57,16 @@ class RolesController < ApplicationController
           role = Role.find_by_id params[:role_id].to_i
           if role
             RoleMenuRelation.delete_all("role_id=#{role.id}")
-            RoleModelRelation.delete_all("role_id=#{role.id}")
+            #RoleModelRelation.delete_all("role_id=#{role.id}")
           end
           params[:m_ids].split(",").each do |m_id|
             model_relation = RoleMenuRelation.create(:role_id => role.id, :menu_id => m_id.to_i)
             if model_relation && model_relation.menu
               params[:f_ids].split(",").each do |f_id|
                 if f_id.split("_")[0] == model_relation.menu.controller
-                  RoleModelRelation.create(:role_id => role.id, :model_name => f_id.split("_")[0], :num => f_id.split("_")[1])
+                  role_model = RoleModelRelation.find_by_role_id_and_model_name role.id,f_id.split("_")[0]
+                  RoleModelRelation.create(:role_id => role.id, :model_name => f_id.split("_")[0], :num => f_id.split("_")[1]) if role_model.nil?
+                  role_model.update_attribute(:num, role_model.num | f_id.split("_")[1].to_i) if role_model
                 end
               end
             end

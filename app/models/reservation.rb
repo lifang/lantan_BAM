@@ -2,4 +2,7 @@
 class Reservation < ActiveRecord::Base
   belongs_to :store
   has_many :res_prod_relation
+
+  STATUS = {:normal => FALSE, :cancel => TRUE}
+
 end

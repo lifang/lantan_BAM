@@ -1,6 +1,5 @@
 #encoding: utf-8
 class MonthScoresController < ApplicationController
-
   
   def update
     @store = Store.find_by_id(params[:store_id])
@@ -19,11 +18,5 @@ class MonthScoresController < ApplicationController
     render :text => "success"
   end
 
-  def makets_totals
-    p MonthScore.sort_order(params[:store_id])
-    @months =MonthScore.sort_order(params[:store_id]).inject(Hash.new){|hash,order|
-      hash[order.day].nil? ? hash[order.day]={order.pay_type=>order.price} : hash[order.day].merge!(order.pay_type=>order.price);hash }
-    p @months
-    render :layout=>'complaint'
-  end
+  
 end
