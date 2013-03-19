@@ -286,7 +286,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 
 .search select.select_marginRight { margin-right: 10px;}
-.input[type="button"].search_btn, .search_btn, .compile_btn {
+.input[type="button"].search_btn, .search_btn, .compile_btn, a.compile_btn {
     display: block;
     height: 24x;
     line-height: 24px;
@@ -296,8 +296,8 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
     padding: 0 10px;
     color: #FFF;
 }
+a.compile_btn { width: 100px;}
 
-.search input[type="text"].input_s { width: 50px;}
 .search input.input_s { width: 50px; _width:20px;}
 
 .search.paddin_left { padding-left: 40px;}
@@ -359,6 +359,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 .item_textarea ul { overflow: hidden; padding: 10px 0 0px 115px;}
 .item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
+.item_textarea input { float: left;}
 .item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 90px;  margin-right:10px;text-align: right;}
 
