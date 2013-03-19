@@ -129,20 +129,20 @@ class MarketManagesController < ApplicationController
                             "orders.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
                             "orders.ended_at <= '#{@end_at}'"
-
     @orders = Order.includes(:c_svc_relation => :sv_card).
                           where("orders.store_id = #{params[:store_id]}").
                           where(started_at_sql).where(ended_at_sql).
                           where("sv_cards.types = #{SvCard::FAVOR[:value]}")
-
     @total_price = @orders.sum(:price)
   end
 
   def daily_consumption_receipt
     @search_time = params[:search_time]
     search_time_sql = params[:search_time] ||= Time.now.strftime("%Y-%m-%d")
-    @orders = Order.where("created_at <= '#{search_time_sql} 23:59:59' and created_at >= '#{search_time_sql} 00:00:00'")
-    @current_day_total = Order.where("created_at <= '#{Time.now}' and created_at >= '#{Time.now.strftime("%Y-%m-%d")} 00:00:00'").sum(:price)
+    @orders = Order.where("created_at <= '#{search_time_sql} 23:59:59'").
+                    where("created_at >= '#{search_time_sql} 00:00:00'")
+    @current_day_total = Order.where("created_at <= '#{Time.now}'").
+                    where("created_at >= '#{Time.now.strftime("%Y-%m-%d")} 00:00:00'").sum(:price)
     @search_total = @orders.sum(:price)
     respond_to do |format|
       format.html
@@ -156,14 +156,14 @@ class MarketManagesController < ApplicationController
                               "orders.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
                               "orders.ended_at <= '#{@end_at}'"
-
     @orders = Order.includes(:c_svc_relation => :sv_card).
                           where("orders.store_id = #{params[:store_id]}").
                           where(started_at_sql).where(ended_at_sql).
                           where("sv_cards.types = #{SvCard::FAVOR[:value]}")
-
     svc_return_records = @orders.collect{|order|SvcReturnRecord.
-        where("types = #{SvcReturnRecord::TYPES[:in]} and target_id = #{order.id} and store_id = #{@store.id}").first}
+                          where("types = #{SvcReturnRecord::TYPES[:in]}").
+                          where("target_id = #{order.id}").
+                          where("store_id = #{@store.id}").first}
     @total = svc_return_records.sum(&:total_price) - svc_return_records.sum(&:price)
     respond_to do |format|
       format.html
