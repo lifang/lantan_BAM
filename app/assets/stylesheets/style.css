@@ -5,9 +5,9 @@ a { text-decoration: none;}
 ul { list-style: none;}
 img { border: none;}
 button { cursor: pointer; font-family: "微软雅黑"; border: none; background: #CCC;}
-input {font-family: "微软雅黑";}
+input {font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
 input[type="button"] {font-family: "微软雅黑"; border: none; background: #CCC;}
-textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;}
+textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
 .box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
 .red { color: #F00;}
@@ -286,7 +286,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 
 .search select.select_marginRight { margin-right: 10px;}
-.input[type="button"].search_btn, .search_btn, .compile_btn {
+.input[type="button"].search_btn, .search_btn, .compile_btn, a.compile_btn {
     display: block;
     height: 24x;
     line-height: 24px;
@@ -296,8 +296,8 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
     padding: 0 10px;
     color: #FFF;
 }
+a.compile_btn { width: 100px;}
 
-.search input[type="text"].input_s { width: 50px;}
 .search input.input_s { width: 50px; _width:20px;}
 
 .search.paddin_left { padding-left: 40px;}
@@ -339,7 +339,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .pq_mb { margin-bottom: 16px;}
 
 /*编辑*/
-.item { margin: 10px; float: left; overflow: hidden; width: 290px; height: 30px; line-height: 24px;}
+.item { margin: 10px; float: left; overflow: hidden; width: 295px; height: 30px; line-height: 24px;}
 .item.item_width { width: 460px;}
 
 .item.show_pic { width: 460px; height: 50px;}
@@ -348,7 +348,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .item_title { font-size: 16px; line-height: 32px; padding-left: 55px;}
 .item_add { float: right; margin-right: 49px;}
 .item label, .item_textarea label {
-    width: 110px;
+    width: 115px;
     height: 24px;
     line-height: 24px;
     display: inline-block;
@@ -357,7 +357,10 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
     font-weight: bold;
     color: #930205;
 }
-.item input[type="text"], .item select {  height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
+.item_textarea ul { overflow: hidden; padding: 10px 0 0px 115px;}
+.item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
+.item_textarea input { float: left;}
+.item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 90px;  margin-right:10px;text-align: right;}
 
 .item input.file { width: 100px; _width: 90px; float: left;}

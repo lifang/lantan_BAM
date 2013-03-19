@@ -4,7 +4,7 @@ class CreateNews < ActiveRecord::Migration
     create_table :news do |t|
       t.string :title
       t.text :content
-      t.boolean :status
+      t.integer :status, :default => 0
 
       t.timestamps
     end
