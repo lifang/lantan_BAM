@@ -5,9 +5,9 @@ a { text-decoration: none;}
 ul { list-style: none;}
 img { border: none;}
 button { cursor: pointer; font-family: "微软雅黑"; border: none; background: #CCC;}
-input {font-family: "微软雅黑";}
+input {font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
 input[type="button"] {font-family: "微软雅黑"; border: none; background: #CCC;}
-textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;}
+textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
 .box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
 .red { color: #F00;}
