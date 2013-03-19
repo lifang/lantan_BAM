@@ -16,7 +16,7 @@ class StaffManagesController < ApplicationController
 
     month = Time.now.months_ago(1).strftime("%m")
     base_sql = "current_day >= '#{year}-#{month}-01 00:00:00' and current_day <= '#{year}-#{month}-31 23:59:59'"
-    chart_image = ChartImage.where("types = 'STAFFMONTHSCORE#{@staff.id}'").
+    chart_image = ChartImage.where("types = #{ChartImage::TYPES[:STAFF_LEVEL]} and staff_id = #{@staff.id}").
       where(base_sql).
       where("store_id = #{@store.id}").
       order("created_at desc").first
@@ -33,7 +33,7 @@ class StaffManagesController < ApplicationController
 
     base_sql = get_base_sql(year)
 
-    chart_image = ChartImage.where("types = 'STAFFMONTHSCORE#{@staff.id}'").
+    chart_image = ChartImage.where("types = #{ChartImage::TYPES[:STAFF_LEVEL]} and staff_id = #{@staff.id}").
       where(base_sql).
       where("store_id = #{params[:store_id]}").
       order("created_at desc").first
@@ -48,13 +48,13 @@ class StaffManagesController < ApplicationController
     base_sql = get_base_sql(@year)
 
     technician_chart_image = ChartImage.
-      where("types = 'TECHNICIAN'").
+      where("types = #{ChartImage::TYPES[:MECHINE_LEVEL]}").
       where(base_sql).
       order('created_at desc').first
     @avg_technician = technician_chart_image.image_url unless technician_chart_image.nil?
 
     front_chart_image = ChartImage.
-      where("types = 'FRONT'").
+      where("types = #{ChartImage::TYPES[:FRONT_LEVEL]}").
       where(base_sql).
       order('created_at desc').first
     @avg_front = front_chart_image.image_url unless front_chart_image.nil?

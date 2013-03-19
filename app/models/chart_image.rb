@@ -56,11 +56,11 @@ class ChartImage < ActiveRecord::Base
       avg_data.each do |key, value|
         chart_name = key == Staff::S_COMPANY[:TECHNICIAN] ? "技师平均水平统计" : "接待平均水平统计"
 
-        types = key == Staff::S_COMPANY[:TECHNICIAN] ? 'TECHNICIAN' : 'FRONT'
+        types = key == Staff::S_COMPANY[:TECHNICIAN] ? ChartImage::TYPES[:MECHINE_LEVEL] : ChartImage::TYPES[:FRONT_LEVEL]
 
         lc = shared_chart_img_options('1000x300', chart_name, value, 100)
 
-        img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),"#{store_id}","chart_images", types)
+        img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,types,store_id)
 
         ChartImage.create(:store_id => store_id, :types => types,
           :created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1))
@@ -129,10 +129,11 @@ class ChartImage < ActiveRecord::Base
     lc = shared_chart_img_options('600x267', "员工绩效统计表", data_array, 100)
 
     store_id = staff.store.id
-    types = "STAFFMONTHSCORE"+staff.id.to_s
-    img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),"#{store_id}","chart_images", types)
+    types = ChartImage::TYPES[:STAFF_LEVEL]
+    img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,types,staff.id)
     ChartImage.create(:store_id => store_id, :types => types,
-      :created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1))
+      :created_at => Time.now, :image_url => img_url, 
+      :current_day => Time.now.months_ago(1), :staff_id => staff.id)
   end
 
 end
