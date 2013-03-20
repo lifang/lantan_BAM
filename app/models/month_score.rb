@@ -1,7 +1,7 @@
 #encoding: utf-8
 class MonthScore < ActiveRecord::Base
   belongs_to :staff
-
+  GOAL_NAME ={0=>"服务类",1=>"产品类",2=>"卡类",3=>"其他"}
 
   def self.sort_order(store_id)
     sql="select date_format(created_at,'%Y-%m-%d') day,sum(op.price) price,op.pay_type  from orders o inner join order_pay_types op
@@ -54,4 +54,11 @@ class MonthScore < ActiveRecord::Base
     sql += " order by o.created_at desc"
     return Order.find_by_sql(sql)
   end
+
+  def self.search_goals(store_id)
+    return GoalSale.find_by_sql("select concat_ws('-',date_format(started_at,'%Y.%m.%d'),date_format(ended_at,'%Y.%m.%d')) day,
+           type_name,goal_price,date_format(ended_at,'%Y-%m-%d') end_day,ended_at,current_price from goal_sales where store_id=#{store_id} group by id,
+           concat_ws('-',date_format(started_at,'%Y.%m.%d'),date_format(ended_at,'%Y.%m.%d'))")
+  end
+  
 end

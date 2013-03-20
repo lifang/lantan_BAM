@@ -1,4 +1,4 @@
-module StoredCardsHelper
+module MarketManagesHelper
   def get_service_products(order)
     Product.includes(:order_prod_relations => :order).
       where("orders.id = #{order.id}").where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").

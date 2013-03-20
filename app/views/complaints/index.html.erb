@@ -3,9 +3,9 @@
 <%= render 'directory' %>
 <div class="search">
   <div><label>统计月份：</label>
-    <%=@complaint.nil? ? session[:created_at].to_datetime.strftime("%Y-%m") : @complaint.created_at.strftime("%Y-%m") %></div>
+    <%=@complaint.nil? ? session[:created_at].nil? ? "" : session[:created_at].to_datetime.strftime("%Y-%m") : @complaint.current_day.strftime("%Y-%m") %></div>
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/search" do%>
-    <div><label>时间：</label><input name="created_at" type="text" onclick="WdatePicker()" value="<%= session[:created_at] %>" /></div>
+    <div><label>时间：</label><input name="created_at" type="text"  class="Wdate" readonly onclick="WdatePicker()" value="<%= session[:created_at] %>" /></div>
     <div><button class="search_btn" >查询</button></div>
   <% end %>
 </div>
@@ -14,6 +14,6 @@
   <% if @complaint.nil?%>
     暂未当月统计结果
   <% else%>
-    <img src="<%= @complaint.img_url %>" />
+    <img src="<%= @complaint.image_url %>" />
   <% end%>
 </div>
