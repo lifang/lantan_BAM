@@ -4,7 +4,7 @@ class CreateReservations < ActiveRecord::Migration
     create_table :reservations do |t|
       t.integer :car_num_id
       t.datetime :res_time  #预约时间 年月日 小时 分钟 
-      t.boolean :status   #预约状态
+      t.integer :status   #预约状态
       t.integer :store_id
 
       t.datetime :created_at

@@ -124,7 +124,7 @@ class Order < ActiveRecord::Base
     customer = nil
     working_orders = []
     old_orders = []
-    sql = "select c.id customer_id,c.name,c.mobilephone,cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
+    sql = "select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,cn.buy_year year,cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
       from customer_num_relations cnr
       inner join car_nums cn on cn.id=cnr.car_num_id and cn.num='#{car_num}'
       inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}
@@ -133,6 +133,7 @@ class Order < ActiveRecord::Base
     customer = CustomerNumRelation.find_by_sql sql
     if customer && customer.size > 0
       customer = customer[0]
+      customer.birth = customer.birth.strftime("%Y-%m-%d")
       orders = Order.find_by_sql("select * from orders o where o.car_num_id=#{customer.car_num_id}
         and o.status!=#{STATUS[:DELETED]} and o.status != #{STATUS[:INNORMAL]} and o.store_id=#{store_id} order by o.created_at desc")
       (orders || []).each do |order|
@@ -145,7 +146,7 @@ class Order < ActiveRecord::Base
            p
          }
          order_hash[:pay_type] = order.order_pay_types.collect{|type|
-            OrderProdRelation::PAY_TYPES_NAME[type.pay_type]
+            OrderPayType::PAY_TYPES_NAME[type.pay_type]
          }.join(",")
          #if order.sale_id
          #  s = Hash.new
@@ -237,13 +238,15 @@ class Order < ActiveRecord::Base
       left join customers c2 on c2.id = o.cons_staff_id_2 where o.id = ?", order_id])
   end
 
+  #arr = [车牌和用户信息，选择的产品和服务，相关的活动，相关的打折卡，选择的套餐卡，状态，总价]
   def self.pre_order store_id,car_num,brand,car_year,user_name,phone,email,birth,prod_ids
     arr  = []
+    status = 0
+    total = 0
      Customer.transaction do
-       begin
+       #begin
          carNum = CarNum.find_by_num car_num
          customer = nil
-         total = 0
          if carNum
            customer_car_relation = CustomerNumRelation.find_by_car_num_id carNum.id
            if customer_car_relation
@@ -267,7 +270,7 @@ class Order < ActiveRecord::Base
              customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
                                         :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
              carNum = CarNum.create(:num => car_num, :car_model_id => m.id,:buy_year => car_year)
-             CustomerNumRelation.create(:car_num_id => n.id,:customer_id => customer.id) if carNum && customer
+             CustomerNumRelation.create(:car_num_id => carNum.id,:customer_id => customer.id) if carNum && customer
            end
          end
          info = Hash.new
@@ -282,10 +285,12 @@ class Order < ActiveRecord::Base
            ids << p_id.split("_")[0] if p_id.split("_")[1].to_i < 3
          end
          time_arr = Station.arrange_time store_id, ids
-         puts time_arr
          info[:start] = time_arr[0]
          info[:end] = time_arr[1]
          info[:station_id] = time_arr[2]
+         if info[:station_id].to_i == 0
+           status = 2
+         end
          arr << info
          #根据产品找活动，打折卡，套餐卡
          p_cards = []
@@ -383,16 +388,16 @@ class Order < ActiveRecord::Base
               end
             end
          end if prod_ids && carNum && customer
+         status = 1 if status == 0
          arr << prod_arr
          arr << sale_arr
          arr << svcard_arr
          arr << p_cards
-         arr << 1
+         arr << status
          arr << total
-       rescue
-         arr << []
-         arr = [nil,[],[],[],[],0,0]
-       end
+       #rescue
+       #  arr = [nil,[],[],[],[],status,total]
+       #end
      end
     arr
   end
@@ -422,7 +427,7 @@ class Order < ActiveRecord::Base
   end
 
   def self.make_record c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id
-   #puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
+   puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
    arr = []
    status = 0
    order = nil
@@ -440,7 +445,8 @@ class Order < ActiveRecord::Base
              :price => price,
              :is_billing => false,
              :front_staff_id => user_id,
-             :customer_id => c_id
+             :customer_id => c_id,
+             :store_id => store_id
                               })
         if order
           hash = Hash.new
@@ -462,9 +468,10 @@ class Order < ActiveRecord::Base
              hash[:sale_id] = sale_id
           end
           if svcard_id != "" && SvCard.find_by_id(svcard_id)
-            c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => svcard_id)
+            c_sv_relation = CSvcRelation.find_by_customer_id_and_sv_card_id c_id,svcard_id
+            c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => svcard_id) if c_sv_relation.nil?
             hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
-            SvcardUseRecord.create(:c_svc_relation_id => c_sv_relation.id, :types => SvcardUseRecord::TYPES[:OUT]) if c_sv_relation
+
           end
           if pcard_id != ""
              pcard = PackageCard.find_by_id_and_store_id_and_status(pcard_id,store_id,PackageCard::STAT[:NORMAL])
@@ -567,7 +574,7 @@ class Order < ActiveRecord::Base
       h = {}
       sv_card = self.c_svc_relation.sv_card
       h[:name] = sv_card.name
-      h[:price] = sv_card.price * sv_card.discount
+      h[:price] = sv_card.price * (10 - sv_card.discount) / 10
       h[:discount] = sv_card.discount
       h[:type] = 2
       hash[:c_svc_relation] = h
@@ -587,5 +594,53 @@ class Order < ActiveRecord::Base
       hash[:c_pcard_relation] =  h
     end
     hash
+  end
+
+  def self.pay order_id,store_id,please,pay_type,billing,code
+    puts order_id,store_id,please,pay_type,billing,code
+    order = Order.find_by_id_and_store_id order_id,store_id
+    status = 0
+    if order
+      Order.transaction do
+        begin
+          hash = Hash.new
+          hash[:is_billing] = billing.to_i == 0 ? false : true
+          hash[:is_pleased] = please.to_i == 0 ? false : true
+          hash[:status] = STATUS[:BEEN_PAYMENT]
+          if pay_type.to_i == 2 && order.c_svc_relation_id && code
+            c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
+            if c_svc_relation && c_svc_relation.left_price.to_f >= order.price.to_f
+              sv_use_record = SvcardUseRecord.create(:c_svc_relation_id => c_svc_relation.id,
+                                                     :types => SvcardUseRecord::TYPES[:OUT],
+                                                     :use_price => order.price,
+                                                     :left_price => (c_svc_relation.left_price - order.price)
+              )
+              c_svc_relation.update_attribute(:left_price,sv_use_record.left_price) if sv_use_record
+              svc_return_record = SvcReturnRecord.find_all_by_store_id(store_id,:order => "created_at desc", :limit => 1)
+              if svc_return_record.size > 0
+                content = "订单号为：#{order.code},消费：#{order.price}."
+                total = svc_return_record[0].total_price - order.price
+                SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:in],
+                                       :content => content, :target_id => order.id, :total_price => total)
+              end
+              order.update_attributes hash
+              OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
+              status = 1
+            else
+              status = 3
+            end
+          else
+            order.update_attributes hash
+            OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
+            status = 1
+          end
+        rescue
+
+        end
+      end
+    else
+      status = 2
+    end
+    [status]
   end
 end

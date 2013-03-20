@@ -4,7 +4,7 @@ class Api::OrdersController < ApplicationController
   def index_list
     status = 0
     begin
-      @reservations = Reservation.find_all_by_store_id_and_status params[:store_id],Reservation::STATUS[:normal]
+      @reservations = Reservation.store_reservations params[:store_id]
       @orders = Order.working_orders Order::STATUS[:SERVICING], params[:store_id]
       status = 1
     rescue
@@ -43,10 +43,10 @@ class Api::OrdersController < ApplicationController
     puts result
     render :json => result
   end
-  #预约
-  def reserve
-
-    render :json => {}
+  #发送验证码
+  def send_code
+     message = MessageRecord.send_code params[:order_id],params[:phone]
+    render :json => {:status => message}
   end
   #下单
   def add
@@ -61,18 +61,28 @@ class Api::OrdersController < ApplicationController
           elsif order[0] == 3
       "没可用的工位了"
           end
-    puts str,order,info
+    #puts str,order,info
     render :json => {:status => order[0], :content => str, :order => info}
   end
   #付款
   def pay
-
-    render :json => {}
+    order = Order.pay params[:order_id],params[:store_id],params[:please],params[:pay_type],params[:billing],params[:code]
+    content = ""
+    if order[0] == 0
+      content = ""
+    elsif order[0] == 1
+      content = "success"
+    elsif order[0] == 2
+      content = "订单不存在"
+    elsif order[0] = 3
+      content = "储值卡余额不足，请选择其他支付方式"
+    end
+    render :json => {:status => order[0], :content => content}
   end
   #投诉
   def complaint
-
-    render :json => {}
+    complaint = Complaint.mk_record params[:store_id],params[:order_id],params[:reason],params[:request]
+    render :json => {:status => (complaint.nil? ? 0 : 1)}
   end
 
   def brands_products
@@ -85,7 +95,31 @@ class Api::OrdersController < ApplicationController
     prod_id = prod_id[0...(prod_id.size-1)] if prod_id
     pre_arr = Order.pre_order params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
                     params[:email],params[:birth],prod_id
+    content = ""
+    if pre_arr[5] == 0
+      content = "数据出现异常"
+    elsif pre_arr[5] == 1
+      content = "success"
+    elsif pre_arr[5] == 2
+      content = "选择的产品和服务无法匹配工位"
+    end
     render :json => {:status => pre_arr[5],:info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
-                     :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6]}
+                     :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
+  end
+
+  def confirm_reservation
+    reservation = Reservation.find_by_id_and_store_id params[:r_id].to_i,params[:store_id]
+
+    if reservation && reservation.status == Reservation::STATUS[:normal]
+      reservation.update_attribute(:status, Reservation::STATUS[:confirmed]) if params[:status].to_i == 0
+      reservation.update_attribute(:status, Reservation::STATUS[:cancel]) if params[:status].to_i == 1
+    end
+    reservations = Reservation.store_reservations params[:store_id]
+    render :json => {:status => 1, :reservation => reservations}
+  end
+
+  def refresh
+    reservations = Reservation.store_reservations params[:store_id]
+    render :json => {:status => 1, :reservation => reservations }
   end
 end
