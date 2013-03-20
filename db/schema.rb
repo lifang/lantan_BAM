@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051411) do
+ActiveRecord::Schema.define(:version => 20130701051414) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -381,7 +381,6 @@ ActiveRecord::Schema.define(:version => 20130701051411) do
     t.integer  "reward_num"
     t.float    "satisfied_perc"
     t.integer  "staff_id"
-    t.integer  "violation_reward_id"
     t.datetime "created_at"
   end
 
@@ -409,6 +408,7 @@ ActiveRecord::Schema.define(:version => 20130701051411) do
     t.boolean  "is_subsidy"
     t.string   "sub_content"
     t.string   "code"
+    t.string   "description"
   end
 
   create_table "send_messages", :force => true do |t|
@@ -595,6 +595,9 @@ ActiveRecord::Schema.define(:version => 20130701051411) do
     t.integer  "target_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.float    "score_num"
+    t.float    "salary_num"
+    t.datetime "process_at"
   end
 
   create_table "w_o_times", :force => true do |t|
