@@ -11,7 +11,8 @@ class ViolationRewardsController < ApplicationController
         params[:violation_reward].delete("score_num") and params[:violation_reward].delete("salary_num") if params[:staff][:num_check] == "2"
         params[:violation_reward].delete("salary_num") if params[:staff][:num_check] == "0"
         params[:violation_reward].delete("score_num") if params[:staff][:num_check] == "1"
-        params[:staff][:id].each do |staff_id|          
+        params[:violation_reward][:status] = ViolationReward::STATUS[:NOMAL]
+        params[:staff][:id].each do |staff_id|
           violation_reward = ViolationReward.new(params[:violation_reward])
           violation_reward.staff_id = staff_id
           violation_reward.save
