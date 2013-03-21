@@ -139,7 +139,7 @@ class MarketManagesController < ApplicationController
     @orders = Order.includes(:c_svc_relation => :sv_card).
       where("orders.store_id = #{params[:store_id]}").
       where(started_at_sql).where(ended_at_sql).
-      where("sv_cards.types = #{SvCard::FAVOR[:value]}")
+      where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
 
     @total_price = @orders.sum(:price)
   end
@@ -166,7 +166,7 @@ class MarketManagesController < ApplicationController
     @orders = Order.includes(:c_svc_relation => :sv_card).
       where("orders.store_id = #{params[:store_id]}").
       where(started_at_sql).where(ended_at_sql).
-      where("sv_cards.types = #{SvCard::FAVOR[:value]}")
+      where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
 
     svc_return_records = @orders.collect{|order|SvcReturnRecord.
         where("types = #{SvcReturnRecord::TYPES[:in]} and target_id = #{order.id} and store_id = #{@store.id}").first}
