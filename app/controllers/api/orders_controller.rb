@@ -40,7 +40,7 @@ class Api::OrdersController < ApplicationController
   def search_car
     order = Order.search_by_car_num params[:store_id],params[:car_num]
     result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2] }.to_json
-    puts result
+    #puts result ,"-=-=-=-=-=-="
     render :json => result
   end
   #发送验证码

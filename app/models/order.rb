@@ -244,7 +244,7 @@ class Order < ActiveRecord::Base
     status = 0
     total = 0
      Customer.transaction do
-       #begin
+       begin
          carNum = CarNum.find_by_num car_num
          customer = nil
          if carNum
@@ -395,9 +395,9 @@ class Order < ActiveRecord::Base
          arr << p_cards
          arr << status
          arr << total
-       #rescue
-       #  arr = [nil,[],[],[],[],status,total]
-       #end
+       rescue
+         arr = [nil,[],[],[],[],status,total]
+       end
      end
     arr
   end
@@ -429,7 +429,7 @@ class Order < ActiveRecord::Base
 
   #生成订单
   def self.make_record c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id
-   puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
+   #puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
    arr = []
    status = 0
    order = nil
@@ -605,7 +605,7 @@ class Order < ActiveRecord::Base
 
   #支付订单根据选择的支付方式
   def self.pay order_id,store_id,please,pay_type,billing,code
-    puts order_id,store_id,please,pay_type,billing,code
+    #puts order_id,store_id,please,pay_type,billing,code
     order = Order.find_by_id_and_store_id order_id,store_id
     status = 0
     if order
