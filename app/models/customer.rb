@@ -6,6 +6,7 @@ class Customer < ActiveRecord::Base
   has_many :revisits
   has_many :send_messages
   has_many :c_svc_relations
+  has_many :reservations
 
   #客户状态
   STATUS = {:NOMAL => 0, :DELETED => 1} #0 正常  1 删除

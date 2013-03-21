@@ -105,7 +105,7 @@ class Station < ActiveRecord::Base
     return video_hash
   end
 
-  def self.arrange_time store_id, prod_ids
+  def self.arrange_time store_id, prod_ids, res_time = nil
     #查询所有满足条件的工位
     stations = Station.find_all_by_store_id_and_status store_id, Station::STAT[:NORMAL]
     station_arr = []
@@ -139,6 +139,7 @@ class Station < ActiveRecord::Base
          break
        end
     end
+    time = res_time && time.to_i < res_time.to_datetime.strftime("%Y%m%d%H%M").to_i ? res_time.to_datetime.strftime("%Y%m%d%H%M").to_i : time
     time = time.to_s.to_datetime
     time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),
                 (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]

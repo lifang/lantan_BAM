@@ -5,7 +5,7 @@ module ApplicationHelper
 
   #客户管理提示信息
   def customer_tips
-    @complaints = Complaint.find_by_sql(["select c.reason, c.suggstion, o.code, cu.name, ca.num, cu.id cu_id
+    @complaints = Complaint.find_by_sql(["select c.reason, c.suggestion, o.code, cu.name, ca.num, cu.id cu_id
       from complaints c inner join orders o on o.id = c.order_id
       inner join customers cu on cu.id = c.customer_id inner join car_nums ca on ca.id = o.car_num_id 
       where c.store_id = ? and c.status = ? ", params[:store_id].to_i, Complaint::STATUS[:UNTREATED]])
