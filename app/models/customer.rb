@@ -58,4 +58,32 @@ class Customer < ActiveRecord::Base
     return Customer.paginate_by_sql(params_arr, :per_page => 1, :page => page)
   end
 
+  def self.auto_generate_customer_type
+    stress_customer_ids = []
+    Complaint.where("created_at >= '#{Time.now.years_ago(1)}'").each do |complaint|
+      customer = complaint.customer
+      stress_customer_ids << customer.id and customer.update_attribute(:types, Customer::TYPES[:STRESS]) unless customer.status
+    end
+
+    orders = Order.includes(:car_num => {:customer_num_relation => :customer}).
+                  where("orders.created_at >= '#{Time.now.years_ago(1)}'").
+                  where("customers.id not in (?)", stress_customer_ids).
+                  group_by{|s|s.car_num.customer_num_relation.customer.id}
+
+    result = {}
+    orders.each do |key, value|
+      result[key] = value.length
+    end
+
+    Customer.where("status = 0 and id not in (?)", stress_customer_ids).each do |customer|
+      if result.keys.include?(customer.id)
+        types = result[customer.id] >= 12 ? Customer::TYPES[:GOOD] : Customer::TYPES[:NORMAL]
+        customer.update_attribute(:types, types)
+      else
+        customer.update_attribute(:types, Customer::TYPES[:NORMAL])
+      end
+    end
+
+  end
+
 end

@@ -15,10 +15,10 @@
             <td><%= reward.situation %></td>
             <td><%= ViolationReward::N_REWARD[reward.process_types] %></td>
             <td>
-              <% if reward.status.nil? %>
+              <% unless reward.status %>
                 <%= link_to "处理", "javascript:void(0)", :class => "process_reward", :id => reward.id, :name => @store.id %>
               <% else %>
-                <%= reward.status %>
+                已处理
               <% end %>
             </td>
             <td><%= reward.mark %></td>
