@@ -50,7 +50,11 @@ class ProductsController < ApplicationController
       product.update_attributes({:standard=>params[:standard]})
     end
     if params[:img_url] and !params[:img_url].keys.blank?
-      params[:img_url].each {|key,img| ImageUrl.create(:product_id=>product.id,:img_url=>Sale.upload_img(img,product.id,"#{types.downcase}_pics",product.store_id,key))}
+      params[:img_url].each_with_index {|img,index|
+        url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,img[0])
+        ImageUrl.create(:product_id=>product.id,:img_url=>url)
+        product.update_attributes({:img_url=>url}) if index == 0
+      }
     end
   end   #为新建产品或者服务提供参数
 
@@ -81,7 +85,11 @@ class ProductsController < ApplicationController
     end
     if params[:img_url] and !params[:img_url].keys.blank?
       product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}
-      params[:img_url].each {|key,img| ImageUrl.create(:product_id=>product.id,:img_url=>Sale.upload_img(img,product.id,"#{types.downcase}_pics",product.store_id,key))}
+      params[:img_url].each_with_index {|img,index|
+        url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,img[0])
+        ImageUrl.create(:product_id=>product.id,:img_url=>url)
+        product.update_attributes({:img_url=>url}) if index == 0
+      }
     end
     product.update_attributes(parms)
   end

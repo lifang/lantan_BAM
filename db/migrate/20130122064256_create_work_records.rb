@@ -4,8 +4,8 @@ class CreateWorkRecords < ActiveRecord::Migration
     create_table :work_records do |t|
       t.datetime :current_day   #年月日
       t.integer :attendance_num  #当月出勤
-      t.integer :construct_num
-      t.integer :materials_used_num   #使用工具
+      t.integer :construct_num #施工次数
+      t.integer :materials_used_num #使用工具
       t.integer :materials_consume_num  #材料损耗
       t.integer :water_num     #水耗
       t.integer :elec_num #电消耗
