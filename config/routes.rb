@@ -1,5 +1,9 @@
 LantanBAM::Application.routes.draw do
 
+  resources :syncs do
+    get "upload_file"
+  end
+  
   resources :sales do
     collection do
       post :delete_sale,:public_sale
@@ -163,12 +167,12 @@ LantanBAM::Application.routes.draw do
   end
 
   namespace :api do
-     resources :orders do
-       collection do
-         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
-              "confirm_reservation","refresh"
-       end
-     end
+    resources :orders do
+      collection do
+        post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
+          "confirm_reservation","refresh"
+      end
+    end
   end
 
 end

@@ -3,6 +3,7 @@ class ComplaintsController < ApplicationController
   layout "complaint"
   #投诉分类统计
   def index
+    p  Sync.test 2
     @complaint = Complaint.get_chart(params[:store_id])
     @complaint = Complaint.gchart(params[:store_id])  if @complaints.blank?
     @complaint = ChartImage.where("store_id=#{params[:store_id]} and types=#{ChartImage::TYPES[:COMPLAINT]}").order("created_at desc")[0]  if @complaint.nil?

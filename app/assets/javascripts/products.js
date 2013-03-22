@@ -94,6 +94,7 @@ function edit_serv(){
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
     var time=$("#cost_time").val();
+    var deduct =$("#deduct_percent").val();
     if (name=="" || name.length==0){
         alert("请输入服务的名称");
         return false;
@@ -104,6 +105,10 @@ function edit_serv(){
     }
     if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
         alert("请输入服务的促销价格");
+        return false;
+    }
+    if(deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct))){
+        alert("请输入技师提成百分点");
         return false;
     }
     if(time== "" || time.length==0 || isNaN(parseInt(time))){
