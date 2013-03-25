@@ -136,6 +136,15 @@ class Complaint < ActiveRecord::Base
     return Complaint.paginate_by_sql(sql, :page => page, :per_page => 15)
   end
 
+  def self.mk_record store_id ,order_id,reason,request
+
+     #puts store_id ,order_id,reason,request
+     order  = Order.find_by_id order_id
+    complaint = Complaint.create(:order_id => order_id, :customer_id => order.customer_id, :reason => reason,
+                                 :suggestion => request, :status => STATUS[:UNTREATED]) if order
+    complaint
+  end
+
   def self.write_img(url,store_id,types,object_id)  #上传图片
     file_name ="#{Time.now.strftime("%Y%m%d").to_s}_#{object_id}.jpg"
     dir = "#{File.expand_path(Rails.root)}/public/chart_images"

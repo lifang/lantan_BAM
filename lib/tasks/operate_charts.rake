@@ -1,5 +1,5 @@
 #encoding: utf-8
-namespace :month do
+namespace :monthly do
   desc "generate chart from google_chart by diffent types of complaint"
   task(:operate_charts => :environment) do
     Store.all.each {|store| Complaint.gchart(store.id)}

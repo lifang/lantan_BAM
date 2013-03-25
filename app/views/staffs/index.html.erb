@@ -169,9 +169,14 @@
                        <label>奖励原因：</label>
                        <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
                   </div>
-                   <div class="item">
+                   <div class="item_textarea">
                        <label>奖励方法：</label>
                        <%= f.select :process_types, ViolationReward::N_REWARD.invert %>
+                       <ul>
+                         <li><input type="radio" name="staff[num_check]" value="2" checked/>无</li>
+                        <li><input name="staff[num_check]" type="radio" value="0"/>&nbsp;按分值奖励&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
+                        <li><input name="staff[num_check]" type="radio" value="1"/>&nbsp;按金额奖励&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
+                       </ul>
                   </div>
                   <div class="item_textarea">
                        <label>补充说明：</label>
@@ -201,9 +206,15 @@
                        <label>违规原因：</label>
                        <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
                   </div>
-                   <div class="item">
+                  
+                   <div class="item_textarea">
                        <label>处罚方法：</label>
                        <%= f.select :process_types, ViolationReward::N_VIOLATE.invert %>
+                       <ul>
+                         <li><input type="radio" name="staff[num_check]" value="2" checked/>无</li>
+                        <li><input name="staff[num_check]" type="radio" value="0"/>&nbsp;按分值处罚&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
+                        <li><input name="staff[num_check]" type="radio" value="1"/>&nbsp;按金额处罚&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
+                       </ul>
                   </div>
                   <div class="item_textarea">
                        <label>补充说明：</label>

@@ -448,7 +448,7 @@ $(document).ready(function(){
                 },
                 success: function(data){
                    if(data == "success"){
-                       this_obj.parents('tr').find("span.train_status").text("通过");
+                       this_obj.parents('tr').find("span.train_status").text("已处理");
                        this_obj.hide();
                        this_obj.next().show();
                    }

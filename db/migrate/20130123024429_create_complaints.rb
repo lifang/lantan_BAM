@@ -3,7 +3,7 @@ class CreateComplaints < ActiveRecord::Migration
     create_table :complaints do |t|
       t.integer :order_id
       t.text :reason
-      t.text :suggstion
+      t.text :suggestion
       t.text :remark
       t.boolean :status, :default => 0
       t.integer :types

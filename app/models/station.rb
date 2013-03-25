@@ -105,10 +105,11 @@ class Station < ActiveRecord::Base
     return video_hash
   end
 
-  def self.arrange_time store_id, prod_ids
+  def self.arrange_time store_id, prod_ids, res_time = nil
     #查询所有满足条件的工位
     stations = Station.find_all_by_store_id_and_status store_id, Station::STAT[:NORMAL]
     station_arr = []
+    prod_ids = prod_ids.collect{|p| p.to_i }
     (stations || []).each do |station|
       if station.station_service_relations
         prods = station.station_service_relations.collect{|r| r.product_id }
@@ -121,20 +122,28 @@ class Station < ActiveRecord::Base
     station_id = 0
     (station_arr || []).each do |station|
        w_o_time = WkOrTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
-       t = w_o_time.current_time.to_s.to_datetime
-       s = time.to_s.to_datetime
-       if w_o_time && (t >= s)
-         time = w_o_time.current_time
-         station_id = station.id
+       if w_o_time
+         t = w_o_time.current_time.to_s.to_datetime
+         s = time.to_s.to_datetime
+         if (t >= s)
+          time = w_o_time.current_time
+          station_id = station.id
+         else
+           station_id = station.id
+           time = Time.now.strftime("%Y%m%d%H%M")
+           break
+         end
        else
          station_id = station.id
          time = Time.now.strftime("%Y%m%d%H%M")
          break
        end
     end
+    time = res_time && time.to_i < res_time.to_datetime.strftime("%Y%m%d%H%M").to_i ? res_time.to_datetime.strftime("%Y%m%d%H%M").to_i : time
     time = time.to_s.to_datetime
     time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),
                 (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]
+    #puts time_arr,"-----------------"
     time_arr
   end
 end

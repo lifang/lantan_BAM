@@ -505,7 +505,6 @@
 .ke-statusbar {
 	position: relative;
 	background-color: #F0F0EE;
-	border-top: 1px solid #CCCCCC;
 	font-size: 0;
 	line-height: 0;
 	*height: 12px;

@@ -7,7 +7,6 @@ class CurrentMonthSalariesController < ApplicationController
   def index
     @statistics_date = params[:statistics_date] ||= DateTime.now.strftime("%Y-%m") 
     @staffs = @store.staffs
-
     respond_to do |format|
       format.xls {
         send_data(xls_content_for(@staffs, @statistics_date),
@@ -36,10 +35,6 @@ class CurrentMonthSalariesController < ApplicationController
     xls_report = StringIO.new
     book = Spreadsheet::Workbook.new
     sheet1 = book.create_worksheet :name => "Users"
-
-#    blue = Spreadsheet::Format.new :color => :blue, :weight => :bold, :size => 10
-#    sheet1.row(0).default_format = blue
-
     sheet1.row(0).concat %w{姓名 职务 底薪 提成金额 扣款金额 总额}
     count_row = 1
     objs.each do |obj|
@@ -52,7 +47,6 @@ class CurrentMonthSalariesController < ApplicationController
       sheet1[count_row,5] = salary.nil? ? 0 : salary.total
      count_row += 1
     end
-
     book.write xls_report
     xls_report.string
   end
