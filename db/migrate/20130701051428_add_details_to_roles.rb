@@ -26,5 +26,6 @@ class AddDetailsToRoles< ActiveRecord::Migration
     add_column :staff_role_relations, :created_at, :datetime
     add_column :svcard_prod_relations, :created_at, :datetime
     add_column :train_staff_relations, :created_at, :datetime
+    add_column :syncs, :created_at, :datetime
   end
 end
