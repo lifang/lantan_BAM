@@ -42,7 +42,8 @@ class ProductsController < ApplicationController
     }
     product =Product.create(parms)
     if types == "SERVICE"
-      product.update_attributes({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
+      product.update_attributes({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
+          :deduct_percent=>params[:deduct_percent] })
       params[:sale_prod].each do |key,value|
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
       end if params[:sale_prod]
@@ -73,7 +74,7 @@ class ProductsController < ApplicationController
       :types=>params[:prod_types],:introduction=>params[:intro]
     }
     if types == "SERVICE"
-      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
+      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],:deduct_percent=>params[:deduct_percent] })
       if params[:sale_prod]
         product.prod_mat_relations.inject(Array.new) {|arr,mat| mat.destroy}
         params[:sale_prod].each do |key,value|

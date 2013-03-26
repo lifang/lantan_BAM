@@ -1,7 +1,7 @@
 class CreateSuppliers < ActiveRecord::Migration
   #供应商
   def change
-    create_table :suppliers do |t|
+    create_table :suppliers,:options => 'AUTO_INCREMENT = 1001' do |t|
       t.string :name
       t.string :email
       t.string :phone

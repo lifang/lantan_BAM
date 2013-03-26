@@ -1,5 +1,9 @@
 LantanBAM::Application.routes.draw do
 
+  resources :syncs do
+    get "upload_file"
+  end
+  
   resources :sales do
     collection do
       post :delete_sale,:public_sale

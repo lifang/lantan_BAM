@@ -10,7 +10,6 @@
 <div class="item">
   <label>施工时间(分)：</label><input name="cost_time" id="cost_time" type="text" value="<%= @service.cost_time %>" />
 </div>
-
 <div class="item">
   <label>技师：</label>
   <select name="level1" id="level1" class="staff">
@@ -30,6 +29,9 @@
       <option value="<%= key %>" <%if @service.types==key%> selected<%end%> ><%= value %></option>
     <% end %>
   </select>
+</div>
+<div class="item">
+  <label>提成(百分点)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" />
 </div>
 <div class="item_textarea">
   <label>相关物料：</label><input type="button" value="选择物料" class="other_btn" onclick="show_center('.mat_tab');" />

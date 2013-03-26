@@ -9,7 +9,8 @@ gem 'mysql2', '0.3.10'
 gem "will_paginate", '3.0.3'
 gem 'mini_magick'
 gem 'gchartrb', '0.8'
-
+gem 'multipart-post','1.1.5'
+gem 'rubyzip', '0.9.4'
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do

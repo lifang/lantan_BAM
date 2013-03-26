@@ -113,7 +113,7 @@ class Salary < ActiveRecord::Base
     end
 
     complaints = Complaint.find_by_sql("select c.staff_id_1, c.staff_id_2, count(*) total_count from complaints c left join staffs s on c.staff_id_1 = s.id
-       left join staffs s2 on c.staff_id_2 = s2.id where c.created_at >= '#{start_time}' and c.created_at <='#{end_time}'
+       left join staffs s2 on c.staff_id_2 = s2.id where c.process_at >= '#{start_time}' and c.process_at <='#{end_time}'
        group by c.staff_id_1, c.staff_id_2")
 
     complaints_info = {}

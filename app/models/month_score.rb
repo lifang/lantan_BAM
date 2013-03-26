@@ -2,6 +2,7 @@
 class MonthScore < ActiveRecord::Base
   belongs_to :staff
   GOAL_NAME ={0=>"服务类",1=>"产品类",2=>"卡类",3=>"其他"}
+  IS_UPDATE = {:YES=>1,:NO=>0} # 1 更新 0 未更新
 
   def self.sort_order(store_id)
     sql="select date_format(created_at,'%Y-%m-%d') day,sum(op.price) price,op.pay_type  from orders o inner join order_pay_types op

@@ -104,5 +104,6 @@ module Constant
   #  施工现场文件目录
   VIDEO_DIR ="work_videos"
 
+  HEAD_OFFICE="http://192.168.0.112:3000/materials/upload_file"
 
 end
