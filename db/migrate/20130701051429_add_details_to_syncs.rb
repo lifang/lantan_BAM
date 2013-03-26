@@ -1,4 +1,4 @@
-class AddDetailsToRoles< ActiveRecord::Migration
+class AddDetailsToSyncs< ActiveRecord::Migration
   def change
     add_column :syncs, :file_status, :boolean
     add_column :syncs, :zip_status, :boolean

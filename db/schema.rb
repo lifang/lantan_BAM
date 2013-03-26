@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051428) do
+ActiveRecord::Schema.define(:version => 20130701051429) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -44,8 +44,9 @@ ActiveRecord::Schema.define(:version => 20130701051428) do
   end
 
   create_table "car_models", :force => true do |t|
-    t.string  "name"
-    t.integer "car_brand_id"
+    t.string   "name"
+    t.integer  "car_brand_id"
+    t.datetime "created_at"
   end
 
   create_table "car_nums", :force => true do |t|
@@ -587,12 +588,17 @@ ActiveRecord::Schema.define(:version => 20130701051428) do
     t.float    "use_price"
     t.float    "left_price"
     t.datetime "created_at"
+    t.string   "content"
   end
 
   create_table "syncs", :force => true do |t|
     t.integer  "sync_id"
     t.string   "table_name"
     t.datetime "sync_at"
+    t.datetime "created_at"
+    t.boolean  "file_status"
+    t.boolean  "zip_status"
+    t.boolean  "sync_status"
   end
 
   add_index "syncs", ["sync_at"], :name => "index_syncs_on_sync_at"
@@ -628,7 +634,7 @@ ActiveRecord::Schema.define(:version => 20130701051428) do
     t.datetime "process_at"
   end
 
-  create_table "w_o_times", :force => true do |t|
+  create_table "wk_or_times", :force => true do |t|
     t.integer  "current_time"
     t.integer  "current_day"
     t.integer  "station_id"

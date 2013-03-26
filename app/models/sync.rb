@@ -41,25 +41,33 @@ class Sync < ActiveRecord::Base
 
 
   def self.input_zip(file_path,store_id)
-    #    file_path = "d:/sqls/"    #测试文件地址
-    paths = get_dir_list(file_path)
+    get_dir_list(file_path).each {|path|  File.delete(file_path+path) if path =~ /.zip/ }
     filename ="#{Time.now.strftime("%Y%m%d")}_#{store_id}.zip"
-    paths.each {|path|  File.delete(file_path+path) if path =~ /.zip/ }
     Zip::ZipFile.open(file_path+filename, Zip::ZipFile::CREATE) { |zf|
-      paths.each {|path| zf.file.open(path, "w") { |os| os.write "#{File.open(file_path+path).read}" } }
+      get_dir_list(file_path).each {|path| zf.file.open(path, "w") { |os| os.write "#{File.open(file_path+path).read}" } }
     }
     send_file(store_id,file_path+filename,filename)
   end
 
-  def self.output_zip(store_id)
-    file_path ="#{Rails.root}/public/syncs"
-    Zip::ZipFile.open(file_path+"#{Time.now.ago(1).strftime("%Y%m%d")}_#{store_id}.zip"){
-      |zipFile|
+  def self.output_zip(store_id,day=1)
+    file_path ="#{Rails.root}/public/"
+    dirs=["syncs/","#{Time.now.strftime("%Y-%m").to_s}/","/#{Time.now.strftime("%Y-%m-%d").to_s}/"]
+    Zip::ZipFile.open(file_path+dirs.join+"#{Time.now.ago(day).strftime("%Y%m%d")}_#{store_id}.zip"){ |zipFile|
       zipFile.each do |file|
-        if file.name.split(".").reverse[0] =="txt"
-          contents = zipFile.read(file)
-          p contents.split("\n")
-          p  contents.split(" ")
+        if file.name.split(".").reverse[0] =="sql"
+          contents = zipFile.read(file).split("\n\n|::|")
+          titles =contents.delete_at(0).split(";||;")
+          total_con = []
+          cap = eval(file.name.split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize})
+          contents.each do |content|
+            hash ={}
+            cons = content.split(";||;")
+            titles.each_with_index {|title,index| hash[title] = cons[index].nil? ? cons[index] : cons[index].force_encoding("UTF-8")}
+            object = cap.new(hash)
+            object.id = hash["id"]
+            total_con << object
+          end
+          cap.import total_con
         end
       end
     }
@@ -74,10 +82,13 @@ class Sync < ActiveRecord::Base
     models.each do |model|
       model_name =model.split(".")[0]
       unless model_name==""
-        attrs = eval(model_name.split("_").inject(String.new){|str,name| str + name.capitalize}).where("date_format(created_at,'%Y-%m-%d')=date_format(now(),'%Y-%m-%d')")
+        cap = eval(model_name.split("_").inject(String.new){|str,name| str + name.capitalize})
+        attrs = cap.where("date_format(created_at,'%Y-%m-%d')=date_format(now(),'%Y-%m-%d')")
         unless attrs.blank?
           file = File.open("#{path+dirs.join+model_name}.sql","w+")
-          file.write("#{attrs.inject(String.new) { |str,attr| str+attr.attributes.values.join(";||;")+"\r"}}")
+          file.write("#{cap.column_names.join(";||;")}\r\n|::|")
+          file.write("#{attrs.inject(String.new) {|str,attr| 
+            str+attr.attributes.values.join(";||;").gsub(";||;true;||;",";||;1;||;").gsub(";||;false;||;",";||;0;||;")+"\r\n|::|"}}")
           file.close
         end
       end
