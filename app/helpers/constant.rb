@@ -104,5 +104,8 @@ module Constant
   #  施工现场文件目录
   VIDEO_DIR ="work_videos"
 
-
+  #发短信url
+  MESSAGE_URL = "http://mt.yeion.com"
+  USERNAME = "XCRJ"
+  PASSWORD = "123456"
 end
