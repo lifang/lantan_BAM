@@ -1,5 +1,8 @@
 #encoding: utf-8
 module ApplicationHelper
+  require 'net/http'
+  require "uri"
+  require 'openssl'
   include Constant
   include UserRoleHelper
 
@@ -94,5 +97,17 @@ module ApplicationHelper
       months << DateTime.now.months_ago(i).strftime("%Y-%m")
     end
     months
+  end
+
+  def create_get_http(url,route)
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    if uri.port==443
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    request= Net::HTTP::Get.new(route)
+    back_res =http.request(request)
+    return JSON back_res.body
   end
 end

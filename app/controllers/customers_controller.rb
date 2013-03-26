@@ -85,6 +85,18 @@ class CustomersController < ApplicationController
         SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id,
           :content => params[:content].strip.gsub("%name%", customer.name), :phone => customer.mobilephone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:NOMAL])
+
+        #hash = {:resend => 0, :list =>[{:content => "群发是好的么？1",:msid => "1",:mobile => "13913607079"},{:content => "群发是好的么？2",:msid => "2",:mobile => "15295652460"}] ,:size => 2}
+        #jsondata = JSON hash
+        #message_url = "http://mt.yeion.com"
+        #message_route = "/send_packet.do?Account=XCRJ&Password=123456&jsondata=#{jsondata}&Exno=0"
+        #info = create_get_http(message_url, message_route)
+        #message_url = "http://mt.yeion.com"
+        #message_route = "/send.do?Account=XCRJ&Password=123456&Mobile=13913607079&Content=再测试一下&Exno=0"
+        #info = create_get_http(message_url, message_route)
+        #puts "--------------------------"
+        #puts info
+
         flash[:notice] = "短信发送成功。"
       end
     end
