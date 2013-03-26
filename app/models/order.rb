@@ -654,4 +654,44 @@ class Order < ActiveRecord::Base
     end
     [status]
   end
+
+  def self.checkin store_id,car_num,brand,car_year,user_name,phone,email,birth
+    carNum = CarNum.find_by_num car_num
+    customer = nil
+    status = 0
+    Customer.transaction do
+      begin
+        if carNum
+          customer_car_relation = CustomerNumRelation.find_by_car_num_id carNum.id
+          if customer_car_relation
+            if customer_car_relation.customer.mobilephone == phone
+              customer = customer_car_relation.customer
+            else
+              customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
+                                         :birthday => birth,:status => Customer::STATUS[:NOMAL])
+              customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer) if customer
+            end
+          else
+            customer = Customer.find_by_mobilephone phone
+            customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
+                                       :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+            customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer)
+          end
+        else
+          m = CarModel.find_by_car_brand_id_and_id brand.split("_")[0].to_i,brand.split("_")[1].to_i
+          if m
+            customer = Customer.find_by_mobilephone phone
+            customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
+                                       :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+            carNum = CarNum.create(:num => car_num, :car_model_id => m.id,:buy_year => car_year)
+            CustomerNumRelation.create(:car_num_id => carNum.id,:customer_id => customer.id) if carNum && customer
+          end
+        end
+        status = 1 if carNum
+      rescue
+        status = 2
+      end
+    end
+    status
+  end
 end
