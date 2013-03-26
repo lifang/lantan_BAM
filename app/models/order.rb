@@ -619,15 +619,17 @@ class Order < ActiveRecord::Base
           if pay_type.to_i == 2 && order.c_svc_relation_id && code
             c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
             if c_svc_relation && c_svc_relation.left_price.to_f >= order.price.to_f
+              content = "订单号为：#{order.code},消费：#{order.price}."
               sv_use_record = SvcardUseRecord.create(:c_svc_relation_id => c_svc_relation.id,
                                                      :types => SvcardUseRecord::TYPES[:OUT],
                                                      :use_price => order.price,
+                                                     :content => content,
                                                      :left_price => (c_svc_relation.left_price - order.price)
               )
               c_svc_relation.update_attribute(:left_price,sv_use_record.left_price) if sv_use_record
               svc_return_record = SvcReturnRecord.find_all_by_store_id(store_id,:order => "created_at desc", :limit => 1)
               if svc_return_record.size > 0
-                content = "订单号为：#{order.code},消费：#{order.price}."
+
                 total = svc_return_record[0].total_price - order.price
                 SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:in],
                                        :content => content, :target_id => order.id, :total_price => total)
