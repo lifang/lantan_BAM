@@ -1,5 +1,13 @@
 #encoding: utf-8
-desc "A list about the staff's detail on pay list"
-task(:salary_list => :environment) do
-  Store.all.each {|store_id| Station.set_stations(store_id)}
+namespace :salary_list do
+  desc "salary of day"
+  task(:salary_of_day => :environment) do
+    SalaryDetail.generate_day_salary
+  end
+
+  desc "salary of month"
+  task(:salary_of_month => :environment) do
+    Salary.generate_month_salary
+  end
+
 end

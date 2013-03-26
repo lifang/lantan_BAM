@@ -26,7 +26,7 @@ class SalaryDetail < ActiveRecord::Base
         end
       end
 
-      satisfied_perc = get_satisfied_perc(start_at_sql, end_at_sql, order_search_sql, complaint_search_sql, key)
+      satisfied_perc = get_satisfied_perc(start_at_sql, end_at_sql, order_search_sql, complaint_search_sql, key, process_at_sql)
       SalaryDetail.create(:deduct_num => violation_amount, :staff_id => key,
                         :current_day => (Time.now - 1.days).strftime("%Y%m%d").to_i,
                         :satisfied_perc => satisfied_perc, :reward_num => reward_amount)
@@ -56,11 +56,11 @@ class SalaryDetail < ActiveRecord::Base
     violation_amount
   end
 
-  def self.get_satisfied_perc(start_at_sql, end_at_sql, order_search_sql, complaint_search_sql, staff_id)
+  def self.get_satisfied_perc(start_at_sql, end_at_sql, order_search_sql, complaint_search_sql, staff_id, process_at_sql)
     total_order = Order.where(start_at_sql).where(end_at_sql).
                         where(order_search_sql,staff_id, staff_id, staff_id).count
 
-    total_complaint = Complaint.where(start_at_sql).where(end_at_sql).
+    total_complaint = Complaint.where(process_at_sql).
                                 where(complaint_search_sql, staff_id, staff_id).count
 
     satisfied_perc = total_order == 0 ? 100 : 100 - total_complaint * 100 / total_order

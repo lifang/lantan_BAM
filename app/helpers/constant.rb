@@ -108,4 +108,8 @@ module Constant
   MESSAGE_URL = "http://mt.yeion.com"
   USERNAME = "XCRJ"
   PASSWORD = "123456"
+
+  HEAD_OFFICE="http://192.168.0.112:3000/materials/upload_file"
+
+
 end

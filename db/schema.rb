@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051414) do
+ActiveRecord::Schema.define(:version => 20130701051429) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -33,23 +33,27 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "capitals", :force => true do |t|
-    t.string "name"
+    t.string   "name"
+    t.datetime "created_at"
   end
 
   create_table "car_brands", :force => true do |t|
-    t.string  "name"
-    t.integer "capital_id"
+    t.string   "name"
+    t.integer  "capital_id"
+    t.datetime "created_at"
   end
 
   create_table "car_models", :force => true do |t|
-    t.string  "name"
-    t.integer "car_brand_id"
+    t.string   "name"
+    t.integer  "car_brand_id"
+    t.datetime "created_at"
   end
 
   create_table "car_nums", :force => true do |t|
-    t.string  "num"
-    t.integer "car_model_id"
-    t.integer "buy_year"
+    t.string   "num"
+    t.integer  "car_model_id"
+    t.integer  "buy_year"
+    t.datetime "created_at"
   end
 
   create_table "chart_images", :force => true do |t|
@@ -67,8 +71,9 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   add_index "chart_images", ["types"], :name => "index_chart_images_on_types"
 
   create_table "cities", :force => true do |t|
-    t.string  "name"
-    t.integer "parent_id"
+    t.string   "name"
+    t.integer  "parent_id"
+    t.datetime "created_at"
   end
 
   create_table "complaints", :force => true do |t|
@@ -76,7 +81,7 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.text     "reason"
     t.text     "suggstion"
     t.text     "remark"
-    t.boolean  "status",       :default => false
+    t.boolean  "status"
     t.integer  "types"
     t.integer  "staff_id_1"
     t.integer  "staff_id_2"
@@ -89,8 +94,9 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "customer_num_relations", :force => true do |t|
-    t.integer "customer_id"
-    t.integer "car_num_id"
+    t.integer  "customer_id"
+    t.integer  "car_num_id"
+    t.datetime "created_at"
   end
 
   create_table "customers", :force => true do |t|
@@ -100,20 +106,21 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.boolean  "sex"
     t.datetime "birthday"
     t.string   "address"
-    t.boolean  "is_vip",      :default => false
+    t.boolean  "is_vip"
     t.string   "mark"
-    t.boolean  "status",      :default => false
+    t.boolean  "status"
     t.integer  "types"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "goal_sale_types", :force => true do |t|
-    t.string  "type_name"
-    t.integer "goal_sale_id"
-    t.float   "goal_price",    :default => 0.0
-    t.float   "current_price", :default => 0.0
-    t.integer "types"
+    t.string   "type_name"
+    t.integer  "goal_sale_id"
+    t.float    "goal_price",    :default => 0.0
+    t.float    "current_price", :default => 0.0
+    t.integer  "types"
+    t.datetime "created_at"
   end
 
   add_index "goal_sale_types", ["goal_sale_id"], :name => "index_goal_sale_types_on_goal_sale_id"
@@ -128,14 +135,16 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "image_urls", :force => true do |t|
-    t.integer "product_id"
-    t.string  "img_url"
+    t.integer  "product_id"
+    t.string   "img_url"
+    t.datetime "created_at"
   end
 
   create_table "m_order_types", :force => true do |t|
-    t.integer "material_order_id"
-    t.integer "pay_types"
-    t.float   "price"
+    t.integer  "material_order_id"
+    t.integer  "pay_types"
+    t.float    "price"
+    t.datetime "created_at"
   end
 
   create_table "mat_in_orders", :force => true do |t|
@@ -148,10 +157,11 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "mat_order_items", :force => true do |t|
-    t.integer "material_order_id"
-    t.integer "material_id"
-    t.integer "material_num"
-    t.float   "price"
+    t.integer  "material_order_id"
+    t.integer  "material_id"
+    t.integer  "material_num"
+    t.float    "price"
+    t.datetime "created_at"
   end
 
   create_table "mat_out_orders", :force => true do |t|
@@ -175,7 +185,6 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.string   "carrier"
     t.integer  "store_id"
     t.string   "remark"
-    t.integer  "sale_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -191,24 +200,26 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "remark",     :limit => 1000
-    t.integer  "check_num",                  :default => 0
+    t.integer  "check_num"
   end
 
   create_table "menus", :force => true do |t|
-    t.string "controller"
+    t.string   "controller"
+    t.datetime "created_at"
   end
 
   create_table "message_records", :force => true do |t|
     t.string   "content"
     t.datetime "send_at"
-    t.boolean  "status",     :default => false
+    t.boolean  "status"
     t.integer  "store_id"
     t.datetime "created_at"
   end
 
   create_table "models", :force => true do |t|
-    t.string  "name"
-    t.integer "num"
+    t.string   "name"
+    t.integer  "num"
+    t.datetime "created_at"
   end
 
   create_table "month_scores", :force => true do |t|
@@ -240,16 +251,18 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "order_pay_types", :force => true do |t|
-    t.integer "order_id"
-    t.integer "pay_type"
-    t.float   "price"
+    t.integer  "order_id"
+    t.integer  "pay_type"
+    t.float    "price"
+    t.datetime "created_at"
   end
 
   create_table "order_prod_relations", :force => true do |t|
-    t.integer "order_id"
-    t.integer "product_id"
-    t.integer "pro_num"
-    t.float   "price"
+    t.integer  "order_id"
+    t.integer  "product_id"
+    t.integer  "pro_num"
+    t.float    "price"
+    t.datetime "created_at"
   end
 
   create_table "orders", :force => true do |t|
@@ -289,15 +302,17 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "pcard_prod_relations", :force => true do |t|
-    t.integer "product_id"
-    t.integer "product_num"
-    t.integer "package_card_id"
+    t.integer  "product_id"
+    t.integer  "product_num"
+    t.integer  "package_card_id"
+    t.datetime "created_at"
   end
 
   create_table "prod_mat_relations", :force => true do |t|
-    t.integer "product_id"
-    t.integer "material_num"
-    t.integer "material_id"
+    t.integer  "product_id"
+    t.integer  "material_num"
+    t.integer  "material_id"
+    t.datetime "created_at"
   end
 
   create_table "products", :force => true do |t|
@@ -318,11 +333,13 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.string   "standard"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.float    "deduct_percent"
   end
 
   create_table "res_prod_relations", :force => true do |t|
-    t.integer "product_id"
-    t.integer "reservation_id"
+    t.integer  "product_id"
+    t.integer  "reservation_id"
+    t.datetime "created_at"
   end
 
   create_table "reservations", :force => true do |t|
@@ -334,12 +351,13 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "revisit_order_relations", :force => true do |t|
-    t.integer "revisit_id"
-    t.integer "order_id"
+    t.integer  "revisit_id"
+    t.integer  "order_id"
+    t.datetime "created_at"
   end
 
   create_table "revisits", :force => true do |t|
-    t.integer  "customer_id"
+    t.integer  "user_id"
     t.integer  "types"
     t.string   "title"
     t.string   "answer"
@@ -350,18 +368,21 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "role_menu_relations", :force => true do |t|
-    t.integer "role_id"
-    t.integer "menu_id"
+    t.integer  "role_id"
+    t.integer  "menu_id"
+    t.datetime "created_at"
   end
 
   create_table "role_model_relations", :force => true do |t|
-    t.integer "role_id"
-    t.integer "num"
-    t.string  "model_name"
+    t.integer  "role_id"
+    t.integer  "num"
+    t.string   "model_name"
+    t.datetime "created_at"
   end
 
   create_table "roles", :force => true do |t|
-    t.string "name"
+    t.string   "name"
+    t.datetime "created_at"
   end
 
   create_table "salaries", :force => true do |t|
@@ -385,9 +406,10 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "sale_prod_relations", :force => true do |t|
-    t.integer "sale_id"
-    t.integer "product_id"
-    t.integer "prod_num"
+    t.integer  "sale_id"
+    t.integer  "product_id"
+    t.integer  "prod_num"
+    t.datetime "created_at"
   end
 
   create_table "sales", :force => true do |t|
@@ -418,6 +440,7 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.string   "phone"
     t.datetime "send_at"
     t.boolean  "status"
+    t.datetime "created_at"
   end
 
   create_table "staff_gr_records", :force => true do |t|
@@ -431,8 +454,9 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "staff_role_relations", :force => true do |t|
-    t.integer "role_id"
-    t.integer "staff_id"
+    t.integer  "role_id"
+    t.integer  "staff_id"
+    t.datetime "created_at"
   end
 
   create_table "staffs", :force => true do |t|
@@ -458,7 +482,7 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "encrypted_password"
+    t.string   "encrypt_password"
     t.string   "username"
     t.string   "salt"
     t.boolean  "is_score_ge_salary", :default => false
@@ -488,12 +512,9 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
 
   create_table "store_complaints", :force => true do |t|
     t.string   "store_id"
-    t.string   "img_url"
+    t.string   "img_url",    :limit => 1000
     t.datetime "created_at"
   end
-
-  add_index "store_complaints", ["created_at"], :name => "index_store_complaints_on_created_at"
-  add_index "store_complaints", ["store_id"], :name => "index_store_complaints_on_store_id"
 
   create_table "store_pleasants", :force => true do |t|
     t.string   "store_id"
@@ -527,8 +548,6 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.string   "phone"
     t.string   "address"
     t.string   "contact"
-    t.integer  "store_id"
-    t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -555,11 +574,12 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
   end
 
   create_table "svcard_prod_relations", :force => true do |t|
-    t.integer "product_id"
-    t.integer "product_num"
-    t.integer "sv_card_id"
-    t.float   "base_price"
-    t.float   "more_price"
+    t.integer  "product_id"
+    t.integer  "product_num"
+    t.integer  "sv_card_id"
+    t.float    "base_price"
+    t.float    "more_price"
+    t.datetime "created_at"
   end
 
   create_table "svcard_use_records", :force => true do |t|
@@ -568,12 +588,26 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.float    "use_price"
     t.float    "left_price"
     t.datetime "created_at"
+    t.string   "content"
   end
 
+  create_table "syncs", :force => true do |t|
+    t.integer  "sync_id"
+    t.string   "table_name"
+    t.datetime "sync_at"
+    t.datetime "created_at"
+    t.boolean  "file_status"
+    t.boolean  "zip_status"
+    t.boolean  "sync_status"
+  end
+
+  add_index "syncs", ["sync_at"], :name => "index_syncs_on_sync_at"
+
   create_table "train_staff_relations", :force => true do |t|
-    t.integer "train_id"
-    t.integer "staff_id"
-    t.boolean "status"
+    t.integer  "train_id"
+    t.integer  "staff_id"
+    t.boolean  "status"
+    t.datetime "created_at"
   end
 
   create_table "trains", :force => true do |t|
@@ -600,7 +634,7 @@ ActiveRecord::Schema.define(:version => 20130701051414) do
     t.datetime "process_at"
   end
 
-  create_table "w_o_times", :force => true do |t|
+  create_table "wk_or_times", :force => true do |t|
     t.integer  "current_time"
     t.integer  "current_day"
     t.integer  "station_id"

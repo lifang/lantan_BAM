@@ -166,4 +166,16 @@ class Api::OrdersController < ApplicationController
      end
 
   end
+
+  def checkin
+    order = Order.checkin params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
+                          params[:email],params[:birth]
+    content = ""
+    if order == 1
+      content = "success"
+    else
+      content = "数据操作失败"
+    end
+    render :json => {:status => order, :content => content}
+  end
 end

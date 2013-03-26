@@ -562,14 +562,17 @@ class Order < ActiveRecord::Base
     hash[:start] = self.started_at.strftime("%Y-%m-%d %H:%M")
     hash[:end] = self.ended_at.strftime("%Y-%m-%d %H:%M")
     hash[:total] = self.price
+    content = ""
     hash[:products] = self.order_prod_relations.collect{|r|
       h = Hash.new
       h[:name] = r.product.name
       h[:price] = r.price
       h[:num] = r.pro_num.to_i
       h[:type] = 0
+      content += h[:name] + ","
       h
     }
+    hash[:content] = content.chomp(",")
     unless self.sale_id.blank?
       h = {}
       h[:name] = self.sale.name
@@ -617,17 +620,19 @@ class Order < ActiveRecord::Base
           hash[:status] = STATUS[:BEEN_PAYMENT]
           #如果是选择储值卡支付
           if pay_type.to_i == 2 && order.c_svc_relation_id && code
-            c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
-            if c_svc_relation && c_svc_relation.left_price.to_f >= order.price.to_f
-              sv_use_record = SvcardUseRecord.create(:c_svc_relation_id => c_svc_relation.id,
-                                                     :types => SvcardUseRecord::TYPES[:OUT],
-                                                     :use_price => order.price,
-                                                     :left_price => (c_svc_relation.left_price - order.price)
-              )
-              c_svc_relation.update_attribute(:left_price,sv_use_record.left_price) if sv_use_record
+            #c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
+            #if c_svc_relation && c_svc_relation.left_price.to_f >= order.price.to_f
+              content = "订单号为：#{order.code},消费：#{order.price}."
+              #sv_use_record = SvcardUseRecord.create(:c_svc_relation_id => c_svc_relation.id,
+              #                                       :types => SvcardUseRecord::TYPES[:OUT],
+              #                                       :use_price => order.price,
+              #                                       :content => content,
+              #                                       :left_price => (c_svc_relation.left_price - order.price)
+              #)
+              #c_svc_relation.update_attribute(:left_price,sv_use_record.left_price) if sv_use_record
               svc_return_record = SvcReturnRecord.find_all_by_store_id(store_id,:order => "created_at desc", :limit => 1)
               if svc_return_record.size > 0
-                content = "订单号为：#{order.code},消费：#{order.price}."
+
                 total = svc_return_record[0].total_price - order.price
                 SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:in],
                                        :content => content, :target_id => order.id, :total_price => total)
@@ -635,9 +640,9 @@ class Order < ActiveRecord::Base
               order.update_attributes hash
               OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
               status = 1
-            else
-              status = 3
-            end
+            #else
+            #  status = 3
+            #end
           else
             order.update_attributes hash
             OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
@@ -651,5 +656,45 @@ class Order < ActiveRecord::Base
       status = 2
     end
     [status]
+  end
+
+  def self.checkin store_id,car_num,brand,car_year,user_name,phone,email,birth
+    carNum = CarNum.find_by_num car_num
+    customer = nil
+    status = 0
+    Customer.transaction do
+      begin
+        if carNum
+          customer_car_relation = CustomerNumRelation.find_by_car_num_id carNum.id
+          if customer_car_relation
+            if customer_car_relation.customer.mobilephone == phone
+              customer = customer_car_relation.customer
+            else
+              customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
+                                         :birthday => birth,:status => Customer::STATUS[:NOMAL])
+              customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer) if customer
+            end
+          else
+            customer = Customer.find_by_mobilephone phone
+            customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
+                                       :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+            customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer)
+          end
+        else
+          m = CarModel.find_by_car_brand_id_and_id brand.split("_")[0].to_i,brand.split("_")[1].to_i
+          if m
+            customer = Customer.find_by_mobilephone phone
+            customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
+                                       :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+            carNum = CarNum.create(:num => car_num, :car_model_id => m.id,:buy_year => car_year)
+            CustomerNumRelation.create(:car_num_id => carNum.id,:customer_id => customer.id) if carNum && customer
+          end
+        end
+        status = 1 if carNum
+      rescue
+        status = 2
+      end
+    end
+    status
   end
 end
