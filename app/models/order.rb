@@ -133,7 +133,7 @@ class Order < ActiveRecord::Base
     customer = CustomerNumRelation.find_by_sql sql
     if customer && customer.size > 0
       customer = customer[0]
-      customer.birth = customer.birth.strftime("%Y-%m-%d")
+      customer.birth = customer.birth.strftime("%Y-%m-%d")  if customer.birth
       orders = Order.find_by_sql("select * from orders o where o.car_num_id=#{customer.car_num_id}
         and o.status!=#{STATUS[:DELETED]} and o.status != #{STATUS[:INNORMAL]} and o.store_id=#{store_id} order by o.created_at desc")
       (orders || []).each do |order|
@@ -239,12 +239,12 @@ class Order < ActiveRecord::Base
   end
 
   #arr = [车牌和用户信息，选择的产品和服务，相关的活动，相关的打折卡，选择的套餐卡，状态，总价]
-  def self.pre_order store_id,car_num,brand,car_year,user_name,phone,email,birth,prod_ids
+  def self.pre_order store_id,car_num,brand,car_year,user_name,phone,email,birth,prod_ids,res_time
     arr  = []
     status = 0
     total = 0
      Customer.transaction do
-       #begin
+       begin
          carNum = CarNum.find_by_num car_num
          customer = nil
          if carNum
@@ -284,7 +284,7 @@ class Order < ActiveRecord::Base
          prod_ids.split(",").each do |p_id|
            ids << p_id.split("_")[0] if p_id.split("_")[1].to_i < 3
          end
-         time_arr = Station.arrange_time store_id, ids
+         time_arr = Station.arrange_time store_id, ids,res_time
          info[:start] = time_arr[0]
          info[:end] = time_arr[1]
          info[:station_id] = time_arr[2]
@@ -395,13 +395,14 @@ class Order < ActiveRecord::Base
          arr << p_cards
          arr << status
          arr << total
-       #rescue
-       #  arr = [nil,[],[],[],[],status,total]
-       #end
+       rescue
+         arr = [nil,[],[],[],[],status,total]
+       end
      end
     arr
   end
 
+  #获取产品相关的活动，打折卡，套餐卡
   def self.get_prod_sale_card prods
     arr = prods.split(",")
     prod_arr = []
@@ -426,8 +427,9 @@ class Order < ActiveRecord::Base
     [prod_arr,sale_arr,svcard_arr,pcard_arr]
   end
 
+  #生成订单
   def self.make_record c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id
-   puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
+   #puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
    arr = []
    status = 0
    order = nil
@@ -453,6 +455,7 @@ class Order < ActiveRecord::Base
           x = 0
           cost_time = 0
           prod_ids = []
+          #创建订单的相关产品 OrdeProdRelation
           (arr[0] || []).each do |prod|
             product = Product.find_by_id_and_store_id_and_status prod[1],store_id,Product::IS_VALIDATE[:YES]
             if product
@@ -464,15 +467,18 @@ class Order < ActiveRecord::Base
             end
           end
           hash[:types] = x > 0 ? TYPES[:SERVICE] : TYPES[:PRODUCT]
+          #订单相关的活动
           if sale_id != "" && Sale.find_by_id_and_store_id_and_status(sale_id,store_id,Sale::STATUS[:RELEASE])
              hash[:sale_id] = sale_id
           end
+          #订单相关的打折卡
           if svcard_id != "" && SvCard.find_by_id(svcard_id)
             c_sv_relation = CSvcRelation.find_by_customer_id_and_sv_card_id c_id,svcard_id
             c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => svcard_id) if c_sv_relation.nil?
             hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
 
           end
+          #订单相关的套餐卡
           if pcard_id != ""
              pcard = PackageCard.find_by_id_and_store_id_and_status(pcard_id,store_id,PackageCard::STAT[:NORMAL])
             if pcard
@@ -494,7 +500,7 @@ class Order < ActiveRecord::Base
           #创建工位订单
           station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
           unless station
-            arrange_time = Station.arrange_time(store_id,prod_ids)
+            arrange_time = Station.arrange_time(store_id,prod_ids,nil)
             if arrange_time[2] > 0
               station_id = arrange_time[2]
               station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
@@ -545,6 +551,7 @@ class Order < ActiveRecord::Base
     arr
   end
 
+  #返回订单的相关信息
   def get_info
     hash = Hash.new
     hash[:id] = self.id
@@ -596,8 +603,9 @@ class Order < ActiveRecord::Base
     hash
   end
 
+  #支付订单根据选择的支付方式
   def self.pay order_id,store_id,please,pay_type,billing,code
-    puts order_id,store_id,please,pay_type,billing,code
+    #puts order_id,store_id,please,pay_type,billing,code
     order = Order.find_by_id_and_store_id order_id,store_id
     status = 0
     if order
@@ -607,6 +615,7 @@ class Order < ActiveRecord::Base
           hash[:is_billing] = billing.to_i == 0 ? false : true
           hash[:is_pleased] = please.to_i == 0 ? false : true
           hash[:status] = STATUS[:BEEN_PAYMENT]
+          #如果是选择储值卡支付
           if pay_type.to_i == 2 && order.c_svc_relation_id && code
             c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
             if c_svc_relation && c_svc_relation.left_price.to_f >= order.price.to_f

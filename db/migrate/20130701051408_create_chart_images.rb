@@ -1,6 +1,6 @@
 class CreateChartImages < ActiveRecord::Migration
   def change
-    create_table :chart_images do |t|
+    create_table :chart_images,:options => 'AUTO_INCREMENT = 1001' do |t|
       t.integer :id
       t.integer :store_id
       t.string :image_url

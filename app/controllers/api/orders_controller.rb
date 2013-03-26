@@ -1,6 +1,6 @@
 #encoding: utf-8
 class Api::OrdersController < ApplicationController
-  #首页
+  #首页,登录后的页面
   def index_list
     status = 0
     begin
@@ -40,7 +40,7 @@ class Api::OrdersController < ApplicationController
   def search_car
     order = Order.search_by_car_num params[:store_id],params[:car_num]
     result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2] }.to_json
-    puts result
+    #puts result ,"-=-=-=-=-=-="
     render :json => result
   end
   #发送验证码
@@ -85,16 +85,18 @@ class Api::OrdersController < ApplicationController
     render :json => {:status => (complaint.nil? ? 0 : 1)}
   end
 
+  #车品牌
   def brands_products
     items = Order.get_brands_products params[:store_id]
     render :json => {:status => 1, :brands => items[0], :products => items[1], :count => items[1][4]}
   end
 
+  #点击完成按钮，确定选择的产品和服务
   def finish
     prod_id = params[:prod_ids]
     prod_id = prod_id[0...(prod_id.size-1)] if prod_id
     pre_arr = Order.pre_order params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
-                    params[:email],params[:birth],prod_id
+                    params[:email],params[:birth],prod_id,params[:res_time]
     content = ""
     if pre_arr[5] == 0
       content = "数据出现异常"
@@ -103,23 +105,65 @@ class Api::OrdersController < ApplicationController
     elsif pre_arr[5] == 2
       content = "选择的产品和服务无法匹配工位"
     end
-    render :json => {:status => pre_arr[5],:info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
+    render :json => {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
                      :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
   end
 
+  #确认预约信息
   def confirm_reservation
     reservation = Reservation.find_by_id_and_store_id params[:r_id].to_i,params[:store_id]
-
+    customer = nil
     if reservation && reservation.status == Reservation::STATUS[:normal]
-      reservation.update_attribute(:status, Reservation::STATUS[:confirmed]) if params[:status].to_i == 0
-      reservation.update_attribute(:status, Reservation::STATUS[:cancel]) if params[:status].to_i == 1
+      time = reservation.res_time
+      if params[:reserv_at]
+        time = (params[:reserv_at].to_s + ":00").gsub(".","-")
+      end
+      reservation.update_attributes(:status => Reservation::STATUS[:confirmed],:res_time => time) if params[:status].to_i == 0     #确认预约
+      reservation.update_attribute(:status, Reservation::STATUS[:cancel]) if params[:status].to_i == 1     #取消预约
+      if params[:reserv_at]
+        customer = Hash.new
+        c = reservation.customer
+        car_num = reservation.car_num
+        customer[:carNum] = car_num.num
+        customer[:car_num_id] = reservation.car_num_id
+        customer[:name] = c.name
+        customer[:customer_id] = reservation.customer_id
+        customer[:reserv_at] = reservation.res_time
+        customer[:phone] = c.mobilephone
+        customer[:email] = c.other_way
+        customer[:birth] = c.birthday.strftime("%Y-%m-%d")
+        customer[:year] = car_num.buy_year
+      end
     end
     reservations = Reservation.store_reservations params[:store_id]
-    render :json => {:status => 1, :reservation => reservations}
+
+    render :json => {:status => 1, :reservation => reservations, :customer => customer}
   end
 
+  #刷新返回预约信息
   def refresh
     reservations = Reservation.store_reservations params[:store_id]
     render :json => {:status => 1, :reservation => reservations }
+  end
+
+  #查询订单后的支付
+  def pay_order
+     order = Order.find_by_id params[:order_id]
+     status = 0
+     if params[:opt_type].to_i == 1
+       if order && order.status == Order::STATUS[:NORMAL]
+          order.update_attribute(:status, Order::STATUS[:DELETED])
+         status = 1
+       else
+         status = 2
+       end
+       info = order.nil? ? nil : order.get_info
+       render :json  => {:status => status}
+     else
+       info = order.nil? ? nil : order.get_info
+       status = 1
+       render :json  => {:status => status, :order => info}
+     end
+
   end
 end
