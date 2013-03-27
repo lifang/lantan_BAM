@@ -24,8 +24,6 @@ GEM
       activesupport (= 3.1.2)
       arel (~> 2.2.1)
       tzinfo (~> 0.3.29)
-    activerecord-import (0.3.1)
-      activerecord (~> 3.0)
     activeresource (3.1.2)
       activemodel (= 3.1.2)
       activesupport (= 3.1.2)
@@ -109,7 +107,6 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
-  activerecord-import
   gchartrb (= 0.8)
   jquery-rails (~> 2.1.0)
   mini_magick
