@@ -7,6 +7,7 @@ class Sync < ActiveRecord::Base
   require 'net/http/post/multipart'
   require 'zip/zip'
   require 'zip/zipfilesystem'
+  require 'open-uri'
 
   SYNC_STAT = {:COMPLETE =>1,:ERROR =>0}  #生成/压缩/上传更新文件 完成1 报错0
 
@@ -94,5 +95,42 @@ class Sync < ActiveRecord::Base
     flog.close
     file_name = filename.nil? ? sync.zip_name : filename
     send_file(store_id,path+dirs.join+file_name,file_name,sync) if file_name
+  end
+
+  def self.get_zip_file(day=1)
+    ip_host = "http://192.168.0.110:3001/"
+    path = Constant::LOCAL_DIR
+    dirs = ["syncs_datas/", "#{Time.now.ago(day).strftime("%Y-%m").to_s}/", "#{Time.now.ago(day).strftime("%Y-%m-%d")}/"]
+    read_dirs = ["write_datas/", "#{Time.now.ago(day).strftime("%Y-%m").to_s}/", "#{Time.now.ago(day).strftime("%Y-%m-%d")}/"]
+    read_dirs.each_with_index {|dir,index| Dir.mkdir path+read_dirs[0..index].join   unless File.directory? path+read_dirs[0..index].join }
+    #Dir.mkdir dirs.join unless File.directory? dirs.join
+    file_name = "#{Time.now.ago(day).strftime("%Y%m%d")}.zip"
+    File.open(path+read_dirs.join+file_name, 'wb') do |fo|
+      fo.print open(ip_host+dirs.join+file_name).read
+    end
+    
+    output_zip(path+read_dirs.join+file_name)
+  end
+
+  def self.output_zip(path)
+    Zip::ZipFile.open(path){ |zipFile|
+      zipFile.each do |file|
+        if file.name.split(".").reverse[0] =="log"
+          contents = zipFile.read(file).split("\n\n|::|")
+          titles =contents.delete_at(0).split(";||;")
+          total_con = []
+          cap = eval(file.name.split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize})
+          contents.each do |content|
+            hash ={}
+            cons = content.split(";||;")
+            titles.each_with_index {|title,index| hash[title] = cons[index].nil? ? cons[index] : cons[index].force_encoding("UTF-8")}
+            object = cap.new(hash)
+            object.id = hash["id"]
+            total_con << object
+          end
+          cap.import total_con
+        end
+      end
+    }
   end
 end
