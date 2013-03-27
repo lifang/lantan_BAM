@@ -105,17 +105,12 @@ module Constant
   #  施工现场文件目录
   VIDEO_DIR ="work_videos"
 
-<<<<<<< HEAD
-  HEAD_OFFICE="http://192.168.0.102:3000/syncs/upload_file"
-  PCARD_PICS = "pcard_pics"
-=======
   #发短信url
   MESSAGE_URL = "http://mt.yeion.com"
   USERNAME = "XCRJ"
   PASSWORD = "123456"
 
-  HEAD_OFFICE="http://192.168.0.112:3000/materials/upload_file"
+  HEAD_OFFICE="http://192.168.0.102:3000/syncs/upload_file"
+  PCARD_PICS = "pcard_pics"
 
-
->>>>>>> 876d933b04bb150f0c518ad3f7a956a75d7b2369
 end
