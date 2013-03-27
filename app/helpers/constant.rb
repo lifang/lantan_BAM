@@ -90,6 +90,7 @@ module Constant
 
   #活动code码生成文件路径
   CODE_PATH =  LOCAL_DIR + "code_file.txt"
+  LOG_DIR = LOCAL_DIR + "logs/"
   #总店id
   STORE_ID = 1
   PER_PAGE = 20
@@ -112,5 +113,8 @@ module Constant
 
   HEAD_OFFICE="http://192.168.0.102:3000/syncs/upload_file"
   PCARD_PICS = "pcard_pics"
-
+  SALE_PICS = "sale_pics"
+  #产品和活动的类别  图片名称分别为 product_pics 和service_pics
+  PRODUCT = "PRODUCT"
+  SERVICE = "SERVICE"
 end

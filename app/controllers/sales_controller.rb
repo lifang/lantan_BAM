@@ -25,7 +25,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]
     sale=Sale.create!(pams)
     if params[:img_url]
-      filename=Sale.upload_img(params[:img_url],sale.id,"sale_pics",sale.store_id)
+      filename=Sale.upload_img(params[:img_url],sale.id,Constant::SALE_PICS,sale.store_id)
       sale.update_attributes(:img_url=>filename)
     end
     params[:sale_prod].each do |key,value|
@@ -65,7 +65,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     pams={:name=>params[:name],:car_num=>params[:car_num],:everycar_times=>params[:every_car], :introduction=>params[:intro],
       :discount=>params["disc_"+params[:discount]],:is_subsidy =>params[:subsidy], :disc_types=>params[:discount],:disc_time_types=>params[:disc_time]
     }
-    pams.merge!({:img_url=>Sale.upload_img(params[:img_url],@sale.id,"sale_pics",@sale.store_id)}) if params[:img_url]
+    pams.merge!({:img_url=>Sale.upload_img(params[:img_url],@sale.id,Constant::SALE_PICS,@sale.store_id)}) if params[:img_url]
     pams.merge!({:started_at=>params[:started_at],:ended_at=>params[:ended_at]})  if params[:disc_time].to_i == Sale::DISC_TIME[:TIME]
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]
     @sale.update_attributes(pams)
