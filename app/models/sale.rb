@@ -31,7 +31,7 @@ class Sale < ActiveRecord::Base
   #img_url 上传文件的路径 sale_id所属对象的id
   #pic_types存放文件的文件夹名称 store_id 门店编号
   def self.upload_img(img_url,sale_id,pic_types,store_id,img_code=nil)
-    path="#{Rails.root}/public"
+    path = Constant::LOCAL_DIR
     dirs=["/#{pic_types}","/#{store_id}","/#{sale_id}"]
     dirs.each_with_index {|dir,index| Dir.mkdir path+dirs[0..index].join   unless File.directory? path+dirs[0..index].join }
     file=img_url.original_filename
@@ -40,7 +40,8 @@ class Sale < ActiveRecord::Base
     img = MiniMagick::Image.open path+filename,"rb"
     Constant::PIC_SIZE.each do |size|
       new_file="#{dirs.join}/#{img_code}img#{sale_id}_#{size}."+ file.split(".").reverse[0]
-      img.run_command("convert #{path+filename}  -resize #{size}x#{size} #{path+new_file}")
+      resize = size > img["width"] ? img["width"] : size
+      img.run_command("convert #{path+filename}  -resize #{resize}x#{resize} #{path+new_file}")
     end
     return filename
   end

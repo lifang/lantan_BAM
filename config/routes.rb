@@ -143,7 +143,16 @@ LantanBAM::Application.routes.draw do
         post "set_role","reset_role"
       end
     end
+    
+    resources :materials_in_outs
   end
+  
+match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
+match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
+match 'get_material' => 'materials_in_outs#get_material'
+match 'create_materials_in' => 'materials_in_outs#create_materials_in'
+match 'create_materials_out' => 'materials_in_outs#create_materials_out'
+match 'save_cookies' => 'materials_in_outs#save_cookies'
 
   resources :customers do
     collection do

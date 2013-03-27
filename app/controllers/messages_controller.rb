@@ -46,13 +46,20 @@ class MessagesController < ApplicationController
     unless params[:content].strip.empty? or params[:customer_ids].nil?
       MessageRecord.transaction do
         message_record = MessageRecord.create(:store_id => params[:store_id].to_i, :content => params[:content].strip,
-          :status => MessageRecord::STATUS[:NOMAL], :send_at => Time.now)
+          :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
         customers = Customer.find_all_by_id(params[:customer_ids].split(","))
+        message_arr = []
         customers.each do |customer|
+          content = params[:content].strip.gsub("%name%", customer.name)
           SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id, 
-            :content => params[:content].strip.gsub("%name%", customer.name), :phone => customer.mobilephone,
-            :send_at => Time.now, :status => MessageRecord::STATUS[:NOMAL])
-        end
+            :content => content, :phone => customer.mobilephone,
+            :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
+          message_arr << {:content => content, :msid => "#{customer.id}", :mobile => customer.mobilephone}
+        end        
+        msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
+        jsondata = JSON msg_hash
+        message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
+        create_get_http(Constant::MESSAGE_URL, message_route)
         flash[:notice] = "短信发送成功。"
       end
     end

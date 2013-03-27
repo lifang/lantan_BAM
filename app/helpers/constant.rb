@@ -1,5 +1,6 @@
 #encoding: utf-8
 module Constant
+  LOCAL_DIR = "#{Rails.root}/public/"
   #权限
   ROLES = {
     #客户
@@ -88,7 +89,7 @@ module Constant
   STAFF = "4" #员工
 
   #活动code码生成文件路径
-  CODE_PATH="#{Rails.root}/public/code_file.txt"
+  CODE_PATH =  LOCAL_DIR + "code_file.txt"
   #总店id
   STORE_ID = 1
   PER_PAGE = 20
@@ -104,6 +105,12 @@ module Constant
   #  施工现场文件目录
   VIDEO_DIR ="work_videos"
 
-  HEAD_OFFICE="http://192.168.0.112:3000/materials/upload_file"
+  #发短信url
+  MESSAGE_URL = "http://mt.yeion.com"
+  USERNAME = "XCRJ"
+  PASSWORD = "123456"
+
+  HEAD_OFFICE="http://192.168.0.102:3000/syncs/upload_file"
+  PCARD_PICS = "pcard_pics"
 
 end
