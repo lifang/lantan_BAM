@@ -80,7 +80,9 @@ module Constant
   }
 
   #上传图片的比例
-  PIC_SIZE=[50,100,148,300,700]
+  SALE_PICSIZE =[300,230,663]
+  P_PICSIZE = [300,356,50,246]
+  C_PICSIZE = [148]
  
   #角色
   SYS_ADMIN = "1"  #系统管理员

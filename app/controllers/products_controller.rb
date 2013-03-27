@@ -52,7 +52,7 @@ class ProductsController < ApplicationController
     end
     if params[:img_url] and !params[:img_url].keys.blank?
       params[:img_url].each_with_index {|img,index|
-        url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,img[0])
+        url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
         ImageUrl.create(:product_id=>product.id,:img_url=>url)
         product.update_attributes({:img_url=>url}) if index == 0
       }
@@ -87,7 +87,7 @@ class ProductsController < ApplicationController
     if params[:img_url] and !params[:img_url].keys.blank?
       product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}
       params[:img_url].each_with_index {|img,index|
-        url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,img[0])
+        url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
         ImageUrl.create(:product_id=>product.id,:img_url=>url)
         product.update_attributes({:img_url=>url}) if index == 0
       }

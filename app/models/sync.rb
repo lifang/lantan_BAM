@@ -10,14 +10,6 @@ class Sync < ActiveRecord::Base
 
   SYNC_STAT = {:COMPLETE =>1,:ERROR =>0}  #生成/压缩/上传更新文件 完成1 报错0
 
-  #接收文件文件并存到本地
-  def self.accept_file(img_url)
-    path= Constant::LOCAL_DIR
-    dirs=["syncs/","#{Time.now.strftime("%Y-%m").to_s}/","#{Time.now.strftime("%Y-%m-%d").to_s}/"]
-    dirs.each_with_index {|dir,index| Dir.mkdir path+dirs[0..index].join   unless File.directory? path+dirs[0..index].join }
-    filename = img_url.original_filename
-    File.open(path+dirs.join+filename, "wb")  {|f|  f.write(img_url.read) }
-  end
 
   #发送上传请求
   def self.send_file(store_id,file_url,filename,sync)
@@ -60,29 +52,7 @@ class Sync < ActiveRecord::Base
     return filename
   end
 
-  def self.output_zip(store_id,day=1)
-    file_path = Constant::LOCAL_DIR
-    dirs=["syncs/","#{Time.now.strftime("%Y-%m").to_s}/","/#{Time.now.strftime("%Y-%m-%d").to_s}/"]
-    Zip::ZipFile.open(file_path+dirs.join+"#{Time.now.ago(day).strftime("%Y%m%d")}_#{store_id}.zip"){ |zipFile|
-      zipFile.each do |file|
-        if file.name.split(".").reverse[0] =="log"
-          contents = zipFile.read(file).split("\n\n|::|")
-          titles =contents.delete_at(0).split(";||;")
-          total_con = []
-          cap = eval(file.name.split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize})
-          contents.each do |content|
-            hash ={}
-            cons = content.split(";||;")
-            titles.each_with_index {|title,index| hash[title] = cons[index].nil? ? cons[index] : cons[index].force_encoding("UTF-8")}
-            object = cap.new(hash)
-            object.id = hash["id"]
-            total_con << object
-          end
-          cap.import total_con
-        end
-      end
-    }
-  end
+
 
 
   def self.out_data(store_id)
