@@ -15,7 +15,7 @@
       <tr>
         <td><%= complaint.created_at.strftime("%Y-%m-%d %H:%M:%S") if complaint.created_at %></td>
         <td><%= complaint.reason %></td>
-        <td><%= complaint.suggstion %></td>
+        <td><%= complaint.suggestion %></td>
         <td><%= complaint.st_name1 %>，<%= complaint.st_name2 %></td>
         <td>
           <%= link_to "#{complaint.code}", "/orders/#{complaint.o_id}/order_info" ,
