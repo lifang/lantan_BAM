@@ -198,12 +198,12 @@ class Order < ActiveRecord::Base
       h[:id] = p.id
       h[:name] = p.name
       h[:price] = p.sale_price
-      h[:img] = p.image_urls.size == 0 ? "" : p.image_urls[0].img_url
-       if p.types.to_i <=4
+      h[:img] = p.image_urls.size == 0 ? "" : p.image_urls[0].img_url.gsub("img#{p.id}","img#{p.id}_148")
+       if p.types.to_i <=5
          prod_arr << h
-       elsif p.types.to_i == 5
+       elsif p.types.to_i == 11
           clean_arr << h
-       elsif p.types.to_i > 5
+       elsif p.types.to_i > 5 && p.types.to_i < 11
           maint_arr << h
        end
     end
