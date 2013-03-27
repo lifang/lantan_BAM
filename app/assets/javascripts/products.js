@@ -19,12 +19,12 @@ function edit_prod(id,store_id){
 }
 
 //显示产品
-function show_prod(id){
+function show_prod(id,store_id){
     $.ajax({
         async:true,
         type : 'post',
         dataType : 'script',
-        url : "/products/"+ id+"/show_prod"
+        url : "/stores/"+ store_id+"/products/"+ id+"/show_prod"
     });
 }
 
@@ -59,12 +59,12 @@ function add_product(){
 
 
 //显示服务
-function show_service(id){
+function show_service(store_id,id){
     $.ajax({
         async:true,
         type : 'post',
         dataType : 'script',
-        url : "/products/"+ id+"/show_serv"
+        url : "/stores/"+ store_id+"/products/"+ id+"/show_serv"
     });
 }
 

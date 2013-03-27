@@ -29,7 +29,7 @@
                     <td><%if prod.store_id!=Constant::STORE_ID%>
                         <a href="javascript:void(0)"  onclick="edit_prod('<%=prod.id %>','<%=params[:store_id] %>')">编辑</a>
                       <% end %>
-                      <a href="javascript:void(0)" class="see_btn" onclick="show_prod('<%=prod.id %>')">查看</a>
+                      <a href="javascript:void(0)" class="see_btn" onclick="show_prod('<%=prod.id %>','<%=params[:store_id] %>')">查看</a>
                       <a href="/stores/<%= params[:store_id] %>/products/<%=prod.id %>" target="_blank" class="see_btn"  >预览</a>
                     </td>
                   </tr>
