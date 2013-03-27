@@ -22,7 +22,10 @@ LantanBAM::Application.routes.draw do
       post "show_prod","show_serv"
     end
   end
-  resources :stations
+  
+  namespace :store do
+    resources :stations
+  end
   # The priority is based upon order of creation:
   # first created -> highest priority.
   root :to => 'logins#index'
@@ -147,12 +150,12 @@ LantanBAM::Application.routes.draw do
     resources :materials_in_outs
   end
   
-match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
-match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
-match 'get_material' => 'materials_in_outs#get_material'
-match 'create_materials_in' => 'materials_in_outs#create_materials_in'
-match 'create_materials_out' => 'materials_in_outs#create_materials_out'
-match 'save_cookies' => 'materials_in_outs#save_cookies'
+  match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
+  match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
+  match 'get_material' => 'materials_in_outs#get_material'
+  match 'create_materials_in' => 'materials_in_outs#create_materials_in'
+  match 'create_materials_out' => 'materials_in_outs#create_materials_out'
+  match 'save_cookies' => 'materials_in_outs#save_cookies'
 
   resources :customers do
     collection do
@@ -176,12 +179,12 @@ match 'save_cookies' => 'materials_in_outs#save_cookies'
   end
 
   namespace :api do
-     resources :orders do
-       collection do
-         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
-              "confirm_reservation","refresh","pay_order","checkin"
-       end
-     end
+    resources :orders do
+      collection do
+        post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
+          "confirm_reservation","refresh","pay_order","checkin"
+      end
+    end
   end
 
 end
