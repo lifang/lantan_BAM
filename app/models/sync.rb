@@ -9,13 +9,12 @@ class Sync < ActiveRecord::Base
   require 'zip/zipfilesystem'
 
   #接收文件文件并存到本地
-  def self.accept_file(store_id,img_url)
-    path="#{Rails.root}/public"
-    dirs=["syncs","/#{Time.now.strftime("%Y-%m").to_s}","/#{Time.now.strftime("%Y-%m-%d").to_s}"]
+  def self.accept_file(img_url)
+    path= Constant::LOCAL_DIR
+    dirs=["syncs/","#{Time.now.strftime("%Y-%m").to_s}/","#{Time.now.strftime("%Y-%m-%d").to_s}/"]
     dirs.each_with_index {|dir,index| Dir.mkdir path+dirs[0..index].join   unless File.directory? path+dirs[0..index].join }
     filename = img_url.original_filename
-    File.open(path+filename, "wb")  {|f|  f.write(img_url.read) }
-    #    render :text=>"success"
+    File.open(path+dirs.join+filename, "wb")  {|f|  f.write(img_url.read) }
   end
 
   #发送上传请求
@@ -26,7 +25,7 @@ class Sync < ActiveRecord::Base
       req = Net::HTTP::Post::Multipart.new url.path,query.merge!("upload" => UploadIO.new(file, "application/zip", "#{filename}"))
       http = Net::HTTP.new(url.host, url.port)
       if  http.request(req).body == "success"
-
+        p "Oh,yes!"
       end
     end
   end
@@ -50,7 +49,7 @@ class Sync < ActiveRecord::Base
   end
 
   def self.output_zip(store_id,day=1)
-    file_path ="#{Rails.root}/public/"
+    file_path = Constant::LOCAL_DIR
     dirs=["syncs/","#{Time.now.strftime("%Y-%m").to_s}/","/#{Time.now.strftime("%Y-%m-%d").to_s}/"]
     Zip::ZipFile.open(file_path+dirs.join+"#{Time.now.ago(day).strftime("%Y%m%d")}_#{store_id}.zip"){ |zipFile|
       zipFile.each do |file|
@@ -76,7 +75,7 @@ class Sync < ActiveRecord::Base
 
   def self.out_data(store_id)
     models=get_dir_list("#{Rails.root}/app/models")
-    path="#{Rails.root}/public/"
+    path = Constant::LOCAL_DIR
     dirs=["syncs_datas/","#{Time.now.strftime("%Y-%m").to_s}/","#{Time.now.strftime("%Y-%m-%d").to_s}/"]
     dirs.each_with_index {|dir,index| Dir.mkdir path+dirs[0..index].join   unless File.directory? path+dirs[0..index].join }
     models.each do |model|
