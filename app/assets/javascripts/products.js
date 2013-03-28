@@ -29,7 +29,7 @@ function show_prod(id,store_id){
 }
 
 //添加或者编辑产品
-function add_product(){
+function add_product(e){
     var name=$("#name").val();
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
@@ -55,6 +55,7 @@ function add_product(){
     })
     $("#desc").val(serv_editor.html());
     $("#add_prod").submit();
+    $(e).removeAttr("onclick");
 }
 
 
@@ -89,7 +90,7 @@ function edit_service(store_id,id){
 }
 
 //添加或者编辑服务
-function edit_serv(){
+function edit_serv(e){
     var name=$("#name").val();
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
@@ -119,6 +120,7 @@ function edit_serv(){
         $(this).attr("name","img_url["+this.id+"]");
     })
     $("#desc").val(serv_editor.html());
+    $(e).removeAttr("onclick");
     $("#edit_serv").submit();
 }
 
