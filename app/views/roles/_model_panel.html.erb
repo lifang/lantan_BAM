@@ -33,15 +33,20 @@
       </ul>
     </div>
     <div style="display: none;">
-      <% (@menus || []).each do |menu| %>
+      <%# (@menus || []).each do |menu| %>
+      <% Constant::ROLES.each do |k, v| %>
       <dl>
-        <dt><%= menu.name %>模块</dt>
-        <% (Constant::ROLES[menu.controller.to_sym] || []).each do |key,val| %>
-            <% check = role_model(@role_model_relations,val[1],menu.controller)  %>
-        <dd><%= check_box_tag "func_check_#{menu.id}_#{menu.controller}",menu.controller.to_s + "_" + val[1].to_s,check %><%= val[0] %></dd>
+        <dt><%= v[:name] %><%#= menu.name %>模块</dt>
+        <% v.each do |k1, v1| %>
+        <dd><%= check_box_tag "" %><%= v1[0] %></dd>
         <% end %>
+        <%# (Constant::ROLES[menu.controller.to_sym] || []).each do |key,val| %>
+            <%# check = role_model(@role_model_relations,val[1],menu.controller)  %>
+       <%#= check_box_tag "func_check_#{menu.id}_#{menu.controller}",menu.controller.to_s + "_" + val[1].to_s,check %><%#= val[0] %>
+        <%# end %>
       </dl>
       <% end %>
+      <%# end %>
     </div>
   </div>
 </div> <%= hidden_field_tag "set_role_id","" %>

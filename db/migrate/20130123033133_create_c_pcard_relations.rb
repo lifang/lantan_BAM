@@ -6,7 +6,7 @@ class CreateCPcardRelations < ActiveRecord::Migration
       t.integer :package_card_id
       t.datetime :ended_at
       t.boolean :status
-      t.text :content
+      t.string :content
 
       t.datetime :created_at
     end

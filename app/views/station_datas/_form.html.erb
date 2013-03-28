@@ -2,10 +2,9 @@
   <div class="popup_box">
     <h1>工位<a href="#" class="close">关闭</a></h1>
     <div class="popup_body">
-      <% @url ||= "/store/stations" %>
-      <% @method ||= :post %>
-      <%= form_tag "#{@url}",:method => "#{@method}", :remote => true, "data-type" => 'script' do |f| %>
-        <% if @station and @station.errors.any? %>
+      <% @station ||= Station.new %>
+      <%= form_for @station, :url => @action == 'new' ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => @action == 'new' ? :post : :put, :remote => true, :html => {"data-type" => 'script'} do |f| %>
+       <% if @station and @station.errors.any? %>
           <div id="errorExplanation">
             <h2><%= pluralize(@station.errors.count, "error") %> prohibited
               this post from being saved:</h2>
@@ -18,8 +17,8 @@
         <% end %>
         <div class="popup_body_area">
           <div class="item">
-            <%= label_tag 'name', '名称：', :style => "width:100px"%>
-            <%= text_field_tag "station[name]", @station.try(:name) %>
+            <%= f.label :name, '名称：', :style => "width:100px"%>
+            <%= f.text_field :name%>
           </div>
 
           <div class="seeProDiv">
@@ -29,7 +28,7 @@
                 <ul>
                   <% @products = Product.is_service %>
                   <% @products.each do |product| %>
-                    <li><%= check_box_tag 'product_ids[]', product.id, @station.nil? ? false : @station.products.map(&:id).include?(product.id)  %><%= product.name %></li>
+                    <li><%= check_box_tag 'product_ids[]', product.id, @station.nil? ? false : @station.products.include?(product)  %><%= product.name %></li>
                   <% end %>
                 </ul>
               </div>
@@ -38,8 +37,7 @@
         </div>
         <div class="btn_box">
           <button type="submit" class="confirm_btn">确定</button>
-          <a class="cancel_btn">取消</a>
-         
+          <a class="cancel_btn"onclick="hide_mask($('#station_form'))" >取消</a>
         </div>
       <% end %>
     </div>

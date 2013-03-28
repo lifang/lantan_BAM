@@ -1,17 +1,18 @@
 #encoding: utf-8
-class Store::StationsController < ApplicationController
+class StationDatasController < ApplicationController
   layout "role"
   before_filter :sign?
   before_filter :find_store
-  
+
   def index
     @stations = @store.stations.valid.includes(:products).paginate(:page => params[:page] ||= 1, :per_page => Station::PerPage)
   end
 
   def new
-    @station = Station.new
+    @action = 'new'
+    render :replace_form
   end
-  
+
   def create
     @station = Station.create({:status => 2,:name => params[:station][:name],:store_id => @store.id})
     if @station.save
@@ -20,14 +21,14 @@ class Store::StationsController < ApplicationController
       end if params[:product_ids]
       render :successful
     else
-      render :failed
+      render :replace_form
     end
   end
 
   def edit
+    @action = 'edit'
     @station = Station.find(params[:id])
-    @url = "/store/stations/#{params[:id]}"
-    @method = :put
+    render :replace_form
   end
 
   def update
@@ -39,19 +40,18 @@ class Store::StationsController < ApplicationController
       end if params[:product_ids]
       render :successful
     else
-      render :failed
+      render :replace_form
     end
   end
 
   def destroy
     @station = Station.find(params[:id])
     @station.status = 4
-    @station.save
-    redirect_to "/store/stations?store_id=#{@store.id}"
+    redirect_to "/stores/#{@store.id}/station_datas" if @station.save
   end
 
   private
-  
+
   def find_store
     store_id = Staff.find(cookies[:user_id]).store_id
     @store = Store.find(store_id)
