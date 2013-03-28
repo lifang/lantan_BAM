@@ -14,15 +14,7 @@ LantanBAM::Application.routes.draw do
       post :delete_pcard
     end
   end
-  resources :products do
-    collection do
-
-    end
-    member do
-      post "show_prod","show_serv"
-    end
-  end
-  
+  resources :stations
   namespace :store do
     resources :stations
   end
@@ -79,7 +71,7 @@ LantanBAM::Application.routes.draw do
         get "prod_services"
       end
       member do
-        post "edit_prod","update_prod","serv_update","edit_serv"
+        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv"
       end
     end
     resources :materials do

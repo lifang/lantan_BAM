@@ -95,7 +95,10 @@ class Station < ActiveRecord::Base
   end
 
   def self.filter_dir(store_id)
-    video_path ="/public/#{Constant::VIDEO_DIR}/#{store_id}/"
+    path_dir = Constant::LOCAL_DIR
+    dirs=["#{Constant::VIDEO_DIR}/","#{store_id}/"]
+    dirs.each_with_index {|dir,index| Dir.mkdir path_dir+dirs[0..index].join   unless File.directory? path_dir+dirs[0..index].join }
+    video_path ="/public/"+dirs.join
     paths=get_dir_list("#{Rails.root}"+video_path)
     video_hash ={}
     paths.each do |path|
@@ -105,7 +108,7 @@ class Station < ActiveRecord::Base
       else
         video_hash[mtime] = [video_path+path]
       end
-    end
+    end unless paths.blank?
     return video_hash
   end
 
@@ -125,28 +128,28 @@ class Station < ActiveRecord::Base
     time = Time.now.strftime("%Y%m%d%H%M").to_i
     station_id = 0
     (station_arr || []).each do |station|
-       w_o_time = WkOrTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
-       if w_o_time
-         t = w_o_time.current_time.to_s.to_datetime
-         s = time.to_s.to_datetime
-         if (t >= s)
+      w_o_time = WkOrTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
+      if w_o_time
+        t = w_o_time.current_time.to_s.to_datetime
+        s = time.to_s.to_datetime
+        if (t >= s)
           time = w_o_time.current_time
           station_id = station.id
-         else
-           station_id = station.id
-           time = Time.now.strftime("%Y%m%d%H%M")
-           break
-         end
-       else
-         station_id = station.id
-         time = Time.now.strftime("%Y%m%d%H%M")
-         break
-       end
+        else
+          station_id = station.id
+          time = Time.now.strftime("%Y%m%d%H%M")
+          break
+        end
+      else
+        station_id = station.id
+        time = Time.now.strftime("%Y%m%d%H%M")
+        break
+      end
     end
     time = res_time && time.to_i < res_time.to_datetime.strftime("%Y%m%d%H%M").to_i ? res_time.to_datetime.strftime("%Y%m%d%H%M").to_i : time
     time = time.to_s.to_datetime
     time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),
-                (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]
+      (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]
     #puts time_arr,"-----------------"
     time_arr
   end

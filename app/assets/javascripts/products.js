@@ -19,17 +19,17 @@ function edit_prod(id,store_id){
 }
 
 //显示产品
-function show_prod(id){
+function show_prod(id,store_id){
     $.ajax({
         async:true,
         type : 'post',
         dataType : 'script',
-        url : "/products/"+ id+"/show_prod"
+        url : "/stores/"+ store_id+"/products/"+ id+"/show_prod"
     });
 }
 
 //添加或者编辑产品
-function add_product(){
+function add_product(e){
     var name=$("#name").val();
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
@@ -55,16 +55,17 @@ function add_product(){
     })
     $("#desc").val(serv_editor.html());
     $("#add_prod").submit();
+    $(e).removeAttr("onclick");
 }
 
 
 //显示服务
-function show_service(id){
+function show_service(store_id,id){
     $.ajax({
         async:true,
         type : 'post',
         dataType : 'script',
-        url : "/products/"+ id+"/show_serv"
+        url : "/stores/"+ store_id+"/products/"+ id+"/show_serv"
     });
 }
 
@@ -89,7 +90,7 @@ function edit_service(store_id,id){
 }
 
 //添加或者编辑服务
-function edit_serv(){
+function edit_serv(e){
     var name=$("#name").val();
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
@@ -119,6 +120,7 @@ function edit_serv(){
         $(this).attr("name","img_url["+this.id+"]");
     })
     $("#desc").val(serv_editor.html());
+    $(e).removeAttr("onclick");
     $("#edit_serv").submit();
 }
 
