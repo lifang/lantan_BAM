@@ -1,5 +1,6 @@
 #encoding: utf-8
 module Constant
+  LOCAL_DIR = "#{Rails.root}/public/"
   #权限
   ROLES = {
     #客户
@@ -79,7 +80,9 @@ module Constant
   }
 
   #上传图片的比例
-  PIC_SIZE=[50,100,148,300,700]
+  SALE_PICSIZE =[300,230,663]
+  P_PICSIZE = [300,356,50,246]
+  C_PICSIZE = [148]
  
   #角色
   SYS_ADMIN = "1"  #系统管理员
@@ -88,7 +91,8 @@ module Constant
   STAFF = "4" #员工
 
   #活动code码生成文件路径
-  CODE_PATH="#{Rails.root}/public/code_file.txt"
+  CODE_PATH =  LOCAL_DIR + "code_file.txt"
+  LOG_DIR = LOCAL_DIR + "logs/"
   #总店id
   STORE_ID = 1
   PER_PAGE = 20
@@ -109,7 +113,10 @@ module Constant
   USERNAME = "XCRJ"
   PASSWORD = "123456"
 
-  HEAD_OFFICE="http://192.168.0.112:3000/materials/upload_file"
-
-
+  HEAD_OFFICE="http://192.168.0.102:3000/syncs/upload_file"
+  PCARD_PICS = "pcard_pics"
+  SALE_PICS = "sale_pics"
+  #产品和活动的类别  图片名称分别为 product_pics 和service_pics
+  PRODUCT = "PRODUCT"
+  SERVICE = "SERVICE"
 end

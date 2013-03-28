@@ -39,7 +39,7 @@
               <td><%= comp.types==Complaint::TYPES[:INVALID]? "否" : "是" %></td>
               <td><%=Complaint::STATUS_NAME[comp.status]  %></td>
               <td><%=comp.process_at.nil? ? "" : comp.process_at.strftime("%Y.%m.%d--%H:%S")  %></td>
-              <td><%= comp.suggstion %></td>
+              <td><%= comp.suggestion %></td>
               <td><%= Complaint::VIOLATE_N[comp.is_violation] %></td>
             </tr>
           <% end %>

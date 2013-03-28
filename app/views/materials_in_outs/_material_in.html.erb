@@ -1,0 +1,15 @@
+<% @material_orders.each do |mo| %>
+  <% mat_order_item = MatOrderItem.where(:material_order_id => mo.id, :material_id => @material.id).first %>
+  <tr class="newTr_red">
+    <td><%= mo.code %></td>
+    <td class="mat_code"><%= @material.code %></td>
+    <td><%= @material.name %></td>
+    <td class ="mat_item_num">1</td><%= hidden_field_tag "material_order[#{mat_order_item.id}][material_num]", 1, :class => "hidden_mat_id"%>
+    <td class ="num_box" style="display:none"><%= text_field_tag "material_order[#{mat_order_item.id}][material_num]", nil, :style => 'width:50px', :disabled => true%></td>
+    <td><a href="#" onclick="changeNum(this)" class="bz_btn">编辑</a><a href="#" onclick="removeRow(this)">删除</a></td>
+    <%= hidden_field_tag "material_order[#{mat_order_item.id}][material_order_id]", mo.id %>
+    <%= hidden_field_tag "material_order[#{mat_order_item.id}][material_id]", @material.id %>
+    <%= hidden_field_tag "material_order[#{mat_order_item.id}][price]", @material.price%>
+    <%= hidden_field_tag "material_order[#{mat_order_item.id}][staff_id]", @staff.id%>
+  </tr>
+<% end %>
