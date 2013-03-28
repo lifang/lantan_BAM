@@ -156,7 +156,7 @@ class Sync < ActiveRecord::Base
     end
   end
 
-  def self.request_is_generate_zip  #发送请求，看是否已经生成zip文件
+  def self.request_is_generate_zip(day=0)  #发送请求，看是否已经生成zip文件
     url = Constant::HEAD_OFFICE_REQUEST_ZIP
     
     Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
@@ -166,9 +166,8 @@ class Sync < ActiveRecord::Base
     sync =Sync.create(:created_at=>Time.now.strftime("%Y-%m-%d"),:types=>Sync::SYNC_TYPE[:SETIN]) if sync.nil?
 
     result = Net::HTTP.get(URI.parse(url))
-    puts result.inspect
     if result == "complete"
-      get_zip_file(0, sync, flog)
+      get_zip_file(day, sync, flog)
     else
       flog.write("zip文件还没有生成成功---#{Time.now}\r\n")
     end
