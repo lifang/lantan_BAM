@@ -120,6 +120,8 @@ module Constant
   PASSWORD = "123456"
 
   HEAD_OFFICE="http://192.168.0.111:3001/syncs/upload_file"
+  HEAD_OFFICE_REQUEST_ZIP="http://127.0.0.1:3001/syncs/is_generate_zip"
+  HEAR_OFFICE_IPHOST="http://127.0.0.1:3001/"
   PCARD_PICS = "pcard_pics"
   SALE_PICS = "sale_pics"
   #产品和活动的类别  图片名称分别为 product_pics 和service_pics

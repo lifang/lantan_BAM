@@ -101,26 +101,37 @@ class Sync < ActiveRecord::Base
     send_file(store_id,path+dirs.join+file_name,file_name,sync) if file_name
   end
 
-  def self.get_zip_file(day=1)
-    ip_host = "http://127.0.0.1:3000/"
+  def self.get_zip_file(day=1, sync, flog)
+    ip_host = Constant::HEAR_OFFICE_IPHOST
     path = Constant::LOCAL_DIR
     dirs = ["syncs_datas/", "#{Time.now.ago(day).strftime("%Y-%m").to_s}/", "#{Time.now.ago(day).strftime("%Y-%m-%d")}/"]
     read_dirs = ["write_datas/", "#{Time.now.ago(day).strftime("%Y-%m").to_s}/", "#{Time.now.ago(day).strftime("%Y-%m-%d")}/"]
     read_dirs.each_with_index {|dir,index| Dir.mkdir path+read_dirs[0..index].join   unless File.directory? path+read_dirs[0..index].join }
     #Dir.mkdir dirs.join unless File.directory? dirs.join
     file_name = "#{Time.now.ago(day).strftime("%Y%m%d")}.zip"
+    is_download = false
     File.open(path+read_dirs.join+file_name, 'wb') do |fo|
       fo.print open(ip_host+dirs.join+file_name).read
+      is_download = true
     end
-    output_zip(path+read_dirs.join+file_name)
+    if is_download
+      sync.update_attribute(:data_status, Sync::SYNC_STAT[:COMPLETE])
+      flog.write("zip文件读取成功---#{Time.now}\r\n")
+      output_zip(path+read_dirs.join+file_name, sync, flog)
+    else
+      sync.update_attribute(:data_status, Sync::SYNC_STAT[:ERROR])
+      flog.write("zip文件读取失败---#{Time.now}\r\n")
+    end
   end
 
-  def self.output_zip(path)
+  def self.output_zip(path, sync, flog)
+    is_update = false
     Zip::ZipFile.open(path){ |zipFile|
       zipFile.each do |file|
         if file.name.split(".").reverse[0] =="log"
           contents = zipFile.read(file).split("\n\n|::|")
           titles =contents.delete_at(0).split(";||;")
+          contents.delete("\n")
           total_con = []
           cap = eval(file.name.split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize})
           contents.each do |content|
@@ -132,8 +143,35 @@ class Sync < ActiveRecord::Base
             total_con << object
           end
           cap.import total_con
+          is_update = true
         end
       end
     }
+    if is_update
+      sync.update_attributes(:sync_status=>Sync::SYNC_STAT[:COMPLETE])
+      flog.write("数据同步成功---#{Time.now}\r\n")
+    else
+      sync.update_attributes(:sync_status=>Sync::SYNC_STAT[:ERROR])
+      flog.write("数据同步失败---#{Time.now}\r\n")
+    end
+  end
+
+  def self.request_is_generate_zip  #发送请求，看是否已经生成zip文件
+    url = Constant::HEAD_OFFICE_REQUEST_ZIP
+    
+    Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
+    flog = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+".log","a+")
+
+    sync =Sync.where("created_at='#{Time.now.strftime("%Y%m%d")}' and types=#{Sync::SYNC_TYPE[:SETIN]}")[0]
+    sync =Sync.create(:created_at=>Time.now.strftime("%Y-%m-%d"),:types=>Sync::SYNC_TYPE[:SETIN]) if sync.nil?
+
+    result = Net::HTTP.get(URI.parse(url))
+    puts result.inspect
+    if result == "complete"
+      get_zip_file(0, sync, flog)
+    else
+      flog.write("zip文件还没有生成成功---#{Time.now}\r\n")
+    end
+    
   end
 end
