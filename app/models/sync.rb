@@ -76,9 +76,9 @@ class Sync < ActiveRecord::Base
             unless attrs.blank?
               is_update = true
               file = File.open("#{path+dirs.join+model_name}.log","w+")
-              file.write("#{cap.column_names.join(";||;")}\r\n|::|")
+              file.write("#{cap.column_names.join(";||;")}\n\n|::|")
               file.write("#{attrs.inject(String.new) {|str,attr|
-                str+attr.attributes.values.join(";||;").gsub(";||;true;||;",";||;1;||;").gsub(";||;false;||;",";||;0;||;")+"\r\n|::|"}}")
+                str+attr.attributes.values.join(";||;").gsub(";||;true;||;",";||;1;||;").gsub(";||;false;||;",";||;0;||;")+"\n\n|::|"}}")
               file.close
             end
           end
@@ -98,7 +98,7 @@ class Sync < ActiveRecord::Base
   end
 
   def self.get_zip_file(day=1)
-    ip_host = "http://192.168.0.110:3001/"
+    ip_host = "http://127.0.0.1:3000/"
     path = Constant::LOCAL_DIR
     dirs = ["syncs_datas/", "#{Time.now.ago(day).strftime("%Y-%m").to_s}/", "#{Time.now.ago(day).strftime("%Y-%m-%d")}/"]
     read_dirs = ["write_datas/", "#{Time.now.ago(day).strftime("%Y-%m").to_s}/", "#{Time.now.ago(day).strftime("%Y-%m-%d")}/"]
@@ -108,7 +108,6 @@ class Sync < ActiveRecord::Base
     File.open(path+read_dirs.join+file_name, 'wb') do |fo|
       fo.print open(ip_host+dirs.join+file_name).read
     end
-    
     output_zip(path+read_dirs.join+file_name)
   end
 
