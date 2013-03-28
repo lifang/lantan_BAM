@@ -119,5 +119,5 @@ module Constant
   #产品和活动的类别  图片名称分别为 product_pics 和service_pics
   PRODUCT = "PRODUCT"
   SERVICE = "SERVICE"
-  UNNEED_UPDATE = ['sync']  #不更新的表
+  UNNEED_UPDATE = ['sync','item']  #不更新的表
 end
