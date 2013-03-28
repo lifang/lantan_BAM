@@ -2,7 +2,7 @@
   <div class="box">
     <div class="data_box">
       <div class="data_menu">
-        <%= link_to "新建工位", new_store_station_path, remote: :true, "data-type" => 'script', :class =>"add_btn" %></div>
+        <%= link_to "新建工位", new_store_station_data_path(@store), remote: :true, "data-type" => 'script', :class =>"add_btn" %></div>
       <div class="clear"></div>
       <div class="data_body">
         <div>
@@ -19,8 +19,8 @@
                 <tr>
                   <td><%= station.name %></td>
                   <td><%= station.products.map(&:name).join("、") %></td>
-                  <td><%= link_to "编辑", edit_store_station_path(station), remote: :true, "data-type" => 'script' %>
-                    <%= link_to "删除", "/store/stations/#{station.id}", :confirm => "Are you sure?", :method => 'delete' %>
+                  <td><%= link_to "编辑", edit_store_station_data_path(@store, station), remote: :true, "data-type" => 'script' %>
+                    <%= link_to "删除", "/stores/#{@store.id}/station_datas/#{station.id}", :confirm => "Are you sure?", :method => 'delete' %>
                     </td>
                 </tr>
               <% end %>

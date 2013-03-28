@@ -215,3 +215,9 @@ function cancel_role_panel(){
         backgroundColor:"#ffffff"
     });
 }
+
+// 点击取消按钮隐藏层
+function hide_mask(t){
+    $(t).css('display','none');
+    $(".mask").css('display','none');
+}
