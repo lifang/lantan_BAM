@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051431) do
+ActiveRecord::Schema.define(:version => 20130701051439) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -642,9 +642,10 @@ ActiveRecord::Schema.define(:version => 20130701051431) do
     t.integer  "store_id"
     t.datetime "sync_at"
     t.datetime "created_at"
-    t.boolean  "file_status"
-    t.boolean  "zip_status",  :default => false
+    t.boolean  "data_status", :default => false
     t.boolean  "sync_status", :default => false
+    t.string   "zip_name"
+    t.integer  "types"
   end
 
   add_index "syncs", ["created_at"], :name => "index_syncs_on_created_at"
