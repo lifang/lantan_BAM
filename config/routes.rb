@@ -22,10 +22,7 @@ LantanBAM::Application.routes.draw do
       post "show_prod","show_serv"
     end
   end
-  
-  namespace :store do
-    resources :stations
-  end
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
   root :to => 'logins#index'
@@ -148,6 +145,7 @@ LantanBAM::Application.routes.draw do
     end
     
     resources :materials_in_outs
+    resources :station_datas
   end
   
   match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
