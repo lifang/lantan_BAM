@@ -10,14 +10,15 @@ class Sync < ActiveRecord::Base
   require 'open-uri'
 
   SYNC_STAT = {:COMPLETE =>1,:ERROR =>0}  #生成/压缩/上传更新文件 完成1 报错0
-
+  SYNC_TYPE = {:BUILD =>0 , :SETIN => 1}  #生成数据  0  本地数据导入 1
+  HAS_DATA = {:YES =>1,:NO =>0}  #1 有更新数据 0  没有更新数据
 
   #发送上传请求
   def self.send_file(store_id,file_url,filename,sync)
     unless sync.sync_status
       flog = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+".log","a+")
       begin
-        query={:store_id=>store_id}
+        query ={:store_id=>store_id,:sync_time =>sync.sync_at}
         url = URI.parse Constant::HEAD_OFFICE
         File.open(file_url) do |file|
           req = Net::HTTP::Post::Multipart.new url.path,query.merge!("upload" => UploadIO.new(file, "application/zip", "#{filename}"))
@@ -44,9 +45,9 @@ class Sync < ActiveRecord::Base
   end
 
   #将文件压缩进zip
-  def self.input_zip(file_path,store_id)
+  def self.input_zip(file_path,store_id,sync_time)
     get_dir_list(file_path).each {|path|  File.delete(file_path+path) if path =~ /.zip/ }
-    filename ="#{Time.now.strftime("%Y%m%d")}_#{store_id}.zip"
+    filename ="#{sync_time.nil? ? Time.now.strftime("%Y%m%d") : sync_time.strftime("%Y%m%d") }_#{store_id}.zip"
     Zip::ZipFile.open(file_path+filename, Zip::ZipFile::CREATE) { |zf|
       get_dir_list(file_path).each {|path| zf.file.open(path, "w") { |os| os.write "#{File.open(file_path+path).read}" } }
     }
@@ -56,13 +57,14 @@ class Sync < ActiveRecord::Base
 
 
 
-  def self.out_data(store_id)
+  def self.out_data(store_id,sync_time =nil)
     path = Constant::LOCAL_DIR
     Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
     flog = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+".log","a+")
-    sync =Sync.find_by_store_id_and_sync_at(store_id,Time.now.strftime("%Y-%m-%d"))
-    sync =Sync.create(:store_id=>store_id,:sync_at=>Time.now.strftime("%Y-%m-%d"),:created_at=>Time.now.strftime("%Y-%m-%d")) if sync.nil?
-    dirs=["syncs_datas/","#{Time.now.strftime("%Y-%m").to_s}/","#{Time.now.strftime("%Y-%m-%d").to_s}/"]
+    sync_at = sync_time.nil? ? Time.now : sync_time
+    sync =Sync.where("store_id=#{store_id} and sync_at='#{sync_at.strftime("%Y-%m-%d")}' and types=#{Sync::SYNC_TYPE[:BUILD]}")[0]
+    sync =Sync.create(:store_id=>store_id,:sync_at=>Time.now.strftime("%Y-%m-%d"),:created_at=>Time.now.strftime("%Y-%m-%d"),:types=>Sync::SYNC_TYPE[:BUILD]) if sync.nil?
+    dirs=["syncs_datas/","#{sync_at.strftime("%Y-%m").to_s}/","#{sync_at.strftime("%Y-%m-%d").to_s}/"]
     dirs.each_with_index {|dir,index| Dir.mkdir path+dirs[0..index].join   unless File.directory? path+dirs[0..index].join }
     unless sync.data_status
       begin
@@ -70,9 +72,9 @@ class Sync < ActiveRecord::Base
         is_update = false
         models.each do |model|
           model_name =model.split(".")[0]
-          unless model_name==""
+          unless (model_name=="" or Constant::UNNEED_UPDATE.include? model_name)
             cap = eval(model_name.split("_").inject(String.new){|str,name| str + name.capitalize})
-            attrs = cap.where("TO_DAYS(NOW())-TO_DAYS(created_at)=1")
+            attrs = cap.where("TO_DAYS('#{sync_at}')-TO_DAYS(created_at)=1")
             unless attrs.blank?
               is_update = true
               file = File.open("#{path+dirs.join+model_name}.log","w+")
@@ -84,9 +86,11 @@ class Sync < ActiveRecord::Base
           end
         end
         if is_update
-          filename =input_zip(path+dirs.join,store_id)
+          filename = input_zip(path+dirs.join,store_id,sync_time)
           sync.update_attributes({:data_status=>Sync::SYNC_STAT[:COMPLETE],:zip_name=>filename})
           flog.write("数据更新并压缩成功---#{Time.now}\r\n")
+        else
+          sync.update_attributes(:has_data=>Sync::HAS_DATA[:NO])
         end
       rescue
         flog.write("数据更新并压缩失败---#{Time.now}\r\n")

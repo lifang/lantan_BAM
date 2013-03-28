@@ -1,9 +1,9 @@
-LantanBAM::Application.routes.draw do
+ LantanBAM::Application.routes.draw do
 
   resources :syncs do
     get "upload_file"
   end
-  
+
   resources :sales do
     collection do
       post :delete_sale,:public_sale
@@ -14,14 +14,7 @@ LantanBAM::Application.routes.draw do
       post :delete_pcard
     end
   end
-  resources :products do
-    collection do
-
-    end
-    member do
-      post "show_prod","show_serv"
-    end
-  end
+  resources :stations
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -53,7 +46,7 @@ LantanBAM::Application.routes.draw do
         post "search"
       end
     end
-    resources :sales do 
+    resources :sales do
       collection do
         post "load_types"
       end
@@ -76,7 +69,7 @@ LantanBAM::Application.routes.draw do
         get "prod_services"
       end
       member do
-        post "edit_prod","update_prod","serv_update","edit_serv"
+        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv"
       end
     end
     resources :materials do
@@ -143,11 +136,11 @@ LantanBAM::Application.routes.draw do
         post "set_role","reset_role"
       end
     end
-    
+
     resources :materials_in_outs
     resources :station_datas
   end
-  
+
   match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
   match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
   match 'get_material' => 'materials_in_outs#get_material'

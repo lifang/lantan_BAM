@@ -1,6 +1,6 @@
 
 //发布活动验证
-function publish_sale(){
+function publish_sale(e){
     var name=$("#sale_title").val();
     var disc=$("#s_disc input[name='discount']:checked").val();
     var time=$("#s_time input[name='disc_time']:checked").val();
@@ -52,6 +52,7 @@ function publish_sale(){
     }
 
     $("#intro").val(editor.html());
+    $(e).removeAttr("onclick");
     $("#one_sale").submit();
 }
 
@@ -158,7 +159,7 @@ function edit_pcard(id,store_id){
         url : "/stores/"+store_id+"/package_cards/"+ id+"/edit_pcard"
     });
 }
-function check_add(){
+function check_add(e){
     var name=$("#name").val();
     var base=$("#price").val();
     if (name=="" || name.length==0){
@@ -178,6 +179,7 @@ function check_add(){
         return false;
     }
     $("#add_pcard").submit();
+    $(e).removeAttr("onclik");
 }
 
 //删除套餐卡

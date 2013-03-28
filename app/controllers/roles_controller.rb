@@ -3,6 +3,7 @@ class RolesController < ApplicationController
   layout "role"
   before_filter :sign?
 
+  #角色列表
   def index
     @roles = Role.all
     @menus = Menu.find_by_sql("select m.*,rmr.id relation_id,rmr.role_id from menus m
@@ -14,6 +15,7 @@ class RolesController < ApplicationController
     end
   end
 
+  #修改角色名称
   def update
     puts params[:name],params[:id]
     role = Role.find_by_id params[:id]
@@ -23,6 +25,7 @@ class RolesController < ApplicationController
     render :json => {:status => 0}
   end
 
+  #添加角色
   def create
     role = Role.find_by_name params[:name]
     status = 0
@@ -34,6 +37,7 @@ class RolesController < ApplicationController
     render :json => {:status => status}
   end
 
+  #查询员工
   def staff
     str = "store_id=#{params[:store_id]} and status =#{Staff::STATUS[:normal]} "
     if params[:name]
@@ -48,6 +52,7 @@ class RolesController < ApplicationController
     end
   end
 
+  #角色功能设定
   def set_role
     puts "set role",params[:m_ids],params[:f_ids],params[:role_id]
     status = 0
@@ -80,6 +85,7 @@ class RolesController < ApplicationController
     render :json => {:status => status}
   end
 
+  #删除角色
   def destroy
     role = Role.find_by_id params[:id].to_i
     status = 0
@@ -101,6 +107,7 @@ class RolesController < ApplicationController
     render :json => {:status => status}
   end
 
+  #用户角色设定
   def reset_role
     staff = Staff.find_by_id params[:staff_id].to_i
     status = 0
