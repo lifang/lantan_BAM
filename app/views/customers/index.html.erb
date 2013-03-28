@@ -54,8 +54,8 @@
                 <td><a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a>
                   <a href="javascript:void(0)" onclick="customer_mark(<%= customer.id %>)">备注</a>
                   <a href="javascript:void(0)" onclick="single_send_message(<%= customer.id %>)">发短信</a>
-                  <%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
-                    :confirm => "您确认要删除 #{customer.name} 信息么？" %>
+                  <% if permission?(:customers, :delete) %><%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
+                    :confirm => "您确认要删除 #{customer.name} 信息么？" %><% end %>
                   <div id="mark_<%= customer.id %>" style="display: none;"><%= customer.mark %></div>
                 </td>
               </tr>

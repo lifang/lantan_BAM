@@ -5,6 +5,7 @@ module Constant
   ROLES = {
     #客户
     :customers => {
+      :name => "客户",
       :show => ["查询、显示客户列表",1],
       :create => ["新建客户",2],
       :delete => ["删除客户",4],
@@ -17,6 +18,7 @@ module Constant
     },
     #库存
     :materials => {
+      :name => "库存",
       :show => ["查看库存列表",1],
       :in => ["入库",2],
       :out => ["出库",4],
@@ -33,6 +35,7 @@ module Constant
       :receive => ["确认已收货",8192]
     },
     :staffs => {
+      :name => "员工",
       :add_staff => ["新建员工",1],
       :edit_sys_score => ["编辑系统打分",2],
       :detail_staff => ["查看员工详情",4],
@@ -50,6 +53,7 @@ module Constant
 
     },
     :datas => {
+      :name => "统计",
       :add_target => ["制定目标销售额",1],
       :customer => ["查看客户统计",2],
       :sale => ["查看营销统计",4],
@@ -58,12 +62,14 @@ module Constant
       :print => ["打印单据",32]
     },
     :stations => {
+      :name => "现场",
       :show => ["查看现场",1],
       :dispatch => ["分配技师",2],
       :video => ["查看现场视频",4],
       :pay => ["订单支付",8]
     },
     :sales => {
+      :name => "营销",
       :add_sale => ["添加活动",1],
       :edit_sale => ["修改活动",2],
       :publish => ["发布活动",4],
