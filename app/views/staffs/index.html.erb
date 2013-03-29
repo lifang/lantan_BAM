@@ -2,13 +2,13 @@
     <div class="box">
          <div class="data_box">
               <div class="search">
-                   <div>统计时间：<%= Time.now.strftime("%Y-%m") %></div>
+                   <div>统计时间：<%= DateTime.now.months_ago(1).strftime("%Y-%m") %></div>
               </div>
               <div class="data_menu">
                    <a href="javascript:void(0)" id="new_staff">新建员工</a>
-                   <a href="javascript:void(1)" id="new_reward">新建奖励</a>
-                   <a href="javascript:void(2)" id="new_violation">新建违规</a>
-                   <a href="javascript:void(3)" id="new_train">新建培训</a>
+                   <a href="javascript:void(0)" id="new_reward">新建奖励</a>
+                   <a href="javascript:void(0)" id="new_violation">新建违规</a>
+                   <a href="javascript:void(0)" id="new_train">新建培训</a>
               </div>
               <input type="hidden" value="<%= @store.id %>" id="store_id"/>
               <div class="clear"></div>
@@ -155,7 +155,7 @@
 
 <div class="tab_popup" style="display:none;" id="new_reward_area">
     <div class="popup_box">
-         <h1>新建奖励<a href="javascript:void(1)" class="close">关闭</a></h1>
+         <h1>新建奖励<a href="javascript:void(0)" class="close">关闭</a></h1>
          <%= form_for(@violation_reward, :url => store_violation_rewards_path(@store)) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
@@ -192,7 +192,7 @@
 
 <div class="tab_popup" style="display:none;" id="new_violation_area">
     <div class="popup_box">
-         <h1>新建违规<a href="javascript:void(2)" class="close">关闭</a></h1>
+         <h1>新建违规<a href="javascript:void(0)" class="close">关闭</a></h1>
          <%= form_for(@violation_reward, :url => store_violation_rewards_path(@store)) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
@@ -230,7 +230,7 @@
 
 <div class="tab_popup" style="display:none;" id="new_train_area">
     <div class="popup_box">
-         <h1>新建培训<a href="javascript:void(3)" class="close">关闭</a></h1>
+         <h1>新建培训<a href="javascript:void(0)" class="close">关闭</a></h1>
          <%= form_for(@train, :url => store_trains_path(@store)) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">

@@ -26,7 +26,7 @@ module StaffsHelper
   end
 
   def get_month_score_obj(staff)
-    staff.month_scores.where("current_month = #{Time.now.strftime("%Y%m")}").first
+    staff.month_scores.where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")}").first
   end
 
   def get_train_status(train_id, staff_id)
