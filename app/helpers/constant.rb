@@ -19,7 +19,6 @@ module Constant
     #库存
     :materials => {
       :name => "库存",
-      :show => ["查看库存列表",1],
       :in => ["入库",2],
       :out => ["出库",4],
       :dinghuo =>["订货",8],
