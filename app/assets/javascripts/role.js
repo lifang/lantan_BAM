@@ -30,14 +30,14 @@ function show_mask_div(div_id){
 }
 
 function add_role(store_id){
-   show_mask_div("add_role");
-   $("#role_input").attr("value","");
+    show_mask_div("add_role");
+    $("#role_input").attr("value","");
 
 }
 
 function new_role(store_id){
     if($.trim($("#role_input").val()).length==0){
-      alert("请输入角色名称");
+        alert("请输入角色名称");
     }else{
         $.ajax({
             url:"/stores/"+store_id+"/roles/",
@@ -49,7 +49,7 @@ function new_role(store_id){
                     $("#add_role").hide();
                     window.location.reload();
                 }else if(data["status"]==1){
-                  alert("你输入的角色已经存在");
+                    alert("你输入的角色已经存在");
                 }
             },
             error:function(data){
@@ -60,15 +60,15 @@ function new_role(store_id){
 }
 
 function edit_role(role_id){
-  $("#a_role_"+role_id).hide();
-  $("#input_role_"+role_id).show().focus();
+    $("#a_role_"+role_id).hide();
+    $("#input_role_"+role_id).show().focus();
 
 }
 
 function blur_role(obj,store_id){
     var role_id = $(obj).attr("id").split("_")[2];
     if($.trim($(obj).val()).length==0){
-      alert("请输入角色名称");
+        alert("请输入角色名称");
     }else if($.trim($(obj).val())==$("#a_role_"+role_id).text()){
         $("#a_role_"+role_id).show();
         $(obj).hide();
@@ -82,7 +82,7 @@ function blur_role(obj,store_id){
                 $("#a_role_"+role_id).html($.trim($(obj).val()));
             },
             error:function(data){
-              alert(data);
+                alert(data);
             }
         });
         $("#a_role_"+role_id).show();
@@ -103,25 +103,25 @@ function set_role(obj,role_id,store_id){
         type:"GET",
         data:"role_id="+role_id,
         success:function(){
-           $("#model_div").show();
-           $("#set_role_id").attr("value",role_id);
+            $("#model_div").show();
+            $("#role_id").attr("value",role_id);
         }
     });
 }
 
 function set_staff_role(staff_id,r_ids){
-   show_mask_div("set_role");
-   $(".groupFunc_b input[type='checked']").each(function(idx,item){
-      if($(item).attr("checked")){
-          $(item).removeAttribute("checked");
-      }
-   });
-   if(r_ids.length>0){
-       for(var i=0;i<r_ids.split(",").length;i++){
-           $("#check_role_"+r_ids.split(",")[i]).attr("checked",'true');
-       }
-   }
-   $("#staff_id_h").attr("value",staff_id);
+    show_mask_div("set_role");
+    $(".groupFunc_b input[type='checked']").each(function(idx,item){
+        if($(item).attr("checked")){
+            $(item).removeAttribute("checked");
+        }
+    });
+    if(r_ids.length>0){
+        for(var i=0;i<r_ids.split(",").length;i++){
+            $("#check_role_"+r_ids.split(",")[i]).attr("checked",'true');
+        }
+    }
+    $("#staff_id_h").attr("value",staff_id);
 }
 
 function search_staff(store_id){
@@ -131,7 +131,7 @@ function search_staff(store_id){
         type:"GET",
         data:"name="+ $.trim($("#name").val()),
         success:function(){
-//           alert(2);
+        //           alert(2);
         },
         error:function(){
             alert("error");
@@ -139,74 +139,41 @@ function search_staff(store_id){
     });
 }
 
-function submit_role_form(){
-    var m_str = "";
-    var f_str = "";
-    $("#role_form input:checked[type='checkbox']").each(function(idx,item){
-        if($(item).attr("id").split("_")[0]=="menu"){
-          m_str += $(item).val()+",";
-        }else if($(item).attr("id").split("_")[0]=="func"){
-          f_str += $(item).val()+",";
-        }
-    });
-    var data = "role_id="+$("#set_role_id").val() +"&m_ids="+m_str +"&f_ids="+f_str;
-    $.ajax({
-        url:$("#role_form").attr("action"),
-        dataType:"json",
-        data:data,
-        type:"POST",
-        success:function(data,status){
-            if(data["status"]==1){
-                alert("设定完成");
-                $("#model_div").hide();
-                $(".people_group li").css({
-                    backgroundColor:"#ffffff"
-                });
-            }else{
-                alert("设定出错了");
-            }
-        },
-        error:function(){
-            alert("设定出错了");
-        }
-    });
-}
-
 function del_role(role_id,store_id){
-  if(confirm("确定要删除该角色吗")){
-      $.ajax({
-          url:"/stores/"+store_id+"/roles/"+role_id,
-          dataType:"json",
-          type:"delete",
-          success:function(){
-            window.location.reload();
-          }
-      });
-  }
+    if(confirm("确定要删除该角色吗")){
+        $.ajax({
+            url:"/stores/"+store_id+"/roles/"+role_id,
+            dataType:"json",
+            type:"delete",
+            success:function(){
+                window.location.reload();
+            }
+        });
+    }
 }
 
 function reset_role(store_id){
-   var len = $(".groupFunc_b input:checked").length;
-   if(len==0){
-      alert("请选择角色");
-   }else{
-       var roles = "";
-       $(".groupFunc_b input:checked").each(function(idx,item){
-          roles += $(item).val()+",";
-       });
-       $.ajax({
-          url:"/stores/"+store_id+"/roles/reset_role",
-          dataType:"json",
-          type:"POST",
-          data:"staff_id="+$("#staff_id_h").val()+"&roles="+roles,
-          success:function(){
-             window.location.reload();
-          },
-          error:function(){
+    var len = $(".groupFunc_b input:checked").length;
+    if(len==0){
+        alert("请选择角色");
+    }else{
+        var roles = "";
+        $(".groupFunc_b input:checked").each(function(idx,item){
+            roles += $(item).val()+",";
+        });
+        $.ajax({
+            url:"/stores/"+store_id+"/roles/reset_role",
+            dataType:"json",
+            type:"POST",
+            data:"staff_id="+$("#staff_id_h").val()+"&roles="+roles,
+            success:function(){
+                window.location.reload();
+            },
+            error:function(){
 
-          }
-       });
-   }
+            }
+        });
+    }
 }
 
 function cancel_role_panel(){
@@ -220,4 +187,12 @@ function cancel_role_panel(){
 function hide_mask(t){
     $(t).css('display','none');
     $(".mask").css('display','none');
+}
+
+function selectAll(obj){
+    if($(obj).attr("checked")=="checked"){
+        $(obj).parent().next().find("input[type='checkbox']").attr("checked", "checked")
+    }else{
+        $(obj).parent().next().find("input[type='checkbox']").attr("checked", false)
+    }
 }

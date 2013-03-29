@@ -34,6 +34,7 @@ class StationDatasController < ApplicationController
   def update
     @station = Station.find(params[:id])
     if @station.update_attributes(params[:station])
+      StationServiceRelation.delete_all("station_id=#{@station.id}")
       @station.station_service_relations.map(&:destroy)
       params[:product_ids].each do |p|
         StationServiceRelation.create({:station_id => @station.id, :product_id => p})

@@ -1,6 +1,7 @@
 <div class="box">
   <%= render :partial => "/customers/show_tips" %>
   <div class="data_box">
+    <% if permission?(controller.controller_name.to_sym, :show) %>
     <div class="search">
       <%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/search", :method => "post" do %>
         <div><label>客户类型：</label>
@@ -24,6 +25,7 @@
         <div><button type="submit" class="search_btn">查询</button></div>
       <% end %>
     </div>
+    <% end %>
 
     <div class="data_body_title">
       <h2 class="data_body_h">当月门店满意度 ：<a href="#">100%</a></h2>

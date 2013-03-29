@@ -6,7 +6,7 @@ module Constant
     #客户
     :customers => {
       :name => "客户",
-      :show => ["查询、显示客户列表",1],
+      :show => ["查询",1],
       :create => ["新建客户",2],
       :delete => ["删除客户",4],
       :send_msg =>["发短信",8],
@@ -63,10 +63,8 @@ module Constant
     },
     :stations => {
       :name => "现场",
-      :show => ["查看现场",1],
-      :dispatch => ["分配技师",2],
-      :video => ["查看现场视频",4],
-      :pay => ["订单支付",8]
+      :dispatch => ["分配技师",1],
+      :video => ["查看现场视频",2]
     },
     :sales => {
       :name => "营销",

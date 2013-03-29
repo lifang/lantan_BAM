@@ -110,4 +110,11 @@ module ApplicationHelper
     back_res =http.request(request)
     return JSON back_res.body
   end
+
+  def current_user
+    if cookies[:user_id]
+      user = Staff.find cookies[:user_id]
+    end
+    user
+  end
 end

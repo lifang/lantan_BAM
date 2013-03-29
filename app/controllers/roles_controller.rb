@@ -6,9 +6,9 @@ class RolesController < ApplicationController
   #角色列表
   def index
     @roles = Role.all
-    @menus = Menu.find_by_sql("select m.*,rmr.id relation_id,rmr.role_id from menus m
-      left join role_menu_relations rmr on m.id=rmr.menu_id and rmr.role_id=#{params[:role_id].to_i}") if params[:role_id]
-    @role_model_relations = RoleModelRelation.find_all_by_role_id params[:role_id].to_i if params[:role_id]
+    @role_id = params[:role_id] if params[:role_id]
+    @menus = Menu.all
+    @role_menu_relation_menu_ids = RoleMenuRelation.where(:role_id => @role_id).map(&:menu_id) if @role_id
     respond_to do |f|
       f.html
       f.js
@@ -43,8 +43,8 @@ class RolesController < ApplicationController
     if params[:name]
       str += " and name like '%#{params[:name]}%'"
     end
-    @staffs = Staff.paginate(:conditions => str,
-                             :page => params[:page], :per_page => Constant::PER_PAGE)
+    @staffs = Staff.includes(:staff_role_relations => :role).paginate(:conditions => str,
+      :page => params[:page], :per_page => Constant::PER_PAGE)
     @roles = Role.all
     respond_to do |f|
       f.html
@@ -54,35 +54,31 @@ class RolesController < ApplicationController
 
   #角色功能设定
   def set_role
-    puts "set role",params[:m_ids],params[:f_ids],params[:role_id]
-    status = 0
     if params[:role_id]
-      RoleMenuRelation.transaction do
-        begin
-          role = Role.find_by_id params[:role_id].to_i
-          if role
-            RoleMenuRelation.delete_all("role_id=#{role.id}")
-            #RoleModelRelation.delete_all("role_id=#{role.id}")
+      role = Role.find(params[:role_id])
+      if params[:menu_checks] #处理角色-菜单设置
+        params[:menu_checks].each do |menu_id|
+          if RoleMenuRelation.where(:menu_id => menu_id, :role_id => role.id).empty?
+            RoleMenuRelation.create(:menu_id => menu_id, :role_id => role.id)
           end
-          params[:m_ids].split(",").each do |m_id|
-            model_relation = RoleMenuRelation.create(:role_id => role.id, :menu_id => m_id.to_i)
-            if model_relation && model_relation.menu
-              params[:f_ids].split(",").each do |f_id|
-                if f_id.split("_")[0] == model_relation.menu.controller
-                  role_model = RoleModelRelation.find_by_role_id_and_model_name role.id,f_id.split("_")[0]
-                  RoleModelRelation.create(:role_id => role.id, :model_name => f_id.split("_")[0], :num => f_id.split("_")[1]) if role_model.nil?
-                  role_model.update_attribute(:num, role_model.num | f_id.split("_")[1].to_i) if role_model
-                end
-              end
-            end
-          end
-          status = 1
-        rescue
-          status = 2
         end
+        deleted_ids = RoleMenuRelation.where(:role_id => role.id).map(&:menu_id) - params[:menu_checks].map(&:to_i)
+        RoleMenuRelation.delete_all(:role_id => role.id, :menu_id => deleted_ids) unless deleted_ids.empty?
+      end
+      if params[:model_nums] #处理角色-功能模块设置
+        params[:model_nums].each do |controller, num|
+          role_model_relation = RoleModelRelation.where(:role_id => role.id, :model_name => controller)
+          if role_model_relation.empty?
+            RoleModelRelation.create(:num => num.map(&:to_i).sum, :role_id => role.id, :model_name => controller)
+          else
+            role_model_relation.first.update_attributes(:num => num.map(&:to_i).sum)
+          end
+        end
+        deleted_menus = RoleModelRelation.where(:role_id => role.id).map(&:model_name) - params[:model_nums].keys
+        RoleModelRelation.delete_all(:role_id => role.id, :model_name => deleted_menus) unless deleted_menus.empty?
       end
     end
-    render :json => {:status => status}
+    redirect_to store_roles_url(params[:store_id])
   end
 
   #删除角色

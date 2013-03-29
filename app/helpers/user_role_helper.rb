@@ -78,5 +78,15 @@ module UserRoleHelper
     #    session[:model_role][model]&i[1]==i[1]
   end
 
+  #判断菜单的权限
+  def permissions_on_menus?(menu)
+    user_roles = []
+    if current_user
+      current_user.roles.each do |role|
+        user_roles << role.menus.map(&:controller)
+      end
+    end
+    user_roles.flatten.uniq.include?(menu.to_s)
+  end
     
 end
