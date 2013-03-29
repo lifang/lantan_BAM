@@ -168,6 +168,15 @@ class Api::OrdersController < ApplicationController
   end
 
   def checkin
+    puts "-----------------------------"
+    puts params[:store_id]
+    puts params[:carNum]
+    puts params[:brand]
+    puts params[:year]
+    puts params[:userName]
+    puts params[:phone]
+    puts params[:email]
+    puts params[:birth]
     order = Order.checkin params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
                           params[:email],params[:birth]
     content = ""

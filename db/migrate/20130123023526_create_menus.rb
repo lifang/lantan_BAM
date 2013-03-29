@@ -8,4 +8,5 @@ class CreateMenus < ActiveRecord::Migration
 
     add_index :menus, :controller
   end
+  
 end
