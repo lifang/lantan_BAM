@@ -142,7 +142,7 @@ class Sync < ActiveRecord::Base
             object.id = hash["id"]
             total_con << object
           end
-          cap.import total_con
+          cap.import total_con, :timestamps=>false, :on_duplicate_key_update=>titles
           is_update = true
         end
       end
