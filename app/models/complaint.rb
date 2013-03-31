@@ -72,7 +72,7 @@ class Complaint < ActiveRecord::Base
   end
 
   def self.search_lis(store_id,created_at)
-    sql ="select * from store_complaints where store_id=#{store_id} and types=#{ChartImage::TYPES[:COMPLAINT]}"
+    sql ="select * from chart_images where store_id=#{store_id} and types=#{ChartImage::TYPES[:COMPLAINT]}"
     sql += " and date_format(current_day,'%Y-%m')=date_format('#{created_at}','%Y-%m') order by created_at desc"  unless created_at=="" || created_at.length==0
     return ChartImage.find_by_sql(sql)[0]
   end
@@ -85,7 +85,7 @@ class Complaint < ActiveRecord::Base
     orders=Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|   
       hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
     percent ={}
-    orders.each {|k,order| percent[k]=(order[true]*100)/(order.values.inject(0){|num,level| num+level})}
+    orders.each {|k,order| percent[k]=(order[true].nil? ? 0 : order[true]*100)/(order.values.blank? ? 1 : order.values.inject(0){|num,level| num+level})}
     lc = GoogleChart::LineChart.new('1000x300', "满意度月度统计表", true)
     lc.data "满意度",percent.inject(Array.new){|arr,o|arr << [o[0]-1,o[1]]} , 'ff0000'
     size =(0..10).inject(Array.new){|arr,int| arr << (percent.values.max%10==0 ? percent.values.max/10 : percent.values.max/10+1)*int} #生成图表的y的坐标
@@ -104,7 +104,7 @@ class Complaint < ActiveRecord::Base
   end
 
   def self.degree_lis(store_id,created_at)
-    sql ="select * from store_pleasants where store_id=#{store_id} and types=#{ChartImage::TYPES[:SATIFY]}"
+    sql ="select * from chart_images where store_id=#{store_id} and types=#{ChartImage::TYPES[:SATIFY]}"
     sql += " and date_format(current_day,'%Y-%m')=date_format('#{created_at}','%Y-%m') order by created_at desc"  unless created_at=="" || created_at.length==0
     return ChartImage.find_by_sql(sql)[0]
   end
@@ -138,10 +138,10 @@ class Complaint < ActiveRecord::Base
 
   def self.mk_record store_id ,order_id,reason,request
 
-     #puts store_id ,order_id,reason,request
-     order  = Order.find_by_id order_id
+    #puts store_id ,order_id,reason,request
+    order  = Order.find_by_id order_id
     complaint = Complaint.create(:order_id => order_id, :customer_id => order.customer_id, :reason => reason,
-                                 :suggestion => request, :status => STATUS[:UNTREATED]) if order
+      :suggestion => request, :status => STATUS[:UNTREATED]) if order
     complaint
   end
 

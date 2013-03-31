@@ -20,9 +20,7 @@
   <body>
     <div class="head">
       <div class="box">
-        <div class="logo">澜泰门店后台管理系统</div>
-        <div class="login">你好：<%= cookies[:user_name] %> | <a href="#">退出</a></div>
-        <div class="clear"></div>
+        <%= render :partial => "/common/login_header" %>
         <div class="nav">
           <ul>
             <li><a href="/stores/<%= @store.id %>/customers" <% if controller.controller_name=="customers" %>class="hover"<% end %>>客户列表</a></li>

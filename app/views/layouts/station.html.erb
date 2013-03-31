@@ -15,9 +15,7 @@
   <body>
     <div class="head">
       <div class="box">
-        <div class="logo">澜泰门店后台管理系统</div>
-        <div class="login">你好：<%= cookies[:user_name] %> | <a href="/logout">退出</a></div>
-        <div class="clear"></div>
+        <%= render :partial => "/common/login_header" %>
         <div class="nav">
           <ul>
             <li><a href="/stores/<%= params[:store_id] %>/stations" <%if params[:action] == "index" %> class="hover"<%end%>>施工现场</a></li>
@@ -25,7 +23,7 @@
             <% if permission?(:stations, :video) %><li><a href="/stores/<%= params[:store_id] %>/stations/show_video" <%if params[:action] =~ /video/  %> class="hover"<%end%>>施工视频</a></li><% end %>
           </ul>
         </div>
-        <div class="back"><a href="#" title="返回">Back</a>现场管理</div>
+        <div class="back"><a href="/stores/<%= params[:store_id] %>/welcomes" title="返回">Back</a>现场管理</div>
       </div>
     </div>
     <div class="main">
