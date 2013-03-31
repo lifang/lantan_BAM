@@ -1,5 +1,9 @@
 <%=  render 'second_menu'%>
-<div class="data_menu"><a href="javascript:void(0)" onclick="show_center('.tab_popup');">定制目标销售额</a></div>
+<div class="data_menu">
+  <% if permission?(:datas, :add_target) %>
+    <a href="javascript:void(0)" onclick="show_center('.tab_popup');">定制目标销售额</a>
+  <% end %>
+</div>
 <div class="clear"></div>
 <div class="tab_head">
   <ul>

@@ -43,7 +43,7 @@
         <td><%= material.price %></td>
         <td><%= text_field_tag "check_num_#{material.id}",material.check_num.to_i,{:style =>"width:50px;"} %></td>
         <td><%= link_to_function "备注", "add_material_remark(#{material.id},'#{material.remark}')", :class => "bz_btn" %>
-          <%= link_to_function "核实","check_material_num(#{material.id},#{material.storage.to_i})" %></td>
+          <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{material.storage.to_i})" %><% end %></td>
       </tr>
 <% end %>
   </tbody>

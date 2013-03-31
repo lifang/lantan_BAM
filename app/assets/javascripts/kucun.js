@@ -32,7 +32,7 @@ function save_material_remark(){
             }
         });
     } else{
-        alert("请输入备注内容");
+        tishi_alert("请输入备注内容");
     }
 }
 
@@ -51,7 +51,7 @@ function check_material_num(m_id,storage){
                     }
                 },
                 error:function(){
-                    alert("核实失败");
+                    tishi_alert("核实失败");
                 }
             });
         }
@@ -77,7 +77,7 @@ function submit_search_form(store_id,type,obj){
             $("#search_result").show();
             $("#dinghuo_search_result").show();
         },error:function(){
-            alert("error");
+            tishi_alert("error");
         }
     });
 }
@@ -144,9 +144,9 @@ function del_result(obj,type){
 function set_out_num(obj,storage){
 //  alert($(obj).val()+"---"+storage+"---");
     if(parseInt($(obj).val())>parseInt(storage)){
-       alert("请输入小于库存量的值");
+       tishi_alert("请输入小于库存量的值");
     }else if(parseInt($(obj).val())==0){
-       alert("请输入出库量");
+       tishi_alert("请输入出库量");
     }else{
         var select_itemts = $("#selected_items").val().split(",");
         for(var i=0;i<select_itemts.length;i++){
@@ -165,9 +165,9 @@ function set_order_num(obj,storage,m_id,m_price){
     var new_num = parseInt($(obj).val()) * parseFloat(m_price);
     $("#total_"+m_id).text(parseInt($(obj).val()) * parseFloat(m_price));
     if(parseInt($(obj).val())>parseInt(storage)){
-        alert("请输入小于库存量的值");
+        tishi_alert("请输入小于库存量的值");
     }else if(parseInt($(obj).val())==0){
-        alert("请输入出库量");
+        tishi_alert("请输入出库量");
     }else{
         var select_itemts = $("#selected_items_dinghuo").val().split(",");
         for(var i=0;i<select_itemts.length;i++){
@@ -192,16 +192,16 @@ function submit_out_order(form_id){
            type:"POST",
            success:function(data,status){
                if(data["status"]==0){
-                   alert("出库成功");
+                   tishi_alert("出库成功");
                    window.location.reload();
                }
            },
            error:function(err){
-              alert("出错了");
+              tishi_alert("出错了");
            }
         });
     }else{
-        alert("请选择物料");
+        tishi_alert("请选择物料");
     }
 }
 
@@ -254,7 +254,7 @@ function submit_material_order(form_id,pay_type){
             type:"POST",
             success:function(data,status){
                 if(data["status"]==0){
-                    alert("订货成功");
+                    tishi_alert("订货成功");
                     window.location.reload();
                 }else if(data["status"]== -1){
 //                   alert(data["pay_req"]);
@@ -262,7 +262,7 @@ function submit_material_order(form_id,pay_type){
                 }
             },
             error:function(err){
-                alert("订货失败");
+                tishi_alert("订货失败");
             }
         });
 
@@ -276,7 +276,7 @@ function pay_material_order(pay_type,store_id){
         type:"GET",
         success:function(data,status){
             if(data["status"]==0){
-                alert("支付成功");
+                tishi_alert("支付成功");
                 window.location.reload();
             }else if(data["status"]== -1){
 //                alert(data["pay_req"]);
@@ -284,7 +284,7 @@ function pay_material_order(pay_type,store_id){
             }
         },
         error:function(err){
-            alert("支付失败");
+            tishi_alert("支付失败");
         }
     });
 }
@@ -308,7 +308,7 @@ function confirm_pay(store_id){
         $("#price_total").html($("#total_count").html());
         $("#dinghuo_tab").hide();
     }else{
-        alert("请选择物料");
+        tishi_alert("请选择物料");
     }
 }
 
@@ -350,13 +350,13 @@ function get_act_count(obj){
 function add_new_material(obj,idx,store_id){
 //    alert($("#add_barcode_"+idx).val());
    if($("#add_barcode_"+idx).val()==""){
-       alert("请输入条形码");
+       tishi_alert("请输入条形码");
    } else if($("#add_name_"+idx).val()==""){
-      alert("请输入名称");
+      tishi_alert("请输入名称");
    }else if($("#add_price_"+idx).val()==""){
-      alert("请输入单价");
+      tishi_alert("请输入单价");
    }else if($("#add_count_"+idx).val()==""){
-     alert("请输入订货量");
+     tishi_alert("请输入订货量");
    }else{
        var item = $("#add_li_"+idx).find("select")[0];
        var type = $(item).find("option:selected").index() + 1;
@@ -433,11 +433,11 @@ function edit_supplier(form_url,name,contact,phone,email,address){
 
 function commit_supplier_form(){
     if($.trim($("#name").val())==""){
-        alert("请输入名称");
+        tishi_alert("请输入名称");
     }else if($.trim($("#contact").val())==""){
-        alert("请输入联系人");
+        tishi_alert("请输入联系人");
     }else if($.trim($("#phone").val())==""){
-        alert("请输入联系电话");
+        tishi_alert("请输入联系电话");
     }else{
         if($("#s_id").val().length==0){
             $("#add_supplier_form").submit();
@@ -473,15 +473,15 @@ function show_mask_div(div_id){
 
 function commit_in(){
     if($.trim($("#name").val())==""){
-       alert("请输入物料名称");
+       tishi_alert("请输入物料名称");
     }else if($.trim($("#code").val())==""){
-        alert("请输入订货单号");
+        tishi_alert("请输入订货单号");
     }else if($.trim($("#barcode").val())==""){
-        alert("请输入条形码");
+        tishi_alert("请输入条形码");
     }else if($.trim($("#price").val())==""){
-        alert("请输入单价");
+        tishi_alert("请输入单价");
     }else if($.trim($("#num").val())==""){
-        alert("请输入数量");
+        tishi_alert("请输入数量");
     }else{
       $("#ruku_tab_form").submit();
     }
@@ -534,7 +534,7 @@ function search_head_order(store_id){
         url:"/stores/"+store_id+"/materials/search_head_orders",
         dataType:"script",
         type:"GET",
-        data:"from="+$("#date01").val()+"&to="+$("#date02").val()+"&m_status="+$("#select_h_order").val()+"status="+$("#h_pay_status").val(),
+        data:"from="+$("#date01").val()+"&to="+$("#date02").val()+"&m_status="+$("#select_h_order").val()+"&status="+$("#h_pay_status").val(),
         success:function(){
 //           alert(1);
         },
@@ -584,7 +584,7 @@ function save_order_remark(){
             }
         });
     } else{
-        alert("请输入备注内容");
+        tishi_alert("请输入备注内容");
     }
 }
 
@@ -595,7 +595,7 @@ function cuihuo(order_id,type,store_id){
         type:"GET",
         data:"order_id="+order_id+"&type="+type,
         success:function(data,status){
-           alert("已催货");
+           tishi_alert("已催货");
         },
         error:function(){
 //            alert("error");
@@ -611,7 +611,7 @@ function cancel_order(order_id,type,store_id){
           type:"GET",
           data:"order_id="+order_id+"&type="+type,
           success:function(data,status){
-              alert(data["content"]);
+              tishi_alert(data["content"]);
               window.location.reload();
           },
           error:function(){
@@ -628,7 +628,7 @@ function receive_order(order_id,type,store_id){
         type:"GET",
         data:"order_id="+order_id+"&type="+type,
         success:function(data,status){
-            alert(data["content"]);
+            tishi_alert(data["content"]);
             window.location.reload();
         },
         error:function(){

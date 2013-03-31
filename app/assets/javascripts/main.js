@@ -131,3 +131,23 @@ $(function() {
     });
 });
 
+//提示错误信息
+function tishi_alert(message){
+    var doc_width = $(document).width();
+    $(".alert_h").html(message);
+    var layer_width = $(".tab_alert").width();
+    $(".tab_alert").css('top',"80px");
+    $(".tab_alert").css('left',(doc_width-layer_width)/2);
+    $(".tab_alert").css('display','block');
+    jQuery('.tab_alert').fadeTo("slow",1);
+    $(".tab_alert .close").click(function(){
+        $(".tab_alert").css('display','none');
+    })
+    setTimeout(function(){
+        jQuery('.tab_alert').fadeTo("slow",0);
+    }, 3000);
+    setTimeout(function(){
+        $(".tab_alert").css('display','none');
+    }, 3000);
+}
+

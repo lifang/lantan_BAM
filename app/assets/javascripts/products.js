@@ -35,19 +35,19 @@ function add_product(e){
     var sale=$("#sale_price").val();
     var standard =$("#standard").val();
     if (name=="" || name.length==0){
-        alert("请输入产品的名称");
+        tishi_alert("请输入产品的名称");
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        alert("请输入产品的零售价格");
+        tishi_alert("请输入产品的零售价格");
         return false;
     }
     if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
-        alert("请输入产品的促销价格");
+        tishi_alert("请输入产品的促销价格");
         return false;
     }
     if (standard=="" || standard.length==0){
-        alert("请输入产品的规格");
+        tishi_alert("请输入产品的规格");
         return false;
     }
     $(".add_img #img_div input[name$='img_url']").each(function (){
@@ -97,23 +97,23 @@ function edit_serv(e){
     var time=$("#cost_time").val();
     var deduct =$("#deduct_percent").val();
     if (name=="" || name.length==0){
-        alert("请输入服务的名称");
+        tishi_alert("请输入服务的名称");
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        alert("请输入服务的零售价格");
+        tishi_alert("请输入服务的零售价格");
         return false;
     }
     if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
-        alert("请输入服务的促销价格");
+        tishi_alert("请输入服务的促销价格");
         return false;
     }
     if(deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct))){
-        alert("请输入技师提成百分点");
+        tishi_alert("请输入技师提成百分点");
         return false;
     }
     if(time== "" || time.length==0 || isNaN(parseInt(time))){
-        alert("请输入服务的施工时间");
+        tishi_alert("请输入服务的施工时间");
         return false;
     }
     $(".add_img #img_div input[name$='img_url']").each(function (){
@@ -140,7 +140,7 @@ function load_material(store_id){
             }
         });
     }else{
-        alert("请选择类型或填写名称！");
+        tishi_alert("请选择类型或填写名称！");
     }
 }
 

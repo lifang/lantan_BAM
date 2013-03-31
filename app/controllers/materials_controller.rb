@@ -98,16 +98,26 @@ class MaterialsController < ApplicationController
         end
         if @material_order
           MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
-                             :price => params[:price],:staff_id => cookies[:current_user]})
+                             :price => params[:price],:staff_id => cookies[:user_id]})
+          #检查是否可以更新成已入库状态
+          if @material_order.mat_order_items.sum(:material_num) <= @material_order.mat_in_orders.sum(:material_num)
+            @material_order.m_status = 3
+            @material_order.save
+          end
         else
           MatInOrder.create({:material => @material, :material_num => params[:num],:price => params[:price],
-                             :staff_id => cookies[:current_user]})
+                             :staff_id => cookies[:user_id]})
         end
       rescue
 
       end
     end
     redirect_to store_materials_path(params[:store_id])
+  end
+
+  #判断订货数目与入库数目是否一致
+  def check_nums
+    
   end
 
   #备注
@@ -185,7 +195,7 @@ class MaterialsController < ApplicationController
               material_order = MaterialOrder.create({
                                                         :supplier_id => params[:supplier], :supplier_type => Supplier::TYPES[:head],
                                                         :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => m_status,
-                                                        :staff_id => cookies[:current_user],:store_id => params[:store_id]
+                                                        :staff_id => cookies[:user_id],:store_id => params[:store_id]
                                                     })
               if material_order
                 price = 0
@@ -229,7 +239,7 @@ class MaterialsController < ApplicationController
               material_order = MaterialOrder.create({
                                                         :supplier_id => params[:supplier], :supplier_type => Supplier::TYPES[:branch],
                                                         :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => m_status,
-                                                        :staff_id => cookies[:current_user],:store_id => params[:store_id]
+                                                        :staff_id => cookies[:user_id],:store_id => params[:store_id]
                                                     })
               if material_order
                 price = 0

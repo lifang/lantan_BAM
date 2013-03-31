@@ -42,7 +42,7 @@ module Constant
       :add_violation => ["新建违规",16],
       :add_train => ["新建培训",32],
       :month_salary => ["本月工资",64],
-      :import_salary => ["导出工资列表",128],
+      :export_salary => ["导出工资列表",128],
       :edit_salary => ["修改工资",256],
       :detail_salary => ["工资详情",512],
       :edit_show_staff => ["编辑查看员工信息",1024],
@@ -55,10 +55,9 @@ module Constant
       :name => "统计",
       :add_target => ["制定目标销售额",1],
       :customer => ["查看客户统计",2],
-      :sale => ["查看营销统计",4],
-      :storage => ["查看库存统计",8],
-      :staff => ["查看员工统计",16],
-      :print => ["打印单据",32]
+      :storage => ["查看库存统计",4],
+      :staff => ["查看员工统计",8],
+      :print => ["打印单据",16]
     },
     :stations => {
       :name => "现场",
