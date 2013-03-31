@@ -84,17 +84,19 @@ class Complaint < ActiveRecord::Base
      and store_id=#{store_id}  group by month(created_at),is_pleased"
     orders=Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|   
       hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
-    percent ={}
-    orders.each {|k,order| percent[k]=(order[true].nil? ? 0 : order[true]*100)/(order.values.blank? ? 1 : order.values.inject(0){|num,level| num+level})}
-    lc = GoogleChart::LineChart.new('1000x300', "满意度月度统计表", true)
-    lc.data "满意度",percent.inject(Array.new){|arr,o|arr << [o[0]-1,o[1]]} , 'ff0000'
-    size =(0..10).inject(Array.new){|arr,int| arr << (percent.values.max%10==0 ? percent.values.max/10 : percent.values.max/10+1)*int} #生成图表的y的坐标
-    lc.max_value [orders.keys.length-1,percent.values.max]
-    lc.axis :x, :labels =>orders.keys.inject(Array.new){|arr,mon|arr << "#{mon}月"}
-    lc.axis :y, :labels => size
-    lc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
-    img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,ChartImage::TYPES[:SATIFY],store_id)
-    month = ChartImage.create({:store_id=>store_id,:types =>ChartImage::TYPES[:SATIFY],:created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1)})  if month.blank?
+    unless orders=={}
+      percent ={}
+      orders.each {|k,order| percent[k]=(order[true].nil? ? 0 : order[true]*100)/(order.values.inject(0){|num,level| num+level})}
+      lc = GoogleChart::LineChart.new('1000x300', "满意度月度统计表", true)
+      lc.data "满意度",percent.inject(Array.new){|arr,o|arr << [o[0]-1,o[1]]} , 'ff0000'
+      size =(0..10).inject(Array.new){|arr,int| arr << (percent.values.max%10==0 ? percent.values.max/10 : percent.values.max/10+1)*int} #生成图表的y的坐标
+      lc.max_value [orders.keys.length-1,percent.values.max]
+      lc.axis :x, :labels =>orders.keys.inject(Array.new){|arr,mon|arr << "#{mon}月"}
+      lc.axis :y, :labels => size
+      lc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
+      img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,ChartImage::TYPES[:SATIFY],store_id)
+      month = ChartImage.create({:store_id=>store_id,:types =>ChartImage::TYPES[:SATIFY],:created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1)})  if month.blank?
+    end
     return month
   end
 
