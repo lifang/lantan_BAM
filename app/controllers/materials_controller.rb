@@ -84,6 +84,7 @@ class MaterialsController < ApplicationController
 
   #入库
   def create
+    p 111111111111111111111111
     @material = Material.find_by_code_and_status_and_store_id params[:barcode].strip,Material::STATUS[:NORMAL],params[:store_id]
     @material_order = MaterialOrder.find_by_code params[:code].strip
     Material.transaction do
@@ -117,7 +118,12 @@ class MaterialsController < ApplicationController
 
   #判断订货数目与入库数目是否一致
   def check_nums
-    
+    material = Material.find_by_code_and_status_and_store_id params[:barcode],Material::STATUS[:NORMAL],params[:store_id]
+    material_order = MaterialOrder.find_by_code params[:mo_code]
+    mio_num = MatInOrder.find_by_material_id_and_material_order_id(material.id, material_order.id).sum(:material_num)
+    moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).sum(:material_num)
+      render :text => mio_num >= moi_num ? "入库大于订单数" : ""
+
   end
 
   #备注

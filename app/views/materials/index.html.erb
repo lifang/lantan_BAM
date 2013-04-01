@@ -74,6 +74,7 @@
               <%= label_tag "num","数量：" %><%= text_field_tag "num" %>
             </div>
           </div>
+          <%= hidden_field_tag "hidden_store_id", params[:store_id] %>
           <div class="btn_box"><button onclick="commit_in()" type="button" class="confirm_btn">确定</button><button type="button" class="cancel_btn">取消</button></div>
           <div class="clear"></div>
       <% end %>

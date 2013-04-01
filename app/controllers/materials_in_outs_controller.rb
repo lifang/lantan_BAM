@@ -36,7 +36,12 @@ class MaterialsInOutsController < ApplicationController
       redirect_to "/stores/#{@store_id}/materials_in" and return
     end
     params['material_order'].values.each do |mo|
-      mat_in_order = MatInOrder.create(mo)
+      mat_in_order = MatInOrder.where(:material_id => mo[:material_id], :material_order_id => mo[:material_order_id])
+      if mat_in_order.empty?
+        mat_in_order = MatInOrder.create(mo)
+      else
+        mat_in_order.update_attributes(:material_num => mat_in_order + mo[:material_num].to_i)
+      end
       if mat_in_order.save
         material = mat_in_order.material
         material_order = mat_in_order.material_order
