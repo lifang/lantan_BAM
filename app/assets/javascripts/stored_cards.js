@@ -87,7 +87,7 @@ function check_goal(e){
     var created  =$("#created").val();
     var ended =$("#ended").val();
     var types_name =[];
-    if ((created=="" || created.length==0) && (ended=="" || ended.length )){
+    if ((created=="" || created.length==0) || (ended=="" || ended.length==0 )){
         alert("请选择目标销售额的起止日期！");
         return false;
     }
