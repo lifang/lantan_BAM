@@ -151,53 +151,53 @@ $(document).ready(function(){
     //创建员工信息验证, 编辑员工信息验证
     $("#new_staff_btn, #edit_staff_btn").live("click", function(){
        if($(this).parents('form').find("#staff_name").val() == ''){
-           alert("名称不能为空!");
+           tishi_alert("名称不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_type_of_w").val() == ''){
-           alert("岗位不能为空!");
+           tishi_alert("岗位不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_level").val() == ''){
-           alert("等级职称不能为空!");
+           tishi_alert("等级职称不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_education").val() == ''){
-           alert("教育程度不能为空!");
+           tishi_alert("教育程度不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_phone").val() == ''){
-           alert("联系方式不能为空!");
+           tishi_alert("联系方式不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_id_card").val() == ''){
-           alert("身份证不能为空!");
+           tishi_alert("身份证不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_address").val() == ''){
-           alert("地址不能为空!");
+           tishi_alert("地址不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_base_salary").val() == ''){
-           alert("薪资标准不能为空!");
+           tishi_alert("薪资标准不能为空!");
            return false;
        }
        if($(this).attr("id") == "new_staff_btn"){
            if($(this).parents('form').find("#staff_photo").val() == ''){
-               alert("照片不能为空!");
+               tishi_alert("照片不能为空!");
                return false;
            }
        }
        if($(this).parents('form').find("#staff_deduct_at").val() == ''){
-           alert("提成起始额不能为空!");
+           tishi_alert("提成起始额不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_deduct_end").val() == ''){
-           alert("结束额度不能为空!");
+           tishi_alert("结束额度不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_deduct_percent").val() == ''){
-           alert("提成率不能为空!");
+           tishi_alert("提成率不能为空!");
            return false;
        }
        $(this).parents('form').submit();
@@ -206,15 +206,15 @@ $(document).ready(function(){
     //新建奖励信息验证
     $("#new_reward_btn").click(function(){
        if($("#new_reward_area input:checked").length == 0){
-           alert("至少选择一个奖励人员!");
+           tishi_alert("至少选择一个奖励人员!");
            return false;
        }
        if($("#new_reward_area #violation_reward_situation").val() == ''){
-           alert("奖励原因不能为空!");
+           tishi_alert("奖励原因不能为空!");
            return false;
        }
        if($("#new_reward_area #violation_reward_mark").val() == ''){
-           alert("补充说明不能为空!");
+           tishi_alert("补充说明不能为空!");
            return false;
        }
        $(this).parents('form').submit();
@@ -223,15 +223,15 @@ $(document).ready(function(){
     //新建违规信息验证
     $("#new_violation_btn").click(function(){
        if($("#new_violation_area input:checked").length == 0){
-           alert("至少选择一个违规人员!");
+           tishi_alert("至少选择一个违规人员!");
            return false;
        }
        if($("#new_violation_area #violation_reward_situation").val() == ''){
-           alert("违规原因不能为空!");
+           tishi_alert("违规原因不能为空!");
            return false;
        }
        if($("#new_violation_area #violation_reward_mark").val() == ''){
-           alert("补充说明不能为空!");
+           tishi_alert("补充说明不能为空!");
            return false;
        }
        $(this).parents('form').submit();
@@ -240,23 +240,23 @@ $(document).ready(function(){
     //新建培训信息验证
     $("#new_train_btn").click(function(){
        if($("#new_train_area #train_start_at").val() == ''){
-            alert("培训开始时间不能为空!");
+            tishi_alert("培训开始时间不能为空!");
             return false;
        }
        if($("#new_train_area #train_end_at").val() == ''){
-            alert("培训结束时间不能为空!");
+            tishi_alert("培训结束时间不能为空!");
             return false;
        }
        if(new Date($("#new_train_area #train_start_at").val()) > new Date($("#new_train_area #train_end_at").val())){
-           alert("培训开始时间必须在培训结束时间之后!");
+           tishi_alert("培训开始时间必须在培训结束时间之后!");
            return false;
        }
        if($("#new_train_area input:checked").length == 0){
-           alert("至少选择一个培训人员!");
+           tishi_alert("至少选择一个培训人员!");
            return false;
        }
        if($("#new_train_area #train_content").val() == ''){
-           alert("培训原因不能为空!");
+           tishi_alert("培训原因不能为空!");
            return false;
        }
        $(this).parents('form').submit();
@@ -448,7 +448,7 @@ $(document).ready(function(){
                 },
                 success: function(data){
                    if(data == "success"){
-                       this_obj.parents('tr').find("span.train_status").text("通过");
+                       this_obj.parents('tr').find("span.train_status").text("已处理");
                        this_obj.hide();
                        this_obj.next().show();
                    }
@@ -474,18 +474,12 @@ $(document).ready(function(){
        return false;
     });
 
-    //日期选择
-    $("#train_start_at").datepicker({inline:true});
-    $("#train_end_at").datepicker({inline:true});
-    $("#start_at").datepicker({inline:true});
-    $("#end_at").datepicker({inline:true});
-
     //查询工作记录
     $("#search_work_record").click(function(){
        var start_at = $(this).parents('.search').find("#start_at").val();
        var end_at = $(this).parents('.search').find("#end_at").val();
        if(new Date(start_at) > new Date(end_at)){
-           alert("开始时间必须在结束时间之后!");
+           tishi_alert("开始时间必须在结束时间之后!");
            return false;
        }
        var staff_id = $(this).parents('.search').find("#staff_id").val();

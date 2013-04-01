@@ -4,7 +4,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>员工管理--员工一览</title>
     <%= stylesheet_link_tag    "application" %>
-    <%= javascript_include_tag "application", "jquery-ui-1.10.0.custom.min", "jquery.ui.datepicker-zh-CN", "jquery.tablesorter.min", "staffs" %>
+    <%= javascript_include_tag "application", "jquery.tablesorter.min" %>
+    <script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
+    <script type="text/javascript" src="/assets/staffs.js" ></script>
+
     <%= csrf_meta_tags %>
     
 
@@ -19,9 +22,7 @@
   <body>
        <div class="head">
             <div class="box">
-                 <div class="logo">澜泰门店后台管理系统</div>
-                 <div class="login">你好：<%= @store.contact %> | <a href="#">退出</a></div>
-                 <div class="clear"></div>
+                <%= render :partial => "/common/login_header" %>
                  <div class="nav">
                       <ul>
                           <li><%= link_to "员工一览", store_staffs_path(@store), :class => controller_name == "current_month_salaries" ? "" : "hover" %></li>
@@ -33,6 +34,7 @@
        </div>
        <%= yield %>
 
-       <%= render :partial => "/shared/notice" %>
+       <!--%= render :partial => "/shared/notice" %-->
+       <%= render :partial => "/shared/tishi_alert" %>
   </body>
 </html>

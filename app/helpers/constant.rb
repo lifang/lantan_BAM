@@ -1,10 +1,12 @@
 #encoding: utf-8
 module Constant
+  LOCAL_DIR = "#{Rails.root}/public/"
   #权限
   ROLES = {
     #客户
     :customers => {
-      :show => ["查询、显示客户列表",1],
+      :name => "客户",
+      :show => ["查询",1],
       :create => ["新建客户",2],
       :delete => ["删除客户",4],
       :send_msg =>["发短信",8],
@@ -16,7 +18,7 @@ module Constant
     },
     #库存
     :materials => {
-      :show => ["查看库存列表",1],
+      :name => "库存",
       :in => ["入库",2],
       :out => ["出库",4],
       :dinghuo =>["订货",8],
@@ -32,6 +34,7 @@ module Constant
       :receive => ["确认已收货",8192]
     },
     :staffs => {
+      :name => "员工",
       :add_staff => ["新建员工",1],
       :edit_sys_score => ["编辑系统打分",2],
       :detail_staff => ["查看员工详情",4],
@@ -49,6 +52,7 @@ module Constant
 
     },
     :datas => {
+      :name => "统计",
       :add_target => ["制定目标销售额",1],
       :customer => ["查看客户统计",2],
       :sale => ["查看营销统计",4],
@@ -57,12 +61,12 @@ module Constant
       :print => ["打印单据",32]
     },
     :stations => {
-      :show => ["查看现场",1],
-      :dispatch => ["分配技师",2],
-      :video => ["查看现场视频",4],
-      :pay => ["订单支付",8]
+      :name => "现场",
+      :dispatch => ["分配技师",1],
+      :video => ["查看现场视频",2]
     },
     :sales => {
+      :name => "营销",
       :add_sale => ["添加活动",1],
       :edit_sale => ["修改活动",2],
       :publish => ["发布活动",4],
@@ -79,7 +83,9 @@ module Constant
   }
 
   #上传图片的比例
-  PIC_SIZE=[50,100,148,300,700]
+  SALE_PICSIZE =[300,230,663]
+  P_PICSIZE = [300,356,50,246]
+  C_PICSIZE = [148]
  
   #角色
   SYS_ADMIN = "1"  #系统管理员
@@ -88,10 +94,15 @@ module Constant
   STAFF = "4" #员工
 
   #活动code码生成文件路径
-  CODE_PATH="#{Rails.root}/public/code_file.txt"
+  CODE_PATH =  LOCAL_DIR + "code_file.txt"
+  LOG_DIR = LOCAL_DIR + "logs/"
   #总店id
   STORE_ID = 1
   PER_PAGE = 20
+
+  #施工时间（分钟）
+  STATION_MIN = 30
+  W_MIN = 10 #休息时间
   #催货提醒
   URGE_GOODS_CONTENT = "门店订货提醒，请关注下"
 
@@ -99,4 +110,19 @@ module Constant
 
   #  施工现场文件目录
   VIDEO_DIR ="work_videos"
+
+  #发短信url
+  MESSAGE_URL = "http://mt.yeion.com"
+  USERNAME = "XCRJ"
+  PASSWORD = "123456"
+
+  HEAD_OFFICE="http://192.168.0.111:3001/syncs/upload_file"
+  HEAD_OFFICE_REQUEST_ZIP="http://127.0.0.1:3001/syncs/is_generate_zip"
+  HEAR_OFFICE_IPHOST="http://127.0.0.1:3001/"
+  PCARD_PICS = "pcard_pics"
+  SALE_PICS = "sale_pics"
+  #产品和活动的类别  图片名称分别为 product_pics 和service_pics
+  PRODUCT = "PRODUCT"
+  SERVICE = "SERVICE"
+  UNNEED_UPDATE = ['sync','item']  #不更新的表
 end

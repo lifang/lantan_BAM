@@ -3,7 +3,7 @@
     <span>客户姓名：<%= @customer.name %></span>
     <span>手机号码：<%= @customer.mobilephone %></span>
     <span>其他联系方式：<%= @customer.other_way %></span>
-    <span>生日：<%= @customer.birthday.strftime("%Y-%m-%d") %></span>
+    <span>生日：<%= @customer.birthday.strftime("%Y-%m-%d") if @customer.birthday %></span>
     <span>地址：<%= @customer.address %></span>
     <span><button type="button" class="compile_btn" onclick="javascript:popup('#edit_cus_div')">编辑</button></span>
   </div>

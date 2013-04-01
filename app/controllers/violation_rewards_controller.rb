@@ -8,6 +8,10 @@ class ViolationRewardsController < ApplicationController
   def create
     ViolationReward.transaction do
       begin
+        params[:violation_reward].delete("score_num") and params[:violation_reward].delete("salary_num") if params[:staff][:num_check] == "2"
+        params[:violation_reward].delete("salary_num") if params[:staff][:num_check] == "0"
+        params[:violation_reward].delete("score_num") if params[:staff][:num_check] == "1"
+        params[:violation_reward][:status] = ViolationReward::STATUS[:NOMAL]
         params[:staff][:id].each do |staff_id|
           violation_reward = ViolationReward.new(params[:violation_reward])
           violation_reward.staff_id = staff_id
@@ -29,14 +33,15 @@ class ViolationRewardsController < ApplicationController
 
   def update
     violation_reward = ViolationReward.find_by_id(params[:id])
+    params[:violation_reward][:process_at] = Time.now
     violation_reward.update_attributes(params[:violation_reward]) if violation_reward
 
     if violation_reward.types
       @rewards = violation_reward.staff.violation_rewards.where("types = true").
-                paginate(:page => params[:page] ||= 1, :per_page => 1)
+                paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     else
       @violations = violation_reward.staff.violation_rewards.where("types = false").
-                paginate(:page => params[:page] ||= 1, :per_page => 1)
+                paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     end
 
 

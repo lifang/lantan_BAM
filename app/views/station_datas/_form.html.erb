@@ -1,0 +1,45 @@
+<div class="tab_popup" style="display: none;" id="station_form">
+  <div class="popup_box">
+    <h1>工位<a href="#" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <% @station ||= Station.new %>
+      <%= form_for @station, :url => @action == 'new' ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => @action == 'new' ? :post : :put, :remote => true, :html => {"data-type" => 'script'} do |f| %>
+       <% if @station and @station.errors.any? %>
+          <div id="errorExplanation">
+            <h2><%= pluralize(@station.errors.count, "error") %> prohibited
+              this post from being saved:</h2>
+            <ul>
+              <% @station.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        <div class="popup_body_area">
+          <div class="item">
+            <%= f.label :name, '名称：', :style => "width:100px"%>
+            <%= f.text_field :name%>
+          </div>
+
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">服务：</div>
+            <div class="seeProDiv_rWidth">
+              <div class="popup_body_result resultHeight">
+                <ul>
+                  <% @products = Product.is_service %>
+                  <% @products.each do |product| %>
+                    <li><%= check_box_tag 'product_ids[]', product.id, @station.nil? ? false : @station.products.include?(product)  %><%= product.name %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="btn_box">
+          <button type="submit" class="confirm_btn">确定</button>
+          <a class="cancel_btn"onclick="hide_mask($('#station_form'))" >取消</a>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

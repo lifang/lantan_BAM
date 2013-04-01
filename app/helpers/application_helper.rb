@@ -1,11 +1,14 @@
 #encoding: utf-8
 module ApplicationHelper
+  require 'net/http'
+  require "uri"
+  require 'openssl'
   include Constant
   include UserRoleHelper
 
   #客户管理提示信息
   def customer_tips
-    @complaints = Complaint.find_by_sql(["select c.reason, c.suggstion, o.code, cu.name, ca.num, cu.id cu_id
+    @complaints = Complaint.find_by_sql(["select c.reason, c.suggestion, o.code, cu.name, ca.num, cu.id cu_id
       from complaints c inner join orders o on o.id = c.order_id
       inner join customers cu on cu.id = c.customer_id inner join car_nums ca on ca.id = o.car_num_id 
       where c.store_id = ? and c.status = ? ", params[:store_id].to_i, Complaint::STATUS[:UNTREATED]])
@@ -94,5 +97,32 @@ module ApplicationHelper
       months << DateTime.now.months_ago(i).strftime("%Y-%m")
     end
     months
+  end
+
+  def create_get_http(url,route)
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    if uri.port==443
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    request= Net::HTTP::Get.new(route)
+    back_res =http.request(request)
+    return JSON back_res.body
+  end
+
+  def current_user
+    if cookies[:user_id]
+      user = Staff.find cookies[:user_id]
+    end
+    user
+  end
+
+  def satisfy
+    orders = Order.find(:all, :select => "is_pleased", :conditions => ["created_at > ? and created_at < ?",
+        Time.mktime(Time.now.year, Time.now.mon-1, 1), Time.mktime(Time.now.year, Time.now.mon, 1)])
+    un_pleased_size = 0
+    orders.collect { |o| un_pleased_size += 1 if o.is_pleased == Order::IS_PLEASED[:BAD] }
+    return orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size
   end
 end

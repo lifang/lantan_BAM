@@ -2,7 +2,9 @@
 <html>
   <head>
     <%= stylesheet_link_tag    "application" %>
-    <%= javascript_include_tag "application" %>
+    <%= javascript_include_tag "application"%>
+    <script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
+    <script type="text/javascript" src="/assets/stored_cards.js" ></script>
     <title><%= @title.nil? ? "现场管理" : @title %></title>
     <%= csrf_meta_tags %>
     <!--[if IE 6]>
@@ -15,18 +17,18 @@
   <body>
     <div class="head">
       <div class="box">
-        <div class="logo">澜泰门店后台管理系统</div>
-        <div class="login">你好：XXX | <a href="#">退出</a></div>
-        <div class="clear"></div>
+       <%= render :partial => "/common/login_header" %>
         <div class="nav">
           <ul>
-            <li><a href="#" class="hover">客户</a></li>
-            <li><a href="#">营销</a></li>
-            <li><a href="#">库存</a></li>
-            <li><a href="#">员工</a></li>
+            <li><a href="/stores/<%=params[:store_id]%>/complaints"
+                   <%if controller.controller_name=="complaints"%> class="hover"<%end%>>客户</a></li>
+            <li><a href="/stores/<%=params[:store_id]%>/market_manages"
+                   <%if controller.controller_name=="market_manages"%> class="hover"<%end%>>营销</a></li>
+            <li><%= link_to "库存", store_material_order_manages_path(@store), :class => controller.controller_name == "material_order_manages" ? "hover" : '' %></li>
+            <li><%= link_to "员工", store_staff_manages_path(@store), :class => controller.controller_name == "staff_manages" ? "hover" : '' %></li>
           </ul>
         </div>
-        <div class="back"><a href="#" title="返回">Back</a>统计管理</div>
+        <div class="back"><a href="/stores/<%= params[:store_id] %>/welcomes" title="返回">Back</a>统计管理</div>
       </div>
     </div>
 
@@ -38,6 +40,7 @@
       </div>
     </div>
     <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+    <%= render :partial => "/shared/tishi_alert" %>
   </body>
 </html>
 

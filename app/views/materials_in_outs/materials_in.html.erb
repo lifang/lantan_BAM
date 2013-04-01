@@ -1,0 +1,27 @@
+<div class="main">
+  <div class="mat_notice" style="color:red;"><%= flash[:notice] %></div>
+  <div class="search"><label>请扫描条形码:</label><input name="mat_code" id="mat_code" data_action="m_in" type="text"/></div>
+  <div class="search_alert">*没有查询到系统中您扫描的货物</div>
+  <div class="data_box">
+    <div class="data_menu"><a href="#">添加货物名称</a></div>
+    <div class="clear"></div>
+    <div class="data_body">
+      <%= form_tag  create_materials_in_path, method: :post do |f|%>
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+          <thead>
+            <tr class="hbg">
+              <td>订货编号</td>
+              <td>条形码</td>
+              <td>物料名称</td>
+              <td>数量</td>
+              <td>操作</td>
+            </tr>
+          </thead>
+          <tbody class="mat-out-list"></tbody>
+        </table>
+        <div class="clear"></div>
+        <div class="btn_box_s"><%= submit_tag '入库', :class => "confirm_btn"%></div>
+      <% end %>
+    </div>
+  </div>
+</div>

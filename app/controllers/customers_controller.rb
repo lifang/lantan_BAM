@@ -12,7 +12,7 @@ class CustomersController < ApplicationController
     session[:name] = nil
     session[:phone] = nil
     session[:is_vip] = nil
-    @store = Store.find(params[:store_id].to_i)
+    @store = Store.find(params[:store_id].to_i)    
     @customers = Customer.search_customer(params[:c_types], params[:car_num], params[:started_at], params[:ended_at],
       params[:name], params[:phone], params[:is_vip], params[:page])
   end
@@ -80,11 +80,14 @@ class CustomersController < ApplicationController
     unless params[:content].strip.empty? or params[:m_customer_id].nil?
       MessageRecord.transaction do
         message_record = MessageRecord.create(:store_id => params[:store_id].to_i, :content => params[:content].strip,
-          :status => MessageRecord::STATUS[:NOMAL], :send_at => Time.now)
+          :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
         customer = Customer.find(params[:m_customer_id].to_i)
+        content = params[:content].strip.gsub("%name%", customer.name)
         SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id,
-          :content => params[:content].strip.gsub("%name%", customer.name), :phone => customer.mobilephone,
-          :send_at => Time.now, :status => MessageRecord::STATUS[:NOMAL])
+          :content => content, :phone => customer.mobilephone,
+          :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
+        message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{content}&Exno=0"
+        create_get_http(Constant::MESSAGE_URL, message_route)
         flash[:notice] = "短信发送成功。"
       end
     end

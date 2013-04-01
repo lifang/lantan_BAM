@@ -8,6 +8,14 @@ namespace :init do
     Role.create(:id => 3,:name => "店长")
     Role.create(:id => 4,:name => "员工")
 
+#    #"init capital"
+#    'A'.upto('Z') do |c|
+#      puts c
+#      Capital.create(:name => c)
+#    end
+#
+#    #init store station ？
 
   end
+
 end

@@ -1,4 +1,8 @@
-LantanBAM::Application.routes.draw do
+ LantanBAM::Application.routes.draw do
+
+  resources :syncs do
+    get "upload_file"
+  end
 
   resources :sales do
     collection do
@@ -10,15 +14,8 @@ LantanBAM::Application.routes.draw do
       post :delete_pcard
     end
   end
-  resources :products do
-    collection do
-
-    end
-    member do
-      post "show_prod","show_serv"
-    end
-  end
   resources :stations
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
   root :to => 'logins#index'
@@ -29,6 +26,14 @@ LantanBAM::Application.routes.draw do
   end
   match "logout" => "logins#logout"
   resources :stores do
+    resources :market_manages do
+      collection do
+        get "makets_totals","makets_list","makets_reports","makets_views","makets_goal",
+          "sale_orders","sale_order_list","stored_card_record","daily_consumption_receipt",
+          "stored_card_bill"
+        post "search_month","search_report","search_sale_order"
+      end
+    end
     resources :complaints do
       collection do
         post "search","search_degree","detail_s"
@@ -41,7 +46,7 @@ LantanBAM::Application.routes.draw do
         post "search"
       end
     end
-    resources :sales do 
+    resources :sales do
       collection do
         post "load_types"
       end
@@ -64,7 +69,7 @@ LantanBAM::Application.routes.draw do
         get "prod_services"
       end
       member do
-        post "edit_prod","update_prod","serv_update","edit_serv"
+        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv"
       end
     end
     resources :materials do
@@ -81,11 +86,18 @@ LantanBAM::Application.routes.draw do
     resources :trains
     resources :month_scores do
       collection do
-        get "update_sys_score","makets_totals"
+        get "update_sys_score"
       end
     end
     resources :salaries
     resources :current_month_salaries
+    resources :material_order_manages
+    resources :staff_manages do
+      collection do
+        get "get_year_staff_hart"
+        get "average_score_hart"
+      end
+    end
 
     resources :suppliers do
       member do
@@ -124,7 +136,17 @@ LantanBAM::Application.routes.draw do
         post "set_role","reset_role"
       end
     end
+
+    resources :materials_in_outs
+    resources :station_datas
   end
+
+  match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
+  match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
+  match 'get_material' => 'materials_in_outs#get_material'
+  match 'create_materials_in' => 'materials_in_outs#create_materials_in'
+  match 'create_materials_out' => 'materials_in_outs#create_materials_out'
+  match 'save_cookies' => 'materials_in_outs#save_cookies'
 
   resources :customers do
     collection do
@@ -148,11 +170,12 @@ LantanBAM::Application.routes.draw do
   end
 
   namespace :api do
-     resources :orders do
-       collection do
-         post "login","add","pay","complaint","search_car","reserve","index_list","brands_products"
-       end
-     end
+    resources :orders do
+      collection do
+        post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
+          "confirm_reservation","refresh","pay_order","checkin"
+      end
+    end
   end
 
 end

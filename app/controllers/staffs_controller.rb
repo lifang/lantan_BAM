@@ -7,7 +7,8 @@ class StaffsController < ApplicationController
   before_filter :search_work_record, :only => :show
 
   def index
-    @staffs_names = @store.staffs.select("id, name")
+    position_sql = "position = #{Staff::S_COMPANY[:FRONT]} or position = #{Staff::S_COMPANY[:TECHNICIAN]}"
+    @staffs_names = @store.staffs.where(position_sql).select("id, name")
     @staffs = @store.staffs.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     @staff =  Staff.new
     @violation_reward = ViolationReward.new
@@ -42,7 +43,7 @@ class StaffsController < ApplicationController
 
     @salaries = @staff.salaries.where("status = false").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("salary_tab")
 
-    current_month = Time.now().strftime("%Y%m")
+    current_month = Time.now().months_ago(1).strftime("%Y%m")
 
     @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
 

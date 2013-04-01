@@ -1,10 +1,10 @@
 function check_customer() {
     if ($.trim($("#new_name").val()) == "") {
-        alert("请输入客户姓名");
+        tishi_alert("请输入客户姓名");
         return false;
     }
     if ($.trim($("#mobilephone").val()) == "") {
-        alert("请输入客户手机号码");
+        tishi_alert("请输入客户手机号码");
         return false;
     }
     return true;
@@ -23,7 +23,7 @@ function single_send_message(customer_id) {
 
 function check_single_send() {
     if ($.trim($("#content").val()) == "") {
-        alert("请您填写需要发送的内容。");
+        tishi_alert("请您填写需要发送的内容。");
         return false;
     }
     return true;
@@ -99,7 +99,7 @@ function check_car_num() {
             type:'post',
             success : function(data) {
                 if (data.is_has == false) {
-                    alert("您输入的车牌号码系统中已经存在，点击‘确定’，当前车牌号将修改到当前客户名下。");
+                    tishi_alert("您输入的车牌号码系统中已经存在，点击‘确定’，当前车牌号将修改到当前客户名下。");
                 }                
             }
         })
@@ -115,19 +115,19 @@ function customer_revisit(order_id, customer_id) {
 
 function check_revisit() {
     if ($.trim($("#rev_title").val()) == "") {
-        alert("请输入回访的标题");
+        tishi_alert("请输入回访的标题");
         return false;
     }
     if ($("#rev_types").val() == "") {
-        alert("请选择回访类型");
+        tishi_alert("请选择回访类型");
         return false;
     }
     if ($.trim($("#rev_content").val()) == "") {
-        alert("请输入回访内容");
+        tishi_alert("请输入回访内容");
         return false;
     }
     if ($.trim($("#rev_answer").val()) == "") {
-        alert("请输入客户留言");
+        tishi_alert("请输入客户留言");
         return false;
     }
     return true;
@@ -135,11 +135,11 @@ function check_revisit() {
 
 function check_process() {
     if ($("#prod_type").val() == "") {
-        alert("请选择投诉类型");
+        tishi_alert("请选择投诉类型");
         return false;
     }
     if ($.trim($("#pro_remark").val()) == "") {
-        alert("请您填写处理意见");
+        tishi_alert("请您填写处理意见");
         return false;
     }
     return true;

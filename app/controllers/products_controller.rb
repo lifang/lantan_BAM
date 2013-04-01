@@ -14,7 +14,7 @@ class ProductsController < ApplicationController
   end
 
   def create
-    set_product("PRODUCT")
+    set_product(Constant::PRODUCT)
     redirect_to "/stores/#{params[:store_id]}/products"
   end  #添加产品
 
@@ -31,7 +31,7 @@ class ProductsController < ApplicationController
   end   #服务列表
 
   def serv_create
-    set_product("SERVICE")
+    set_product(Constant::SERVICE)
     redirect_to "/stores/#{params[:store_id]}/products/prod_services"
   end   #添加服务
 
@@ -41,8 +41,9 @@ class ProductsController < ApplicationController
       :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3)}"
     }
     product =Product.create(parms)
-    if types == "SERVICE"
-      product.update_attributes({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
+    if types == Constant::SERVICE
+      product.update_attributes({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
+          :deduct_percent=>params[:deduct_percent] })
       params[:sale_prod].each do |key,value|
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
       end if params[:sale_prod]
@@ -50,7 +51,11 @@ class ProductsController < ApplicationController
       product.update_attributes({:standard=>params[:standard]})
     end
     if params[:img_url] and !params[:img_url].keys.blank?
-      params[:img_url].each {|key,img| ImageUrl.create(:product_id=>product.id,:img_url=>Sale.upload_img(img,product.id,"#{types.downcase}_pics",product.store_id,key))}
+      params[:img_url].each_with_index {|img,index|
+        url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
+        ImageUrl.create(:product_id=>product.id,:img_url=>url)
+        product.update_attributes({:img_url=>url}) if index == 0
+      }
     end
   end   #为新建产品或者服务提供参数
 
@@ -68,8 +73,8 @@ class ProductsController < ApplicationController
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:desc],
       :types=>params[:prod_types],:introduction=>params[:intro]
     }
-    if types == "SERVICE"
-      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
+    if types == Constant::SERVICE
+      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],:deduct_percent=>params[:deduct_percent] })
       if params[:sale_prod]
         product.prod_mat_relations.inject(Array.new) {|arr,mat| mat.destroy}
         params[:sale_prod].each do |key,value|
@@ -81,13 +86,17 @@ class ProductsController < ApplicationController
     end
     if params[:img_url] and !params[:img_url].keys.blank?
       product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}
-      params[:img_url].each {|key,img| ImageUrl.create(:product_id=>product.id,:img_url=>Sale.upload_img(img,product.id,"#{types.downcase}_pics",product.store_id,key))}
+      params[:img_url].each_with_index {|img,index|
+        url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
+        ImageUrl.create(:product_id=>product.id,:img_url=>url)
+        product.update_attributes({:img_url=>url}) if index == 0
+      }
     end
     product.update_attributes(parms)
   end
 
   def update_prod
-    update_product("PRODUCT",Product.find(params[:id]))
+    update_product(Constant::PRODUCT,Product.find(params[:id]))
     redirect_to "/stores/#{params[:store_id]}/products"
   end
 
@@ -110,7 +119,7 @@ class ProductsController < ApplicationController
   end
 
   def serv_update
-    update_product("SERVICE",Product.find(params[:id]))
+    update_product(Constant::SERVICE,Product.find(params[:id]))
     redirect_to "/stores/#{params[:store_id]}/products/prod_services"
   end
 

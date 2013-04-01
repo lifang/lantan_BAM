@@ -3,11 +3,15 @@ class Station < ActiveRecord::Base
   has_many :word_orders
   has_many :station_staff_relations
   has_many :station_service_relations
-  has_many :w_o_times
+  has_many :wk_or_times
+  has_many :products, :through => :station_service_relations
   belongs_to :store
-  STAT = {:WRONG =>0,:NORMAL =>2,:LACK =>1,:NO_SERVICE =>3} #0 故障 1 缺少技师 2 正常 3 无服务
-  STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常"}
-
+  STAT = {:WRONG =>0,:NORMAL =>2,:LACK =>1,:NO_SERVICE =>3, :DELETED => 4} #0 故障 1 缺少技师 2 正常 3 无服务
+  STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常", 4 => "删除"}
+  PerPage = 10
+  validates :name, :presence => true
+  scope :valid, where("status != 4")
+  
   def self.set_stations(store_id)
     s_levels ={}  #所需技师等级
     l_staffs ={}  #现有等级的技师
@@ -91,7 +95,10 @@ class Station < ActiveRecord::Base
   end
 
   def self.filter_dir(store_id)
-    video_path ="/public/#{Constant::VIDEO_DIR}/#{store_id}/"
+    path_dir = Constant::LOCAL_DIR
+    dirs=["#{Constant::VIDEO_DIR}/","#{store_id}/"]
+    dirs.each_with_index {|dir,index| Dir.mkdir path_dir+dirs[0..index].join   unless File.directory? path_dir+dirs[0..index].join }
+    video_path ="/public/"+dirs.join
     paths=get_dir_list("#{Rails.root}"+video_path)
     video_hash ={}
     paths.each do |path|
@@ -101,7 +108,49 @@ class Station < ActiveRecord::Base
       else
         video_hash[mtime] = [video_path+path]
       end
-    end
+    end unless paths.blank?
     return video_hash
+  end
+
+  def self.arrange_time store_id, prod_ids, res_time = nil
+    #查询所有满足条件的工位
+    stations = Station.find_all_by_store_id_and_status store_id, Station::STAT[:NORMAL]
+    station_arr = []
+    prod_ids = prod_ids.collect{|p| p.to_i }
+    (stations || []).each do |station|
+      if station.station_service_relations
+        prods = station.station_service_relations.collect{|r| r.product_id }
+        station_arr << station if (prods & prod_ids).sort == prod_ids.sort
+      end
+    end
+
+    #按照工位的忙闲获取预计时间
+    time = Time.now.strftime("%Y%m%d%H%M").to_i
+    station_id = 0
+    (station_arr || []).each do |station|
+      w_o_time = WkOrTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
+      if w_o_time
+        t = w_o_time.current_time.to_s.to_datetime
+        s = time.to_s.to_datetime
+        if (t >= s)
+          time = w_o_time.current_time
+          station_id = station.id
+        else
+          station_id = station.id
+          time = Time.now.strftime("%Y%m%d%H%M")
+          break
+        end
+      else
+        station_id = station.id
+        time = Time.now.strftime("%Y%m%d%H%M")
+        break
+      end
+    end
+    time = res_time && time.to_i < res_time.to_datetime.strftime("%Y%m%d%H%M").to_i ? res_time.to_datetime.strftime("%Y%m%d%H%M").to_i : time
+    time = time.to_s.to_datetime
+    time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),
+      (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]
+    #puts time_arr,"-----------------"
+    time_arr
   end
 end

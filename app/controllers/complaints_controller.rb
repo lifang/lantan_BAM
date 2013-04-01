@@ -5,7 +5,7 @@ class ComplaintsController < ApplicationController
   def index
     @complaint = Complaint.get_chart(params[:store_id])
     @complaint = Complaint.gchart(params[:store_id])  if @complaints.blank?
-    @complaint =StoreComplaint.where("store_id=#{params[:store_id]}").order("created_at desc")[0]  if @complaint.nil?
+    @complaint = ChartImage.where("store_id=#{params[:store_id]} and types=#{ChartImage::TYPES[:COMPLAINT]}").order("created_at desc")[0]  if @complaint.nil?
   end
 
   #投诉分类查询
@@ -39,7 +39,7 @@ class ComplaintsController < ApplicationController
   def satisfy_degree
     @degree = Complaint.count_pleasant(params[:store_id])
     @degree = Complaint.degree_chart(params[:store_id])  if @degree.blank?
-    @degree =StorePleasant.where("store_id=#{params[:store_id]}").order("created_at desc")[0]  if @degree.nil?
+    @degree = ChartImage.where("store_id=#{params[:store_id]} and types=#{ChartImage::TYPES[:SATIFY]}").order("created_at desc")[0]  if @degree.nil?
   end
 
   #满意度查询
@@ -61,6 +61,7 @@ class ComplaintsController < ApplicationController
     session[:detail] =params[:detail]
     redirect_to "/stores/#{params[:store_id]}/complaints/detail_list"
   end
+  
   #投诉详细查询列表
   def detail_list
     @complaint =Complaint.detail_one(params[:store_id],params[:page],session[:detail])

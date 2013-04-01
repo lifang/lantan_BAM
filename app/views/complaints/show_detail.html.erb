@@ -1,11 +1,10 @@
-<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
-<%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
 <%= render 'directory' %>
 <div class="search">
-  <div><label>统计月份：</label><%= @complaint.blank??  session[:detail].to_datetime.strftime("%Y-%m") : @complaint[0].created_at.strftime("%Y-%m") %></div>
+  <div><label>统计月份：</label><%= @complaint.blank?? session[:detail].nil? ? "" : session[:detail].to_datetime.strftime("%Y-%m") : 
+  @complaint[0].created_at.strftime("%Y-%m") %></div>
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/detail_s" do%>
     <div><label>时间：</label>
-      <input name="detail" type="text" onclick="WdatePicker()" value="<%= session[:detail] %>" /></div>
+      <input name="detail" type="text" onclick="WdatePicker()"  class="Wdate" readonly value="<%= session[:detail] %>" /></div>
     <div><button class="search_btn">查询</button></div>
   <% end %>
 </div>
@@ -33,14 +32,14 @@
             <tr>
               <td><%= comp.created_at.nil? ? "" : comp.created_at.strftime("%Y.%m.%d--%H:%S") %></td>
               <td> <%= link_to "#{comp.code}", "/orders/#{comp.o_id}/order_info" ,
-            :remote => "true", "data-type" => "script", :class => "other_a" %></td>
+                  :remote => "true", "data-type" => "script", :class => "other_a" %></td>
               <td><%= @staff_name[comp.id] %></td>
               <td><%=Complaint::CHART_NAMES[comp.types]%></td>
               <td><%= comp.reason %></td>
               <td><%= comp.types==Complaint::TYPES[:INVALID]? "否" : "是" %></td>
               <td><%=Complaint::STATUS_NAME[comp.status]  %></td>
               <td><%=comp.process_at.nil? ? "" : comp.process_at.strftime("%Y.%m.%d--%H:%S")  %></td>
-              <td><%= comp.suggstion %></td>
+              <td><%= comp.suggestion %></td>
               <td><%= Complaint::VIOLATE_N[comp.is_violation] %></td>
             </tr>
           <% end %>

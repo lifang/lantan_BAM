@@ -4,7 +4,7 @@ class CreateProducts < ActiveRecord::Migration
       t.string :name
       t.float :base_price
       t.float :sale_price  #销售价格
-      t.text :description   #产品介绍
+      t.string :description   #产品介绍
       t.integer :types  #清洁类，保养类。。。
       t.string :service_code   #服务代码
       t.boolean :status     #状态

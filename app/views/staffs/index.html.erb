@@ -2,13 +2,13 @@
     <div class="box">
          <div class="data_box">
               <div class="search">
-                   <div>统计时间：<%= Time.now.strftime("%Y-%m") %></div>
+                   <div>统计时间：<%= DateTime.now.months_ago(1).strftime("%Y-%m") %></div>
               </div>
               <div class="data_menu">
                    <a href="javascript:void(0)" id="new_staff">新建员工</a>
-                   <a href="javascript:void(1)" id="new_reward">新建奖励</a>
-                   <a href="javascript:void(2)" id="new_violation">新建违规</a>
-                   <a href="javascript:void(3)" id="new_train">新建培训</a>
+                   <a href="javascript:void(0)" id="new_reward">新建奖励</a>
+                   <a href="javascript:void(0)" id="new_violation">新建违规</a>
+                   <a href="javascript:void(0)" id="new_train">新建培训</a>
               </div>
               <input type="hidden" value="<%= @store.id %>" id="store_id"/>
               <div class="clear"></div>
@@ -139,6 +139,10 @@
                        <label>提成率：</label>
                        <%= f.text_field :deduct_percent %>
                   </div>
+                  <div class="item">
+                       <label>按考核分发底薪：</label>
+                       <%= f.check_box :is_score_ge_salary, :value => 1 %>
+                  </div>
               </div>
               <div class="btn_box">
                 <button class="confirm_btn" id="new_staff_btn">确定</button>
@@ -151,7 +155,7 @@
 
 <div class="tab_popup" style="display:none;" id="new_reward_area">
     <div class="popup_box">
-         <h1>新建奖励<a href="javascript:void(1)" class="close">关闭</a></h1>
+         <h1>新建奖励<a href="javascript:void(0)" class="close">关闭</a></h1>
          <%= form_for(@violation_reward, :url => store_violation_rewards_path(@store)) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
@@ -165,9 +169,14 @@
                        <label>奖励原因：</label>
                        <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
                   </div>
-                   <div class="item">
+                   <div class="item_textarea">
                        <label>奖励方法：</label>
                        <%= f.select :process_types, ViolationReward::N_REWARD.invert %>
+                       <ul>
+                         <li><input type="radio" name="staff[num_check]" value="2" checked/>无</li>
+                        <li><input name="staff[num_check]" type="radio" value="0"/>&nbsp;按分值奖励&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
+                        <li><input name="staff[num_check]" type="radio" value="1"/>&nbsp;按金额奖励&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
+                       </ul>
                   </div>
                   <div class="item_textarea">
                        <label>补充说明：</label>
@@ -183,7 +192,7 @@
 
 <div class="tab_popup" style="display:none;" id="new_violation_area">
     <div class="popup_box">
-         <h1>新建违规<a href="javascript:void(2)" class="close">关闭</a></h1>
+         <h1>新建违规<a href="javascript:void(0)" class="close">关闭</a></h1>
          <%= form_for(@violation_reward, :url => store_violation_rewards_path(@store)) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
@@ -197,9 +206,15 @@
                        <label>违规原因：</label>
                        <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
                   </div>
-                   <div class="item">
+                  
+                   <div class="item_textarea">
                        <label>处罚方法：</label>
                        <%= f.select :process_types, ViolationReward::N_VIOLATE.invert %>
+                       <ul>
+                         <li><input type="radio" name="staff[num_check]" value="2" checked/>无</li>
+                        <li><input name="staff[num_check]" type="radio" value="0"/>&nbsp;按分值处罚&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
+                        <li><input name="staff[num_check]" type="radio" value="1"/>&nbsp;按金额处罚&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
+                       </ul>
                   </div>
                   <div class="item_textarea">
                        <label>补充说明：</label>
@@ -215,13 +230,14 @@
 
 <div class="tab_popup" style="display:none;" id="new_train_area">
     <div class="popup_box">
-         <h1>新建培训<a href="javascript:void(3)" class="close">关闭</a></h1>
+         <h1>新建培训<a href="javascript:void(0)" class="close">关闭</a></h1>
          <%= form_for(@train, :url => store_trains_path(@store)) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
                    <div class="search paddin_left">
                           <div><label>培训时间：</label>
-                            <%= f.text_field :start_at %>  到 <%= f.text_field :end_at %>
+                            <%= f.text_field :start_at, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();" %>
+                            到 <%= f.text_field :end_at, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();" %>
                           </div>
                     </div>
                   <div class="item_textarea">

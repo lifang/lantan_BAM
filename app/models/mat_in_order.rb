@@ -2,6 +2,7 @@
 class MatInOrder < ActiveRecord::Base
   belongs_to :material
   belongs_to :material_order
+  belongs_to :staff
 
   def self.in_list page,per_page,store_id
     MatInOrder.paginate(:select =>"m.*,o.material_num,s.name staff_name,o.price out_price,o.created_at out_time, mo.code order_code",

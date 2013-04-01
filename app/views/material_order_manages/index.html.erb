@@ -1,0 +1,49 @@
+<form action="/stores/<%= @store.id %>/material_order_manages" method="get">
+<div class="search">
+      <div>统计月份：<%= @statistics_month %></div>
+      <div><label>时间：</label>
+        <select name="statistics_month" id="statistics_month_select">
+         <% get_last_twelve_months.each do |month| %>
+         <option value="<%= month %>" <%= @statistics_month.eql?(month) ? "selected" : "" %>><%= month %></option>
+         <% end %>
+        </select>
+      </div>
+      <!--div><button class="search_btn">查询</button></div-->
+</div>
+</form>
+<div class="clear"></div>
+
+<div class="data_body">
+     <div>
+         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+             <thead>
+                  <tr class="hbg">
+                    <td>时间</td>
+                    <td>订货编号</td>
+                    <td>金额（元）</td>
+                  </tr>
+              </thead>
+              <tbody>
+                <% @material_orders.each do |material_order| %>
+                  <tr>
+                    <td><%= material_order.arrival_at.strftime("%Y-%m") %></td>
+                    <td><%= link_to material_order.logistics_code, store_material_order_manage_path(@store, material_order), :class => "other_a", :remote => true, "data-type" => "script" %></td>
+                    <td><%= material_order.price %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+        </table>
+        <div class="amount">总计：<%= @total_price %>（元）</div>
+     </div>
+</div>
+<div class="mask"></div>
+<div id="material_order_div">
+  <div class="tab_popup" id="material_order_detail">
+    <div class="popup_box">
+      <h1>订货编号<a href="javascript:void(0)" class="close">关闭</a></h1>
+      <div class="popup_body">
+        <div class="popup_body_area"></div>
+      </div>
+    </div>
+  </div>
+</div>

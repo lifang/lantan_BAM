@@ -18,11 +18,11 @@ function delete_cus(customer_id) {
 
 function check_message() {
     if ($.trim($("#customer_ids").val()) == "") {
-        alert("请选择您要发信息的客户。")
+        tishi_alert("请选择您要发信息的客户。")
         return false;
     }
     if ($.trim($("#content").val()) == "") {
-        alert("请您填写需要发送的内容。");
+        tishi_alert("请您填写需要发送的内容。");
         return false;
     }
     return true;

@@ -1,0 +1,30 @@
+<%= render 'second_menu'%>
+<form accept-charset="UTF-8" action="/stores/<%= @store.id %>/market_manages/daily_consumption_receipt" method="get">
+<div class="search">
+      <div><label>时间：</label>
+        <input name="search_time" type="text" id="search_time_at" value="<%= @search_time %>" class="Wdate" readonly onClick="WdatePicker();"/></div>
+      <div><button class="search_btn">查询</button></div>
+</div>
+</form>
+<input type="hidden" id="store_id" value="<%= @store.id %>"/>
+<div class="data_body_title">
+     <h2 class="data_body_h">当日销售额：<%= @current_day_total %>（元）</h2>
+</div>
+<div class="data_menu"><a href="javascript:void(0)" class="add_btn" id="print_daily_receipt" name="<%= @search_time %>">打印单据</a></div>
+<div class="clear"></div>
+
+<div class="data_body">
+     <%= render :partial => "/market_manages/daily_receipt_partial" %>
+</div>
+<div class="mask"></div>
+<div id="related_order_div"></div>
+<div id="print_receipt_div">
+  <div class="tab_popup" id="print_receipt_partial">
+    <div class="popup_box">
+      <h1>打印单据<a href="javascript:void(0)" class="close">关闭</a></h1>
+      <div class="popup_body">
+        <div class="popup_body_area"></div>
+      </div>
+    </div>
+  </div>
+</div>

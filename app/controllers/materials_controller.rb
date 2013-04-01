@@ -4,7 +4,9 @@ class MaterialsController < ApplicationController
   respond_to :json, :xml, :html
   before_filter :sign?
 
+  #库存列表
   def index
+
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
                                                    :per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]
@@ -21,6 +23,7 @@ class MaterialsController < ApplicationController
     @notice_ids = @notices.collect{ |item| item.n_id}.join(",")
   end
 
+  #库存列表分页
   def page_materials
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
                                                    :per_page => Constant::PER_PAGE, :page => params[:page])
@@ -30,6 +33,7 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #入库列表分页
   def page_ins
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id]
     respond_with(@in_records) do |f|
@@ -38,6 +42,7 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #出库列表分页
   def page_outs
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]
     respond_with(@out_records) do |f|
@@ -46,6 +51,7 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #向总部订货分页
   def page_head_orders
     @head_order_records =  []
     if params[:from] || params[:to]
@@ -60,6 +66,7 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #向供应商订货分页
   def page_supplier_orders
     @supplier_order_records = []
     if params[:from] || params[:to]
@@ -75,6 +82,7 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #入库
   def create
     @material = Material.find_by_code_and_status_and_store_id params[:barcode].strip,Material::STATUS[:NORMAL],params[:store_id]
     @material_order = MaterialOrder.find_by_code params[:code].strip
@@ -102,6 +110,7 @@ class MaterialsController < ApplicationController
     redirect_to store_materials_path(params[:store_id])
   end
 
+  #备注
   def remark
     #puts params[:remark],"ssss:#{params[:id]}"
     @material = Material.find_by_id(params[:id])
@@ -109,6 +118,7 @@ class MaterialsController < ApplicationController
     render :json => {:status => 1}.to_json
   end
 
+  #核实
   def check
     #puts params[:num],"m_id:#{params[:id]}"
     @material = Material.find_by_id(params[:id])
@@ -116,6 +126,7 @@ class MaterialsController < ApplicationController
     render :json => {:status => 1}.to_json
   end
 
+  #物料查询
   def search
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
@@ -133,16 +144,19 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #出库
   def out_order
     status = MatOutOrder.new_out_order params[:selected_items],params[:store_id],params[:staff]
     render :json => {:status => status}
   end
 
+  #订货页面
   def order
     @type = 1
     @use_card_count = SvcReturnRecord.store_return_count params[:store_id]
   end
 
+  #创建订货记录
   def material_order
     puts params[:store_id],params[:selected_items],params[:supplier],params[:use_count],params[:sale_id],params[:pay_type]
     status = MaterialOrder.make_order
@@ -247,6 +261,7 @@ class MaterialsController < ApplicationController
     render :json => {:status => 1,:text => text,:sale_id => sale_id}
   end
 
+  #添加物料（供应商订货）
   def add
     #puts params[:store_id]
     material = Material.find_by_code params[:code]
@@ -259,6 +274,7 @@ class MaterialsController < ApplicationController
     render :json => x
   end
 
+  #查询向总部订货的订单
   def search_head_orders
     supplier_id = params[:type] && params[:type].to_i == 1 ? 1 : 0
     @head_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,
@@ -269,6 +285,7 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #查询向供应商订货的订单
   def search_supplier_orders
     supplier_id = params[:type] && params[:type].to_i == 1 ? 1 : 0
     @supplier_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,
@@ -349,10 +366,12 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #打印
   def print
     @materials_storages = Material.normal.all(:conditions => "store_id=#{params[:store_id]}")
   end
 
+  #订货订单的备注
   def order_remark
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
@@ -363,6 +382,7 @@ class MaterialsController < ApplicationController
     render :json => {:status => 1}.to_json
   end
 
+  #催货
   def cuihuo
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
@@ -374,6 +394,7 @@ class MaterialsController < ApplicationController
     render :json => {:status => 1}.to_json
   end
 
+  #取消订货订单
   def cancel_order
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
@@ -389,6 +410,7 @@ class MaterialsController < ApplicationController
     render :json => {:status => 1,:content => content}.to_json
   end
 
+  #确认收货
   def receive_order
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
@@ -405,6 +427,7 @@ class MaterialsController < ApplicationController
     render :json => {:status => 1,:content => content}.to_json
   end
 
+  #订单支付
   def pay_order
     @order = nil
     if params[:order_id]
@@ -425,6 +448,7 @@ class MaterialsController < ApplicationController
 
   end
 
+  #修改提醒状态
   def update_notices
     if params[:ids]
       (params[:ids].split(",") || []).each do |id|
