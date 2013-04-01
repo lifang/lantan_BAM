@@ -88,7 +88,7 @@ function check_goal(e){
     var ended =$("#ended").val();
     var types_name =[];
     if ((created=="" || created.length==0) || (ended=="" || ended.length==0 )){
-        alert("请选择目标销售额的起止日期！");
+        tishi_alert("请选择目标销售额的起止日期！");
         return false;
     }
     var carry_out =true;
@@ -97,7 +97,7 @@ function check_goal(e){
             var label =$(this).find("label").html();
             types_name.push(label)
             if ($(this).find("input").val()==0 || $(this).find("input").length==0){
-                alert("请输入"+label+"的金额");
+                tishi_alert("请输入"+label+"的金额");
                 carry_out=false;
                 return false
             }
@@ -106,12 +106,12 @@ function check_goal(e){
             if (first!="" || first.length!=0 ){
                 var second=$(this).find("input").last().val();
                 if(second=="" || second.length==0){
-                    alert("请输入"+first+"的金额");
+                    tishi_alert("请输入"+first+"的金额");
                     carry_out=false;
                     return false;
                 }
                 if (types_name.indexOf(first)>=0 ){
-                    alert("”"+first+"“ 已经存在，请检查");
+                    tishi_alert("”"+first+"“ 已经存在，请检查");
                     carry_out=false;
                     return false;
                 }

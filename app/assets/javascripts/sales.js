@@ -8,46 +8,46 @@ function publish_sale(e){
     var pic_format=["png",'gif',"jpg","bmp","pcx","tiff","jpeg","tga","eps","hdr","tif"]
     var img=$("#img_url").val();
     if (name=="" || name.length==0){
-        alert("请输入本次活动的标题")
+        tishi_alert("请输入本次活动的标题")
         return false;
     }
     if($("#add_products").children().length == 0){
-        alert("请选择产品或服务");
+        tishi_alert("请选择产品或服务");
         return false;
     }
     if (disc == undefined){
-        alert("请选择优惠类型");
+        tishi_alert("请选择优惠类型");
         return false;
     }
     if (parseInt(disc)==1 && $("#disc_"+disc).val().length==0){
-        alert("请填写优惠的金额");
+        tishi_alert("请填写优惠的金额");
         return false;
     }
     if (parseInt(disc)==0 && $("#disc_"+disc).val().length==0){
-        alert("请填写打折的折扣");
+        tishi_alert("请填写打折的折扣");
         return false;
     }
     if (time == undefined){
-        alert("请选择时间的类型")
+        tishi_alert("请选择时间的类型")
         return false;
     }
     if (parseInt(time)==0 && ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0)){
-        alert("请输入活动开始和结束的时间");
+        tishi_alert("请输入活动开始和结束的时间");
         return false;
     }
     if ($("#disc_car_nums").val() == " " || $("#disc_car_nums").val().length==0 ){
-        alert("请参加活动的总车辆数");
+        tishi_alert("请参加活动的总车辆数");
         return false;
     }
     if (subsidy == undefined){
-        alert("请选择是否需要总店补贴")
+        tishi_alert("请选择是否需要总店补贴")
         return false;
     }
     if ((img != "" || img.length !=0) && pic_format.indexOf(img.split(".")[img.split(".").length-1])== -1){
-        alert("请选择正确格式的图片！")
+        tishi_alert("请选择正确格式的图片！")
     }
     if (parseInt(subsidy)==1 && $("#sub_content").val().length == 0){
-        alert("请输入补贴金额");
+        tishi_alert("请输入补贴金额");
         return false;
     }
 
@@ -75,7 +75,7 @@ function delete_sale(sale_id){
                 sale_id : sale_id
             },
             success:function(data){
-                alert(data.message);
+                tishi_alert(data.message);
                 window.location.reload();
             }
         });
@@ -93,7 +93,7 @@ function public_sale(sale_id){
                 sale_id : sale_id
             },
             success:function(data){
-                alert(data.message);
+                tishi_alert(data.message);
                 window.location.reload();
             }
         });
@@ -116,7 +116,7 @@ function load_types(store_id){
             }
         });
     }else{
-        alert("请选择类型或填写名称！");
+        tishi_alert("请选择类型或填写名称！");
     }
 }
 
@@ -136,7 +136,7 @@ function pcard_types(store_id){
             }
         });
     }else{
-        alert("请选择类型或填写名称！");
+        tishi_alert("请选择类型或填写名称！");
     }
 }
 
@@ -163,19 +163,19 @@ function check_add(e){
     var name=$("#name").val();
     var base=$("#price").val();
     if (name=="" || name.length==0){
-        alert("请输入套餐卡的名称");
+        tishi_alert("请输入套餐卡的名称");
         return false;
     }
     if ( ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0)){
-        alert("请输入套餐卡有效时间和失效时间时间");
+        tishi_alert("请输入套餐卡有效时间和失效时间时间");
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        alert("请输入套餐卡的价格");
+        tishi_alert("请输入套餐卡的价格");
         return false;
     }
     if($("#add_products").children().length == 0){
-        alert("请选择产品或服务");
+        tishi_alert("请选择产品或服务");
         return false;
     }
     $("#add_pcard").submit();
@@ -191,7 +191,7 @@ function delete_pcard(pcard_id){
             dataType : 'json',
             url : "/package_cards/"+pcard_id+"/delete_pcard",
             success:function(data){
-                alert(data.message);
+                tishi_alert(data.message);
                 window.location.reload();
             }
         });
@@ -203,7 +203,7 @@ function check_station(){
     $("select[name^=select]").each(function(){
         var station_id =$("#stat"+this.id.split("_")[1]+" option:selected").val();
         if(parseInt(station_id)==$("#station_id").val() && $(this).find("option:selected").val()== "0" 　){
-            alert("工位状态正常的必须设置技师");
+            tishi_alert("工位状态正常的必须设置技师");
             status=false;
             return false
         } 
