@@ -488,18 +488,20 @@ function commit_in(){
       var store_id = $("#hidden_store_id").val();
       $.ajax({
            url:"/stores/" + store_id + "/materials/check_nums",
-           dataType:"json",
+           dataType:"text",
            type:"GET",
            data:{barcode: barcode, mo_code: mo_code},
            success:function(data){
-              alert(data);
-              if(data=="入库大于订单数")
+              if(data=="1")
                {
                    if(confirm("商品入库数目已经大于订单中的商品数目，仍然要入库吗？")){
                       $("#ruku_tab_form").submit();
                    }else
-                      { return false;}
-               }
+                      {  $("#ruku_tab").hide();
+                         $(".mask").hide();
+                         return false;
+                      }
+               }else{ $("#ruku_tab_form").submit();}
            }
        });
       

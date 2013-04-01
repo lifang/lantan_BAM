@@ -84,7 +84,6 @@ class MaterialsController < ApplicationController
 
   #入库
   def create
-    p 111111111111111111111111
     @material = Material.find_by_code_and_status_and_store_id params[:barcode].strip,Material::STATUS[:NORMAL],params[:store_id]
     @material_order = MaterialOrder.find_by_code params[:code].strip
     Material.transaction do
@@ -98,8 +97,14 @@ class MaterialsController < ApplicationController
                                        :types => params[:material][:types],:check_num => params[:num].strip})
         end
         if @material_order
-          MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
+          mat_in_order = MatInOrder.find_by_material_id_and_material_order_id(@material.id, @material_order.id)
+          if mat_in_order
+            mat_in_order.update_attributes(:material_num => mat_in_order.material_num + params[:num].to_i)
+          else
+            MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
                              :price => params[:price],:staff_id => cookies[:user_id]})
+          end
+
           #检查是否可以更新成已入库状态
           if @material_order.mat_order_items.sum(:material_num) <= @material_order.mat_in_orders.sum(:material_num)
             @material_order.m_status = 3
@@ -120,10 +125,11 @@ class MaterialsController < ApplicationController
   def check_nums
     material = Material.find_by_code_and_status_and_store_id params[:barcode],Material::STATUS[:NORMAL],params[:store_id]
     material_order = MaterialOrder.find_by_code params[:mo_code]
-    mio_num = MatInOrder.find_by_material_id_and_material_order_id(material.id, material_order.id).sum(:material_num)
-    moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).sum(:material_num)
-      render :text => mio_num >= moi_num ? "入库大于订单数" : ""
-
+    mio_num = MatInOrder.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
+    moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
+    p mio_num
+    p moi_num
+    render :text => !mio_num.nil? && mio_num >= moi_num ? 1 : 0
   end
 
   #备注
