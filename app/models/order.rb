@@ -7,6 +7,7 @@ class Order < ActiveRecord::Base
   belongs_to :car_num
   belongs_to :c_pcard_relation
   belongs_to :c_svc_relation
+  belongs_to :sale
   has_many :revisit_order_relations
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
