@@ -39,7 +39,7 @@
         <div class="seeProDiv_rWidth">
           <ul class="seeProPic">
             <%@img_urls.each do |img|%>
-              <li><img src="<%= img.img_url.nil? ? "" : img.img_url.gsub("img#{@serv.id}","img#{@serv.id}_50")  %>" /></li>
+              <li><img src="<%= img.img_url.nil? ? "" : img.img_url.gsub("img#{@serv.id}","img#{@serv.id}_#{Constant::P_PICSIZE[0]}")  %>" /></li>
             <% end unless @img_urls.blank? %>
           </ul>
         </div>

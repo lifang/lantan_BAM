@@ -17,7 +17,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   #创建发布活动
   def create
     pams={:name=>params[:name],:status=>Sale::STATUS[:UN_RELEASE],:car_num=>params[:car_num],:everycar_times=>params[:every_car],
-      :created_at=>Time.now.strftime("%Y%M%d"),:introduction=>params[:intro],:discount=>params["disc_"+params[:discount]],
+      :created_at=>Time.now,:introduction=>params[:intro],:discount=>params["disc_"+params[:discount]],
       :store_id=>params[:store_id], :disc_types=>params[:discount],:disc_time_types=>params[:disc_time],
       :code=>Sale.set_code(8),:is_subsidy =>params[:subsidy]
     }

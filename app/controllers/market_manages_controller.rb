@@ -107,10 +107,12 @@ class MarketManagesController < ApplicationController
     session[:o_created],session[:o_ended],session[:order_name]=nil,nil,nil
     orders = Sale.count_sale_orders(params[:store_id])
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>10)
-    @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types 
+    unless @sale_orders.blank?
+      @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
      p on p.order_id=o.id where o.sale_id in (#{@sale_orders.map(&:id).join(',')}) ").inject(Hash.new)  {|hash,order_pay|
-      hash[order_pay.sale_id].nil? ? hash[order_pay.sale_id]=order_pay.price : hash[order_pay.sale_id] += order_pay.price  if order_pay.pay_type == OrderPayType::PAY_TYPES[:SALE];hash }
-    @sale_names =orders.map(&:name)
+        hash[order_pay.sale_id].nil? ? hash[order_pay.sale_id]=order_pay.price : hash[order_pay.sale_id] += order_pay.price  if order_pay.pay_type == OrderPayType::PAY_TYPES[:SALE];hash }
+      @sale_names =orders.map(&:name)
+    end
   end
 
   def search_sale_order
@@ -122,19 +124,21 @@ class MarketManagesController < ApplicationController
   def sale_order_list
     orders = Sale.count_sale_orders_search(params[:store_id],session[:o_created],session[:o_ended],session[:order_name])
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>10)
-    @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
+    unless @sale_orders.blank?
+      @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
      p on p.order_id=o.id where o.sale_id in (#{@sale_orders.map(&:id).join(',')}) ").inject(Hash.new)  {|hash,order_pay|
-      hash[order_pay.sale_id].nil? ? hash[order_pay.sale_id]=order_pay.price : hash[order_pay.sale_id] += order_pay.price  if order_pay.pay_type == OrderPayType::PAY_TYPES[:SALE];hash }
-    @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
+        hash[order_pay.sale_id].nil? ? hash[order_pay.sale_id]=order_pay.price : hash[order_pay.sale_id] += order_pay.price  if order_pay.pay_type == OrderPayType::PAY_TYPES[:SALE];hash }
+      @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
+    end
     render 'sale_orders'
   end
 
   def stored_card_record
     @start_at, @end_at = params[:started_at], params[:ended_at]
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
-                            "orders.started_at >= '#{@start_at}'"
+      "orders.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
-                            "orders.ended_at <= '#{@end_at}'"
+      "orders.ended_at <= '#{@end_at}'"
     @orders = Order.includes(:c_svc_relation => :sv_card).
       where("orders.store_id = #{params[:store_id]}").
       where(started_at_sql).where(ended_at_sql).
@@ -147,9 +151,9 @@ class MarketManagesController < ApplicationController
     @search_time = params[:search_time]
     search_time_sql = params[:search_time] ||= Time.now.strftime("%Y-%m-%d")
     @orders = Order.where("created_at <= '#{search_time_sql} 23:59:59'").
-                    where("created_at >= '#{search_time_sql} 00:00:00'")
+      where("created_at >= '#{search_time_sql} 00:00:00'")
     @current_day_total = Order.where("created_at <= '#{Time.now}'").
-                    where("created_at >= '#{Time.now.strftime("%Y-%m-%d")} 00:00:00'").sum(:price)
+      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")} 00:00:00'").sum(:price)
     @search_total = @orders.sum(:price)
     respond_to do |format|
       format.html
@@ -160,17 +164,17 @@ class MarketManagesController < ApplicationController
   def stored_card_bill
     @start_at, @end_at = params[:started_at], params[:ended_at]
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
-                              "orders.started_at >= '#{@start_at}'"
+      "orders.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
-                              "orders.ended_at <= '#{@end_at}'"
+      "orders.ended_at <= '#{@end_at}'"
     @orders = Order.includes(:c_svc_relation => :sv_card).
       where("orders.store_id = #{params[:store_id]}").
       where(started_at_sql).where(ended_at_sql).
       where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
     svc_return_records = @orders.collect{|order|SvcReturnRecord.
-                          where("types = #{SvcReturnRecord::TYPES[:in]}").
-                          where("target_id = #{order.id}").
-                          where("store_id = #{@store.id}").first}
+        where("types = #{SvcReturnRecord::TYPES[:in]}").
+        where("target_id = #{order.id}").
+        where("store_id = #{@store.id}").first}
     @total = svc_return_records.sum(&:total_price) - svc_return_records.sum(&:price)
     respond_to do |format|
       format.html

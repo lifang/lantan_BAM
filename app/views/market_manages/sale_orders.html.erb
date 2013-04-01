@@ -5,7 +5,7 @@
         <option value="">全部</option>
         <% @sale_names.each do |name| %>
           <option value="<%= name %>" <% if session[:order_name]== name %> selected<%end%>><%= name %></option>
-        <% end unless @sale_names.blank? %>
+        <% end unless @sale_names.nil? %>
       </select></div>
     <div><label>时间：</label><input class="Wdate" readonly name="o_created" type="text" onclick="WdatePicker()" value="<%= session[:o_created] %>" />&nbsp;到&nbsp;
       <input class="Wdate" readonly name="o_ended" type="text" onclick="WdatePicker()" value="<%= session[:o_ended] %>"/></div>
