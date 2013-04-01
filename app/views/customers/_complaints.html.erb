@@ -26,8 +26,10 @@
           <% if complaint.status == Complaint::STATUS[:PROCESSED] %>
             已处理
           <% else %>
+            <% if permission?(:customers,:deal_complaint) %>
             <%= link_to "处理", "/orders/#{complaint.c_id}_#{complaint.o_id}/order_staff" ,
               :remote => "true", "data-type" => "script" %>
+            <% end %>
           <% end %>
         </td>
       </tr>

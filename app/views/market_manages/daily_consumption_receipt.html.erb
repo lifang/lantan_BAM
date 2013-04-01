@@ -10,7 +10,11 @@
 <div class="data_body_title">
      <h2 class="data_body_h">当日销售额：<%= @current_day_total %>（元）</h2>
 </div>
-<div class="data_menu"><a href="javascript:void(0)" class="add_btn" id="print_daily_receipt" name="<%= @search_time %>">打印单据</a></div>
+<div class="data_menu">
+  <% if permission?(:datas, :print) %>
+  <a href="javascript:void(0)" class="add_btn" id="print_daily_receipt" name="<%= @search_time %>">打印单据</a>
+  <% end %>
+</div>
 <div class="clear"></div>
 
 <div class="data_body">

@@ -15,7 +15,9 @@
             <td><%= violation.mark %></td>
             <td>
               <% unless violation.status %>
-                <%= link_to "处理", "javascript:void(0)", :class => "process_violation", :id => violation.id, :name => @store.id %>
+                <% if permission?(:staffs, :deal_violation) %>
+                  <%= link_to "处理", "javascript:void(0)", :class => "process_violation", :id => violation.id, :name => @store.id %>
+                <% end %>
               <% else %>
                 已处理
               <% end %>

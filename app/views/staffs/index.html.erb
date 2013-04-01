@@ -5,10 +5,10 @@
                    <div>统计时间：<%= DateTime.now.months_ago(1).strftime("%Y-%m") %></div>
               </div>
               <div class="data_menu">
-                   <a href="javascript:void(0)" id="new_staff">新建员工</a>
-                   <a href="javascript:void(0)" id="new_reward">新建奖励</a>
-                   <a href="javascript:void(0)" id="new_violation">新建违规</a>
-                   <a href="javascript:void(0)" id="new_train">新建培训</a>
+                   <% if permission?(:staffs,:add_staff) %><a href="javascript:void(0)" id="new_staff">新建员工</a><% end %>
+                   <% if permission?(:staffs,:add_priase) %><a href="javascript:void(0)" id="new_reward">新建奖励</a><% end %>
+                   <% if permission?(:staffs,:add_violation) %><a href="javascript:void(0)" id="new_violation">新建违规</a><% end %>
+                   <% if permission?(:staffs,:add_train) %><a href="javascript:void(0)" id="new_train">新建培训</a><% end %>
               </div>
               <input type="hidden" value="<%= @store.id %>" id="store_id"/>
               <div class="clear"></div>
@@ -41,8 +41,8 @@
                                   <td><%= current_month_access_result(month_score) %></td>
                                   <td>
                                     <a href="javascript:void(0)" class="edit_btn" style="display: none;">提交</a>
-                                    <a href="javascript:void(0)" class="bz_btn" id="<%= staff.id %>" name="<%= @store.id %>">编辑</a>
-                                    <%= link_to "详细", store_staff_path(@store, staff.id) %>
+                                    <% if permission?(:staffs,:edit_sys_score) %><a href="javascript:void(0)" class="bz_btn" id="<%= staff.id %>" name="<%= @store.id %>">编辑</a><% end %>
+                                    <% if permission?(:staffs,:detail_staff) %><%= link_to "详细", store_staff_path(@store, staff.id) %><% end %>
                                   </td>
                                 </tr>
                               <% end %>

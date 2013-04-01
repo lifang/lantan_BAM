@@ -534,7 +534,7 @@ function search_head_order(store_id){
         url:"/stores/"+store_id+"/materials/search_head_orders",
         dataType:"script",
         type:"GET",
-        data:"from="+$("#date01").val()+"&to="+$("#date02").val()+"&m_status="+$("#select_h_order").val()+"status="+$("#h_pay_status").val(),
+        data:"from="+$("#date01").val()+"&to="+$("#date02").val()+"&m_status="+$("#select_h_order").val()+"&status="+$("#h_pay_status").val(),
         success:function(){
 //           alert(1);
         },

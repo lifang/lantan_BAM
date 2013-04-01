@@ -1,5 +1,7 @@
 <div class="data_box">
-  <div class="data_menu"><%= link_to_function "添加供应商", "add_supplier('#{params[:store_id]}','')", :class => "add_btn" %></div>
+  <div class="data_menu">
+<% if permission?(:materials, :add_supplier) %><%= link_to_function "添加供应商", "add_supplier('#{params[:store_id]}','')", :class => "add_btn" %>
+  <% end %></div>
   <div class="clear"></div>
   <div class="data_body">
     <div id="page_supplier">

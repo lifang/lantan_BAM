@@ -7,7 +7,7 @@ class MaterialOrder < ActiveRecord::Base
   belongs_to :supplier
 
   STATUS = {:no_pay => 0, :pay => 1, :cancel => 4}
-  M_STATUS = {:no_send => 0,:send => 1, :received => 2, :save_in => 3} #未发货--》已发货 --》已收货 --》已入库
+  M_STATUS = {:no_send => 0, :send => 1, :received => 2, :save_in => 3} #未发货--》已发货 --》已收货 --》已入库
   PAY_TYPES = {:CHARGE => 1,:LICENSE=>2, :CASH => 3, :STORE_CARD => 4 }
   PAY_TYPE_NAME = {1 => "订货付费",2=>"授权码", 3 => "现金", 4 => "门店账户扣款"}
 
@@ -28,7 +28,7 @@ class MaterialOrder < ActiveRecord::Base
   end
 
   def self.supplier_order_records page, per_page, store_id
-    self.paginate(:select => "mo.*", :from => "material_orders mo", :conditions => "mo.supplier_id != 0",
+    self.paginate(:select => "*", :from => "material_orders", :include => [:supplier, :mat_order_items => :material], :conditions => "material_orders.supplier_id != 0",
     :page => page, :per_page => per_page)
   end
 
