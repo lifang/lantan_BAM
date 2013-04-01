@@ -59,7 +59,7 @@ class MaterialOrder < ActiveRecord::Base
       elsif m_status == 2
         str += " and mo.m_status=#{M_STATUS[:received]} "
       elsif m_status == 3
-        str += " and mo.m_status=#{M_STATUS[:sav_in]} "
+        str += " and mo.m_status=#{M_STATUS[:save_in]} "
       end
     end
     if from_date && from_date.length > 0
@@ -72,5 +72,23 @@ class MaterialOrder < ActiveRecord::Base
                            :order => "created_at desc",
                            :page => page, :per_page => per_page)
     orders
+  end
+
+  def check_material_order_status
+    mo_status = []
+    self.mat_order_items.group_by{|moi| moi.material_id}.each do |material_id, value|
+      mat_order_item = MatOrderItem.find_by_material_id_and_material_order_id(material_id, self.id)
+      mat_in_order = MatInOrder.find_by_material_id_and_material_order_id(material_id, self.id)
+      if !mat_in_order.nil?
+        if mat_in_order.try(:material_num) >= mat_order_item.try(:material_num)
+          mo_status << true
+        else
+          mo_status << false
+        end
+      else
+        mo_status << false
+      end
+    end
+    !mo_status.include?(false)
   end
 end

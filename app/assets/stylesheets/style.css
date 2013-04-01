@@ -39,6 +39,11 @@ textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-
 /*tab提示*/
 .tab_popup.tab_alert { width: 500px;}
 .alert_h { width: 400px; margin: 20px auto; line-height: 24px; font-size: 16px; color:#930205; text-align: center;}
+/*协议*/
+.agreement_text { width: 600px; height: 400px; margin: 0 auto; overflow-y: auto; font-size: 12px;}
+.agreement_text p { margin-top: 10px;}
+.agreement_btn { width: 160px; margin: 20px auto;}
+.agreement_btn input { width: 160px; height: 32px; line-height: 32px; background: #930205; cursor: pointer; color: #FFF;}
 
 
 /*确定  取消 btn*/
