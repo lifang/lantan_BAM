@@ -12,7 +12,7 @@ class CustomersController < ApplicationController
     session[:name] = nil
     session[:phone] = nil
     session[:is_vip] = nil
-    @store = Store.find(params[:store_id].to_i)
+    @store = Store.find(params[:store_id].to_i)    
     @customers = Customer.search_customer(params[:c_types], params[:car_num], params[:started_at], params[:ended_at],
       params[:name], params[:phone], params[:is_vip], params[:page])
   end

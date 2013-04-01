@@ -6,6 +6,7 @@ class WelcomesController < ApplicationController
   def index
     @material_notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
       Notice::TYPES[:URGE_PAYMENT], Notice::STATUS[:NORMAL])
+    @material_orders = MaterialOrder.count(:id, :conditions => ["m_status = ?", MaterialOrder::M_STATUS[:send]])
     render :index, :layout => false
   end
 end

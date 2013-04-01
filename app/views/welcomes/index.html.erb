@@ -30,7 +30,7 @@
           <% if permissions_on_menus?(:sales)%><li><a href="/stores/<%= params[:store_id] %>/sales" class="m_five">营销管理</a></li><% end %>
           <% if permissions_on_menus?(:staffs)%><li><a href="/stores/<%= params[:store_id] %>/staffs" class="m_six">员工管理</a></li><% end %>
           <% if is_admin? %>
-          <li><a href="/stores/<%= params[:store_id] %>/roles" class="m_six">基础数据</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/roles" class="m_six">基础数据</a></li>
           <% end %>
         </ul>
         <div class="clear"></div>
@@ -45,10 +45,13 @@
           <% end %>
           <% unless @material_notices.blank? %>
             有 <span class="red"><%= @material_notices.size %></span> 条催款信息，请您及时与总部联系
-            <a href="#">点击查看</a><br/>
+            <a href="/stores/<%= params[:store_id] %>/materials">点击查看</a><br/>
           <% end %>
-          有 <span class="red">2</span> 条订货相关信息需要您去处理<a href="#">点击查看</a>
-          <span class="x">Close</span>
+          <% unless @material_orders == 0 %>
+            有 <span class="red"><%= @material_orders %></span> 条订单已发货，请注意查收
+            <a href="/stores/<%= params[:store_id] %>/materials">点击查看</a>
+          <% end %>
+            <span class="x" onclick="$('.message').hide();">Close</span>
         </div>
       </div>
     </div>

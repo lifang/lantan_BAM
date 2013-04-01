@@ -126,27 +126,31 @@ class Sync < ActiveRecord::Base
 
   def self.output_zip(path, sync, flog)
     is_update = false
-    Zip::ZipFile.open(path){ |zipFile|
-      zipFile.each do |file|
-        if file.name.split(".").reverse[0] =="log"
-          contents = zipFile.read(file).split("\n\n|::|")
-          titles =contents.delete_at(0).split(";||;")
-          contents.delete("\n")
-          total_con = []
-          cap = eval(file.name.split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize})
-          contents.each do |content|
-            hash ={}
-            cons = content.split(";||;")
-            titles.each_with_index {|title,index| hash[title] = cons[index].nil? ? cons[index] : cons[index].force_encoding("UTF-8")}
-            object = cap.new(hash)
-            object.id = hash["id"]
-            total_con << object
+    begin
+      Zip::ZipFile.open(path){ |zipFile|
+        zipFile.each do |file|
+          if file.name.split(".").reverse[0] =="log"
+            contents = zipFile.read(file).split("\n\n|::|")
+            titles =contents.delete_at(0).split(";||;")
+            contents.delete("\n")
+            total_con = []
+            cap = eval(file.name.split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize})
+            contents.each do |content|
+              hash ={}
+              cons = content.split(";||;")
+              titles.each_with_index {|title,index| hash[title] = cons[index].nil? ? cons[index] : cons[index].force_encoding("UTF-8")}
+              object = cap.new(hash)
+              object.id = hash["id"]
+              total_con << object
+            end
+            cap.import total_con, :timestamps=>false, :on_duplicate_key_update=>titles
+            is_update = true
           end
-          cap.import total_con, :timestamps=>false, :on_duplicate_key_update=>titles
-          is_update = true
         end
-      end
-    }
+      }
+    rescue
+      flog.write("当前目录文件#{path}更新失败---#{Time.now}\r\n")
+    end
     if is_update
       sync.update_attributes(:sync_status=>Sync::SYNC_STAT[:COMPLETE])
       flog.write("数据同步成功---#{Time.now}\r\n")
