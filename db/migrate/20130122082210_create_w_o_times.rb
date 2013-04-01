@@ -11,7 +11,7 @@ class CreateWOTimes < ActiveRecord::Migration
       t.datetime :created_at
     end
 
-    add_index :w_o_times, :current_day
-    add_index :w_o_times, :station_id
+    add_index :wk_or_times, :current_day
+    add_index :wk_or_times, :station_id
   end
 end

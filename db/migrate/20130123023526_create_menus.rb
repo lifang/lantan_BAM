@@ -1,3 +1,4 @@
+#encoding: utf-8
 class CreateMenus < ActiveRecord::Migration
   #菜单表
   def change
