@@ -37,7 +37,7 @@ function add_role(store_id){
 
 function new_role(store_id){
     if($.trim($("#role_input").val()).length==0){
-        alert("请输入角色名称");
+        tishi_alert("请输入角色名称");
     }else{
         $.ajax({
             url:"/stores/"+store_id+"/roles/",
@@ -49,11 +49,11 @@ function new_role(store_id){
                     $("#add_role").hide();
                     window.location.reload();
                 }else if(data["status"]==1){
-                    alert("你输入的角色已经存在");
+                    tishi_alert("你输入的角色已经存在");
                 }
             },
             error:function(data){
-                alert("添加失败");
+                tishi_alert("添加失败");
             }
         });
     }
@@ -68,7 +68,7 @@ function edit_role(role_id){
 function blur_role(obj,store_id){
     var role_id = $(obj).attr("id").split("_")[2];
     if($.trim($(obj).val()).length==0){
-        alert("请输入角色名称");
+        tishi_alert("请输入角色名称");
     }else if($.trim($(obj).val())==$("#a_role_"+role_id).text()){
         $("#a_role_"+role_id).show();
         $(obj).hide();
@@ -82,7 +82,7 @@ function blur_role(obj,store_id){
                 $("#a_role_"+role_id).html($.trim($(obj).val()));
             },
             error:function(data){
-                alert(data);
+                tishi_alert(data);
             }
         });
         $("#a_role_"+role_id).show();
@@ -134,7 +134,7 @@ function search_staff(store_id){
         //           alert(2);
         },
         error:function(){
-            alert("error");
+            tishi_alert("error");
         }
     });
 }
@@ -155,7 +155,7 @@ function del_role(role_id,store_id){
 function reset_role(store_id){
     var len = $(".groupFunc_b input:checked").length;
     if(len==0){
-        alert("请选择角色");
+        tishi_alert("请选择角色");
     }else{
         var roles = "";
         $(".groupFunc_b input:checked").each(function(idx,item){
