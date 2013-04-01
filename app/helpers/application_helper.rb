@@ -117,4 +117,12 @@ module ApplicationHelper
     end
     user
   end
+
+  def satisfy
+    orders = Order.find(:all, :select => "is_pleased", :conditions => ["created_at > ? and created_at < ?",
+        Time.mktime(Time.now.year, Time.now.mon-1, 1), Time.mktime(Time.now.year, Time.now.mon, 1)])
+    un_pleased_size = 0
+    orders.collect { |o| un_pleased_size += 1 if o.is_pleased == Order::IS_PLEASED[:BAD] }
+    return orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size
+  end
 end
