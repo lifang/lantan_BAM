@@ -1,6 +1,7 @@
 #encoding: utf-8
 module Constant
   LOCAL_DIR = "#{Rails.root}/public/"
+  HEAD_OFFICE_API_PATH = "http://headoffice.gankao.co"
   #权限
   ROLES = {
     #客户
