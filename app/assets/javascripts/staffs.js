@@ -149,75 +149,81 @@ $(document).ready(function(){
     });
 
     //创建员工信息验证, 编辑员工信息验证
-    $("#new_staff_btn, #edit_staff_btn").live("click", function(){
-       if($(this).parents('form').find("#staff_name").val() == ''){
-           tishi_alert("名称不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_type_of_w").val() == ''){
-           tishi_alert("岗位不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_level").val() == ''){
-           tishi_alert("等级职称不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_education").val() == ''){
-           tishi_alert("教育程度不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_phone").val() == ''){
-           tishi_alert("联系方式不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_id_card").val() == ''){
-           tishi_alert("身份证不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_address").val() == ''){
-           tishi_alert("地址不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_base_salary").val() == ''){
-           tishi_alert("薪资标准不能为空!");
-           return false;
-       }
-       if(isNaN($(this).parents('form').find("#staff_base_salary").val())){
-           tishi_alert("薪资标准必须为数字!");
-           return false;
-       }
-       if($(this).attr("id") == "new_staff_btn"){
-           if($(this).parents('form').find("#sale_img").val() == ''){
-               tishi_alert("照片不能为空!");
-               return false;
-           }
-       }
-       if($(this).parents('form').find("#staff_deduct_at").val() == ''){
-           tishi_alert("提成起始额不能为空!");
-           return false;
-       }
-       if(isNaN($(this).parents('form').find("#staff_deduct_at").val())){
-           tishi_alert("提成起始额必须为数字!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_deduct_end").val() == ''){
-           tishi_alert("结束额度不能为空!");
-           return false;
-       }
-       if(isNaN($(this).parents('form').find("#staff_deduct_end").val())){
-           tishi_alert("结束额度必须为数字!");
-           return false;
-       }
-       if(parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val())){
-           tishi_alert("起始额必须不能大于结束额度!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_deduct_percent").val() == ''){
-           tishi_alert("提成率不能为空!");
-           return false;
-       }
-       $(this).parents('form').submit();
-    });
+//    $("#new_staff_btn, #edit_staff_btn").live("click", function(){
+//       if($(this).parents('form').find("#staff_name").val() == ''){
+//           tishi_alert("名称不能为空!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_type_of_w").val() == ''){
+//           tishi_alert("岗位不能为空!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_level").val() == ''){
+//           tishi_alert("等级职称不能为空!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_education").val() == ''){
+//           tishi_alert("教育程度不能为空!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_phone").val() == ''){
+//           tishi_alert("联系方式不能为空!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_id_card").val() == ''){
+//           tishi_alert("身份证不能为空!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_address").val() == ''){
+//           tishi_alert("地址不能为空!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_base_salary").val() == ''){
+//           tishi_alert("薪资标准不能为空!");
+//           return false;
+//       }
+//       if(isNaN($(this).parents('form').find("#staff_base_salary").val())){
+//           tishi_alert("薪资标准必须为数字!");
+//           return false;
+//       }
+//       if($(this).attr("id") == "new_staff_btn"){
+//           if($(this).parents('form').find("#sale_img").val() == ''){
+//               tishi_alert("照片不能为空!");
+//               return false;
+//           }
+//       }
+//       if($(this).parents('form').find("#staff_deduct_at").val() == ''){
+//           tishi_alert("提成起始额不能为空!");
+//           return false;
+//       }
+//       if(isNaN($(this).parents('form').find("#staff_deduct_at").val())){
+//           tishi_alert("提成起始额必须为数字!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_deduct_end").val() == ''){
+//           tishi_alert("结束额度不能为空!");
+//           return false;
+//       }
+//       if(isNaN($(this).parents('form').find("#staff_deduct_end").val())){
+//           tishi_alert("结束额度必须为数字!");
+//           return false;
+//       }
+//       if(parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val())){
+//           tishi_alert("起始额必须不能大于结束额度!");
+//           return false;
+//       }
+//       if($(this).parents('form').find("#staff_deduct_percent").val() == ''){
+//           tishi_alert("提成率不能为空!");
+//           return false;
+//       }
+//       if(isNaN($(this).parents('form').find("#staff_deduct_percent").val())){
+//           tishi_alert("提成率必须为数字!");
+//           return false;
+//       }
+//       //$(this).parents('form').submit();
+//       alert(1);
+//       $("#adv").submit();
+//    });
 
     //新建奖励信息验证
     $("#new_reward_btn").click(function(){
