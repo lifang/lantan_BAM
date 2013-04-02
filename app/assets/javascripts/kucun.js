@@ -20,7 +20,7 @@ function save_material_remark(){
         $.ajax({
             url:"/materials/"+m_id + "/remark",
             dataType:"json",
-            type:"GET",
+            type:"POST",
             data:"remark="+content,
             success: function(data,status){
                 if(status == "success"){
@@ -227,6 +227,7 @@ function change_supplier(obj){
      $("#dinghuo_selected_materials").html("");
       $("#activity_code").show();
        $("#add_material").hide();
+       $("#add_new_materials").html("");
    }else{
        $("#dinghuo_selected_materials").html("");
        $("#activity_code").hide();

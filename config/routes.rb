@@ -162,7 +162,8 @@
 
   resources :materials do
     member do
-      get "remark","check"
+      get "check"
+      post "remark"
     end
     collection do
       get "get_act_count", "out","order_remark"

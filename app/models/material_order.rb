@@ -59,7 +59,7 @@ class MaterialOrder < ActiveRecord::Base
       elsif m_status == 2
         str += " and mo.m_status=#{M_STATUS[:received]} "
       elsif m_status == 3
-        str += " and mo.m_status=#{M_STATUS[:sav_in]} "
+        str += " and mo.m_status=#{M_STATUS[:save_in]} "
       end
     end
     if from_date && from_date.length > 0
