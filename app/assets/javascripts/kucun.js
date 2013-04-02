@@ -483,7 +483,28 @@ function commit_in(){
     }else if($.trim($("#num").val())==""){
         tishi_alert("请输入数量");
     }else{
-      $("#ruku_tab_form").submit();
+      var barcode = $.trim($("#barcode").val());
+      var mo_code = $.trim($("#code").val());
+      var store_id = $("#hidden_store_id").val();
+      $.ajax({
+           url:"/stores/" + store_id + "/materials/check_nums",
+           dataType:"text",
+           type:"GET",
+           data:{barcode: barcode, mo_code: mo_code},
+           success:function(data){
+              if(data=="1")
+               {
+                   if(confirm("商品入库数目已经大于订单中的商品数目，仍然要入库吗？")){
+                      $("#ruku_tab_form").submit();
+                   }else
+                      {  $("#ruku_tab").hide();
+                         $(".mask").hide();
+                         return false;
+                      }
+               }else{ $("#ruku_tab_form").submit();}
+           }
+       });
+      
     }
 }
 
@@ -534,7 +555,7 @@ function search_head_order(store_id){
         url:"/stores/"+store_id+"/materials/search_head_orders",
         dataType:"script",
         type:"GET",
-        data:"from="+$("#date01").val()+"&to="+$("#date02").val()+"&m_status="+$("#select_h_order").val()+"status="+$("#h_pay_status").val(),
+        data:"from="+$("#date01").val()+"&to="+$("#date02").val()+"&m_status="+$("#select_h_order").val()+"&status="+$("#h_pay_status").val(),
         success:function(){
 //           alert(1);
         },

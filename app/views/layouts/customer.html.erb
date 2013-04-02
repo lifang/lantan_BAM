@@ -24,8 +24,8 @@
         <div class="nav">
           <ul>
             <li><a href="/stores/<%= @store.id %>/customers" <% if controller.controller_name=="customers" %>class="hover"<% end %>>客户列表</a></li>
-            <li><a href="/stores/<%= @store.id %>/revisits" <% if controller.controller_name=="revisits" %>class="hover"<% end %>>客户回访</a></li>
-            <li><a href="/stores/<%= @store.id %>/messages" <% if controller.controller_name=="messages" %>class="hover"<% end %>>群发短信</a></li>
+             <% if permission?(:customers, :revisit) %><li><a href="/stores/<%= @store.id %>/revisits" <% if controller.controller_name=="revisits" %>class="hover"<% end %>>客户回访</a></li><% end %>
+            <% if permission?(:customers, :group_msg) %><li><a href="/stores/<%= @store.id %>/messages" <% if controller.controller_name=="messages" %>class="hover"<% end %>>群发短信</a></li><% end %>
           </ul>
         </div>
         <div class="back"><a href="/stores/<%= @store.id %>/welcomes" title="返回">Back</a>客户管理</div>

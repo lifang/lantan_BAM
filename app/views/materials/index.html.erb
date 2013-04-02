@@ -1,10 +1,10 @@
 <%= render :partial => "notice_panel" %>
 <div class="data_box">
   <div class="data_menu">
-    <%= link_to_function "入库","ruku()", :class => "rk_btn" %>
-    <%= link_to_function "出库","chuku()", :class => "ck_btn" %>
-    <%= link_to_function "订货", "dinghuo()", :class => "dh_btn" %>
-    <%= link_to "打印库存清单",print_store_materials_path(params[:store]), :class => "",:target => "_blank" %>
+    <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
+    <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
+    <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo()", :class => "dh_btn" %><% end %>
+    <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store]), :class => "",:target => "_blank" %><% end %>
   </div>
   <div class="clear"></div>
   <div class="tab_head">
@@ -74,6 +74,7 @@
               <%= label_tag "num","数量：" %><%= text_field_tag "num" %>
             </div>
           </div>
+          <%= hidden_field_tag "hidden_store_id", params[:store_id] %>
           <div class="btn_box"><button onclick="commit_in()" type="button" class="confirm_btn">确定</button><button type="button" class="cancel_btn">取消</button></div>
           <div class="clear"></div>
       <% end %>

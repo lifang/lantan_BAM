@@ -35,12 +35,18 @@ class MaterialsInOutsController < ApplicationController
       flash[:notice] = '请录入商品！'
       redirect_to "/stores/#{@store_id}/materials_in" and return
     end
+
     params['material_order'].values.each do |mo|
-      mat_in_order = MatInOrder.create(mo)
+      mat_in_order = MatInOrder.where(:material_id => mo[:material_id], :material_order_id => mo[:material_order_id]).first
+      if mat_in_order.nil?
+        mat_in_order = MatInOrder.create(mo)
+      else
+        mat_in_order.update_attributes(:material_num => mat_in_order.material_num + mo[:material_num].to_i)
+      end
       if mat_in_order.save
         material = mat_in_order.material
         material_order = mat_in_order.material_order
-        if material_order.mat_order_items.sum(:material_num)<=material_order.mat_in_orders.sum(:material_num)
+        if material_order.check_material_order_status
           material_order.m_status = 3
           material_order.save
         end

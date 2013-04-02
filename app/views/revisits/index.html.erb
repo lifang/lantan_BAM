@@ -57,11 +57,13 @@
                 <td><%= customer.mobilephone %></td>
                 <td>
                   <%= link_to "#{customer.code}", "/orders/#{customer.o_id}/order_info" ,
-            :remote => "true", "data-type" => "script", :class => "other_a" %>                  
+                    :remote => "true", "data-type" => "script", :class => "other_a" %>
                 </td>
                 <td>
-                  <a href="javascript:void(0)" 
-                     onclick="javascript:customer_revisit(<%= customer.o_id %>, <%= customer.cu_id %>)">回访</a>
+                  <% if permission?(:customers, :show) %>
+                    <a href="javascript:void(0)"
+                       onclick="javascript:customer_revisit(<%= customer.o_id %>, <%= customer.cu_id %>)">回访</a>
+                     <% end %>
                 </td>
               </tr>
             <% end %>

@@ -34,7 +34,9 @@
       <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries %></span>位</p>
     </div>
     <div class="data_menu">
-      <a href="javascript:void(0)" onclick="javascript:popup('#new_cus_div')">新建客户</a></div>
+      <% if permission?(controller.controller_name.to_sym, :create) %>
+        <a href="javascript:void(0)" onclick="javascript:popup('#new_cus_div')">新建客户</a>
+      <% end %></div>
     <div class="clear"></div>
     <div class="data_body">
       <div>
@@ -55,10 +57,11 @@
                 <td><%= customer.name %></td>
                 <td><%= customer.mobilephone %></td>
                 <td><%= customer.is_vip ? "是" : "否"  %></td>
-                <td><a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a>
+                <td>
+                  <% if permission?(controller.controller_name.to_sym, :detail) %><a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a><% end %>
                   <a href="javascript:void(0)" onclick="customer_mark(<%= customer.id %>)">备注</a>
-                  <a href="javascript:void(0)" onclick="single_send_message(<%= customer.id %>)">发短信</a>
-                  <% if permission?(:customers, :delete) %><%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
+                  <% if permission?(controller.controller_name.to_sym, :send_msg) %><a href="javascript:void(0)" onclick="single_send_message(<%= customer.id %>)">发短信</a><% end %>
+                  <% if permission?(controller.controller_name.to_sym, :delete) %><%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
                     :confirm => "您确认要删除 #{customer.name} 信息么？" %><% end %>
                   <div id="mark_<%= customer.id %>" style="display: none;"><%= customer.mark %></div>
                 </td>
