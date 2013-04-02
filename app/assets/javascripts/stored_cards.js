@@ -87,8 +87,8 @@ function check_goal(e){
     var created  =$("#created").val();
     var ended =$("#ended").val();
     var types_name =[];
-    if ((created=="" || created.length==0) || (ended=="" || ended.length==0 )){
-        tishi_alert("请选择目标销售额的起止日期！");
+    if (created=="" || created.length==0 || ended=="" || ended.length==0 || ended < created ){
+        tishi_alert("请选择目标销售额的起止日期，且开始日期小于结束日期");
         return false;
     }
     var carry_out =true;
@@ -96,8 +96,8 @@ function check_goal(e){
         if ($(this).find("input").length==1){
             var label =$(this).find("label").html();
             types_name.push(label)
-            if ($(this).find("input").val()==0 || $(this).find("input").length==0){
-                tishi_alert("请输入"+label+"的金额");
+            if ($(this).find("input").val()==0 || $(this).find("input").val().length==0 || isNaN(parseFloat($(this).find("input").val()))){
+                tishi_alert("请输入"+label+"的金额,且为数值");
                 carry_out=false;
                 return false
             }
@@ -105,8 +105,8 @@ function check_goal(e){
             var first=$(this).find("input").first().val();
             if (first!="" || first.length!=0 ){
                 var second=$(this).find("input").last().val();
-                if(second=="" || second.length==0){
-                    tishi_alert("请输入"+first+"的金额");
+                if(second=="" || second.length==0 || isNaN(parseFloat(second)) ){
+                    tishi_alert("请输入"+first+"的金额,且为数值");
                     carry_out=false;
                     return false;
                 }

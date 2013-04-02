@@ -5,17 +5,17 @@ class MonthScore < ActiveRecord::Base
   IS_UPDATE = {:YES=>1,:NO=>0} # 1 更新 0 未更新
 
   def self.sort_order(store_id)
-    sql="select date_format(created_at,'%Y-%m-%d') day,sum(op.price) price,op.pay_type  from orders o inner join order_pay_types op
-    on o.id=op.order_id where store_id=#{store_id} and TO_DAYS(NOW())-TO_DAYS(created_at)<=15 group by date_format(created_at,'%Y-%m-%d'),op.pay_type"
+    sql="select date_format(o.created_at,'%Y-%m-%d') day,sum(op.price) price,op.pay_type  from orders o inner join order_pay_types op
+    on o.id=op.order_id where o.store_id=#{store_id} and TO_DAYS(NOW())-TO_DAYS(o.created_at)<=15 group by date_format(o.created_at,'%Y-%m-%d'),op.pay_type"
     return Order.find_by_sql(sql)
   end
 
   def self.sort_order_date(store_id,created,ended)
-    sql ="select date_format(created_at,'%Y-%m-%d') day,sum(op.price) price,op.pay_type  from orders o inner join
+    sql ="select date_format(o.created_at,'%Y-%m-%d') day,sum(op.price) price,op.pay_type  from orders o inner join
            order_pay_types op on o.id=op.order_id where store_id=#{store_id} "
     sql += " and o.created_at>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and o.created_at<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
-    sql += "group by date_format(created_at,'%Y-%m-%d'),op.pay_type"
+    sql += "group by date_format(o.created_at,'%Y-%m-%d'),op.pay_type"
     return Order.find_by_sql(sql)
   end
 

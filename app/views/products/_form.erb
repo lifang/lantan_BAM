@@ -20,7 +20,7 @@
     <% if @img_urls %>
       <ul class="seeProPic">
         <%@img_urls.each do |url|%>
-          <li><img src="<%=url.img_url.nil? ? "" : url.img_url.gsub("img#{@product.id}","img#{@product.id}_50") %>" /></li>
+          <li><img src="<%=url.img_url.nil? ? "" : url.img_url.gsub("img#{@product.id}","img#{@product.id}_#{Constant::P_PICSIZE[0]}") %>" /></li>
         <%end unless @img_urls.blank?%>
       </ul>
     <% end %>

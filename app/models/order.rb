@@ -163,7 +163,7 @@ class Order < ActiveRecord::Base
          #end
          front_staff = Staff.find_by_id_and_store_id order.front_staff_id,store_id
          order_hash[:staff] = front_staff.name if front_staff
-         if order.status == STATUS[:FINISHED]
+         if order.status == STATUS[:BEEN_PAYMENT]
             old_orders << order_hash
          else
             working_orders << order_hash
@@ -198,7 +198,7 @@ class Order < ActiveRecord::Base
       h[:id] = p.id
       h[:name] = p.name
       h[:price] = p.sale_price
-      h[:img] = p.image_urls.size == 0 ? "" : p.image_urls[0].img_url.gsub("img#{p.id}","img#{p.id}_148")
+      h[:img] = p.image_urls.size == 0 ? "" : p.image_urls[0].img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
        if p.types.to_i <=5
          prod_arr << h
        elsif p.types.to_i == 11

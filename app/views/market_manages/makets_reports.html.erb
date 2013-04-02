@@ -24,24 +24,33 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
         <thead>
           <tr class="hbg">
-            <td>日期</td>
-            <td>服务项目</td>
-            <td>服务代码</td>
-            <td>数量</td>
-            <td>合计（元）</td>
+            <td>时间</td>
+            <td>详细</td>
           </tr>
         </thead>
         <tbody>
           <%@serv.sort.reverse.each do |key,prod|%>
-            <%prod.each_with_index do |pro,index|%>
-              <tr>
-                <%if index==0%> <td rowspan="<%=prod.length%>"><%= key %></td><%end%>
-                <td><%= pro.name %></td>
-                <td><%= pro.service_code %></td>
-                <td><%= pro.prod_num %></td>
-                <td><%= pro.sum %></td>
-              </tr>
-            <% end %>
+            <tr>
+              <td><%= key %></td>
+              <td>
+                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                  <tr class="fws">
+                    <td>服务项目</td>
+                    <td>服务代码</td>
+                    <td>数量</td>
+                    <td>合计（元）</td>
+                  </tr>
+                  <%prod.each_with_index do |pro,index|%>
+                    <tr>
+                      <td><%= pro.name %></td>
+                      <td><%= pro.service_code %></td>
+                      <td><%= pro.prod_num %></td>
+                      <td><%= pro.sum %></td>
+                    </tr>
+                  <% end %>
+                </table>
+              </td>
+            </tr>
           <% end %>
         </tbody>
       </table>
@@ -55,24 +64,33 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
         <thead>
           <tr class="hbg">
-            <td>日期</td>
-            <td>商品名称</td>
-            <td>商品编号</td>
-            <td>数量</td>
-            <td>合计（元）</td>
+            <td>时间</td>
+            <td>详细</td>
           </tr>
         </thead>
         <tbody>
           <%@prods.sort.reverse.each do |key,prod|%>
-            <%prod.each_with_index do |pro,index|%>
-              <tr>
-                <%if index==0%> <td rowspan="<%=prod.length%>"><%= key %></td><%end%>
-                <td><%= pro.name %></td>
-                <td><%= pro.service_code %></td>
-                <td><%= pro.prod_num %></td>
-                <td><%= pro.sum %></td>
-              </tr>
-            <% end %>
+            <tr>
+              <td><%= key %></td>
+              <td>
+                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                  <tr class="fws">
+                    <td>商品名称</td>
+                    <td>商品编号</td>
+                    <td>数量</td>
+                    <td>合计（元）</td>
+                  </tr>
+                  <%prod.each_with_index do |pro,index|%>
+                    <tr>
+                      <td><%= pro.name %></td>
+                      <td><%= pro.service_code %></td>
+                      <td><%= pro.prod_num %></td>
+                      <td><%= pro.sum %></td>
+                    </tr>
+                  <% end %>
+                </table>
+              </td>
+            </tr>
           <% end %>
         </tbody>
       </table>
@@ -86,27 +104,36 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
         <thead>
           <tr class="hbg">
-            <td>日期</td>
-            <td>商品名称</td>
-            <td>商品编号</td>
-            <td>免费性质</td>
-            <td>数量</td>
-            <td>合计（元）</td>
+            <td>时间</td>
+            <td>详细</td>
           </tr>
         </thead>
         <tbody>
           <%@pcards.sort.reverse.each do |key,prod|%>
-            <%prod.each_with_index do |pro,index|%>
-              <tr>
-                <%if index==0%> <td rowspan="<%=prod.length%>"><%= key %></td><%end%>
-                <td><%= pro.name %></td>
-                <td><%= pro.service_code %></td>
-                <td><%= pro.is_free ? Order::FREE_TYPE[:PCARD] : Order::FREE_TYPE[:ORDER_FREE] %></td>
-                <td><%= pro.prod_num %></td>
-                <td><%= pro.sum %></td>
-              </tr>
-            <% end %>
-          <% end  %>
+            <tr>
+              <td><%= key %></td>
+              <td>
+                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                  <tr class="fws">
+                    <td>商品名称</td>
+                    <td>商品编号</td>
+                    <td>免费性质</td>
+                    <td>数量</td>
+                    <td>合计（元）</td>
+                  </tr>
+                  <%prod.each_with_index do |pro,index|%>
+                    <tr>
+                      <td><%= pro.name %></td>
+                      <td><%= pro.service_code %></td>
+                      <td><%= pro.is_free ? Order::FREE_TYPE[:PCARD] : Order::FREE_TYPE[:ORDER_FREE] %></td>
+                      <td><%= pro.prod_num %></td>
+                      <td><%= pro.sum %></td>
+                    </tr>
+                  <% end %>
+                </table>
+              </td>
+            </tr>
+          <% end %>
         </tbody>
       </table>
       <div class="amount">总计：<%= @total_fee %></div>

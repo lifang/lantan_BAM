@@ -19,24 +19,24 @@ function publish_sale(e){
         tishi_alert("请选择优惠类型");
         return false;
     }
-    if (parseInt(disc)==1 && $("#disc_"+disc).val().length==0){
-        tishi_alert("请填写优惠的金额");
+    if (parseInt(disc)==1 && ($("#disc_"+disc).val().length==0 || isNaN(parseFloat($("#disc_"+disc).val())) )){
+        tishi_alert("请填写优惠的金额，且为数字");
         return false;
     }
-    if (parseInt(disc)==0 && $("#disc_"+disc).val().length==0){
-        tishi_alert("请填写打折的折扣");
+    if (parseInt(disc)==0 && ($("#disc_"+disc).val().length==0 || isNaN(parseFloat($("#disc_"+disc).val())) || parseFloat($("#disc_"+disc).val())<0 || parseFloat($("#disc_"+disc).val()) > 10 )){
+        tishi_alert("请填写打折的折扣,且为数字，折扣额度为0到10之间");
         return false;
     }
     if (time == undefined){
         tishi_alert("请选择时间的类型")
         return false;
     }
-    if (parseInt(time)==0 && ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0)){
-        tishi_alert("请输入活动开始和结束的时间");
+    if (parseInt(time)==0 && ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0 || $("#started_at").val() > $("#ended_at").val())){
+        tishi_alert("请输入活动开始和结束的时间,且开始日期小于结束日期");
         return false;
     }
     if ($("#disc_car_nums").val() == " " || $("#disc_car_nums").val().length==0 ){
-        tishi_alert("请参加活动的总车辆数");
+        tishi_alert("请输入参加活动的总车辆数");
         return false;
     }
     if (subsidy == undefined){
@@ -52,8 +52,8 @@ function publish_sale(e){
     }
 
     $("#intro").val(editor.html());
-    $(e).removeAttr("onclick");
     $("#one_sale").submit();
+    $(e).removeAttr("onclick");
 }
 
 function input_time(){
