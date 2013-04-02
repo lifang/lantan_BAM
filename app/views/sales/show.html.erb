@@ -5,7 +5,7 @@
       <div class="salesDetail">
         <h1><%= @sale.name %></h1>
         <span>发布时间：<%= @sale.created_at.nil? ? "" :  @sale.created_at.strftime("%Y.%m.%d") %></span>
-        <img src="<%= @sale.img_url.nil? ? "" : @sale.img_url.gsub("img#{@sale.id}","img#{@sale.id}_663")  %>" />
+        <img src="<%= @sale.img_url.nil? ? "" : @sale.img_url.gsub("img#{@sale.id}","img#{@sale.id}_#{Constant::SALE_PICSIZE[2]}")  %>" />
         <h2>活动介绍:</h2>
         <p><%= @sale.introduction.nil? ? "" : @sale.introduction.html_safe  %></p>
         <% if @sale.disc_time_types == Sale::DISC_TIME[:TIME] %>

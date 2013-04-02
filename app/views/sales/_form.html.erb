@@ -27,11 +27,15 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">优惠时间：</div>
   <div class="releaseDiv_r" id="s_time">
-    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>" onclick="input_time()" />日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:WEEK] %>" onclick="input_time()" />周&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:MONTH] %>"  onclick="input_time()"/>月&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:YEAR] %>" onclick="input_time()" />年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:TIME] %>" onclick="input_time()" id="is_checked" />有效期：
+    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>" checked onclick="input_time()" />日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:WEEK] %>" onclick="input_time()"
+           <% if @sale.disc_time_types==Sale::DISC_TIME[:WEEK] %>checked <%end%>     />周&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:MONTH] %>"  onclick="input_time()"
+           <% if @sale.disc_time_types==Sale::DISC_TIME[:MONTH] %>checked <%end%> />月&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:YEAR] %>" onclick="input_time()"
+           <% if @sale.disc_time_types==Sale::DISC_TIME[:YEAR] %>checked <%end%> />年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:TIME] %>" onclick="input_time()" id="is_checked"
+           <% if @sale.disc_time_types==Sale::DISC_TIME[:TIME] %>checked <%end%> />有效期：
     <input name="started_at" id="started_at" type="text" disabled onclick="WdatePicker()" />&nbsp;&nbsp;到&nbsp;&nbsp;
     <input name="ended_at" id="ended_at" type="text" disabled onclick="WdatePicker()" />
   </div>
@@ -50,7 +54,7 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">活动图片：</div>
   <div class="releaseDiv_r"><input type=file name=img_url id="img_url" style="display: none;"  onchange="ye.value=value" />
-  <input name=ye type="text" class="file"  id="sale_img" value="<%= @sale.img_url %>" /><input type="button" class="file_btn" value="浏览" onclick=img_url.click()  />
+    <input name=ye type="text" class="file"  id="sale_img" value="<%= @sale.img_url %>" /><input type="button" class="file_btn" value="浏览" onclick=img_url.click()  />
   </div>
 </div>
 <div class="releaseDiv">
@@ -86,7 +90,6 @@
       $("#ended_at").val('<%= @sale.ended_at.nil?? "" : @sale.ended_at.strftime("%Y-%m-%d") %>');
       $("#started_at,#ended_at").removeAttr("disabled");
   <% end %>
-    $("#s_time [value='<%=@sale.disc_time_types  %>']")[0].checked=true;
     $("#disc_times").val("<%= @sale.everycar_times %>");
     $("#disc_<%=@sale.disc_types  %>").val("<%= @sale.discount %>")
 <% end %>

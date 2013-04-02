@@ -182,6 +182,10 @@ $(document).ready(function(){
            tishi_alert("薪资标准不能为空!");
            return false;
        }
+       if(isNaN($(this).parents('form').find("#staff_base_salary").val())){
+           tishi_alert("薪资标准必须为数字!");
+           return false;
+       }
        if($(this).attr("id") == "new_staff_btn"){
            if($(this).parents('form').find("#staff_photo").val() == ''){
                tishi_alert("照片不能为空!");
@@ -192,8 +196,20 @@ $(document).ready(function(){
            tishi_alert("提成起始额不能为空!");
            return false;
        }
+       if(isNaN($(this).parents('form').find("#staff_deduct_at").val())){
+           tishi_alert("提成起始额必须为数字!");
+           return false;
+       }
        if($(this).parents('form').find("#staff_deduct_end").val() == ''){
            tishi_alert("结束额度不能为空!");
+           return false;
+       }
+       if(isNaN($(this).parents('form').find("#staff_deduct_end").val())){
+           tishi_alert("结束额度必须为数字!");
+           return false;
+       }
+       if(parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val())){
+           tishi_alert("起始额必须不能大于结束额度!");
            return false;
        }
        if($(this).parents('form').find("#staff_deduct_percent").val() == ''){
@@ -400,7 +416,7 @@ $(document).ready(function(){
     });
 
     //处理奖励
-    $(".process_reward").click(function(){
+    $(".process_reward").live("click", function(){
        var store_id = $(this).attr("name");
        var id = $(this).attr("id");
        $.ajax({
@@ -417,7 +433,7 @@ $(document).ready(function(){
     });
 
     //处理违规
-    $(".process_violation").click(function(){
+    $(".process_violation").live("click", function(){
        var store_id = $(this).attr("name");
        var id = $(this).attr("id");
        $.ajax({

@@ -17,8 +17,9 @@ class StaffsController < ApplicationController
 
   def create
     @staff = @store.staffs.new(params[:staff])
-    @staff.photo = params[:staff][:photo].original_filename
-    if @staff.save && @staff.operate_picture(params[:staff][:photo], "create") #save staff info and picture
+    @staff.photo = params[:staff][:photo].original_filename unless params[:staff][:photo].nil?
+    if @staff.save   #save staff info and picture
+      @staff.operate_picture(params[:staff][:photo], "create") unless params[:staff][:photo].nil?
       flash[:notice] = "创建员工成功!"
     else
       flash[:notice] = "创建员工失败!"

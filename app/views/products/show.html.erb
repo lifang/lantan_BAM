@@ -10,13 +10,13 @@
           <div class="bigImg jqzoom">
             <%if @img_urls[0]%>
               <img jqimg="<%= @img_urls[0].img_url.nil? ? "" : @img_urls[0].img_url  %>"
-                   src="<%= @img_urls[0].img_url.nil? ? "" : @img_urls[0].img_url.gsub("img#{@prod.id}","img#{@prod.id}_300")  %>" />
+                   src="<%= @img_urls[0].img_url.nil? ? "" : @img_urls[0].img_url.gsub("img#{@prod.id}","img#{@prod.id}_#{Constant::P_PICSIZE[3]}")  %>" />
                  <% end %>
           </div>
           <div class="pic_show">
             <ul>
               <%@img_urls.each do |img|%>
-                <li><img src="<%=  img.img_url.nil? ? "" : img.img_url.gsub("img#{@prod.id}","img#{@prod.id}_50") %>"    /></li>
+                <li><img src="<%=  img.img_url.nil? ? "" : img.img_url.gsub("img#{@prod.id}","img#{@prod.id}_#{Constant::P_PICSIZE[0]}") %>"    /></li>
               <% end unless @img_urls.blank?  %>
             </ul>
           </div>
@@ -58,8 +58,8 @@
       var i = imgSrc.lastIndexOf('.');
       var format = imgSrc.substring(i);
       imgSrc = imgSrc.substring(0,i);
-      var imgSrc_big = imgSrc.replace("_50","")+format;
-      var imgSrc_show =imgSrc.replace("_50","_300")+format;
+      var imgSrc_big = imgSrc.replace("_<%= Constant::P_PICSIZE[0] %>","")+format;
+      var imgSrc_show =imgSrc.replace("_<%= Constant::P_PICSIZE[0] %>","_<%= Constant::P_PICSIZE[3] %>")+format;
       $('.bigImg img').attr('src',imgSrc_show);
       $('.bigImg img').attr('jqimg',imgSrc_big);
     })
