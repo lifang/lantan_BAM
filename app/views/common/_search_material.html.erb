@@ -3,7 +3,7 @@
     <% (@search_materials || []).each do |m| %>
       
       <li><%= check_box_tag "mat_#{m.id}",m.storage,false,{:onclick=>"select_material(this,'#{m.name}',
-      '#{Material::TYPES_NAMES.to_a[m.types.to_i][1]}',#{@type})"} %><%= m.name %></li>
+      '#{Material::TYPES_NAMES[m.types.to_i]}',#{@type})"} %><%= m.name %></li>
     <% end %>
   </ul>
 <% elsif @type == 1 %>
