@@ -400,7 +400,7 @@ $(document).ready(function(){
     });
 
     //处理奖励
-    $(".process_reward").click(function(){
+    $(".process_reward").live("click", function(){
        var store_id = $(this).attr("name");
        var id = $(this).attr("id");
        $.ajax({
@@ -417,7 +417,7 @@ $(document).ready(function(){
     });
 
     //处理违规
-    $(".process_violation").click(function(){
+    $(".process_violation").live("click", function(){
        var store_id = $(this).attr("name");
        var id = $(this).attr("id");
        $.ajax({
