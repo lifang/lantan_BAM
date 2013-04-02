@@ -36,8 +36,8 @@
            <% if @sale.disc_time_types==Sale::DISC_TIME[:YEAR] %>checked <%end%> />年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:TIME] %>" onclick="input_time()" id="is_checked"
            <% if @sale.disc_time_types==Sale::DISC_TIME[:TIME] %>checked <%end%> />有效期：
-    <input name="started_at" id="started_at" type="text" disabled onclick="WdatePicker()" />&nbsp;&nbsp;到&nbsp;&nbsp;
-    <input name="ended_at" id="ended_at" type="text" disabled onclick="WdatePicker()" />
+    <input name="started_at" id="started_at" type="text" readonly onclick="WdatePicker()" />&nbsp;&nbsp;到&nbsp;&nbsp;
+    <input name="ended_at" id="ended_at" type="text" readonly onclick="WdatePicker()" />
   </div>
 </div>
 

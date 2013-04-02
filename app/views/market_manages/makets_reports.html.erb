@@ -4,7 +4,7 @@
     <div><label>时间：</label>
       <input name="created" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_created] %>"  class="Wdate"/>&nbsp;到&nbsp;
       <input name="ended" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_ended] %>" class="Wdate"/></div>
-    <div><input name="time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>"  <%if session[:time]==Sale::DISC_TIME[:DAY]%>checked<%end%> />日&nbsp;&nbsp;
+    <div><input name="time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>"  checked />日&nbsp;&nbsp;
       <input name="time" type="radio" value="<%= Sale::DISC_TIME[:WEEK] %>" <%if session[:time]==Sale::DISC_TIME[:WEEK]%>checked<%end%> />周&nbsp;&nbsp;
       <input name="time" type="radio" value="<%= Sale::DISC_TIME[:MONTH] %>" <%if session[:time]==Sale::DISC_TIME[:MONTH]%>checked<%end%> />月</div>
     <div><button class="search_btn">查询</button></div>

@@ -12,12 +12,12 @@
 <div class="item">
   <label>开始时间：</label>
   <input name="started_at" id="started_at"  value="<%= @pcard.started_at.nil?? "" : @pcard.started_at.strftime("%Y-%m-%d") %>"
-         type="text" onclick="WdatePicker()" />
+         type="text" onclick="WdatePicker()" readonly />
 </div>
 <div class="item">
   <label>结束时间：</label>
   <input name="ended_at" id="ended_at" type="text" value="<%= @pcard.ended_at.nil?? "" : @pcard.ended_at.strftime("%Y-%m-%d") %>"
-         onclick="WdatePicker()" />
+         onclick="WdatePicker()" readonly />
 </div>
 <div class="item">
   <label>套餐价格：</label><input name="price" id="price" type="text" value="<%= @pcard.price %>" />
