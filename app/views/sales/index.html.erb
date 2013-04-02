@@ -36,13 +36,11 @@
                     <td><%=Sale::STATUS_NAME[sale.status] %></td>
                     <td><%= sale.reported_num %></td>
                     <td style="text-align: right;">
-                      <%if sale.store_id!=Constant::STORE_ID%>
                         <%if sale.status==0 %>
                           <% if permission?(:sales, :publish) %><a href="javascript:void(0)" onclick="public_sale('<%= sale.id %>')">发布</a><% end %>
                         <%end%>
                         <% if permission?(:sales, :edit_sale) %><a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">修改</a><% end %>
                         <% if permission?(:sales, :delete) %><a href="javascript:void(0)" onclick="delete_sale('<%= sale.id %>')">删除</a><% end %>
-                      <% end %>
                       <a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>" target="_blank">预览</a>
                     </td>
                   </tr>
