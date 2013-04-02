@@ -100,8 +100,7 @@ $(document).ready(function(){
             4: { sorter: false },
             5: { sorter: false },
             6: { sorter: false },
-            7: { sorter: false },
-            8: { sorter: false }
+            7: { sorter: false }
         }
     });
 
@@ -152,18 +151,6 @@ $(document).ready(function(){
     $("#new_staff_btn, #edit_staff_btn").live("click", function(){
        if($(this).parents('form').find("#staff_name").val() == ''){
            tishi_alert("名称不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_type_of_w").val() == ''){
-           tishi_alert("岗位不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_level").val() == ''){
-           tishi_alert("等级职称不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_education").val() == ''){
-           tishi_alert("教育程度不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_phone").val() == ''){

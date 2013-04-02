@@ -5,13 +5,13 @@ class CurrentMonthSalariesController < ApplicationController
   before_filter :get_store
 
   def index
-    @statistics_date = params[:statistics_date] ||= DateTime.now.strftime("%Y-%m") 
-    @staffs = @store.staffs
+    @statistics_date = params[:statistics_date] ||= DateTime.now.months_ago(1).strftime("%Y-%m")
+    @staffs = Staff.find_by_sql("select s.*,sa.reward_num reward_num,sa.deduct_num deduct_num,sa.total total,sa.id s_id from staffs s left join salaries sa on s.id=sa.staff_id where s.store_id = #{@store.id}  and sa.current_month = #{(@statistics_date.delete '-').to_i}")
     respond_to do |format|
       format.xls {
-        send_data(xls_content_for(@staffs, @statistics_date),
+        send_data(xls_content_for(@staffs),
                   :type => "text/excel;charset=utf-8; header=present",
-                  :filename => "Current_Month_Salary_#{Time.now.strftime("%Y%m%d")}.xls")
+                  :filename => "Current_Month_Salary_#{@statistics_date}.xls")
       }
       format.html
     end
@@ -31,7 +31,7 @@ class CurrentMonthSalariesController < ApplicationController
     @store = Store.find_by_id(params[:store_id])
   end
 
-  def xls_content_for(objs, current_month)
+  def xls_content_for(objs)
     xls_report = StringIO.new
     book = Spreadsheet::Workbook.new
     sheet1 = book.create_worksheet :name => "Users"
@@ -39,12 +39,12 @@ class CurrentMonthSalariesController < ApplicationController
     count_row = 1
     objs.each do |obj|
       sheet1[count_row,0] = obj.name
-      sheet1[count_row,1] = Staff::N_COMPANY[obj.position]
+      sheet1[count_row,1] = Staff::N_COMPANY[obj.type_of_w]
       sheet1[count_row,2] = obj.base_salary
-      salary = obj.salaries.where("current_month = #{(current_month.delete '-').to_i}").first
-      sheet1[count_row,3] = salary.nil? ? 0 : salary.reward_num
-      sheet1[count_row,4] = salary.nil? ? 0 : salary.deduct_num
-      sheet1[count_row,5] = salary.nil? ? 0 : salary.total
+      #salary = obj.salaries.where("current_month = #{(current_month.delete '-').to_i}").first
+      sheet1[count_row,3] = obj.reward_num
+      sheet1[count_row,4] = obj.deduct_num
+      sheet1[count_row,5] = obj.total
      count_row += 1
     end
     book.write xls_report

@@ -36,7 +36,7 @@
       <tr>
         <td><%= out.code %></td>
         <td><%= out.name %></td>
-        <td><%= Material::TYPES_NAMES.to_a[out.types.to_i][1] %></td>
+        <td><%= Material::TYPES_NAMES[out.types.to_i] %></td>
         <td><%= out.staff_name %></td>
         <td><%= out.material_num.to_i %></td>
         <td><%= out.out_price %></td>
