@@ -1,15 +1,24 @@
 <% if @type == 0 %>
-    <ul>
+  <ul>
     <% (@search_materials || []).each do |m| %>
-        <li><%= check_box_tag "mat_#{m.id}",m.storage.to_i,false,{:onclick=>"select_material(this,'#{m.name}',
-  '#{Material::TYPES_NAMES.to_a[m.types.to_i][1]}',#{@type})"} %><%= m.name %></li>
+      
+      <li><%= check_box_tag "mat_#{m.id}",m.storage,false,{:onclick=>"select_material(this,'#{m.name}',
+      '#{Material::TYPES_NAMES.to_a[m.types.to_i][1]}',#{@type})"} %><%= m.name %></li>
     <% end %>
-        </ul>
+  </ul>
 <% elsif @type == 1 %>
-    <ul>
+  <ul>
     <% (@search_materials || []).each do |m| %>
-        <li><%= check_box_tag "mat_#{m.id}",m.storage.to_i,false,{:onclick=>"select_order_material(this,'#{m.name}',
-  '#{Material::TYPES_NAMES.to_a[m.types.to_i][1]}',#{@type},'#{m.code}','#{m.price}')"} %><%= m.name %></li>
+    <%
+      id = m.is_a?(Hash) ? m["id"] : m.id
+      storage = m.is_a?(Hash) ? m["storage"].to_i : m.storage.to_i
+      name = m.is_a?(Hash) ? m["name"] : m.name
+      types = m.is_a?(Hash) ? m["types"] : m.types
+      code = m.is_a?(Hash) ? m["code"] : m.code
+      price = m.is_a?(Hash) ? m["price"] : m.price
+    %>
+      <li><%= check_box_tag "mat_#{id}",storage.to_i,false,{:onclick=>"select_order_material(this,'#{name}',
+      '#{Material::TYPES_NAMES.to_a[types.to_i][1]}',#{@type},'#{code}','#{price}')"} %><%= name %></li>
     <% end %>
-        </ul>
+  </ul>
 <% end %>

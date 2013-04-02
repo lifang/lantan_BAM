@@ -151,12 +151,16 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
-        str += " and store_id=#{Constant::STORE_ID} "
+        headoffice_api_url = "headoffice.gankao.co/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+        @search_materials = JSON.parse(open(headoffice_api_url).read)
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
+        @search_materials = Material.normal.all(:conditions => str)
       end
+    else
+      @search_materials = Material.normal.all(:conditions => str)
     end
-    @search_materials = Material.normal.all(:conditions => str)
+    
     @type = params[:type].to_i == 0 ? 0 : 1
     respond_with(@search_materials,@type) do |format|
       format.html
@@ -229,7 +233,7 @@ class MaterialsController < ApplicationController
                   material_order.update_attribute(:sale_id,params[:sale_id])
                 end
                 #发送订货提醒给总店
-                Notice.create(:store_id => Constant::STORE_ID, :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS])
+                Notice.create(:store_id => params[:store_id], :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS])
                 #支付记录
                 MOrderType.create(:material_order_id => material_order.id,:pay_types => params[:pay_type], :price => price)
                 if params[:pay_type].to_i == MaterialOrder::PAY_TYPES[:STORE_CARD]
@@ -407,7 +411,7 @@ class MaterialsController < ApplicationController
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
       if order
-        Notice.create(:store_id => Constant::STORE_ID, :content => URGE_GOODS_CONTENT + ",订单号为：#{order.code}",
+        Notice.create(:store_id => order.store_id, :content => URGE_GOODS_CONTENT + ",订单号为：#{order.code}",
           :target_id => order.id, :types => Notice::TYPES[:URGE_GOODS])
       end
     end
