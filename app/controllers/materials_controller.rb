@@ -295,7 +295,7 @@ class MaterialsController < ApplicationController
     #puts params[:store_id]
     material = Material.find_by_code params[:code]
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
-        :price => params[:price].strip, :storage => params[:count].strip,
+        :price => params[:price].strip.to_i, :storage => params[:count].strip.to_i,
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
         :types => params[:types],:check_num => params[:count].strip}) if material.nil?
     x = {:status => 1, :material => material}.to_json
