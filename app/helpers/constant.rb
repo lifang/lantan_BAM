@@ -1,7 +1,7 @@
 #encoding: utf-8
 module Constant
   LOCAL_DIR = "#{Rails.root}/public/"
-  HEAD_OFFICE_API_PATH = "http://headoffice.gankao.co"
+ 
   #权限
   ROLES = {
     #客户
@@ -105,7 +105,6 @@ module Constant
   #催货提醒
   URGE_GOODS_CONTENT = "门店订货提醒，请关注下"
 
-  SERVER_PATH = "http://localhost:3000"
 
   #  施工现场文件目录
   VIDEO_DIR ="work_videos"
@@ -114,10 +113,12 @@ module Constant
   MESSAGE_URL = "http://mt.yeion.com"
   USERNAME = "XCRJ"
   PASSWORD = "123456"
-
-  HEAD_OFFICE="http://192.168.0.111:3001/syncs/upload_file"
-  HEAD_OFFICE_REQUEST_ZIP="http://127.0.0.1:3001/syncs/is_generate_zip"
-  HEAR_OFFICE_IPHOST="http://127.0.0.1:3001/"
+  
+  SERVER_PATH = "http://bam.gankao.co"
+  HEAD_OFFICE_API_PATH = "http://headoffice.gankao.co/"
+  HEAD_OFFICE = HEAD_OFFICE_API_PATH + "syncs/upload_file"
+  HEAD_OFFICE_REQUEST_ZIP = HEAD_OFFICE_API_PATH + "syncs/is_generate_zip"
+  HEAR_OFFICE_IPHOST= HEAD_OFFICE_API_PATH
   PCARD_PICS = "pcard_pics"
   SALE_PICS = "sale_pics"
   #产品和活动的类别  图片名称分别为 product_pics 和service_pics
