@@ -18,13 +18,13 @@
           </div>
           <div class="item">
             <label>品牌型号：</label>
-            <select class="ymd" id="capital_div" onchange="choose_brand()">
+            <select class="ymd" id="capital_div" onchange="choose_brand('#capital_div', '#car_brands')">
               <option value="">--</option>
               <% Capital.all.each do |ca| %>
                 <option value="<%= ca.id %>"><%= ca.name %></option>
               <% end %>
             </select>&nbsp;
-            <select class="ymd" id="car_brands" name="car_brands" onchange="choose_model()">
+            <select class="ymd" id="car_brands" name="car_brands" onchange="choose_model('#car_brands', '#car_models')">
               <option value="">--</option>
             </select>
             <select class="ymd" id="car_models" name="car_models">

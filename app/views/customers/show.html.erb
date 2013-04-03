@@ -21,3 +21,11 @@
 <%= render :partial => "customer_revisit" %>
 <div id="related_order_div"></div>
 <div id="process_complaint_div"></div>
+<script type="text/javascript">
+<% if params[:comp] == "1" %>
+    $(".tab_head ul li").removeClass("hover");
+    $(".tab_head ul li:last").addClass("hover");
+    $(".data_body div").hide();
+    $("#complaints_partial, #complaints_partial .pageTurn").show();
+<% end %>
+</script>

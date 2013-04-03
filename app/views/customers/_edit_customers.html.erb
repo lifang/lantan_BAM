@@ -2,7 +2,7 @@
   <%= form_for :customer, :url=>"/stores/#{@store.id}/customers/#{@customer.id}", :method => "put",
     :html => {:onsubmit => "return check_customer()"} do %>
     <div class="popup_box">
-      <h1>新建用户信息<a href="javascript:void(0)" class="close">关闭</a></h1>
+      <h1>编辑用户信息<a href="javascript:void(0)" class="close">关闭</a></h1>
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item">
