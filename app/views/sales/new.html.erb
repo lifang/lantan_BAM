@@ -2,9 +2,6 @@
 <div class="main">
   <div class="box">
     <div class="data_box">
-      <div class="second_menu"><a href="/stores/<%= params[:store_id] %>/sales" <% if params[:action] == "index"  %> class="hover"<%end%>>活动列表</a>
-        <a href="/stores/<%= params[:store_id] %>/sales/new" <% if params[:action] == "new"  %> class="hover"<%end%>>发布活动</a></div>
-      <div class="clear"></div>
       <div class="data_body">
         <div>
           <%= form_for @sale, :url=>"/stores/#{params[:store_id]}/sales",:method=>:post,:html=>{:multipart => true,:id=>"one_sale"} do  %>
