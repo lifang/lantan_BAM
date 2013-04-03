@@ -18,7 +18,7 @@
       price = m.is_a?(Hash) ? m["price"] : m.price
     %>
       <li><%= check_box_tag "mat_#{id}",storage.to_i,false,{:onclick=>"select_order_material(this,'#{name}',
-      '#{Material::TYPES_NAMES.to_a[types.to_i][1]}',#{@type},'#{code}','#{price}')"} %><%= name %></li>
+      '#{Material::TYPES_NAMES[types.to_i]}',#{@type},'#{code}','#{price}')"} %><%= name %></li>
     <% end %>
   </ul>
 <% end %>
