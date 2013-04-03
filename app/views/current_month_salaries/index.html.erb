@@ -36,7 +36,7 @@
                               <% @staffs.each do |staff| %>
                                 <tr>
                                   <td><%= staff.name %></td>
-                                  <td><%= Staff::N_COMPANY[staff.position] %></td>
+                                  <td><%= Staff::N_COMPANY[staff.type_of_w] %></td>
                                   <td><%= staff.base_salary.to_i %></td>
                                   <td>
                                     <span class="reward_num_text"><%= staff.reward_num %></span>

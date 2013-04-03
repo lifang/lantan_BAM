@@ -21,10 +21,12 @@
           <tr>
             <td><%= complaint.num %></td>
             <td><%= complaint.name %></td>
-            <td><a href="#" class="other_a"><%= complaint.code %></a></td>
+            <td><%= link_to "#{complaint.code}", "/orders/#{complaint.o_id}/order_info" ,
+                :remote => "true", "data-type" => "script", :class => "other_a" %>
+            </td>
             <td><%= complaint.reason %></td>
             <td><%= complaint.suggestion %></td>
-            <td><a href="#">处理</a></td>
+            <td><a href="/stores/<%= @store.id %>/customers/<%= complaint.cu_id %>?comp=1">处理</a></td>
           </tr>
         <% end %>
 

@@ -11,7 +11,7 @@ class CurrentMonthSalariesController < ApplicationController
       format.xls {
         send_data(xls_content_for(@staffs),
                   :type => "text/excel;charset=utf-8; header=present",
-                  :filename => "Current_Month_Salary_#{Time.now.strftime("%Y%m%d")}.xls")
+                  :filename => "Current_Month_Salary_#{@statistics_date}.xls")
       }
       format.html
     end
@@ -39,7 +39,7 @@ class CurrentMonthSalariesController < ApplicationController
     count_row = 1
     objs.each do |obj|
       sheet1[count_row,0] = obj.name
-      sheet1[count_row,1] = Staff::N_COMPANY[obj.position]
+      sheet1[count_row,1] = Staff::N_COMPANY[obj.type_of_w]
       sheet1[count_row,2] = obj.base_salary
       #salary = obj.salaries.where("current_month = #{(current_month.delete '-').to_i}").first
       sheet1[count_row,3] = obj.reward_num
