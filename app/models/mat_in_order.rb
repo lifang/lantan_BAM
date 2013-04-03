@@ -9,6 +9,7 @@ class MatInOrder < ActiveRecord::Base
                         :from => "mat_in_orders o",
                         :joins => "inner join materials m on m.id=o.material_id inner join staffs s on s.id=o.staff_id left join material_orders mo on mo.id=o.material_order_id",
                         :conditions => "m.status=#{Material::STATUS[:NORMAL]} and m.store_id=#{store_id}",
+                        :order => "o.created_at desc",
                         :page => page,:per_page => per_page)
   end
 end
