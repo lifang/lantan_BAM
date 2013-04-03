@@ -153,18 +153,6 @@ $(document).ready(function(){
            tishi_alert("名称不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_type_of_w").val() == ''){
-           tishi_alert("岗位不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_level").val() == ''){
-           tishi_alert("等级职称不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_education").val() == ''){
-           tishi_alert("教育程度不能为空!");
-           return false;
-       }
        if($(this).parents('form').find("#staff_phone").val() == ''){
            tishi_alert("联系方式不能为空!");
            return false;

@@ -26,13 +26,13 @@ class Salary < ActiveRecord::Base
       deduct_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:deduct_num]
       reward_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:reward_num]
       percent = avg_percent[staff.id].nil? ? 100 : avg_percent[staff.id]
-      if staff.position == Staff::S_COMPANY[:FRONT] #前台
+      if staff.type_of_w == Staff::S_COMPANY[:FRONT] #前台
         front_amount = front_deduct_amount[staff.id].nil? ? 0 : front_deduct_amount[staff.id]
         total = staff.base_salary + reward_amount - deduct_amount + front_amount*staff.deduct_percent*0.01
         Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,
           :total => total, :current_month => start_time.strftime("%Y%m"),
           :staff_id => staff.id, :satisfied_perc => percent)
-      elsif staff.position == Staff::S_COMPANY[:TECHNICIAN] #技师
+      elsif staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN] #技师
         technician_amount = technician_deduct_amount[staff.id].nil? ? 0 : technician_deduct_amount[staff.id]
         total = staff.base_salary + reward_amount - deduct_amount + technician_amount*staff.deduct_percent*0.01
         Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,

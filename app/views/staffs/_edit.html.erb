@@ -10,7 +10,7 @@
                   </div>
                   <div class="item">
                        <label>岗位：</label>
-                       <%= f.select :type_of_w, Staff::N_HEAD.invert %>
+                       <%= f.select :position, Staff::N_COMPANY.invert %>
                   </div>
                   <div class="item">
                        <label>性别：</label>
@@ -23,7 +23,7 @@
                   </div>
                   <div class="item">
                        <label>职务：</label>
-                       <%= f.select :position, Staff::N_COMPANY.invert %>
+                       <%= f.select :type_of_w, Staff::N_HEAD.invert %>
                   </div>
                   <div class="item">
                        <label>教育程度：</label>
