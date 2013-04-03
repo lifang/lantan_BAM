@@ -27,7 +27,6 @@
                                   <th>平均满意度</th>
                                   <th>提成金额</th>
                                   <th>扣款金额</th>
-                                  <th>扣款说明</th>
                                   <th>合计</th>
                                 </tr>
                             </thead>
@@ -46,7 +45,6 @@
                                   <% end %>
                                   <td><%= salary_detail.reward_num %></td>
                                   <td><%= salary_detail.deduct_num %></td>
-                                  <td><%= salary_detail.violation_reward.mark %></td>
                                   <% if flag %>
                                   <td rowspan="<%= @salary_details.length %>"><%= @salary.total.to_i unless @salary.nil? %></td>
                                   <% end %>
