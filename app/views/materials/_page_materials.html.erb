@@ -37,7 +37,7 @@
       <tr style="background-color: <%if material.storage.to_i == 0 %>red;<% end %>">
         <td><%= material.code %></td>
         <td><%= material.name %></td>
-        <td><%= Material::TYPES_NAMES.to_a[material.types.to_i][1] %></td>
+        <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
         <td><%= material.storage.to_i > 0 ? "存货" : "缺货" %></td>
         <td><%= material.storage.to_i %></td>
         <td><%= material.price %></td>

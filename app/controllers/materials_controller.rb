@@ -125,9 +125,14 @@ class MaterialsController < ApplicationController
   def check_nums
     material = Material.find_by_code_and_status_and_store_id params[:barcode],Material::STATUS[:NORMAL],params[:store_id]
     material_order = MaterialOrder.find_by_code params[:mo_code]
-    mio_num = MatInOrder.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
-    moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
-    render :text => !mio_num.nil? && mio_num >= moi_num ? 1 : 0
+    
+    if material.nil? || material_order.nil?
+      render :text => "error"
+    else
+      mio_num = MatInOrder.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
+      moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
+      render :text => !mio_num.nil? && mio_num >= moi_num ? 1 : 0
+    end
   end
 
   #备注
@@ -151,12 +156,16 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
-        str += " and store_id=#{Constant::STORE_ID} "
+        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+        @search_materials = JSON.parse(open(headoffice_api_url).read)
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
+        @search_materials = Material.normal.all(:conditions => str)
       end
+    else
+      @search_materials = Material.normal.all(:conditions => str)
     end
-    @search_materials = Material.normal.all(:conditions => str)
+    
     @type = params[:type].to_i == 0 ? 0 : 1
     respond_with(@search_materials,@type) do |format|
       format.html
@@ -229,7 +238,7 @@ class MaterialsController < ApplicationController
                   material_order.update_attribute(:sale_id,params[:sale_id])
                 end
                 #发送订货提醒给总店
-                Notice.create(:store_id => Constant::STORE_ID, :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS])
+                Notice.create(:store_id => params[:store_id], :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS])
                 #支付记录
                 MOrderType.create(:material_order_id => material_order.id,:pay_types => params[:pay_type], :price => price)
                 if params[:pay_type].to_i == MaterialOrder::PAY_TYPES[:STORE_CARD]
@@ -286,7 +295,7 @@ class MaterialsController < ApplicationController
     #puts params[:store_id]
     material = Material.find_by_code params[:code]
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
-        :price => params[:price].strip, :storage => params[:count].strip,
+        :price => params[:price].strip.to_i, :storage => params[:count].strip.to_i,
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
         :types => params[:types],:check_num => params[:count].strip}) if material.nil?
     x = {:status => 1, :material => material}.to_json
@@ -407,7 +416,7 @@ class MaterialsController < ApplicationController
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
       if order
-        Notice.create(:store_id => Constant::STORE_ID, :content => URGE_GOODS_CONTENT + ",订单号为：#{order.code}",
+        Notice.create(:store_id => order.store_id, :content => URGE_GOODS_CONTENT + ",订单号为：#{order.code}",
           :target_id => order.id, :types => Notice::TYPES[:URGE_GOODS])
       end
     end

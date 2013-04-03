@@ -61,7 +61,7 @@
     <div class="popup_box">
          <h1>新建员工<a href="javascript:void(0)" class="close">关闭</a></h1>
    
-         <%= form_for(@staff, :url => store_staffs_path(@store), :html => {:multipart => true}) do |f| %>
+         <%= form_for(@staff, :url => store_staffs_path(@store), :html => {:multipart => true, :id => "adv"}) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
                   <div class="item">
@@ -124,7 +124,7 @@
                   <div class="item">
                        <label>上传照片：</label>
                        <input type="file" name="staff[photo]" style="display: none;" onchange="ye.value=value" id="staff_photo" />
-                       <input name="ye" type="text" class="file" id="sale_img" />
+                       <input name="ye" type="text" class="file" id="sale_img" readonly/>
                        <input type="button" class="file_btn" value="浏览" onclick="staff_photo.click()" />
                   </div>
                   <div class="item">
@@ -145,7 +145,7 @@
                   </div>
               </div>
               <div class="btn_box">
-                <a class="confirm_btn" id="new_staff_btn">确定</a>
+                <button class="confirm_btn" id="new_staff_btn">确定</button>
                 <button class="cancel_btn">取消</button></div>
               <div class="clear"></div>
          </div>

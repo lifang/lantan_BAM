@@ -187,7 +187,7 @@ $(document).ready(function(){
            return false;
        }
        if($(this).attr("id") == "new_staff_btn"){
-           if($(this).parents('form').find("#staff_photo").val() == ''){
+           if($(this).parents('form').find("#sale_img").val() == ''){
                tishi_alert("照片不能为空!");
                return false;
            }
@@ -214,6 +214,10 @@ $(document).ready(function(){
        }
        if($(this).parents('form').find("#staff_deduct_percent").val() == ''){
            tishi_alert("提成率不能为空!");
+           return false;
+       }
+       if(isNaN($(this).parents('form').find("#staff_deduct_percent").val())){
+           tishi_alert("提成率必须为数字!");
            return false;
        }
        $(this).parents('form').submit();

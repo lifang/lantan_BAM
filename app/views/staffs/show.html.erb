@@ -51,12 +51,19 @@
                                <span id="sys_score_text"><%= @current_month_score.nil? ? "系统没有上一个月的绩效记录" : @current_month_score.sys_score %></span>
                                <input name="" type="text" value="<%= @current_month_score.sys_score unless @current_month_score.nil? %>" style="display: none;" id="sys_score_input"/>
                              </div>
-                             <div>
-                               <button class="search_btn" id="edit_sys_score_submit" style="display: none;" name="<%= @current_month_score.id unless @current_month_score.nil? %>">提交</button>
-                               <% if permission?(:staffs, :edit_sys_score) %><button class="search_btn" id="edit_sys_score">编辑</button><% end %>
-                             </div>
-                             <div>
-                               <% if permission?(:staffs, :manager_score) %><button class="search_btn" id="manage_score_btn">店长打分</button><% end %>
+                             <% unless @current_month_score.nil? %>
+                               <div>
+                                 <button class="search_btn" id="edit_sys_score_submit" style="display: none;" name="<%= @current_month_score.id unless @current_month_score.nil? %>">提交</button>
+                                 <% if permission?(:staffs, :edit_sys_score) %><button class="search_btn" id="edit_sys_score">编辑</button><% end %>
+                               </div>
+                             <% end %>
+                             <div style="width:150px;">
+                               <% if permission?(:staffs, :manager_score) %>
+                               <% unless @current_month_score.nil? %>
+                                 <span style="float:left"><%= @current_month_score.sys_score %></span>
+                               <% end %>
+                               <button class="search_btn" id="manage_score_btn" style="float:left;margin-left:5px;">店长打分</button>
+                               <% end %>
                              </div>
                         </div>
                      <div id="month_score_tab">

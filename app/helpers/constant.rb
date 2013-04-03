@@ -1,6 +1,7 @@
 #encoding: utf-8
 module Constant
   LOCAL_DIR = "#{Rails.root}/public/"
+  HEAD_OFFICE_API_PATH = "http://headoffice.gankao.co"
   #权限
   ROLES = {
     #客户
@@ -95,8 +96,7 @@ module Constant
   #活动code码生成文件路径
   CODE_PATH =  LOCAL_DIR + "code_file.txt"
   LOG_DIR = LOCAL_DIR + "logs/"
-  #总店id
-  STORE_ID = 1
+
   PER_PAGE = 20
 
   #施工时间（分钟）
