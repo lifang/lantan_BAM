@@ -36,22 +36,21 @@
                               <% @staffs.each do |staff| %>
                                 <tr>
                                   <td><%= staff.name %></td>
-                                  <td><%= Staff::N_COMPANY[staff.position] %></td>
+                                  <td><%= Staff::N_COMPANY[staff.type_of_w] %></td>
                                   <td><%= staff.base_salary.to_i %></td>
-                                  <% salary = staff.salaries.where("current_month = #{(@statistics_date.delete '-').to_i}").first %>
                                   <td>
-                                    <span class="reward_num_text"><%= salary.reward_num unless salary.nil? %></span>
-                                    <input name="" type="text" value="<%= salary.reward_num unless salary.nil? %>" class="data_input_s reward_num_input" style="display: none;"/>
+                                    <span class="reward_num_text"><%= staff.reward_num %></span>
+                                    <input name="" type="text" value="<%= staff.reward_num %>" class="data_input_s reward_num_input" style="display: none;"/>
                                   </td>
                                   <td>
-                                    <span class="deduct_num_text"><%= salary.deduct_num unless salary.nil? %></span>
-                                    <input name="" type="text" value="<%= salary.deduct_num unless salary.nil? %>" class="data_input_s deduct_num_input" style="display: none;"/>
+                                    <span class="deduct_num_text"><%= staff.deduct_num %></span>
+                                    <input name="" type="text" value="<%= staff.deduct_num %>" class="data_input_s deduct_num_input" style="display: none;"/>
                                   </td>
-                                  <td><%= salary.total.to_i unless salary.nil? %></td>
+                                  <td><%= staff.total.to_i %></td>
                                   <td>
-                                    <a href="javascript:void(0)" class="edit_reward_deduct_submit" style="display: none;" id="<%= salary.id unless salary.nil? %>">提交</a>
+                                    <a href="javascript:void(0)" class="edit_reward_deduct_submit" style="display: none;" id="<%= staff.s_id %>">提交</a>
                                     <% if permission?(:staffs, :edit_salary) %><a href="javascript:void(0)" class="bz_btn">编辑</a><% end %>
-                                    <% if permission?(:staffs, :detail_salary) %><%= link_to "详细", store_current_month_salary_path(@store, staff)+"?statistics_date=#{@statistics_date}" %><% end %>
+                                    <% if permission?(:staffs, :detail_salary) %><%= link_to "详细", store_current_month_salary_path(@store, staff.id)+"?statistics_date=#{@statistics_date}" %><% end %>
                                   </td>
                                 </tr>
                               <% end %>

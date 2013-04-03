@@ -7,8 +7,8 @@ class StaffsController < ApplicationController
   before_filter :search_work_record, :only => :show
 
   def index
-    position_sql = "position = #{Staff::S_COMPANY[:FRONT]} or position = #{Staff::S_COMPANY[:TECHNICIAN]}"
-    @staffs_names = @store.staffs.where(position_sql).select("id, name")
+    type_of_w_sql = "type_of_w = #{Staff::S_COMPANY[:FRONT]} or type_of_w = #{Staff::S_COMPANY[:TECHNICIAN]}"
+    @staffs_names = @store.staffs.where(type_of_w_sql).select("id, name")
     @staffs = @store.staffs.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     @staff =  Staff.new
     @violation_reward = ViolationReward.new

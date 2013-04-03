@@ -22,8 +22,8 @@ class ChartImage < ActiveRecord::Base
   def self.get_month_score_data(store, year, month)
     month_scores = MonthScore.includes(:staff => :store).where("stores.id = #{store.id}").
       where("month_scores.current_month >= #{year}01 and month_scores.current_month <= #{year}#{month}").
-      where("staffs.position = #{Staff::S_COMPANY[:FRONT]} or staffs.position = #{Staff::S_COMPANY[:TECHNICIAN]}").
-      group_by{|s|s.staff.position}
+      where("staffs.type_of_w = #{Staff::S_COMPANY[:FRONT]} or staffs.type_of_w = #{Staff::S_COMPANY[:TECHNICIAN]}").
+      group_by{|s|s.staff.type_of_w}
     if month_scores.blank?
       zero_data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
       return {Staff::S_COMPANY[:TECHNICIAN] => zero_data,

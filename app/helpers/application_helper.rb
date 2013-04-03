@@ -18,7 +18,7 @@ module ApplicationHelper
 
   def material_types
     types = []
-    items = Material::TYPES_NAMES.to_a.each_with_index{|item,idx|
+    Material::TYPES_NAMES.to_a.each_with_index{|item,idx|
       types[idx] = [item[1],item[0]]
     }
     types
@@ -94,7 +94,7 @@ module ApplicationHelper
   def get_last_twelve_months
     months = []
     12.times do |i|
-      months << DateTime.now.months_ago(i).strftime("%Y-%m")
+      months << DateTime.now.months_ago(i+1).strftime("%Y-%m")
     end
     months
   end
