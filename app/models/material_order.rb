@@ -78,9 +78,9 @@ class MaterialOrder < ActiveRecord::Base
     mo_status = []
     self.mat_order_items.group_by{|moi| moi.material_id}.each do |material_id, value|
       mat_order_item = MatOrderItem.find_by_material_id_and_material_order_id(material_id, self.id)
-      mat_in_order = MatInOrder.find_by_material_id_and_material_order_id(material_id, self.id)
+      mat_in_order = MatInOrder.where(:material_id => material_id, :material_order_id => self.id)
       if !mat_in_order.nil?
-        if mat_in_order.try(:material_num) >= mat_order_item.try(:material_num)
+        if mat_in_order.sum(:material_num) >= mat_order_item.try(:material_num)
           mo_status << true
         else
           mo_status << false
