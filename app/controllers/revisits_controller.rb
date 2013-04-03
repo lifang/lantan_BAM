@@ -56,7 +56,7 @@ class RevisitsController < ApplicationController
     if params[:prod_type]
       staff_ids = params[:c_staff_id].split(",") unless params[:c_staff_id].nil?
       staff_id_1, staff_id_2 = staff_ids[0], staff_ids[1] if staff_ids
-      is_violation = params[:prod_type].to_i < Complaint::TYPES[:invalid] ? true : false
+      is_violation = params[:prod_type].to_i < Complaint::TYPES[:INVALID] ? true : false
       complaint = Complaint.find(params[:pro_compl_id].to_i)
       complaint.update_attributes(:types => params[:prod_type].to_i, :remark => params[:pro_remark],
         :status => Complaint::STATUS[:PROCESSED], :is_violation => is_violation, :process_at => Time.now,
