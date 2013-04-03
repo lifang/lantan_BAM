@@ -58,9 +58,13 @@ class MessagesController < ApplicationController
         end        
         msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
         jsondata = JSON msg_hash
-        message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
-        create_get_http(Constant::MESSAGE_URL, message_route)
-        flash[:notice] = "短信发送成功。"
+        begin
+          message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
+          create_get_http(Constant::MESSAGE_URL, message_route)
+          flash[:notice] = "短信发送成功。"
+        rescue
+          flash[:notice] = "短信通道忙碌，请稍后重试。"
+        end
       end
     end
     redirect_to "/stores/#{params[:store_id]}/messages/search_list"

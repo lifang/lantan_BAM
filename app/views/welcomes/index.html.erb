@@ -34,6 +34,7 @@
           <% end %>
         </ul>
         <div class="clear"></div>
+        <% unless @complaints.blank? and @notices.blank? and @material_notices.blank? and @material_orders == 0 %>
         <div class="message">
           <% unless @complaints.blank? %>
             有 <span class="red"><%= @complaints.size %></span> 条投诉信息需要您去处理
@@ -53,6 +54,7 @@
           <% end %>
             <span class="x" onclick="$('.message').hide();">Close</span>
         </div>
+        <% end %>
       </div>
     </div>
     <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>

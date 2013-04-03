@@ -86,8 +86,12 @@ class CustomersController < ApplicationController
         SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id,
           :content => content, :phone => customer.mobilephone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
-        message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{content}&Exno=0"
-        create_get_http(Constant::MESSAGE_URL, message_route)
+        begin
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{content}&Exno=0"
+          create_get_http(Constant::MESSAGE_URL, message_route)
+        rescue
+          flash[:notice] = "短信通道忙碌，请稍后重试。"
+        end
         flash[:notice] = "短信发送成功。"
       end
     end
@@ -97,8 +101,9 @@ class CustomersController < ApplicationController
   def show
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @car_nums = CarNum.find_by_sql(["select c.num, cb.name b_name, cm.name m_name, c.buy_year from car_nums c
-        left join car_models cm on cm.id = c.car_model_id
+    @car_nums = CarNum.find_by_sql(["select c.id c_id, c.num, cb.name b_name, cm.name m_name, cb.id b_id,
+        cm.id m_id, c.buy_year,cb.capital_id
+        from car_nums c left join car_models cm on cm.id = c.car_model_id
         left join car_brands cb on cb.id = cm.car_brand_id
         inner join customer_num_relations cr on cr.car_num_id = c.id
         where cr.customer_id = ?", @customer.id])
@@ -137,7 +142,24 @@ class CustomersController < ApplicationController
     respond_to do |format|
       format.js
     end
-  end  
+  end
+
+  def edit_car_num
+    car_num_id = params[:id].split("_")[1].to_i
+    customer_id = params[:id].split("_")[0]
+    current_car_num = CarNum.find_by_id(car_num_id)
+    car_num = CarNum.find_by_num(params["car_num_#{car_num_id}"].strip)
+    if car_num.nil? or car_num.id == current_car_num.id
+      current_car_num.update_attributes(:num => params["car_num_#{car_num_id}"].strip,
+        :buy_year => params["buy_year_#{car_num_id}"].to_i, :car_model_id => params["car_models_#{car_num_id}"].to_i)
+      flash[:notice] = "车牌号码信息修改成功。"
+      puts "true"
+    else
+      puts "false"
+      flash[:notice] = "车牌号码在系统中已经存在。"
+    end
+    redirect_to "/stores/#{params["store_id_#{car_num_id}"]}/customers/#{customer_id}"
+  end
 
   def get_car_brands
     respond_to do |format|

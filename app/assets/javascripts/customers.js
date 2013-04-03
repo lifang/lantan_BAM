@@ -47,20 +47,20 @@ function hide_complaint() {
 }
 
 
-function choose_brand() {
-    if ($.trim($("#capital_div").val()) != "") {
+function choose_brand(capital_div, car_brands) {
+    if ($.trim($(capital_div).val()) != "") {
         $.ajax({
             async:true,
             dataType:'json',
-            data:{ capital_id : $("#capital_div").val() },
+            data:{ capital_id : $(capital_div).val() },
             url:"/customers/get_car_brands",
             type:'post',
             success : function(data) {
                 if (data != null && data != undefined) {
-                        $("#car_brands option").remove();
-                        $("#car_brands").append("<option value=''>--</option>");
+                        $(car_brands +" option").remove();
+                        $(car_brands).append("<option value=''>--</option>");
                     for (var i=0; i<data.length; i++) {
-                        $("#car_brands").append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
+                        $(car_brands).append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
                     }
                 }
             }
@@ -68,20 +68,20 @@ function choose_brand() {
     }   
 }
 
-function choose_model() {
-    if ($.trim($("#car_brands").val()) != "") {
+function choose_model(car_brands, car_models) {
+    if ($.trim($(car_brands).val()) != "") {
         $.ajax({
             async:true,
             dataType:'json',
-            data:{ brand_id : $("#car_brands").val() },
+            data:{ brand_id : $(car_brands).val() },
             url:"/customers/get_car_models",
             type:'post',
             success : function(data) {
                 if (data != null && data != undefined) {
-                        $("#car_models option").remove();
-                        $("#car_models").append("<option value=''>--</option>");
+                        $(car_models + " option").remove();
+                        $(car_models).append("<option value=''>--</option>");
                     for (var i=0; i<data.length; i++) {
-                        $("#car_models").append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
+                        $(car_models).append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
                     }
                 }
             }
@@ -140,6 +140,22 @@ function check_process() {
     }
     if ($.trim($("#pro_remark").val()) == "") {
         tishi_alert("请您填写处理意见");
+        return false;
+    }
+    return true;
+}
+
+function check_car_num(car_num_id) {
+    if ($.trim($("#buy_year_" + car_num_id).val()) == "") {
+        tishi_alert("请输入汽车购买年份");
+        return false;
+    }
+    if ($.trim($("#car_num_" + car_num_id).val()) == "") {
+        tishi_alert("请输入车牌号码");
+        return false;
+    }
+    if ($("#car_models_" + car_num_id).val() == "") {
+        tishi_alert("请选择汽车品牌型号");
         return false;
     }
     return true;
