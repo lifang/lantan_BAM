@@ -56,7 +56,7 @@ class MaterialsInOutsController < ApplicationController
 
       end
     end
-    render :text => "success"
+    render :text => "1"
   end
   
   def create_materials_out
@@ -81,17 +81,6 @@ class MaterialsInOutsController < ApplicationController
     cookies[:user_id]={:value =>params[:staff_id], :path => "/", :secure  => false}
     cookies[:user_name]={:value =>staff_name, :path => "/", :secure  => false}
     render :text => 'successful'
-  end
-
-
-  #判断订货数目与入库数目是否一致
-  def check_nums
-    num = params[:num].to_i
-    material = Material.find_by_code_and_status_and_store_id params[:barcode],Material::STATUS[:NORMAL],@store_id
-    material_order = MaterialOrder.find_by_code params[:mo_code]
-    mio_num = MatInOrder.where(:material_id => material.id, :material_order_id => material_order.id).sum(:material_num)
-    moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
-    render :text => !mio_num.nil? && (mio_num+num) >= moi_num ? 1 : 0
   end
 
   protected
