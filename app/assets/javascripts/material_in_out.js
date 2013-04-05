@@ -118,7 +118,7 @@ function checkNums(){
                         success:function(data2){
                             if(data2=="1")
                               { tishi_alert("入库成功！");
-                                window.location.replace("/stores/"+ store_id +"/materials_in_outs");
+                                window.location.href = "/stores/"+ store_id +"/materials_in_outs";
                               }
                         }
                     });

@@ -26,7 +26,9 @@
             </td>
             <td><%= complaint.reason %></td>
             <td><%= complaint.suggestion %></td>
-            <td><a href="/stores/<%= @store.id %>/customers/<%= complaint.cu_id %>?comp=1">处理</a></td>
+            <td><% if permission?(:customers,:deal_complaint) %>
+              <a href="/stores/<%= @store.id %>/customers/<%= complaint.cu_id %>?comp=1">处理</a>
+            <% end %></td>
           </tr>
         <% end %>
 
