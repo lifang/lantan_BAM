@@ -365,6 +365,8 @@ a.compile_btn { width: 100px;}
 .item_textarea ul { overflow: hidden; padding: 10px 0 0px 115px;}
 .item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
 
+.item_textarea input { float:left;}
+
 .item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 90px;  margin-right:10px;text-align: right;}
 
