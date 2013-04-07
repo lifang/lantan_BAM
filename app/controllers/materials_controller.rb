@@ -1,5 +1,6 @@
 #encoding:utf-8
 class MaterialsController < ApplicationController
+  require 'uri'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?
@@ -152,8 +153,9 @@ class MaterialsController < ApplicationController
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
 #        @search_materials = Material.normal.all(:conditions => str)
+
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-        @search_materials = JSON.parse(open(headoffice_api_url).read)
+        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
         @search_materials = Material.normal.all(:conditions => str)
