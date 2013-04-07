@@ -104,7 +104,7 @@ function select_material(obj,name,type,panel_type){
       
     }
 }
-
+//select_order_material(this,'水枪',       '辅助工具',1,'234234566','2344.0')
 function select_order_material(obj,name,type,panel_type,code,price){
 //   alert($(obj).is(":checked"));
     if($(obj).is(":checked")){
@@ -112,7 +112,7 @@ function select_order_material(obj,name,type,panel_type,code,price){
         var storage = $("#from").val()==0 ? $(obj).val() : "--";
         var li = "<tr id='li_"+$(obj).attr("id")+"' class='in_mat_selected'><td>";
         li += code + "</td><td>" + name + "</td><td>" + type + "</td><td>" + price +
-            "</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+price+"')\" style='width:50px;'/></td><td>" +
+            "</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+price+"','"+code+"','"+type+"')\" style='width:50px;'/></td><td>" +
             "<span id='total_"+id+"'>" + price + "</span></td><td>" + storage +"</td><td><a href='javascript:void(0);' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
         if($("#dinghuo_selected_materials").find("tr.in_mat_selected").length > 0){
             $("#dinghuo_selected_materials").find("tr.in_mat_selected:last").after(li);
@@ -120,7 +120,7 @@ function select_order_material(obj,name,type,panel_type,code,price){
             $("#dinghuo_selected_materials").prepend(li);
         }
         var select_str = $("#selected_items_dinghuo").val();
-        select_str += id + "_1_"+ price +",";
+        select_str += id + "_1_"+ price + "_"+ code +"_"+ name +"_"+ type +",";
         $("#selected_items_dinghuo").attr("value",select_str);
         var old_total = parseFloat($("#total_count").text());
         $("#total_count").text(old_total + parseFloat(price));
@@ -176,9 +176,10 @@ function set_out_num(obj,storage){
     }
 }
 
-function set_order_num(obj,storage,m_id,m_price){
+function set_order_num(obj,storage,m_id,m_price,m_code,m_type){
     var old_num = parseFloat($("#total_"+m_id).text());
     var new_num = parseInt($(obj).val()=="" ? 0 : $(obj).val()) * parseFloat(m_price);
+    var name = $("#mat_"+m_id).next().text();
     $("#total_"+m_id).text(new_num.toFixed(1));
     if($("#from").val()==0 && parseInt($(obj).val())>parseInt(storage)){
         tishi_alert("请输入小于库存量的值");
@@ -188,7 +189,7 @@ function set_order_num(obj,storage,m_id,m_price){
         var select_itemts = $("#selected_items_dinghuo").val().split(",");
         for(var i=0;i<select_itemts.length;i++){
             if(select_itemts[i].split("_")[0]==$(obj).parent().parent().attr("id").split("_")[2]){
-                select_itemts[i] = select_itemts[i].split("_")[0] + "_" + $(obj).val() + "_" + select_itemts[i].split("_")[2];
+                select_itemts[i] = select_itemts[i].split("_")[0] + "_" + $(obj).val() + "_" + select_itemts[i].split("_")[2] + "_" + m_code + "_" + name + "_" + m_type;
             }
         }
         $("#selected_items_dinghuo").attr("value",select_itemts.join(","));
@@ -400,7 +401,7 @@ function add_material_to_selected(obj,order_count){
     var toatl_account = 0;
     var li = "<tr id='li_mat_"+id+"' class='in_mat_selected'><td>";
     li += obj.code + "</td><td>" + obj.name + "</td><td>" + type_name(obj.types) + "</td><td>" + parseFloat(obj.price) + "</td>"
-        + "<td><input type='text' id='out_num_mat_"+id+"' value='"+order_count+"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"')\" style='width:50px;'/></td><td>" +
+        + "<td><input type='text' id='out_num_mat_"+id+"' value='"+order_count+"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"','"+obj.code+"', '"+type_name(obj.types)+"')\" style='width:50px;'/></td><td>" +
         "<span id='total_"+id+"'>" + parseFloat(obj.price * parseInt(order_count)) + "</span></td><td>--</td><td><a href='javascript:void(0);' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
     $("#dinghuo_selected_materials").append(li);
     $("#dinghuo_selected_materials").find("tr.in_mat_selected").each(function(){
@@ -620,7 +621,7 @@ function save_order_remark(){
         $.ajax({
             url:"/materials/order_remark",
             dataType:"json",
-            type:"GET",
+            type:"POST",
             data:"remark="+content+"&order_id="+m_id,
             success: function(data,status){
                 if(status == "success"){
