@@ -1,10 +1,15 @@
 <%= render 'directory' %>
 <div class="search">
-  <div><label>统计月份：</label><%= @complaint.blank?? session[:detail].nil? ? "" : session[:detail].to_datetime.strftime("%Y-%m") : 
-  @complaint[0].created_at.strftime("%Y-%m") %></div>
+  <div><label>统计月份：</label><%= @complaint.blank?? session[:detail].nil? ? "" : session[:detail] : @complaint[0].created_at.strftime("%Y-%m") %></div>
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/detail_s" do%>
     <div><label>时间：</label>
-      <input name="detail" type="text" onclick="WdatePicker()"  class="Wdate" readonly value="<%= session[:detail] %>" /></div>
+       <select name="detail">
+        <option value="">请选择</option>
+        <% (Constant::DATE_START..Time.now.strftime("%Y-%m")).each do |month| %>
+          <option <%if session[:detail]==month%>selected <%end%> value="<%= month %>"><%= month %></option>
+        <% end %>
+      </select>
+</div>
     <div><button class="search_btn">查询</button></div>
   <% end %>
 </div>
