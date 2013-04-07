@@ -169,7 +169,8 @@
       post "remark"
     end
     collection do
-      get "get_act_count", "out","order_remark"
+      get "get_act_count", "out"
+      post "order_remark"
     end
   end
 

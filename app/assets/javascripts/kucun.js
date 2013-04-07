@@ -620,7 +620,7 @@ function save_order_remark(){
         $.ajax({
             url:"/materials/order_remark",
             dataType:"json",
-            type:"GET",
+            type:"POST",
             data:"remark="+content+"&order_id="+m_id,
             success: function(data,status){
                 if(status == "success"){
