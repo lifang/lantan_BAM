@@ -6,7 +6,7 @@
     <div class="data_menu"><a href="#">添加货物名称</a></div>
     <div class="clear"></div>
     <div class="data_body">
-      <%= form_tag  create_materials_in_path, method: :post do |f|%>
+      <%= form_tag  create_materials_in_path , :id => "create_mat_in_form" do |f|%>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
           <thead>
             <tr class="hbg">
@@ -19,8 +19,11 @@
           </thead>
           <tbody class="mat-out-list"></tbody>
         </table>
+      <%= hidden_field_tag "store_id", @store_id%>
         <div class="clear"></div>
-        <div class="btn_box_s"><%= submit_tag '入库', :class => "confirm_btn"%></div>
+        <div class="btn_box_s">
+          <button onclick="checkNums()" type="button" class="confirm_btn">入库</button>
+        </div>
       <% end %>
     </div>
   </div>

@@ -97,14 +97,8 @@ class MaterialsController < ApplicationController
               :types => params[:material][:types],:check_num => params[:num].strip})
         end
         if @material_order
-          mat_in_order = MatInOrder.find_by_material_id_and_material_order_id(@material.id, @material_order.id)
-          if mat_in_order
-            mat_in_order.update_attributes(:material_num => mat_in_order.material_num + params[:num].to_i)
-          else
-            mat_in_order = MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
-                :price => params[:price],:staff_id => cookies[:user_id]})
-          end
-
+          MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
+              :price => params[:price],:staff_id => cookies[:user_id]})
           #检查是否可以更新成已入库状态
           if @material_order.check_material_order_status
             @material_order.m_status = 3
@@ -123,15 +117,16 @@ class MaterialsController < ApplicationController
 
   #判断订货数目与入库数目是否一致
   def check_nums
+    num = params[:num].to_i
     material = Material.find_by_code_and_status_and_store_id params[:barcode],Material::STATUS[:NORMAL],params[:store_id]
     material_order = MaterialOrder.find_by_code params[:mo_code]
     
     if material.nil? || material_order.nil?
       render :text => "error"
     else
-      mio_num = MatInOrder.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
+      mio_num = MatInOrder.where(:material_id => material.id, :material_order_id => material_order.id).sum(:material_num)
       moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
-      render :text => !mio_num.nil? && mio_num >= moi_num ? 1 : 0
+      render :text => !mio_num.nil? && (mio_num+num) > moi_num ? 1 : 0
     end
   end
 
@@ -156,6 +151,7 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
+#        @search_materials = Material.normal.all(:conditions => str)
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
         @search_materials = JSON.parse(open(headoffice_api_url).read)
       elsif params[:from].to_i > 0
@@ -295,9 +291,9 @@ class MaterialsController < ApplicationController
     #puts params[:store_id]
     material = Material.find_by_code params[:code]
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
-        :price => params[:price].strip.to_i, :storage => params[:count].strip.to_i,
+        :price => params[:price].strip.to_i, :storage => 0,
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
-        :types => params[:types],:check_num => params[:count].strip}) if material.nil?
+        :types => params[:types], :check_num => params[:count].strip}) if material.nil?
     x = {:status => 1, :material => material}.to_json
     #puts x
     render :json => x

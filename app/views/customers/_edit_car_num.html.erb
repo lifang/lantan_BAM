@@ -27,14 +27,14 @@
               <% Capital.all.each do |ca| %>
                 <option value="<%= ca.id %>" <% if edit_car_num.capital_id == ca.id %>selected<% end %>><%= ca.name %></option>
               <% end %>
-            </select>&nbsp;
+            </select>
             <select class="ymd" id="car_brands_<%= edit_car_num.c_id %>" name="car_brands_<%= edit_car_num.c_id %>"
                     onchange="choose_model('#car_brands_<%= edit_car_num.c_id %>', '#car_models_<%= edit_car_num.c_id %>')">
               <option value="">--</option>
               <% CarBrand.where(:capital_id => edit_car_num.capital_id).each do |b| %>
                 <option value="<%= b.id %>" <% if edit_car_num.b_id == b.id %>selected<% end %>><%= b.name %></option>
               <% end %>
-            </select>&nbsp;
+            </select>
             <select class="ymd" id="car_models_<%= edit_car_num.c_id %>" name="car_models_<%= edit_car_num.c_id %>">
               <option value="">--</option>
               <% CarModel.where(:car_brand_id => edit_car_num.b_id).each do |m| %>
