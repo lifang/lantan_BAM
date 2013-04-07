@@ -152,9 +152,9 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
-        #@search_materials = Material.normal.all(:conditions => str)
-        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
+#        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+#        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
+     @search_materials = [{"name" => "测试物料", "code" => "0001234", "id" => 15, "types" => 3, "price" => 80.0, "storage" => 1000}]
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
         @search_materials = Material.normal.all(:conditions => str)
@@ -219,16 +219,19 @@ class MaterialsController < ApplicationController
                 params[:selected_items].split(",").each do |item|
                   price += item.split("_")[2].to_f * item.split("_")[1].to_i
                   code = item.split("_")[3]
+                  s_price = item.split("_")[2].to_f
                   m = Material.find_by_code code
-                  if m.nil?
-                    headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?code=#{code}"
-                   # headoffice_api_url = "http://headoffice.gankao.co/api/materials/search_material.json?name=水枪&types=2"
-                    material = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)[0]
-                    m = Material.create(:name => material["name"], :code => material["code"],
-                          :price => material["price"], :types =>material["types"], :status => 0, :storage => 0, :store_id => params[:store_id] )
+                  if m.nil?                   
+                    name = item.split("_")[4]
+                    type_name = item.split("_")[5]
+                    types = Material::TYPES_NAMES.key(type_name)
+                    #                    headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?code=#{code}"
+                    #                    material = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)[0]
+                    m = Material.create(:name => name, :code => code,
+                      :price => s_price, :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
                   end
                   MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
-                      :price => item.split("_")[2].to_f})   if m
+                      :price => s_price})   if m
 
                 end
                 #使用储值抵货款
@@ -286,7 +289,7 @@ class MaterialsController < ApplicationController
       end
     end
   end
-
+  
   def get_act_count
     #puts params[:code]
     sale = Sale.find_by_code params[:code]
