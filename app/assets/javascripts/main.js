@@ -155,3 +155,11 @@ function tishi_alert(message){
     }, 3000);
 }
 
+//center popup div
+function center_popup_div(ele){
+    var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
+    var win_height = document.documentElement.clientHeight;
+    var z_layer_height = $(ele).height();
+    $(ele).css('top',(win_height-z_layer_height)/2 + scolltop);
+}
+
