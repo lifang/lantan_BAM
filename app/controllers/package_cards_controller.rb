@@ -1,5 +1,6 @@
 #encoding: utf-8
 class PackageCardsController < ApplicationController
+  before_filter :sign?
   # 营销管理 -- 套餐卡
   layout 'sale'
 

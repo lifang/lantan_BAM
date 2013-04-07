@@ -1,6 +1,7 @@
 #encoding: utf-8
 class StationsController < ApplicationController
   # 现场管理 -- 施工现场
+  before_filter :sign?
   layout 'station'
 
   #施工现场

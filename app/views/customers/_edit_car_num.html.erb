@@ -1,6 +1,6 @@
 <div id="edit_car_num_<%= edit_car_num.c_id %>" class="tab_popup" style="display:none;">
   <%= form_for :customer, :url=>"/customers/#{@customer.id}_#{edit_car_num.c_id}/edit_car_num", :method => "post",
-    :html => {:onsubmit => "return check_car_num(#{edit_car_num.c_id})"} do %>
+    :html => {:onsubmit => "return edit_car_num(#{edit_car_num.c_id})"} do %>
     <div class="popup_box">
       <h1>编辑车牌号码<a href="javascript:void(0)" class="close">关闭</a></h1>
       <input type="hidden" name="store_id_<%= edit_car_num.c_id %>" name="store_id_<%= edit_car_num.c_id %>"
@@ -16,8 +16,10 @@
             </select>
           </div>
           <div class="item">
-            <label>车牌号码：</label><input type="text" id="car_num_<%= edit_car_num.c_id %>"
-                                       name="car_num_<%= edit_car_num.c_id %>" value="<%= edit_car_num.num %>"/>
+            <label>车牌号码：</label>
+            <input type="text" id="car_num_<%= edit_car_num.c_id %>"
+                   name="car_num_<%= edit_car_num.c_id %>" value="<%= edit_car_num.num %>" 
+                   onblur="check_e_car_num('<%= edit_car_num.c_id %>')" />
           </div>
           <div class="item">
             <label>品牌型号：</label>

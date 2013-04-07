@@ -1,6 +1,6 @@
 #encoding:utf-8
 class MaterialOrderManagesController < ApplicationController
-
+  before_filter :sign?
   layout "complaint"
 
   def index

@@ -107,6 +107,25 @@ function check_car_num() {
     }
 }
 
+function check_e_car_num(c_num_id) {
+    if ($.trim($("#car_num_" + c_num_id).val()) != "") {
+        $.ajax({
+            async:true,
+            dataType:'json',
+            data:{ car_num : $("#car_num_" + c_num_id).val(),
+                car_num_id : c_num_id },
+            url:"/customers/check_e_car_num",
+            type:'post',
+            success : function(data) {
+                if (data.is_has == false) {
+                    tishi_alert("您输入的车牌号码系统中已经存在，点击‘确定’，当前车牌号将修改到当前客户名下。");
+                }
+            }
+        })
+        return false;
+    }
+}
+
 function customer_revisit(order_id, customer_id) {
     popup("#customer_revisit_div");
     $("#rev_order_id").val(order_id);
@@ -145,7 +164,7 @@ function check_process() {
     return true;
 }
 
-function check_car_num(car_num_id) {
+function edit_car_num(car_num_id) {
     if ($.trim($("#buy_year_" + car_num_id).val()) == "") {
         tishi_alert("请输入汽车购买年份");
         return false;

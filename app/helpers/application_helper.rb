@@ -6,6 +6,20 @@ module ApplicationHelper
   include Constant
   include UserRoleHelper
 
+  def sign?
+    puts "------------------------------------"
+    puts signed_in?
+    deny_access unless signed_in?
+  end
+
+  def deny_access
+    redirect_to "/logins"
+  end
+
+  def signed_in?
+    return cookies[:user_id] != nil
+  end
+
   #客户管理提示信息
   def customer_tips
     @complaints = Complaint.find_by_sql(["select c.reason, c.suggestion, o.code, cu.name, ca.num, cu.id cu_id, o.id o_id
@@ -77,18 +91,6 @@ module ApplicationHelper
       end
     end
     check
-  end
-
-  def sign?
-    deny_access unless signed_in?
-  end
-
-  def deny_access
-    redirect_to root_path
-  end
-
-  def signed_in?
-    return cookies[:user_id] != nil
   end
 
   def get_last_twelve_months

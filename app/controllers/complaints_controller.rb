@@ -1,5 +1,6 @@
 #encoding: utf-8
 class ComplaintsController < ApplicationController
+  before_filter :sign?
   layout "complaint"
   #投诉分类统计
   def index

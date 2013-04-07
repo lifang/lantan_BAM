@@ -1,5 +1,6 @@
 #encoding: utf-8
 class CurrentMonthSalariesController < ApplicationController
+  before_filter :sign?
   layout "staff"
 
   before_filter :get_store

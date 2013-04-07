@@ -1,5 +1,6 @@
 #encoding: utf-8
 class SalariesController < ApplicationController
+  before_filter :sign?
 
   def destroy
     @store = Store.find_by_id(params[:store_id])

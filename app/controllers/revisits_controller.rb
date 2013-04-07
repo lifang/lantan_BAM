@@ -1,5 +1,6 @@
 #encoding: utf-8
 class RevisitsController < ApplicationController
+  before_filter :sign?
   layout "customer"
   def index
     session[:started_at] = nil

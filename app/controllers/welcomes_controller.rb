@@ -1,6 +1,6 @@
 #encoding: utf-8
 class WelcomesController < ApplicationController
-  
+  before_filter :sign?
   before_filter :customer_tips
 
   def index

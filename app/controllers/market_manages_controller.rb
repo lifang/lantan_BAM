@@ -1,5 +1,6 @@
 #encoding: utf-8
 class MarketManagesController < ApplicationController
+  before_filter :sign?
   layout "complaint"
   require 'will_paginate/array'
 
