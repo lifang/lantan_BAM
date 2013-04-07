@@ -28,14 +28,14 @@ class ComplaintsController < ApplicationController
   def show_detail
     total = Complaint.search_detail(params[:store_id])
     @complaint = total.paginate(:page=>params[:page],:per_page=>10)
-    non_time = Complaint.search_non(params[:store_id],0)
-    un_done = Complaint.search_non(params[:store_id],1)
+    non_time = Complaint.search_detail(params[:store_id],0)
+    un_done = Complaint.search_detail(params[:store_id],1)
     @staff_name ={}
     @complaint.each do |comp|
       @staff_name[comp.id]=Staff.where("id in (#{comp.staff_id_1},#{comp.staff_id_2})").map(&:name).join("、 ") if comp.staff_id_1 and comp.staff_id_2
     end
-    @non =(non_time.num*100.0/total.num).round(1)
-    @undo =((total.num-un_done.num)*100.0/total.num).round(1)
+    @non =(non_time.size*100.0/total.size).round(1)
+    @undo =((total.size-un_done.size)*100.0/total.size).round(1)
   end
 
   #满意度统计页

@@ -111,16 +111,13 @@ class Complaint < ActiveRecord::Base
     return ChartImage.find_by_sql(sql)[0]
   end
 
-  def self.search_detail(store_id)
-    return Complaint.find_by_sql("select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
-    where c.store_id=#{store_id} and date_format(now(),'%Y-%m')=date_format(c.created_at,'%Y-%m') order by created_at desc")
-  end
-
-  def self.search_non(store_id,num=nil)
-    sql ="select count(*) num from complaints  where store_id=#{store_id} and date_format(created_at,'%Y-%m')=date_format(now(),'%Y-%m')"
-    sql += " and TO_DAYS(process_at)=TO_DAYS(created_at)"  if num==0
-    sql += " and process_at is null " if num==1
-    return Complaint.find_by_sql(sql)[0]
+  def self.search_detail(store_id,num=nil)
+    sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
+    where c.store_id=#{store_id} and date_format(now(),'%Y-%m')=date_format(c.created_at,'%Y-%m') "
+     sql += " and TO_DAYS(c.process_at)=TO_DAYS(c.created_at)"  if num==0
+    sql += " and c.process_at is null " if num==1
+    sql += " order by c.created_at desc"
+    return Complaint.find_by_sql(sql)
   end
 
   def self.search_one(store_id,time,num=nil)

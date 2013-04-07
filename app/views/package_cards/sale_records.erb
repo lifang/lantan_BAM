@@ -61,7 +61,7 @@
                     <td><%= card.name %></td>
                     <td><%= card.mobilephone %></td>
                     <td><%= card.price %></td>
-                    <%stat=card.content.nil?? [] : card.content.split(",")%>
+                    <%  stat = card.content.nil? ? [] : card.content.split(",")%>
                     <td><%= stat.collect{|prod| prod.split("-")[1]+" 剩余#{prod.split("-")[2]}次" }.join(" ") %></td>
                     <td><%= CPcardRelation::STATUS_NAME[card.status] %></td>
                   </tr>
