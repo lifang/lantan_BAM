@@ -5,7 +5,7 @@ class StationsController < ApplicationController
 
   #施工现场
   def index
-    @stations =Station.where("store_id=#{params[:store_id]}")
+    @stations =Station.where("store_id=#{params[:store_id]} and status !=#{Station::STAT[:DELETED]}")
     sql=Station.make_data(params[:store_id])
     work_orders=WorkOrder.find_by_sql(sql).inject(Hash.new) { |hash, a| hash[a.status].nil? ? hash[a.status]=[a] : hash[a.status] << a;hash}
     waits =work_orders[WorkOrder::STAT[:WAIT_PAY]].nil? ? {} : work_orders[WorkOrder::STAT[:WAIT_PAY]]
@@ -22,7 +22,7 @@ class StationsController < ApplicationController
   end
 
   def show_detail
-    @stations =Station.where("store_id=#{params[:store_id]}")
+    @stations =Station.where("store_id=#{params[:store_id]} and status !=#{Station::STAT[:DELETED]}")
     @t_infos={}
     @stations.each do |station|
       staff=StationStaffRelation.find_by_sql("select staff_id from station_staff_relations where station_id=#{station.id} and current_day='#{Time.now.strftime("%Y%m%d")}' ")

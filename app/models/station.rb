@@ -16,7 +16,7 @@ class Station < ActiveRecord::Base
     s_levels ={}  #所需技师等级
     l_staffs ={}  #现有等级的技师
     next_turn=[]
-    stations=Station.where("store_id=#{store_id} and status != #{Station::STAT[:WRONG]}")
+    stations=Station.where("store_id=#{store_id} and status != #{Station::STAT[:WRONG]} and status !=#{Station::STAT[:DELETED]}")
     stations.each do |station|
       prod=Product.find_by_sql("select staff_level level1,staff_level_1 level2 from products p inner join station_service_relations  s on
       s.product_id=p.id where s.station_id=#{station.id}").inject(Array.new) {|sum,level| sum.push(level.level1,level.level2)}.compact.uniq.sort

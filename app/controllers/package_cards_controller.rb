@@ -2,6 +2,7 @@
 class PackageCardsController < ApplicationController
   # 营销管理 -- 套餐卡
   layout 'sale'
+  require 'will_paginate/array'
 
   def index
     @cards=PackageCard.paginate_by_sql("select name,img_url,started_at,ended_at,id from package_cards where store_id=#{params[:store_id]}
@@ -27,9 +28,10 @@ class PackageCardsController < ApplicationController
 
 
   def sale_records
-    @cards=PackageCard.search_pcard(params[:store_id],params[:page])
-    @card_fee =@cards.inject(0) {|num,card| num+card.price }
-    @pcards =PackageCard.where(:status=>PackageCard::STAT[:NORMAL]).inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
+    p_cards =PackageCard.search_pcard(params[:store_id])
+    @cards=p_cards.paginate(:page=>params[:page],:per_page=>10)
+    @card_fee = p_cards.inject(0) {|num,card| num+card.price }
+    @pcards =p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
     p @pcards
     #content中存放使用情况 将所有产品或服务以字符串组合存放，包含 产品id,name,剩余次数
   end #销售记录
@@ -87,9 +89,10 @@ class PackageCardsController < ApplicationController
   end
 
   def search_list
-    @cards=PackageCard.search_pcard(params[:store_id],params[:page],session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at])
-    @card_fee =@cards.inject(0) {|num,card| num+card.price }
-    @pcards =PackageCard.where(:status=>PackageCard::STAT[:NORMAL]).inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
+    p_cards=PackageCard.search_pcard(params[:store_id],session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at])
+    @cards=p_cards.paginate(:page=>params[:page],:per_page=>10)
+    @card_fee = p_cards.inject(0) {|num,card| num+card.price }
+    @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
     render "sale_records"
   end
   

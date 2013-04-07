@@ -5,7 +5,7 @@
   <div><label>统计月份：</label>
     <%=@complaint.nil? ? session[:created_at].nil? ? "" : session[:created_at].to_datetime.strftime("%Y-%m") : @complaint.current_day.strftime("%Y-%m") %></div>
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/search" do%>
-    <div><label>时间：</label><input name="created_at" type="text"  class="Wdate" readonly onclick="WdatePicker()" value="<%= session[:created_at] %>" /></div>
+    <div><label>时间：</label><input name="created_at" type="text"  class="Wdate" readonly onclick="WdatePicker({dateFmt:'yyyy-M',vel:'d244_2'})" value="<%= session[:created_at] %>" /></div>
     <div><button class="search_btn" >查询</button></div>
   <% end %>
 </div>
