@@ -2,7 +2,9 @@ $(".mask").hide();
 $("#process").html('');
 <% if !@rewards.nil? %>
   $("#reward_tab").html('<%= escape_javascript(render :partial => '/staffs/reward_tab') %>');
+  tishi_alert("处理奖励成功!");
 <% end %>
 <% if !@violations.nil? %>
   $("#violation_tab").html('<%= escape_javascript(render :partial => '/staffs/violation_tab') %>');
+  tishi_alert("处理违规成功!");
 <% end %>

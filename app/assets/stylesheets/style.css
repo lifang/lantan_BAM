@@ -6,7 +6,7 @@ ul { list-style: none;}
 img { border: none;}
 button { cursor: pointer; font-family: "微软雅黑"; border: none; background: #CCC;}
 input {font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
-input[type="button"] {font-family: "微软雅黑"; border: none; background: #CCC;}
+input[type="button"] {font-family: "微软雅黑"; border: none; background: #CCC; cursor:pointer;}
 textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
 .box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
@@ -347,8 +347,7 @@ a.compile_btn { width: 100px;}
 .item { margin: 10px; float: left; overflow: hidden; width: 295px; height: 30px; line-height: 24px;}
 .item.item_width { width: 460px;}
 
-.item.show_pic { width: 460px; height: 50px;}
-.item.show_pic img { margin-left: 10px;}
+.item .show_pic { width: 100px; height: 100px; position: absolute; z-index:1000; display: none;}
 
 .item_title { font-size: 16px; line-height: 32px; padding-left: 55px;}
 .item_add { float: right; margin-right: 49px;}
@@ -372,7 +371,7 @@ a.compile_btn { width: 100px;}
 
 .item input.file { width: 100px; _width: 90px; float: left;}
 input.file { width: 100px; _width: 90px; float: left;}
-.file_btn { width: 55px; height: 26px; line-height: 26px; margin-left: 5px; background: #ccc;float: left;}
+.file_btn { width: 55px; height: 26px; line-height: 26px; margin-left: 5px; background: #ccc;float: left; cursor:pointer;}
 .item select {float: left;}
 .item select.staff { width: 70px; margin-right: 20px; _margin-right: 16px;}
 .item select.ymd { width: 50px; margin-right: 5px;}
