@@ -33,7 +33,7 @@ class StationsController < ApplicationController
   end
 
   def create
-    stations =Station.where("store_id=#{params[:store_id]}")
+    stations =Station.where("store_id=#{params[:store_id]} and status !=#{Station::STAT[:DELETED]}")
     stations.each {|station|
       if params[:"stat#{station.id}"].to_i==Station::STAT[:NORMAL]
         station.update_attributes(:status=>params[:"stat#{station.id}"].to_i)
