@@ -1,6 +1,6 @@
 #encoding: utf-8
 class StaffsController < ApplicationController
-
+  before_filter :sign?
   layout "staff"
 
   before_filter :get_store

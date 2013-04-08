@@ -1,5 +1,7 @@
 #encoding: utf-8
 class OrdersController < ApplicationController
+  before_filter :sign?
+  
   def order_info
     @order = Order.one_order_info(params[:id].to_i)
     @order_prods = OrderProdRelation.order_products(@order)

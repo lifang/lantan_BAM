@@ -1,5 +1,6 @@
 #encoding: utf-8
 class CustomersController < ApplicationController
+  before_filter :sign?
   include RemotePaginateHelper
   layout "customer"
   before_filter :customer_tips
@@ -49,11 +50,14 @@ class CustomersController < ApplicationController
           :address => params[:address], :status => Customer::STATUS[:NOMAL],
           :types => Customer::TYPES[:NORMAL], :is_vip => Customer::IS_VIP[:NORMAL])
         car_num = CarNum.find_by_num(params[:new_car_num].strip)
-        car_num = car_num.nil? ? 
-          CarNum.create(:num => params[:new_car_num].strip, :buy_year => params[:buy_year], :car_model_id => params[:car_models]) :
+        if car_num.nil?
+          car_num = CarNum.create(:num => params[:new_car_num].strip, :buy_year => params[:buy_year], :car_model_id => params[:car_models])
+        else
           car_num.update_attributes(:buy_year => params[:buy_year], :car_model_id => params[:car_models])
+        end
         CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
         CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
+        flash[:notice] = "客户信息创建成功。"
       end
     end
     redirect_to "/stores/#{params[:store_id]}/customers"
@@ -65,13 +69,14 @@ class CustomersController < ApplicationController
       customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
         :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
         :address => params[:address])
+      flash[:notice] = "客户信息更新成功。"
     end
     redirect_to request.referer
   end
 
   def customer_mark
     customer = Customer.find(params[:c_customer_id].to_i)
-    customer.update_attributes(:mark => params[:mark].strip)
+    customer.update_attributes(:mark => params[:mark].strip) if params[:mark]
     flash[:notice] = "备注成功。"
     redirect_to "/stores/#{params[:store_id]}/customers"
   end
@@ -151,13 +156,12 @@ class CustomersController < ApplicationController
     car_num = CarNum.find_by_num(params["car_num_#{car_num_id}"].strip)
     if car_num.nil? or car_num.id == current_car_num.id
       current_car_num.update_attributes(:num => params["car_num_#{car_num_id}"].strip,
-        :buy_year => params["buy_year_#{car_num_id}"].to_i, :car_model_id => params["car_models_#{car_num_id}"].to_i)
-      flash[:notice] = "车牌号码信息修改成功。"
-      puts "true"
+        :buy_year => params["buy_year_#{car_num_id}"].to_i, :car_model_id => params["car_models_#{car_num_id}"].to_i)      
     else
-      puts "false"
-      flash[:notice] = "车牌号码在系统中已经存在。"
+      CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
+      CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer_id.to_i)
     end
+    flash[:notice] = "车牌号码信息修改成功。"
     redirect_to "/stores/#{params["store_id_#{car_num_id}"]}/customers/#{customer_id}"
   end
 
@@ -182,6 +186,16 @@ class CustomersController < ApplicationController
     respond_to do |format|
       format.json {
         render :json => {:is_has => car_num.nil?}
+      }
+    end
+  end
+
+  def check_e_car_num
+    car_num = CarNum.find_by_num(params[:car_num].strip)
+    is_has = (car_num.nil? or (!car_num.nil? and (car_num.id == params[:car_num_id].to_i))) ? true : false
+    respond_to do |format|
+      format.json {
+        render :json => {:is_has => is_has}
       }
     end
   end

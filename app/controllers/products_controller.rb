@@ -1,5 +1,6 @@
 #encoding: utf-8
 class ProductsController < ApplicationController
+  before_filter :sign?
   # 营销管理 -- 产品
   layout 'sale'
 

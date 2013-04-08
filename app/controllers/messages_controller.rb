@@ -1,5 +1,6 @@
 #encoding: utf-8
 class MessagesController < ApplicationController
+  before_filter :sign?
   layout "customer"
   
   def index

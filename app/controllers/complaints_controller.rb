@@ -1,5 +1,6 @@
 #encoding: utf-8
 class ComplaintsController < ApplicationController
+  before_filter :sign?
   layout "complaint"
   require 'will_paginate/array'
 

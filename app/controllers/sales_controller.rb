@@ -1,5 +1,6 @@
 #encoding: utf-8
 class SalesController < ApplicationController    #营销管理 -- 活动
+  before_filter :sign?
   layout 'sale'
 
   #活动列表

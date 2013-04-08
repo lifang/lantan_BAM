@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8"/>
     <title>门店后台管理系统</title>
-    <%= stylesheet_link_tag    "login" %>
-    <%= javascript_include_tag  "application", "logins.js" %>
+    <%= stylesheet_link_tag    "application", "login" %>
+    <%= javascript_include_tag  "application", "logins.js", "main" %>
     <%= csrf_meta_tags %>
     <!--[if IE 6]>
     <script src="/assets/DD_belatedPNG_0.0.8a-min.js"></script>
@@ -25,6 +25,8 @@
         <% end %>
       </div>
     </div>
-    <div><%= flash[:error] %></div>
+    <div>
+      <%= render :partial => "/shared/tishi_alert" %>
+    </div>
   </body>
 </html>

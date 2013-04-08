@@ -87,7 +87,7 @@ class MaterialsInOutsController < ApplicationController
 
   def find_store
     if cookies[:user_id].nil?
-      flash[:error] = "请先选择用户！"
+      flash[:notice] = "请先选择用户！"
       redirect_to request.referrer and return
     end
     @staff = Staff.find(cookies[:user_id])

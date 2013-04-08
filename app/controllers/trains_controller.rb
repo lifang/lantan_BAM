@@ -1,6 +1,6 @@
 #encoding: utf-8
 class TrainsController < ApplicationController
-
+  before_filter :sign?
   layout "staff"
 
   def create

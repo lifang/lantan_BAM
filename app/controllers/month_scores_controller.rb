@@ -1,6 +1,6 @@
 #encoding: utf-8
 class MonthScoresController < ApplicationController
-  
+  before_filter :sign?
   def update
     @store = Store.find_by_id(params[:store_id])
     month_score = MonthScore.find_by_id(params[:id])
