@@ -55,29 +55,30 @@ class RolesController < ApplicationController
   #角色功能设定
   def set_role
     if params[:role_id]
-      role = Role.find(params[:role_id])
+      role_id = params[:role_id]
       if params[:menu_checks] #处理角色-菜单设置
         params[:menu_checks].each do |menu_id|
-          if RoleMenuRelation.where(:menu_id => menu_id, :role_id => role.id).empty?
-            RoleMenuRelation.create(:menu_id => menu_id, :role_id => role.id)
+          if RoleMenuRelation.where(:menu_id => menu_id, :role_id => role_id).empty?
+            RoleMenuRelation.create(:menu_id => menu_id, :role_id => role_id)
           end
         end
-        deleted_ids = RoleMenuRelation.where(:role_id => role.id).map(&:menu_id) - params[:menu_checks].map(&:to_i)
-        RoleMenuRelation.delete_all(:role_id => role.id, :menu_id => deleted_ids) unless deleted_ids.empty?
+        deleted_ids = RoleMenuRelation.where(:role_id => role_id).map(&:menu_id) - params[:menu_checks].map(&:to_i)
+        RoleMenuRelation.delete_all(:role_id => role_id, :menu_id => deleted_ids) unless deleted_ids.empty?
       end
       if params[:model_nums] #处理角色-功能模块设置
         params[:model_nums].each do |controller, num|
-          role_model_relation = RoleModelRelation.where(:role_id => role.id, :model_name => controller)
+          role_model_relation = RoleModelRelation.where(:role_id => role_id, :model_name => controller)
           if role_model_relation.empty?
-            RoleModelRelation.create(:num => num.map(&:to_i).sum, :role_id => role.id, :model_name => controller)
+            RoleModelRelation.create(:num => num.map(&:to_i).sum, :role_id => role_id, :model_name => controller)
           else
             role_model_relation.first.update_attributes(:num => num.map(&:to_i).sum)
           end
         end
-        deleted_menus = RoleModelRelation.where(:role_id => role.id).map(&:model_name) - params[:model_nums].keys
-        RoleModelRelation.delete_all(:role_id => role.id, :model_name => deleted_menus) unless deleted_menus.empty?
+        deleted_menus = RoleModelRelation.where(:role_id => role_id).map(&:model_name) - params[:model_nums].keys
+        RoleModelRelation.delete_all(:role_id => role_id, :model_name => deleted_menus) unless deleted_menus.empty?
       end
     end
+    flash[:notice] = "设置成功!"
     redirect_to store_roles_url(params[:store_id])
   end
 
