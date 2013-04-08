@@ -152,9 +152,9 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
-#        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-#        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
-     @search_materials = [{"name" => "测试物料", "code" => "0001234", "id" => 15, "types" => 3, "price" => 80.0, "storage" => 1000}]
+        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
+     #@search_materials = [{"name" => "测试物料", "code" => "0001234", "id" => 15, "types" => 3, "price" => 80.0, "storage" => 1000}]
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
         @search_materials = Material.normal.all(:conditions => str)
