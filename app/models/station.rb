@@ -7,7 +7,7 @@ class Station < ActiveRecord::Base
   has_many :products, :through => :station_service_relations
   belongs_to :store
   STAT = {:WRONG =>0,:NORMAL =>2,:LACK =>1,:NO_SERVICE =>3, :DELETED => 4} #0 故障 1 缺少技师 2 正常 3 无服务
-  STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常", 4 => "删除"}
+  STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常"}
   PerPage = 10
   validates :name, :presence => true
   scope :valid, where("status != 4")
@@ -16,7 +16,7 @@ class Station < ActiveRecord::Base
     s_levels ={}  #所需技师等级
     l_staffs ={}  #现有等级的技师
     next_turn=[]
-    stations=Station.where("store_id=#{store_id} and status != #{Station::STAT[:WRONG]}")
+    stations=Station.where("store_id=#{store_id} and status != #{Station::STAT[:WRONG]} and status !=#{Station::STAT[:DELETED]}")
     stations.each do |station|
       prod=Product.find_by_sql("select staff_level level1,staff_level_1 level2 from products p inner join station_service_relations  s on
       s.product_id=p.id where s.station_id=#{station.id}").inject(Array.new) {|sum,level| sum.push(level.level1,level.level2)}.compact.uniq.sort

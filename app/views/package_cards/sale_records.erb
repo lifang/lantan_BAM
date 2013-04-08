@@ -24,9 +24,9 @@
           </div>
           <div>
             <label>时间：</label>
-            <input name="created_at" type="text" onclick="WdatePicker()" value="<%= session[:created_at] %>" />
+            <input name="created_at" type="text" onclick="WdatePicker()" value="<%= session[:created_at] %>" class="Wdate" readonly />
             &nbsp;到&nbsp;
-            <input name="ended_at" type="text" onclick="WdatePicker()" value="<%= session[:ended_at] %>" />
+            <input name="ended_at" type="text" onclick="WdatePicker()" value="<%= session[:ended_at] %>" class="Wdate" readonly />
           </div>
           <div><label>车牌号：</label><input name="car_num" type="text" value="<%= session[:car_num] %>" /></div>
           <div><label>客户名称：</label><input name="c_name" type="text" value="<%= session[:c_name] %>" /></div>
@@ -61,7 +61,7 @@
                     <td><%= card.name %></td>
                     <td><%= card.mobilephone %></td>
                     <td><%= card.price %></td>
-                    <%stat=card.content.nil?? [] : card.content.split(",")%>
+                    <%  stat = card.content.nil? ? [] : card.content.split(",")%>
                     <td><%= stat.collect{|prod| prod.split("-")[1]+" 剩余#{prod.split("-")[2]}次" }.join(" ") %></td>
                     <td><%= CPcardRelation::STATUS_NAME[card.status] %></td>
                   </tr>

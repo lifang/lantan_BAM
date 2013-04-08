@@ -1,7 +1,7 @@
 <%=  render 'second_menu'%>
 <div class="data_menu">
   <% if permission?(:datas, :add_target) %>
-    <a href="javascript:void(0)" onclick="show_center('.tab_popup');">定制目标销售额</a>
+    <a href="javascript:void(0)" onclick="show_center('.goal_mark');">定制目标销售额</a>
   <% end %>
 </div>
 <div class="clear"></div>
@@ -27,12 +27,12 @@
             <tr>
               <td> <%="#{sale.started_at.strftime("%Y.%m.%d")}-#{sale.ended_at.strftime("%Y.%m.%d")}" %></td>
               <td>
-                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                <table width="720" border="0" cellspacing="1" cellpadding="0" class="s_table">
                   <tr class="fws">
-                    <td>分类</td>
-                    <td>目标销售额（元）</td>
-                    <td>目前完成销售额（元）</td>
-                    <td>目前完成百分比</td>
+                    <td width="300px">分类</td>
+                    <td width="140px">目标销售额（元）</td>
+                    <td width="140px">目前完成销售额（元）</td>
+                    <td width="140px">目前完成百分比</td>
                   </tr>
                   <% @goal_hash[sale.id].each_with_index do |goal,index| %>
                     <tr>
@@ -70,10 +70,10 @@
               <td>
                 <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                   <tr class="fws">
-                    <td>分类</td>
-                    <td>目标销售额（元）</td>
-                    <td>目前完成销售额（元）</td>
-                    <td>目前完成百分比</td>
+                    <td width="300px">分类</td>
+                    <td width="140px">目标销售额（元）</td>
+                    <td width="140px">目前完成销售额（元）</td>
+                    <td width="140px">目前完成百分比</td>
                   </tr>
                   <% @goal_hash[sale.id].each_with_index do |goal,index| %>
                     <tr>
@@ -85,7 +85,7 @@
                   <% end unless @goal_hash[sale.id].blank? %>
                 </table>
               </td>
-              <td><%= ((sale.ended_at-Time.now)/86400.00).to_i%>天</td>
+              <td>--</td>
             </tr>
           <% end %>
         </tbody>
@@ -97,7 +97,7 @@
 </div>
 
 <div class="mask"></div>
-<div class="tab_popup" style="display: none;">
+<div class="tab_popup goal_mark" style="display: none;">
   <div class="popup_box">
     <h1>定制目标销售额<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
