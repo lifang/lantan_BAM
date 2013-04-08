@@ -5,9 +5,9 @@
               <div class="data_body_title">
                    <div class="data_body_p">
                      <span>姓名：<%= @staff.name %></span>
-                     <span>岗位：<%= Staff::N_COMPANY[@staff.position] %></span>
+                     <span>岗位：<%= Staff::N_HEAD[@staff.position] %></span>
                      <span>等级职称：<%= Staff::LEVELS[@staff.level] %></span>
-                     <span>职务：<%= Staff::N_HEAD[@staff.type_of_w] %></span>
+                     <span>职务：<%= Staff::N_COMPANY[@staff.type_of_w] %></span>
                      <% if permission?(:staffs, :edit_show_staff) %><a href="javascript:void(0)" id="staff_detail">详情</a><% end %></div>
               </div>
               <div class="clear"></div>

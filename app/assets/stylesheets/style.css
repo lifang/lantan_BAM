@@ -308,7 +308,16 @@ a.compile_btn { width: 100px;}
 .search.paddin_left { padding-left: 40px;}
 
 /*tab_popup*/
-.tab_popup { width: 650px; padding: 10px; background: url(/assets/black.png) repeat; border-radius: 0.6em;}
+
+.tab_popup { 
+    width: 650px; 
+	padding: 10px; 
+	background: url(/assets/black.png) repeat; 
+	border-radius: 0.6em;
+	display: none;
+    position: absolute;
+    z-index: 100;
+}
 .popup_box { background: #FFF;}
 .popup_box h1 {
     height: 32px;
@@ -364,7 +373,6 @@ a.compile_btn { width: 100px;}
 .item_textarea ul { overflow: hidden; padding: 10px 0 0px 115px;}
 .item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
 
-.item_textarea input { float:left;}
 
 .item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 90px;  margin-right:10px;text-align: right;}
@@ -378,6 +386,9 @@ input.file { width: 100px; _width: 90px; float: left;}
 
 .item_textarea { margin: 20px 10px; float: left; overflow: hidden; width: 590px;}
 .width_textarea { width: 460px;}
+
+.width_div { width: 460px; line-height:24px; float: left; padding-top: 2px;}
+.width_div span { margin: 0px 8px; float: left;}
 
 .width_input { width: 385px; height: 24px;}
 
@@ -399,14 +410,6 @@ input.file { width: 100px; _width: 90px; float: left;}
 .suggest a:hover { background: #f5f5f5;}
 
 
-
-/*入库 出库 订货*/
-
-.tab_popup {
-    display: none;
-    position: absolute;
-    z-index: 100;
-}
 /*添加套餐卡*/
 .card_content { padding: 0 25px;}
 
