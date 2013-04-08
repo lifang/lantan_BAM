@@ -291,15 +291,15 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 
 .search select.select_marginRight { margin-right: 10px;}
-.input[type="button"].search_btn, .search_btn, .compile_btn, a.compile_btn {
-    display: block;
-    height: 24x;
-    line-height: 24px;
-    text-align: center;
-    background: #930205;
-    border: none;
-    padding: 0 10px;
-    color: #FFF;
+.input[type="button"].search_btn, .search .search_btn, .search_btn, .compile_btn, a.compile_btn {
+	line-height: 25px;
+	height: 25px;
+	text-align: center;
+	background: #930205;
+	border: none;
+	padding: 0 10px;
+	color: #FFF;
+	display: block;
 }
 a.compile_btn { width: 100px;}
 
