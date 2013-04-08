@@ -45,7 +45,7 @@
                    <div style="display:none;">
                         <div class="search">
                              <div>本月评估：
-                               <input name="" type="text" value="<%= current_month_access_result(@current_month_score) %>" disabled/>
+                               <input id="assess_result" name="" type="text" value="<%= current_month_access_result(@current_month_score) %>" disabled/>
                              </div>
                              <div>系统打分：
                                <span id="sys_score_text"><%= @current_month_score.nil? ? "系统没有上一个月的绩效记录" : @current_month_score.sys_score %></span>
@@ -60,7 +60,7 @@
                              <div style="width:150px;">
                                <% if permission?(:staffs, :manager_score) %>
                                <% unless @current_month_score.nil? %>
-                                 <span style="float:left"><%= @current_month_score.sys_score %></span>
+                                 <span style="float:left" id="month_score_val"><%= @current_month_score.manage_score %></span>
                                <% end %>
                                <button class="search_btn" id="manage_score_btn" style="float:left;margin-left:5px;">店长打分</button>
                                <% end %>

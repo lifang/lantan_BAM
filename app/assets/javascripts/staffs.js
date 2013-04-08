@@ -8,6 +8,26 @@ function remove_area(parent, close, cancel){
     return false;
 }
 
+function assess_result(sys_score, manage_score){
+    var total = parseInt(sys_score) + parseInt(manage_score);
+    if(total >= 90){
+        result = "优秀";
+    }
+    if(total >= 80 && total < 90){
+        result = "良好";
+    }
+    if(total >= 70 && total < 80){
+        result = "一般";
+    }
+    if(total >= 60 && total < 70){
+        result = "及格";
+    }
+    if(total < 60){
+        result = "不及格";
+    }
+    return result;
+}
+
 $(document).ready(function(){
 
     $("#staffs_table").tablesorter({
@@ -174,7 +194,7 @@ $(document).ready(function(){
            return false;
        }
        if($(this).attr("id") == "new_staff_btn"){
-           if($(this).parents('form').find("#sale_img").val() == ''){
+           if($(this).parents('form').find("#staff_photo").val() == ''){
                tishi_alert("照片不能为空!");
                return false;
            }
@@ -325,6 +345,7 @@ $(document).ready(function(){
        var sys_score = $("#sys_score_input").val();
        var store_id = $("#store_id").val();
        var month_score_id = $(this).attr("name");
+       var manage_score = $("#month_score_val").text();
        $.ajax({
             type : 'get',
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
@@ -338,6 +359,7 @@ $(document).ready(function(){
                    this_obj.next().show();
                    $("#sys_score_text").text(sys_score).show();
                    $("#sys_score_input").hide();
+                   $("#assess_result").val(assess_result(sys_score, manage_score));
                }
             }
         });

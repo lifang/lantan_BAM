@@ -4,7 +4,7 @@
     <div><label>时间：</label>
       <input name="created" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_created] %>"  class="Wdate"/>&nbsp;到&nbsp;
       <input name="ended" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_ended] %>" class="Wdate"/></div>
-    <div><input name="time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>"  <%if session[:time]==Sale::DISC_TIME[:DAY]%>checked<%end%> />日&nbsp;&nbsp;
+    <div><input name="time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>"  checked />日&nbsp;&nbsp;
       <input name="time" type="radio" value="<%= Sale::DISC_TIME[:WEEK] %>" <%if session[:time]==Sale::DISC_TIME[:WEEK]%>checked<%end%> />周&nbsp;&nbsp;
       <input name="time" type="radio" value="<%= Sale::DISC_TIME[:MONTH] %>" <%if session[:time]==Sale::DISC_TIME[:MONTH]%>checked<%end%> />月</div>
     <div><button class="search_btn">查询</button></div>
@@ -33,12 +33,12 @@
             <tr>
               <td><%= key %></td>
               <td>
-                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                <table width="720" border="0" cellspacing="1" cellpadding="0" class="s_table">
                   <tr class="fws">
-                    <td>服务项目</td>
-                    <td>服务代码</td>
-                    <td>数量</td>
-                    <td>合计（元）</td>
+                    <td width="300px">服务项目</td>
+                    <td width="140px">服务代码</td>
+                    <td width="140px">数量</td>
+                    <td width="140px">合计（元）</td>
                   </tr>
                   <%prod.each_with_index do |pro,index|%>
                     <tr>
@@ -75,10 +75,10 @@
               <td>
                 <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                   <tr class="fws">
-                    <td>商品名称</td>
-                    <td>商品编号</td>
-                    <td>数量</td>
-                    <td>合计（元）</td>
+                    <td width="300px">商品名称</td>
+                    <td width="140px">商品编号</td>
+                    <td width="140px">数量</td>
+                    <td width="140px">合计（元）</td>
                   </tr>
                   <%prod.each_with_index do |pro,index|%>
                     <tr>
@@ -115,11 +115,11 @@
               <td>
                 <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                   <tr class="fws">
-                    <td>商品名称</td>
-                    <td>商品编号</td>
-                    <td>免费性质</td>
-                    <td>数量</td>
-                    <td>合计（元）</td>
+                    <td width="320px">商品名称</td>
+                    <td width="100px">商品编号</td>
+                    <td width="100px">免费性质</td>
+                    <td width="100px">数量</td>
+                    <td width="100px">合计（元）</td>
                   </tr>
                   <%prod.each_with_index do |pro,index|%>
                     <tr>

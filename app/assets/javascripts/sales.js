@@ -43,9 +43,13 @@ function publish_sale(e){
         tishi_alert("请选择是否需要总店补贴")
         return false;
     }
-    if ((img != "" || img.length !=0) && pic_format.indexOf(img.split(".")[img.split(".").length-1])== -1){
-        tishi_alert("请选择正确格式的图片！")
+    if (img == "" || img.length ==0){
+        tishi_alert("or not");
+        return false;
     }
+//    if ((img != "" || img.length !=0) && pic_format.indexOf(img.split(".")[img.split(".").length-1])== -1){
+//        tishi_alert("请选择正确格式的图片！")
+//    }
     if (parseInt(subsidy)==1 && $("#sub_content").val().length == 0){
         tishi_alert("请输入补贴金额");
         return false;
@@ -53,7 +57,7 @@ function publish_sale(e){
 
     $("#intro").val(editor.html());
     $("#one_sale").submit();
-    $(e).removeAttr("onclick");
+//    $(e).removeAttr("onclick");
 }
 
 function input_time(){
@@ -212,4 +216,24 @@ function check_station(){
         $("#change_station").submit();
     }
 
+}
+
+function show_pic(){
+    var y = 50;
+    var doc_width = $(document).width();
+    $("input.file").mouseover(function(){
+        $(this).parent().find("#card_pic").css("display","block");
+    }).mouseout(function(){
+        $(this).parent().find("#card_pic").css("display","none");
+    }).mousemove(function(e){
+        var left = e.pageX-(doc_width-$(".add_tab").width())/2
+        if ($(".add_tab").length==0){
+            left=e.pageX;
+            y=e.pageY;
+        }
+        $(this).parent().find("#card_pic").css({
+            "top":y+"px",
+            "left":left+"px"
+        })
+    })
 }
