@@ -204,13 +204,14 @@ class MaterialsController < ApplicationController
             #向总部订货
             if params[:supplier].to_i == 0
               #生成订单
-              m_status = MaterialOrder::STATUS[:pay_not_send]
+              m_status = MaterialOrder::STATUS[:pay]
               if params[:pay_type].to_i == 5
-                m_status = MaterialOrder::STATUS[:no_send_no_pay]
+                m_status = MaterialOrder::STATUS[:no_pay]
               end
               material_order = MaterialOrder.create({
                   :supplier_id => params[:supplier], :supplier_type => Supplier::TYPES[:head],
                   :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => m_status,
+                  :m_status => MaterialOrder::M_STATUS[:no_send],
                   :staff_id => cookies[:user_id],:store_id => params[:store_id]
                 })
               if material_order
