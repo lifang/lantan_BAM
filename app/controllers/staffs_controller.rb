@@ -65,7 +65,7 @@ class StaffsController < ApplicationController
     @staff = Staff.find_by_id(params[:id])
     photo = params[:staff][:photo]
     params[:staff][:photo] = photo.original_filename unless photo.nil?
-    @staff.update_attributes(params[:staff]) if @staff
+    @staff.update_attributes(params[:staff]) and flash[:notice] = "更新员工成功" if @staff
     #update picture
     @staff.operate_picture(photo, "update") if !photo.nil? && @staff
     redirect_to store_staff_path(@store, @staff)
