@@ -82,10 +82,10 @@ module Constant
     }
   }
 
-  #上传图片的比例
-  SALE_PICSIZE =[50,300,230,663]
+  #上传图片的比例,如需更改请追加，部分已按index引用
+  SALE_PICSIZE =[300,230,663,50]
   P_PICSIZE = [50,154,246,300,356]
-  C_PICSIZE = [50,148,154]
+  C_PICSIZE = [148,154,50]
  
   #角色
   SYS_ADMIN = "1"  #系统管理员
