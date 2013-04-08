@@ -54,7 +54,8 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">活动图片：</div>
   <div class="releaseDiv_r"><input type=file name=img_url id="img_url" style="display: none;"  onchange="ye.value=value" />
-    <input name=ye type="text" class="file"  id="sale_img" value="<%= @sale.img_url %>" readonly /><input type="button" class="file_btn" value="浏览" onclick=img_url.click()  />
+    <input name=ye type="text" class="file"  id="sale_img" value="<%= @sale.img_url %>" readonly  /><input type="button" class="file_btn" value="浏览" onclick=img_url.click()  />
+    <img src="<%=@sale.img_url %>" class="show_pic" id="card_pic"  />
   </div>
 </div>
 <div class="releaseDiv">
