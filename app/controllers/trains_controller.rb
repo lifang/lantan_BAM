@@ -13,6 +13,7 @@ class TrainsController < ApplicationController
           train.train_staff_relations.new({:staff_id => staff_id, :status => 1}) #是否通过考核默认为没有，status=1
           train.save
         end
+        flash[:notice] = "新建培训成功!"
       rescue
         flash[:notice] = "新建培训失败!"
       end
