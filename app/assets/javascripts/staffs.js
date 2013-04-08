@@ -194,7 +194,7 @@ $(document).ready(function(){
            return false;
        }
        if($(this).attr("id") == "new_staff_btn"){
-           if($(this).parents('form').find("#sale_img").val() == ''){
+           if($(this).parents('form').find("#staff_photo").val() == ''){
                tishi_alert("照片不能为空!");
                return false;
            }
