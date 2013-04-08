@@ -390,7 +390,7 @@ input.file { width: 100px; _width: 90px; float: left;}
 .width_div { width: 460px; line-height:24px; float: left; padding-top: 2px;}
 .width_div span { margin: 0px 8px; float: left;}
 
-.width_input { width: 385px; height: 24px;}
+.item_textarea .width_input { width: 385px; height: 24px; float: left;}
 
 .item_addItem { 
     width: 80px; 
