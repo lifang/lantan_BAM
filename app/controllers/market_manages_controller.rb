@@ -107,7 +107,7 @@ class MarketManagesController < ApplicationController
   def sale_orders
     session[:o_created],session[:o_ended],session[:order_name]=nil,nil,nil
     orders = Sale.count_sale_orders(params[:store_id])
-    @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>10)
+    @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
       @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
      p on p.order_id=o.id where o.sale_id in (#{@sale_orders.map(&:id).join(',')}) ").inject(Hash.new)  {|hash,order_pay|
@@ -124,7 +124,7 @@ class MarketManagesController < ApplicationController
 
   def sale_order_list
     orders = Sale.count_sale_orders_search(params[:store_id],session[:o_created],session[:o_ended],session[:order_name])
-    @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>10)
+    @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
       @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
      p on p.order_id=o.id where o.sale_id in (#{@sale_orders.map(&:id).join(',')}) ").inject(Hash.new)  {|hash,order_pay|

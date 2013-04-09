@@ -4,7 +4,7 @@ class SuppliersController < ApplicationController
 
   def index
     @suppliers = Supplier.paginate(:conditions => "status= #{Supplier::STATUS[:normal]} and store_id=#{params[:store_id]}",
-                                   :per_page => 10, :page => params[:page])
+                                   :per_page => Constant::PER_PAGE, :page => params[:page])
     respond_to do |f|
       f.html
       f.js

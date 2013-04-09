@@ -31,3 +31,11 @@
 
 .pro_text { border-top: 1px #930205 dashed; margin-top: 20px; line-height: 24px; padding: 20px;}
 .pro_text p { text-indent: 24px;}
+
+/*促销活动详细*/
+.salesDetail { padding: 10px;}
+.salesDetail h1 { font-size: 24px; color:#930205; line-height: 36px;}
+.salesDetail span { font-size: 12px; color: #999; font-style: italic;}
+.salesDetail h2 { font-size: 16px; color: #333; line-height: 32px; margin: 10px 0;}
+.salesDetail img { margin: 10px;}
+.salesDetail p { text-indent: 24px; line-height: 24px;}
