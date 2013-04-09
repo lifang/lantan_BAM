@@ -140,7 +140,7 @@ class Complaint < ActiveRecord::Base
     #puts store_id ,order_id,reason,request
     order  = Order.find_by_id order_id
     complaint = Complaint.create(:order_id => order_id, :customer_id => order.customer_id, :reason => reason,
-      :suggestion => request, :status => STATUS[:UNTREATED]) if order
+      :suggestion => request, :status => STATUS[:UNTREATED], :store_id => store_id) if order
     complaint
   end
 
