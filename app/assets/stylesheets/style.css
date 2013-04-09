@@ -356,7 +356,7 @@ a.compile_btn { width: 100px;}
 .item { margin: 10px; float: left; overflow: hidden; width: 295px; height: 30px; line-height: 24px;}
 .item.item_width { width: 460px;}
 
-.show_pic { width: 100px; height: 100px; position: absolute; z-index:1000; display: none; background: #FFF;}
+
 
 .item_title { font-size: 16px; line-height: 32px; padding-left: 55px;}
 .item_add { float: right; margin-right: 49px;}
@@ -377,9 +377,9 @@ a.compile_btn { width: 100px;}
 .item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 90px;  margin-right:10px;text-align: right;}
 
-.item input.file { width: 100px; _width: 90px; float: left;}
-input.file { width: 100px; _width: 90px; float: left;}
-.file_btn { width: 55px; height: 26px; line-height: 26px; margin-left: 5px; background: #ccc;float: left; cursor:pointer;}
+.file {float: left;}
+.show_pic { margin-left: 10px;}
+
 .item select {float: left;}
 .item select.staff { width: 70px; margin-right: 20px; _margin-right: 16px;}
 .item select.ymd { width: 50px; margin-right: 5px;}
@@ -389,8 +389,6 @@ input.file { width: 100px; _width: 90px; float: left;}
 
 .width_div { width: 460px; line-height:24px; float: left; padding-top: 2px;}
 .width_div span { margin: 0px 8px; float: left;}
-
-.item_textarea .width_input { width: 385px; height: 24px; float: left;}
 
 .item_addItem { 
     width: 80px; 
