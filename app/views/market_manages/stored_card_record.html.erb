@@ -25,7 +25,7 @@
                   <tr>
                     <td><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
                     <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
-                        :remote => "true", "data-type" => "script" %></td>
+                        :remote => "true", "data-type" => "script", :class => "other_a" %></td>
                     <td><%= get_products_name(order).join(",") %></td>
                     <td><%= order.price %></td>
                   </tr>
