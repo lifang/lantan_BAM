@@ -93,7 +93,7 @@ class Order < ActiveRecord::Base
       ended_at, is_visited, is_vip, is_time, time, is_price, price, is_birthday)
     customer_condition_sql[0][0] = customer_sql + customer_condition_sql[1]
     return customer_condition_sql[2].blank? ? [] :
-      Customer.paginate_by_sql(customer_condition_sql[0], :per_page => 1, :page => page)
+      Customer.paginate_by_sql(customer_condition_sql[0], :per_page => 10, :page => page)
   end
 
   #查询需要发短信的用户

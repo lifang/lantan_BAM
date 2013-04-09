@@ -20,7 +20,7 @@
                  class="Wdate" readonly onClick="WdatePicker();"/>&nbsp;到&nbsp;
           <input type="text" name="ended_at" id="ended_at" value="<%= session[:ended_at] %>"
                  class="Wdate" readonly onClick="WdatePicker();"/></div>
-        <input type="checkbox" name="is_vip" id="is_vip" value="1" <% if session[:is_vip] %>checked<% end %>/>会员
+        <div><input type="checkbox" name="is_vip" id="is_vip" value="1" <% if session[:is_vip] %>checked<% end %>/>会员</div>
         <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
         <div><button type="submit" class="search_btn">查询</button></div>
       <% end %>
