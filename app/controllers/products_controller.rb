@@ -23,7 +23,7 @@ class ProductsController < ApplicationController
   def prod_services
     @services = Product.paginate_by_sql("select id, service_code code,store_id,name,types,base_price,cost_time,staff_level level1,staff_level_1
     level2 from products where store_id in (#{params[:store_id]},1) and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}
-    order by created_at asc", :page => params[:page], :per_page => 5)
+    order by created_at asc", :page => params[:page], :per_page => Constant::PER_PAGE)
     @materials={}
     @services.each do |service|
       @materials[service.id]=Material.find_by_sql("select name,code,p.material_num num from materials m inner join prod_mat_relations p on
