@@ -152,7 +152,7 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
-        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
         @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
      #@search_materials = [{"name" => "测试物料", "code" => "0001234", "id" => 15, "types" => 3, "price" => 80.0, "storage" => 1000}]
       elsif params[:from].to_i > 0
@@ -204,13 +204,14 @@ class MaterialsController < ApplicationController
             #向总部订货
             if params[:supplier].to_i == 0
               #生成订单
-              m_status = MaterialOrder::STATUS[:pay_not_send]
+              m_status = MaterialOrder::STATUS[:pay]
               if params[:pay_type].to_i == 5
-                m_status = MaterialOrder::STATUS[:no_send_no_pay]
+                m_status = MaterialOrder::STATUS[:no_pay]
               end
               material_order = MaterialOrder.create({
                   :supplier_id => params[:supplier], :supplier_type => Supplier::TYPES[:head],
                   :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => m_status,
+                  :m_status => MaterialOrder::M_STATUS[:no_send],
                   :staff_id => cookies[:user_id],:store_id => params[:store_id]
                 })
               if material_order

@@ -7,7 +7,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   def index
     @sales=Sale.paginate_by_sql("select s.id,name,s.store_id,s.started_at,s.everycar_times,s.disc_time_types,s.ended_at,s.code,s.status,
     count(o.id) reported_num from sales s left join orders o on s.id=o.sale_id where s.store_id in (#{params[:store_id]},1) and
-    s.status !=#{Sale::STATUS[:DESTROY]}  group by s.id order by s.started_at desc ", :page => params[:page], :per_page => 5)
+    s.status !=#{Sale::STATUS[:DESTROY]}  group by s.id order by s.started_at desc ", :page => params[:page], :per_page => Constant::PER_PAGE)
   end
 
   #

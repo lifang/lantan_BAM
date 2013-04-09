@@ -28,7 +28,7 @@ class ComplaintsController < ApplicationController
   #投诉详细页
   def show_detail
     total = Complaint.search_detail(params[:store_id])
-    @complaint = total.paginate(:page=>params[:page],:per_page=>10)
+    @complaint = total.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     non_time = Complaint.search_detail(params[:store_id],0)
     un_done = Complaint.search_detail(params[:store_id],1)
     @staff_name ={}

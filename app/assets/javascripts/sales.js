@@ -1,12 +1,12 @@
-
 //发布活动验证
 function publish_sale(e){
     var name=$("#sale_title").val();
     var disc=$("#s_disc input[name='discount']:checked").val();
     var time=$("#s_time input[name='disc_time']:checked").val();
     var subsidy =$("#s_sub input[name='subsidy']:checked").val();
-    var pic_format=["png",'gif',"jpg","bmp","pcx","tiff","jpeg","tga","eps","hdr","tif"]
+    var pic_format =["png","gif","jpg","bmp"]
     var img=$("#img_url").val();
+    var pic_type =img.substring(img.lastIndexOf(".")).toLowerCase()
     if (name=="" || name.length==0){
         tishi_alert("请输入本次活动的标题")
         return false;
@@ -43,13 +43,16 @@ function publish_sale(e){
         tishi_alert("请选择是否需要总店补贴")
         return false;
     }
-    if (img == "" || img.length ==0){
-        tishi_alert("or not");
+    Array.prototype.indexOf=function(el, index){
+        var n = this.length>>>0, i = ~~index;
+        if(i < 0) i += n;
+        for(; i < n; i++) if(i in this && this[i] === el) return i;
+        return -1;
+    }
+    if ((img != "" || img.length !=0) && pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
+        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format )
         return false;
     }
-//    if ((img != "" || img.length !=0) && pic_format.indexOf(img.split(".")[img.split(".").length-1])== -1){
-//        tishi_alert("请选择正确格式的图片！")
-//    }
     if (parseInt(subsidy)==1 && $("#sub_content").val().length == 0){
         tishi_alert("请输入补贴金额");
         return false;
@@ -57,7 +60,7 @@ function publish_sale(e){
 
     $("#intro").val(editor.html());
     $("#one_sale").submit();
-//    $(e).removeAttr("onclick");
+    $(e).removeAttr("onclick");
 }
 
 function input_time(){
@@ -221,7 +224,7 @@ function check_station(){
 function show_pic(){
     var y = 50;
     var doc_width = $(document).width();
-    $("input.file").mouseover(function(){
+    $("#img_url,#sale_img").mouseover(function(){
         $(this).parent().find("#card_pic").css("display","block");
     }).mouseout(function(){
         $(this).parent().find("#card_pic").css("display","none");

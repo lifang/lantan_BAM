@@ -7,7 +7,7 @@ class PackageCardsController < ApplicationController
 
   def index
     @cards=PackageCard.paginate_by_sql("select name,img_url,started_at,ended_at,id from package_cards where store_id=#{params[:store_id]}
-         and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => 5)
+         and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => Constant::PER_PAGE)
     @prods ={}
     @cards.each do |card|
       @prods[card.id]=Product.find_by_sql("select s.name,p.product_num num from products s inner join
@@ -30,7 +30,7 @@ class PackageCardsController < ApplicationController
 
   def sale_records
     p_cards =PackageCard.search_pcard(params[:store_id])
-    @cards= p_cards.paginate(:page=>params[:page],:per_page=>10)
+    @cards= p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @card_fee = p_cards.inject(0) {|num,card| num+card.price }
     @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
     p @pcards
@@ -91,7 +91,7 @@ class PackageCardsController < ApplicationController
 
   def search_list
     p_cards=PackageCard.search_pcard(params[:store_id],session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at])
-    @cards=p_cards.paginate(:page=>params[:page],:per_page=>10)
+    @cards=p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @card_fee = p_cards.inject(0) {|num,card| num+card.price }
     @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
     render "sale_records"
