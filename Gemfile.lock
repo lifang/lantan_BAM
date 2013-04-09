@@ -110,7 +110,7 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
-  activerecord-import
+  activerecord-import (~> 0.2.8)
   gchartrb (= 0.8)
   jquery-rails (~> 2.1.0)
   mini_magick
