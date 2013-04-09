@@ -645,6 +645,7 @@ function cuihuo(order_id,type,store_id){
         data:"order_id="+order_id+"&type="+type,
         success:function(data,status){
            tishi_alert("已催货");
+           hide_mask('#mat_order_detail_tab'); 
         },
         error:function(){
 //            alert("error");

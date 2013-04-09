@@ -1,0 +1,77 @@
+<div class="popup_body_area">
+  <div class="seeProDiv">
+    <div class="seeProDiv_l">订单编码：</div>
+    <div class="seeProDiv_r"><%= @mo.code ||= "------" %></div>
+  </div>
+  <div class="seeProDiv">
+    <div class="seeProDiv_l">到货时间：</div>
+    <div class="seeProDiv_r"><%= @mo.arrival_at.nil? ? "------" : @mo.arrival_at.strftime("%Y-%m-%d") %></div>
+  </div>
+  <div class="seeProDiv">
+    <div class="seeProDiv_l">物流状态：</div>
+    <div class="seeProDiv_r">
+      <%= @mo.transfer_status %>
+    </div>
+  </div>
+  <div class="seeProDiv">
+    <div class="seeProDiv_l">物流信息：</div>
+    <div class="seeProDiv_r">物流单号:<%= @mo.logistics_code ||= "------" %><br/>承运人：<%= @mo.carrier ||= "------" %></div>
+  </div>
+  <div class="seeProDiv">
+    <div class="seeProDiv_l">付款状态:</div>
+    <div class="seeProDiv_r">
+       <%= @mo.pay_status %>
+    </div>
+  </div>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+    <thead>
+      <tr class="hbg">
+        <td>名称</td>
+        <td>单价（元）</td>
+        <td>数量（个）</td>
+      </tr>
+    </thead>
+    <tbody>
+      <% if @mo.mat_order_items.blank? %>
+        <tr>
+          <td colspan="3">无！</td>
+        </tr>
+      <% else %>
+        <% @mo.mat_order_items.each do |moi| %>
+          <tr>
+            <td><%= moi.material.try(:name) %></td>
+            <td><%= moi.price %></td>
+            <td><%= moi.material_num %></td>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+  <div class="otherWay">
+    <div class="amount">总计：<%= @total_money %></div>
+  </div>
+</div>
+<div class="btn_box">
+  <div style="margin: 0 auto">
+  <% if @mo.supplier_id == 0 && permission?(:materials, :cuihuo) %>
+    <% if @mo.m_status == MaterialOrder::M_STATUS[:no_send] && @mo.status != MaterialOrder::STATUS[:cancel]%>
+      <button class="confirm_btn" onclick="cuihuo(<%= @mo.id %>,1,<%= @store_id %>)">催货</button>
+    <% end %>
+  <% end %>
+  <% if permission?(:materials, :receive) %>
+    <% if @mo.m_status == MaterialOrder::M_STATUS[:send] %>
+      <button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,1,<%= @store_id %>)">已收货</button>
+    <% end %>
+  <% end %>
+  <% if permission?(:materials, :pay) %>
+    <% if @mo.status == MaterialOrder::STATUS[:no_pay] %>
+      <button class="confirm_btn" onclick="hide_mask('#mat_order_detail_tab');pay_order(<%= @mo.id %>,<%= @store_id %>)">付款</button>
+    <% end %>
+  <% end %>
+  <% if permission?(:materials, :cancel) %>
+    <% if @mo.status == MaterialOrder::STATUS[:no_pay] && @mo.m_status == MaterialOrder::M_STATUS[:no_send] %>
+      <button class="confirm_btn" onclick="cancel_order(<%= @mo.id %>,1,<%= @store_id %>)">取消订单</button>
+    <% end %>
+  <% end %>
+  </div>
+</div>

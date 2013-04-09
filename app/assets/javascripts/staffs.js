@@ -193,12 +193,6 @@ $(document).ready(function(){
            tishi_alert("薪资标准必须为数字!");
            return false;
        }
-       if($(this).attr("id") == "new_staff_btn"){
-           if($(this).parents('form').find("#staff_photo").val() == ''){
-               tishi_alert("照片不能为空!");
-               return false;
-           }
-       }
        if($(this).parents('form').find("#staff_deduct_at").val() == ''){
            tishi_alert("提成起始额不能为空!");
            return false;
@@ -226,6 +220,12 @@ $(document).ready(function(){
        if(isNaN($(this).parents('form').find("#staff_deduct_percent").val())){
            tishi_alert("提成率必须为数字!");
            return false;
+       }
+       if($(this).attr("id") == "new_staff_btn"){
+           if($(this).parents('form').find("#staff_photo").val() == ''){
+               tishi_alert("照片不能为空!");
+               return false;
+           }
        }
        $(this).parents('form').submit();
     });

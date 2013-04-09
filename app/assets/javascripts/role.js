@@ -184,12 +184,6 @@ function cancel_role_panel(){
     });
 }
 
-// 点击取消按钮隐藏层
-function hide_mask(t){
-    $(t).css('display','none');
-    $(".mask").css('display','none');
-}
-
 function selectAll(obj){
     if($(obj).attr("checked")=="checked"){
         $(obj).parent().next().find("input[type='checkbox']").attr("checked", "checked")
