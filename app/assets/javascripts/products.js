@@ -34,6 +34,7 @@ function add_product(e){
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
     var standard =$("#standard").val();
+    var pic_format =["png","gif","jpg","bmp"];
     if (name=="" || name.length==0){
         tishi_alert("请输入产品的名称");
         return false;
@@ -50,9 +51,21 @@ function add_product(e){
         tishi_alert("请输入产品的规格");
         return false;
     }
+    var img_f  = false
     $(".add_img #img_div input[name$='img_url']").each(function (){
-        $(this).attr("name","img_url["+this.id+"]");
+        if (this.value!="" || this.value.length!=0){
+            var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase()
+            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
+                img_f = true
+            }else{
+                $(this).attr("name","img_url["+this.id+"]");
+            }
+        }     
     })
+    if(img_f){
+        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format );
+        return false
+    }
     $("#desc").val(serv_editor.html());
     $("#add_prod").submit();
     $(e).removeAttr("onclick");
@@ -96,6 +109,7 @@ function edit_serv(e){
     var sale=$("#sale_price").val();
     var time=$("#cost_time").val();
     var deduct =$("#deduct_percent").val();
+    var pic_format =["png","gif","jpg","bmp"];
     if (name=="" || name.length==0){
         tishi_alert("请输入服务的名称");
         return false;
@@ -116,9 +130,21 @@ function edit_serv(e){
         tishi_alert("请输入服务的施工时间");
         return false;
     }
+    var img_f  = false
     $(".add_img #img_div input[name$='img_url']").each(function (){
-        $(this).attr("name","img_url["+this.id+"]");
+        if (this.value!="" || this.value.length!=0){
+            var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase()
+            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
+                img_f = true
+            }else{
+                $(this).attr("name","img_url["+this.id+"]");
+            }
+        }
     })
+    if(img_f){
+        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format );
+        return false
+    }
     $("#desc").val(serv_editor.html());
     $(e).removeAttr("onclick");
     $("#edit_serv").submit();
