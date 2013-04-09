@@ -163,3 +163,8 @@ function center_popup_div(ele){
     $(ele).css('top',(win_height-z_layer_height)/2 + scolltop);
 }
 
+// 点击取消按钮隐藏层
+function hide_mask(t){
+    $(t).css('display','none');
+    $(".mask").css('display','none');
+}

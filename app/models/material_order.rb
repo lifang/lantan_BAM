@@ -29,12 +29,12 @@ class MaterialOrder < ActiveRecord::Base
 
   def self.supplier_order_records page, per_page, store_id
     self.paginate(:select => "*", :from => "material_orders", :include => [:supplier, :mat_order_items => :material], :conditions => "material_orders.supplier_id != 0",
-    :page => page, :per_page => per_page)
+      :page => page, :per_page => per_page)
   end
 
   def self.head_order_records page, per_page, store_id
-    self.paginate(:select => "mo.*", :from => "material_orders mo", :conditions => "mo.supplier_id = 0",
-                  :page => page, :per_page => per_page)
+    self.paginate(:select => "*", :from => "material_orders",  :include => [:mat_order_items => :material],:conditions => "material_orders.supplier_id = 0",
+      :page => page, :per_page => per_page)
   end
 
   def self.search_orders store_id,from_date, to_date, status, supplier_id,page,per_page,m_status
@@ -69,8 +69,8 @@ class MaterialOrder < ActiveRecord::Base
       str += " and unix_timestamp(date_format(mo.created_at,'%Y-%m-%d')) <= unix_timestamp(date_format('#{to_date}','%Y-%m-%d')) "
     end
     orders = self.paginate(:select => "mo.*", :from => "material_orders mo", :conditions => str,
-                           :order => "created_at desc",
-                           :page => page, :per_page => per_page)
+      :order => "created_at desc",
+      :page => page, :per_page => per_page)
     orders
   end
 
@@ -90,5 +90,33 @@ class MaterialOrder < ActiveRecord::Base
       end
     end
     !mo_status.include?(false)
+  end
+
+  def transfer_status
+    case self.m_status
+    when M_STATUS[:no_send]
+      "未发货"
+    when M_STATUS[:send]
+      "已发货"
+    when M_STATUS[:received]
+      "已收货"
+    when M_STATUS[:save_in]
+      "已入库"
+    else
+      "未知"
+    end
+  end
+
+  def pay_status
+    case self.status
+    when STATUS[:no_pay]
+      "未付款"
+    when STATUS[:pay]
+      "已付款"
+    when STATUS[:cancel]
+      "已取消"
+    else
+      "未知"
+    end
   end
 end

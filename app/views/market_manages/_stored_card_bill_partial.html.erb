@@ -15,7 +15,7 @@
             <tr>
               <td>
                 <%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
-                  :remote => "true", "data-type" => "script" %></td>
+                  :remote => "true", "data-type" => "script", :class => "other_a" %></td>
               <td><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
               <td><%= get_products_name(order).join(",") %></td>
               <% svc_return_record = get_svc_return_record(order.id, @store.id) %>

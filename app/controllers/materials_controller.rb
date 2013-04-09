@@ -226,8 +226,8 @@ class MaterialsController < ApplicationController
                     name = item.split("_")[4]
                     type_name = item.split("_")[5]
                     types = Material::TYPES_NAMES.key(type_name)
-                    #                    headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?code=#{code}"
-                    #                    material = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)[0]
+                    #   headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?code=#{code}"
+                    #   material = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)[0]
                     m = Material.create(:name => name, :code => code,
                       :price => s_price, :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
                   end
@@ -260,13 +260,14 @@ class MaterialsController < ApplicationController
               #material = Material.find_by_id_and_store_id
               #向供应商订货
             elsif params[:supplier].to_i > 0
-              m_status = MaterialOrder::STATUS[:pay_not_send]
+              m_status = MaterialOrder::STATUS[:pay]
               if params[:pay_type].to_i == 5
-                m_status = MaterialOrder::STATUS[:no_send_no_pay]
+                m_status = MaterialOrder::STATUS[:no_pay]
               end
               material_order = MaterialOrder.create({
                   :supplier_id => params[:supplier], :supplier_type => Supplier::TYPES[:branch],
                   :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => m_status,
+                  :m_status => MaterialOrder::M_STATUS[:no_send],
                   :staff_id => cookies[:user_id],:store_id => params[:store_id]
                 })
               if material_order
@@ -499,4 +500,12 @@ class MaterialsController < ApplicationController
     render :json => {:status => 0}
   end
 
+  def mat_order_detail
+    @mo = MaterialOrder.find params[:id]
+    @store_id = params[:store_id]
+    @total_money = 0
+    @mo.mat_order_items.each do |moi|
+      @total_money += moi.price * moi.material_num
+    end
+  end
 end
