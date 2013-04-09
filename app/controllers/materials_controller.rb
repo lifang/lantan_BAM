@@ -1,13 +1,13 @@
 #encoding:utf-8
 class MaterialsController < ApplicationController
   require 'uri'
+  require 'net/http'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?
 
   #库存列表
   def index
-
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
       :per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]
@@ -152,9 +152,9 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
-        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+       headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+       # headoffice_api_url = "http://192.168.0.108:3001/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
         @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
-     #@search_materials = [{"name" => "测试物料", "code" => "0001234", "id" => 15, "types" => 3, "price" => 80.0, "storage" => 1000}]
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
         @search_materials = Material.normal.all(:conditions => str)
@@ -216,8 +216,10 @@ class MaterialsController < ApplicationController
                 })
               if material_order
                 price = 0
-                #订单相关的物料
-                params[:selected_items].split(",").each do |item|
+                #订单相关的物料    
+                mat_code_items = {}
+                params[:selected_items].split(",").each_with_index do |item, index|
+#                  mat_code_items[index] = {}
                   price += item.split("_")[2].to_f * item.split("_")[1].to_i
                   code = item.split("_")[3]
                   s_price = item.split("_")[2].to_f
@@ -226,15 +228,21 @@ class MaterialsController < ApplicationController
                     name = item.split("_")[4]
                     type_name = item.split("_")[5]
                     types = Material::TYPES_NAMES.key(type_name)
-                    #   headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "/api/materials/search_material.json?code=#{code}"
-                    #   material = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)[0]
-                    m = Material.create(:name => name, :code => code,
-                      :price => s_price, :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
+                    m = Material.create(:name => name, :code => code, :price => s_price,
+                      :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
                   end
-                  MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
+                  mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
                       :price => s_price})   if m
 
+                 mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code}
                 end
+    
+                headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
+             #   headoffice_post_api_url = "http://192.168.0.108:3001/api/materials/save_mat_info"
+               result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
+                p "----------------------------------"
+                p result
+
                 #使用储值抵货款
                 if params[:use_count].to_i > 0
                   SvcReturnRecord.create({
