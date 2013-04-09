@@ -56,7 +56,7 @@ class Customer < ActiveRecord::Base
     end
     
     params_arr[0] = base_sql + condition_sql
-    return Customer.paginate_by_sql(params_arr, :per_page => 1, :page => page)
+    return Customer.paginate_by_sql(params_arr, :per_page => 10, :page => page)
   end
 
   def self.auto_generate_customer_type
