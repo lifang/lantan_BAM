@@ -278,7 +278,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 /*search*/
 .search { padding-top: 8px; overflow: hidden; margin-bottom: 5px;}
 
-.search div { display: inline-block; margin: 0px 20px 10px 0px; line-height: 24px; overflow: hidden;}
+.search div { float: left; margin: 0px 20px 10px 0px;overflow: hidden;}
 .search label {
     height: 24px;
     line-height: 21px;
