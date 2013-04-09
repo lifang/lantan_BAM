@@ -61,26 +61,8 @@
         <td><%= record.carrier %></td>
         <td><%= material_status record.status,0 %></td>
         <td>
-          <% if permission?(:materials, :cuihuo) %>
-            <% if record.m_status == MaterialOrder::M_STATUS[:no_send] %>
-              <a href="javascript:void(0)" onclick="cuihuo(<%= record.id %>,1,<%= params[:store_id] %>)">催货</a>
-            <% end %>
-          <% end %>
-          <% if permission?(:materials, :receive) %>
-            <% if record.m_status == MaterialOrder::M_STATUS[:send] %>
-              <a href="javascript:void(0)" onclick="receive_order(<%= record.id %>,1,<%= params[:store_id] %>)">已收货</a>
-            <% end %>
-          <% end %>
-          <% if permission?(:materials, :pay) %>
-            <% if record.status == MaterialOrder::STATUS[:no_pay] %>
-              <a href="javascript:void(0)" onclick="pay_order(<%= record.id %>,<%= params[:store_id] %>)">付款</a>
-            <% end %>
-          <% end %>
-          <% if permission?(:materials, :cancel) %>
-            <% if record.status == MaterialOrder::STATUS[:no_pay] && record.m_status == MaterialOrder::M_STATUS[:no_send] %>
-                <a href="javascript:void(0)" onclick="cancel_order(<%= record.id %>,1,<%= params[:store_id] %>)">取消</a>
-            <% end %>
-          <% end %>
+          <%= link_to "详情", mat_order_detail_store_material_path(params[:store_id],record), remote: :true, "data-type" => "script" %>
+          
           <a href="javascript:void(0)" onclick="add_order_remark('<%= record.id %>','<%= record.remark %>')">备注</a>
         </td>
       </tr>

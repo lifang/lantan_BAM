@@ -79,6 +79,9 @@
           "search_supplier_orders","receive_order","pay_order","update_notices","check_nums"
         post "out_order","material_order","add","alipay_complete"
       end
+      member do
+        get "mat_order_detail"
+      end
     end
 
     resources :staffs
@@ -147,7 +150,7 @@
   match 'create_materials_in' => 'materials_in_outs#create_materials_in'
   match 'create_materials_out' => 'materials_in_outs#create_materials_out'
   match 'save_cookies' => 'materials_in_outs#save_cookies'
-
+#  match 'mat_order_detail' =>'materials#mat_order_detail'
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"
