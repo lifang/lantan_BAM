@@ -16,8 +16,12 @@ class StaffsController < ApplicationController
   end
 
   def create
+    params[:staff][:username] = params[:staff][:name]
+    params[:staff][:password] = params[:staff][:phone]
     @staff = @store.staffs.new(params[:staff])
+    @staff.encrypt_password
     @staff.photo = params[:staff][:photo].original_filename unless params[:staff][:photo].nil?
+    @staff.staff_role_relations.new(:role_id => Constant::STAFF)
     if @staff.save   #save staff info and picture
       @staff.operate_picture(params[:staff][:photo], "create") unless params[:staff][:photo].nil?
       flash[:notice] = "创建员工成功!"
