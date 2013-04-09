@@ -54,7 +54,7 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">活动图片：</div>
   <div class="releaseDiv_r">
-    <input type="file" name="img_url" id="img_url" />
+    <input type="file" name="img_url" id="img_url"  value="<%= @pcard.img_url %>" />
     <span class="show_pic" >
       <img src="<%=  @sale.img_url.nil? ? "" : @sale.img_url.gsub("img#{@sale.id}","img#{@sale.id}_#{Constant::SALE_PICSIZE[3]}") %>" />
     </span>

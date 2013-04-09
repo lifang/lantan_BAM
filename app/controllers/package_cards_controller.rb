@@ -20,9 +20,14 @@ class PackageCardsController < ApplicationController
       :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL],:price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d")
     }
     pcard =PackageCard.create(parms)
-    pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
-    params[:sale_prod].each do |key,value|
-      PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
+    begin
+      pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+
+      params[:sale_prod].each do |key,value|
+        PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
+      end
+    rescue
+      flash[:notice] ="图片上传失败，请重新添加！"
     end
     redirect_to "/stores/#{params[:store_id]}/package_cards"
   end #添加套餐卡

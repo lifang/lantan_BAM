@@ -25,12 +25,16 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     pams.merge!({:started_at=>params[:started_at],:ended_at=>params[:ended_at]})  if params[:disc_time].to_i == Sale::DISC_TIME[:TIME]
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]
     sale=Sale.create!(pams)
-    if params[:img_url]
-      filename=Sale.upload_img(params[:img_url],sale.id,Constant::SALE_PICS,sale.store_id,Constant::SALE_PICSIZE)
-      sale.update_attributes(:img_url=>filename)
-    end
-    params[:sale_prod].each do |key,value|
-      SaleProdRelation.create({:sale_id=>sale.id,:product_id=>key,:prod_num=>value})
+    begin
+      if params[:img_url]
+        filename=Sale.upload_img(params[:img_url],sale.id,Constant::SALE_PICS,sale.store_id,Constant::SALE_PICSIZE)
+        sale.update_attributes(:img_url=>filename)
+      end
+      params[:sale_prod].each do |key,value|
+        SaleProdRelation.create({:sale_id=>sale.id,:product_id=>key,:prod_num=>value})
+      end
+    rescue
+      flash[:notice] ="图片上传失败，请重新添加！"
     end
     redirect_to "/stores/#{params[:store_id]}/sales"
   end
