@@ -44,7 +44,11 @@ function popup(t){
         display:'block',
         height:doc_height
     });
-    $(t).css('top',"80px");
+    var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
+    var win_height = document.documentElement.clientHeight;//jQuery(document).height();
+    var z_layer_height = $(".tab_alert").height();
+    $(t).css('top',(win_height-z_layer_height)/2 + scolltop);
+
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
 
