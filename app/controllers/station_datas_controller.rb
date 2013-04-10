@@ -14,7 +14,7 @@ class StationDatasController < ApplicationController
   end
 
   def create
-    @station = Station.create({:status => 2,:name => params[:station][:name],:store_id => @store.id})
+    @station = Station.create({:status => 2,:name => params[:station][:name],:collector_code => params[:station][:collector_code],:store_id => @store.id})
     if @station.save
       params[:product_ids].each do |p|
         StationServiceRelation.create({:station_id => @station.id, :product_id => p})
