@@ -31,7 +31,7 @@
                   </div>
                   <div class="item">
                        <label>出生年月：</label>
-                       <%= f.date_select :birthday, {}, {:class => "ymd"} %>
+                       <%= f.text_field :birthday, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();", :value => f.object.birthday.strftime("%Y-%m-%d") %>
                   </div>
                   <div class="item">
                        <label>联系方式：</label>

@@ -6,7 +6,7 @@ class MaterialOrderManagesController < ApplicationController
   def index
     @store = Store.find_by_id(params[:store_id])
 
-    @statistics_month = (params[:statistics_month] ||= Time.now.strftime("%Y-%m"))
+    @statistics_month = (params[:statistics_month] ||= Time.now.months_ago(1).strftime("%Y-%m"))
 
     arrival_at_sql = "arrival_at >= '#{@statistics_month}-01' and arrival_at <= '#{@statistics_month}-31'"
 
@@ -19,7 +19,8 @@ class MaterialOrderManagesController < ApplicationController
 
   def show
     @store = Store.find_by_id(params[:store_id])
-    @material_order = MaterialOrder.find_by_id(params[:id])
+    material_order = MaterialOrder.find_by_id(params[:id])
+    @mat_order_items = material_order.nil? ? [] : material_order.mat_order_items
     respond_to do |format|
       format.js
     end
