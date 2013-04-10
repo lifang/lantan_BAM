@@ -360,6 +360,7 @@ $(document).ready(function(){
                    $("#sys_score_text").text(sys_score).show();
                    $("#sys_score_input").hide();
                    $("#assess_result").val(assess_result(sys_score, manage_score));
+                   $("#current_month_score").text(sys_score);
                }
             }
         });
