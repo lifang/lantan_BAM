@@ -3,12 +3,6 @@
 
 $(document).ready(function(){
 
-    //库存成本统计选择月份提交
-    $("#statistics_month_select").change(function(){
-        $(this).parents('form').submit();
-        return false;
-    });
-
     //查看员工绩效统计
     $(".staff_month_score_detail").click(function(){
         var id = $(this).attr("id");

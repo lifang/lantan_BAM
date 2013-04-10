@@ -112,12 +112,12 @@ class CustomersController < ApplicationController
         left join car_brands cb on cb.id = cm.car_brand_id
         inner join customer_num_relations cr on cr.car_num_id = c.id
         where cr.customer_id = ?", @customer.id])
-    @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 1, params[:page])
+    @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 10, params[:page])
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
     
-    @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, 1, params[:page])
-    @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, 1, params[:page])    
+    @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, 10, params[:page])
+    @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, 10, params[:page])
   end
 
   def order_prods
