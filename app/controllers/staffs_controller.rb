@@ -87,7 +87,7 @@ class StaffsController < ApplicationController
       @cal_style = params[:cal_style]
       start_at = (params[:start_at].nil? || params[:start_at].empty?) ? "1 = 1" : "current_day >= '#{params[:start_at]}'"
 
-      end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "current_day <= '#{params[:end_at]}'"
+      end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "current_day <= '#{params[:end_at]} 23:59:59'"
 
       if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day")
         @work_records = @staff.work_records.where(start_at).where(end_at).order("current_day desc").

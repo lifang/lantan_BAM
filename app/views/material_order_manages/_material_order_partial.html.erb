@@ -9,12 +9,12 @@
             </tr>
         </thead>
         <tbody>
-            <% @material_order.mat_in_orders.each_with_index do |met_in_order, index| %>
+            <% @mat_order_items.each_with_index do |mat_order_item, index| %>
               <tr class="<%= index%2 == 0 ? '' : 'tbg' %>">
-                <td><%= @material_order.code %></td>
-                <td><%= met_in_order.material.name %></td>
-                <td><%= met_in_order.price %></td>
-                <td><%= met_in_order.material_num %></td>
+                <td><%= mat_order_item.material.code %></td>
+                <td><%= mat_order_item.material.name %></td>
+                <td><%= mat_order_item.price %></td>
+                <td><%= mat_order_item.material_num %></td>
               </tr>
             <% end %>
         </tbody>

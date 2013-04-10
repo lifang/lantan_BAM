@@ -7,7 +7,13 @@
           <span>订单编号： <%= @order[0].code %></span>
           <span>消费时间：<%= @order[0].created_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
           <span>接待人员：<%= @order[0].front_s_name %></span>
-          <span>施工人员：<%= @order[0].cons_s_name1 %>、<%= @order[0].cons_s_name2 %></span>
+          <span>施工人员：
+            <% if @order[0].cons_s_name1 or @order[0].cons_s_name2 %>
+            <%= (@order[0].cons_s_name1 +  "、") if @order[0].cons_s_name1 %>
+            <%= @order[0].cons_s_name2 if @order[0].cons_s_name2 %>
+            <% else %>--
+            <% end %>
+          </span>
         </div>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
           <thead>

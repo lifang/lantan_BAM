@@ -3,7 +3,6 @@ class Order < ActiveRecord::Base
   has_many :order_prod_relations
   has_many :order_pay_types
   has_many :work_orders
-  has_many :revisits
   belongs_to :car_num
   belongs_to :c_pcard_relation
   belongs_to :c_svc_relation
@@ -448,7 +447,8 @@ class Order < ActiveRecord::Base
              :is_billing => false,
              :front_staff_id => user_id,
              :customer_id => c_id,
-             :store_id => store_id
+             :store_id => store_id,
+             :is_visited => IS_VISITED[:NO]
                               })
         if order
           hash = Hash.new
@@ -563,10 +563,12 @@ class Order < ActiveRecord::Base
     hash[:end] = self.ended_at.strftime("%Y-%m-%d %H:%M")
     hash[:total] = self.price
     content = ""
+    realy_price = 0
     hash[:products] = self.order_prod_relations.collect{|r|
       h = Hash.new
       h[:name] = r.product.name
       h[:price] = r.price
+      realy_price += r.price
       h[:num] = r.pro_num.to_i
       h[:type] = 0
       content += h[:name] + ","
@@ -575,8 +577,9 @@ class Order < ActiveRecord::Base
     hash[:content] = content.chomp(",")
     unless self.sale_id.blank?
       h = {}
-      h[:name] = self.sale.name
-      h[:price] = self.sale.discount
+      sale = self.sale
+      h[:name] = sale.name
+      h[:price] = sale.disc_types == Sale::DISC_TYPES[:FEE] ? sale.discount : realy_price * (10 - sale.discount) / 10
       h[:type] = 1
       hash[:sale] = h
     end
