@@ -433,8 +433,8 @@ a.compile_btn { width: 100px;}
     background: #026c93;
 }
 
-.fukuan_btn { padding-left: 140px; margin: 10px 0;}
-.zfb { width: 110px; height: 33px; background: url(/assets/zfb.jpg) no-repeat; display: block; float: left;}
+.fukuan_btn { padding-left: 40px; margin: 10px 0;}
+.zfb { width: 110px; height: 33px; margin: 10px 0; background: url(/assets/zfb.jpg) no-repeat; display: block; float: left;}
 
 /*备注*/
 .beizhu_textarea { width: 600px; height: 200px; margin: 0 auto; display: block;}
