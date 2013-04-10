@@ -2,13 +2,13 @@
 <div class="search">
       <div>统计月份：<%= @statistics_month %></div>
       <div><label>时间：</label>
-        <select name="statistics_month" id="statistics_month_select">
+        <select name="statistics_month">
          <% get_last_twelve_months.each do |month| %>
          <option value="<%= month %>" <%= @statistics_month.eql?(month) ? "selected" : "" %>><%= month %></option>
          <% end %>
         </select>
       </div>
-      <!--div><button class="search_btn">查询</button></div-->
+      <div><button class="search_btn" type="submit">查询</button></div>
 </div>
 </form>
 <div class="clear"></div>
@@ -27,7 +27,7 @@
                 <% @material_orders.each do |material_order| %>
                   <tr>
                     <td><%= material_order.arrival_at.strftime("%Y-%m") %></td>
-                    <td><%= link_to material_order.logistics_code, store_material_order_manage_path(@store, material_order), :class => "other_a", :remote => true, "data-type" => "script" %></td>
+                    <td><%= link_to material_order.code, store_material_order_manage_path(@store, material_order), :class => "other_a", :remote => true, "data-type" => "script" %></td>
                     <td><%= material_order.price %></td>
                   </tr>
                 <% end %>
