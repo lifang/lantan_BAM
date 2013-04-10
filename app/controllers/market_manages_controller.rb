@@ -172,7 +172,7 @@ class MarketManagesController < ApplicationController
       where(started_at_sql).where(ended_at_sql).
       where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
     svc_return_records = @orders.collect{|order|SvcReturnRecord.
-        where("types = #{SvcReturnRecord::TYPES[:in]}").
+        where("types = #{SvcReturnRecord::TYPES[:IN]}").
         where("target_id = #{order.id}").
         where("store_id = #{@store.id}").first}
     @total = svc_return_records.sum(&:total_price) - svc_return_records.sum(&:price)

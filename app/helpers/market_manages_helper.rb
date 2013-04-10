@@ -17,6 +17,6 @@ module MarketManagesHelper
   end
 
   def get_svc_return_record(order_id, store_id)
-    SvcReturnRecord.where("types = #{SvcReturnRecord::TYPES[:in]} and target_id = #{order_id} and store_id = #{store_id}").first
+    SvcReturnRecord.where("types = #{SvcReturnRecord::TYPES[:IN]} and target_id = #{order_id} and store_id = #{store_id}").first
   end
 end
