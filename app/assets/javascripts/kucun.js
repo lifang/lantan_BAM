@@ -498,7 +498,10 @@ function show_mask_div(div_id){
 function commit_in(){
     if($.trim($("#name").val())==""){
        tishi_alert("请输入物料名称");
-    }else if($.trim($("#code").val())==""){
+    }else if($("#material_types").val()==""){
+       tishi_alert("请选择物料类型");
+    }
+    else if($.trim($("#code").val())==""){
         tishi_alert("请输入订货单号");
     }else if($.trim($("#barcode").val())==""){
         tishi_alert("请输入条形码");
@@ -527,7 +530,7 @@ function commit_in(){
                       }
                }else if(data=="0"){$("#ruku_tab_form").submit();}
                else{
-                  alert("未找到物料或者订单！");
+                  tishi_alert("未找到物料或者订单！");
                   return false;
                }
            }
