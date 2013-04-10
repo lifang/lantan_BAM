@@ -12,5 +12,12 @@ class Material < ActiveRecord::Base
   TYPES = { :COST_M =>1,:HELP_TOOL =>2,:PROTECTED_L =>3,:ONE_USE =>4,:PRODUCT =>0}
 
   scope :normal, where(:status => STATUS[:NORMAL])
+  after_save :strip_material_name
 
+  private
+
+  def strip_material_name
+    name = self.name.strip
+    self.update_column(:name,name)
+  end
 end

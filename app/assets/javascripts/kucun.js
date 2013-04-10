@@ -483,8 +483,11 @@ function show_mask_div(div_id){
         display:'block',
         height:doc_height
     });
-
-    $("#"+div_id).css("top","50px").css("left",(doc_width-layer_width)/2).show();
+    var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
+    var win_height = document.documentElement.clientHeight;//jQuery(document).height();
+    var z_layer_height = $(".tab_alert").height();
+    
+    $("#"+div_id).css("top",(win_height-z_layer_height)/2 + scolltop).css("left",(doc_width-layer_width)/2).show();
     $("#"+div_id +" a.close").click(function(){
         $("#"+div_id).hide();
         $(".mask").hide();
