@@ -485,7 +485,7 @@ function show_mask_div(div_id){
     });
 
     $("#"+div_id).css("top","50px").css("left",(doc_width-layer_width)/2).show();
-    $(".close").click(function(){
+    $("#"+div_id +" a.close").click(function(){
         $("#"+div_id).hide();
         $(".mask").hide();
     })
