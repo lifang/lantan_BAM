@@ -27,8 +27,11 @@
             <div class="seeProDiv_l">责任人：</div>
             <div class="seeProDiv_rWidth">
               <span><input type="radio" id="c_staff_id" name="c_staff_id" value="<%= @order.front_staff_id %>" /> <%= @order.front_s_name %>(接待)</span>
-              <span><input type="radio" id="c_staff_id" name="c_staff_id"
-                           value="<%= @order.cons_staff_id_1 %>,<%= @order.cons_staff_id_2 %>" /> <%= @order.cons_s_name1 %>、<%= @order.cons_s_name2 %>（技师）</span>
+              <% if @order.cons_staff_id_1 and @order.cons_staff_id_1 %>
+                <span><input type="radio" id="c_staff_id" name="c_staff_id"
+                             value="<%= @order.cons_staff_id_1 %>,<%= @order.cons_staff_id_2 %>" /> <%= @order.cons_s_name1 %>、<%= @order.cons_s_name2 %>（技师）
+                </span>
+              <% end %>
             </div>
           </div>
           <div class="clear"></div>
