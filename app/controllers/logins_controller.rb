@@ -3,11 +3,15 @@ class LoginsController < ApplicationController
   def index
     if cookies[:user_id]
       @staff = Staff.find_by_id(cookies[:user_id].to_i)
-      session_role(cookies[:user_id])
-      if is_admin? or is_boss? or is_manager? or is_staff?
-        redirect_to "/stores/#{@staff.store_id}/welcomes"
-      else
+      if @staff.nil?
         render :index, :layout => false
+      else
+        session_role(cookies[:user_id])
+        if is_admin? or is_boss? or is_manager? or is_staff?
+          redirect_to "/stores/#{@staff.store_id}/welcomes"
+        else
+          render :index, :layout => false
+        end
       end
     else
       render :index, :layout => false
