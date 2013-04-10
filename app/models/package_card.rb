@@ -8,7 +8,7 @@ class PackageCard < ActiveRecord::Base
 
   #查询卡信息
   def self.search_pcard(store_id,pcard=nil,car_num=nil,c_name=nil,created_at=nil,ended_at=nil)
-    sql="select cp.id,c.name,c.mobilephone,cp.content,n.num,p.price,cp.status from c_pcard_relations cp inner join customers c on c.id=cp.customer_id
+    sql="select cp.id,p.name,c.mobilephone,cp.content,n.num,p.price,cp.status from c_pcard_relations cp inner join customers c on c.id=cp.customer_id
     inner join  package_cards p on p.id=cp.package_card_id inner join customer_num_relations  cn on c.id=cn.customer_id inner join car_nums n
     on n.id=cn.car_num_id where p.store_id=#{store_id} and p.status=#{PackageCard::STAT[:NORMAL]}"
     sql += " and p.id=#{pcard}"  unless pcard.nil? || pcard == "" || pcard.length==0

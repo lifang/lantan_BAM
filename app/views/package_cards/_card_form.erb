@@ -18,7 +18,7 @@
 </div>
 <div class="item_textarea">
   <label>套餐卡配图：</label>
-  <input type="file" name="img_url" id="sale_img" value="<%= @pcard.img_url %>" class="file" size="25" /><span class="show_pic" >
+  <input type="file" name="img_url" id="sale_img" value="<%= @pcard.img_url %>" class="file" size="50px" /><span class="show_pic" >
     <img src="<%=  @pcard.img_url.nil? ? "" : @pcard.img_url.gsub("img#{@pcard.id}","img#{@pcard.id}_#{Constant::C_PICSIZE[2]}") %>" /></span>
 </div>
 

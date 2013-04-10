@@ -37,7 +37,7 @@ class PackageCardsController < ApplicationController
     p_cards =PackageCard.search_pcard(params[:store_id])
     @cards= p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @card_fee = p_cards.inject(0) {|num,card| num+card.price }
-    @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
+    @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name];p_hash.uniq }
     p @pcards
     #content中存放使用情况 将所有产品或服务以字符串组合存放，包含 产品id,name,剩余次数
   end #销售记录

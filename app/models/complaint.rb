@@ -73,7 +73,7 @@ class Complaint < ActiveRecord::Base
 
   def self.search_lis(store_id,created_at)
     sql ="select * from chart_images where store_id=#{store_id} and types=#{ChartImage::TYPES[:COMPLAINT]}"
-    sql += " and date_format(current_day,'%Y-%m')='#{created_at}' order by created_at desc"  unless created_at=="" || created_at.length==0
+    sql += " and date_format(current_day,'%Y-%m')='#{created_at}' order by created_at desc"  unless created_at.nil? || created_at=="" || created_at.length==0
     return ChartImage.find_by_sql(sql)[0]
   end
 
@@ -107,14 +107,14 @@ class Complaint < ActiveRecord::Base
 
   def self.degree_lis(store_id,created_at)
     sql ="select * from chart_images where store_id=#{store_id} and types=#{ChartImage::TYPES[:SATIFY]}"
-    sql += " and date_format(current_day,'%Y-%m')='#{created_at}' order by created_at desc"  unless created_at=="" || created_at.length==0
+    sql += " and date_format(current_day,'%Y-%m')='#{created_at}' order by created_at desc"  unless created_at.nil? || created_at=="" || created_at.length==0
     return ChartImage.find_by_sql(sql)[0]
   end
 
   def self.search_detail(store_id,num=nil)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
     where c.store_id=#{store_id} and date_format(now(),'%Y-%m')=date_format(c.created_at,'%Y-%m') "
-     sql += " and TO_DAYS(c.process_at)=TO_DAYS(c.created_at)"  if num==0
+    sql += " and TO_DAYS(c.process_at)=TO_DAYS(c.created_at)"  if num==0
     sql += " and c.process_at is null " if num==1
     sql += " order by c.created_at desc"
     return Complaint.find_by_sql(sql)
@@ -122,7 +122,7 @@ class Complaint < ActiveRecord::Base
 
   def self.search_one(store_id,time,num=nil)
     sql ="select count(*) num from complaints  where store_id=#{store_id} "
-    sql += "and date_format(created_at,'%Y-%m')='#{time}'" unless time =="" || time.length==0
+    sql += "and date_format(created_at,'%Y-%m')='#{time}'" unless time.nil? || time =="" || time.length==0
     sql += " and TO_DAYS(process_at)=TO_DAYS(created_at)"  if num==0
     sql += " and process_at is null " if num==1
     return Complaint.find_by_sql(sql)[0]
@@ -130,7 +130,7 @@ class Complaint < ActiveRecord::Base
 
   def self.detail_one(store_id,page,time)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id where c.store_id=#{store_id} "
-    sql += "and date_format(c.created_at,'%Y-%m')='#{time}'" unless time =="" || time.length==0
+    sql += "and date_format(c.created_at,'%Y-%m')='#{time}'" unless time.nil? || time =="" || time.length==0
     sql += " order by created_at desc"
     return Complaint.paginate_by_sql(sql, :page => page, :per_page => 15)
   end
