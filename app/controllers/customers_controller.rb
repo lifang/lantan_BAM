@@ -123,7 +123,7 @@ class CustomersController < ApplicationController
   def order_prods
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 1, params[:page])
+    @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 10, params[:page])
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
     respond_to do |format|
@@ -134,7 +134,7 @@ class CustomersController < ApplicationController
   def revisits
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, 1, params[:page])
+    @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, 10, params[:page])
     respond_to do |format|
       format.js
     end
@@ -143,7 +143,7 @@ class CustomersController < ApplicationController
   def complaints
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, 1, params[:page])
+    @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, 10, params[:page])
     respond_to do |format|
       format.js
     end
