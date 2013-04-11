@@ -182,7 +182,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 
 /*main*/
-.main { padding: 10px 0 30px 0; overflow: hidden;}
+.main { padding: 10px 0 30px 0; overflow: hidden; min-height: 500px;}
 
 .data_box { padding: 5px 0;}
 .data_body { padding: 5px 0;}
