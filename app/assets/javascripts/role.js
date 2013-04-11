@@ -129,7 +129,6 @@ function set_staff_role(staff_id,r_ids){
 }
 
 function search_staff(store_id){
-    alert(this.href)
     $.ajax({
         url:this.href,
         dataType:"script",
