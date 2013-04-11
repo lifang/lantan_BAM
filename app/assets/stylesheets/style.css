@@ -760,3 +760,14 @@ a.compile_btn { width: 100px;}
     background: #f5f5f5;
     color: #CCC;
 }
+.data_table tr.hbg td a{
+     background: none;
+    color: #FFFFFF;
+    font-size: 14px;
+    margin: 0 auto;
+    padding: 0 auto;
+}
+.data_table tr.hbg td a.sort_asc{
+    color:red
+}
+.data_table tr.hbg td a.sort_desc{ color:green}

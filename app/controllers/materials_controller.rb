@@ -26,7 +26,12 @@ class MaterialsController < ApplicationController
 
   #库存列表分页
   def page_materials
+    order_sql = params[:column] && params[:direction]?
+          "#{params[:column]} #{params[:direction]}" : "id asc"
+    @direction = params[:direction] if params[:direction]
+    @column = params[:column] if params[:column]
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
+      :order => order_sql,
       :per_page => Constant::PER_PAGE, :page => params[:page])
     respond_with(@materials_storages) do |format|
       #format.html
