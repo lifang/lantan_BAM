@@ -169,7 +169,7 @@ class MarketManagesController < ApplicationController
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
       "orders.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
-      "orders.ended_at <= '#{@end_at}'"
+      "orders.ended_at <= '#{@end_at} 23:59:59'"
     @orders = Order.includes(:c_svc_relation => :sv_card).
       where("orders.store_id = #{params[:store_id]}").
       where(started_at_sql).where(ended_at_sql).
