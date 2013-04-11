@@ -53,7 +53,7 @@ module RemotePaginateHelper
           prev = n
           text = (n==page ? n : n)
           puts
-          links << page_link_remote_or_span((n != page ? n : nil), 'current', text, param, update, url)
+          links << page_link_remote_or_em((n != page ? n : nil), 'current', text, param, update, url)
         else
           prev = n - 1
           links << '...'
@@ -72,6 +72,15 @@ module RemotePaginateHelper
   def page_link_remote_or_span(page, span_class, text, param, update, url)
     unless page
       content_tag(:span, text, :class => span_class)
+    else
+      #link_to_remote text, :update => update, :url => "#{url}?#{param.to_sym}=#{page}", :method=>:get
+      link_to "#{text}", "#{url}&#{param.to_sym}=#{page}", :method => :get, :remote => true, "data-type" => "script"
+    end
+  end
+
+  def page_link_remote_or_em(page, span_class, text, param, update, url)
+    unless page
+      content_tag(:em, text, :class => span_class)
     else
       #link_to_remote text, :update => update, :url => "#{url}?#{param.to_sym}=#{page}", :method=>:get
       link_to "#{text}", "#{url}&#{param.to_sym}=#{page}", :method => :get, :remote => true, "data-type" => "script"

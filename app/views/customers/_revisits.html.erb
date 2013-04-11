@@ -11,11 +11,11 @@
   <tbody>
     <% @revisits.each do |revisit| %>
       <tr>
-        <td><%= revisit.created_at.strftime("%Y-%m-%d %H:%M:%S") if revisit.created_at %></td>
-        <td><%= Revisit::TYPES_NAME[revisit.types] %></td>
-        <td><%= revisit.content %></td>
-        <td><%= revisit.answer %></td>
-        <td>
+        <td width="20%" class="wordBreak"><%= revisit.created_at.strftime("%Y-%m-%d %H:%M:%S") if revisit.created_at %></td>
+        <td width="10%" class="wordBreak"><%= Revisit::TYPES_NAME[revisit.types] %></td>
+        <td width="25%" class="wordBreak"><%= revisit.content %></td>
+        <td width="25%" class="wordBreak"><%= revisit.answer %></td>
+        <td width="20%" class="wordBreak">
           <%= link_to "#{revisit.code}", "/orders/#{revisit.o_id}/order_info" , 
             :remote => "true", "data-type" => "script", :class => "other_a" %>
         </td>
