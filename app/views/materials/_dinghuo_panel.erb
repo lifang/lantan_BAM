@@ -3,14 +3,7 @@
         width:50px;
     }
 </style>
-<script>
-    $(function() {
-        $( "#date01" ).datepicker({inline: true});
-        $( "#date02" ).datepicker({inline: true});
-        $( "#date03" ).datepicker({inline: true});
-        $( "#date04" ).datepicker({inline: true});
-    })
-</script>
+
 <%= form_tag material_order_store_materials_url(params[:store_id]), :id => "order_form" do |f| %>
     <div class="tab_popup dinghuo_tab" id="dinghuo_tab">
       <div class="popup_box">
@@ -101,10 +94,10 @@
             </div>
           </div>
           <div class="fukuan_btn">
-            <button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){submit_material_order('order_form',3)}else{hide_mask($('#fukuan_tab'))}">现金</button>
-            <button class="confirm_btn" type="button" onclick="submit_material_order('order_form',5)">货到付款</button>
+            <span><a href="javascript:void(0)"class="zfb" onclick="submit_material_order('order_form',1)"></a></span>
+            <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){submit_material_order('order_form',3)}else{hide_mask($('#fukuan_tab'))}">现金</button></span>
+            <span><button class="confirm_btn" type="button" onclick="submit_material_order('order_form',5)">货到付款</button></span>
             <span id="mendian_account"><button class="confirm_btn" type="button" onclick="submit_material_order('order_form',4)">门店账户扣款</button><em id="rest_count">（余额：<%= @store_account.to_f %>）</em></span>
-            <span class="zfb" onclick="submit_material_order('order_form',1)"></span>
           </div>
           <div class="clear"></div>
         </div>
