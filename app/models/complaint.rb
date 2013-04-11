@@ -80,13 +80,14 @@ class Complaint < ActiveRecord::Base
 
   def self.degree_chart(store_id)
     month = Complaint.count_pleasant(store_id)
-    sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m')< date_format(now(),'%Y-%m')
-     and store_id=#{store_id}  group by month(created_at),is_pleased"
-    orders=Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|   
+    sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') and store_id=#{store_id} and status=#{Order::STATUS[:BEEN_PAYMENT]} group by month(created_at),is_pleased"
+    orders =Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|
       hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
     unless orders=={}
       percent ={}
+      p orders
       orders.each {|k,order| percent[k]=(order[true].nil? ? 0 : order[true]*100)/(order.values.inject(0){|num,level| num+level})}
+      p percent
       lc = GoogleChart::LineChart.new('1000x300', "满意度月度统计表", true)
       lc.data "满意度",percent.inject(Array.new){|arr,o|arr << [o[0]-1,o[1]]} , 'ff0000'
       size =(0..10).inject(Array.new){|arr,int| arr << (percent.values.max%10==0 ? percent.values.max/10 : percent.values.max/10+1)*int} #生成图表的y的坐标
