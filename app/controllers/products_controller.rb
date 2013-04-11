@@ -6,7 +6,7 @@ class ProductsController < ApplicationController
 
   def index
     @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,id,store_id from products where  store_id in (#{params[:store_id]},1)
-    and is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]} order by created_at desc", :page => params[:page], :per_page => 5)
+    and is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]} order by created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
   end  #产品列表页
 
   #新建

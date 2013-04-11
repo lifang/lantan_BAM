@@ -85,13 +85,11 @@ class Complaint < ActiveRecord::Base
       hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
     unless orders=={}
       percent ={}
-      p orders
-      orders.each {|k,order| percent[k]=(order[true].nil? ? 0 : order[true]*100)/(order.values.inject(0){|num,level| num+level})}
-      p percent
+      orders.each {|k,order| percent[k]=(order.select{|k,v|  k != Order::IS_PLEASED[:BAD]}=={} ? 0 : order.select{|k,v|  k != Order::IS_PLEASED[:BAD]}.values.inject(0){|num,level| num+level}*100)/(order.values.inject(0){|num,level| num+level})}
       lc = GoogleChart::LineChart.new('1000x300', "满意度月度统计表", true)
       lc.data "满意度",percent.inject(Array.new){|arr,o|arr << [o[0]-1,o[1]]} , 'ff0000'
-      size =(0..10).inject(Array.new){|arr,int| arr << (percent.values.max%10==0 ? percent.values.max/10 : percent.values.max/10+1)*int} #生成图表的y的坐标
-      lc.max_value [orders.keys.length-1,percent.values.max]
+      size =(0..10).inject(Array.new){|arr,int| arr << 10*int} #生成图表的y的坐标
+      lc.max_value [orders.keys.length-1,100]
       lc.axis :x, :labels =>orders.keys.inject(Array.new){|arr,mon|arr << "#{mon}月"}
       lc.axis :y, :labels => size
       lc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3

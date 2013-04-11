@@ -38,7 +38,8 @@ class Staff < ActiveRecord::Base
   
 
   attr_accessor :password
-#  validates :password, :allow_nil => true#, :length=>{:within=>6..20} #:confirmation=>true
+  #validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
+
 
 
   def has_password?(submitted_password)

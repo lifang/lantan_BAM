@@ -10,7 +10,7 @@
           <div class="bigImg jqzoom">
             <%if @img_urls[0]%>
               <img jqimg="<%= @img_urls[0].img_url.nil? ? "" : @img_urls[0].img_url  %>"
-                   src="<%= @img_urls[0].img_url.nil? ? "" : @img_urls[0].img_url.gsub("img#{@prod.id}","img#{@prod.id}_#{Constant::P_PICSIZE[3]}")  %>" />
+                   src="<%= @img_urls[0].img_url.nil? ? "" : @img_urls[0].img_url.gsub("img#{@prod.id}","img#{@prod.id}_#{Constant::P_PICSIZE[2]}")  %>" />
                  <% end %>
           </div>
           <div class="pic_show">
