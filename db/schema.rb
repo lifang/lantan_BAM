@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051439) do
+ActiveRecord::Schema.define(:version => 20130701051442) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -144,12 +144,15 @@ ActiveRecord::Schema.define(:version => 20130701051439) do
     t.boolean  "sex"
     t.datetime "birthday"
     t.string   "address"
-    t.boolean  "is_vip",      :default => false
+    t.boolean  "is_vip",             :default => false
     t.string   "mark"
-    t.boolean  "status",      :default => false
+    t.boolean  "status",             :default => false
     t.integer  "types"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "encrypted_password"
+    t.string   "username"
+    t.string   "salt"
   end
 
   add_index "customers", ["birthday"], :name => "index_customers_on_birthday"
@@ -158,6 +161,7 @@ ActiveRecord::Schema.define(:version => 20130701051439) do
   add_index "customers", ["name"], :name => "index_customers_on_name"
   add_index "customers", ["status"], :name => "index_customers_on_status"
   add_index "customers", ["types"], :name => "index_customers_on_types"
+  add_index "customers", ["username"], :name => "index_customers_on_username"
 
   create_table "goal_sale_types", :force => true do |t|
     t.string   "type_name"
@@ -423,11 +427,13 @@ ActiveRecord::Schema.define(:version => 20130701051439) do
     t.boolean  "status"
     t.integer  "price"
     t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   add_index "package_cards", ["created_at"], :name => "index_package_cards_on_created_at"
   add_index "package_cards", ["status"], :name => "index_package_cards_on_status"
   add_index "package_cards", ["store_id"], :name => "index_package_cards_on_store_id"
+  add_index "package_cards", ["updated_at"], :name => "index_package_cards_on_updated_at"
 
   create_table "pcard_prod_relations", :force => true do |t|
     t.integer  "product_id"
@@ -719,6 +725,7 @@ ActiveRecord::Schema.define(:version => 20130701051439) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "name"
+    t.string   "collector_code"
   end
 
   add_index "stations", ["status"], :name => "index_stations_on_status"
@@ -892,6 +899,18 @@ ActiveRecord::Schema.define(:version => 20130701051439) do
 
   add_index "w_o_times", ["current_day"], :name => "index_w_o_times_on_current_day"
   add_index "w_o_times", ["station_id"], :name => "index_w_o_times_on_station_id"
+
+  create_table "wk_or_times", :force => true do |t|
+    t.string   "current_time"
+    t.integer  "current_day"
+    t.integer  "station_id"
+    t.integer  "worked_num"
+    t.integer  "wait_num"
+    t.datetime "created_at"
+  end
+
+  add_index "wk_or_times", ["current_day"], :name => "index_wk_or_times_on_current_day"
+  add_index "wk_or_times", ["station_id"], :name => "index_wk_or_times_on_station_id"
 
   create_table "work_orders", :force => true do |t|
     t.integer  "station_id"

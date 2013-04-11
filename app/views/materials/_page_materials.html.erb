@@ -1,3 +1,5 @@
+<% direction ||= 'none' %>
+<% column ||= 'none' %>
 <script>
     $(document).ready(function(){
         $(".pageTurn a").unbind("click");
@@ -7,6 +9,7 @@
                 async:true,
                 url:this.href,
                 dataType:"script",
+                data: {column : '<%= column %>', direction: '<%= direction %>'},
                 type:"GET",
                 success:function(){
                     // alert(1);
@@ -31,6 +34,7 @@
         $(obj).removeClass("sort_desc");
         $(obj).addClass("sort_asc");
       }
+
       var url = $(obj).attr("data-link") +"?column="+column+"&direction="+direction;
             $.ajax({
                 async:true,
@@ -51,7 +55,6 @@
   <thead>
   <tr class="hbg">
     <td>条形码</td>
-    <% direction ||= 'none' %>
     <td><a class="sort_<%= direction%>" href="javascript:void(0)" data-link="<%= page_materials_store_materials_url(params[:store_id]) %>" onclick="orderMaterial(this)" data-name="name">物料名称</a></td>
     <td>物料类别</td>
     <td>库存状态</td>

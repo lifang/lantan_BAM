@@ -26,7 +26,7 @@ class MaterialsController < ApplicationController
 
   #库存列表分页
   def page_materials
-    order_sql = params[:column] && params[:direction]?
+    order_sql = params[:column] && params[:direction]!="none"?
           "#{params[:column]} #{params[:direction]}" : "id asc"
     @direction = params[:direction] if params[:direction]
     @column = params[:column] if params[:column]
