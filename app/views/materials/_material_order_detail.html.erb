@@ -51,27 +51,25 @@
     <div class="amount">总计：<%= @total_money %></div>
   </div>
 </div>
-<div class="btn_box">
-  <div style="margin: 0 auto">
+<div class="fukuan_btn">
   <% if @mo.supplier_id == 0 && permission?(:materials, :cuihuo) %>
     <% if @mo.m_status == MaterialOrder::M_STATUS[:no_send] && @mo.status != MaterialOrder::STATUS[:cancel]%>
-      <button class="confirm_btn" onclick="cuihuo(<%= @mo.id %>,1,<%= @store_id %>)">催货</button>
+      <span><button class="confirm_btn" onclick="cuihuo(<%= @mo.id %>,1,<%= @store_id %>)">催货</button></span>
     <% end %>
   <% end %>
   <% if permission?(:materials, :receive) %>
     <% if @mo.m_status == MaterialOrder::M_STATUS[:send] %>
-      <button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,1,<%= @store_id %>)">已收货</button>
+      <span><button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,1,<%= @store_id %>)">已收货</button></span>
     <% end %>
   <% end %>
   <% if permission?(:materials, :pay) %>
     <% if @mo.status == MaterialOrder::STATUS[:no_pay] %>
-      <button class="confirm_btn" onclick="hide_mask('#mat_order_detail_tab');pay_order(<%= @mo.id %>,<%= @store_id %>)">付款</button>
+      <span><button class="confirm_btn" onclick="hide_mask('#mat_order_detail_tab');pay_order(<%= @mo.id %>,<%= @store_id %>)">付款</button></span>
     <% end %>
   <% end %>
   <% if permission?(:materials, :cancel) %>
     <% if @mo.status == MaterialOrder::STATUS[:no_pay] && @mo.m_status == MaterialOrder::M_STATUS[:no_send] %>
-      <button class="confirm_btn" onclick="cancel_order(<%= @mo.id %>,1,<%= @store_id %>)">取消订单</button>
+      <span><button class="confirm_btn" onclick="cancel_order(<%= @mo.id %>,1,<%= @store_id %>)">取消订单</button></span>
     <% end %>
   <% end %>
-  </div>
 </div>
