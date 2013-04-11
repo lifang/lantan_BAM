@@ -4,6 +4,7 @@ namespace :monthly do
   task(:operate_charts => :environment) do
     Store.all.each {|store| Complaint.gchart(store.id)}
   end
+  
   task(:operate_satify => :environment) do
     Store.all.each {|store| Complaint.degree_chart(store.id)}
   end

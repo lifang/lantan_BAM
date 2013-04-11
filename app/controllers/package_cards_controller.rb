@@ -20,7 +20,11 @@ class PackageCardsController < ApplicationController
       :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL],:price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d")
     }
     pcard =PackageCard.create(parms)
-    pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+    begin
+      pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+    rescue
+      flash[:notice] ="图片上传失败，请重新添加！"
+    end
     params[:sale_prod].each do |key,value|
       PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
     end
@@ -32,7 +36,7 @@ class PackageCardsController < ApplicationController
     p_cards =PackageCard.search_pcard(params[:store_id])
     @cards= p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @card_fee = p_cards.inject(0) {|num,card| num+card.price }
-    @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
+    @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.p_name];p_hash.uniq }
     p @pcards
     #content中存放使用情况 将所有产品或服务以字符串组合存放，包含 产品id,name,剩余次数
   end #销售记录
@@ -63,7 +67,11 @@ class PackageCardsController < ApplicationController
     parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],
       :ended_at=>params[:ended_at],:price=>params[:price]
     }
-    parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+    begin
+      parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+    rescue
+      flash[:notice] ="图片上传失败，请重新添加！"
+    end
     pcard.update_attributes(parms)
     pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
     params[:sale_prod].each do |key,value|

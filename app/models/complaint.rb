@@ -73,24 +73,23 @@ class Complaint < ActiveRecord::Base
 
   def self.search_lis(store_id,created_at)
     sql ="select * from chart_images where store_id=#{store_id} and types=#{ChartImage::TYPES[:COMPLAINT]}"
-    sql += " and date_format(current_day,'%Y-%m')='#{created_at}' order by created_at desc"  unless created_at=="" || created_at.length==0
+    sql += " and date_format(current_day,'%Y-%m')='#{created_at}' order by created_at desc"  unless created_at.nil? || created_at=="" || created_at.length==0
     return ChartImage.find_by_sql(sql)[0]
   end
 
 
   def self.degree_chart(store_id)
     month = Complaint.count_pleasant(store_id)
-    sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m')< date_format(now(),'%Y-%m')
-     and store_id=#{store_id}  group by month(created_at),is_pleased"
-    orders=Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|   
+    sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') and store_id=#{store_id} and status=#{Order::STATUS[:BEEN_PAYMENT]} group by month(created_at),is_pleased"
+    orders =Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|
       hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
     unless orders=={}
       percent ={}
-      orders.each {|k,order| percent[k]=(order[true].nil? ? 0 : order[true]*100)/(order.values.inject(0){|num,level| num+level})}
+      orders.each {|k,order| percent[k]=(order.select{|k,v|  k != Order::IS_PLEASED[:BAD]}=={} ? 0 : order.select{|k,v|  k != Order::IS_PLEASED[:BAD]}.values.inject(0){|num,level| num+level}*100)/(order.values.inject(0){|num,level| num+level})}
       lc = GoogleChart::LineChart.new('1000x300', "满意度月度统计表", true)
       lc.data "满意度",percent.inject(Array.new){|arr,o|arr << [o[0]-1,o[1]]} , 'ff0000'
-      size =(0..10).inject(Array.new){|arr,int| arr << (percent.values.max%10==0 ? percent.values.max/10 : percent.values.max/10+1)*int} #生成图表的y的坐标
-      lc.max_value [orders.keys.length-1,percent.values.max]
+      size =(0..10).inject(Array.new){|arr,int| arr << 10*int} #生成图表的y的坐标
+      lc.max_value [orders.keys.length-1,100]
       lc.axis :x, :labels =>orders.keys.inject(Array.new){|arr,mon|arr << "#{mon}月"}
       lc.axis :y, :labels => size
       lc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
@@ -107,14 +106,14 @@ class Complaint < ActiveRecord::Base
 
   def self.degree_lis(store_id,created_at)
     sql ="select * from chart_images where store_id=#{store_id} and types=#{ChartImage::TYPES[:SATIFY]}"
-    sql += " and date_format(current_day,'%Y-%m')='#{created_at}' order by created_at desc"  unless created_at=="" || created_at.length==0
+    sql += " and date_format(current_day,'%Y-%m')='#{created_at}' order by created_at desc"  unless created_at.nil? || created_at=="" || created_at.length==0
     return ChartImage.find_by_sql(sql)[0]
   end
 
   def self.search_detail(store_id,num=nil)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
     where c.store_id=#{store_id} and date_format(now(),'%Y-%m')=date_format(c.created_at,'%Y-%m') "
-     sql += " and TO_DAYS(c.process_at)=TO_DAYS(c.created_at)"  if num==0
+    sql += " and TO_DAYS(c.process_at)=TO_DAYS(c.created_at)"  if num==0
     sql += " and c.process_at is null " if num==1
     sql += " order by c.created_at desc"
     return Complaint.find_by_sql(sql)
@@ -122,7 +121,7 @@ class Complaint < ActiveRecord::Base
 
   def self.search_one(store_id,time,num=nil)
     sql ="select count(*) num from complaints  where store_id=#{store_id} "
-    sql += "and date_format(created_at,'%Y-%m')='#{time}'" unless time =="" || time.length==0
+    sql += "and date_format(created_at,'%Y-%m')='#{time}'" unless time.nil? || time =="" || time.length==0
     sql += " and TO_DAYS(process_at)=TO_DAYS(created_at)"  if num==0
     sql += " and process_at is null " if num==1
     return Complaint.find_by_sql(sql)[0]
@@ -130,7 +129,7 @@ class Complaint < ActiveRecord::Base
 
   def self.detail_one(store_id,page,time)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id where c.store_id=#{store_id} "
-    sql += "and date_format(c.created_at,'%Y-%m')='#{time}'" unless time =="" || time.length==0
+    sql += "and date_format(c.created_at,'%Y-%m')='#{time}'" unless time.nil? || time =="" || time.length==0
     sql += " order by created_at desc"
     return Complaint.paginate_by_sql(sql, :page => page, :per_page => 15)
   end

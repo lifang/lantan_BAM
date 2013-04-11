@@ -117,7 +117,10 @@ function show_center(t){
         display:'block',
         height:($(t).height()+50)>doc_height?　$(t).height()+180 : doc_height
     });
-    $(t).css('top',"50px");
+    var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
+    var win_height = document.documentElement.clientHeight;//jQuery(document).height();
+    var z_layer_height = $(".tab_alert").height();
+    $(t).css('top',(win_height-z_layer_height)/2 + scolltop);
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
     $(t + " .close").click(function(){
@@ -125,6 +128,27 @@ function show_center(t){
         $(".mask").css('display','none');
     });
 }
+function before_center(t){
+    var doc_height = $(document).height();
+    var doc_width = $(document).width();
+    var layer_height = $(t).height();
+    var layer_width = $(t).width();
+    $(".maskOne").css({
+        display:'block',
+        height:($(t).height()+50)>doc_height?　$(t).height()+180 : doc_height
+    });
+    var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
+    var win_height = document.documentElement.clientHeight;//jQuery(document).height();
+    var z_layer_height = $(".tab_alert").height();
+    $(t).css('top',(win_height-z_layer_height)/2 + scolltop);
+    $(t).css('left',(doc_width-layer_width)/2);
+    $(t).css('display','block');
+    $(t + " .close").click(function(){
+        $(t).css('display','none');
+        $(".maskOne").css('display','none');
+    });
+}
+
 
 //基础数据权限配置 切换
 $(function() {

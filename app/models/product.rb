@@ -15,7 +15,7 @@ class Product < ActiveRecord::Base
   TYPES_NAME = {:OTHER_PROD => 5, :OTHER_SERV => 11}
   PRODUCT_END = 6
   PROD_TYPES = {:PRODUCT =>0, :SERVICE =>1}  #0 为产品 1 为服务
-  IS_VALIDATE={:NO=>0,:YES=>1} #0 无效 已删除状态 1 有效
+  IS_VALIDATE ={:NO=>0,:YES=>1} #0 无效 已删除状态 1 有效
 
   scope :is_service, where(:is_service => true)
 end

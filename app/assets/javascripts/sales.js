@@ -186,7 +186,7 @@ function check_add(e){
         return false;
     }
     $("#add_pcard").submit();
-    $(e).removeAttr("onclik");
+    $(e).removeAttr("onclick");
 }
 
 //删除套餐卡

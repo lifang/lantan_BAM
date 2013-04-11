@@ -37,10 +37,9 @@ class StationsController < ApplicationController
     stations.each {|station|
       if params[:"stat#{station.id}"].to_i==Station::STAT[:NORMAL]
         station.update_attributes(:status=>params[:"stat#{station.id}"].to_i)
-        station.station_staff_relations.inject(Array.new) {|arr,mat| mat.destroy if mat.current_day==Time.now.strftime("%Y%m%d")}
+        station.station_staff_relations.where("current_day=#{Time.now.strftime("%Y%m%d")}").inject(Array.new) {|arr,mat| mat.destroy if mat.current_day==Time.now.strftime("%Y%m%d").to_i}
         params[:"select#{station.id}"].each {|staff_id|
           StationStaffRelation.create(:station_id=>station.id,:staff_id=>staff_id,:current_day=>Time.now.strftime("%Y%m%d")) }
-
       else
         station.update_attributes(:status=>params[:"stat#{station.id}"].to_i)
       end

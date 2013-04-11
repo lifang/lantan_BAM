@@ -10,8 +10,8 @@
   <% (@staffs || []).each do |staff| %>
   <tr>
     <td><%= staff.name %></td>
-    <td><%= staff.staff_role_relations.collect{|rel| rel.role.name }.join(",") %></td>
-    <td><a href="javascript:void(0);" onclick="set_staff_role('<%= staff.id %>','<%= staff.staff_role_relations.collect{|rel| rel.role.id }.join(",") %>')">角色设定</a></td>
+    <td><%= staff.roles.collect{|role| role.name }.join(", ") %></td>
+    <td><a href="javascript:void(0);" onclick="set_staff_role('<%= staff.id %>','<%= staff.roles.collect{|role| role.id }.join(",") %>')">角色设定</a></td>
   </tr>
   <% end %>
   </tbody>

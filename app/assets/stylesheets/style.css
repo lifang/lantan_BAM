@@ -73,6 +73,16 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
     top: 0;
     left: 0;
 }
+.maskOne {
+    background: url(/assets/black.png) repeat;
+    width: 100%;
+    height: 100%;
+    display: none;
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    left: 0;
+}
 
 
 .head { height: 100px; background: #930205;}
@@ -182,13 +192,13 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 
 /*main*/
-.main { padding: 10px 0 30px 0; overflow: hidden; min-height: 500px;}
+.main { padding: 10px 0 30px 0; overflow: hidden; min-height:500px;}
 
 .data_box { padding: 5px 0;}
 .data_body { padding: 5px 0;}
 .data_body_title { line-height: 24px; }
 .data_body_h { display: inline; font-size: 18px; color: #930205; font-weight: bold; line-height: 36px; margin-right: 10px;}
-.data_body_p { font-size: 16px; padding: 0 10px 10px 10px; line-height: 24px;}
+.data_body_p { font-size: 14px; padding: 0 10px 10px 10px; line-height: 24px;}
 .data_body_p span { margin: 0 10px;}
 
 .data_body_ul { color: #930205; padding: 10px 0 10px 10px;}
@@ -304,7 +314,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	border: none;
 	padding: 0 10px;
 	color: #FFF;
-	display: block;
+	display: inline-block;
 }
 a.compile_btn { width: 100px;}
 
@@ -342,7 +352,7 @@ a.compile_btn { width: 100px;}
     display: block;
     font-size: 18px;
 }
-.popup_body_area .data_body_p {font-size: 14px; padding: 0 10px 10px 10px; line-height: 24px;}
+
 
 .popup_body_fieldset { border: 1px #CCCCCC solid;}
 .popup_body_title { font-size: 14px; line-height: 28px; padding: 0 5px; margin-left: 10px; font-weight:bold;}

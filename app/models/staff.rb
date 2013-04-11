@@ -41,6 +41,7 @@ class Staff < ActiveRecord::Base
   #validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
 
 
+
   def has_password?(submitted_password)
 		encrypted_password == encrypt(submitted_password)
 	end

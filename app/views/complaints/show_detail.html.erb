@@ -40,11 +40,11 @@
                   :remote => "true", "data-type" => "script", :class => "other_a" %></td>
               <td><%= @staff_name[comp.id] %></td>
               <td><%=Complaint::CHART_NAMES[comp.types]%></td>
-              <td><%= comp.reason %></td>
+              <td width="250px"><%= comp.reason %></td>
               <td><%= comp.types==Complaint::TYPES[:INVALID]? "否" : "是" %></td>
               <td><%=Complaint::STATUS_NAME[comp.status]  %></td>
               <td><%=comp.process_at.nil? ? "" : comp.process_at.strftime("%Y.%m.%d--%H:%S")  %></td>
-              <td><%= comp.suggestion %></td>
+              <td width="250px"><%= comp.suggestion %></td>
               <td><%= Complaint::VIOLATE_N[comp.is_violation] %></td>
             </tr>
           <% end %>

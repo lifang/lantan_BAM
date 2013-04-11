@@ -19,7 +19,7 @@
         <div class="nav">
           <ul>
             <li><a href="/stores/<%= params[:store_id] %>/stations" <%if params[:action] == "index" %> class="hover"<%end%>>施工现场</a></li>
-            <% if permission?(:stations, :dispatch) %><li><a href="/stores/<%= params[:store_id] %>/stations/show_detail" <%if params[:action] == "show_detail" %> class="hover"<%end%>>工位技师分配</a></li><% end %>
+            <% if permission?(:stations, :dispatch) %><li><a href="/stores/<%= params[:store_id] %>/stations/show_detail"  class="fontSize17 <%if params[:action] == "show_detail" %>hover<%end%>">工位技师分配</a></li><% end %>
             <% if permission?(:stations, :video) %><li><a href="/stores/<%= params[:store_id] %>/stations/show_video" <%if params[:action] =~ /video/  %> class="hover"<%end%>>施工视频</a></li><% end %>
           </ul>
         </div>
