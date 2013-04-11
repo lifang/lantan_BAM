@@ -26,5 +26,5 @@
           <% end %>
         </tbody>
   </table>
-  <div class="amount">总店未支付储值卡余额  总计：<%= @svc_returns.first.total_price %>（元）</div>
+  <div class="amount">总店未支付储值卡余额  总计：<%= @svc_returns.first.nil? ? 0 : @svc_returns.first.total_price %>（元）</div>
 </div>
