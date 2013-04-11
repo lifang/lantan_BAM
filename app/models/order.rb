@@ -179,10 +179,11 @@ class Order < ActiveRecord::Base
   def self.get_brands_products store_id
     arr = []
     brands = CarBrand.all :order => "id"
+    car_models = CarModel.all.group_by { |cm| cm.car_brand_id  }
     brand_arr = []
     (brands || []).each do |brand|
       b = brand
-      b[:models] = brand.car_models
+      b[:models] = car_models[brand.id] unless car_models.empty? and car_models[brand.id] #brand.car_models
       brand_arr << b
     end
     arr << brand_arr
@@ -190,19 +191,18 @@ class Order < ActiveRecord::Base
     clean_arr = []
     prod_arr = []
     maint_arr = []
-    card_arr = []
     products = Product.find_all_by_store_id_and_status store_id, Product::IS_VALIDATE[:YES]
     (products || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
       h[:price] = p.sale_price
-      h[:img] = p.image_urls.size == 0 ? "" : p.image_urls[0].img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
-      if p.types.to_i <=5
+      h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
+      if p.types.to_i <= Product::TYPES_NAME[:OTHER_PROD]
         prod_arr << h
-      elsif p.types.to_i == 11
+      elsif p.types.to_i == Product::PRODUCT_END
         clean_arr << h
-      elsif p.types.to_i > 5 && p.types.to_i < 11
+      elsif p.types.to_i > Product::PRODUCT_END
         maint_arr << h
       end
     end
@@ -225,7 +225,6 @@ class Order < ActiveRecord::Base
     count = prod_arr.length if count < prod_arr.length
     count = cards.length if count < cards.length
     product_arr << count
-    #puts arr
     arr
   end
 
@@ -243,46 +242,49 @@ class Order < ActiveRecord::Base
     status = 0
     total = 0
     Customer.transaction do
-      begin
-        carNum = CarNum.find_by_num car_num
-        customer = nil
-        if carNum
-          customer_car_relation = CustomerNumRelation.find_by_car_num_id carNum.id
-          if customer_car_relation
-            if customer_car_relation.customer.mobilephone == phone
-              customer = customer_car_relation.customer
-            else
-              customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-                :birthday => birth,:status => Customer::STATUS[:NOMAL])
-              customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer) if customer
-            end
+      #begin
+      carNum = CarNum.find_by_num car_num
+      customer = nil
+      if carNum
+        customer_car_relation = CustomerNumRelation.find_by_car_num_id carNum.id
+        if customer_car_relation
+          if customer_car_relation.customer.mobilephone == phone
+            customer = customer_car_relation.customer
           else
-            customer = Customer.find_by_mobilephone phone
             customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-              :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
-            customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer)
+              :birthday => birth,:status => Customer::STATUS[:NOMAL])
+            customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer) if customer
           end
         else
-          m = CarModel.find_by_car_brand_id_and_id brand.split("_")[0].to_i,brand.split("_")[1].to_i
-          if m
-            customer = Customer.find_by_mobilephone phone
-            customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-              :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
-            carNum = CarNum.create(:num => car_num, :car_model_id => m.id,:buy_year => car_year)
-            CustomerNumRelation.create(:car_num_id => carNum.id,:customer_id => customer.id) if carNum && customer
-          end
+          customer = Customer.find_by_mobilephone phone
+          customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
+            :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+          customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer)
         end
-        info = Hash.new
-        info[:c_id] = customer.id
-        info[:car_num] = car_num
-        info[:c_name] = customer.name
-        info[:phone] = phone
-        info[:car_brand] = carNum.car_model.car_brand.name + "-" + carNum.car_model.name
-        info[:car_num_id] = carNum.id
-        ids = []
-        prod_ids.split(",").each do |p_id|
-          ids << p_id.split("_")[0] if p_id.split("_")[1].to_i < 3
+      else
+        m = CarModel.find_by_car_brand_id_and_id brand.split("_")[0].to_i,brand.split("_")[1].to_i
+        if m
+          customer = Customer.find_by_mobilephone phone
+          customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
+            :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+          carNum = CarNum.create(:num => car_num, :car_model_id => m.id,:buy_year => car_year)
+          CustomerNumRelation.create(:car_num_id => carNum.id,:customer_id => customer.id) if carNum && customer
         end
+      end
+      info = Hash.new
+      info[:c_id] = customer.id
+      info[:car_num] = car_num
+      info[:c_name] = customer.name
+      info[:phone] = phone
+      info[:car_brand] = carNum.car_model.car_brand.name + "-" + carNum.car_model.name
+      info[:car_num_id] = carNum.id
+      ids = []
+      prod_ids.split(",").each do |p_id|
+        ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 3
+      end
+
+      products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", ids])
+      unless products.blank?
         time_arr = Station.arrange_time store_id, ids,res_time
         info[:start] = time_arr[0]
         info[:end] = time_arr[1]
@@ -290,113 +292,119 @@ class Order < ActiveRecord::Base
         if info[:station_id].to_i == 0
           status = 2
         end
-        arr << info
-        #根据产品找活动，打折卡，套餐卡
-        p_cards = []
-        prod_arr = []
-        sale_arr = []
-        svcard_arr = []
-        prod_ids.split(",").each do |id|
-          if id.split("_")[1].to_i == 3
-            #套餐卡
-            user_p_card = CPcardRelation.find_by_package_card_id_and_customer_id id.split("_")[0].to_i, customer.id
-            has_p_card = 0
-            p_c = Hash.new
-            if user_p_card && user_p_card.package_card.status == PackageCard::STAT[:NORMAL] && user_p_card.package_card.store_id = store_id
-              has_p_card = 1
-              p_c = user_p_card.package_card
+      else
+        info[:start] = ""
+        info[:end] = ""
+        info[:station_id] = ""
+        status = 1
+      end
+      arr << info
+      #根据产品找活动，打折卡，套餐卡
+      p_cards = []
+      prod_arr = []
+      sale_arr = []
+      svcard_arr = []
+      prod_ids.split(",").each do |id|
+        if id.split("_")[1].to_i == 3
+          #套餐卡
+          user_p_card = CPcardRelation.find_by_package_card_id_and_customer_id id.split("_")[0].to_i, customer.id
+          has_p_card = 0
+          p_c = Hash.new
+          if user_p_card && user_p_card.package_card.status == PackageCard::STAT[:NORMAL] && user_p_card.package_card.store_id = store_id
+            has_p_card = 1
+            p_c = user_p_card.package_card
+            p_c[:products] = p_c.pcard_prod_relations.collect{|r|
+              p = Hash.new
+              p[:name] = r.product.name
+              p[:num] = user_p_card.get_prod_num r.product_id
+              p[:p_card_id] = r.package_card_id
+              p[:product_id] = r.product_id
+              p[:product_price] = r.product.sale_price
+              p[:selected] = 1
+              p
+            }
+            p_c[:has_p_card] = has_p_card
+            p_c[:show_price] = p_c[:price]
+            p_cards << p_c
+          else
+            p_c = PackageCard.find_by_id_and_status_and_store_id id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id
+            if p_c
               p_c[:products] = p_c.pcard_prod_relations.collect{|r|
                 p = Hash.new
                 p[:name] = r.product.name
-                p[:num] = user_p_card.get_prod_num r.product_id
+                p[:num] = r.product_num
                 p[:p_card_id] = r.package_card_id
                 p[:product_id] = r.product_id
                 p[:product_price] = r.product.sale_price
                 p[:selected] = 1
                 p
               }
-              p_c[:has_p_card] = has_p_card
-              p_c[:show_price] = p_c[:price]
-              p_cards << p_c
-            else
-              p_c = PackageCard.find_by_id_and_status_and_store_id id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id
-              if p_c
-                p_c[:products] = p_c.pcard_prod_relations.collect{|r|
-                  p = Hash.new
-                  p[:name] = r.product.name
-                  p[:num] = r.product_num
-                  p[:p_card_id] = r.package_card_id
-                  p[:product_id] = r.product_id
-                  p[:product_price] = r.product.sale_price
-                  p[:selected] = 1
-                  p
-                }
-              end
-              p_c[:has_p_card] = has_p_card
-              p_c[:show_price] = p_c[:price]
-              p_cards << p_c
-              total += p_c.price
             end
-          else
-            #产品
-            prod = Product.find_by_store_id_and_id_and_status store_id,id.split("_")[0].to_i,Product::IS_VALIDATE[:YES]
-            if prod
-              product = Hash.new
-              product[:id] = prod.id
-              product[:name] = prod.name
-              product[:price] = prod.sale_price
-              product[:count] = 1
-              prod_arr << product
-              total += product[:price]
-              #产品相关的活动
-              if prod.sale_prod_relations
-                prod.sale_prod_relations.each{|r|
-                  if r.sale && r.sale.status == Sale::STATUS[:RELEASE]
-                    s = Hash.new
-                    s[:sale_id] = r.sale_id
-                    s[:sale_name] =r.sale.name
-                    if r.sale.disc_types == Sale::DISC_TYPES[:FEE]
-                      s[:price] = r.sale.discount
-                    elsif r.sale.disc_types == Sale::DISC_TYPES[:DIS]
-                      s[:price] = prod.sale_price * (10 - r.sale.discount) / 10
-                    end
-                    s[:selected] = 0
-                    s[:show_price] = "-" + s[:price].to_s
-                    sale_arr << s
-                    total -= s[:price]
-                  end
-                }
-              end
-              #产品相关的打折卡
-              if prod.svcard_prod_relations
-                prod.svcard_prod_relations.each{|r|
-                  if r.sv_card
-                    s = Hash.new
-                    s[:scard_id] = r.sv_card_id
-                    s[:scard_name] = r.sv_card.name
-                    s[:scard_discount] = r.sv_card.discount
-                    s[:price] = prod.sale_price * (10 - r.sv_card.discount) / 10
-                    s[:selected] = 0
-                    s[:show_price] = "-" + s[:price].to_s
-                    svcard_arr << s
-                    total -= s[:price]
-                  end
-                }
-              end
-
-            end
+            p_c[:has_p_card] = has_p_card
+            p_c[:show_price] = p_c[:price]
+            p_cards << p_c
+            total += p_c.price
           end
-        end if prod_ids && carNum && customer
-        status = 1 if status == 0
-        arr << prod_arr
-        arr << sale_arr
-        arr << svcard_arr
-        arr << p_cards
-        arr << status
-        arr << total
-      rescue
-        arr = [nil,[],[],[],[],status,total]
-      end
+        else
+          #产品
+          prod = Product.find_by_store_id_and_id_and_status store_id,id.split("_")[0].to_i,Product::IS_VALIDATE[:YES]
+          if prod
+            product = Hash.new
+            product[:id] = prod.id
+            product[:name] = prod.name
+            product[:price] = prod.sale_price
+            product[:count] = 1
+            prod_arr << product
+            total += product[:price]
+            #产品相关的活动
+            if prod.sale_prod_relations
+              prod.sale_prod_relations.each{|r|
+                if r.sale && r.sale.status == Sale::STATUS[:RELEASE]
+                  s = Hash.new
+                  s[:sale_id] = r.sale_id
+                  s[:sale_name] =r.sale.name
+                  if r.sale.disc_types == Sale::DISC_TYPES[:FEE]
+                    s[:price] = r.sale.discount
+                  elsif r.sale.disc_types == Sale::DISC_TYPES[:DIS]
+                    s[:price] = prod.sale_price * (10 - r.sale.discount) / 10
+                  end
+                  s[:selected] = 0
+                  s[:show_price] = "-" + s[:price].to_s
+                  sale_arr << s
+                  total -= s[:price]
+                end
+              }
+            end
+            #产品相关的打折卡
+            if prod.svcard_prod_relations
+              prod.svcard_prod_relations.each{|r|
+                if r.sv_card
+                  s = Hash.new
+                  s[:scard_id] = r.sv_card_id
+                  s[:scard_name] = r.sv_card.name
+                  s[:scard_discount] = r.sv_card.discount
+                  s[:price] = prod.sale_price * (10 - r.sv_card.discount) / 10
+                  s[:selected] = 0
+                  s[:show_price] = "-" + s[:price].to_s
+                  svcard_arr << s
+                  total -= s[:price]
+                end
+              }
+            end
+
+          end
+        end
+      end if prod_ids && carNum && customer
+      status = 1 if status == 0
+      arr << prod_arr
+      arr << sale_arr
+      arr << svcard_arr
+      arr << p_cards
+      arr << status
+      arr << total
+      #rescue
+      #arr = [nil,[],[],[],[],status,total]
+      #end
     end
     arr
   end
@@ -455,6 +463,7 @@ class Order < ActiveRecord::Base
           x = 0
           cost_time = 0
           prod_ids = []
+          is_has_service = false #用来记录是否有服务
           #创建订单的相关产品 OrdeProdRelation
           (arr[0] || []).each do |prod|
             product = Product.find_by_id_and_store_id_and_status prod[1],store_id,Product::IS_VALIDATE[:YES]
@@ -464,6 +473,7 @@ class Order < ActiveRecord::Base
               x += 1 if product.is_service?
               cost_time += product.cost_time.to_i
               prod_ids << product.id
+              is_has_service = true if product.is_service
             end
           end
           hash[:types] = x > 0 ? TYPES[:SERVICE] : TYPES[:PRODUCT]
@@ -497,50 +507,60 @@ class Order < ActiveRecord::Base
             end
           end
 
-          #创建工位订单
-          station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
-          unless station
-            arrange_time = Station.arrange_time(store_id,prod_ids,nil)
-            if arrange_time[2] > 0
-              station_id = arrange_time[2]
-              station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
+          if is_has_service
+            #创建工位订单
+            station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
+            unless station
+              arrange_time = Station.arrange_time(store_id,prod_ids,nil)
+              if arrange_time[2] > 0
+                station_id = arrange_time[2]
+                station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
+              end
             end
-          end
-          if station
-            woTime = WkOrTime.find_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i
-            if woTime
-              t =  woTime.current_time.to_datetime + Constant::W_MIN.minutes
-              start  = t > start.to_datetime ? t : start.to_datetime
-              end_at = start + cost_time.minutes
-              woTime.update_attributes(:current_time => end_at.strftime("%Y%m%d%H%M").to_i, :wait_num => woTime.wait_num.to_i + 1)
+            if station
+              woTime = WkOrTime.find_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i
+              if woTime
+                t =  woTime.current_time.to_datetime + Constant::W_MIN.minutes
+                start  = t > start.to_datetime ? t : start.to_datetime
+                end_at = start + cost_time.minutes
+                woTime.update_attributes(:current_time => end_at.strftime("%Y%m%d%H%M").to_i, :wait_num => woTime.wait_num.to_i + 1)
+              else
+                end_at = start.to_datetime + cost_time.minutes
+                WkOrTime.create(:current_time => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
+                  :station_id => station_id, :worked_num => 1)
+              end
+              work_order = WorkOrder.create({
+                  :order_id => order.id,
+                  :current_day => Time.now.strftime("%Y%m%d"),
+                  :station_id => station_id,
+                  :store_id => store_id,
+                  :status => (woTime.nil? ? WorkOrder::STAT[:SERVICING] : WorkOrder::STAT[:WAIT]),
+                  :started_at => start,
+                  :ended_at => end_at
+                })
+              hash[:station_id] = station_id
+              station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i
+              hash[:cons_staff_id_1] = station_staffs[0].staff_id if station_staffs.size > 0
+              hash[:cons_staff_id_2] = station_staffs[1].staff_id if station_staffs.size > 1
+              hash[:started_at] = start
+              hash[:ended_at] = end_at
+              hash[:status] = STATUS[:NORMAL]
+              puts hash
+              order.update_attributes hash
+              status = 1
             else
-              end_at = start.to_datetime + cost_time.minutes
-              WkOrTime.create(:current_time => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
-                :station_id => station_id, :worked_num => 1)
+              status = 3
             end
-            work_order = WorkOrder.create({
-                :order_id => order.id,
-                :current_day => Time.now.strftime("%Y%m%d"),
-                :station_id => station_id,
-                :store_id => store_id,
-                :status => (woTime.nil? ? WorkOrder::STAT[:SERVICING] : WorkOrder::STAT[:WAIT]),
-                :started_at => start,
-                :ended_at => end_at
-              })
-            hash[:station_id] = station_id
-            station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i
-            hash[:cons_staff_id_1] = station_staffs[0].staff_id if station_staffs.size > 0
-            hash[:cons_staff_id_2] = station_staffs[1].staff_id if station_staffs.size > 1
+          else
+            hash[:station_id] = ""
+            hash[:cons_staff_id_1] = ""
+            hash[:cons_staff_id_2] = ""
             hash[:started_at] = start
             hash[:ended_at] = end_at
-            hash[:status] = STATUS[:NORMAL]
-            puts hash
+            hash[:status] = STATUS[:WAIT_PAYMENT]
             order.update_attributes hash
             status = 1
-          else
-            status = 3
           end
-
         end
       rescue
         status = 2
@@ -559,8 +579,8 @@ class Order < ActiveRecord::Base
     car_num = self.car_num
     hash[:car_num] = car_num.num
     hash[:username] = self.customer.name
-    hash[:start] = self.started_at.strftime("%Y-%m-%d %H:%M")
-    hash[:end] = self.ended_at.strftime("%Y-%m-%d %H:%M")
+    hash[:start] = self.started_at.strftime("%Y-%m-%d %H:%M") if self.started_at
+    hash[:end] = self.ended_at.strftime("%Y-%m-%d %H:%M") if self.ended_at
     hash[:total] = self.price
     content = ""
     realy_price = 0

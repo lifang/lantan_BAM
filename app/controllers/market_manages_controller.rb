@@ -167,18 +167,37 @@ class MarketManagesController < ApplicationController
   def stored_card_bill
     @start_at, @end_at = params[:started_at], params[:ended_at]
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
-      "orders.started_at >= '#{@start_at}'"
+      "srr.created_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
-      "orders.ended_at <= '#{@end_at} 23:59:59'"
-    @orders = Order.includes(:c_svc_relation => :sv_card).
-      where("orders.store_id = #{params[:store_id]}").
-      where(started_at_sql).where(ended_at_sql).
-      where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
-    svc_return_records = @orders.collect{|order|SvcReturnRecord.
-        where("types = #{SvcReturnRecord::TYPES[:IN]}").
-        where("target_id = #{order.id}").
-        where("store_id = #{@store.id}").first}
-    @total = svc_return_records.sum(&:total_price) - svc_return_records.sum(&:price)
+      "srr.created_at <= '#{@end_at} 23:59:59'"
+#    @orders = Order.includes(:c_svc_relation => :sv_card).
+#      where("orders.store_id = #{params[:store_id]}").
+#      where(started_at_sql).where(ended_at_sql).
+#      where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
+#    base_sql = "select * from orders o left join"
+#
+#    @orders = Order.find_by_sql()
+
+#    svc_return_records = @orders.collect{|order|SvcReturnRecord.
+#        where("types = #{SvcReturnRecord::TYPES[:IN]}").
+#        where("target_id = #{order.id}").
+#        where("store_id = #{@store.id}").first}
+#    @total = svc_return_records.sum(&:total_price) - svc_return_records.sum(&:price)
+
+    relation_order_sql = "select srr.*,o.code code,o.id o_id from svc_return_records srr
+                          left join orders o on o.id = srr.target_id where #{started_at_sql}
+                          and #{ended_at_sql} and srr.store_id=#{@store.id} and
+                          srr.types=#{SvcReturnRecord::TYPES[:IN]}"
+    order_svc_returns = SvcReturnRecord.find_by_sql(relation_order_sql)
+
+    relation_material_order_sql = "select srr.*,mo.code code,mo.id mo_id from svc_return_records srr
+                          left join material_orders mo on mo.id = srr.target_id where #{started_at_sql}
+                          and #{ended_at_sql} and srr.store_id=#{@store.id} and
+                          srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
+    material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
+
+    @svc_returns = (order_svc_returns + material_order_svc_returns).sort{|a,b| b[:created_at] <=> a[:created_at]}
+
     respond_to do |format|
       format.html
       format.js
