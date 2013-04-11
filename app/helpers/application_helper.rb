@@ -7,8 +7,6 @@ module ApplicationHelper
   include UserRoleHelper
 
   def sign?
-    puts "------------------------------------"
-    puts signed_in?
     deny_access unless signed_in?
   end
 
