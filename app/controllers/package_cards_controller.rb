@@ -22,12 +22,11 @@ class PackageCardsController < ApplicationController
     pcard =PackageCard.create(parms)
     begin
       pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
-
-      params[:sale_prod].each do |key,value|
-        PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
-      end
     rescue
       flash[:notice] ="图片上传失败，请重新添加！"
+    end
+    params[:sale_prod].each do |key,value|
+      PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
     end
     redirect_to "/stores/#{params[:store_id]}/package_cards"
   end #添加套餐卡
@@ -68,7 +67,11 @@ class PackageCardsController < ApplicationController
     parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],
       :ended_at=>params[:ended_at],:price=>params[:price]
     }
-    parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+    begin
+      parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+    rescue
+      flash[:notice] ="图片上传失败，请重新添加！"
+    end
     pcard.update_attributes(parms)
     pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
     params[:sale_prod].each do |key,value|

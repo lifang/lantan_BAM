@@ -179,3 +179,21 @@ function show_mat(){
     $(".seeProDiv_rWidth .srw_ul").html(mats);
     $('.mat_tab').css('display','none');
 }
+
+function prod_delete(id,store_id){
+    $.ajax({
+        async:true,
+        type : 'post',
+        dataType : 'script',
+        url : "/stores/"+ store_id+"/products/"+ id+"/prod_delete"
+    });
+}
+
+function serve_delete(id,store_id){
+    $.ajax({
+        async:true,
+        type : 'post',
+        dataType : 'script',
+        url : "/stores/"+ store_id+"/products/"+ id+"/serve_delete"
+    });
+}

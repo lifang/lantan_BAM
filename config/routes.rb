@@ -69,7 +69,7 @@
         get "prod_services"
       end
       member do
-        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv"
+        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv","serve_delete","prod_delete"
       end
     end
     resources :materials do

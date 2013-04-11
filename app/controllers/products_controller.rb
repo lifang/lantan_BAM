@@ -13,7 +13,7 @@ class ProductsController < ApplicationController
   def add_prod
     @product=Product.new
   end
-
+  
   def create
     set_product(Constant::PRODUCT)
     redirect_to "/stores/#{params[:store_id]}/products"
@@ -143,5 +143,23 @@ class ProductsController < ApplicationController
   def show
     @prod =Product.find(params[:id])
     @img_urls = @prod.image_urls
+  end
+
+  def prod_delete
+    @redit = delete_p(Constant::PRODUCT,params[:id],params[:store_id])
+  end
+
+  def serve_delete
+    @redit = delete_p(Constant::SERVICE,params[:id],params[:store_id])
+  end
+
+  def delete_p(types,id,store_id)
+    Product.find(id).update_attribute(:status, Product::IS_VALIDATE[:NO])
+    if types == Constant::SERVICE
+      redit = "/stores/#{store_id}/products/prod_services"
+    else
+      redit =  "/stores/#{store_id}/products"
+    end
+    return redit
   end
 end
