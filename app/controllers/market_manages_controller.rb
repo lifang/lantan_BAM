@@ -137,15 +137,18 @@ class MarketManagesController < ApplicationController
   def stored_card_record
     @start_at, @end_at = params[:started_at], params[:ended_at]
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
-      "orders.started_at >= '#{@start_at}'"
+      "o.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
-      "orders.ended_at <= '#{@end_at}'"
-    @orders = Order.includes(:c_svc_relation => :sv_card).
-      where("orders.store_id = #{params[:store_id]}").
-      where(started_at_sql).where(ended_at_sql).
-      where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
-
-    @total_price = @orders.sum(:price)
+      "o.ended_at <= '#{@end_at} 23:59:59'"
+#    @orders = Order.includes(:c_svc_relation => :sv_card).
+#      where("orders.store_id = #{params[:store_id]}").
+#      where(started_at_sql).where(ended_at_sql).
+#      where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
+    @orders = Order.find_by_sql("select o.id,o.code,opt.price price,opt.created_at created_at from orders o
+                                left join order_pay_types opt on opt.order_id = o.id
+                                where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
+                                #{started_at_sql} and #{ended_at_sql}")
+    @total_price = @orders.sum(&:price)
   end
 
   def daily_consumption_receipt
