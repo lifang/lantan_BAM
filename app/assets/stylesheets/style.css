@@ -182,7 +182,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 
 /*main*/
-.main { padding: 10px 0 30px 0; overflow: hidden;}
+.main { padding: 10px 0 30px 0; overflow: hidden; min-height: 500px;}
 
 .data_box { padding: 5px 0;}
 .data_body { padding: 5px 0;}
@@ -341,7 +341,6 @@ a.compile_btn { width: 100px;}
     color:#930205;
     display: block;
     font-size: 18px;
-    padding-left: 30px;
 }
 .popup_body_area .data_body_p {font-size: 14px; padding: 0 10px 10px 10px; line-height: 24px;}
 
@@ -434,8 +433,11 @@ a.compile_btn { width: 100px;}
     background: #026c93;
 }
 
-.fukuan_btn { padding-left: 40px; margin: 10px 0;}
-.zfb { width: 110px; height: 33px; margin: 10px 0; background: url(/assets/zfb.jpg) no-repeat; display: block; float: left;}
+
+.fukuan_btn { margin: 10px 0; padding: 10px 0; text-align: center; overflow: hidden;}
+.zfb { padding: 16px 55px; margin: 0 10px; background: url(/assets/zfb.jpg) no-repeat center center;}
+
+.fukuan_btn .confirm_btn, .fukuan_btn span { display: inline-block;}
 
 /*备注*/
 .beizhu_textarea { width: 600px; height: 200px; margin: 0 auto; display: block;}
