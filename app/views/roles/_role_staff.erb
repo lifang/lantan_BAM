@@ -16,4 +16,5 @@
   <% end %>
   </tbody>
 </table>
-<%= will_paginate @staffs if @staffs && @staffs.size > 0 %>
+<%= will_paginate @staffs, :class => "pageTurn", :previous_label => "上一页",
+            :next_label => "下一页"  unless @staffs.empty?%>
