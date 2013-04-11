@@ -15,7 +15,7 @@
       <option value="1">已付款</option>
     </select>
   </div>
-  <div><label>时间：</label><input name="" type="text" id="date01"> 到 <input name="" type="text" id="date02"></div>
+  <div><label>时间：</label><input class="Wdate" readonly onclick="WdatePicker()" name="mo_start" type="text" id="date01"/> 到 <input class="Wdate" readonly onclick="WdatePicker()" name="mo_end" type="text" id="date02"/></div>
   <div><button onclick="search_head_order('<%= params[:store_id] %>')" class="search_btn">查询</button></div>
 </div>
 <div id="page_head_orders">

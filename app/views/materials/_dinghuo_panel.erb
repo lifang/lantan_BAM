@@ -3,14 +3,7 @@
         width:50px;
     }
 </style>
-<script>
-    $(function() {
-        $( "#date01" ).datepicker({inline: true});
-        $( "#date02" ).datepicker({inline: true});
-        $( "#date03" ).datepicker({inline: true});
-        $( "#date04" ).datepicker({inline: true});
-    })
-</script>
+
 <%= form_tag material_order_store_materials_url(params[:store_id]), :id => "order_form" do |f| %>
     <div class="tab_popup dinghuo_tab" id="dinghuo_tab">
       <div class="popup_box">
