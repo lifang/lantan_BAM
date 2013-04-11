@@ -434,7 +434,7 @@ a.compile_btn { width: 100px;}
 }
 
 
-.fukuan_btn { margin: 10px 0; padding: 5px 0; text-align: center; overflow: hidden;}
+.fukuan_btn { margin: 10px 0; padding: 10px 0; text-align: center; overflow: hidden;}
 .zfb { padding: 16px 55px; margin: 0 10px; background: url(/assets/zfb.jpg) no-repeat center center;}
 
 .fukuan_btn .confirm_btn, .fukuan_btn span { display: inline-block;}
