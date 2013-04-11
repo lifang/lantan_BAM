@@ -483,9 +483,12 @@ function show_mask_div(div_id){
         display:'block',
         height:doc_height
     });
-
-    $("#"+div_id).css("top","50px").css("left",(doc_width-layer_width)/2).show();
-    $(".close").click(function(){
+    var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
+    var win_height = document.documentElement.clientHeight;//jQuery(document).height();
+    var z_layer_height = $(".tab_alert").height();
+    
+    $("#"+div_id).css("top",(win_height-z_layer_height)/2 + scolltop).css("left",(doc_width-layer_width)/2).show();
+    $("#"+div_id +" a.close").click(function(){
         $("#"+div_id).hide();
         $(".mask").hide();
     })
@@ -498,7 +501,10 @@ function show_mask_div(div_id){
 function commit_in(){
     if($.trim($("#name").val())==""){
        tishi_alert("请输入物料名称");
-    }else if($.trim($("#code").val())==""){
+    }else if($("#material_types").val()==""){
+       tishi_alert("请选择物料类型");
+    }
+    else if($.trim($("#code").val())==""){
         tishi_alert("请输入订货单号");
     }else if($.trim($("#barcode").val())==""){
         tishi_alert("请输入条形码");
@@ -527,7 +533,7 @@ function commit_in(){
                       }
                }else if(data=="0"){$("#ruku_tab_form").submit();}
                else{
-                  alert("未找到物料或者订单！");
+                  tishi_alert("未找到物料或者订单！");
                   return false;
                }
            }

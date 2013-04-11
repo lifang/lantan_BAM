@@ -16,7 +16,11 @@
         <td><%= complaint.created_at.strftime("%Y-%m-%d %H:%M:%S") if complaint.created_at %></td>
         <td><%= complaint.reason %></td>
         <td><%= complaint.suggestion %></td>
-        <td><%= complaint.st_name1 %>，<%= complaint.st_name2 %></td>
+        <td><% if complaint.st_name1 or complaint.st_name2  %>
+            <%= (complaint.st_name1 + "，") if complaint.st_name1 %><%= complaint.st_name2 if complaint.st_name2 %>
+          <% else %>--
+          <% end %>
+        </td>
         <td>
           <%= link_to "#{complaint.code}", "/orders/#{complaint.o_id}/order_info" ,
             :remote => "true", "data-type" => "script", :class => "other_a" %>
@@ -27,8 +31,10 @@
             已处理
           <% else %>
             <% if permission?(:customers,:deal_complaint) %>
-            <%= link_to "处理", "/orders/#{complaint.c_id}_#{complaint.o_id}/order_staff" ,
-              :remote => "true", "data-type" => "script" %>
+            <% if complaint.status == Complaint::STATUS[:UNTREATED] %>
+              <%= link_to "处理", "/orders/#{complaint.c_id}_#{complaint.o_id}/order_staff" ,
+                :remote => "true", "data-type" => "script" %>
+            <% end %>
             <% end %>
           <% end %>
         </td>

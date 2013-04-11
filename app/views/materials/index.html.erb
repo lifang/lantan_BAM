@@ -38,7 +38,7 @@
 <!--tab-->
 <div class="tab_popup beizhu_tab" id="remark_div">
   <div class="popup_box">
-    <h1>备注<a href="#" class="close">关闭</a></h1>
+    <h1>备注<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
         <%= hidden_field_tag "material_id" %>
@@ -51,7 +51,7 @@
 
 <div class="tab_popup ruku_tab" id="ruku_tab">
   <div class="popup_box">
-    <h1>入库<a href="#" class="close">关闭</a></h1>
+    <h1>入库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <%= form_tag store_materials_url(params[:store_id]), :id => "ruku_tab_form" do |f| %>
           <div class="popup_body_area">
@@ -59,7 +59,7 @@
               <%= label_tag "name","物料名称：" %><%= text_field_tag "name" %>
             </div>
             <div class="item">
-              <%= label_tag "types","物料类型：" %><%= select(:material,:types,material_types,{:include_blank => false}) %>
+              <%= label_tag "types","物料类型：" %><%= select(:material,:types,material_types,{:prompt => "请选择"}) %>
             </div>
             <div class="item">
               <%= label_tag "code","订货单号：" %><%= text_field_tag "code" %>
@@ -84,7 +84,7 @@
 
 <div class="tab_popup chuku_tab" id="chuku_tab">
   <div class="popup_box">
-    <h1>出库<a href="#" class="close">关闭</a></h1>
+    <h1>出库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <%= form_tag out_order_store_materials_url(params[:store_id]), :id => "out_order_form" do |f| %>
         <div class="popup_body">
           <div class="popup_body_area">
@@ -115,7 +115,7 @@
 </div>
 <div class="tab_popup beizhu_tab" id="order_remark_div">
   <div class="popup_box">
-    <h1>备注<a href="#" class="close">关闭</a></h1>
+    <h1>备注<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
         <%= hidden_field_tag "material_order_id" %>
@@ -127,7 +127,7 @@
 </div>
 <div class="tab_popup" id="zhifu_tab">
   <div class="popup_box">
-    <h1>付款<a href="#" class="close">关闭</a></h1>
+    <h1>付款<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
       <div class="fukuan_btn">
@@ -142,7 +142,7 @@
 </div>
 <div class="tab_popup xiangqing_tab" id="mat_order_detail_tab">
   <div class="popup_box">
-    <h1>详情<a href="#" class="close">关闭</a></h1>
+    <h1>详情<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       
     </div>

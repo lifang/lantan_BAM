@@ -91,7 +91,7 @@
                   </div>
                   <div class="item">
                        <label>出生年月：</label>
-                       <%= f.date_select :birthday, {:start_year => 1903, :use_month_numbers => true}, {:class => "ymd"} %>
+                       <%= f.text_field :birthday, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();" %>
                   </div>
                   <div class="item">
                        <label>联系方式：</label>

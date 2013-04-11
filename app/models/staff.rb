@@ -34,11 +34,11 @@ class Staff < ActiveRecord::Base
   N_SEX = {0 => "男", 1 => "女"}
 
   #分页页数
-  PerPage = 3
+  PerPage = 10
   
 
   attr_accessor :password
-  validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
+  validates :password, :allow_nil => true#, :length=>{:within=>6..20} #:confirmation=>true
 
 
   def has_password?(submitted_password)

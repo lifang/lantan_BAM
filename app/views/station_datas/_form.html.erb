@@ -1,6 +1,6 @@
 <div class="tab_popup" style="display: none;" id="station_form">
   <div class="popup_box">
-    <h1>工位<a href="#" class="close">关闭</a></h1>
+    <h1>工位<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <% @station ||= Station.new %>
       <%= form_for @station, :url => @action == 'new' ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => @action == 'new' ? :post : :put, :remote => true, :html => {"data-type" => 'script'} do |f| %>
