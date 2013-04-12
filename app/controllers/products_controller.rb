@@ -39,7 +39,7 @@ class ProductsController < ApplicationController
   def set_product(types)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:desc],
       :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:intro], :store_id=>params[:store_id],
-      :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product")}"
+      :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product","service_code")}"
     }
     product =Product.create(parms)
     if types == Constant::SERVICE

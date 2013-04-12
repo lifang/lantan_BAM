@@ -12,10 +12,11 @@ class Sale < ActiveRecord::Base
   require 'mini_magick'
 
   #生成code
-  def self.set_code(length,model_n)
+  def self.set_code(length,model_n,code_name)
     chars = (1..9).to_a + ("a".."z").to_a + ("A".."Z").to_a
     code=(1..length).inject(Array.new) {|codes| codes << chars[rand(chars.length)]}.join("")
-    codes=eval(model_n.capitalize).all.map(&:id)
+    codes=eval(model_n.capitalize).all.map(&:"#{code_name}")
+    p codes
     if codes.index(code)
       set_code(length)
     else
