@@ -167,10 +167,8 @@ class MarketManagesController < ApplicationController
 
   def stored_card_bill
     @start_at, @end_at = params[:started_at], params[:ended_at]
-    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
-      "srr.created_at >= '#{@start_at}'"
-    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
-      "srr.created_at <= '#{@end_at} 23:59:59'"
+    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "srr.created_at >= '#{@start_at}'"
+    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "srr.created_at <= '#{@end_at} 23:59:59'"
 
     relation_order_sql = "select srr.*,o.code code,o.id o_id from svc_return_records srr
                           left join orders o on o.id = srr.target_id where #{started_at_sql}
@@ -184,7 +182,7 @@ class MarketManagesController < ApplicationController
                           srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
     material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
 
-    @svc_returns = (order_svc_returns + material_order_svc_returns).sort{|a,b| b[:created_at] <=> a[:created_at]}
+    @svc_returns = (order_svc_returns + material_order_svc_returns).sort{|a,b| a[:id] <=> b[:id]}
 
     respond_to do |format|
       format.html
