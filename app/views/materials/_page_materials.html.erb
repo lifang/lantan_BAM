@@ -1,3 +1,5 @@
+<% direction ||= 'none' %>
+<% column ||= 'none' %>
 <script>
     $(document).ready(function(){
         $(".pageTurn a").unbind("click");
@@ -7,6 +9,7 @@
                 async:true,
                 url:this.href,
                 dataType:"script",
+                data: {column : '<%= column %>', direction: '<%= direction %>'},
                 type:"GET",
                 success:function(){
                     // alert(1);
@@ -16,15 +19,16 @@
             });
             /* alert(this.href); */
             return false;
-        });
+        });       
     });
+
 </script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
   <thead>
   <tr class="hbg">
     <td>条形码</td>
-    <td>物料名称</td>
-    <td>物料类别</td>
+    <td><span class="sort_<%= column=="name" ? direction : "asc" %>"  data-link="<%= page_materials_store_materials_url(params[:store_id]) %>" onclick="orderMaterial(this)" data-name="name">物料名称</span></td>
+    <td><span class="sort_<%= column=="types" ? direction : "asc" %>" data-link="<%= page_materials_store_materials_url(params[:store_id]) %>" onclick="orderMaterial(this)" data-name="types">物料类别</span></td>
     <td>库存状态</td>
     <td>库存量（个）</td>
     <td>成本价（元）</td>

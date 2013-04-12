@@ -2,6 +2,7 @@
 class MaterialsController < ApplicationController
   require 'uri'
   require 'net/http'
+  require 'will_paginate/array'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?
@@ -26,8 +27,30 @@ class MaterialsController < ApplicationController
 
   #库存列表分页
   def page_materials
-    @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
-      :per_page => Constant::PER_PAGE, :page => params[:page])
+    if params[:column]=="name" && params[:direction]
+      conv = Iconv.new("GBK", "utf-8")
+    elsif params[:column]=="types"
+      order_sql = "#{params[:column]} #{params[:direction]}"
+    else
+      order_sql = "id asc"
+    end
+    @direction = params[:direction] if params[:direction]
+    @column = params[:column] if params[:column]
+    if conv
+      if @direction == "asc"
+        @materials_storages = Material.normal.sort{|a,b| conv.iconv(a.name) <=> conv.iconv(b.name)}.
+          paginate(:conditions => "store_id=#{params[:store_id]}",
+          :per_page => Constant::PER_PAGE, :page => params[:page])
+      else
+        @materials_storages = Material.normal.sort{|a,b| conv.iconv(b.name) <=> conv.iconv(a.name)}.
+          paginate(:conditions => "store_id=#{params[:store_id]}",
+          :per_page => Constant::PER_PAGE, :page => params[:page])
+      end
+    else
+      @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
+        :order => order_sql,
+        :per_page => Constant::PER_PAGE, :page => params[:page])
+    end
     respond_with(@materials_storages) do |format|
       #format.html
       format.js
