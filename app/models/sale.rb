@@ -12,19 +12,15 @@ class Sale < ActiveRecord::Base
   require 'mini_magick'
 
   #生成code
-  def self.set_code(length)
+  def self.set_code(length,model_n)
     chars = (1..9).to_a + ("a".."z").to_a + ("A".."Z").to_a
     code=(1..length).inject(Array.new) {|codes| codes << chars[rand(chars.length)]}.join("")
-    file = File.open(Constant::CODE_PATH,"a+")
-    codes=file.read
+    codes=eval(model_n.capitalize).all.map(&:id)
     if codes.index(code)
       set_code(length)
     else
-      file.write("#{code}\r\n")
-      file.close
       return code
     end
-
   end
 
   #上传图片并裁剪不同比例 目前为50,100,200和原图
