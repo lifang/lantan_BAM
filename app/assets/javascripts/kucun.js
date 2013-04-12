@@ -200,7 +200,15 @@ function set_order_num(obj,storage,m_id,m_price,m_code,m_type){
 }
 
 function submit_out_order(form_id){
-//    alert($("#selected_items").val());
+    var a = true;
+    $("#selected_materials").find("input").each(function(){
+          var storage = parseInt($(this).parent().prev().text());
+          if($(this).val() > storage){
+              tishi_alert("请输入小于库存量的值");
+              a = false;
+          }
+    })
+    if(a){
     if($("#selected_items").val()!=null && $("#selected_items").val()!=""){
         $.ajax({
            url:$("#"+form_id).attr("action"),
@@ -219,6 +227,7 @@ function submit_out_order(form_id){
         });
     }else{
         tishi_alert("请选择物料");
+    }
     }
 }
 
