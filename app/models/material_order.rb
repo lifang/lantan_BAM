@@ -28,12 +28,12 @@ class MaterialOrder < ActiveRecord::Base
   end
 
   def self.supplier_order_records page, per_page, store_id
-    self.paginate(:select => "*", :from => "material_orders", :include => [:supplier, :mat_order_items => :material], :conditions => "material_orders.supplier_id != 0",
+    self.paginate(:select => "*", :from => "material_orders", :include => [:supplier, {:mat_order_items => :material}], :conditions => "material_orders.supplier_id != 0",
       :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
   end
 
   def self.head_order_records page, per_page, store_id
-    self.paginate(:select => "*", :from => "material_orders",  :include => [:mat_order_items => :material],:conditions => "material_orders.supplier_id = 0",
+    self.paginate(:select => "*", :from => "material_orders", :include => [:mat_order_items => :material],:conditions => "material_orders.supplier_id = 0",
       :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
   end
 

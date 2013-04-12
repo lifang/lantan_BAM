@@ -236,14 +236,12 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .tab_head li.hover { height: 30px; background: #FFF; font-weight: bolder; color: #930205;}
 
 
-.sort_u, .sort_d, .sort_u_s, .sort_d_s { padding: 0 15px; cursor: pointer; background: url(/assets/sort.png) no-repeat}
-.sort_u { background-position:74px -26px; _background-position: 74px -20px;}
-.sort_d { background-position: 74px 6px; _background-position: 74px 12px;}
+.sort_u, .sort_asc, .sort_d, .sort_u_s, .sort_d_s, .sort_desc { padding: 0 15px; cursor: pointer; background: url(/assets/sort.png) no-repeat}
+.sort_u, .sort_asc{ background-position:74px -26px; _background-position: 74px -20px;}
+.sort_d, .sort_desc { background-position: 74px 6px; _background-position: 74px 12px;}
 
 .sort_u_s { background-position: 46px -26px; _background-position: 74px -20px;}
 .sort_d_s { background-position: 46px 6px; _background-position: 74px 12px;}
-
-
 
 /*table*/
 .data_table { text-align: center; margin-bottom: 30px;}
@@ -759,4 +757,11 @@ a.compile_btn { width: 100px;}
     border: 1px #CCCCCC solid;
     background: #f5f5f5;
     color: #CCC;
+}
+.data_table tr.hbg td a{
+     background: none;
+    color: #FFFFFF;
+    font-size: 14px;
+    margin: 0 auto;
+    padding: 0 auto;
 }
