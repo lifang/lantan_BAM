@@ -30,7 +30,7 @@
       collection do
         get "makets_totals","makets_list","makets_reports","makets_views","makets_goal",
           "sale_orders","sale_order_list","stored_card_record","daily_consumption_receipt",
-          "stored_card_bill"
+          "stored_card_bill", "daily_consumption_receipt_blank"
         post "search_month","search_report","search_sale_order"
       end
     end
