@@ -6,13 +6,6 @@ class CreateMenus < ActiveRecord::Migration
       t.string :controller
       t.string :name
     end
-    Menu.create(:id => 1,:controller => "customers",:name => "客户")
-    Menu.create(:id => 2,:controller => "materials",:name => "库存")
-    Menu.create(:id => 3,:controller => "staffs",:name => "员工")
-    Menu.create(:id => 4,:controller => "datas",:name => "统计")
-    Menu.create(:id => 5,:controller => "stations",:name => "现场")
-    Menu.create(:id => 6,:controller => "sales",:name => "营销")
-
     add_index :menus, :controller
     
   end

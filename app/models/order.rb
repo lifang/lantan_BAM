@@ -127,8 +127,8 @@ class Order < ActiveRecord::Base
       from customer_num_relations cnr
       inner join car_nums cn on cn.id=cnr.car_num_id and cn.num='#{car_num}'
       inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}
-      inner join car_models cm on cm.id=cn.car_model_id
-      inner join car_brands cb on cb.id=cm.car_brand_id "
+      left join car_models cm on cm.id=cn.car_model_id
+      left join car_brands cb on cb.id=cm.car_brand_id "
     customer = CustomerNumRelation.find_by_sql sql
     if customer && customer.size > 0
       customer = customer[0]
@@ -138,11 +138,16 @@ class Order < ActiveRecord::Base
       (orders || []).each do |order|
         order_hash = order
         #puts order_hash
-        order_hash[:products] = order.order_prod_relations.collect{|r|
-          p = Hash.new
-          p[:name] = r.product.name
-          p[:price] = r.price.to_f * r.pro_num.to_i
-          p
+        order_hash[:products] = []
+        order.order_prod_relations.collect{|r|
+          product = r.product          
+          if product
+            p = Hash.new
+            p[:name] = product.name
+            p[:price] = r.price.to_f * r.pro_num.to_i
+            p
+            order_hash[:products] << p
+          end          
         }
         order_hash[:pay_type] = order.order_pay_types.collect{|type|
           OrderPayType::PAY_TYPES_NAME[type.pay_type]
@@ -285,7 +290,8 @@ class Order < ActiveRecord::Base
 
       products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", ids])
       unless products.blank?
-        time_arr = Station.arrange_time store_id, ids,res_time
+        service_ids = products.collect { |p| p.id  }
+        time_arr = Station.arrange_time store_id, service_ids, res_time
         info[:start] = time_arr[0]
         info[:end] = time_arr[1]
         info[:station_id] = time_arr[2]
@@ -472,7 +478,7 @@ class Order < ActiveRecord::Base
                 :pro_num => prod[2], :price => product.sale_price)
               x += 1 if product.is_service?
               cost_time += product.cost_time.to_i
-              prod_ids << product.id
+              prod_ids << product.id if product.is_service
               is_has_service = true if product.is_service
             end
           end
