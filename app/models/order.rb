@@ -52,8 +52,8 @@ class Order < ActiveRecord::Base
       params_arr << time.to_i
     end
     if !is_price.nil? and !price.nil? and !price.strip.empty?
-      group_by_sql == "" ? group_by_sql = " group by o.customer_id having sum(o.price) >= ? "
-      : group_by_sql += " or sum(o.price) >= ? "
+      group_by_sql == "" ? group_by_sql = " group by o.customer_id having sum(o.price) >= ? " :
+        group_by_sql += " or sum(o.price) >= ? "
       params_arr << price.to_i
     end
     params_arr[0] = base_sql + condition_sql + group_by_sql
