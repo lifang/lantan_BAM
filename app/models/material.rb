@@ -2,7 +2,11 @@
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :mat_order_items
-  has_many :material_orders, :through => :mat_order_items
+  has_many :material_orders, :through => :mat_order_items do 
+    def not_all_in
+       where("m_status != 3")
+    end
+  end
   has_many :mat_out_orders
   has_many  :mat_in_orders
   has_many :prod_mat_relations

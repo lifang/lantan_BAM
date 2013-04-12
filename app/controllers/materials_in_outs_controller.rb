@@ -21,7 +21,7 @@ class MaterialsInOutsController < ApplicationController
       render :text => 'fail'
     else
       if params[:action_name]=='m_in'
-        @material_orders = @material.material_orders
+        @material_orders = @material.material_orders.not_all_in
         if @material_orders.empty?
           render :text => 'fail'
         else
