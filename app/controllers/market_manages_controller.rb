@@ -144,8 +144,9 @@ class MarketManagesController < ApplicationController
 #      where("orders.store_id = #{params[:store_id]}").
 #      where(started_at_sql).where(ended_at_sql).
 #      where("sv_cards.types = #{SvCard::FAVOR[:SAVE]}")
-    @orders = Order.find_by_sql("select o.id,o.code,opt.price price,opt.created_at created_at from orders o
-                                left join order_pay_types opt on opt.order_id = o.id
+    @orders = Order.find_by_sql("select o.id,o.code,opt.price price,opt.created_at created_at,p.name product_name from orders o
+                                left join order_pay_types opt on opt.order_id = o.id inner join order_prod_relations op on
+                                op.order_id = o.id inner join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
                                 #{started_at_sql} and #{ended_at_sql}")
     @total_price = @orders.sum(&:price)
