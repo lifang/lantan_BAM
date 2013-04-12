@@ -42,22 +42,22 @@ $(document).ready(function(){
     })
 
     //打印储值卡对账单
-    $("#print_bill").click(function(){
-        var started_at = $(this).attr("started_at");
-        var ended_at = $(this).attr("ended_at");
-        var store_id = $("#store_id").val();
-        $.ajax({
-            async:true,
-            type : 'get',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/market_manages/stored_card_bill",
-            data : {
-                started_at : started_at,
-                ended_at : ended_at
-            }
-        });
-        return false;
-    });
+//    $("#print_bill").click(function(){
+//        var started_at = $(this).attr("started_at");
+//        var ended_at = $(this).attr("ended_at");
+//        var store_id = $("#store_id").val();
+//        $.ajax({
+//            async:true,
+//            type : 'get',
+//            dataType : 'script',
+//            url : "/stores/"+ store_id+"/market_manages/stored_card_bill",
+//            data : {
+//                started_at : started_at,
+//                ended_at : ended_at
+//            }
+//        });
+//        return false;
+//    });
 
 });
 
