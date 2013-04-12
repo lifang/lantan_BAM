@@ -7,7 +7,7 @@
       <div><button class="search_btn">查询</button></div>
 </div>
 </form>
-<div class="data_menu"><a href="javascript:void(0)" class="add_btn" id="print_bill" started_at="<%= @start_at %>" ended_at="<%= @end_at %>">打印单据</a></div>
+<div class="data_menu"><a href="/stores/<%= @store.id %>/market_manages/stored_card_bill_blank?started_at=<%= @start_at %>&ended_at=<%= @end_at %>" class="add_btn" id="print_bill" target="_blank">打印单据</a></div>
 <div class="clear"></div>
 <input type="hidden" id="store_id" value="<%= @store.id %>"/>
 <div class="data_body">
