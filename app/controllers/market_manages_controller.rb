@@ -1,7 +1,7 @@
 #encoding: utf-8
 class MarketManagesController < ApplicationController
   before_filter :sign?
-  layout "complaint", :except => :daily_consumption_receipt_blank
+  layout "complaint", :except => [:daily_consumption_receipt_blank, :stored_card_bill_blank]
   require 'will_paginate/array'
 
   before_filter :get_store, :only => [:stored_card_record, :daily_consumption_receipt, :stored_card_bill]
@@ -167,33 +167,34 @@ class MarketManagesController < ApplicationController
 
   def stored_card_bill
     @start_at, @end_at = params[:started_at], params[:ended_at]
-    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' :
-      "srr.created_at >= '#{@start_at}'"
-    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' :
-      "srr.created_at <= '#{@end_at} 23:59:59'"
+    @svc_returns = shared_stored_card_bill(@start_at, @start_at, @store.id)
+  end
 
-    relation_order_sql = "select srr.*,o.code code,o.id o_id from svc_return_records srr
-                          left join orders o on o.id = srr.target_id where #{started_at_sql}
-                          and #{ended_at_sql} and srr.store_id=#{@store.id} and
-                          srr.types=#{SvcReturnRecord::TYPES[:IN]}"
-    order_svc_returns = SvcReturnRecord.find_by_sql(relation_order_sql)
-
-    relation_material_order_sql = "select srr.*,mo.code code,mo.id mo_id from svc_return_records srr
-                          left join material_orders mo on mo.id = srr.target_id where #{started_at_sql}
-                          and #{ended_at_sql} and srr.store_id=#{@store.id} and
-                          srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
-    material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
-
-    @svc_returns = (order_svc_returns + material_order_svc_returns).sort{|a,b| b[:created_at] <=> a[:created_at]}
-
-    respond_to do |format|
-      format.html
-      format.js
-    end
+  def stored_card_bill_blank
+    @svc_returns = shared_stored_card_bill(params[:started_at], params[:ended_at], params[:store_id])
   end
 
   private
   def get_store
     @store = Store.find_by_id(params[:store_id])
+  end
+
+  def shared_stored_card_bill(started_at, ended_at, store_id)
+    started_at_sql = (started_at.nil? || started_at.empty?) ? '1 = 1' : "srr.created_at >= '#{started_at}'"
+    ended_at_sql = (ended_at.nil? || ended_at.empty?) ? '1 = 1' : "srr.created_at <= '#{ended_at} 23:59:59'"
+
+    relation_order_sql = "select srr.*,o.code code,o.id o_id from svc_return_records srr
+                          left join orders o on o.id = srr.target_id where #{started_at_sql}
+                          and #{ended_at_sql} and srr.store_id=#{store_id} and
+                          srr.types=#{SvcReturnRecord::TYPES[:IN]}"
+    order_svc_returns = SvcReturnRecord.find_by_sql(relation_order_sql)
+
+    relation_material_order_sql = "select srr.*,mo.code code,mo.id mo_id from svc_return_records srr
+                          left join material_orders mo on mo.id = srr.target_id where #{started_at_sql}
+                          and #{ended_at_sql} and srr.store_id=#{store_id} and
+                          srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
+    material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
+
+    (order_svc_returns + material_order_svc_returns).sort{|a,b| a[:id] <=> b[:id]}
   end
 end
