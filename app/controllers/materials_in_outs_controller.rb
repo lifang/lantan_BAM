@@ -77,7 +77,7 @@ class MaterialsInOutsController < ApplicationController
   end
 
   def save_cookies
-    staff_name = Staff.find(params[:staff_id])
+    staff_name = Staff.find(params[:staff_id]).name
     cookies[:user_id]={:value =>params[:staff_id], :path => "/", :secure  => false}
     cookies[:user_name]={:value =>staff_name, :path => "/", :secure  => false}
     render :text => 'successful'
