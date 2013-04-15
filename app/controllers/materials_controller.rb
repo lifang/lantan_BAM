@@ -516,4 +516,16 @@ class MaterialsController < ApplicationController
       @total_money += moi.price * moi.material_num
     end
   end
+
+  def add_material
+    store = Store.find params[:store_id]
+    material = Material.find_by_code(params[:materials][:code])
+    if material.nil?
+      store.materials << Material.create(params[:materials])
+    else
+      storage = material.storage + params[:materials][:storage].to_i
+      material.update_attributes(:storage => storage)
+    end
+    redirect_to "/stores/#{params[:store_id]}/materials"
+  end
 end
