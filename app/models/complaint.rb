@@ -42,7 +42,7 @@ class Complaint < ActiveRecord::Base
   end
 
   def self.count_types(store_id)
-    return Complaint.find_by_sql("select count(*) total_num,types from complaints where store_id=#{store_id} and
+    return AsComplaint.find_by_sql("select count(*) total_num,types from complaints where store_id=#{store_id} and
            date_format(created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') group by types")
   end
   

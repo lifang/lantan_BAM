@@ -30,6 +30,7 @@ class Sync < ActiveRecord::Base
         end
       rescue
         flog.write("数据上传失败---#{Time.now}\r\n")
+        p "#{filename}  file send failed"
       end
       flog.close
     end
@@ -93,6 +94,7 @@ class Sync < ActiveRecord::Base
           sync.update_attributes(:has_data =>Sync::HAS_DATA[:NO])
         end
       rescue
+        p "#{filename} file update failed"
         flog.write("数据更新并压缩失败---#{Time.now}\r\n")
       end
     end
