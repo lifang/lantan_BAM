@@ -1,5 +1,3 @@
-<% direction ||= 'none' %>
-<% column ||= 'none' %>
 <script>
     $(document).ready(function(){
         $(".pageTurn a").unbind("click");
@@ -9,7 +7,6 @@
                 async:true,
                 url:this.href,
                 dataType:"script",
-                data: {column : '<%= column %>', direction: '<%= direction %>'},
                 type:"GET",
                 success:function(){
                     // alert(1);
@@ -19,49 +16,45 @@
             });
             /* alert(this.href); */
             return false;
-        });       
+        });
+
+        $("#materials_tab_table").tablesorter({
+        headers:
+        {
+            0: {
+                sorter: false
+            },
+            3: {
+                sorter: false
+            },
+            4: {
+                sorter: false
+            },
+            5: {
+                sorter: false
+            },
+            6: {
+                sorter: false
+            },
+            7: {
+                sorter: false
+            }
+        }
+    });
     });
 
-    function orderMaterial(obj){
-      var direction = $(obj).attr("class").split("_")[1];
-      var column = $(obj).attr("data-name");
-      if(direction=="asc"){
-        direction = "desc";
-        $(obj).removeClass("sort_asc");
-        $(obj).addClass("sort_desc");
-      }else if(direction=="desc" || direction=="none"){
-        direction = "asc";
-        $(obj).removeClass("sort_desc");
-        $(obj).addClass("sort_asc");
-      }
-
-      var url = $(obj).attr("data-link") +"?column="+column+"&direction="+direction;
-            $.ajax({
-                async:true,
-                url:url,
-                dataType:"script",
-                type:"GET",
-                success:function(){
-                   //  alert(1);
-                },error:function(){
-                  // alert("error");
-                }
-            });
-            /* alert(this.href); */
-            return false;
-    }
 </script>
-<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_tab_table">
   <thead>
   <tr class="hbg">
-    <td>条形码</td>
-    <td><a class="sort_<%= direction%>" href="javascript:void(0)" data-link="<%= page_materials_store_materials_url(params[:store_id]) %>" onclick="orderMaterial(this)" data-name="name">物料名称</a></td>
-    <td>物料类别</td>
-    <td>库存状态</td>
-    <td>库存量（个）</td>
-    <td>成本价（元）</td>
-    <td>盘点实数</td>
-    <td>操作</td>
+    <th>条形码</th>
+    <th><span class="sort_u">物料名称</span></th>
+    <th><span class="sort_d">物料类别</span></th>
+    <th>库存状态</th>
+    <th>库存量（个）</th>
+    <th>成本价（元）</th>
+    <th>盘点实数</th>
+    <th>操作</th>
   </tr>
   </thead>
   <tbody>

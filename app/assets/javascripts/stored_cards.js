@@ -39,40 +39,6 @@ $(document).ready(function(){
     $("#statistics_year").change(function(){
         $(this).parents('form').submit();
         return false;
-    })
-
-    //打印每日销售单据
-    $("#print_daily_receipt").click(function(){
-        var search_time = $(this).attr("name");
-        var store_id = $("#store_id").val();
-        $.ajax({
-            async:true,
-            type : 'get',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/market_manages/daily_consumption_receipt",
-            data : {
-                search_time : search_time
-            }
-        });
-        return false;
-    });
-
-    //打印储值卡对账单
-    $("#print_bill").click(function(){
-        var started_at = $(this).attr("started_at");
-        var ended_at = $(this).attr("ended_at");
-        var store_id = $("#store_id").val();
-        $.ajax({
-            async:true,
-            type : 'get',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/market_manages/stored_card_bill",
-            data : {
-                started_at : started_at,
-                ended_at : ended_at
-            }
-        });
-        return false;
     });
 
 });

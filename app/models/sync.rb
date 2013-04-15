@@ -90,7 +90,7 @@ class Sync < ActiveRecord::Base
           sync.update_attributes({:data_status=>Sync::SYNC_STAT[:COMPLETE],:zip_name=>filename})
           flog.write("数据更新并压缩成功---#{Time.now}\r\n")
         else
-          sync.update_attributes(:has_data=>Sync::HAS_DATA[:NO])
+          sync.update_attributes(:has_data =>Sync::HAS_DATA[:NO])
         end
       rescue
         flog.write("数据更新并压缩失败---#{Time.now}\r\n")

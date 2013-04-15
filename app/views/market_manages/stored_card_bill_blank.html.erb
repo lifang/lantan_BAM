@@ -1,3 +1,7 @@
+<%= stylesheet_link_tag    "application" %>
+<%= javascript_include_tag "application"%>
+<script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
+<script type="text/javascript" src="/assets/stored_cards.js" ></script>
 <div>
    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
        <thead>
@@ -14,8 +18,7 @@
           <% @svc_returns.each do |svc_return| %>
             <tr>
               <td>
-                <%= link_to "#{svc_return.code}", "/orders/#{svc_return.types == SvcReturnRecord::TYPES[:IN] ? svc_return.o_id : svc_return.mo_id}/order_info",
-                  :remote => "true", "data-type" => "script", :class => "other_a" %></td>
+                <%= svc_return.code %></td>
               <td><%= svc_return.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
               <td><%= svc_return.content %></td>
               <td><%= svc_return.price if svc_return.types == SvcReturnRecord::TYPES[:OUT] %></td>

@@ -37,19 +37,19 @@ $(document).ready(function(){
             });
         }
     });
-    $("#staff_id").live('change', function(){
-        var staff_id = $(this).val();
-        $.get("/save_cookies", {
-            staff_id: staff_id
-        })
-        .done(function(data) {})
-    })
 
     setTimeout( function(){
         $('.mat_notice' ).fadeOut();
     }, 3000 );
 
 });
+function chooseCookie(obj){
+    var staff_id = $(obj).val();
+    $.get("/save_cookies", {
+        staff_id: staff_id
+    })
+    .done(function(data) {})
+}
 
 function changeNum(obj){
     var ori_num = $(obj).parent("td").siblings(".mat_item_num").text();
@@ -117,7 +117,7 @@ function checkNums(){
                         },
                         success:function(data2){
                             if(data2=="1")
-                              { tishi_alert("入库成功！");
+                              {tishi_alert("入库成功！");
                                 window.location.href = "/stores/"+ store_id +"/materials_in_outs";
                               }
                         }
