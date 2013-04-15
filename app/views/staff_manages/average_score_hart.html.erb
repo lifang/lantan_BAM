@@ -6,9 +6,9 @@
 <div class="search">
      <div><label>统计年份：</label>
               <select name="year" id="statistics_year">
-               <option <%= @year.eql?('2013') ? "selected" : "" %>>2013</option>
-               <option <%= @year.eql?('2012') ? "selected" : "" %>>2012</option>
-               <option <%= @year.eql?('2011') ? "selected" : "" %>>2011</option>
+               <% get_last_ten_years.each do |year| %>
+               <option <%= @year.eql?(year) ? "selected" : "" %>><%= year %></option>
+               <% end %>
               </select>
      </div>
 </div>

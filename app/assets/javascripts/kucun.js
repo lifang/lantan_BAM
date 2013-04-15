@@ -507,6 +507,22 @@ function show_mask_div(div_id){
     })
 }
 
+function checkMaterial(){
+  if($.trim($("#materials_name").val())==""){
+       tishi_alert("请输入物料名称");
+    }else if($("#materials_types").val()==""){
+       tishi_alert("请选择物料类型");
+    }else if($.trim($("#materials_code").val())==""){
+        tishi_alert("请输入条形码");
+    }else if($.trim($("#materials_price").val())==""){
+        tishi_alert("请输入单价");
+    }else if($.trim($("#materials_storage").val())==""){
+        tishi_alert("请输入数量");
+    }else{
+        $("#add_material_tab_form").submit();
+    }
+}
+
 function commit_in(){
     if($.trim($("#name").val())==""){
        tishi_alert("请输入物料名称");
@@ -549,6 +565,10 @@ function commit_in(){
        });
       
     }
+}
+
+function addMaterial(){
+  show_mask_div('add_material_tab');
 }
 
 function ruku(){
