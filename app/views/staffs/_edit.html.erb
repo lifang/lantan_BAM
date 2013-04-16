@@ -1,6 +1,6 @@
 <div class="tab_popup" style="display:none;" id="edit_staff_area">
     <div class="popup_box">
-         <h1>编辑员工<a href="javascript:void(0)" class="close" id="edit_staff_close">关闭</a></h1>
+         <h1>编辑员工<a href="javascript:void(0)" class="close">关闭</a></h1>
          <%= form_for(@staff, :url => store_staff_path(@store, @staff), :html => {:method => :put, :multipart => true}) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
@@ -85,8 +85,7 @@
                 
               </div>
               <div class="btn_box">
-                <button class="confirm_btn" id="edit_staff_btn">编辑</button>
-                <button class="cancel_btn" id="edit_staff_cancel">取消</button></div>
+                <button class="confirm_btn" id="edit_staff_btn">编辑</button></div>
               <div class="clear"></div>
          </div>
          <% end %>

@@ -28,12 +28,12 @@
 
 <div class="tab_popup" style="display: none;" id="add_role">
   <div class="popup_box">
-    <h1>添加角色<a href="javascript:void(0);" onclick="hide_mask('#add_role');" class="close">关闭</a></h1>
+    <h1>添加角色<a href="javascript:void(0);" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
         <div class="brand">角色：<%= text_field_tag "role_input","" %></div>
       </div>
-      <div class="btn_box"><button class="confirm_btn" onclick="new_role('<%= params[:store_id] %>')">确定</button><button class="cancel_btn">取消</button></div>
+      <div class="btn_box"><button class="confirm_btn" onclick="new_role('<%= params[:store_id] %>')">确定</button></div>
     </div>
   </div>
 </div>

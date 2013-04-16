@@ -46,18 +46,17 @@ function popup(t){
     });
     var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
     var win_height = document.documentElement.clientHeight;//jQuery(document).height();
-    var z_layer_height = $(".tab_alert").height();
-    $(t).css('top',(win_height-z_layer_height)/2 + scolltop);
+    var layer_height = $(t).height();
+    $(t).css('top',(win_height-layer_height)/2 + scolltop);
 
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
 
-    $(t + " .close").click(function(){
+    $(t + " a.close").click(function(){
         $(t).css('display','none');
         $(".mask").css('display','none');
     })
 }
-
 
 //现场施工
 $(function(){
