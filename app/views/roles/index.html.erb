@@ -1,8 +1,10 @@
 <div class="data_box">
+  <% if permission?(:base_datas, :role_conf) || permission?(:base_datas, :role_set) %>
   <div class="second_menu">
-    <a href="/stores/<%= params[:store_id] %>/roles" class="hover">权限配置</a>
-    <a href="/stores/<%= params[:store_id] %>/roles/staff">用户设定</a>
+    <% if permission?(:base_datas, :role_conf) %><a href="/stores/<%= params[:store_id] %>/roles" class="hover">权限配置</a><% end %>
+    <% if permission?(:base_datas, :role_set) %><a href="/stores/<%= params[:store_id] %>/roles/staff">用户设定</a><% end %>
   </div>
+  <% end %>
   <div class="data_menu"><a href="javascript:void(0);" onclick="add_role('<%= params[:store_id] %>')" class="add_btn">添加角色</a></div>
   <div class="clear"></div>
   <div class="data_body">
@@ -12,8 +14,9 @@
         <li>
           <a href="javascript:void(0)" style="display: block;" id="a_role_<%= role.id %>"><%= role.name %></a>
           <%= text_field_tag "input_role_#{role.id}",role.name,{:style => "display:none;",:onblur => "blur_role(this,'#{params[:store_id]}')"} %>
-          <a href="javascript:void(0)" onclick="del_role(<%= role.id %>,'<%= params[:store_id] %>')" class="group_x">Close</a>
-          <span class="group_func"><a href="javascript:void(0)" onclick="edit_role(<%= role.id %>)">编辑</a>
+          <% if permission?(:base_datas, :del_role) %><a href="javascript:void(0)" onclick="del_role(<%= role.id %>,'<%= params[:store_id] %>')" class="group_x">Close</a><% end %>
+          <span class="group_func">
+            <% if permission?(:base_datas, :edit_role) %><a href="javascript:void(0)" onclick="edit_role(<%= role.id %>)">编辑</a><% end %>
             <a href="javascript:void(0)" onclick="set_role(this,<%= role.id %>,'<%= params[:store_id] %>')">设置权限</a></span>
         </li>
         <% end %>
@@ -28,12 +31,12 @@
 
 <div class="tab_popup" style="display: none;" id="add_role">
   <div class="popup_box">
-    <h1>添加角色<a href="javascript:void(0);" onclick="hide_mask('#add_role');" class="close">关闭</a></h1>
+    <h1>添加角色<a href="javascript:void(0);" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
         <div class="brand">角色：<%= text_field_tag "role_input","" %></div>
       </div>
-      <div class="btn_box"><button class="confirm_btn" onclick="new_role('<%= params[:store_id] %>')">确定</button><button class="cancel_btn">取消</button></div>
+      <div class="btn_box"><button class="confirm_btn" onclick="new_role('<%= params[:store_id] %>')">确定</button></div>
     </div>
   </div>
 </div>

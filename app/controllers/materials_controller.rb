@@ -152,8 +152,8 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
-        #headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-         headoffice_api_url = "http://117.83.223.243:3001/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+        headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+        #headoffice_api_url = "http://117.83.223.243:3001/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
         @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
@@ -259,8 +259,8 @@ class MaterialsController < ApplicationController
                 end
                 material_order.update_attributes(:price => price)
 
-                # headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
-                 headoffice_post_api_url = "http://117.83.223.243:3001/api/materials/save_mat_info"
+                 headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
+                # headoffice_post_api_url = "http://117.83.223.243:3001/api/materials/save_mat_info"
                 result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
                 p "----------------------------------"
                 p result

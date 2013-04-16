@@ -2,7 +2,7 @@ class CreateWOTimes < ActiveRecord::Migration
   #工位排单
   def change
     create_table :wk_or_times do |t|
-      t.string :current_time  #当天时间  小时分钟
+      t.string :current_times  #当天时间  小时分钟
       t.integer :current_day   #年月日
       t.integer :station_id   #工单编号
       t.integer :worked_num   #已工作次数
