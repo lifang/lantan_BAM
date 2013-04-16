@@ -11,7 +11,9 @@
   <tr class="<%= cycle('', 'tbg') %>">
     <td><%= staff.name %></td>
     <td><%= staff.roles.collect{|role| role.name }.join(", ") %></td>
-    <td><a href="javascript:void(0);" onclick="set_staff_role('<%= staff.id %>','<%= staff.roles.collect{|role| role.id }.join(",") %>')">角色设定</a></td>
+    <td>
+      <% if permission?(:base_datas, :role_role_set) %><a href="javascript:void(0);" onclick="set_staff_role('<%= staff.id %>','<%= staff.roles.collect{|role| role.id }.join(",") %>')">角色设定</a><% end %>
+    </td>
   </tr>
   <% end %>
   </tbody>
