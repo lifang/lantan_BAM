@@ -23,7 +23,7 @@ class Sync < ActiveRecord::Base
         req = Net::HTTP::Post::Multipart.new url.path,query.merge!("upload" => UploadIO.new(file, "application/zip", "#{filename}"))
         http = Net::HTTP.new(url.host, url.port)
         if  http.request(req).body == "success"
-          Sync.create(:store_id=>store_id,:sync_at=>sync_time.strftime("%Y-%m-%d-%H"),:created_at=>Time.now.strftime("%Y-%m-%d-%H"),:types=>Sync::SYNC_TYPE[:BUILD])
+          Sync.create(:store_id=>store_id,:sync_at=>sync_time.strftime("%Y-%m-%d %H"),:created_at=>Time.now.strftime("%Y-%m-%d %H"),:types=>Sync::SYNC_TYPE[:BUILD])
           flog.write("数据上传成功---#{sync_time.strftime("%Y-%m-%d-%H")}\r\n")
         end
       end
@@ -61,8 +61,8 @@ class Sync < ActiveRecord::Base
     Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
     flog = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+".log","a+")
     sync_time = Time.now
-    sync =Sync.where("store_id=#{store_id} and types=#{Sync::SYNC_TYPE[:BUILD]}")[0]
-    sync =Sync.create(:store_id=>store_id,:sync_at=>Time.now.strftime("%Y-%m-%d-%H"),:created_at=>Time.now.strftime("%Y-%m-%d-%H"),:types=>Sync::SYNC_TYPE[:BUILD]) if sync.nil?
+    sync =Sync.where("store_id=#{store_id} and types=#{Sync::SYNC_TYPE[:BUILD]}").order("created_at desc")[0]
+    sync =Sync.create(:store_id=>store_id,:sync_at=>Time.now.strftime("%Y-%m-%d %H"),:created_at=>Time.now.strftime("%Y-%m-%d %H"),:types=>Sync::SYNC_TYPE[:BUILD]) if sync.nil?
     dirs=["syncs_datas/","#{sync.sync_at.strftime("%Y-%m").to_s}/","#{sync.sync_at.strftime("%Y-%m-%d").to_s}/","#{sync.sync_at.strftime("%H").to_s}/"]
     dirs.each_with_index {|dir,index| Dir.mkdir path+dirs[0..index].join   unless File.directory? path+dirs[0..index].join }
     begin
@@ -73,7 +73,6 @@ class Sync < ActiveRecord::Base
         unless (model_name=="" or Constant::UNNEED_UPDATE.include? model_name)
           cap = eval(model_name.split("_").inject(String.new){|str,name| str + name.capitalize})
           attrs = cap.where("updated_at between '#{sync.sync_at}' and '#{sync_time}'")
-          p attrs
           unless attrs.blank?
             is_update = true
             file = File.open("#{path+dirs.join+model_name}.log","w+")
