@@ -44,7 +44,7 @@ class AddUpdatedAtToTables < ActiveRecord::Migration
     add_column :train_staff_relations, :updated_at, :datetime
     add_column :syncs, :updated_at, :datetime
     add_column :trains, :updated_at, :datetime
-    add_column :w_o_times, :updated_at, :datetime
+    add_column :wk_or_times, :updated_at, :datetime
     add_column :work_orders, :updated_at, :datetime
     add_column :work_records, :updated_at, :datetime
     add_column :models, :updated_at, :datetime
@@ -93,7 +93,7 @@ class AddUpdatedAtToTables < ActiveRecord::Migration
     add_index :train_staff_relations, :updated_at
     add_index :syncs, :updated_at
     add_index :trains, :updated_at
-    add_index :w_o_times, :updated_at
+    add_index :wk_or_times, :updated_at
     add_index :work_orders, :updated_at
     add_index :work_records, :updated_at
     add_index :models, :updated_at
