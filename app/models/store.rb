@@ -11,4 +11,5 @@ class Store < ActiveRecord::Base
   has_many :notices
   has_many :package_cards
   has_many :staffs
+  has_many :materials
 end

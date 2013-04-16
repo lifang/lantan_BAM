@@ -2,7 +2,6 @@
 class MaterialsController < ApplicationController
   require 'uri'
   require 'net/http'
-  require 'will_paginate/array'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?
@@ -27,30 +26,8 @@ class MaterialsController < ApplicationController
 
   #库存列表分页
   def page_materials
-    if params[:column]=="name" && params[:direction]
-      conv = Iconv.new("GBK", "utf-8")
-    elsif params[:column]=="types"
-      order_sql = "#{params[:column]} #{params[:direction]}"
-    else
-      order_sql = "id asc"
-    end
-    @direction = params[:direction] if params[:direction]
-    @column = params[:column] if params[:column]
-    if conv
-      if @direction == "asc"
-        @materials_storages = Material.normal.sort{|a,b| conv.iconv(a.name) <=> conv.iconv(b.name)}.
-          paginate(:conditions => "store_id=#{params[:store_id]}",
-          :per_page => Constant::PER_PAGE, :page => params[:page])
-      else
-        @materials_storages = Material.normal.sort{|a,b| conv.iconv(b.name) <=> conv.iconv(a.name)}.
-          paginate(:conditions => "store_id=#{params[:store_id]}",
-          :per_page => Constant::PER_PAGE, :page => params[:page])
-      end
-    else
-      @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
-        :order => order_sql,
-        :per_page => Constant::PER_PAGE, :page => params[:page])
-    end
+    @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
+      :per_page => Constant::PER_PAGE, :page => params[:page])
     respond_with(@materials_storages) do |format|
       #format.html
       format.js
@@ -175,8 +152,8 @@ class MaterialsController < ApplicationController
     str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
-       headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-       # headoffice_api_url = "http://192.168.0.108:3001/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+        #headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
+         headoffice_api_url = "http://117.83.223.243:3001/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
         @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
@@ -242,7 +219,7 @@ class MaterialsController < ApplicationController
                 #订单相关的物料    
                 mat_code_items = {}
                 params[:selected_items].split(",").each_with_index do |item, index|
-#                  mat_code_items[index] = {}
+                  #                  mat_code_items[index] = {}
                   price += item.split("_")[2].to_f * item.split("_")[1].to_i
                   code = item.split("_")[3]
                   s_price = item.split("_")[2].to_f
@@ -257,14 +234,9 @@ class MaterialsController < ApplicationController
                   mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
                       :price => s_price})   if m
 
-                 mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code}
+                  mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code}
                 end
-    
-                headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
-             #   headoffice_post_api_url = "http://192.168.0.108:3001/api/materials/save_mat_info"
-               result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
-                p "----------------------------------"
-                p result
+   
 
                 #使用储值抵货款
                 if params[:use_count].to_i > 0
@@ -287,6 +259,11 @@ class MaterialsController < ApplicationController
                 end
                 material_order.update_attributes(:price => price)
 
+                # headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
+                 headoffice_post_api_url = "http://117.83.223.243:3001/api/materials/save_mat_info"
+                result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
+                p "----------------------------------"
+                p result
               end
               #material = Material.find_by_id_and_store_id
               #向供应商订货
@@ -538,5 +515,17 @@ class MaterialsController < ApplicationController
     @mo.mat_order_items.each do |moi|
       @total_money += moi.price * moi.material_num
     end
+  end
+
+  def add_material
+    store = Store.find params[:store_id]
+    material = Material.find_by_code(params[:materials][:code])
+    if material.nil?
+      store.materials << Material.create(params[:materials])
+    else
+      storage = material.storage + params[:materials][:storage].to_i
+      material.update_attributes(:storage => storage)
+    end
+    redirect_to "/stores/#{params[:store_id]}/materials"
   end
 end

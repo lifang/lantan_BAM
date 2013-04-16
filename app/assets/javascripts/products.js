@@ -178,6 +178,7 @@ function show_mat(){
     })
     $(".seeProDiv_rWidth .srw_ul").html(mats);
     $('.mat_tab').css('display','none');
+    $(".maskOne").hide();
 }
 
 function prod_delete(id,store_id){

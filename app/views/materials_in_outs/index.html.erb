@@ -1,7 +1,7 @@
 <div class="main">
   <div class="search_select">
     <label>您是：</label>
-    <%= select("staff", "id", Staff.all.collect {|s| [ s.name, s.id ] }, { :include_blank => true }) %>
+    <%= select("staff", "id", Staff.all.collect {|s| [ s.name, s.id ] }, { :include_blank => true}, {:onchange => "chooseCookie(this)"}) %>
   </div>
   <div class="mat_notice" style="margin: auto 400px;"><%= flash[:error] %></div>
   <div class="ul_bg">

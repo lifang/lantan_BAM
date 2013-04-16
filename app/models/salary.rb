@@ -28,7 +28,7 @@ class Salary < ActiveRecord::Base
       percent = avg_percent[staff.id].nil? ? 100 : avg_percent[staff.id]
       if staff.type_of_w == Staff::S_COMPANY[:FRONT] #前台
         front_amount = front_deduct_amount[staff.id].nil? ? 0 : front_deduct_amount[staff.id]
-        total = staff.base_salary + reward_amount - deduct_amount + front_amount*staff.deduct_percent*0.01
+        total = staff.base_salary + reward_amount - deduct_amount + front_amount
         Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,
           :total => total, :current_month => start_time.strftime("%Y%m"),
           :staff_id => staff.id, :satisfied_perc => percent)

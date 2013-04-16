@@ -16,7 +16,7 @@ class PackageCardsController < ApplicationController
   end #套餐卡列表
   
   def create
-    parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],:ended_at=>params[:ended_at],
+    parms = {:name=>params[:name],:started_at=>params[:started_at],:ended_at=>params[:ended_at],
       :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL],:price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d")
     }
     pcard =PackageCard.create(parms)
@@ -64,14 +64,13 @@ class PackageCardsController < ApplicationController
   #更新套餐卡
   def update_pcard
     pcard=PackageCard.find(params[:id])
-    parms = {:name=>params[:name],:img_url=>params[:img_url],:started_at=>params[:started_at],
-      :ended_at=>params[:ended_at],:price=>params[:price]
+    parms = {:name=>params[:name],:started_at=>params[:started_at],:ended_at=>params[:ended_at],:price=>params[:price]
     }
-    begin
+#    begin
       parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
-    rescue
-      flash[:notice] ="图片上传失败，请重新添加！"
-    end
+#    rescue
+#      flash[:notice] ="图片上传失败，请重新添加！"
+#    end
     pcard.update_attributes(parms)
     pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
     params[:sale_prod].each do |key,value|
