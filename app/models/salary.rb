@@ -57,11 +57,13 @@ class Salary < ActiveRecord::Base
     orders_info = Order.all.group_by{|o|o.front_staff_id}
     orders_info.each do |staff_id, orders_array|
       staff = Staff.find_by_id(staff_id)
-      order_total_price = orders_array.sum(&:price)
-      difference_price = order_total_price - staff.deduct_at
-      duduct_num = difference_price < 0 ? 0 : (order_total_price > staff.deduct_end ? staff.deduct_end : difference_price)
-      deduct_amount = duduct_num * staff.deduct_percent * 0.01
-      front_deduct_amount[staff_id] = deduct_amount
+      if !staff.nil?
+        order_total_price = orders_array.sum(&:price)
+        difference_price = order_total_price - staff.deduct_at
+        duduct_num = difference_price < 0 ? 0 : (order_total_price > staff.deduct_end ? staff.deduct_end : difference_price)
+        deduct_amount = duduct_num * staff.deduct_percent * 0.01
+        front_deduct_amount[staff_id] = deduct_amount
+      end
     end
     front_deduct_amount
   end
