@@ -47,7 +47,6 @@ class AddUpdatedAtToTables < ActiveRecord::Migration
     add_column :wk_or_times, :updated_at, :datetime
     add_column :work_orders, :updated_at, :datetime
     add_column :work_records, :updated_at, :datetime
-    add_column :models, :updated_at, :datetime
 
 
     add_index :c_pcard_relations, :updated_at
@@ -96,7 +95,6 @@ class AddUpdatedAtToTables < ActiveRecord::Migration
     add_index :wk_or_times, :updated_at
     add_index :work_orders, :updated_at
     add_index :work_records, :updated_at
-    add_index :models, :updated_at
   end
 
   
