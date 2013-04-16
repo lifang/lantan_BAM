@@ -130,10 +130,10 @@ class Station < ActiveRecord::Base
     (station_arr || []).each do |station|
       w_o_time = WkOrTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
       if w_o_time
-        t = w_o_time.current_time.to_s.to_datetime
+        t = w_o_time.current_times.to_s.to_datetime
         s = time.to_s.to_datetime
         if (t >= s)
-          time = w_o_time.current_time
+          time = w_o_time.current_times
           station_id = station.id
         else
           station_id = station.id

@@ -79,6 +79,9 @@ module Constant
       :edit_p_card => ["编辑套餐卡",512],
       :del_p_card => ["删除套餐卡",1024],
       :show_sale_records => ["查看销售记录",2048]
+    },
+    :station_datas => {
+      :name => "基础数据"
     }
   }
 

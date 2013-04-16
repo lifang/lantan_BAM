@@ -526,13 +526,13 @@ class Order < ActiveRecord::Base
             if station
               woTime = WkOrTime.find_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i
               if woTime
-                t =  woTime.current_time.to_datetime + Constant::W_MIN.minutes
+                t =  woTime.current_times.to_datetime + Constant::W_MIN.minutes
                 start  = t > start.to_datetime ? t : start.to_datetime
                 end_at = start + cost_time.minutes
-                woTime.update_attributes(:current_time => end_at.strftime("%Y%m%d%H%M").to_i, :wait_num => woTime.wait_num.to_i + 1)
+                woTime.update_attributes(:current_times => end_at.strftime("%Y%m%d%H%M").to_i, :wait_num => woTime.wait_num.to_i + 1)
               else
                 end_at = start.to_datetime + cost_time.minutes
-                WkOrTime.create(:current_time => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
+                WkOrTime.create(:current_times => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
                   :station_id => station_id, :worked_num => 1)
               end
               work_order = WorkOrder.create({

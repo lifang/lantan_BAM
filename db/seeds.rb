@@ -13,6 +13,7 @@ Menu.create(:id => 3,:controller => "staffs",:name => "员工")
 Menu.create(:id => 4,:controller => "datas",:name => "统计")
 Menu.create(:id => 5,:controller => "stations",:name => "现场")
 Menu.create(:id => 6,:controller => "sales",:name => "营销")
+Menu.create(:id => 7,:controller => "roles",:name => "基础数据")
 #角色
 Role.create(:id => 1,:name => "系统管理员")
 Role.create(:id => 2,:name => "老板")
@@ -29,3 +30,11 @@ staff = Staff.create(:name => "系统管理员", :type_of_w => 0, :position => 0
 staff.encrypt_password
 StaffRoleRelation.create(:role_id => 1, :satff_id => staff.id)
 
+#系统管理员菜单权限
+RoleMenuRelation.create(:role_id => 1, :menu_id => 1)
+RoleMenuRelation.create(:role_id => 1, :menu_id => 2)
+RoleMenuRelation.create(:role_id => 1, :menu_id => 3)
+RoleMenuRelation.create(:role_id => 1, :menu_id => 4)
+RoleMenuRelation.create(:role_id => 1, :menu_id => 5)
+RoleMenuRelation.create(:role_id => 1, :menu_id => 6)
+RoleMenuRelation.create(:role_id => 1, :menu_id => 7)
