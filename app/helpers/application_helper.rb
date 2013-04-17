@@ -111,11 +111,8 @@ module ApplicationHelper
     return JSON back_res.body
   end
 
-  def current_user
-    if cookies[:user_id]
-      user = Staff.find cookies[:user_id]
-    end
-    user
+  def current_user 
+    @current_user ||= Staff.find cookies[:user_id] if cookies[:user_id]
   end
 
   def satisfy
