@@ -15,7 +15,7 @@ namespace :daily do
     Store.all.each {|store| Sync.out_data(store.id)}
   end
 
-  task(:request_zip_again => :enviroment) do
+  task(:request_zip_again => :environment) do
     #syncs = Sync.where("types=#{Sync::SYNC_TYPE[:SETIN]} and (sync_status == null or sync_status = #{Sync::SYNC_STAT[:ERROR]})")
     #syncs.each do |sync|
     #  day = (Time.now - sync.created_at).strftime("%d")
