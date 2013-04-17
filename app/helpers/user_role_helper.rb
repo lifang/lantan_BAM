@@ -61,6 +61,7 @@ module UserRoleHelper
     function = role[1]
     i = Constant::ROLES[model][function]
     #    session_role cookies[:user_id] unless session[:model_role]
+    return false unless i
     role_flag = nil
     if cookies[:user_id]
       session_role(cookies[:user_id]) unless cookies[:model_role]
