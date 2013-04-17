@@ -164,6 +164,10 @@ class Sync < ActiveRecord::Base
     sync =Sync.create(:created_at=>Time.now.strftime("%Y-%m-%d"),:types=>Sync::SYNC_TYPE[:SETIN]) if sync.nil?
 
     result = Net::HTTP.get(URI.parse(url))
+
+    puts "***********"
+    puts result.inspect
+    puts "***************"
     if result == "complete"
       get_zip_file(day, sync, flog)
     else

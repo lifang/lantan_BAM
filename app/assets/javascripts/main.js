@@ -150,6 +150,14 @@ $(function() {
         var index = $('.groupFunc_h li').index(this);
         $('.groupFunc_b > div').eq(index).show().siblings().hide();
     });
+//排序切换箭头
+    $(".sort_u, .sort_d").click(function(){
+        if($(this).attr("class") == "sort_u"){
+            $(this).attr("class", "sort_d");
+        }else{
+            $(this).attr("class", "sort_u");
+        }
+    });
 });
 
 //提示错误信息
