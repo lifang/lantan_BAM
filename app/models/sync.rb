@@ -102,7 +102,7 @@ class Sync < ActiveRecord::Base
     read_dirs = ["write_datas/", "#{Time.now.ago(day).strftime("%Y-%m").to_s}/", "#{Time.now.ago(day).strftime("%Y-%m-%d")}/"]
     read_dirs.each_with_index {|dir,index| Dir.mkdir path+read_dirs[0..index].join   unless File.directory? path+read_dirs[0..index].join }
     #Dir.mkdir dirs.join unless File.directory? dirs.join
-    file_name = "#{Time.now.ago(day).strftime("%Y%m%d")}.zip"
+    file_name = "shared.zip"
     is_download = false
     File.open(path+read_dirs.join+file_name, 'wb') do |fo|
       fo.print open(ip_host+dirs.join+file_name).read
