@@ -28,7 +28,7 @@ store = Store.create(:id => 1, :name => "杭州西湖路门店", :address => "�
 staff = Staff.create(:name => "系统管理员", :type_of_w => 0, :position => 0, :sex => 1, :level => 2, :birthday => Time.now,
   :status => Staff::STATUS[:normal], :store_id => store.id, :username => "admin", :password => "123456")
 staff.encrypt_password
-StaffRoleRelation.create(:role_id => 1, :satff_id => staff.id)
+StaffRoleRelation.create(:role_id => 1, :staff_id => staff.id)
 
 #系统管理员菜单权限
 RoleMenuRelation.create(:role_id => 1, :menu_id => 1)

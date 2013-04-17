@@ -36,8 +36,7 @@ class AddUpdatedAtToTables < ActiveRecord::Migration
     add_column :staff_gr_records, :updated_at, :datetime
     add_column :staff_role_relations, :updated_at, :datetime
     add_column :station_staff_relations, :updated_at, :datetime
-    add_column :store_complaints, :updated_at, :datetime
-    add_column :store_pleasants, :updated_at, :datetime
+    
     add_column :svc_return_records, :updated_at, :datetime
     add_column :svcard_prod_relations, :updated_at, :datetime
     add_column :svcard_use_records, :updated_at, :datetime
@@ -85,8 +84,6 @@ class AddUpdatedAtToTables < ActiveRecord::Migration
     add_index :staff_gr_records, :updated_at
     add_index :staff_role_relations, :updated_at
     add_index :station_staff_relations, :updated_at
-    add_index :store_complaints, :updated_at
-    add_index :store_pleasants, :updated_at
     add_index :svcard_prod_relations, :updated_at
     add_index :svcard_use_records, :updated_at
     add_index :train_staff_relations, :updated_at
