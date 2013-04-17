@@ -1,8 +1,10 @@
 <div class="data_box">
+  <% if permission?(:base_datas, :role_conf) || permission?(:base_datas, :role_set) %>
   <div class="second_menu">
-    <a href="/stores/<%= params[:store_id] %>/roles">权限配置</a>
-    <a href="/stores/<%= params[:store_id] %>/roles/staff" class="hover">用户设定</a>
+    <% if permission?(:base_datas, :role_conf) %><a href="/stores/<%= params[:store_id] %>/roles">权限配置</a><% end %>
+    <% if permission?(:base_datas, :role_set) %><a href="/stores/<%= params[:store_id] %>/roles/staff" class="hover">用户设定</a><% end %>
   </div>
+  <% end %>
   <div class="search">
     <div><label>姓名：</label><%= text_field_tag "name",""%></div>
     <div><button class="search_btn" onclick="search_staff('<%= params[:store_id] %>')">查询</button></div>

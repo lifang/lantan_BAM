@@ -20,19 +20,19 @@ module Constant
     #库存
     :materials => {
       :name => "库存",
-      :in => ["入库",2],
-      :out => ["出库",4],
-      :dinghuo =>["订货",8],
-      :add_supplier => ["添加供应商",16],
-      :supplier => ["查看供应商",32],
-      :edit_supplier => ["编辑供应商",64],
-      :print => ["打印库存清单", 128],
-      :check => ["盘点核实",256],
-      :cuihuo => ["催货",512],
-      :cancel => ["取消订单",1024],
-      :pay => ["付款",2048],
-      :del_supplier => ["删除供应商",4096],
-      :receive => ["确认已收货",8192]
+      :in => ["入库",1],
+      :out => ["出库",2],
+      :dinghuo =>["订货",4],
+      :add_supplier => ["添加供应商",8],
+      :supplier => ["查看供应商",16],
+      :edit_supplier => ["编辑供应商",32],
+      :print => ["打印库存清单", 64],
+      :check => ["盘点核实",128],
+      :cuihuo => ["催货",256],
+      :cancel => ["取消订单",512],
+      :pay => ["付款",1024],
+      :del_supplier => ["删除供应商",2048],
+      :receive => ["确认已收货",4096]
     },
     :staffs => {
       :name => "员工",
@@ -80,8 +80,18 @@ module Constant
       :del_p_card => ["删除套餐卡",1024],
       :show_sale_records => ["查看销售记录",2048]
     },
-    :station_datas => {
-      :name => "基础数据"
+    :base_datas => {
+      :name => "基础数据",
+      :new_station_data => ["新建工位",1],
+      :edit_station_data => ["编辑工位",2],
+      :del_station_data => ["删除工位",4],
+      :roles => ["权限",8],
+      :role_conf => ["权限配置",16],
+      :role_set => ["用户设定",32],
+      :add_role => ["添加角色",64],
+      :edit_role => ["编辑角色",128],
+      :del_role => ["删除角色",256],
+      :role_role_set => ["角色设定",512]
     }
   }
 
