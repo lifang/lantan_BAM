@@ -5,7 +5,8 @@
     <% if permission?(:base_datas, :role_set) %><a href="/stores/<%= params[:store_id] %>/roles/staff">用户设定</a><% end %>
   </div>
   <% end %>
-  <div class="data_menu"><a href="javascript:void(0);" onclick="add_role('<%= params[:store_id] %>')" class="add_btn">添加角色</a></div>
+  <div class="data_menu">
+    <% if permission?(:base_datas, :add_role) %><a href="javascript:void(0);" onclick="add_role('<%= params[:store_id] %>')" class="add_btn">添加角色</a><% end %></div>
   <div class="clear"></div>
   <div class="data_body">
     <div class="people_group">
