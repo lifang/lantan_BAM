@@ -70,7 +70,11 @@ class RevisitsController < ApplicationController
       ViolationReward.create(violation_hash.merge({:staff_id => staff_id_2})) if staff_id_2
       flash[:notice] = "处理投诉成功。"
     end
-    redirect_to request.referer
+    if params["is_trains_#{params[:pro_compl_id]}"] == "0"
+      redirect_to request.referer
+    else
+      redirect_to "/stores/#{params[:store_id]}/staffs"
+    end
   end
 
   

@@ -24,7 +24,7 @@
           <div class="item">
             <label>品牌型号：</label>
             <select class="ymd" id="capital_div_<%= edit_car_num.c_id %>"
-                    onchange="choose_brand('#capital_div_<%= edit_car_num.c_id %>', '#car_brands_<%= edit_car_num.c_id %>')">
+                    onchange="choose_brand('#capital_div_<%= edit_car_num.c_id %>', '#car_brands_<%= edit_car_num.c_id %>', '#car_models_<%= edit_car_num.c_id %>')">
               <option value="">--</option>
               <% Capital.all.each do |ca| %>
                 <option value="<%= ca.id %>" <% if edit_car_num.capital_id == ca.id %>selected<% end %>><%= ca.name %></option>

@@ -30,7 +30,7 @@ class Order < ActiveRecord::Base
     end
     unless ended_at.nil? or ended_at.strip.empty?
       condition_sql += " and o.created_at <= ? "
-      params_arr << ended_at.strip
+      params_arr << ended_at.strip.to_date + 1.days
     end
     unless is_visited.nil? or is_visited == "-1"
       condition_sql += " and o.is_visited = ? "
@@ -237,8 +237,8 @@ class Order < ActiveRecord::Base
     return Order.find_by_sql(["select o.id, o.code, o.created_at, o.sale_id, o.price, o.c_pcard_relation_id, o.store_id,
       o.is_free, o.c_svc_relation_id, c.name front_s_name, c1.name cons_s_name1,
       c2.name cons_s_name2, o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2
-      from orders o left join customers c on c.id = o.front_staff_id left join customers c1 on c1.id = o.cons_staff_id_1
-      left join customers c2 on c2.id = o.cons_staff_id_2 where o.id = ?", order_id])
+      from orders o left join staffs c on c.id = o.front_staff_id left join staffs c1 on c1.id = o.cons_staff_id_1
+      left join staffs c2 on c2.id = o.cons_staff_id_2 where o.id = ?", order_id])
   end
 
   #arr = [车牌和用户信息，选择的产品和服务，相关的活动，相关的打折卡，选择的套餐卡，状态，总价]
@@ -257,13 +257,13 @@ class Order < ActiveRecord::Base
             customer = customer_car_relation.customer
           else
             customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-              :birthday => birth,:status => Customer::STATUS[:NOMAL])
+              :birthday => birth,:status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL])
             customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer) if customer
           end
         else
           customer = Customer.find_by_mobilephone phone
           customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-            :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+            :birthday => birth,:status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL]) if customer.nil?
           customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer)
         end
       else
@@ -271,7 +271,7 @@ class Order < ActiveRecord::Base
         if m
           customer = Customer.find_by_mobilephone phone
           customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-            :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+            :birthday => birth,:status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL]) if customer.nil?
           carNum = CarNum.create(:num => car_num, :car_model_id => m.id,:buy_year => car_year)
           CustomerNumRelation.create(:car_num_id => carNum.id,:customer_id => customer.id) if carNum && customer
         end
