@@ -388,7 +388,7 @@ a.compile_btn { width: 100px;}
 
 
 .item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
-.item input[type="text"].input_s { width: 90px;  margin-right:10px;text-align: right;}
+.item input[type="text"].input_s { width: 117px;  margin-right:10px;text-align: right;}
 
 .file {float: left;}
 .show_pic { margin-left: 10px;}
