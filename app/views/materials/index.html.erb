@@ -45,7 +45,7 @@
         <%= hidden_field_tag "material_id" %>
         <%= text_area_tag "remark","",{:rows => 7,:cols => 30, :class => "beizhu_textarea"} %>
       </div>
-      <div class="btn_box"><%= button_to_function "确定","save_material_remark()",{:class => "confirm_btn"} %></div>
+      <div class="btn_box"><%= button_to_function "确定","save_material_remark(this)",{:class => "confirm_btn"} %></div>
     </div>
   </div>
 </div>
@@ -74,7 +74,7 @@
             <%= hidden_field_tag "materials[status]",false %>
             <%= hidden_field_tag "materials[check_num]",0 %>
           </div>
-          <div class="btn_box"><button type="button" onclick="checkMaterial()" class="confirm_btn">确定</button></div>
+          <div class="btn_box"><button type="button" onclick="checkMaterial(this)" class="confirm_btn">确定</button></div>
           <div class="clear"></div>
       <% end %>
     </div>
@@ -107,7 +107,7 @@
             </div>
           </div>
           <%= hidden_field_tag "hidden_store_id", params[:store_id] %>
-          <div class="btn_box"><button onclick="commit_in()" type="button" class="confirm_btn">确定</button></div>
+          <div class="btn_box"><button onclick="commit_in(this)" type="button" class="confirm_btn">确定</button></div>
           <div class="clear"></div>
       <% end %>
     </div>

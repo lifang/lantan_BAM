@@ -47,7 +47,7 @@ function hide_complaint() {
 }
 
 
-function choose_brand(capital_div, car_brands) {
+function choose_brand(capital_div, car_brands, car_models) {
     if ($.trim($(capital_div).val()) != "") {
         $.ajax({
             async:true,
@@ -59,6 +59,8 @@ function choose_brand(capital_div, car_brands) {
                 if (data != null && data != undefined) {
                         $(car_brands +" option").remove();
                         $(car_brands).append("<option value=''>--</option>");
+                        $(car_models +" option").remove();
+                        $(car_models).append("<option value=''>--</option>");
                     for (var i=0; i<data.length; i++) {
                         $(car_brands).append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
                     }
@@ -178,4 +180,12 @@ function edit_car_num(car_num_id) {
         return false;
     }
     return true;
+}
+
+
+function is_has_trains(complaint_id, obj) {
+    $("#is_trains_" + complaint_id).attr("value", "1");
+    if (check_process()) {
+      obj.submit();
+    }    
 }

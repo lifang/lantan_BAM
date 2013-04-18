@@ -17,7 +17,7 @@
         <td width="15%" class="wordBreak"><%= complaint.reason %></td>
         <td width="15%" class="wordBreak"><%= complaint.suggestion %></td>
         <td width="15%" class="wordBreak"><% if complaint.st_name1 or complaint.st_name2  %>
-            <%= (complaint.st_name1 + "，") if complaint.st_name1 %><%= complaint.st_name2 if complaint.st_name2 %>
+            <%= complaint.st_name1 if complaint.st_name1 %><%= "，" + complaint.st_name2 if complaint.st_name2 %>
           <% else %>--
           <% end %>
         </td>
