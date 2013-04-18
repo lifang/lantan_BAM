@@ -41,7 +41,7 @@ module ApplicationHelper
     a.id = 0
     a.name = "总部"
     suppliers = [a] + Supplier.all(:select => "s.id,s.name", :from => "suppliers s",
-                                   :conditions => "s.store_id=#{store_id}")
+                                   :conditions => "s.store_id=#{store_id} and s.status=0")
     suppliers
   end
 
