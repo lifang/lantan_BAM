@@ -549,14 +549,16 @@ function dinghuo(s_id){
     if(s_id==0)
      {
          $("#from").get(0).selectedIndex = 0;
+         $("#add_material").hide();
+         $("#activity_code").show();
      }
      else{
-         $("#from").find("option[value="+s_id+"]").attr("selected", "selected")
+         $("#from").find("option[value="+s_id+"]").attr("selected", "selected");
+         $("#add_material").show();
+         $("#activity_code").hide();
      }
-    $("#add_material").hide();
+    
     $("#order_selected_materials").html("");
-    $("#activity_code").show();
-    $("#add_material").hide();
 }
 
 function search_head_order(store_id){
