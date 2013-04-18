@@ -36,9 +36,9 @@
         <td><%= s.phone %></td>
         <td><%= s.email %></td>
         <td><%= s.address %></td>
-        <td><%= link_to_function "订货", "dinghuo()" %>
-          <% if permission?(:materials, :edit_supplier) %><%= link_to_function "修改","edit_supplier('/stores/#{params[:store_id]}/suppliers/#{s.id}/change','#{s.name}','#{s.contact}','#{s.phone}','#{s.email}','#{s.address}')" %><% end %>
-          <% if permission?(:materials, :del_supplier) %><%= link_to_function "删除","delete_supplier(this,'#{s.id}')" %><% end %></td>
+        <td><% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(#{s.id})" %><% end %>
+          <% if permission?(:materials, :edit_supplier) %><%= link_to "修改",edit_store_supplier_path(params[:store_id], s.id), :remote => true, "data-type" => "script" %><% end %>
+          <% if permission?(:materials, :del_supplier) %><%= link_to "删除", "/stores/#{params[:store_id]}/suppliers/#{s.id}", :method => "delete", :confirm => "确定要删除供应商？" %><% end %></td>
       </tr>
   <% end %>
   </tbody>

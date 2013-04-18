@@ -1,6 +1,7 @@
 class SuppliersController < ApplicationController
   layout "storage"
   before_filter :sign?
+  before_filter :find_record, :only => [:edit, :update, :destroy]
 
   def index
     @suppliers = Supplier.paginate(:conditions => "status= #{Supplier::STATUS[:normal]} and store_id=#{params[:store_id]}",
@@ -12,36 +13,42 @@ class SuppliersController < ApplicationController
   end
 
   def new
-
+    @store = Store.find params[:store_id]
+    @supplier = Supplier.new
   end
 
   def create
-    puts params[:store_id],"--------------"
-    Supplier.create({
-        :name => params[:name],:contact => params[:contact],:phone => params[:phone],
-        :email => params[:email],:address => params[:address],:store_id => params[:store_id],
-        :status => Supplier::STATUS[:normal]
-                    }) if params[:store_id] && params[:name] && params[:contact] && params[:phone]
-    redirect_to store_suppliers_path params[:store_id]
+    @store = Store.find params[:store_id]
+    @supplier = Supplier.create(params[:supplier])
+    if @supplier.save
+      @store.suppliers << @supplier
+      render :success
+    else
+      render :new
+    end
+  end
+
+  def edit
+  end
+
+  def update
+    if @supplier.update_attributes(params[:supplier])
+      render :success
+    else
+      render :edit
+    end
   end
 
   def destroy
-     #puts params[:store_id],params[:id]
-     supplier = Supplier.find_by_id_and_store_id params[:id],params[:store_id]
-     #puts supplier,"----------"
-     supplier.update_attribute(:status,Supplier::STATUS[:delete]) if supplier && supplier.status != Supplier::STATUS[:delete]
-    render :json => {:status => 1}
+    @supplier.update_attribute(:status,Supplier::STATUS[:delete]) if @supplier && @supplier.status != Supplier::STATUS[:delete]
+    redirect_to store_suppliers_path @store
   end
+  
+  private
 
-  def change
-    supplier = Supplier.find_by_id_and_status params[:id], Supplier::STATUS[:normal]
-    if supplier
-      supplier.update_attributes({
-        :name => params[:name],:contact => params[:contact],:phone => params[:phone],
-        :email => params[:email],:address => params[:address]
-                                 })
-    end
-    redirect_to store_suppliers_path params[:store_id]
+  def find_record
+    @store = Store.find params[:store_id]
+    @supplier = Supplier.find params[:id]
   end
 
 end

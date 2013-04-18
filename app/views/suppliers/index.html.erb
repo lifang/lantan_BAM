@@ -1,6 +1,6 @@
 <div class="data_box">
   <div class="data_menu">
-<% if permission?(:materials, :add_supplier) %><%= link_to_function "添加供应商", "add_supplier('#{params[:store_id]}','')", :class => "add_btn" %>
+<% if permission?(:materials, :add_supplier) %><%= link_to "添加供应商", new_store_supplier_path(params[:store_id]), :remote => true, 'data-type' => 'script', :class => "add_btn" %>
   <% end %></div>
   <div class="clear"></div>
   <div class="data_body">
@@ -13,29 +13,16 @@
 <div class="mask"></div>
 <div class="tab_popup add_tab" id="add_tab_supplier">
   <div class="popup_box">
-    <h1>供应商<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <h1>添加供应商<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
-      <%= form_tag store_suppliers_url(params[:store_id]), :id => "add_supplier_form" do %>
-          <div class="popup_body_area">
-            <div class="item">
-              <%= label_tag "name", "名称：" %><%= text_field_tag "name" %>
-            </div>
-            <div class="item">
-              <%= label_tag "contact","联系人：" %><%= text_field_tag "contact" %>
-            </div>
-            <div class="item">
-              <%= label_tag "phone","联系电话：" %><%= text_field_tag "phone" %>
-            </div>
-            <div class="item">
-              <%= label_tag "email","其他联系方式：" %><%= text_field_tag "email","QQ/微信/Email" %>
-            </div>
-            <div class="item_textarea">
-              <%= label_tag "address","地址：" %><%= text_area_tag "address","",{:class => "width_textarea"} %>
-            </div> <%= hidden_field_tag "s_id" %>
-          </div>
-          <div class="btn_box"><button type="button" onclick="commit_supplier_form()" class="confirm_btn">确定</button></div>
-          </div>
-      <% end %>
-      </div>
+    </div>
+</div>
+</div>
+<div class="tab_popup add_tab" id="edit_tab_supplier">
+  <div class="popup_box">
+    <h1>修改供应商<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+    </div>
+</div>
 </div>
 <%= render :partial => "materials/dinghuo_panel" %>

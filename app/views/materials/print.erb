@@ -26,6 +26,14 @@
             }
         }
     });
+
+    $(".sort_u, .sort_d").click(function(){
+        if($(this).attr("class") == "sort_u"){
+            $(this).attr("class", "sort_d");
+        }else{
+            $(this).attr("class", "sort_u");
+        }
+    });
     });
 
 </script>
