@@ -315,13 +315,9 @@ class Order < ActiveRecord::Base
           if id.split("_")[1].to_i == 3
             puts "================================="
             #套餐卡
-            #user_p_card = CPcardRelation.find_by_package_card_id_and_customer_id id.split("_")[0].to_i, customer.id
-            user_p_cards = CPcardRelation.find(:all,
-              :conditons => ["pc.status = ? and pc.store_id = ? and p.product_id = ?
-              and c_pcard_relations.ended_at >= ? and c_pcard_relations.customer_id = ?",
-                PackageCard::STAT[:NORMAL], store_id, id.split("_")[0].to_i, Time.now, customer.id],
-              :joins => "left join pcard_prod_relations p on p.package_card_id = c_pcard_relations.package_card_id
-              left join package_cards pc on pc.id = p.package_card_id ")
+            user_p_cards = CPcardRelation.find(:all, 
+              :conditions => ["package_card_id = ? and ended_at >= ? and customer_id = ?",
+                id.split("_")[0].to_i, Time.now, customer.id])
             puts user_p_cards
             has_p_card = 0
             p_c = Hash.new
@@ -344,29 +340,26 @@ class Order < ActiveRecord::Base
                 p_cards << p_c
               end
             else
-              puts "++++++++++++++++++++++++++++++"
-              #p_c = PackageCard.find_by_id_and_status_and_store_id id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id
-              p_c = PackageCard.find(:first,
-                :conditons => ["p.product_id = ? and package_cards.status = ? and package_cards.store_id = ?",
-                  id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id],
-                :joins => "left join pcard_prod_relations p on p.package_card_id = c_pcard_relations.package_card_id")
-
-              if p_c
-                p_c[:products] = p_c.pcard_prod_relations.collect{|r|
-                  p = Hash.new
-                  p[:name] = r.product.name
-                  p[:num] = r.product_num
-                  p[:p_card_id] = r.package_card_id
-                  p[:product_id] = r.product_id
-                  p[:product_price] = r.product.sale_price
-                  p[:selected] = 1
-                  p
-                }
+              p_cs = PackageCard.find_all_by_id_and_status_and_store_id(id.split("_")[0].to_i,
+                PackageCard::STAT[:NORMAL],store_id)
+              if p_cs.any?
+                p_cs.each do |pc|
+                  p_c[:products] = p_c.pcard_prod_relations.collect{|r|
+                    p = Hash.new
+                    p[:name] = r.product.name
+                    p[:num] = r.product_num
+                    p[:p_card_id] = r.package_card_id
+                    p[:product_id] = r.product_id
+                    p[:product_price] = r.product.sale_price
+                    p[:selected] = 1
+                    p
+                  }
+                end
+                p_c[:has_p_card] = has_p_card
+                p_c[:show_price] = p_c[:price]
+                p_cards << p_c
+                total += p_c.price
               end
-              p_c[:has_p_card] = has_p_card
-              p_c[:show_price] = p_c[:price]
-              p_cards << p_c
-              total += p_c.price
             end
           else
             #产品
