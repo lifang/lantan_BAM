@@ -13,7 +13,18 @@ function select_customers() {
 
 function delete_cus(customer_id) {
    $("#c_" + customer_id).removeAttr("checked");
-   $("#cus_" + customer_id).remove();   
+   $("#cus_" + customer_id).remove();
+   var ids = $("#customer_ids").val();
+   if (ids != null && ids != "") {
+       var ids_arr = ids.split(",");
+       var new_ids = [];
+       for (var i=0; i<ids_arr.length; i++) {
+           if (ids_arr[i] != ""+customer_id) {
+               new_ids.push(ids_arr[i]);
+           }
+       }
+       $("#customer_ids").attr("value", new_ids.join(","));
+   }
 }
 
 function check_message() {

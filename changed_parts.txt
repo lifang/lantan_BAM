@@ -1,3 +1,4 @@
 1.工位中增加 工位名称（name）
 2. 没有免单的订单状态为null
 3.c_pcard_relations price默认值为0
+4.谨记：文件目录不能和controller同名，nginx转发会出问题
