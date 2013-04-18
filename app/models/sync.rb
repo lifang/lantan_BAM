@@ -23,12 +23,12 @@ class Sync < ActiveRecord::Base
         req = Net::HTTP::Post::Multipart.new url.path,query.merge!("upload" => UploadIO.new(file, "application/zip", "#{filename}"))
         http = Net::HTTP.new(url.host, url.port)
         if  http.request(req).body == "success"
-          Sync.create(:store_id=>store_id,:sync_at=>sync_time.strftime("%Y-%m-%d %H"),:created_at=>Time.now.strftime("%Y-%m-%d %H"),:types=>Sync::SYNC_TYPE[:BUILD])
-          flog.write("数据上传成功---#{sync_time.strftime("%Y-%m-%d-%H")}\r\n")
+          Sync.create(:store_id=>store_id,:sync_at=>sync_time.strftime("%Y-%m-%d %H").to_datetime,:created_at=>Time.now.strftime("%Y-%m-%d %H").to_datetime,:types=>Sync::SYNC_TYPE[:BUILD])
+          flog.write("数据上传成功---#{sync_time.strftime("%Y-%m-%d %H")}\r\n")
         end
       end
     rescue
-      flog.write("数据上传失败---#{sync_time.strftime("%Y-%m-%d-%H")}\r\n")
+      flog.write("数据上传失败---#{sync_time.strftime("%Y-%m-%d %H")}\r\n")
       p "#{filename}  file send failed"
     end
     flog.close
@@ -62,8 +62,8 @@ class Sync < ActiveRecord::Base
     flog = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+".log","a+")
     sync_time = Time.now
     sync =Sync.where("store_id=#{store_id} and types=#{Sync::SYNC_TYPE[:BUILD]}").order("created_at desc")[0]
-    sync =Sync.create(:store_id=>store_id,:sync_at=>Time.now.strftime("%Y-%m-%d %H"),:created_at=>Time.now.strftime("%Y-%m-%d %H"),:types=>Sync::SYNC_TYPE[:BUILD]) if sync.nil?
-    dirs=["syncs_datas/","#{sync.sync_at.strftime("%Y-%m").to_s}/","#{sync.sync_at.strftime("%Y-%m-%d").to_s}/","#{sync.sync_at.strftime("%H").to_s}/"]
+    file_time = sync.nil? ? sync_time : sync.sync_at
+    dirs=["syncs_datas/","#{file_time.strftime("%Y-%m").to_s}/","#{file_time.strftime("%Y-%m-%d").to_s}/","#{file_time.strftime("%H").to_s}/"]
     dirs.each_with_index {|dir,index| Dir.mkdir path+dirs[0..index].join   unless File.directory? path+dirs[0..index].join }
     begin
       models=get_dir_list("#{Rails.root}/app/models")
@@ -72,7 +72,11 @@ class Sync < ActiveRecord::Base
         model_name =model.split(".")[0]
         unless (model_name=="" or Constant::UNNEED_UPDATE.include? model_name)
           cap = eval(model_name.split("_").inject(String.new){|str,name| str + name.capitalize})
-          attrs = cap.where("updated_at between '#{sync.sync_at}' and '#{sync_time}'")
+          if sync.nil?
+            attrs = cap.where("updated_at <= '#{sync_time.strftime("%Y-%m-%d %H")}'")
+          else
+            attrs = cap.where("updated_at between '#{file_time}' and '#{sync_time.strftime("%Y-%m-%d %H")}'")
+          end
           unless attrs.blank?
             is_update = true
             file = File.open("#{path+dirs.join+model_name}.log","w+")
@@ -162,9 +166,7 @@ class Sync < ActiveRecord::Base
 
     sync =Sync.where("created_at='#{Time.now.strftime("%Y%m%d")}' and types=#{Sync::SYNC_TYPE[:SETIN]}")[0]
     sync =Sync.create(:created_at=>Time.now.strftime("%Y-%m-%d"),:types=>Sync::SYNC_TYPE[:SETIN]) if sync.nil?
-
     result = Net::HTTP.get(URI.parse(url))
-
     puts "***********"
     puts result.inspect
     puts "***************"
@@ -175,4 +177,5 @@ class Sync < ActiveRecord::Base
     end
     
   end
+  
 end
