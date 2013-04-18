@@ -344,6 +344,7 @@ $(document).ready(function(){
        var this_obj = $(this);
        var sys_score = $("#sys_score_input").val();
        var store_id = $("#store_id").val();
+       var staff_id = $("#staff_id").val();
        var month_score_id = $(this).attr("name");
        var manage_score = $("#month_score_val").text();
        $.ajax({
@@ -351,7 +352,8 @@ $(document).ready(function(){
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
             data : {
                 sys_score : sys_score,
-                month_score_id : month_score_id
+                month_score_id : month_score_id,
+                staff_id : staff_id
             },
             success: function(data){
                if(data == "success"){

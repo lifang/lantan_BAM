@@ -23,7 +23,9 @@ class LoginsController < ApplicationController
     @staff = Staff.find_by_username(params[:user_name])
     if  @staff.nil? or !@staff.has_password?(params[:user_password])
       flash[:notice] = "用户名或密码错误"
-      redirect_to "/"
+      #redirect_to "/"
+      @user_name = params[:user_name]
+      render :action => :index
     else
       cookies[:user_id]={:value =>@staff.id, :path => "/", :secure  => false}
       cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => false}
