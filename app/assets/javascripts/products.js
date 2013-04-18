@@ -40,11 +40,11 @@ function add_product(e){
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        tishi_alert("请输入产品的零售价格");
+        tishi_alert("请输入产品的零售价格,价格为数字");
         return false;
     }
     if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
-        tishi_alert("请输入产品的促销价格");
+        tishi_alert("请输入产品的促销价格,价格为数字");
         return false;
     }
     if (standard=="" || standard.length==0){
@@ -115,11 +115,11 @@ function edit_serv(e){
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        tishi_alert("请输入服务的零售价格");
+        tishi_alert("请输入服务的零售价格,价格为数字");
         return false;
     }
     if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
-        tishi_alert("请输入服务的促销价格");
+        tishi_alert("请输入服务的促销价格,价格为数字");
         return false;
     }
     if(deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct))){

@@ -55,8 +55,8 @@ class Sale < ActiveRecord::Base
   def self.count_sale_orders_search(store_id,started_at=nil,ended_at=nil,name=nil)
     sql ="select count(o.id) o_num,sum(o.price) sum,concat_ws('--',date_format(s.started_at,'%Y.%m.%d'),date_format(s.ended_at,'%Y.%m.%d')) day,
          s.introduction intro,s.name,s.id from sales s  inner join orders o on s.id=o.sale_id where s.store_id=#{store_id}"
-    sql += " and s.ended_at>='#{started_at}'" unless started_at.nil? || started_at =="" || started_at.length==0
-    sql += " and s.ended_at<='#{ended_at}'" unless ended_at.nil? || ended_at =="" || ended_at.length==0
+    sql += " and o.created_at>='#{started_at}'" unless started_at.nil? || started_at =="" || started_at.length==0
+    sql += " and o.created_at<='#{ended_at}'" unless ended_at.nil? || ended_at =="" || ended_at.length==0
     sql += " and s.name like '#{name}'"   unless name.nil? || name =="" || name.length==0
     sql += " group by s.id"
     return Sale.find_by_sql(sql)
