@@ -46,6 +46,8 @@ class RevisitsController < ApplicationController
           :title => params[:rev_title], :answer => params[:rev_content], :content => params[:rev_answer],
           :complaint_id => (complaint.nil? ? nil : complaint.id))
         RevisitOrderRelation.create(:order_id => params[:rev_order_id].to_i, :revisit_id => revisit.id)
+        order = Order.find(params[:rev_order_id].to_i)
+        order.update_attributes(:is_visited => true) unless order.is_visited
       end
       flash[:notice] = "添加回访成功。"
     end
