@@ -26,7 +26,7 @@ Store.create(:id => 1,:name => "杭州西湖路门店", :address => "杭州西�
   :city_id => 1, :status => 1)
 #系统管理员
 staff = Staff.create(:name => "系统管理员", :type_of_w => 0, :position => 0, :sex => 1, :level => 2, :birthday => Time.now,
-  :status => Staff::STATUS[:normal], :store_id => store.id, :username => "admin", :password => "123456")
+  :status => Staff::STATUS[:normal], :store_id => Store.first.id, :username => "admin", :password => "123456")
 staff.encrypt_password
 staff.save
 StaffRoleRelation.create(:role_id => 1, :staff_id => staff.id)
