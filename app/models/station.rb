@@ -4,7 +4,11 @@ class Station < ActiveRecord::Base
   has_many :station_staff_relations
   has_many :station_service_relations
   has_many :wk_or_times
-  has_many :products, :through => :station_service_relations
+  has_many :products, :through => :station_service_relations do
+    def valid
+      where("status!=4 and is_service=true")
+    end
+  end
   belongs_to :store
   STAT = {:WRONG =>0,:NORMAL =>2,:LACK =>1,:NO_SERVICE =>3, :DELETED => 4} #0 故障 1 缺少技师 2 正常 3 无服务
   STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常"}
