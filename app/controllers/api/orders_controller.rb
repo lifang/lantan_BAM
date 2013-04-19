@@ -40,26 +40,28 @@ class Api::OrdersController < ApplicationController
   def search_car
     order = Order.search_by_car_num params[:store_id],params[:car_num]
     result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2] }.to_json
+    puts "------------------"
+    puts result
     render :json => result
   end
   #发送验证码
   def send_code
-     message = MessageRecord.send_code params[:order_id],params[:phone]
+    message = MessageRecord.send_code params[:order_id],params[:phone]
     render :json => {:status => message}
   end
   #下单
   def add
     user_id = params[:user_id].nil? ? cookies[:user_id] : params[:user_id]
     order = Order.make_record params[:c_id],params[:store_id],params[:car_num_id],params[:start],
-                              params[:end],params[:prods],params[:price],params[:station_id],user_id
+      params[:end],params[:prods],params[:price],params[:station_id],user_id
     info = order[1].nil? ? nil : order[1].get_info
     str = if order[0] == 0 || order[0] == 2
       "数据出现异常"
-          elsif order[0] == 1
+    elsif order[0] == 1
       "success"
-          elsif order[0] == 3
+    elsif order[0] == 3
       "没可用的工位了"
-          end
+    end
     #puts str,order,info
     render :json => {:status => order[0], :content => str, :order => info}
   end
@@ -95,7 +97,7 @@ class Api::OrdersController < ApplicationController
     prod_id = params[:prod_ids]
     prod_id = prod_id[0...(prod_id.size-1)] if prod_id
     pre_arr = Order.pre_order params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
-                    params[:email],params[:birth],prod_id,params[:res_time]
+      params[:email],params[:birth],prod_id,params[:res_time]
     content = ""
     if pre_arr[5] == 0
       content = "数据出现异常"
@@ -104,8 +106,10 @@ class Api::OrdersController < ApplicationController
     elsif pre_arr[5] == 2
       content = "选择的产品和服务无法匹配工位"
     end
-    render :json => {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
-                     :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
+    result = {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
+      :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
+    puts result.to_json
+    render :json => result.to_json
   end
 
   #确认预约信息
@@ -147,22 +151,22 @@ class Api::OrdersController < ApplicationController
 
   #查询订单后的支付
   def pay_order
-     order = Order.find_by_id params[:order_id]
-     status = 0
-     if params[:opt_type].to_i == 1
-       if order && order.status == Order::STATUS[:NORMAL]
-          order.update_attribute(:status, Order::STATUS[:DELETED])
-         status = 1
-       else
-         status = 2
-       end
-       info = order.nil? ? nil : order.get_info
-       render :json  => {:status => status}
-     else
-       info = order.nil? ? nil : order.get_info
-       status = 1
-       render :json  => {:status => status, :order => info}
-     end
+    order = Order.find_by_id params[:order_id]
+    status = 0
+    if params[:opt_type].to_i == 1
+      if order && order.status == Order::STATUS[:NORMAL]
+        order.update_attribute(:status, Order::STATUS[:DELETED])
+        status = 1
+      else
+        status = 2
+      end
+      info = order.nil? ? nil : order.get_info
+      render :json  => {:status => status}
+    else
+      info = order.nil? ? nil : order.get_info
+      status = 1
+      render :json  => {:status => status, :order => info}
+    end
 
   end
 
@@ -177,7 +181,7 @@ class Api::OrdersController < ApplicationController
     puts params[:email]
     puts params[:birth]
     order = Order.checkin params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
-                          params[:email],params[:birth]
+      params[:email],params[:birth]
     content = ""
     if order == 1
       content = "success"

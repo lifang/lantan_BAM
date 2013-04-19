@@ -3,7 +3,7 @@ class CreateOrders < ActiveRecord::Migration
     create_table :orders do |t|
       t.string :code     #订单流水号
       t.integer :car_num_id  #车牌
-      t.boolean :status
+      t.integer :status
       t.datetime :started_at
       t.datetime :ended_at
       t.float :price

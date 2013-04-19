@@ -8,6 +8,9 @@ class Customer < ActiveRecord::Base
   has_many :c_svc_relations
   has_many :reservations
 
+  attr_accessor :password
+  validates :password, :allow_nil => true, :length =>{:within=>6..20, :message => "密码长度必须在6-20位之间"}
+
   #客户状态
   STATUS = {:NOMAL => 0, :DELETED => 1} #0 正常  1 删除
   #客户类型
@@ -66,9 +69,9 @@ class Customer < ActiveRecord::Base
     end
 
     orders = Order.includes(:car_num => {:customer_num_relation => :customer}).
-                  where("orders.created_at >= '#{Time.now.years_ago(1)}'").
-                  where("customers.id not in (?)", stress_customer_ids).
-                  group_by{|s|s.car_num.customer_num_relation.customer.id}
+      where("orders.created_at >= '#{Time.now.years_ago(1)}'").
+      where("customers.id not in (?)", stress_customer_ids).
+      group_by{|s|s.car_num.customer_num_relation.customer.id}
 
     result = {}
     orders.each do |key, value|
@@ -83,7 +86,49 @@ class Customer < ActiveRecord::Base
         customer.update_attribute(:types, Customer::TYPES[:NORMAL])
       end
     end
+  end
 
+  def Customer.create_single_cus(customer, carnum, phone, car_num, user_name, other_way,
+      birth, buy_year, car_model_id, sex, address)
+    Customer.transaction do
+      customer = Customer.create(:name => user_name, :mobilephone => phone,
+        :other_way => other_way, :birthday => birth, :status => Customer::STATUS[:NOMAL],
+        :types => Customer::TYPES[:NORMAL], :is_vip => Customer::IS_VIP[:NORMAL], :username => user_name,
+        :password => phone, :sex => sex, :address => address)
+      customer.encrypt_password
+      customer.save
+      if carnum
+        carnum.update_attributes(:buy_year => buy_year, :car_model_id => car_model_id)
+      else
+        carnum = CarNum.create(:num => car_num, :buy_year => buy_year,
+          :car_model_id => car_model_id)
+      end
+      CustomerNumRelation.delete_all(["car_num_id = ?", carnum.id])
+      CustomerNumRelation.create(:car_num_id => carnum.id, :customer_id => customer.id)
+    end if customer.nil?
+    return [customer, carnum]
+  end
+
+  def has_password?(submitted_password)
+		encrypted_password == encrypt(submitted_password)
+	end
+
+  def encrypt_password
+    self.encrypted_password=encrypt(password)
+  end
+
+  private
+  def encrypt(string)
+    self.salt = make_salt if new_record?
+    secure_hash("#{salt}--#{string}")
+  end
+
+  def make_salt
+    secure_hash("#{Time.new.utc}--#{password}")
+  end
+
+  def secure_hash(string)
+    Digest::SHA2.hexdigest(string)
   end
 
 end
