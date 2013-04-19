@@ -6,7 +6,7 @@ class Station < ActiveRecord::Base
   has_many :wk_or_times
   has_many :products, :through => :station_service_relations do
     def valid
-      where("status!=4 and is_service=true")
+      where("status=true and is_service=true")
     end
   end
   belongs_to :store
