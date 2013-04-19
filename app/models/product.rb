@@ -18,4 +18,5 @@ class Product < ActiveRecord::Base
   IS_VALIDATE ={:NO=>0,:YES=>1} #0 无效 已删除状态 1 有效
 
   scope :is_service, where(:is_service => true)
+  scope :is_normal, where(:status => true)
 end
