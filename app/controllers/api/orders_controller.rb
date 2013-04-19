@@ -5,7 +5,7 @@ class Api::OrdersController < ApplicationController
     status = 0
     begin
       @reservations = Reservation.store_reservations params[:store_id]
-      @orders = Order.working_orders Order::STATUS[:SERVICING], params[:store_id]
+      @orders = Order.working_orders params[:store_id]
       status = 1
     rescue
       status = 2
@@ -40,7 +40,6 @@ class Api::OrdersController < ApplicationController
   def search_car
     order = Order.search_by_car_num params[:store_id],params[:car_num]
     result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2] }.to_json
-    puts "------------------"
     puts result
     render :json => result
   end
@@ -62,12 +61,13 @@ class Api::OrdersController < ApplicationController
     elsif order[0] == 3
       "没可用的工位了"
     end
-    #puts str,order,info
+    puts str,order,info
     render :json => {:status => order[0], :content => str, :order => info}
   end
   #付款
   def pay
-    order = Order.pay params[:order_id],params[:store_id],params[:please],params[:pay_type],params[:billing],params[:code]
+    order = Order.pay(params[:order_id], params[:store_id], params[:please],
+      params[:pay_type], params[:billing], params[:code], params[:is_free])
     content = ""
     if order[0] == 0
       content = ""
@@ -75,7 +75,7 @@ class Api::OrdersController < ApplicationController
       content = "success"
     elsif order[0] == 2
       content = "订单不存在"
-    elsif order[0] = 3
+    elsif order[0] == 3
       content = "储值卡余额不足，请选择其他支付方式"
     end
     render :json => {:status => order[0], :content => content}
@@ -171,15 +171,6 @@ class Api::OrdersController < ApplicationController
   end
 
   def checkin
-    puts "-----------------------------"
-    puts params[:store_id]
-    puts params[:carNum]
-    puts params[:brand]
-    puts params[:year]
-    puts params[:userName]
-    puts params[:phone]
-    puts params[:email]
-    puts params[:birth]
     order = Order.checkin params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
       params[:email],params[:birth]
     content = ""
