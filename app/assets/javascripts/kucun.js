@@ -181,9 +181,9 @@ function set_out_num(obj,storage){
 
 function set_order_num(obj,storage,m_id,m_price,m_code,m_type){
     var old_num = parseFloat($("#total_"+m_id).text());
-    var new_num = parseInt($(obj).val()=="" ? 0 : $(obj).val()) * parseFloat(m_price);
+    var new_num = parseFloat($(obj).val()=="" ? 0 : $(obj).val()) * parseFloat(m_price);
     var name = $("#mat_"+m_id).next().text();
-    $("#total_"+m_id).text(new_num.toFixed(1));
+    $("#total_"+m_id).text(new_num.toFixed(2));
     if($("#from").val()==0 && parseInt($(obj).val())>parseInt(storage)){
         tishi_alert("请输入小于库存量的值");
     }else if(parseInt($(obj).val())==0 || $(obj).val()==""){
@@ -266,7 +266,7 @@ function change_supplier(obj){
    }
 }
 
-function submit_material_order(form_id,pay_type){
+function submit_material_order(form_id){
 //    alert($("#selected_items").val());
 
         var data = "";
@@ -278,7 +278,6 @@ function submit_material_order(form_id,pay_type){
         }else{
            data = "supplier="+$("#from").val()+"&selected_items="+$("#selected_items_dinghuo").val();
         }
-        data += "&pay_type="+pay_type;
         $("#"+form_id).find("button[class='confirm_btn']").attr("disabled","disabled");
         $.ajax({
             url:$("#"+form_id).attr("action"),
@@ -287,11 +286,19 @@ function submit_material_order(form_id,pay_type){
             type:"POST",
             success:function(data,status){
                 if(data["status"]==0){
-                    tishi_alert("订货成功");
-                    window.location.reload();
-                }else if(data["status"]== -1){
-//                   alert(data["pay_req"]);
-                    window.open(encodeURI(data["pay_req"]),'支付宝','height=768,width=1024,scrollbars=yes,status =yes');
+                    $.ajax({
+                        url: $("#"+form_id).attr("action") + "_pay",
+                        data:{mat_code:data["mat_code"]},
+                        dataType:"script",
+                        type:"GET",
+                        success:function(data){
+                          
+                        }
+                    })
+                   
+                }
+               else{
+                    tishi_alert("出错了，订货失败！")
                 }
             },
             error:function(err){
@@ -302,10 +309,11 @@ function submit_material_order(form_id,pay_type){
 }
 
 function pay_material_order(pay_type,store_id){
+    var mo_id = $("#pay_order_id").val();
     $.ajax({
         url:"/stores/"+store_id + "/materials/pay_order",
         dataType:"json",
-        data:"order_id="+$("#pay_order_id").val()+"&pay_type="+pay_type,
+        data:"mo_id="+mo_id+"&pay_type="+pay_type,
         type:"GET",
         success:function(data,status){
             if(data["status"]==0){
@@ -314,6 +322,8 @@ function pay_material_order(pay_type,store_id){
             }else if(data["status"]== -1){
 //                alert(data["pay_req"]);
                 window.open(encodeURI(data["pay_req"]),'支付宝','height=768,width=1024,scrollbars=yes,status =yes');
+            }else{
+                tishi_alert("出错了，订货失败！")
             }
         },
         error:function(err){
