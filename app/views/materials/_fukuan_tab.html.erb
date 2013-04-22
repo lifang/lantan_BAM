@@ -1,0 +1,52 @@
+<div class="tab_popup final_fukuan_tab" id="final_fukuan_tab">
+      <div class="popup_box">
+        <h1>付款<a href="javascript:void(0)" class="close">关闭</a></h1>
+        <div class="popup_body">
+          <div class="popup_body_area">
+            <h2 class="popup_body_title" id="supplier_from">订货渠道：总部</h2>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+              <thead>
+              <tr class="hbg">
+                <td>条形码</td>
+                <td>物料名称</td>
+                <td>物料类别</td>
+                <td>单价（元）</td>
+                <td>订货量</td>
+                <td>总价</td>
+              </tr>
+              </thead>
+              <tbody id="order_selected_materials">
+                <% @material_order.mat_order_items.each do |moi| %>
+                <tr>
+                  <td><%= moi.material.try(:code) %></td>
+                  <td><%= moi.material.try(:name) %></td>
+                  <td><%= Material::TYPES_NAMES[moi.material.try(:types)] %></td>
+                  <td><%= moi.try(:price) %></td>
+                  <td><%= moi.try(:material_num) %></td>
+                  <td><%= moi.try(:price) * moi.try(:material_num) %></td>
+                </tr>
+                <% end %>
+              </tbody>
+            </table>
+            <div class="otherWay">
+              <div class="amount">总计：<span id="price_total"><%= @material_order.price %></span></div>
+            </div>
+          </div>
+           <div class="otherWay" id="activity_code" style="display: block;">
+              <ul>
+                <li><%= check_box_tag "use_card",@use_card_count.to_f %>本店累计使用储值卡<%= @use_card_count.to_f() %>元，用来抵货款</li>
+                <li><%= check_box_tag "use_code","",false %>使用活动代码<%= text_field_tag "act_code","",{:onblur => "get_act_count(this)"} %><span id="use_code_count" class="red"></span>
+                </li>
+              </ul>
+            </div>
+          <%= hidden_field_tag "pay_order_id",@material_order.id %>
+          <div class="fukuan_btn">
+            <span><a href="/stores/<%= @current_store.id %>/materials/alipay?f=<%= @material_order.price %>&mo_code=<%= @material_order.code %>" target="_blank" class="zfb" ></a></span>
+            <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order(3, <%= @current_store.id %>)}">现金</button></span>
+            <span><button class="confirm_btn" type="button" onclick="pay_material_order(5, <%= @current_store.id %>)">货到付款</button></span>
+            <span id="mendian_account"><button class="confirm_btn" type="button" onclick="pay_material_order(4, <%= @current_store.id %>)">门店账户扣款</button><em id="rest_count">（余额：<%= @store_account.to_f %>）</em></span>
+          </div>
+          <div class="clear"></div>
+        </div>
+      </div>
+</div>

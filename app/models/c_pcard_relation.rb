@@ -22,8 +22,6 @@ class CPcardRelation < ActiveRecord::Base
         new_oroducts << prod
       end
     end
-    puts "new_content"
-    puts new_oroducts.join(",")
     new_oroducts.join(",")
     
   end
@@ -31,7 +29,7 @@ class CPcardRelation < ActiveRecord::Base
   def get_prod_num p_id
     prods = self.content.split(",")
     num = 0
-    (prods || []).each_with_index do |idx,prod|
+    (prods || []).each do |prod|
       if prod.split("-")[0].to_i == p_id
         num = prod.split("-")[2].to_s
       end

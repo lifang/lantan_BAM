@@ -40,7 +40,6 @@ class Api::OrdersController < ApplicationController
   def search_car
     order = Order.search_by_car_num params[:store_id],params[:car_num]
     result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2] }.to_json
-    puts result
     render :json => result
   end
   #发送验证码
@@ -61,7 +60,6 @@ class Api::OrdersController < ApplicationController
     elsif order[0] == 3
       "没可用的工位了"
     end
-    puts str,order,info
     render :json => {:status => order[0], :content => str, :order => info}
   end
   #付款
@@ -108,7 +106,6 @@ class Api::OrdersController < ApplicationController
     end
     result = {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
       :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
-    puts result.to_json
     render :json => result.to_json
   end
 
