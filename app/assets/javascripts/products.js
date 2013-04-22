@@ -182,19 +182,24 @@ function show_mat(){
 }
 
 function prod_delete(id,store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/prod_delete"
-    });
+    if (confirm("确定删除该产品吗？")){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/products/"+ id+"/prod_delete"
+        });
+    }
+  
 }
 
 function serve_delete(id,store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/serve_delete"
-    });
+    if (confirm("确定删除该服务吗？")){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/products/"+ id+"/serve_delete"
+        });
+    }
 }

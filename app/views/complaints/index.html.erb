@@ -7,7 +7,7 @@
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/search" do%>
     <div><label>时间：</label><select name="created_at">
         <option value="">请选择</option>
-        <% (Constant::DATE_START..Time.now.strftime("%Y-%m")).each do |month| %>
+        <% (Constant::DATE_START..Time.now.months_ago(1).strftime("%Y-%m")).each do |month| %>
           <option <%if session[:created_at]==month%>selected <%end%> value="<%= month %>"><%= month %></option>
         <% end %>
       </select>
