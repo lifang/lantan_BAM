@@ -19,7 +19,8 @@
           <tbody class="mat-out-list"></tbody>
         </table>
         <div class="clear"></div>
-        <div class="btn_box_s"><%= submit_tag '出库', :class => "confirm_btn"%></div>
+        <div class="btn_box_s">
+          <button onclick="checkMatOutNum(this)" type="button" class="confirm_btn">出库</button>
       <% end %>
     </div>
   </div>
