@@ -37,8 +37,8 @@
                                     <label class="sys_score_text"><%= month_score.sys_score unless month_score.nil? %></label>
                                     <input name="" type="text" value="<%= month_score.sys_score unless month_score.nil? %>" class="data_input_s" style="display: none;" id="<%= month_score.id unless month_score.nil? %>"/>
                                   </td>
-                                  <td><%= month_score.manage_score unless month_score.nil? %></td>
-                                  <td><%= current_month_access_result(month_score) %></td>
+                                  <td class="manage_score_data"><%= month_score.manage_score unless month_score.nil? %></td>
+                                  <td class="assess_result"><%= current_month_access_result(month_score) %></td>
                                   <td>
                                     <a href="javascript:void(0)" class="edit_btn" style="display: none;">提交</a>
                                     <% if permission?(:staffs,:edit_sys_score) %><a href="javascript:void(0)" class="bz_btn" id="<%= staff.id %>" name="<%= @store.id %>">编辑</a><% end %>

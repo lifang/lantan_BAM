@@ -9,7 +9,7 @@ class StaffsController < ApplicationController
   def index
     type_of_w_sql = "type_of_w = #{Staff::S_COMPANY[:FRONT]} or type_of_w = #{Staff::S_COMPANY[:TECHNICIAN]}"
     @staffs_names = @store.staffs.where(type_of_w_sql).select("id, name")
-    @staffs = @store.staffs.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @staffs = @store.staffs.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     @staff =  Staff.new
     @violation_reward = ViolationReward.new
     @train = Train.new
@@ -32,7 +32,7 @@ class StaffsController < ApplicationController
   end
 
   def show
-    @tab = params[:tab] 
+     
            
     @violations = @staff.violation_rewards.where("types = false").
                   paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("violation_tab")
@@ -83,8 +83,16 @@ class StaffsController < ApplicationController
 
   def search_work_record
     @staff = Staff.find_by_id(params[:id])
+    @tab = params[:tab]
+    puts "***************"
+    puts @tab.inspect
+    puts "*************"
     if @tab.nil? || @tab.eql?("work_record_tab")
       @cal_style = params[:cal_style]
+      puts "&&&&&&&&&&&&&&&"
+      puts @cal_style.inspect
+      puts "&&&&&&&&&&&&&&&&"
+
       start_at = (params[:start_at].nil? || params[:start_at].empty?) ? "1 = 1" : "current_day >= '#{params[:start_at]}'"
 
       end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "current_day <= '#{params[:end_at]} 23:59:59'"
@@ -92,9 +100,13 @@ class StaffsController < ApplicationController
       if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day")
         @work_records = @staff.work_records.where(start_at).where(end_at).order("current_day desc").
                     paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+        puts "!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        puts @work_records.first.inspect
+        puts "!!!!!!!!!!!!!!!!!!!!!!"
       end
 
       if @cal_style.eql?("week") || @cal_style.eql?("month")
+        puts "1111111111"
         base_sql = Staff.search_work_record_sql
         @work_records = @staff.work_records.select(base_sql).
           where(start_at).where(end_at).group("#{@cal_style}(current_day)").order("current_day desc").
