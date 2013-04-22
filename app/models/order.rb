@@ -115,8 +115,9 @@ class Order < ActiveRecord::Base
 
   #施工中的订单
   def self.working_orders store_id
-    Order.find_by_sql(["select o.id,c.num from orders o inner join car_nums c on c.id=o.car_num_id where o.status in (?)
-      and o.store_id=? order by o.created_at", STATUS[:SERVICING], STATUS[:WAIT_PAYMENT], store_id])
+    return Order.find_by_sql(["select o.id,c.num from orders o inner join car_nums c on c.id=o.car_num_id 
+      where o.status in (#{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]})
+      and o.store_id = ? order by o.created_at", store_id])
   end
 
   def self.search_by_car_num store_id,car_num
@@ -222,7 +223,8 @@ class Order < ActiveRecord::Base
     product_arr << clean_arr
     product_arr << maint_arr
     product_arr << prod_arr
-    cards = PackageCard.find_all_by_store_id_and_status store_id, PackageCard::STAT[:NORMAL]
+    cards = PackageCard.find(:all, :conditions => ["status = ? and store_id = ? and ended_at >= ?",
+        PackageCard::STAT[:NORMAL], store_id, Time.now])
 
     product_arr << (cards || []).collect{|c|
       h = Hash.new
@@ -452,20 +454,14 @@ class Order < ActiveRecord::Base
 
   #生成订单
   def self.make_record c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id
-    #puts c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id,"---------------------"
     arr = []
     status = 0
     order = nil
     Order.transaction do
       #begin
-      puts "-----------------------------"
-      puts prods
       arr = self.get_prod_sale_card prods
       sale_id = arr[1].size > 0 ? arr[1][0][1] : ""
       svcard_id = arr[2].size > 0 ? arr[2][0][1] : ""
-      #pcard_ids = arr[3].size > 0 ? arr[3].collect { |a| a[1] } : []
-      #pcard_id = arr[3].size > 0 ? arr[3][0][1] : ""
-      #new order
       order = Order.create({
           :code => MaterialOrder.material_order_code(store_id.to_i),
           :car_num_id => car_num_id,
@@ -518,15 +514,9 @@ class Order < ActiveRecord::Base
               :conditions => ["status = ? and customer_id = ? and package_card_id in (?)",
                 CPcardRelation::STATUS[:NORMAL], c_id, p_cards]).group_by { |c_p_r| c_p_r.package_card_id }
             p_cards_hash = p_cards.group_by { |p_c| p_c.id }
-            puts "p_cards_hash"
-            puts p_cards_hash
             arr[3].each do |a_pc|
               if p_cards_hash[a_pc[1].to_i]
-                puts "p_cards_hash[a_pc[1].to_i]"
-                puts p_cards_hash[a_pc[1].to_i]
                 if c_pcard_relations and c_pcard_relations[a_pc[1].to_i]
-                  puts "c_pcard_relations[a_pc[1].to_i][0].id"
-                  puts c_pcard_relations[a_pc[1].to_i][0].id
                   unless a_pc[3].nil? or a_pc[3].empty?
                     p_ids = a_pc[3].split("-")
                     content = c_pcard_relations[a_pc[1].to_i][0].get_content p_ids
@@ -535,29 +525,13 @@ class Order < ActiveRecord::Base
                     c_pcard_relations[a_pc[1].to_i][0].update_attribute(:content, CPcardRelation.set_content(a_pc[1].to_i))
                   end                    
                 else
-                  puts "is insert"
                   CPcardRelation.create(:customer_id => c_id, :package_card_id => a_pc[1].to_i,
-                    :status => CPcardRelation::STATUS[:NORMAL],
+                    :status => CPcardRelation::STATUS[:NORMAL], :ended_at => p_cards_hash[a_pc[1].to_i][0].ended_at,
                     :content => CPcardRelation.set_content(a_pc[1].to_i), :order_id => order.id)
                 end
               end
             end
           end
-          #            pcard = PackageCard.find_by_id_and_store_id_and_status(pcard_id,store_id,PackageCard::STAT[:NORMAL])
-          #            if pcard
-          #              c_pcard_relation = CPcardRelation.find_by_customer_id_and_package_card_id_and_status c_id,pcard.id, CPcardRelation::STATUS[:NORMAL]
-          #              if c_pcard_relation && arr[3][0][2].to_i == 1
-          #                p_ids = arr[3][0][3].split("-")
-          #                content = c_pcard_relation.get_content p_ids
-          #                c_pcard_relation.update_attribute(:content,content)
-          #              end
-          #              if c_pcard_relation.nil? && arr[3][0][2].to_i == 0
-          #                c_pcard_relation = CPcardRelation.create(:customer_id => c_id, :package_card_id => pcard.id,
-          #                  :status => CPcardRelation::STATUS[:NORMAL],
-          #                  :content => CPcardRelation.set_content(pcard.id))
-          #              end
-          #              hash[:c_pcard_relation_id] = c_pcard_relation.id if c_pcard_relation
-          #            end
         end
 
         if is_has_service
