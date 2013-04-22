@@ -225,7 +225,6 @@ class MaterialsController < ApplicationController
               material_order.update_attributes(:price => price)
 
               headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
-              # headoffice_post_api_url = "http://117.83.223.243:3001/api/materials/save_mat_info"
               result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
               p "----------------------------------"
               p result
@@ -268,6 +267,7 @@ class MaterialsController < ApplicationController
   end
 
   #确认付款
+  =begin
   def material_order_copy
     puts params[:store_id],params[:selected_items],params[:supplier],params[:use_count],params[:sale_id],params[:pay_type]
     status = MaterialOrder.make_order
@@ -374,6 +374,7 @@ class MaterialsController < ApplicationController
       end
     end
   end
+=end
   
   def get_act_count
     #puts params[:code]
@@ -470,6 +471,10 @@ class MaterialsController < ApplicationController
             begin
               MaterialOrder.transaction do
                 order.update_attribute(:status, MaterialOrder::STATUS[:pay])
+                headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
+                result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
+                p "----------------------------------"
+                p result
               #支付记录
               MOrderType.create(:material_order_id => order.id,:pay_types => MaterialOrder::PAY_TYPES[:CHARGE], :price => order.price)
               render :text=>"success"
@@ -580,6 +585,10 @@ class MaterialsController < ApplicationController
           @current_store = Store.find_by_id params[:store_id]
           @current_store.update_attribute(:account, @current_store.account - @mat_order.price) if @current_store
         end
+        headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
+        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
+        p "----------------------------------"
+        p result
         render :json => {:status => 0}
      
       end
