@@ -52,6 +52,10 @@ class StaffsController < ApplicationController
 
     @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
 
+    puts "3333333333333333333"
+    puts @work_records.first.inspect
+    puts "333333333333333333333"
+
     respond_to do |format|
       format.html
       format.js
@@ -112,7 +116,9 @@ class StaffsController < ApplicationController
           where(start_at).where(end_at).group("#{@cal_style}(current_day)").order("current_day desc").
           paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
       end
-
+      puts "222222222222222"
+      puts @work_records.first.inspect
+      puts "22222222222222222222"
     end
 
   end
