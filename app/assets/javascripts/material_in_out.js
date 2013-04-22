@@ -24,6 +24,7 @@ $(document).ready(function(){
                                 $(this).parent('tr').addClass("newTr_red");
                                 var ori_num = parseInt($(this).siblings(".mat_item_num").text());
                                 $(this).siblings(".mat_item_num").text(ori_num+1);
+                                $(this).siblings(".num_box").find('input').val(ori_num+1);
                                 return false;
                             }
                         });
@@ -126,7 +127,20 @@ function checkNums(){
             }
         });
     })
+}
 
 
-    
+function checkMatOutNum(obj){
+    $(".mat-out-list").find("tr").each(function(index){
+      var out_num = parseInt($(this).find(".mat_item_num").text());
+      var mat_storage = parseInt($(this).find(".material_storage").text());
+      var mat_name = $(this).find(".mat_name").text();
+      if(out_num > mat_storage){
+          tishi_alert("【" + mat_name + "】出库量(" + out_num +")大于库存量("+ mat_storage+")");
+          $(this).remove();
+      }
+    })
+    if($(".mat-out-list").find("tr").length > 0){
+        $(obj).parents("form").submit();
+    }
 }
