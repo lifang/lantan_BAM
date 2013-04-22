@@ -9,7 +9,7 @@ class StaffsController < ApplicationController
   def index
     type_of_w_sql = "type_of_w = #{Staff::S_COMPANY[:FRONT]} or type_of_w = #{Staff::S_COMPANY[:TECHNICIAN]}"
     @staffs_names = @store.staffs.where(type_of_w_sql).select("id, name")
-    @staffs = @store.staffs.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @staffs = @store.staffs.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     @staff =  Staff.new
     @violation_reward = ViolationReward.new
     @train = Train.new
