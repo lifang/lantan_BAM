@@ -5,7 +5,7 @@ class CreateSvCards < ActiveRecord::Migration
       t.string :name
       t.string :img_url
       t.integer :types
-      t.integer :price
+      t.float :price
       t.float :discount #折扣比例
 
       t.timestamps
