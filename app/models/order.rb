@@ -396,13 +396,15 @@ class Order < ActiveRecord::Base
         inner join pcard_prod_relations ppr on ppr.package_card_id = cpr.package_card_id
         where cpr.ended_at >= ? and product_id in (?) and cpr.customer_id = ? group by cpr.id",
             Time.now, ids, customer.id])
+        puts "customer_pcards"
+        puts customer_pcards.to_json
         customer_pcards.each do |c_pr|
-          puts "c_pr"
-          puts c_pr.to_json
+
           p_c = c_pr.package_card
           p_c[:products] = p_c.pcard_prod_relations.collect{|r|
             p = Hash.new
             p[:name] = r.product.name
+            puts c_pr.content
             p[:num] = c_pr.get_prod_num r.product_id
             p[:p_card_id] = r.package_card_id
             p[:product_id] = r.product_id

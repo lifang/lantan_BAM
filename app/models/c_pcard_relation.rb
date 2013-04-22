@@ -29,7 +29,10 @@ class CPcardRelation < ActiveRecord::Base
   end
 
   def get_prod_num p_id
+    puts "content"
+    puts self.content
     prods = self.content.split(",")
+    puts "111111"
     num = 0
     (prods || []).each_with_index do |idx,prod|
       if prod.split("-")[0].to_i == p_id
