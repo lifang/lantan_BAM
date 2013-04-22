@@ -311,6 +311,7 @@ $(document).ready(function(){
         var store_id = $("#store_id").val();
         var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
         var sys_score = $(this).parents('tr').find(".data_input_s").val();
+        var manage_score = $(this).parents('tr').find(".manage_score_data").text();
         $.ajax({
             type : 'get',
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
@@ -324,6 +325,7 @@ $(document).ready(function(){
                    this_obj.parents('tr').find(".sys_score_text").text(sys_score).show();
                    this_obj.hide();
                    this_obj.next().show();
+                   this_obj.parents('tr').find('.assess_result').text(assess_result(sys_score, manage_score));
                }
             }
         });
