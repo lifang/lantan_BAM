@@ -111,19 +111,6 @@ $(document).ready(function(){
         }
     });
 
-    $("#current_month_salary_detail_table").tablesorter({
-        headers:
-        {
-            1: { sorter: false },
-            2: { sorter: false },
-            3: { sorter: false },
-            4: { sorter: false },
-            5: { sorter: false },
-            6: { sorter: false },
-            7: { sorter: false }
-        }
-    });
-
     $(".sort_u_s, .sort_d_s").click(function(){
         if($(this).attr("class") == "sort_u_s"){
             $(this).attr("class", "sort_d_s");
