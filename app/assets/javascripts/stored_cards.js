@@ -84,11 +84,29 @@ function check_goal(e){
         $("#create_goal").submit();
     }
 }
-
+var tishi ="类别"
+var num_n ="金额"
 function add_div(){
-    var tishi ="类别"
-    var num="数量"
+
     var num=$(".popup_body_area div[id *='item']");
-    var  str='<div class="item" id=item_'+ num.length+'><input type="text" name="val['+num.length +']" size="12" class="input_s" value="'+tishi +'" onfucus='+ +'  /> <input name="goal['+num.length +']" type="text" /></div>';
+    var  str='<div class="item" id=item_'+ num.length+'>\n\
+<input type="text" name="val['+num.length +']" size="12" class="input_s" value="'+tishi +'" onfocus="remove_v(this)" onblur="back_v(this)"  /> \n\
+<input name="goal['+num.length +']" type="text" value="'+ num_n+'" onfocus="remove_v(this)" onblur="back_n(this)"  /></div>';
     $(num[num.length-1]).after(str);
 }
+
+function remove_v(e){
+    $(e).val("");
+}
+
+function back_v(e){
+    if( e.value==""|| e.length == 0){
+        e.value= tishi
+    }
+}
+function back_n(e){
+    if( e.value==""|| e.length == 0){
+        e.value= num_n
+    }
+}
+
