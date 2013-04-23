@@ -17,7 +17,7 @@ class Sale < ActiveRecord::Base
     code=(1..length).inject(Array.new) {|codes| codes << chars[rand(chars.length)]}.join("")
     codes=eval(model_n.capitalize).all.map(&:"#{code_name}")
     p codes
-    if codes.index(code)
+    if codes.index(code) 
       set_code(length)
     else
       return code

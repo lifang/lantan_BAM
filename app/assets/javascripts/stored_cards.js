@@ -86,7 +86,9 @@ function check_goal(e){
 }
 
 function add_div(){
+    var tishi ="类别"
+    var num="数量"
     var num=$(".popup_body_area div[id *='item']");
-    var  str='<div class="item" id=item_'+ num.length+'><input type="text" name="val['+num.length +']" size="12" class="input_s" /><input name="goal['+num.length +']" type="text" /></div>';
+    var  str='<div class="item" id=item_'+ num.length+'><input type="text" name="val['+num.length +']" size="12" class="input_s" value="'+tishi +'" onfucus='+ +'  /> <input name="goal['+num.length +']" type="text" /></div>';
     $(num[num.length-1]).after(str);
 }
