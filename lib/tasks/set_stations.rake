@@ -15,7 +15,7 @@ namespace :daily do
     #  day = (Time.now - sync.created_at).strftime("%d")
     #  Sync.request_is_generate_zip(day)
     #end
-    Sync.request_is_generate_zip
+    Sync.request_is_generate_zip(Time.now)
   end
 
 end

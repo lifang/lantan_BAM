@@ -174,7 +174,7 @@ class Order < ActiveRecord::Base
         #end
         front_staff = Staff.find_by_id_and_store_id order.front_staff_id,store_id
         order_hash[:staff] = front_staff.name if front_staff
-        if order.status == STATUS[:BEEN_PAYMENT]
+        if order.status == STATUS[:BEEN_PAYMENT] or order.status == STATUS[:FINISHED]
           old_orders << order_hash
         else
           working_orders << order_hash
@@ -392,8 +392,8 @@ class Order < ActiveRecord::Base
       if ids.any?
         customer_pcards = CPcardRelation.find_by_sql(["select cpr.* from c_pcard_relations cpr
         inner join pcard_prod_relations ppr on ppr.package_card_id = cpr.package_card_id
-        where cpr.ended_at >= ? and product_id in (?) and cpr.customer_id = ? group by cpr.id",
-            Time.now, ids, customer.id])
+        where cpr.status = ? and cpr.ended_at >= ? and product_id in (?) and cpr.customer_id = ? group by cpr.id",
+            CPcardRelation::STATUS[:NORMAL], Time.now, ids, customer.id])
         customer_pcards.each do |c_pr|
           p_c = c_pr.package_card
           p_c[:products] = p_c.pcard_prod_relations.collect{|r|
@@ -521,8 +521,8 @@ class Order < ActiveRecord::Base
               PackageCard::STAT[:NORMAL], store_id, p_c_ids.keys])
           if p_cards.any?
             c_pcard_relations = CPcardRelation.find(:all,
-              :conditions => ["status = ? and customer_id = ? and package_card_id in (?)",
-                CPcardRelation::STATUS[:NORMAL], c_id, p_cards]).group_by { |c_p_r| c_p_r.package_card_id }
+              :conditions => ["status = ? and ended_at >= ? and customer_id = ? and package_card_id in (?)",
+                CPcardRelation::STATUS[:NORMAL], Time.now, c_id, p_cards]).group_by { |c_p_r| c_p_r.package_card_id }
             p_cards_hash = p_cards.group_by { |p_c| p_c.id }
             #新增的套餐卡
             pc_ids.each do |key, value|
@@ -530,7 +530,7 @@ class Order < ActiveRecord::Base
               alreay_has = c_pcard_relations[key].length if (c_pcard_relations and c_pcard_relations[key])
               (1..(value - alreay_has)).each do |i|
                 cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id => key.to_i,
-                  :status => CPcardRelation::STATUS[:NORMAL], :ended_at => p_cards_hash[key][0].ended_at,
+                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[key][0].ended_at,
                   :content => CPcardRelation.set_content(key), :order_id => order.id)
                 if c_pcard_relations and c_pcard_relations[key]
                   c_pcard_relations[key] << cpr
@@ -717,6 +717,11 @@ class Order < ActiveRecord::Base
             hash[:is_free] = true
             hash[:price] = 0
           end
+          #如果有套餐卡，则更新状态
+          c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
+          c_pcard_relations.each do |cpr|
+            cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
+          end unless c_pcard_relations.blank?
           #如果是选择储值卡支付
           if pay_type.to_i == OrderPayType::PAY_TYPES[:SV_CARD] && code
             #c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
