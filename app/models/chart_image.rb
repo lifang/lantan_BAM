@@ -39,7 +39,7 @@ class ChartImage < ActiveRecord::Base
           data_array << 0
         else
           total_amount = (scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))/scores[key_value].size
-          data_array << total_amount > 100 ? 100 : total_amount
+          data_array << (total_amount > 100 ? 100 : total_amount)
         end
       }
       average_score_hart[key] = data_array
