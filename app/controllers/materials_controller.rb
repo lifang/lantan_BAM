@@ -458,7 +458,7 @@ class MaterialsController < ApplicationController
     if @mat_order
       #支付方式
       if params[:pay_type].to_i == 1   #支付宝
-        url = "/stores/#{params[:store_id]}/materials/alipay?f="+@mat_order.price.to_s
+        url = "/stores/#{params[:store_id]}/materials/alipay?f="+@mat_order.price.to_s+"&mo_code="+@mat_order.code
         render :json => {:status => -1,:pay_type => params[:pay_type].to_i,:pay_req => url}
       elsif params[:pay_type].to_i == 3 || params[:pay_type].to_i == 4 || params[:pay_type].to_i == 5 #现金已支付 #使用储值卡  #现金未支付
         @mat_order.update_attribute(:status, MaterialOrder::STATUS[:pay]) unless params[:pay_type].to_i == 5
