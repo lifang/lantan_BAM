@@ -107,6 +107,7 @@ class MarketManagesController < ApplicationController
   def sale_orders
     session[:o_created],session[:o_ended],session[:order_name]=nil,nil,nil
     orders = Sale.count_sale_orders(params[:store_id])
+    p orders
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
       @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
