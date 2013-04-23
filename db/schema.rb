@@ -11,20 +11,22 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051443) do
+ActiveRecord::Schema.define(:version => 20130701051445) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
     t.integer  "package_card_id"
     t.datetime "ended_at"
     t.boolean  "status"
-    t.text     "content"
+    t.string   "content"
     t.datetime "created_at"
     t.integer  "price",           :default => 0
     t.datetime "updated_at"
+    t.integer  "order_id"
   end
 
   add_index "c_pcard_relations", ["customer_id"], :name => "index_c_pcard_relations_on_customer_id"
+  add_index "c_pcard_relations", ["order_id"], :name => "index_c_pcard_relations_on_order_id"
   add_index "c_pcard_relations", ["package_card_id"], :name => "index_c_pcard_relations_on_package_card_id"
   add_index "c_pcard_relations", ["status"], :name => "index_c_pcard_relations_on_status"
   add_index "c_pcard_relations", ["updated_at"], :name => "index_c_pcard_relations_on_updated_at"
@@ -421,7 +423,7 @@ ActiveRecord::Schema.define(:version => 20130701051443) do
   create_table "orders", :force => true do |t|
     t.string   "code"
     t.integer  "car_num_id"
-    t.boolean  "status"
+    t.integer  "status"
     t.datetime "started_at"
     t.datetime "ended_at"
     t.float    "price"
@@ -507,7 +509,7 @@ ActiveRecord::Schema.define(:version => 20130701051443) do
     t.string   "name"
     t.float    "base_price"
     t.float    "sale_price"
-    t.text     "description"
+    t.string   "description"
     t.integer  "types"
     t.string   "service_code"
     t.boolean  "status"
@@ -803,28 +805,6 @@ ActiveRecord::Schema.define(:version => 20130701051443) do
   add_index "stations", ["status"], :name => "index_stations_on_status"
   add_index "stations", ["store_id"], :name => "index_stations_on_store_id"
 
-  create_table "store_complaints", :force => true do |t|
-    t.string   "store_id"
-    t.string   "img_url"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "store_complaints", ["created_at"], :name => "index_store_complaints_on_created_at"
-  add_index "store_complaints", ["store_id"], :name => "index_store_complaints_on_store_id"
-  add_index "store_complaints", ["updated_at"], :name => "index_store_complaints_on_updated_at"
-
-  create_table "store_pleasants", :force => true do |t|
-    t.string   "store_id"
-    t.string   "img_url"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "store_pleasants", ["created_at"], :name => "index_store_pleasants_on_created_at"
-  add_index "store_pleasants", ["store_id"], :name => "index_store_pleasants_on_store_id"
-  add_index "store_pleasants", ["updated_at"], :name => "index_store_pleasants_on_updated_at"
-
   create_table "stores", :force => true do |t|
     t.string   "name"
     t.string   "address"
@@ -864,7 +844,7 @@ ActiveRecord::Schema.define(:version => 20130701051443) do
     t.string   "name"
     t.string   "img_url"
     t.integer  "types"
-    t.integer  "price"
+    t.float    "price"
     t.float    "discount"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -920,9 +900,9 @@ ActiveRecord::Schema.define(:version => 20130701051443) do
     t.integer  "store_id"
     t.datetime "sync_at"
     t.datetime "created_at"
-    t.boolean  "data_status"
-    t.string   "zip_name"
-    t.boolean  "sync_status"
+    t.boolean  "data_status", :default => false
+    t.string   "zip_name",    :default => "0"
+    t.boolean  "sync_status", :default => false
     t.integer  "types"
     t.boolean  "has_data",    :default => true
     t.datetime "updated_at"
@@ -976,8 +956,8 @@ ActiveRecord::Schema.define(:version => 20130701051443) do
   add_index "violation_rewards", ["created_at"], :name => "index_violation_rewards_on_created_at"
   add_index "violation_rewards", ["staff_id"], :name => "index_violation_rewards_on_staff_id"
 
-  create_table "w_o_times", :force => true do |t|
-    t.integer  "current_time"
+  create_table "wk_or_times", :force => true do |t|
+    t.string   "current_times"
     t.integer  "current_day"
     t.integer  "station_id"
     t.integer  "worked_num"
@@ -986,21 +966,9 @@ ActiveRecord::Schema.define(:version => 20130701051443) do
     t.datetime "updated_at"
   end
 
-  add_index "w_o_times", ["current_day"], :name => "index_w_o_times_on_current_day"
-  add_index "w_o_times", ["station_id"], :name => "index_w_o_times_on_station_id"
-  add_index "w_o_times", ["updated_at"], :name => "index_w_o_times_on_updated_at"
-
-  create_table "wk_or_times", :force => true do |t|
-    t.string   "current_time"
-    t.integer  "current_day"
-    t.integer  "station_id"
-    t.integer  "worked_num"
-    t.integer  "wait_num"
-    t.datetime "created_at"
-  end
-
   add_index "wk_or_times", ["current_day"], :name => "index_wk_or_times_on_current_day"
   add_index "wk_or_times", ["station_id"], :name => "index_wk_or_times_on_station_id"
+  add_index "wk_or_times", ["updated_at"], :name => "index_wk_or_times_on_updated_at"
 
   create_table "work_orders", :force => true do |t|
     t.integer  "station_id"

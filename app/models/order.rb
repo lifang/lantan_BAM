@@ -174,7 +174,7 @@ class Order < ActiveRecord::Base
         #end
         front_staff = Staff.find_by_id_and_store_id order.front_staff_id,store_id
         order_hash[:staff] = front_staff.name if front_staff
-        if order.status == STATUS[:BEEN_PAYMENT]
+        if order.status == STATUS[:BEEN_PAYMENT] or order.status == STATUS[:FINISHED]
           old_orders << order_hash
         else
           working_orders << order_hash
