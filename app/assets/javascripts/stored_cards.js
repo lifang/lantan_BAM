@@ -102,11 +102,15 @@ function remove_v(e){
 function back_v(e){
     if( e.value==""|| e.length == 0){
         e.value= tishi
+    }else{
+        $(e).attr("onfocus","")
     }
 }
 function back_n(e){
     if( e.value==""|| e.length == 0){
         e.value= num_n
+    }else{
+        $(e).attr("onfocus","")
     }
 }
 

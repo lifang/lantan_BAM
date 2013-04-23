@@ -455,14 +455,8 @@ class MaterialsController < ApplicationController
       my_sign = Digest::MD5.hexdigest(my_params.sort.map{|k,v|"#{k}=#{v}"}.join("&")+Oauth2Helper::PARTNER_KEY)
       dir = "#{Rails.root}/public/compete"
       Dir.mkdir(dir)  unless File.directory?(dir)
-      file_path = dir+"/#{Time.now.strftime("%Y%m%d")}.log"
-      if File.exists? file_path
-        file = File.open( file_path,"a")
-      else
-        file = File.new(file_path, "w")
-      end
+      file = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+"_alipay.log","a+")
       file.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')}   #{request.parameters.to_s}\r\n"
-      file.close
       if my_sign==params[:sign] and response_txt=="true"
         if params[:trade_status]=="WAIT_BUYER_PAY"
           render :text=>"success"
@@ -475,9 +469,9 @@ class MaterialsController < ApplicationController
                 result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
                 p "----------------------------------"
                 p result
-              #支付记录
-              MOrderType.create(:material_order_id => order.id,:pay_types => MaterialOrder::PAY_TYPES[:CHARGE], :price => order.price)
-              render :text=>"success"
+                #支付记录
+                MOrderType.create(:material_order_id => order.id,:pay_types => MaterialOrder::PAY_TYPES[:CHARGE], :price => order.price)
+                render :text=>"success"
               end
               
             rescue
@@ -490,6 +484,7 @@ class MaterialsController < ApplicationController
       else
         redirect_to "/"
       end
+      file.close
     else
       render :text=>"fail" + "<br>"
     end
