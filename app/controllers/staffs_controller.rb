@@ -7,7 +7,7 @@ class StaffsController < ApplicationController
   before_filter :search_work_record, :only => :show
 
   def index
-    type_of_w_sql = "type_of_w = #{Staff::S_COMPANY[:FRONT]} or type_of_w = #{Staff::S_COMPANY[:TECHNICIAN]}"
+    type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
     @staffs_names = @store.staffs.where(type_of_w_sql).select("id, name")
     @staffs = @store.staffs.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     @staff =  Staff.new

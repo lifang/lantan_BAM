@@ -3,7 +3,7 @@
         <h1>付款<a href="javascript:void(0)" class="close">关闭</a></h1>
         <div class="popup_body">
           <div class="popup_body_area">
-            <h2 class="popup_body_title" id="supplier_from">订货渠道：总部</h2>
+            <h2 class="popup_body_title" id="supplier_from">订货渠道：<%= @material_order.supplier_name %></h2>
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
               <thead>
               <tr class="hbg">
@@ -32,6 +32,7 @@
               <div class="amount">总计：<span id="price_total"><%= @material_order.price %></span></div>
             </div>
           </div>
+          <% if @material_order.supplier_type == 0 %>
            <div class="otherWay" id="activity_code" style="display: block;">
               <ul>
                 <li><%= check_box_tag "use_card",@use_card_count.to_f %>本店累计使用储值卡<%= @use_card_count.to_f() %>元，用来抵货款</li>
@@ -39,12 +40,15 @@
                 </li>
               </ul>
             </div>
+          <% end %>
           <%= hidden_field_tag "pay_order_id",@material_order.id %>
           <div class="fukuan_btn">
             <span><a href="/stores/<%= @current_store.id %>/materials/alipay?f=<%= @material_order.price %>&mo_code=<%= @material_order.code %>" target="_blank" class="zfb" ></a></span>
             <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order(3, <%= @current_store.id %>)}">现金</button></span>
             <span><button class="confirm_btn" type="button" onclick="pay_material_order(5, <%= @current_store.id %>)">货到付款</button></span>
-            <span id="mendian_account"><button class="confirm_btn" type="button" onclick="pay_material_order(4, <%= @current_store.id %>)">门店账户扣款</button><em id="rest_count">（余额：<%= @store_account.to_f %>）</em></span>
+            <% if @material_order.supplier_type == 0 %>
+              <span id="mendian_account"><button class="confirm_btn" type="button" onclick="pay_material_order(4, <%= @current_store.id %>)">门店账户扣款</button><em id="rest_count">（余额：<%= @store_account.to_f %>）</em></span>
+            <% end %>
           </div>
           <div class="clear"></div>
         </div>
