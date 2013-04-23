@@ -302,24 +302,6 @@ class Order < ActiveRecord::Base
           #              customer.id, Time.now, id.split("_")[0].to_i])
           has_p_card = 0
           p_c = Hash.new
-          #          if user_p_card && user_p_card.package_card.status == PackageCard::STAT[:NORMAL] && user_p_card.package_card.store_id = store_id
-          #            has_p_card = 1
-          #            p_card_r_ids << user_p_card.id
-          #            p_c = user_p_card.package_card
-          #            p_c[:products] = p_c.pcard_prod_relations.collect{|r|
-          #              p = Hash.new
-          #              p[:name] = r.product.name
-          #              p[:num] = user_p_card.get_prod_num r.product_id
-          #              p[:p_card_id] = r.package_card_id
-          #              p[:product_id] = r.product_id
-          #              p[:product_price] = r.product.sale_price
-          #              p[:selected] = 1
-          #              p
-          #            }
-          #            p_c[:has_p_card] = has_p_card
-          #            p_c[:show_price] = 0.0#p_c[:price]
-          #            p_cards << p_c
-          #          else
           p_c = PackageCard.find_by_id_and_status_and_store_id id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id
           if p_c
             p_c[:products] = p_c.pcard_prod_relations.collect{|r|
@@ -337,7 +319,6 @@ class Order < ActiveRecord::Base
           p_c[:show_price] = p_c[:price]
           p_cards << p_c
           total += p_c.price
-          #          end
         else
           #产品
           prod = Product.find_by_store_id_and_id_and_status store_id,id.split("_")[0].to_i,Product::IS_VALIDATE[:YES]
