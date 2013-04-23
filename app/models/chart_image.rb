@@ -35,8 +35,12 @@ class ChartImage < ActiveRecord::Base
       data_array = []
       (1..12).collect{|i|
         key_value = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i
-        total_amount = (scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))
-        data_array << (scores[key_value].nil? ? 0 : (total_amount/scores[key_value].size > 100 ? 100 : total_amount/scores[key_value].size))
+        if scores[key_value].nil?
+          data_array << 0
+        else
+          total_amount = (scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))/scores[key_value].size
+          data_array << (total_amount > 100 ? 100 : total_amount)
+        end
       }
       average_score_hart[key] = data_array
     end
