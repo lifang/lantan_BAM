@@ -2,6 +2,7 @@
 class MaterialsController < ApplicationController
   require 'uri'
   require 'net/http'
+  require 'will_paginate/array'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?
@@ -15,7 +16,8 @@ class MaterialsController < ApplicationController
     @type = 0
     @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
       :conditions => "s.store_id=#{params[:store_id]} and s.status=#{Staff::STATUS[:normal]}")
-    @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id]
+    @status = params[:status] if params[:status]
+    @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id], @status
     @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]
     
     @notices = Notice.kucun_notices params[:store_id]

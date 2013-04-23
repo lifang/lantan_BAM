@@ -181,5 +181,14 @@
   </div>
 </div>
 <%= render :partial => "dinghuo_panel" %>
+<script type="text/javascript">
+<% if @status %>
+    $(function() {
+        $('div.tab_head li').eq(3).addClass('hover').siblings().removeClass('hover');
+        $('div.data_body > div').eq(3).show().siblings().hide();
+        $('#select_h_order').find("option[value=1]").attr('selected', 'selected')
+    })
+<% end %>
 
+</script>
 
