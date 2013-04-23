@@ -33,7 +33,11 @@ class ChartImage < ActiveRecord::Base
     month_scores.each do |key, value|
       scores = value.group_by{|m|m.current_month}
       data_array = []
-      (1..12).collect{|i|key_value = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i and data_array << (scores[key_value].nil? ? 0 : ((scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))/scores[key_value].size))}
+      (1..12).collect{|i|
+        key_value = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i
+        total_amount = (scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))
+        data_array << (scores[key_value].nil? ? 0 : (total_amount/scores[key_value].size > 100 ? 100 : total_amount/scores[key_value].size))
+      }
       average_score_hart[key] = data_array
     end
     average_score_hart
@@ -41,16 +45,8 @@ class ChartImage < ActiveRecord::Base
 
   def self.generate_chart_images(avg_month_scores)
     avg_month_scores.each do |store_id, avg_data|
-      puts "&&&&&&&&&&&&"
-      puts avg_data.inspect
-      puts "&&&&&&&&&&&&&&&"
       avg_data.each do |key, value|
-
         chart_name = key == Staff::S_COMPANY[:TECHNICIAN] ? "技师平均水平统计" : "接待平均水平统计"
-        puts "************"
-        puts chart_name.inspect
-        puts value.inspect
-        puts "***********"
         types = key == Staff::S_COMPANY[:TECHNICIAN] ? ChartImage::TYPES[:MECHINE_LEVEL] : ChartImage::TYPES[:FRONT_LEVEL]
         lc = shared_chart_img_options('1000x300', chart_name, value, 100)
         img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,types,store_id)
@@ -109,7 +105,15 @@ class ChartImage < ActiveRecord::Base
       where("current_month >= #{year}01 and current_month <= #{year}#{month}").
       group_by{|s|s.current_month}
     data_array = []
-    (1..12).collect{|i|key = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i and data_array << (month_scores[key].nil? ? 0 : (month_scores[key].sum(&:manage_score) + month_scores[key].sum(&:sys_score)))}
+    (1..12).collect{|i|
+      key = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i
+      if month_scores[key].nil?
+        data_array << 0
+      else
+        total_amount = month_scores[key].sum(&:manage_score) + month_scores[key].sum(&:sys_score)
+        data_array << (total_amount > 100 ? 100 : total_amount)
+      end
+    }
     lc = shared_chart_img_options('600x267', "员工绩效统计表", data_array, 100)
     store_id = staff.store.id
     types = ChartImage::TYPES[:STAFF_LEVEL]
