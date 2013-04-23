@@ -26,7 +26,7 @@ class Salary < ActiveRecord::Base
       deduct_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:deduct_num]
       reward_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:reward_num]
       percent = avg_percent[staff.id].nil? ? 100 : avg_percent[staff.id]
-      if staff.type_of_w == Staff::S_COMPANY[:FRONT] #前台
+      if staff.type_of_w == Staff::S_COMPANY[:FRONT] || staff.type_of_w == Staff::S_COMPANY[:CHIC] #前台或者店长
         front_amount = front_deduct_amount[staff.id].nil? ? 0 : front_deduct_amount[staff.id]
         total = staff.base_salary + reward_amount - deduct_amount + front_amount
         Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,
