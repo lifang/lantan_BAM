@@ -267,7 +267,7 @@ class MaterialsController < ApplicationController
   end
 
   #确认付款
-  =begin
+=begin
   def material_order_copy
     puts params[:store_id],params[:selected_items],params[:supplier],params[:use_count],params[:sale_id],params[:pay_type]
     status = MaterialOrder.make_order

@@ -119,4 +119,12 @@ class MaterialOrder < ActiveRecord::Base
       "未知"
     end
   end
+
+  def supplier_name
+    if supplier_type==0
+      "总部"
+    else
+      supplier.name
+    end
+  end
 end
