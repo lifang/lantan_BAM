@@ -473,10 +473,12 @@ class MaterialsController < ApplicationController
             begin
               MaterialOrder.transaction do
                 order.update_attribute(:status, MaterialOrder::STATUS[:pay])
-                headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-                result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
-                p "----------------------------------"
-                p result
+                if order.supplier_type==0
+                  headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
+                  result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
+                  p "----------------------------------"
+                  p result
+                end
               #支付记录
               MOrderType.create(:material_order_id => order.id,:pay_types => MaterialOrder::PAY_TYPES[:CHARGE], :price => order.price)
               render :text=>"success"
