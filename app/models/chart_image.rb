@@ -33,7 +33,11 @@ class ChartImage < ActiveRecord::Base
     month_scores.each do |key, value|
       scores = value.group_by{|m|m.current_month}
       data_array = []
-      (1..12).collect{|i|key_value = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i and data_array << (scores[key_value].nil? ? 0 : ((scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))/scores[key_value].size))}
+      (1..12).collect{|i|
+        key_value = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i
+        total_amount = (scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))
+        data_array << (scores[key_value].nil? ? 0 : (total_amount/scores[key_value].size > 100 ? 100 : total_amount/scores[key_value].size))
+      }
       average_score_hart[key] = data_array
     end
     average_score_hart
@@ -58,7 +62,7 @@ class ChartImage < ActiveRecord::Base
     lc.data chart_name, value , 'ff0000'
     lc.show_legend = true
     lc.max_value max_value
-    lc.axis :x, :labels =>['日期(月)1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], :range => [0,12], :alignment => :center
+    lc.axis :x, :labels =>['日期(月)1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], :range => [0,11], :alignment => :center
     lc.axis :y, :labels => [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], :range => [0,10], :alignment => :center
     lc.grid :x_step => 100.0/11, :y_step => 100.0/10, :length_segment => 1, :length_blank => 3
     lc
@@ -101,7 +105,15 @@ class ChartImage < ActiveRecord::Base
       where("current_month >= #{year}01 and current_month <= #{year}#{month}").
       group_by{|s|s.current_month}
     data_array = []
-    (1..12).collect{|i|key = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i and data_array << (month_scores[key].nil? ? 0 : (month_scores[key].sum(&:manage_score) + month_scores[key].sum(&:sys_score)))}
+    (1..12).collect{|i|
+      key = (i>=10 ? year+i.to_s : year+"0#{i.to_s}").to_i
+      if month_scores[key].nil?
+        data_array << 0
+      else
+        total_amount = month_scores[key].sum(&:manage_score) + month_scores[key].sum(&:sys_score)
+        data_array << (total_amount > 100 ? 100 : total_amount)
+      end
+    }
     lc = shared_chart_img_options('600x267', "员工绩效统计表", data_array, 100)
     store_id = staff.store.id
     types = ChartImage::TYPES[:STAFF_LEVEL]
