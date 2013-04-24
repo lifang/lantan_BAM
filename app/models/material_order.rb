@@ -32,8 +32,10 @@ class MaterialOrder < ActiveRecord::Base
       :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
   end
 
-  def self.head_order_records page, per_page, store_id
-    self.paginate(:select => "*", :from => "material_orders", :include => [:mat_order_items => :material],:conditions => "material_orders.supplier_id = 0",
+  def self.head_order_records page, per_page, store_id, status=nil
+    sql = status.nil? ? "" : "and material_orders.m_status=#{status}"
+    self.paginate(:select => "*", :from => "material_orders", :include => [:mat_order_items => :material],
+      :conditions => "material_orders.supplier_id = 0 #{sql}",
       :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
   end
 

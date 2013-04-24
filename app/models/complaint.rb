@@ -84,7 +84,8 @@ class Complaint < ActiveRecord::Base
   def self.degree_chart(store_id)
     begin
       month = Complaint.count_pleasant(store_id)
-      sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') and store_id=#{store_id} and status=#{Order::STATUS[:BEEN_PAYMENT]} group by month(created_at),is_pleased"
+      sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') 
+      and store_id=#{store_id} and status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by month(created_at),is_pleased"
       orders =Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|
         hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
       unless orders=={}
@@ -118,9 +119,9 @@ class Complaint < ActiveRecord::Base
 
   def self.search_detail(store_id,num=nil)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
-    where c.store_id=#{store_id} and date_format(now(),'%Y-%m')=date_format(c.created_at,'%Y-%m') "
+    where c.store_id=#{store_id} and  date_format(c.created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')"
     sql += " and TO_DAYS(c.process_at)=TO_DAYS(c.created_at)"  if num==0
-    sql += " and c.process_at is null " if num==1
+    sql += " and c.process_at is  null" if num==1
     sql += " order by c.created_at desc"
     return Complaint.find_by_sql(sql)
   end

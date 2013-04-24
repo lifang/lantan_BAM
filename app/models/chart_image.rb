@@ -41,8 +41,16 @@ class ChartImage < ActiveRecord::Base
 
   def self.generate_chart_images(avg_month_scores)
     avg_month_scores.each do |store_id, avg_data|
+      puts "&&&&&&&&&&&&"
+      puts avg_data.inspect
+      puts "&&&&&&&&&&&&&&&"
       avg_data.each do |key, value|
+
         chart_name = key == Staff::S_COMPANY[:TECHNICIAN] ? "技师平均水平统计" : "接待平均水平统计"
+        puts "************"
+        puts chart_name.inspect
+        puts value.inspect
+        puts "***********"
         types = key == Staff::S_COMPANY[:TECHNICIAN] ? ChartImage::TYPES[:MECHINE_LEVEL] : ChartImage::TYPES[:FRONT_LEVEL]
         lc = shared_chart_img_options('1000x300', chart_name, value, 100)
         img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,types,store_id)
@@ -58,7 +66,7 @@ class ChartImage < ActiveRecord::Base
     lc.data chart_name, value , 'ff0000'
     lc.show_legend = true
     lc.max_value max_value
-    lc.axis :x, :labels =>['日期(月)1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], :range => [0,12], :alignment => :center
+    lc.axis :x, :labels =>['日期(月)1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], :range => [0,11], :alignment => :center
     lc.axis :y, :labels => [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], :range => [0,10], :alignment => :center
     lc.grid :x_step => 100.0/11, :y_step => 100.0/10, :length_segment => 1, :length_blank => 3
     lc

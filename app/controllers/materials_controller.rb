@@ -2,9 +2,11 @@
 class MaterialsController < ApplicationController
   require 'uri'
   require 'net/http'
+  require 'will_paginate/array'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
-  before_filter :sign?
+  before_filter :sign?,:except=>["alipay_complete"]
+  @@m = Mutex.new
 
   #库存列表
   def index
@@ -15,7 +17,8 @@ class MaterialsController < ApplicationController
     @type = 0
     @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
       :conditions => "s.store_id=#{params[:store_id]} and s.status=#{Staff::STATUS[:normal]}")
-    @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id]
+    @status = params[:status] if params[:status]
+    @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id], @status
     @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]
     
     @notices = Notice.kucun_notices params[:store_id]
@@ -421,73 +424,68 @@ class MaterialsController < ApplicationController
 
   #发送充值请求
   def alipay
-    #category = Category.find(params[:category].to_i)
     options = {
       :service => "create_direct_pay_by_user",
       :notify_url => Constant::SERVER_PATH+"/stores/#{params[:store_id]}/materials/alipay_complete",
       :subject => "订货支付",
-      :payment_type => MaterialOrder::PAY_TYPES[:CHARGE],
       :total_fee => params[:f]
     }
-    out_trade_no = MaterialOrder.find_by_code(params[:mo_code])
+    out_trade_no =params[:mo_code]
     options.merge!(:seller_email =>Oauth2Helper::SELLER_EMAIL, :partner =>Oauth2Helper::PARTNER,
-      :_input_charset=>"utf-8", :out_trade_no=>out_trade_no)
-    options.merge!(:sign_type => "MD5",
-      :sign =>Digest::MD5.hexdigest(options.sort.map{|k,v|"#{k}=#{v}"}.join("&")+Oauth2Helper::PARTNER_KEY))
-    u = "#{Oauth2Helper::PAGE_WAY}?#{options.sort.map{|k, v| "#{CGI::escape(k.to_s)}=#{CGI::escape(v.to_s)}"}.join('&')}"
-    #puts u
-    redirect_to u
+      :_input_charset=>"utf-8", :out_trade_no=>out_trade_no,:payment_type => 1)
+    options.merge!(:sign_type => "MD5",:sign =>Digest::MD5.hexdigest(options.sort.map{|k,v|"#{k}=#{v}"}.join("&")+Oauth2Helper::PARTNER_KEY))
+    redirect_to "#{Oauth2Helper::PAGE_WAY}?#{options.sort.map{|k, v| "#{CGI::escape(k.to_s)}=#{CGI::escape(v.to_s)}"}.join('&')}"
   end
 
   #充值异步回调
   def alipay_complete
     out_trade_no=params[:out_trade_no]
     order = MaterialOrder.find_by_code out_trade_no
-    if !order.nil?
-      alipay_notify_url = "#{Oauth2Helper::NOTIFY_URL}?partner=#{Oauth2Helper::PARTNER}&notify_id=#{params[:notify_id]}"
-      response_txt =Net::HTTP.get(URI.parse(alipay_notify_url))
-      my_params = Hash.new
-      request.parameters.each {|key,value|my_params[key.to_s]=value}
-      my_params.delete("action")
-      my_params.delete("controller")
-      my_params.delete("sign")
-      my_params.delete("sign_type")
-      my_sign = Digest::MD5.hexdigest(my_params.sort.map{|k,v|"#{k}=#{v}"}.join("&")+Oauth2Helper::PARTNER_KEY)
-      dir = "#{Rails.root}/public/compete"
-      Dir.mkdir(dir)  unless File.directory?(dir)
-      file = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+"_alipay.log","a+")
-      file.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')}   #{request.parameters.to_s}\r\n"
-      if my_sign==params[:sign] and response_txt=="true"
-        if params[:trade_status]=="WAIT_BUYER_PAY"
-          render :text=>"success"
-        elsif params[:trade_status]=="TRADE_FINISHED" or params[:trade_status]=="TRADE_SUCCESS"
+    alipay_notify_url = "#{Oauth2Helper::NOTIFY_URL}?partner=#{Oauth2Helper::PARTNER}&notify_id=#{params[:notify_id]}"
+    response_txt =Net::HTTP.get(URI.parse(alipay_notify_url))
+    my_params = Hash.new
+    request.parameters.each {|key,value|my_params[key.to_s]=value}
+    my_params.delete("action")
+    my_params.delete("controller")
+    my_params.delete("sign")
+    my_params.delete("sign_type")
+    my_params.delete("store_id")
+    my_sign = Digest::MD5.hexdigest(my_params.sort.map{|k,v|"#{k}=#{v}"}.join("&")+Oauth2Helper::PARTNER_KEY)
+    dir = "#{Rails.root}/public/logs"
+    Dir.mkdir(dir)  unless File.directory?(dir)
+    file = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+"_alipay.log","a+")
+    file.write "#{Time.now.strftime('%Y%m%d %H:%M:%S')}   #{request.parameters.to_s}\r\n"
+    if my_sign==params[:sign] and response_txt=="true"
+      if params[:trade_status]=="WAIT_BUYER_PAY"
+        render :text=>"success"
+      elsif params[:trade_status]=="TRADE_FINISHED" or params[:trade_status]=="TRADE_SUCCESS"
+        if order
           @@m.synchronize {
             begin
               MaterialOrder.transaction do
                 order.update_attribute(:status, MaterialOrder::STATUS[:pay])
-                headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-                result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
-                p "----------------------------------"
-                p result
+                if order.supplier_type==0
+                  headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
+                  result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
+                end
                 #支付记录
                 MOrderType.create(:material_order_id => order.id,:pay_types => MaterialOrder::PAY_TYPES[:CHARGE], :price => order.price)
                 render :text=>"success"
               end
-              
             rescue
               render :text=>"success"
             end
           }
         else
-          render :text=>"fail" + "<br>"
+          file.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')} #{out_trade_no} is not Found \r\n"
         end
       else
-        redirect_to "/"
+        render :text=>"fail" + "<br>"
       end
-      file.close
     else
-      render :text=>"fail" + "<br>"
+      redirect_to "/"
     end
+    file.close
   end
 
   #打印

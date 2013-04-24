@@ -19,6 +19,8 @@ class LoginsController < ApplicationController
     
   end
 
+
+
   def create
     @staff = Staff.find_by_username(params[:user_name])
     if  @staff.nil? or !@staff.has_password?(params[:user_password])
