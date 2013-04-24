@@ -136,7 +136,12 @@ class MaterialsController < ApplicationController
     #puts params[:remark],"ssss:#{params[:id]}"
     @material = Material.find_by_id(params[:id])
     @material.update_attribute(:remark,params[:remark]) if @material
-    render :json => {:status => 1}.to_json
+    render :json => {:status => "success", :remark => @material.remark}.to_json
+  end
+
+  #显示备注框
+  def get_remark
+    @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
   end
 
   #核实

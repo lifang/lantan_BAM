@@ -80,7 +80,7 @@
         post "out_order","material_order","add","alipay_complete","add_material"
       end
       member do
-        get "mat_order_detail"
+        get "mat_order_detail","get_remark"
       end
     end
 

@@ -5,27 +5,21 @@
  * Time: 下午4:44
  * To change this template use File | Settings | File Templates.
  */
-function add_material_remark(material_id,remark){
-//    alert(material_id);
-    popup("#remark_div");
-    document.getElementById("remark").innerHTML = remark;
-    $("#material_id").attr("value",material_id);
-//    alert(remark);
-}
-
-function save_material_remark(obj){
-    var m_id = $("#material_id").val();
+//保存material remark
+function save_material_remark(mat_id,obj){
     var content = $("#remark").val();
-    if(m_id!=null && content.length>0){
+    if(mat_id!=null && content.length>0){
         $(obj).attr("disabled", "disabled");
         $.ajax({
-            url:"/materials/"+m_id + "/remark",
+            url:"/materials/"+mat_id + "/remark",
             dataType:"json",
             type:"POST",
             data:"remark="+content,
-            success: function(data,status){
-                if(status == "success"){
-                    window.location.reload();
+            success: function(data){
+                if(data.status == "success"){
+                   tishi_alert("操作成功！");
+                   hide_mask("#remark_div");
+                    //window.location.reload();
                 }
             },
             error:function(err){
