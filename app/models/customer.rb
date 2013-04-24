@@ -54,9 +54,10 @@ class Customer < ActiveRecord::Base
     end
     unless ended_at.nil? or ended_at.strip.empty?
       base_sql += " inner join orders o on o.car_num_id = ca.id " unless is_has_order
-      condition_sql += " and o.created_at <= ? "
+      condition_sql += " and o.created_at <= ?"
       params_arr << ended_at.strip.to_date + 1.days
     end
+    condition_sql += " group by ca.id " if started_at or ended_at
     params_arr[0] = base_sql + condition_sql
     return Customer.paginate_by_sql(params_arr, :per_page => 10, :page => page)
   end

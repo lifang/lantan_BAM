@@ -765,3 +765,4 @@ a.compile_btn { width: 100px;}
     margin: 0 auto;
     padding: 0 auto;
 }
+#materials_tab_table th, #materials_tab_table td{width:12.5%; word-break:break-all}

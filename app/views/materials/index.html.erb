@@ -38,16 +38,7 @@
 <div class="mask"></div>
 <!--tab-->
 <div class="tab_popup beizhu_tab" id="remark_div">
-  <div class="popup_box">
-    <h1>备注<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <div class="popup_body">
-      <div class="popup_body_area">
-        <%= hidden_field_tag "material_id" %>
-        <%= text_area_tag "remark","",{:rows => 7,:cols => 30, :class => "beizhu_textarea"} %>
-      </div>
-      <div class="btn_box"><%= button_to_function "确定","save_material_remark(this)",{:class => "confirm_btn"} %></div>
-    </div>
-  </div>
+  
 </div>
 
 <div class="tab_popup add_material_tab" id="add_material_tab">
@@ -164,14 +155,31 @@
       <div class="popup_body_area">
       <div class="fukuan_btn">
         <%= hidden_field_tag "pay_order_id","0" %>
-        <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order(1,<%= params[:store_id] %>)"></a></span>
-        <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order(3,<%= params[:store_id] %>)}">现金</button></span>
+        <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('zhifu_tab', 1,<%= params[:store_id] %>)"></a></span>
+        <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order('zhifu_tab', 3,<%= params[:store_id] %>)}">现金</button></span>
       </div>
       <div class="clear"></div>
     </div>
       </div>
   </div>
 </div>
+<div class="tab_popup" id="alipay_confirm">
+  <div class="popup_box">
+    <h1>支付宝付款<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <div class="popup_body_area">
+        <div style="text-align:center">完成付款后请根据你的情况点击下面的按钮:</div>
+      <div class="fukuan_btn">
+        <%= hidden_field_tag "pay_order_id","0" %>
+        <span><a href="javascript:void(0)" class="confirm_btn" onclick="pay_material_order('alipay_confirm',1,<%= params[:store_id] %>)">重新付款</a></span>
+        <span><button class="confirm_btn" type="button" onclick="window.location.reload()">支付完成</button></span>
+      </div>
+      <div class="clear"></div>
+    </div>
+      </div>
+  </div>
+</div>
+
 <div class="tab_popup xiangqing_tab" id="mat_order_detail_tab">
   <div class="popup_box">
     <h1>详情<a href="javascript:void(0)" class="close">关闭</a></h1>
@@ -180,6 +188,9 @@
     </div>
   </div>
 </div>
+<div class="tab_popup final_fukuan_tab" id="final_fukuan_tab">
+</div>
+
 <%= render :partial => "dinghuo_panel" %>
 <script type="text/javascript">
 <% if @status %>

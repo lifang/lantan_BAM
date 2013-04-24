@@ -79,7 +79,7 @@
                   </div>
                 <div class="item_textarea">
                      <label>上传照片：</label><%= f.file_field :photo, :class => "file", :style => "width:100px" %>
-                       <span class="show_pic"><%= image_tag "/uploads/#{f.object.id}/#{f.object.photo}", :width => 100, :height => 80 %>
+                       <span class="show_pic"><%= image_tag "/uploads/#{f.object.id}/#{f.object.photo}" %>
                      </span>
                 </div>
                 
