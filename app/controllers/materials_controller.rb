@@ -215,6 +215,8 @@ class MaterialsController < ApplicationController
                   m = Material.create(:name => name, :code => code, :price => s_price,
                     :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
                 end
+                p "-------------------"
+                p m
                 mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
                     :price => s_price})   if m
 
