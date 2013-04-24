@@ -162,7 +162,7 @@ class Sync < ActiveRecord::Base
     url = Constant::HEAD_OFFICE_REQUEST_ZIP
 
     Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
-    flog = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+".log","a+")
+    flog = File.open(Constant::LOG_DIR+"download_and_import_"+Time.now.strftime("%Y-%m").to_s+".log","a+")
 
     sync =Sync.where("created_at='#{Time.now.strftime("%Y%m%d")}' and types=#{Sync::SYNC_TYPE[:SETIN]}")[0]
     sync =Sync.create(:created_at=>Time.now.strftime("%Y-%m-%d"),:types=>Sync::SYNC_TYPE[:SETIN]) if sync.nil?
