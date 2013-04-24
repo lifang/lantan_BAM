@@ -43,11 +43,11 @@
           <% end %>
           <%= hidden_field_tag "pay_order_id",@material_order.id %>
           <div class="fukuan_btn">
-            <span><a href="/stores/<%= @current_store.id %>/materials/alipay?f=<%= @material_order.price %>&mo_code=<%= @material_order.code %>" target="_blank" class="zfb" ></a></span>
-            <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order(3, <%= @current_store.id %>)}">现金</button></span>
-            <span><button class="confirm_btn" type="button" onclick="pay_material_order(5, <%= @current_store.id %>)">货到付款</button></span>
+            <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('final_fukuan_tab', 1,<%= params[:store_id] %>)"></a></span>
+            <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order('final_fukuan_tab', 3, <%= @current_store.id %>)}">现金</button></span>
+            <span><button class="confirm_btn" type="button" onclick="pay_material_order('final_fukuan_tab', 5, <%= @current_store.id %>)">货到付款</button></span>
             <% if @material_order.supplier_type == 0 %>
-              <span id="mendian_account"><button class="confirm_btn" type="button" onclick="pay_material_order(4, <%= @current_store.id %>)">门店账户扣款</button><em id="rest_count">（余额：<%= @store_account.to_f %>）</em></span>
+              <span id="mendian_account"><button class="confirm_btn" type="button" onclick="pay_material_order('final_fukuan_tab', 4, <%= @current_store.id %>)">门店账户扣款</button><em id="rest_count">（余额：<%= @store_account.to_f %>）</em></span>
             <% end %>
           </div>
           <div class="clear"></div>

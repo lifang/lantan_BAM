@@ -268,116 +268,6 @@ class MaterialsController < ApplicationController
     @use_card_count = SvcReturnRecord.store_return_count params[:store_id]
   end
 
-  #确认付款
-=begin
-  def material_order_copy
-    puts params[:store_id],params[:selected_items],params[:supplier],params[:use_count],params[:sale_id],params[:pay_type]
-    status = MaterialOrder.make_order
-    #支付方式
-    if params[:pay_type].to_i == 1   #支付宝
-      p = 0
-      #订单相关的物料
-      params[:selected_items].split(",").each do |item|
-        p += item.split("_")[2].to_f * item.split("_")[1].to_i
-      end
-      #alipay p, params[:store_id]
-      url = "/stores/#{params[:store_id]}/materials/alipay?f="+p.to_s
-      #url = encodeURI url
-      render :json => {:status => -1,:pay_type => params[:pay_type].to_i,:pay_req => url}
-    elsif params[:pay_type].to_i == 3 || params[:pay_type].to_i == 4 || params[:pay_type].to_i == 5  #现金已支付 #使用储值卡 #现金未支付
-      MaterialOrder.transaction do
-        begin
-          if params[:supplier]
-            #向总部订货
-            if params[:supplier].to_i == 0
-              #生成订单
-              m_status = MaterialOrder::STATUS[:pay]
-              if params[:pay_type].to_i == 5
-                m_status = MaterialOrder::STATUS[:no_pay]
-              end
-              material_order = MaterialOrder.create({
-                  :supplier_id => params[:supplier], :supplier_type => Supplier::TYPES[:head],
-                  :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => m_status,
-                  :m_status => MaterialOrder::M_STATUS[:no_send],
-                  :staff_id => cookies[:user_id],:store_id => params[:store_id]
-                })
-              if material_order
-                price = 0
-                #订单相关的物料    
-                mat_code_items = {}
-                params[:selected_items].split(",").each_with_index do |item, index|
-                  #                  mat_code_items[index] = {}
-                  price += item.split("_")[2].to_f * item.split("_")[1].to_i
-                  code = item.split("_")[3]
-                  s_price = item.split("_")[2].to_f
-                  m = Material.find_by_code code
-                  if m.nil?                   
-                    name = item.split("_")[4]
-                    type_name = item.split("_")[5]
-                    types = Material::TYPES_NAMES.key(type_name)
-                    m = Material.create(:name => name, :code => code, :price => s_price,
-                      :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
-                  end
-                  mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
-                      :price => s_price})   if m
-
-                  mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code}
-                end
-   
-
-               
-                #发送订货提醒给总店
-                Notice.create(:store_id => params[:store_id], :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS])
-                #支付记录
-                MOrderType.create(:material_order_id => material_order.id,:pay_types => params[:pay_type], :price => price)
-                if params[:pay_type].to_i == MaterialOrder::PAY_TYPES[:STORE_CARD]
-                  @current_store = Store.find_by_id params[:store_id]
-                  @current_store.update_attribute(:account, @current_store.account - price) if @current_store
-                end
-                material_order.update_attributes(:price => price)
-
-                headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
-                # headoffice_post_api_url = "http://117.83.223.243:3001/api/materials/save_mat_info"
-                result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
-                p "----------------------------------"
-                p result
-              end
-              #material = Material.find_by_id_and_store_id
-              #向供应商订货
-            elsif params[:supplier].to_i > 0
-              m_status = MaterialOrder::STATUS[:pay]
-              if params[:pay_type].to_i == 5
-                m_status = MaterialOrder::STATUS[:no_pay]
-              end
-              material_order = MaterialOrder.create({
-                  :supplier_id => params[:supplier], :supplier_type => Supplier::TYPES[:branch],
-                  :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => m_status,
-                  :m_status => MaterialOrder::M_STATUS[:no_send],
-                  :staff_id => cookies[:user_id],:store_id => params[:store_id]
-                })
-              if material_order
-                price = 0
-                #订单相关的物料
-                params[:selected_items].split(",").each do |item|
-                  price += item.split("_")[2].to_f * item.split("_")[1].to_i
-                  m = Material.normal.find_by_id item.split("_")[0]
-                  MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
-                      :price => item.split("_")[2].to_f})   if m
-
-                end
-                material_order.update_attribute(:price,price)
-              end
-            end
-          end
-        rescue
-          status = 2
-        end
-        render :json => {:status => status}
-      end
-    end
-  end
-=end
-  
   def get_act_count
     #puts params[:code]
     sale = Sale.find_by_code params[:code]
@@ -568,7 +458,7 @@ class MaterialsController < ApplicationController
     if @mat_order
       #支付方式
       if params[:pay_type].to_i == 1   #支付宝
-        url = "/stores/#{params[:store_id]}/materials/alipay?f="+@mat_order.price.to_s
+        url = "/stores/#{params[:store_id]}/materials/alipay?f="+@mat_order.price.to_s+"&mo_code="+@mat_order.code
         render :json => {:status => -1,:pay_type => params[:pay_type].to_i,:pay_req => url}
       elsif params[:pay_type].to_i == 3 || params[:pay_type].to_i == 4 || params[:pay_type].to_i == 5 #现金已支付 #使用储值卡  #现金未支付
         @mat_order.update_attribute(:status, MaterialOrder::STATUS[:pay]) unless params[:pay_type].to_i == 5

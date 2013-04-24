@@ -308,8 +308,8 @@ function submit_material_order(form_id){
 
 }
 
-function pay_material_order(pay_type,store_id){
-    var mo_id = $("#pay_order_id").val();
+function pay_material_order(parent_id, pay_type,store_id){
+    var mo_id = $("#"+parent_id+" #pay_order_id").val();
     $.ajax({
         url:"/stores/"+store_id + "/materials/pay_order",
         dataType:"json",
@@ -320,7 +320,9 @@ function pay_material_order(pay_type,store_id){
                 tishi_alert("支付成功");
                 window.location.reload();
             }else if(data["status"]== -1){
-//                alert(data["pay_req"]);
+                hide_mask("#"+parent_id);
+                popup("#alipay_confirm");
+                $("#alipay_confirm #pay_order_id").val(mo_id);
                 window.open(encodeURI(data["pay_req"]),'支付宝','height=768,width=1024,scrollbars=yes,status =yes');
             }else{
                 tishi_alert("出错了，订货失败！")
@@ -682,7 +684,7 @@ function receive_order(order_id,type,store_id){
 
 function pay_order(order_id,store_id){
     popup("#zhifu_tab");
-    $("#pay_order_id").attr("value",order_id);
+    $("#zhifu_tab #pay_order_id").attr("value",order_id);
 }
 
 function show_notice(type){
