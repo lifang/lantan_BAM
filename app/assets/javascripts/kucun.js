@@ -6,24 +6,24 @@
  * To change this template use File | Settings | File Templates.
  */
 //保存material remark
-function save_material_remark(mat_id,obj){
+function save_material_remark(mat_id,store_id,obj){
     var content = $("#remark").val();
     if(mat_id!=null && content.length>0){
         $(obj).attr("disabled", "disabled");
         $.ajax({
-            url:"/materials/"+mat_id + "/remark",
-            dataType:"json",
+            url:"/stores/"+store_id+"/materials/"+mat_id + "/remark",
+            dataType:"text",
             type:"POST",
             data:"remark="+content,
             success: function(data){
-                if(data.status == "success"){
+                if(data == "1"){
                    tishi_alert("操作成功！");
                    hide_mask("#remark_div");
                     //window.location.reload();
                 }
             },
             error:function(err){
-                tishi_alert("提交中...");
+                tishi_alert("出错了");
             }
         });
     } else{
@@ -597,28 +597,23 @@ function search_supplier_order(store_id){
     });
 }
 
-function add_order_remark(order_id,remark){
-    popup("#order_remark_div");
-    document.getElementById("order_remark").innerHTML = remark;
-    $("#material_order_id").attr("value",order_id);
-}
-
-function save_order_remark(){
-    var m_id = $("#material_order_id").val();
+function save_order_remark(mo_id, store_id, obj){
     var content = $("#order_remark").val();
-    if(m_id!=null && content.length>0){
+    if(mo_id!=null && content.length>0){
+        $(obj).attr("disabled", "disabled");
         $.ajax({
-            url:"/materials/order_remark",
+            url:"/stores/"+store_id+"/materials/"+mo_id+"/order_remark",
             dataType:"json",
             type:"POST",
-            data:"remark="+content+"&order_id="+m_id,
-            success: function(data,status){
-                if(status == "success"){
-                    window.location.reload();
+            data:"remark="+content,
+            success: function(data){
+                if(data == "1"){
+                    hide_mask("#order_remark_div");
+                    tishi_alert("操作成功");
                 }
             },
             error:function(err){
-//                alert(err);
+              tishi_alert("出错了");
             }
         });
     } else{

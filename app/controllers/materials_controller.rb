@@ -135,13 +135,14 @@ class MaterialsController < ApplicationController
   #备注
   def remark
     #puts params[:remark],"ssss:#{params[:id]}"
-    @material = Material.find_by_id(params[:id])
+    @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     @material.update_attribute(:remark,params[:remark]) if @material
-    render :json => {:status => "success", :remark => @material.remark}.to_json
+    render :text => 1
   end
 
   #显示备注框
   def get_remark
+    @store = Store.find params[:store_id]
     @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
   end
 
@@ -390,15 +391,18 @@ class MaterialsController < ApplicationController
     @materials_storages = Material.normal.all(:conditions => "store_id=#{params[:store_id]}")
   end
 
+
+  #获得mat_order 的备注
+  def get_mo_remark
+    @store = Store.find params[:store_id]
+    @material_order = MaterialOrder.find_by_id_and_store_id(params[:mo_id], params[:store_id])
+  end
+  
   #订货订单的备注
   def order_remark
-    if params[:order_id]
-      order = MaterialOrder.find_by_id params[:order_id]
-      if order
-        order.update_attribute(:remark, params[:remark])
-      end
-    end
-    render :json => {:status => 1}.to_json
+    order = MaterialOrder.find_by_id_and_store_id(params[:mo_id], params[:store_id]) if params[:mo_id] 
+    order.update_attribute(:remark, params[:remark]) if order
+    render :text => '1'
   end
 
   #催货
