@@ -24,7 +24,7 @@ class Api::OrdersController < ApplicationController
       cookies[:user_id]={:value => @staff.id, :path => "/", :secure  => false}
       cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => false}
       session_role(cookies[:user_id])
-      if is_admin? or is_boss? or is_manager? or is_staff?
+      if has_authority?
         info = ""
       else
         cookies.delete(:user_id)
