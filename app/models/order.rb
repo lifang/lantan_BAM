@@ -755,13 +755,13 @@ class Order < ActiveRecord::Base
               customer = customer_car_relation.customer
             else
               customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-                :birthday => birth,:status => Customer::STATUS[:NOMAL])
+                :birthday => birth,:status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL])
               customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer) if customer
             end
           else
             customer = Customer.find_by_mobilephone phone
             customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-              :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+              :birthday => birth,:status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL]) if customer.nil?
             customer_car_relation = CustomerNumRelation.create(:car_num_id => carNum.id, :customer => customer)
           end
         else
@@ -769,7 +769,7 @@ class Order < ActiveRecord::Base
           if m
             customer = Customer.find_by_mobilephone phone
             customer = Customer.create(:name => user_name,:mobilephone => phone,:other_way => email,
-              :birthday => birth,:status => Customer::STATUS[:NOMAL]) if customer.nil?
+              :birthday => birth,:status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL]) if customer.nil?
             carNum = CarNum.create(:num => car_num, :car_model_id => m.id,:buy_year => car_year)
             CustomerNumRelation.create(:car_num_id => carNum.id,:customer_id => customer.id) if carNum && customer
           end
