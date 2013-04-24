@@ -2,8 +2,8 @@
 module RemotePaginateHelper
   @@pagination_options = {
     :class => 'pageTurn',
-    :prev_label   => '&lt;',
-    :next_label   => '&gt;',
+    :prev_label   => ' 上一页',
+    :next_label   => ' 下一页',
     :inner_window => 4, # links around the current page
     :outer_window => 1, # links around beginning and end
     :separator    => ' ', # single space is friendly to spiders and non-graphic browsers
