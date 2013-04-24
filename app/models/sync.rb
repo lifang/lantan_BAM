@@ -151,21 +151,19 @@ class Sync < ActiveRecord::Base
     Sale.update_all("store_id = #{store_id}")
     MaterialOrder.destroy_all("store_id != #{store_id}")
     if is_update
-      puts "11111111"
-      Sync.create(:created_at=> time.strftime("%Y-%m-%d %H"))
+      Sync.create(:sync_at => time.strftime("%Y-%m-%d %H"), :types => Sync::SYNC_TYPE[:SETIN])
       flog.write("数据同步成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
     else
-      puts "222222222"
       flog.write("数据同步失败---#{time.strftime("%Y-%m-%d %H")}\r\n")
     end
   end
 
   def self.request_is_generate_zip(time)  #发送请求，看是否已经生成zip文件
-    sync = Sync.order("created_at desc").first
+    sync = Sync.where("types = #{Sync::SYNC_TYPE[:SETIN]}").order("sync_at desc").first
     if sync.nil?
       url = Constant::HEAD_OFFICE_REQUEST_ZIP
     else
-      url = Constant::HEAD_OFFICE_REQUEST_ZIP+"?time=#{sync.created_at.strftime("%Y-%m-%d %H")}"
+      url = Constant::HEAD_OFFICE_REQUEST_ZIP+"?time=#{sync.sync_at.strftime("%Y-%m-%d %H")}"
     end
     
     Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
@@ -175,7 +173,6 @@ class Sync < ActiveRecord::Base
     if result == "uncomplete"
       flog.write("zip文件还没有生成成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
     else
-      puts result.inspect
       objs = JSON.parse(result)
       if !objs.nil?
         objs.each do |obj|
