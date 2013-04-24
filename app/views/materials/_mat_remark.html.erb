@@ -4,6 +4,6 @@
       <div class="popup_body_area">
         <%= text_area_tag "remark",@material.remark,{:rows => 7,:cols => 30, :class => "beizhu_textarea"} %>
       </div>
-      <div class="btn_box"><%= button_to_function "确定","save_material_remark(#{@material.id},this)",{:class => "confirm_btn"} %></div>
+      <div class="btn_box"><%= button_to_function "确定","save_material_remark(#{@material.id},#{@store.id},this)",{:class => "confirm_btn"} %></div>
     </div>
 </div>
