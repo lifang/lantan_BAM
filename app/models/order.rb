@@ -42,7 +42,7 @@ class Order < ActiveRecord::Base
   #获取需要回访的订单
   def self.get_revisit_orders(store_id, started_at, ended_at, is_visited, is_time, time, is_price, price)
     base_sql = "select o.customer_id from orders o
-      where o.store_id = #{store_id.to_i} and o.status != #{STATUS[:DELETED]} "
+      where o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
     group_by_sql = ""
