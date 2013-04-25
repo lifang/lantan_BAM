@@ -151,7 +151,7 @@ class Sync < ActiveRecord::Base
     Sale.update_all("store_id = #{store_id}")
     MaterialOrder.destroy_all("store_id != #{store_id}")
     if is_update
-      Sync.create(:sync_at => time.strftime("%Y-%m-%d %H"), :types => Sync::SYNC_TYPE[:SETIN])
+      Sync.create(:sync_at => time.strftime("%Y-%m-%d %H"), :types => Sync::SYNC_TYPE[:SETIN], :zip_name => path)
       flog.write("数据同步成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
     else
       flog.write("数据同步失败---#{time.strftime("%Y-%m-%d %H")}\r\n")

@@ -25,8 +25,8 @@ module ApplicationHelper
       from complaints c inner join orders o on o.id = c.order_id
       inner join customers cu on cu.id = c.customer_id inner join car_nums ca on ca.id = o.car_num_id 
       where c.store_id = ? and c.status = ? ", params[:store_id].to_i, Complaint::STATUS[:UNTREATED]])
-    @notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
-      Notice::TYPES[:BIRTHDAY], Notice::STATUS[:NOMAL])
+    @notices = Customer.find_by_sql("select id, name from customers
+      where birthday is not null and (-((birthday-now())/1000000)%100) <= 7")
   end
 
   def material_types
