@@ -9,7 +9,7 @@ class WorkRecord < ActiveRecord::Base
       if station_s.include? staff.id
 
       else
-        WorkRecord.create(:current_day=>Time.now.strftime("%Y-%m-%d"))
+        WorkRecord.create(:current_day=>Time.now.strftime("%Y-%m-%d"),:attendance=>"")
       end
     end
   end
