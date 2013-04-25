@@ -149,7 +149,7 @@ class MaterialsController < ApplicationController
     #puts params[:num],"m_id:#{params[:id]}"
     material = Material.find_by_id(params[:id])
     if material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
-      render :json => {:num => params[:num], :status => 1}
+      render :json => {:status => 1}
     else
       render :json => {:status => 0}
     end

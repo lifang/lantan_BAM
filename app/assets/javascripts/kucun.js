@@ -43,7 +43,7 @@ function check_material_num(m_id, storage, obj){
                 success:function(data,status){
                     if(data.status=="1"){
                         tishi_alert("操作成功")
-                       $(obj).parent().siblings(".storage").text(data.num);
+                       $(obj).parent().siblings(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("")
                     }else{
                         tishi_alert("核实失败")
