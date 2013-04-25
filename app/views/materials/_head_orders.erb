@@ -62,8 +62,7 @@
         <td><%= material_status record.status,0 %></td>
         <td>
           <%= link_to "详情", mat_order_detail_store_material_path(params[:store_id],record), remote: :true, "data-type" => "script" %>
-          
-          <a href="javascript:void(0)" onclick="add_order_remark('<%= record.id %>','<%= record.remark %>')">备注</a>
+          <%= link_to "备注", "/stores/#{params[:store_id]}/materials/#{record.id}/get_mo_remark", :remote => true, 'data-type' => 'script' %>
         </td>
       </tr>
   <% end %>

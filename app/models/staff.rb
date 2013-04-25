@@ -62,9 +62,8 @@ class Staff < ActiveRecord::Base
 
     Constant::STAFF_PICSIZE.each do |size|
       resize = size > img["width"] ? img["width"] : size
-      img.resize "#{resize}x#{resize}"
       new_file = file_path.split(".")[0]+"_#{resize}."+file_path.split(".").reverse[0]
-      img.write(new_file)
+      img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
     end
   end
 

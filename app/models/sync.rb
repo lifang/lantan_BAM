@@ -8,6 +8,7 @@ class Sync < ActiveRecord::Base
   require 'zip/zip'
   require 'zip/zipfilesystem'
   require 'open-uri'
+  require 'json'
 
   SYNC_STAT = {:COMPLETE =>1,:ERROR =>0}  #生成/压缩/上传更新文件 完成1 报错0
   SYNC_TYPE = {:BUILD =>0 , :SETIN => 1}  #生成数据  0  本地数据导入 1
@@ -97,29 +98,28 @@ class Sync < ActiveRecord::Base
     flog.close
   end
 
-  def self.get_zip_file(time, sync, flog, get_headoffice_zip_path)
+  def self.get_zip_file(flog, obj, time)
     ip_host = Constant::HEAR_OFFICE_IPHOST
     path = Constant::LOCAL_DIR
-    read_dirs = ["write_datas/", "#{time.strftime("%Y-%m").to_s}/", "#{time.strftime("%Y-%m-%d")}/", "#{time.strftime("%H")}/"]
+    arr = obj["zip_name"].split("/")
+    read_dirs = ["write_datas/", "#{arr[1]}/", "#{arr[2]}/", "#{arr[3]}/"]
     read_dirs.each_with_index {|dir,index| Dir.mkdir path+read_dirs[0..index].join   unless File.directory? path+read_dirs[0..index].join }
     #Dir.mkdir dirs.join unless File.directory? dirs.join
     file_name = "download.zip"
     is_download = false
     File.open(path+read_dirs.join+file_name, 'wb') do |fo|
-      fo.print open(ip_host+get_headoffice_zip_path).read
+      fo.print open(ip_host+obj["zip_name"]).read
       is_download = true
     end
     if is_download
-      sync.update_attribute(:data_status, Sync::SYNC_STAT[:COMPLETE])
-      flog.write("zip文件读取成功---#{Time.now}\r\n")
-      output_zip(path+read_dirs.join+file_name, sync, flog)
+      flog.write("zip文件读取成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
+      output_zip(path+read_dirs.join+file_name, flog, time)
     else
-      sync.update_attribute(:data_status, Sync::SYNC_STAT[:ERROR])
-      flog.write("zip文件读取失败---#{Time.now}\r\n")
+      flog.write("zip文件读取失败---#{time.strftime("%Y-%m-%d %H")}\r\n")
     end
   end
 
-  def self.output_zip(path, sync, flog)
+  def self.output_zip(path, flog, time)
     is_update = false
     store_id = Store.all.first.id
     begin
@@ -145,32 +145,40 @@ class Sync < ActiveRecord::Base
         end
       }
     rescue
-      flog.write("当前目录文件#{path}更新失败---#{Time.now}\r\n")
+      flog.write("当前目录文件#{path}更新失败---#{time.strftime("%Y-%m-%d %H")}\r\n")
     end
     Reservation.destroy_all("store_id != #{store_id}")
     Sale.update_all("store_id = #{store_id}")
+    MaterialOrder.destroy_all("store_id != #{store_id}")
     if is_update
-      sync.update_attributes(:sync_status=>Sync::SYNC_STAT[:COMPLETE])
-      flog.write("数据同步成功---#{Time.now}\r\n")
+      Sync.create(:sync_at => time.strftime("%Y-%m-%d %H"), :types => Sync::SYNC_TYPE[:SETIN])
+      flog.write("数据同步成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
     else
-      sync.update_attributes(:sync_status=>Sync::SYNC_STAT[:ERROR])
-      flog.write("数据同步失败---#{Time.now}\r\n")
+      flog.write("数据同步失败---#{time.strftime("%Y-%m-%d %H")}\r\n")
     end
   end
 
   def self.request_is_generate_zip(time)  #发送请求，看是否已经生成zip文件
-    url = Constant::HEAD_OFFICE_REQUEST_ZIP
-
-    Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
-    flog = File.open(Constant::LOG_DIR+"download_and_import_"+Time.now.strftime("%Y-%m").to_s+".log","a+")
-
-    sync =Sync.where("created_at='#{Time.now.strftime("%Y%m%d")}' and types=#{Sync::SYNC_TYPE[:SETIN]}")[0]
-    sync =Sync.create(:created_at=>Time.now.strftime("%Y-%m-%d"),:types=>Sync::SYNC_TYPE[:SETIN]) if sync.nil?
-    result = Net::HTTP.get(URI.parse(url))
-    if result == "uncomplete"
-      flog.write("zip文件还没有生成成功---#{Time.now}\r\n")
+    sync = Sync.where("types = #{Sync::SYNC_TYPE[:SETIN]}").order("sync_at desc").first
+    if sync.nil?
+      url = Constant::HEAD_OFFICE_REQUEST_ZIP
     else
-      get_zip_file(time, sync, flog, result)
+      url = Constant::HEAD_OFFICE_REQUEST_ZIP+"?time=#{sync.sync_at.strftime("%Y-%m-%d %H")}"
+    end
+    
+    Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
+    flog = File.open(Constant::LOG_DIR+"download_and_import_"+time.strftime("%Y-%m").to_s+".log","a+")
+    result = Net::HTTP.get(URI.parse(URI.encode(url)))
+
+    if result == "uncomplete"
+      flog.write("zip文件还没有生成成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
+    else
+      objs = JSON.parse(result)
+      if !objs.nil?
+        objs.each do |obj|
+          get_zip_file(flog, obj, time)
+        end
+      end
     end
   end
   

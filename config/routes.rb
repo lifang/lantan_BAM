@@ -80,7 +80,8 @@
         post "out_order","material_order","add","alipay_complete","add_material"
       end
       member do
-        get "mat_order_detail"
+        get "mat_order_detail","get_remark"
+        post "remark"
       end
     end
 
@@ -150,7 +151,8 @@
   match 'create_materials_in' => 'materials_in_outs#create_materials_in'
   match 'create_materials_out' => 'materials_in_outs#create_materials_out'
   match 'save_cookies' => 'materials_in_outs#save_cookies'
-#  match 'mat_order_detail' =>'materials#mat_order_detail'
+  match 'stores/:store_id/materials/:mo_id/get_mo_remark' => 'materials#get_mo_remark'
+  match 'stores/:store_id/materials/:mo_id/order_remark' => 'materials#order_remark'
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"
@@ -169,11 +171,9 @@
   resources :materials do
     member do
       get "check"
-      post "remark"
     end
     collection do
       get "get_act_count", "out"
-      post "order_remark"
     end
   end
 

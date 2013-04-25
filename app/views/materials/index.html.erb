@@ -38,16 +38,6 @@
 <div class="mask"></div>
 <!--tab-->
 <div class="tab_popup beizhu_tab" id="remark_div">
-  <div class="popup_box">
-    <h1>备注<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <div class="popup_body">
-      <div class="popup_body_area">
-        <%= hidden_field_tag "material_id" %>
-        <%= text_area_tag "remark","",{:rows => 7,:cols => 30, :class => "beizhu_textarea"} %>
-      </div>
-      <div class="btn_box"><%= button_to_function "确定","save_material_remark(this)",{:class => "confirm_btn"} %></div>
-    </div>
-  </div>
 </div>
 
 <div class="tab_popup add_material_tab" id="add_material_tab">
@@ -146,16 +136,7 @@
   </div>
 </div>
 <div class="tab_popup beizhu_tab" id="order_remark_div">
-  <div class="popup_box">
-    <h1>备注<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <div class="popup_body">
-      <div class="popup_body_area">
-        <%= hidden_field_tag "material_order_id" %>
-        <%= text_area_tag "order_remark","",{:rows => 7,:cols => 30, :class => "beizhu_textarea"} %>
-      </div>
-      <div class="btn_box"><%= button_to_function "确定","save_order_remark()",{:class => "confirm_btn"} %></div>
-    </div>
-  </div>
+  
 </div>
 <div class="tab_popup" id="zhifu_tab">
   <div class="popup_box">
@@ -197,6 +178,9 @@
     </div>
   </div>
 </div>
+<div class="tab_popup final_fukuan_tab" id="final_fukuan_tab">
+</div>
+
 <%= render :partial => "dinghuo_panel" %>
 <script type="text/javascript">
 <% if @status %>
