@@ -42,6 +42,7 @@
     <a href="javascript:void(0)" onclick="javascript:show_complaint('notice')">点击查看</a><span class="x">Close</span>
   </div>
   <div class="message" id="notice_s" style="display: none;">
+    <a href="javascript:void(0)" onclick="javascript:hide_complaint('notice')" >隐藏</a><span class="x">Close</span>
     <% @notices.each do |notice| %>
     <div><span> <%= notice.name %> 即将过生日</span>
       <a href="javascript:void(0)" onclick="javascript:single_send_message(<%= notice.id %>)">短信问候</a></div>
