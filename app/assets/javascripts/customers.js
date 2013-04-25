@@ -1,14 +1,18 @@
 function check_customer() {
+    if ($.trim($("#new_car_num").val()) == "") {
+        tishi_alert("请输入车牌号码");
+        return false;
+    }
+    if ($("#car_models").val() == "") {
+        tishi_alert("请选择汽车品牌型号");
+        return false;
+    }
     if ($.trim($("#new_name").val()) == "") {
         tishi_alert("请输入客户姓名");
         return false;
     }
     if ($.trim($("#mobilephone").val()) == "") {
         tishi_alert("请输入客户手机号码");
-        return false;
-    }
-    if ($("#car_models").val() == "") {
-        tishi_alert("请选择汽车品牌型号");
         return false;
     }
     return true;
@@ -40,14 +44,14 @@ $(function(){
     });
 })
 
-function show_complaint() {
-    $("#complaint_s").show();
-    $("#complaint_h").hide();
+function show_complaint(t) {
+    $("#"+t+"_s").show();
+    $("#"+t+"_h").hide();
 }
 
-function hide_complaint() {
-    $("#complaint_s").hide();
-    $("#complaint_h").show();
+function hide_complaint(t) {
+    $("#"+t+"_s").hide();
+    $("#"+t+"_h").show();
 }
 
 
@@ -56,15 +60,17 @@ function choose_brand(capital_div, car_brands, car_models) {
         $.ajax({
             async:true,
             dataType:'json',
-            data:{ capital_id : $(capital_div).val() },
+            data:{
+                capital_id : $(capital_div).val()
+            },
             url:"/customers/get_car_brands",
             type:'post',
             success : function(data) {
                 if (data != null && data != undefined) {
-                        $(car_brands +" option").remove();
-                        $(car_brands).append("<option value=''>--</option>");
-                        $(car_models +" option").remove();
-                        $(car_models).append("<option value=''>--</option>");
+                    $(car_brands +" option").remove();
+                    $(car_brands).append("<option value=''>--</option>");
+                    $(car_models +" option").remove();
+                    $(car_models).append("<option value=''>--</option>");
                     for (var i=0; i<data.length; i++) {
                         $(car_brands).append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
                     }
@@ -79,13 +85,15 @@ function choose_model(car_brands, car_models) {
         $.ajax({
             async:true,
             dataType:'json',
-            data:{ brand_id : $(car_brands).val() },
+            data:{
+                brand_id : $(car_brands).val()
+            },
             url:"/customers/get_car_models",
             type:'post',
             success : function(data) {
                 if (data != null && data != undefined) {
-                        $(car_models + " option").remove();
-                        $(car_models).append("<option value=''>--</option>");
+                    $(car_models + " option").remove();
+                    $(car_models).append("<option value=''>--</option>");
                     for (var i=0; i<data.length; i++) {
                         $(car_models).append("<option value='"+ data[i].id + "'>"+ data[i].name + "</option>");
                     }
@@ -100,7 +108,9 @@ function check_car_num() {
         $.ajax({
             async:true,
             dataType:'json',
-            data:{ car_num : $("#new_car_num").val() },
+            data:{
+                car_num : $("#new_car_num").val()
+            },
             url:"/customers/check_car_num",
             type:'post',
             success : function(data) {
@@ -118,8 +128,10 @@ function check_e_car_num(c_num_id) {
         $.ajax({
             async:true,
             dataType:'json',
-            data:{ car_num : $("#car_num_" + c_num_id).val(),
-                car_num_id : c_num_id },
+            data:{
+                car_num : $("#car_num_" + c_num_id).val(),
+                car_num_id : c_num_id
+            },
             url:"/customers/check_e_car_num",
             type:'post',
             success : function(data) {
@@ -190,6 +202,6 @@ function edit_car_num(car_num_id) {
 function is_has_trains(complaint_id, obj) {
     $("#is_trains_" + complaint_id).attr("value", "1");
     if (check_process()) {
-      obj.submit();
+        obj.submit();
     }    
 }

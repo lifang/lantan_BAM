@@ -37,15 +37,15 @@
         <% unless @complaints.blank? and @notices.blank? and @material_notices.blank? and @material_orders == 0 %>
           <div class="message">
             <% unless @complaints.blank? %>
-              有 <span class="red"><%= @complaints.size %></span> 条投诉信息需要您去处理
+              有 <span class="red"><%= @complaints.length %></span> 条投诉信息需要您去处理
               <a href="/stores/<%= params[:store_id] %>/customers">点击查看</a><br/>
             <% end %>
             <% unless @notices.blank? %>
-              有 <span class="red"><%= @notices.size %></span> 位客户即将过生日
+              有 <span class="red"><%= @notices.length %></span> 位客户即将过生日
               <a href="/stores/<%= params[:store_id] %>/customers">点击查看</a><br/>
             <% end %>
             <% unless @material_notices.blank? %>
-              有 <span class="red"><%= @material_notices.size %></span> 条催款信息，请您及时与总部联系
+              有 <span class="red"><%= @material_notices.length %></span> 条催款信息，请您及时与总部联系
               <a href="/stores/<%= params[:store_id] %>/materials">点击查看</a><br/>
             <% end %>
             <% unless @material_orders == 0 %>
