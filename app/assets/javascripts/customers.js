@@ -7,6 +7,10 @@ function check_customer() {
         tishi_alert("请输入客户手机号码");
         return false;
     }
+    if ($("#car_models").val() == "") {
+        tishi_alert("请选择汽车品牌型号");
+        return false;
+    }
     return true;
 }
 
