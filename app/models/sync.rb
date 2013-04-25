@@ -161,8 +161,10 @@ class Sync < ActiveRecord::Base
   def self.request_is_generate_zip(time)  #发送请求，看是否已经生成zip文件
     sync = Sync.where("types = #{Sync::SYNC_TYPE[:SETIN]}").order("sync_at desc").first
     if sync.nil?
+      puts "gggg"
       url = Constant::HEAD_OFFICE_REQUEST_ZIP
     else
+      puts "rrrrrr"
       url = Constant::HEAD_OFFICE_REQUEST_ZIP+"?time=#{sync.sync_at.strftime("%Y-%m-%d %H")}"
     end
     
@@ -170,12 +172,20 @@ class Sync < ActiveRecord::Base
     flog = File.open(Constant::LOG_DIR+"download_and_import_"+time.strftime("%Y-%m").to_s+".log","a+")
     result = Net::HTTP.get(URI.parse(URI.encode(url)))
 
+    puts "****************"
+    puts result.inspect
+    puts "**************"
     if result == "uncomplete"
+      puts "1111111111111"
       flog.write("zip文件还没有生成成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
     else
+      puts "22222222222"
       objs = JSON.parse(result)
+      puts objs.inspect
       if !objs.nil?
+        puts "33333333"
         objs.each do |obj|
+          puts obj.inspect
           get_zip_file(flog, obj, time)
         end
       end
