@@ -298,6 +298,12 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 .search input[type="text"], .search select { 
     width: 100px; 
+    height: 23px;
+    line-height: 24px;
+    border: 1px #CCCCCC solid;
+}
+.search select { 
+    width: 100px; 
     height: 24px;
     line-height: 24px;
     border: 1px #CCCCCC solid;
@@ -388,7 +394,7 @@ a.compile_btn { width: 100px;}
 
 
 .item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
-.item input[type="text"].input_s { width: 117px;  margin-right:10px;text-align: right;}
+.item input[type="text"].input_s { width: 115px; margin-right:8px;text-align: right;}
 
 .file {float: left;}
 .show_pic { margin-left: 10px;}
