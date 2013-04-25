@@ -79,7 +79,7 @@ function check_goal(e){
             }
         }
     })
-    if(carry_out && confirm("目标销售额不能更改，您确定创建该目标吗？")){
+    if(carry_out && confirm("目标销售额创建后不能更改，您确定创建该目标吗？")){
         $(e).removeAttr("onclick");
         $("#create_goal").submit();
     }
