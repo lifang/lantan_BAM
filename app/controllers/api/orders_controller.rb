@@ -122,16 +122,17 @@ class Api::OrdersController < ApplicationController
       reservation.update_attribute(:status, Reservation::STATUS[:cancel]) if params[:status].to_i == 1     #取消预约
       if params[:reserv_at]
         customer = Hash.new
-        c = reservation.customer
         car_num = reservation.car_num
+        c = Customer.find_by_sql(["select c.* from customers c left join customer_num_relations cnr
+          on cnr.customer_id = c.id where car_num_id = ?", car_num.id])[0]
         customer[:carNum] = car_num.num
         customer[:car_num_id] = reservation.car_num_id
         customer[:name] = c.name
-        customer[:customer_id] = reservation.customer_id
+        customer[:customer_id] = c.id
         customer[:reserv_at] = reservation.res_time
-        customer[:phone] = c.mobilephone
-        customer[:email] = c.other_way
-        customer[:birth] = c.birthday.strftime("%Y-%m-%d")
+        customer[:phone] = c.mobilephone if c
+        customer[:email] = c.other_way if c
+        customer[:birth] = c.birthday.strftime("%Y-%m-%d") if c and c.birthday
         customer[:year] = car_num.buy_year
       end
     end

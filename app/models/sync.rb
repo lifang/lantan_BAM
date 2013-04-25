@@ -113,13 +113,13 @@ class Sync < ActiveRecord::Base
     end
     if is_download
       flog.write("zip文件读取成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
-      output_zip(path+read_dirs.join+file_name, flog, time)
+      output_zip(path+read_dirs.join+file_name, flog, time, obj)
     else
       flog.write("zip文件读取失败---#{time.strftime("%Y-%m-%d %H")}\r\n")
     end
   end
 
-  def self.output_zip(path, flog, time)
+  def self.output_zip(path, flog, time, obj)
     is_update = false
     store_id = Store.all.first.id
     begin
@@ -151,7 +151,7 @@ class Sync < ActiveRecord::Base
     Sale.update_all("store_id = #{store_id}")
     MaterialOrder.destroy_all("store_id != #{store_id}")
     if is_update
-      Sync.create(:sync_at => time.strftime("%Y-%m-%d %H"), :types => Sync::SYNC_TYPE[:SETIN], :zip_name => path)
+      Sync.create(:sync_at => obj["sync_at"], :types => Sync::SYNC_TYPE[:SETIN], :zip_name => path)
       flog.write("数据同步成功---#{time.strftime("%Y-%m-%d %H")}\r\n")
     else
       flog.write("数据同步失败---#{time.strftime("%Y-%m-%d %H")}\r\n")
