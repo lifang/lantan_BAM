@@ -703,16 +703,18 @@ function pay_order(order_id,store_id){
     $("#zhifu_tab #pay_order_id").attr("value",order_id);
 }
 
-function show_notice(type){
-  if(type == 0){
-    $("#m_notice_div").show();
-  }else{
-      $("#m_notice_div").hide();
-  }
+function toggle_notice(obj){
+    if($(obj).text()=="点击查看"){
+       $(obj).text("隐藏");
+    }else{ $(obj).text("点击查看")}
+    $("#m_notice_div").toggle(); 
 }
 
-function close_notice(ids,store_id){
-    $.ajax({
+function close_notice(obj){
+    $(obj).parent().hide();
+    $(obj).parent().next().hide();
+
+   /* $.ajax({
         url:"/stores/"+store_id+"/materials/update_notices",
         dataType:"json",
         type:"GET",
@@ -720,5 +722,5 @@ function close_notice(ids,store_id){
         success:function(){
             window.location.reload();
         }
-    });
+    });*/
 }
