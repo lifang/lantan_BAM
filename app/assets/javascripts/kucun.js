@@ -31,9 +31,9 @@ function save_material_remark(mat_id,store_id,obj){
     }
 }
 
-function check_material_num(m_id,storage){
+function check_material_num(m_id, storage, obj){
     var check_num = $("#check_num_"+m_id).val();
-    if(check_num !=0&&check_num!=storage){
+    if($.trim(check_num) !=""){
         if(confirm("确定核实的库存？")){
             $.ajax({
                 url:"/materials/"+m_id + "/check",
@@ -41,8 +41,12 @@ function check_material_num(m_id,storage){
                 data:"num="+check_num,
                 type:"GET",
                 success:function(data,status){
-                    if(status=="success"){
-                       window.location.reload();
+                    if(data.status=="1"){
+                        tishi_alert("操作成功")
+                       $(obj).parent().siblings(".storage").text(check_num);
+                       $(obj).parent().siblings(".check_num_field").find('input').val("")
+                    }else{
+                        tishi_alert("核实失败")
                     }
                 },
                 error:function(){
@@ -51,7 +55,7 @@ function check_material_num(m_id,storage){
             });
         }
     }else{
-        tishi_alert("已核实");
+        tishi_alert("请填写核实数目");
     }
 }
 

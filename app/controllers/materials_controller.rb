@@ -95,7 +95,7 @@ class MaterialsController < ApplicationController
           @material = Material.create({:code => params[:barcode].strip,:name => params[:name].strip,
               :price => params[:price].strip, :storage => params[:num].strip,
               :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
-              :types => params[:material][:types],:check_num => params[:num].strip})
+              :types => params[:material][:types]})
         end
         if @material_order
           MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
@@ -133,9 +133,8 @@ class MaterialsController < ApplicationController
 
   #备注
   def remark
-    #puts params[:remark],"ssss:#{params[:id]}"
-    @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
-    @material.update_attribute(:remark,params[:remark]) if @material
+    material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
+    material.update_attribute(:remark,params[:remark]) if material
     render :text => 1
   end
 
@@ -148,9 +147,12 @@ class MaterialsController < ApplicationController
   #核实
   def check
     #puts params[:num],"m_id:#{params[:id]}"
-    @material = Material.find_by_id(params[:id])
-    @material.update_attributes(:storage => params[:num].to_i, :check_num => 0) if @material
-    render :json => {:status => 1}.to_json
+    material = Material.find_by_id(params[:id])
+    if material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
+      render :json => {:status => 1}
+    else
+      render :json => {:status => 0}
+    end
   end
 
   #物料查询
