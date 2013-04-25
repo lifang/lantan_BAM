@@ -59,8 +59,8 @@
   </thead>
   <tbody>
 <% (@materials_storages || []).each do |material| %>
-      <tr style="background-color: <%if material.storage.to_i == 0 %>red;<% end %>">
-        <td><%= material.code %></td>
+      <tr>
+        <td <% if material.storage.to_i <= 0 %>class="data_table_error"<% end %>><%= material.code %></td>
         <td><%= material.name %></td>
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
         <td><%= material.storage.to_i > 0 ? "存货" : "缺货" %></td>
