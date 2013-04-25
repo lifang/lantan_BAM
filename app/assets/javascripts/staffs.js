@@ -456,7 +456,7 @@ $(document).ready(function(){
 
     //处理培训
     $(".process_train").live("click", function(){
-       if(confirm("确认处理？")){
+       if(confirm("确认已通过考核？")){
            var this_obj = $(this);
            var store_id = $("#store_id").val();
            var staff_id = $("#staff_id").val();
@@ -469,7 +469,7 @@ $(document).ready(function(){
                 },
                 success: function(data){
                    if(data == "success"){
-                       this_obj.parents('tr').find("span.train_status").text("已处理");
+                       this_obj.parents('tr').find("span.train_status").text("");
                        this_obj.hide();
                        this_obj.next().show();
                    }
