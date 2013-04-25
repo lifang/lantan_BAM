@@ -33,10 +33,10 @@ class PackageCardsController < ApplicationController
 
 
   def sale_records
-    p_cards =PackageCard.search_pcard(params[:store_id])
-    @cards= p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    @card_fee = p_cards.inject(0) {|num,card| num+card.price }
-    @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.p_id,card.p_name];p_hash.uniq }
+    @p_cards =PackageCard.search_pcard(params[:store_id])
+    @cards= @p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+    @card_fee = @p_cards.inject(0) {|num,card| num+card.price }
+    @pcards = @p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.p_id,card.p_name];p_hash.uniq }
     p @pcards
     #content中存放使用情况 将所有产品或服务以字符串组合存放，包含 产品id,name,剩余次数
   end #销售记录
@@ -66,11 +66,11 @@ class PackageCardsController < ApplicationController
     pcard=PackageCard.find(params[:id])
     parms = {:name=>params[:name],:started_at=>params[:started_at],:ended_at=>params[:ended_at],:price=>params[:price]
     }
-#    begin
-      parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
-#    rescue
-#      flash[:notice] ="图片上传失败，请重新添加！"
-#    end
+    #    begin
+    parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+    #    rescue
+    #      flash[:notice] ="图片上传失败，请重新添加！"
+    #    end
     pcard.update_attributes(parms)
     pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
     params[:sale_prod].each do |key,value|
@@ -97,10 +97,10 @@ class PackageCardsController < ApplicationController
   end
 
   def search_list
-    p_cards=PackageCard.search_pcard(params[:store_id],session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at])
-    @cards=p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    @card_fee = p_cards.inject(0) {|num,card| num+card.price }
-    @pcards = p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.id,card.name]}
+    @p_cards =PackageCard.search_pcard(params[:store_id],session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at])
+    @cards=@p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+    @card_fee = @p_cards.inject(0) {|num,card| num+card.price }
+    @pcards = PackageCard.search_pcard(params[:store_id]).inject(Array.new) {|p_hash,card| p_hash << [card.p_id,card.p_name];p_hash.uniq }
     render "sale_records"
   end
   

@@ -89,7 +89,7 @@ class ProductsController < ApplicationController
     else
       parms.merge!({:standard=>params[:standard]})
     end
-#    begin
+    begin
       if params[:img_url] and !params[:img_url].keys.blank?
         product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}
         params[:img_url].each_with_index {|img,index|
@@ -98,9 +98,9 @@ class ProductsController < ApplicationController
           product.update_attributes({:img_url=>url}) if index == 0
         }
       end
-#    rescue
-#      flash[:notice] ="图片上传失败，请重新添加！"
-#    end
+    rescue
+      flash[:notice] ="图片上传失败，请重新添加！"
+    end
     product.update_attributes(parms)
   end
 

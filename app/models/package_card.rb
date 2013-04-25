@@ -13,7 +13,7 @@ class PackageCard < ActiveRecord::Base
     where p.store_id=#{store_id} and p.status=#{PackageCard::STAT[:NORMAL]}"
     sql += " and p.id=#{pcard}"  unless pcard.nil? || pcard == "" || pcard.length==0
     sql += " and n.num like '%#{car_num}%'"  unless car_num.nil? || car_num == ""  || car_num.length ==0
-    sql += " and p.name like '%#{c_name}%'" unless c_name.nil? || c_name == "" || c_name.length == 0
+    sql += " and c.name like '%#{c_name}%'" unless c_name.nil? || c_name == "" || c_name.length == 0
     sql += " and cp.created_at > '#{created_at}'" unless created_at.nil? || created_at == "" || created_at.length ==0
     sql += " and cp.created_at < '#{ended_at}'" unless ended_at.nil? ||  ended_at == "" || ended_at.length == 0
     return CPcardRelation.find_by_sql(sql)

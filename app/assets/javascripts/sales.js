@@ -174,7 +174,11 @@ function check_add(e){
         return false;
     }
     if ( ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0)){
-        tishi_alert("请输入套餐卡有效时间和失效时间时间");
+        tishi_alert("请输入套餐卡有效时间和失效时间");
+        return false;
+    }
+     if ( ($("#started_at").val() > $("#ended_at").val().length == 0)){
+        tishi_alert("套餐卡有效时间不能大于失效时间");
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
