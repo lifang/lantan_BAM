@@ -766,3 +766,5 @@ a.compile_btn { width: 100px;}
     padding: 0 auto;
 }
 #materials_tab_table th, #materials_tab_table td{width:12.5%; word-break:break-all}
+#role_staffs .data_table td{width:33.3%; word-break:break-all}
+.station-data .data_table td{width:25%; word-break:break-all}
