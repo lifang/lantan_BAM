@@ -84,7 +84,7 @@ function select_material(obj,name,type,panel_type){
     if($(obj).is(":checked")){
         var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
         tr += name + "</td><td>" + type + "</td><td>" + $(obj).val() + "</td><td>" +
-        "<input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onchange=\"set_out_num(this,'"+$(obj).val()+"')\" style='width:50px;'/></td><td><a href='javascript:void(0);' onclick='del_result(this,\"\")'>删除</a></td></tr>";
+        "<input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onchange=\"set_out_num(this,'"+$(obj).val()+"')\" style='width:50px;'/></td><td><a href='javascript:void(0);' alt='"+$(obj).attr("id")+"' onclick='del_result(this,\"\")'>删除</a></td></tr>";
         $("#selected_materials").append(tr);
         select_str += $(obj).attr("id").split("_")[1] + "_1,";
         $("#selected_items").attr("value",select_str);
@@ -110,7 +110,7 @@ function select_order_material(obj,name,type,panel_type,code,price){
         var li = "<tr id='li_"+$(obj).attr("id")+"' class='in_mat_selected'><td>";
         li += code + "</td><td>" + name + "</td><td>" + type + "</td><td>" + price +
             "</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+price+"','"+code+"','"+type+"')\" style='width:50px;'/></td><td>" +
-            "<span id='total_"+id+"'>" + price + "</span></td><td>" + storage +"</td><td><a href='javascript:void(0);' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
+            "<span id='total_"+id+"'>" + price + "</span></td><td>" + storage +"</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
         if($("#dinghuo_selected_materials").find("tr.in_mat_selected").length > 0){
             $("#dinghuo_selected_materials").find("tr.in_mat_selected:last").after(li);
         }else{
@@ -139,6 +139,7 @@ function select_order_material(obj,name,type,panel_type,code,price){
 
 function del_result(obj,type){
 //   alert($("#selected_items").val());
+    var matId = $(obj).attr('alt');
     var select_items = $("#selected_items"+type).val().split(",");
     var del_item =  jQuery.grep(select_items,function(n,i){
         return select_items[i].split("_")[0]==$(obj).parent().parent().attr("id").split("_")[2];
@@ -148,10 +149,24 @@ function del_result(obj,type){
     });
     $("#selected_items"+type).attr("value",select_items.join(","));
     $(obj).parent().parent().remove();
+    
     if(type=="_dinghuo"){
+        $("#dinghuo_search_material").find("input").each(function(){
+            var mat_id = $(this).attr("id").split("_")[1];
+            if(matId == mat_id){
+                $(this).attr("checked",false);
+            }
+        })
         var items = del_item[0].split("_");
         var old_total = parseFloat($("#total_count").text());
         $("#total_count").text((old_total - parseFloat(items[2]) * parseInt(items[1])).toFixed(2));
+    }else{
+        $("#search_material").find("input").each(function(){
+            var mat_id = $(this).attr("id");
+            if(matId == mat_id){
+                $(this).attr("checked",false);
+            }
+        })
     }
 }
 
@@ -329,6 +344,17 @@ function pay_material_order(parent_id, pay_type,store_id){
 }
 
 function confirm_pay(){
+    var flag = true;
+    $("#dinghuo_selected_materials").find("input").each(function(){
+        var count = $(this).val();
+        var storage = parseInt($(this).parent().next().next().text());
+        var mat_name = $(this).parent().prev().prev().prev().text();
+        if(count > storage){
+            flag = false;
+            tishi_alert("【"+mat_name+"】订货量大于库存量")
+        }
+    })
+if(flag){
     if($("#selected_items_dinghuo").val()!=null && $("#selected_items_dinghuo").val()!=""){
         popup("#fukuan_tab");
         var supplier = $("#from").find("option:selected").text();
@@ -348,6 +374,7 @@ function confirm_pay(){
         $("#dinghuo_tab").hide();
     }else{
         tishi_alert("请选择物料");
+    }
     }
 }
 
