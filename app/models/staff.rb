@@ -58,7 +58,7 @@ class Staff < ActiveRecord::Base
       file.write(photo.read)
     end
     file_path = "#{File.expand_path(Rails.root)}/public/uploads/#{self.id}/#{photo.original_filename}"
-    img = MiniMagick::Image.open file_path,"rb"
+    img = MiniMagick::Image.from_file file_path,"rb"
 
     Constant::STAFF_PICSIZE.each do |size|
       resize = size > img["width"] ? img["width"] : size
