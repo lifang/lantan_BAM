@@ -46,7 +46,11 @@ class WorkRecord < ActiveRecord::Base
           materials_consume_num = materials_used_num
           work_orders = WorkOrder.find_by_sql("select wo.water_num, wo.electricity_num from work_orders wo
                                              left join station_staff_relations ssr on ssr.station_id = wo.station_id
-                                             where ssr.staff_id = #{work_record.staff_id} and wo.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and wo.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59' and wo.status = #{WorkOrder::STAT[:COMPLETE]}")
+                                             where ssr.staff_id = #{work_record.staff_id} and 
+                                             wo.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and
+                                             wo.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59' and
+                                             wo.status = #{WorkOrder::STAT[:COMPLETE]} and ssr.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and
+                                             ssr.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'")
           
           water_num = work_orders.sum(&:water_num)
 
