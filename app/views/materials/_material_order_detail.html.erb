@@ -49,7 +49,14 @@
   </table>
   <div class="otherWay">
     <div class="amount">总计：<%= @total_money %></div>
+    <div class="amount">储值卡抵用：<%= @mo.sale_price %></div>
+    <div class="amount">活动优惠：<%= @mo.svc_use_price %></div>
+    <div class="amount">合计：<%= @mo.price %></div>
   </div>
+  <% unless @mo.sale_id.blank? %>
+   <% sale = Sale.find @mo.sale_id %>
+  <%= sale.name %>
+  <% end %>
 </div>
 <div class="fukuan_btn">
   <% if @mo.supplier_id == 0 && permission?(:materials, :cuihuo) %>

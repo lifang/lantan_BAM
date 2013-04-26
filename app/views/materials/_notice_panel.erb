@@ -1,5 +1,5 @@
 <% if @material_notices && @material_notices.size > 0 %>
-<div class="message">有<%= @material_notices.size %>条您的订单已经到货，但尚未入库<a href="javascript:void(0);" onclick="toggle_notice(this)">点击查看</a><span class="x" onclick="close_notice(this)">Close</span></div>
+<div class="message">有<%= @material_notices.size %>条您的订单已经到货，但尚未入库<a href="javascript:void(0);" onclick="toggle_notice(this)">点击查看</a></div>
 <div class="message" style="display: none;" id="m_notice_div">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
     <thead>

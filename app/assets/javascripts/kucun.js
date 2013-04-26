@@ -323,10 +323,13 @@ function submit_material_order(form_id){
 
 function pay_material_order(parent_id, pay_type,store_id){
     var mo_id = $("#"+parent_id+" #pay_order_id").val();
+    var total_price = $("#final_price").text();
+    var sav_price = $("#sav_price").val();
+    var sale_id = $("#sale_id").val();
     $.ajax({
         url:"/stores/"+store_id + "/materials/pay_order",
         dataType:"json",
-        data:"mo_id="+mo_id+"&pay_type="+pay_type,
+        data:"mo_id="+mo_id+"&pay_type="+pay_type+"&total_price="+total_price+"&sav_price="+sav_price+"&sale_id="+sale_id,
         type:"GET",
         success:function(data,status){
             if(data["status"]==0){
@@ -384,6 +387,7 @@ if(flag){
 
 function get_act_count(obj){
    if($(obj).val()!=""){
+       var total_price = parseFloat($("#price_total").text());
        $.ajax({
            url:"/materials/get_act_count",
            dataType:"json",
@@ -392,11 +396,55 @@ function get_act_count(obj){
            success:function(data,status){
              if(data.status==1){
                 $("#use_code_count").text(data.text);
-                $("#use_code").attr("value",data.sale_id);
+                $("#sale_id").attr("value",data.sale_id);
+                $("#sale_price").text(data.text);
              }
            }
-       });
+       }); 
    }
+}
+
+function use_sale(obj, flag){
+    var total_price = parseFloat($("#price_total").text());
+    var sav_price = $("#sav_price").val();
+    var sal_price = parseFloat($("#use_code_count").text());
+    if($(obj).attr("checked")=="checked"){
+        if(flag=='sav'){
+            if(sav_price!="")
+            {
+                $("#savecard_price").text(sav_price);
+                $("#savecard_price").parent().show();
+            }
+            else{
+                tishi_alert("请输入抵用金额");
+                $(obj).attr("checked", false);
+            }
+        //$("#price_total").text((total_price - sav_price) > 0 ? (total_price - sav_price) : 0.0);
+        }
+        else{
+            if($("#act_code").val()!=""){
+              $("#sale_price").text(sal_price);
+              $("#sale_price").parent().show();
+            }else{
+                tishi_alert("请输入活动代码");
+                $(obj).attr("checked", false);
+            }
+        }
+    }
+    else{
+        if(flag=='sav'){
+            $("#savecard_price").text("");
+            $("#savecard_price").parent().hide();
+        }
+        else{
+            $("#sale_price").text("");
+            $("#sale_price").parent().hide();
+           
+        }
+    }
+    if($("#sav_price").val()!="" || $("#act_code").val()!=""){
+        $("#final_price").text(parseFloat($("#price_total").text()) - parseFloat($("#sale_price").text()=="" ? 0 : $("#sale_price").text()) - parseFloat($("#savecard_price").text()=="" ? 0 :$("#savecard_price").text()));
+    }
 }
 
 function add_new_material(obj,idx,store_id){
@@ -710,7 +758,7 @@ function pay_order(order_id,store_id){
 function toggle_notice(obj){
     if($(obj).text()=="点击查看"){
        $(obj).text("隐藏");
-    }else{ $(obj).text("点击查看")}
+    }else{$(obj).text("点击查看")}
     $("#m_notice_div").toggle(); 
 }
 

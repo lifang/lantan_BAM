@@ -276,7 +276,7 @@ class MaterialsController < ApplicationController
     @current_store = Store.find_by_id params[:store_id]
     @store_account = @current_store.account if @current_store
     @material_order = MaterialOrder.find_by_code params[:mat_code]
-    @use_card_count = SvcReturnRecord.store_return_count params[:store_id]
+    @use_card_count = SvcReturnRecord.store_return_count(params[:store_id]).abs
   end
 
   def get_act_count
@@ -459,22 +459,26 @@ class MaterialsController < ApplicationController
     end
     if @mat_order
       #支付方式
-      if params[:pay_type].to_i == 1   #支付宝
-        url = "/stores/#{params[:store_id]}/materials/alipay?f="+@mat_order.price.to_s+"&mo_code="+@mat_order.code
-        render :json => {:status => -1,:pay_type => params[:pay_type].to_i,:pay_req => url}
-      elsif params[:pay_type].to_i == 3 || params[:pay_type].to_i == 4 || params[:pay_type].to_i == 5 #现金已支付 #使用储值卡  #现金未支付
-        @mat_order.update_attribute(:status, MaterialOrder::STATUS[:pay]) unless params[:pay_type].to_i == 5
-        #使用储值抵货款
-        if params[:use_count].to_i > 0
+      @mat_order.update_attributes(:price => params[:total_price])
+      #使用储值抵货款
+        if params[:sav_price].to_f > 0
+          use_card_count = SvcReturnRecord.store_return_count params[:store_id]
           SvcReturnRecord.create({
-              :store_id => params[:store_id],:types => SvcReturnRecord::TYPES[:out],
-              :price => params[:use_count]
+              :store_id => params[:store_id],:types => SvcReturnRecord::TYPES[:IN],
+              :price => params[:sav_price], :total_price => use_card_count+params[:sav_price].to_f,
+              :target_id => @mat_order.id
             })
         end
         #使用活动代码
         if params[:sale_id]
           @mat_order.update_attribute(:sale_id,params[:sale_id])
         end
+      if params[:pay_type].to_i == 1   #支付宝
+        url = "/stores/#{params[:store_id]}/materials/alipay?f="+@mat_order.price.to_s+"&mo_code="+@mat_order.code
+        render :json => {:status => -1,:pay_type => params[:pay_type].to_i,:pay_req => url}
+      elsif params[:pay_type].to_i == 3 || params[:pay_type].to_i == 4 || params[:pay_type].to_i == 5 #现金已支付 #使用储值卡  #现金未支付
+        @mat_order.update_attribute(:status, MaterialOrder::STATUS[:pay]) unless params[:pay_type].to_i == 5
+        
         #支付记录
         MOrderType.create(:material_order_id => @mat_order.id,:pay_types => params[:pay_type], :price => @mat_order.price)
         if params[:pay_type].to_i == MaterialOrder::PAY_TYPES[:STORE_CARD]

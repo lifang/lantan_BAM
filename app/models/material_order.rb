@@ -129,4 +129,15 @@ class MaterialOrder < ActiveRecord::Base
       supplier.name
     end
   end
+
+  def svc_use_price
+    SvcReturnRecord.find_by_target_id(self.id).try(:price)
+  end
+
+  def sale_price
+    if self.sale_id
+      sale = Sale.find self.sale_id 
+      sale.sub_content
+    end
+  end
 end
