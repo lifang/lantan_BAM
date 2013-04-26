@@ -3,7 +3,7 @@ class WorkRecord < ActiveRecord::Base
   belongs_to :staff
 
   def self.update_record
-    time = (Time.now - 1.days).strftime("%Y-%m-%d")
+    time = Time.now.strftime("%Y-%m-%d")
     work_records = WorkRecord.where("current_day >= '#{time}' and current_day <= '#{time} 23:59:59'")
     work_records.each do |work_record|
       staff = Staff.find_by_id(work_record.staff_id)
