@@ -44,12 +44,13 @@ class WorkRecord < ActiveRecord::Base
                               where("updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'").sum(:material_num)
 
           materials_consume_num = materials_used_num
-          work_order = WorkOrder.find_by_sql("select sum(wo.water_num) water_num_total, sum(wo.electricity_num) elec_num_total from work_orders wo
+          work_orders = WorkOrder.find_by_sql("select wo.water_num, wo.electricity_num from work_orders wo
                                              left join station_staff_relations ssr on ssr.station_id = wo.station_id
-                                             where ssr.staff_id = #{work_record.staff_id} and wo.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and wo.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59' and wo.status = #{WorkOrder::STAT[:COMPLETE]}").first
-          water_num = work_order.water_num_total
+                                             where ssr.staff_id = #{work_record.staff_id} and wo.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and wo.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59' and wo.status = #{WorkOrder::STAT[:COMPLETE]}")
+          
+          water_num = work_orders.sum(&:water_num)
 
-          elec_num = work_order.elec_num_total
+          elec_num = work_orders.sum(&:electricity_num)
 
           work_record.update_attributes(:construct_num => construct_num, :materials_used_num => materials_used_num,
                                         :materials_consume_num => materials_consume_num, :water_num => water_num,
