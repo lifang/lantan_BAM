@@ -114,9 +114,9 @@ function show_center(t){
     var layer_width = $(t).width();
     $(".mask").css({
         display:'block',
-        height:($(t).height()+50)>doc_height?　$(t).height()+180 : doc_height
+        height:($(t).height()+100)>doc_height?　$(t).height()+280 : doc_height+50
     });
-    $(t).css('top',"50px");
+    $(t).css('top',"100px");
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
     $(t + " .close").click(function(){
@@ -131,9 +131,9 @@ function before_center(t){
     var layer_width = $(t).width();
     $(".maskOne").css({
         display:'block',
-        height:($(t).height()+50)>doc_height?　$(t).height()+180 : doc_height
+        height:($(t).height()+100)>doc_height?　$(t).height()+280 : doc_height+50
     });
-    $(t).css('top',"50px");
+    $(t).css('top',"100px");
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
     $(t + " .close").click(function(){
@@ -167,7 +167,6 @@ function tishi_alert(message){
     var win_height = document.documentElement.clientHeight;//jQuery(document).height();
     var z_layer_height = $(".tab_alert").height();
     $(".tab_alert").css('top',(win_height-z_layer_height)/2 + scolltop);
-
     var doc_width = $(document).width();
     var layer_width = $(".tab_alert").width();
     $(".tab_alert").css('left',(doc_width-layer_width)/2);

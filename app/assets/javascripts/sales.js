@@ -177,7 +177,7 @@ function check_add(e){
         tishi_alert("请输入套餐卡有效时间和失效时间");
         return false;
     }
-     if ( ($("#started_at").val() > $("#ended_at").val().length == 0)){
+     if ( ($("#started_at").val() > $("#ended_at").val())){
         tishi_alert("套餐卡有效时间不能大于失效时间");
         return false;
     }

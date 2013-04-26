@@ -24,7 +24,7 @@ class Sale < ActiveRecord::Base
     end
   end
 
-  #上传图片并裁剪不同比例 目前为50,100,200和原图
+  #上传图片并缩放不同比例 目前为50,100,200和原图
   #img_url 上传文件的路径 sale_id所属对象的id
   #pic_types存放文件的文件夹名称 store_id 门店编号
   def self.upload_img(img_url,sale_id,pic_types,store_id,pics_size,img_code=nil)
@@ -38,8 +38,8 @@ class Sale < ActiveRecord::Base
     pics_size.each do |size|
       new_file="#{dirs.join}/#{img_code}img#{sale_id}_#{size}."+ file.split(".").reverse[0]
       resize = size > img["width"] ? img["width"] : size
-      resize = img["height"].to_f/img["width"].to_f > 5/6 ?  img["width"]*(img["height"]/250)  : resize
-      img.run_command("convert #{path+filename}  -resize #{resize}x#{resize} #{path+new_file}")
+      height = img["height"].to_f/img["width"].to_f > 5/6 ?  250 : resize
+      img.run_command("convert #{path+filename}  -resize #{resize}x#{height} #{path+new_file}")
     end
     return filename
   end
