@@ -14,9 +14,9 @@ development:
   reconnect: false
   database: lantan_db
   pool: 5
-  username: comdo
+  username: root
   password: comdo2012
-  host: 50.116.17.119
+  host: localhost
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".

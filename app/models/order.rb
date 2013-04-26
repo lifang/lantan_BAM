@@ -268,7 +268,7 @@ class Order < ActiveRecord::Base
       info[:car_num] = car_num
       info[:c_name] = customer.name
       info[:phone] = phone
-      info[:car_brand] = carNum.car_model.car_brand.name + "-" + carNum.car_model.name
+      info[:car_brand] = (carNum.car_model and carNum.car_model.car_brand) ? carNum.car_model.car_brand.name + "-" + carNum.car_model.name : ""
       info[:car_num_id] = carNum.id
       ids = []
       prod_ids.split(",").each do |p_id|
@@ -513,7 +513,7 @@ class Order < ActiveRecord::Base
               (1..(value - alreay_has)).each do |i|
                 cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id => key.to_i,
                   :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[key][0].ended_at,
-                  :content => CPcardRelation.set_content(key), :order_id => order.id)
+                  :content => CPcardRelation.set_content(key), :order_id => order.id, :price => p_cards_hash[key][0].price)
                 if c_pcard_relations and c_pcard_relations[key]
                   c_pcard_relations[key] << cpr
                 else
