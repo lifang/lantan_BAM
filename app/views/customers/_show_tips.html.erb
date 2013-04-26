@@ -39,14 +39,13 @@
 <% unless @notices.blank? %>
   <div class="message" id="notice_h">
     有 <span class="red"><%= @notices.length %></span> 生日提醒
-    <a href="javascript:void(0)" onclick="javascript:show_complaint('notice')">点击查看</a><span class="x">Close</span>
+    <a href="javascript:void(0)" onclick="javascript:show_complaint('notice')">点击查看</a>
   </div>
   <div class="message" id="notice_s" style="display: none;">
-    <a href="javascript:void(0)" onclick="javascript:hide_complaint('notice')" >隐藏</a><span class="x">Close</span>
+    <a href="javascript:void(0)" onclick="javascript:hide_complaint('notice')" >隐藏</a>
     <% @notices.each do |notice| %>
     <div><span> <%= notice.name %> 即将过生日</span>
       <a href="javascript:void(0)" onclick="javascript:single_send_message(<%= notice.id %>)">短信问候</a></div>
     <% end %>
-    <span class="x">Close</span>
   </div>
 <% end %>
