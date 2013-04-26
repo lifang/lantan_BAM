@@ -51,11 +51,6 @@ class WorkRecord < ActiveRecord::Base
                                              wo.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59' and
                                              wo.status = #{WorkOrder::STAT[:COMPLETE]} and ssr.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and
                                              ssr.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'")
-
-          puts "11111111111"
-          puts work_orders.inspect
-          puts work_orders.uniq{|x| x.id}
-          puts "11111111111111111"
           
           water_num = work_orders.uniq{|x| x.id}.sum(&:water_num)
 
