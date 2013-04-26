@@ -120,6 +120,7 @@ class Api::OrdersController < ApplicationController
       end
       reservation.update_attributes(:status => Reservation::STATUS[:confirmed],:res_time => time) if params[:status].to_i == 0     #确认预约
       reservation.update_attribute(:status, Reservation::STATUS[:cancel]) if params[:status].to_i == 1     #取消预约
+      products = ResProdRelation.find_all_by_reservation_id(reservation.id)
       if params[:reserv_at]
         customer = Hash.new
         car_num = reservation.car_num
