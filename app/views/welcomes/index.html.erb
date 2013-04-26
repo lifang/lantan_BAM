@@ -52,7 +52,7 @@
               有 <span class="red"><%= @material_orders %></span> 条订单已发货，请注意查收
               <a href="/stores/<%= params[:store_id] %>/materials?status=<%= MaterialOrder::M_STATUS[:send] %>">点击查看</a>
             <% end %>
-            <span class="x" onclick="$('.message').hide();">Close</span>
+            <!--<span class="x" onclick="$('.message').hide();">Close</span>-->
           </div>
         <% end %>
       </div>

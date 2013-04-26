@@ -113,6 +113,7 @@ class Api::OrdersController < ApplicationController
   def confirm_reservation
     reservation = Reservation.find_by_id_and_store_id params[:r_id].to_i,params[:store_id]
     customer = nil
+    product_ids = []
     if reservation && reservation.status == Reservation::STATUS[:normal]
       time = reservation.res_time
       if params[:reserv_at]
@@ -120,7 +121,9 @@ class Api::OrdersController < ApplicationController
       end
       reservation.update_attributes(:status => Reservation::STATUS[:confirmed],:res_time => time) if params[:status].to_i == 0     #确认预约
       reservation.update_attribute(:status, Reservation::STATUS[:cancel]) if params[:status].to_i == 1     #取消预约
-      products = ResProdRelation.find_all_by_reservation_id(reservation.id)
+      r_products = ResProdRelation.find(:all, :select => "product_id", :conditions => ["reservation_id = ?", reservation.id])
+      product_ids = r_products.collect { |r_p| r_p.product_id }
+
       if params[:reserv_at]
         customer = Hash.new
         car_num = reservation.car_num
@@ -137,9 +140,11 @@ class Api::OrdersController < ApplicationController
         customer[:year] = car_num.buy_year
       end
     end
+    items = Order.get_brands_products params[:store_id]
     reservations = Reservation.store_reservations params[:store_id]
 
-    render :json => {:status => 1, :reservation => reservations, :customer => customer}
+    render :json => {:status => 1, :reservation => reservations, :customer => customer, :product_ids => product_ids,
+      :brands => items[0], :products => items[1], :count => items[1][4]}
   end
 
   #刷新返回预约信息
