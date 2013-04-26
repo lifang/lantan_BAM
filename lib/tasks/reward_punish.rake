@@ -1,5 +1,7 @@
 #encoding: utf-8
-desc "judge whether to reward or punish the staff or not"
-task(:reward_punish => :environment) do
-
+namespace :work_record_list do
+  desc "generate work record of day"
+  task(:generate_work_record => :environment) do
+    WorkRecord.update_record
+  end
 end
