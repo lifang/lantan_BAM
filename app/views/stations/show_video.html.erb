@@ -4,8 +4,8 @@
   <div class="search">
     <%= form_for :video,:url=>"/stores/#{params[:store_id]}/stations/search" do %>
       <div><label>时间：</label>
-        <input name="create_at" type="text" value="<%= session[:create_at] %>" onclick="WdatePicker()" />&nbsp;到&nbsp;
-        <input name="end_at" type="text" value="<%= session[:end_at]  %>" onclick="WdatePicker()" /></div>
+        <input name="create_at" type="text" value="<%= session[:create_at] %>" onclick="WdatePicker()" class="Wdate" readonly />&nbsp;到&nbsp;
+        <input name="end_at" type="text" value="<%= session[:end_at]  %>" onclick="WdatePicker()" readonly readonly /></div>
       <div><button class="search_btn">查询</button></div>
     <% end  %>
   </div>

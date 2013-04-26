@@ -38,6 +38,7 @@ class Sale < ActiveRecord::Base
     pics_size.each do |size|
       new_file="#{dirs.join}/#{img_code}img#{sale_id}_#{size}."+ file.split(".").reverse[0]
       resize = size > img["width"] ? img["width"] : size
+      resize = img["height"].to_f/img["width"].to_f > 5/6 ?  img["width"]*(img["height"]/250)  : resize
       img.run_command("convert #{path+filename}  -resize #{resize}x#{resize} #{path+new_file}")
     end
     return filename

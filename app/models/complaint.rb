@@ -21,8 +21,8 @@ class Complaint < ActiveRecord::Base
     10 => "美容技师服务态度不好", 11 => "服务顾问服务态度不好",
     12 => "服务顾问着装或言辞不得体",13 => "休息厅自取茶水或报纸杂志等不完备", 14 => "休息厅环境差",
     15 => "展厅体验不完整", 16 => "施工等待时间过长", 17 => "无效投诉"}
-  CHART_NAMES = {1=>"精洗",2=>"打蜡",3=>"去污",4=>"内饰清洗",5=>"内饰护理",6=>"抛光",7=>"踱晶",8=>"玻璃清洗护理",9=>"施工事故",
-    10=>"美容技师服务",11=>"服务顾问服务",12=>"服务顾问着装",13=>"休息厅设备不完善",14=>"休息厅环境差",15=>"展厅体验",16=>"等待时间过长",
+  CHART_NAMES = {1=>"精洗",2=>"打蜡",3=>"去污",4=>"内饰清洗",5=>"内饰护理",6=>"抛光",7=>"踱晶",8=>"玻璃清洗",9=>"施工事故",
+    10=>"美容技师",11=>"服务顾问",12=>"服务顾问着装",13=>"休息厅设备不完善",14=>"休息厅环境差",15=>"展厅体验",16=>"等待时间过长",
     17=>"无效投诉"}
 
   #投诉状态
@@ -84,7 +84,8 @@ class Complaint < ActiveRecord::Base
   def self.degree_chart(store_id)
     begin
       month = Complaint.count_pleasant(store_id)
-      sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') and store_id=#{store_id} and status=#{Order::STATUS[:BEEN_PAYMENT]} group by month(created_at),is_pleased"
+      sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') 
+      and store_id=#{store_id} and status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by month(created_at),is_pleased"
       orders =Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|
         hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
       unless orders=={}
@@ -118,9 +119,9 @@ class Complaint < ActiveRecord::Base
 
   def self.search_detail(store_id,num=nil)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
-    where c.store_id=#{store_id} and date_format(now(),'%Y-%m')=date_format(c.created_at,'%Y-%m') "
+    where c.store_id=#{store_id} and  date_format(c.created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')"
     sql += " and TO_DAYS(c.process_at)=TO_DAYS(c.created_at)"  if num==0
-    sql += " and c.process_at is null " if num==1
+    sql += " and c.process_at is  null" if num==1
     sql += " order by c.created_at desc"
     return Complaint.find_by_sql(sql)
   end

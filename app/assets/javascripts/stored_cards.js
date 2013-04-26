@@ -79,7 +79,7 @@ function check_goal(e){
             }
         }
     })
-    if(carry_out && confirm("目标销售额不能更改，您确定创建该目标吗？")){
+    if(carry_out && confirm("目标销售额创建后不能更改，您确定创建该目标吗？")){
         $(e).removeAttr("onclick");
         $("#create_goal").submit();
     }
@@ -102,11 +102,15 @@ function remove_v(e){
 function back_v(e){
     if( e.value==""|| e.length == 0){
         e.value= tishi
+    }else{
+        $(e).attr("onfocus","")
     }
 }
 function back_n(e){
     if( e.value==""|| e.length == 0){
         e.value= num_n
+    }else{
+        $(e).attr("onfocus","")
     }
 }
 

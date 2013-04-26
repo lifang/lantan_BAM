@@ -130,8 +130,8 @@ class MarketManagesController < ApplicationController
       @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
      p on p.order_id=o.id where o.sale_id in (#{@sale_orders.map(&:id).join(',')}) ").inject(Hash.new)  {|hash,order_pay|
         hash[order_pay.sale_id].nil? ? hash[order_pay.sale_id]=order_pay.price : hash[order_pay.sale_id] += order_pay.price  if order_pay.pay_type == OrderPayType::PAY_TYPES[:SALE];hash }
-      @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     end
+    @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     render 'sale_orders'
   end
 

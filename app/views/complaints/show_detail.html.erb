@@ -1,12 +1,10 @@
 <%= render 'directory' %>
 <div class="search">
-  <div><label>统计月份：</label><%= @complaint.blank?? session[:detail].nil? ? "" : session[:detail] : @complaint[0].created_at.strftime("%Y-%m") %></div>
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/detail_s" do%>
-    <div><label>时间：</label>
+    <div><label>统计月份：</label>
        <select name="detail">
-        <option value="">请选择</option>
         <% (Constant::DATE_START..Time.now.months_ago(1).strftime("%Y-%m")).each do |month| %>
-          <option <%if session[:detail]==month%>selected <%end%> value="<%= month %>"><%= month %></option>
+          <option <%if (@complaint.blank?? session[:detail].nil? ? "" : session[:detail] : @complaint[0].created_at.strftime("%Y-%m"))==month%>selected <%end%> value="<%= month %>"><%= month %></option>
         <% end %>
       </select>
 </div>
@@ -44,7 +42,7 @@
               <td><%= comp.types==Complaint::TYPES[:INVALID]? "否" : "是" %></td>
               <td><%=Complaint::STATUS_NAME[comp.status]  %></td>
               <td><%=comp.process_at.nil? ? "" : comp.process_at.strftime("%Y.%m.%d--%H:%S")  %></td>
-              <td width="200px"><%= comp.suggestion %></td>
+              <td width="200px"><%= comp.remark %></td>
               <td><%= Complaint::VIOLATE_N[comp.is_violation] %></td>
             </tr>
           <% end %>
