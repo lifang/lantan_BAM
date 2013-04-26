@@ -268,7 +268,7 @@ class Order < ActiveRecord::Base
       info[:car_num] = car_num
       info[:c_name] = customer.name
       info[:phone] = phone
-      info[:car_brand] = carNum.car_model.car_brand.name + "-" + carNum.car_model.name
+      info[:car_brand] = (carNum.car_model and carNum.car_model.car_brand) ? carNum.car_model.car_brand.name + "-" + carNum.car_model.name : ""
       info[:car_num_id] = carNum.id
       ids = []
       prod_ids.split(",").each do |p_id|
