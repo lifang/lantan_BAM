@@ -408,6 +408,21 @@ function get_act_count(obj,mo_id){
                     $("#use_code_count").text(data.text);
                     $("#sale_id").attr("value",data.sale_id);
                 //$("#sale_price").text(data.text);
+                 var save_price = 0.0;
+    var sale_price = 0.0;
+    if($("#use_card").attr('checked')=='checked')
+    {
+        $('#savecard_price').text($("#sav_price").val()).parent().show();
+        save_price = $("#sav_price").val()=="" ? 0.0 : $("#sav_price").val();
+    }
+  
+    if($("#use_code").attr('checked')=='checked'){
+        alert(0)
+        $('#sale_price').text($("#use_code_count").text()).parent().show();
+        sale_price = $("#use_code_count").text()=="" ? 0.0 : $("#use_code_count").text();
+    }
+    var final_price = (price_total - parseFloat(save_price) - parseFloat(sale_price)) > 0 ? (price_total - parseFloat(save_price) - parseFloat(sale_price)) : 0.0
+    $("#final_price").text(parseFloat(final_price).toFixed(2));
                 }
             }
         });
@@ -417,20 +432,22 @@ function get_act_count(obj,mo_id){
         $('#sale_price').text("").parent().hide();
         tishi_alert("请输入活动代码")
         $("#use_code").attr('checked',false);
-    }
-    var save_price = 0.0;
+         var save_price = 0.0;
     var sale_price = 0.0;
     if($("#use_card").attr('checked')=='checked')
     {
         $('#savecard_price').text($("#sav_price").val()).parent().show();
         save_price = $("#sav_price").val()=="" ? 0.0 : $("#sav_price").val();
     }
+
     if($("#use_code").attr('checked')=='checked'){
         $('#sale_price').text($("#use_code_count").text()).parent().show();
         sale_price = $("#use_code_count").text()=="" ? 0.0 : $("#use_code_count").text();
     }
     var final_price = (price_total - parseFloat(save_price) - parseFloat(sale_price)) > 0 ? (price_total - parseFloat(save_price) - parseFloat(sale_price)) : 0.0
     $("#final_price").text(parseFloat(final_price).toFixed(2));
+    }
+   
 }
 
 function use_sale(obj, flag){
