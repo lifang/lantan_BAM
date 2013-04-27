@@ -34,7 +34,7 @@ class StaffManagesController < ApplicationController
                   where(base_sql).
                   where("store_id = #{params[:store_id]}").
                   order("created_at desc").first
-    chart_url = chart_image.image_url unless chart_image.nil?
+    chart_url = chart_image.nil? ? "no data" : chart_image.image_url
     render :text => chart_url
   end
 
