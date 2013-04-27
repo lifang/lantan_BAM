@@ -28,7 +28,7 @@ class Salary < ActiveRecord::Base
       percent = avg_percent[staff.id].nil? ? 100 : avg_percent[staff.id]
       if staff.type_of_w == Staff::S_COMPANY[:FRONT] #前台
         front_amount = front_deduct_amount[staff.id].nil? ? 0 : front_deduct_amount[staff.id]
-        total = staff.base_salary + reward_amount - deduct_amount + front_amount*staff.deduct_percent*0.01
+        total = staff.base_salary + reward_amount - deduct_amount + front_amount
         Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,
           :total => total, :current_month => start_time.strftime("%Y%m"),
           :staff_id => staff.id, :satisfied_perc => percent)
@@ -57,11 +57,13 @@ class Salary < ActiveRecord::Base
     orders_info = Order.all.group_by{|o|o.front_staff_id}
     orders_info.each do |staff_id, orders_array|
       staff = Staff.find_by_id(staff_id)
-      order_total_price = orders_array.sum(&:price)
-      difference_price = order_total_price - staff.deduct_at
-      duduct_num = difference_price < 0 ? 0 : (order_total_price > staff.deduct_end ? staff.deduct_end : difference_price)
-      deduct_amount = duduct_num * staff.deduct_percent * 0.01
-      front_deduct_amount[staff_id] = deduct_amount
+      if !staff.nil?
+        order_total_price = orders_array.sum(&:price)
+        difference_price = order_total_price - staff.deduct_at
+        duduct_num = difference_price < 0 ? 0 : (order_total_price > staff.deduct_end ? staff.deduct_end : difference_price)
+        deduct_amount = duduct_num * staff.deduct_percent * 0.01
+        front_deduct_amount[staff_id] = deduct_amount
+      end
     end
     front_deduct_amount
   end
