@@ -276,7 +276,7 @@ class MaterialsController < ApplicationController
     @current_store = Store.find_by_id params[:store_id]
     @store_account = @current_store.account if @current_store
     @material_order = MaterialOrder.find_by_code params[:mat_code]
-    @use_card_count = SvcReturnRecord.store_return_count(params[:store_id]).abs
+    @use_card_count = SvcReturnRecord.store_return_count(params[:store_id]).try(:abs)
   end
 
   def get_act_count
