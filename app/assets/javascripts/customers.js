@@ -1,9 +1,9 @@
 function check_customer() {
-    if ($.trim($("#new_car_num").val()) == "") {
+    if ($("#new_car_num").val() != null && $("#new_car_num").val() != undefined && $.trim($("#new_car_num").val()) == "") {
         tishi_alert("请输入车牌号码");
         return false;
     }
-    if ($("#car_models").val() == "") {
+    if ($("#car_models").val() != null && $("#car_models").val() != undefined && $("#car_models").val() == "") {
         tishi_alert("请选择汽车品牌型号");
         return false;
     }

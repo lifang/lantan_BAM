@@ -85,7 +85,7 @@ class Order < ActiveRecord::Base
       price, is_vip, is_birthday, page)
     customer_sql = "select cu.id cu_id, cu.name, cu.mobilephone, cn.num, o.code, o.id o_id from customers cu
       inner join orders o on o.customer_id = cu.id left join car_nums cn on cn.id = o.car_num_id
-      where cu.status = #{Customer::STATUS[:NOMAL]} and o.store_id = #{store_id.to_i} and o.status != #{STATUS[:DELETED]} "
+      where cu.status = #{Customer::STATUS[:NOMAL]} and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
     customer_condition_sql = self.generate_customer_sql(condition_sql, params_arr, store_id, started_at,
@@ -744,18 +744,18 @@ class Order < ActiveRecord::Base
   end
 
   def self.checkin store_id,car_num,brand,car_year,user_name,phone,email,birth
-    car_num = CarNum.find_by_num car_num
+    car_num_r = CarNum.find_by_num car_num
     customer = Customer.find_by_mobilephone(phone)
     status = 0
     begin
-      Customer.transaction do
-        if car_num
+      if car_num
+        Customer.transaction do
           customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
             :other_way => email, :birthday => birth) if customer
-          Customer.create_single_cus(customer, car_num, phone, car_num,
+          Customer.create_single_cus(customer, car_num_r, phone, car_num,
             user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, nil, nil)
-          status = 1
         end
+        status = 1
       end
     rescue
       status = 2
