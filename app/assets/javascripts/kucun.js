@@ -407,7 +407,7 @@ function get_act_count(obj){
 function use_sale(obj, flag){
     var total_price = parseFloat($("#price_total").text());
     var sav_price = $("#sav_price").val();
-    var sal_price = parseFloat($("#use_code_count").text());
+    var sal_price = $("#use_code_count").text();
     if($(obj).attr("checked")=="checked"){
         if(flag=='sav'){
             if(sav_price!="")
@@ -423,8 +423,10 @@ function use_sale(obj, flag){
         }
         else{
             if($("#act_code").val()!=""){
-              $("#sale_price").text(sal_price);
-              $("#sale_price").parent().show();
+              if(sal_price!=""){
+                $("#sale_price").text(sal_price);
+                $("#sale_price").parent().show();
+                }
             }else{
                 tishi_alert("请输入活动代码");
                 $(obj).attr("checked", false);
@@ -442,7 +444,7 @@ function use_sale(obj, flag){
            
         }
     }
-    if($("#sav_price").val()!="" || $("#act_code").val()!=""){
+    if($("#sav_price").val()!="" || sal_price!=""){
         $("#final_price").text(parseFloat($("#price_total").text()) - parseFloat($("#sale_price").text()=="" ? 0 : $("#sale_price").text()) - parseFloat($("#savecard_price").text()=="" ? 0 :$("#savecard_price").text()));
     }
 }
