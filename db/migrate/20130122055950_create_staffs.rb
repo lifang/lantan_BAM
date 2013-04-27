@@ -12,7 +12,7 @@ class CreateStaffs < ActiveRecord::Migration
       t.string :hometown
       t.integer :education
       t.string :nation
-      t.integer :political
+      t.string :political
       t.string :phone
       t.string :address
       t.string :photo
