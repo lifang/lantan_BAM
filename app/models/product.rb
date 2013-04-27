@@ -6,6 +6,7 @@ class Product < ActiveRecord::Base
   has_many :order_prod_relations
   has_many :pcard_prod_relations
   has_many :prod_mat_relations
+  has_many :materials, :through => :prod_mat_relations
   has_many :svcard_prod_relations
   has_many :image_urls
   has_many :stations, :through => :station_service_relations
@@ -18,4 +19,5 @@ class Product < ActiveRecord::Base
   IS_VALIDATE ={:NO=>0,:YES=>1} #0 无效 已删除状态 1 有效
 
   scope :is_service, where(:is_service => true)
+  scope :is_normal, where(:status => true)
 end

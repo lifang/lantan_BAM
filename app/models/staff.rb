@@ -57,6 +57,14 @@ class Staff < ActiveRecord::Base
     File.open(Rails.root.join('public', "uploads", "#{self.id}", photo.original_filename), 'wb') do |file|
       file.write(photo.read)
     end
+    file_path = "#{File.expand_path(Rails.root)}/public/uploads/#{self.id}/#{photo.original_filename}"
+    img = MiniMagick::Image.open file_path,"rb"
+
+    Constant::STAFF_PICSIZE.each do |size|
+      resize = size > img["width"] ? img["width"] : size
+      new_file = file_path.split(".")[0]+"_#{resize}."+file_path.split(".").reverse[0]
+      img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
+    end
   end
 
   private

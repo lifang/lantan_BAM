@@ -3,7 +3,7 @@ class GoalSale < ActiveRecord::Base
   belongs_to :store
   has_many :goal_sale_types
   TYPES_NAMES = {1 =>"产品",2 =>"服务",0 =>"卡",3 =>"其他"}
-  TYPES = {:PRODUCT =>0,:SERVICE =>1,:CARD =>2,:OTHER =>3}
+  TYPES = {:PRODUCT =>1,:SERVICE =>2,:CARD =>0,:OTHER =>3}
 
   #选取目前销售额当前的最大分类编号
   def self.max_type(store_id)

@@ -34,7 +34,7 @@ class StaffManagesController < ApplicationController
                   where(base_sql).
                   where("store_id = #{params[:store_id]}").
                   order("created_at desc").first
-    chart_url = chart_image.image_url unless chart_image.nil?
+    chart_url = chart_image.nil? ? "no data" : chart_image.image_url
     render :text => chart_url
   end
 
@@ -43,11 +43,13 @@ class StaffManagesController < ApplicationController
     base_sql = get_base_sql(@year)
     technician_chart_image = ChartImage.where(base_sql).
                             where("types = #{ChartImage::TYPES[:MECHINE_LEVEL]}").
+                            where("store_id = #{params[:store_id]}").
                             order('created_at desc').first
     @avg_technician = technician_chart_image.image_url unless technician_chart_image.nil?
 
     front_chart_image = ChartImage.where(base_sql).
                         where("types = #{ChartImage::TYPES[:FRONT_LEVEL]}").
+                        where("store_id = #{params[:store_id]}").
                         order('created_at desc').first
     @avg_front = front_chart_image.image_url unless front_chart_image.nil?
   end

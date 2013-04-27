@@ -32,7 +32,7 @@
           <%@sale_orders.each do |order| %>
             <tr>
               <td><%= order.name %></td>
-              <td><%= order.day %></td>
+              <td><%= order.day == "" ? Sale::DISC_TIME_NAME[order.disc_time_types] : order.day  %></td>
               <td><%= order.intro.nil? ? "" : order.intro.html_safe  %></td>
               <td><%= order.o_num %></td>
               <td><%= order.sum %></td>

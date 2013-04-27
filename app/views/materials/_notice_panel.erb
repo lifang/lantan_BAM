@@ -1,6 +1,6 @@
-<% if @notices && @notices.size > 0 %>
-<div class="message">有您的订单已经到货，但尚未入库<a href="javascript:void(0);" onclick="show_notice(0)">点击查看</a><span class="x" onclick="close_notice('<%= @notice_ids %>','<%= params[:store_id] %>')">Close</span></div>
-<div class="message" style="display: none;" id="m_notice_div"><a href="javascript:void(0);" onclick="show_notice(1)">隐藏</a><span class="x" onclick="close_notice('<%= @notice_ids %>','<%= params[:store_id] %>')">Close</span>
+<% if @material_notices && @material_notices.size > 0 %>
+<div class="message">有<%= @material_notices.size %>条您的订单已经到货，但尚未入库<a href="javascript:void(0);" onclick="toggle_notice(this)">点击查看</a></div>
+<div class="message" style="display: none;" id="m_notice_div">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
     <thead>
     <tr class="hbg">
@@ -14,7 +14,7 @@
     </tr>
     </thead>
     <tbody>
-    <% (@notices || []).each do |record| %>
+    <% (@material_notices || []).each do |record| %>
         <tr>
           <td><%= record.code %></td>
           <td>

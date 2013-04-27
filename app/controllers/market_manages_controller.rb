@@ -107,6 +107,7 @@ class MarketManagesController < ApplicationController
   def sale_orders
     session[:o_created],session[:o_ended],session[:order_name]=nil,nil,nil
     orders = Sale.count_sale_orders(params[:store_id])
+    p orders
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
       @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
@@ -129,8 +130,8 @@ class MarketManagesController < ApplicationController
       @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
      p on p.order_id=o.id where o.sale_id in (#{@sale_orders.map(&:id).join(',')}) ").inject(Hash.new)  {|hash,order_pay|
         hash[order_pay.sale_id].nil? ? hash[order_pay.sale_id]=order_pay.price : hash[order_pay.sale_id] += order_pay.price  if order_pay.pay_type == OrderPayType::PAY_TYPES[:SALE];hash }
-      @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     end
+    @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     render 'sale_orders'
   end
 
@@ -139,11 +140,17 @@ class MarketManagesController < ApplicationController
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "o.started_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "o.ended_at <= '#{@end_at} 23:59:59'"
 
-    @orders = Order.find_by_sql("select o.id,o.code,opt.price price,opt.created_at created_at,p.name product_name from orders o
-                                left join order_pay_types opt on opt.order_id = o.id inner join order_prod_relations op on
+    order_details = Order.find_by_sql("select o.id,o.code,opt.price price,opt.created_at created_at,p.name product_name from orders o
+                                inner join order_pay_types opt on opt.order_id = o.id inner join order_prod_relations op on
                                 op.order_id = o.id inner join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
                                 #{started_at_sql} and #{ended_at_sql}")
+    
+    orders = {}
+    order_details.each do |order|
+      orders.keys.include?(order.id) ? orders[order.id][:product_name] += (","+order.product_name) : orders[order.id] = order
+    end
+    @orders = orders.values
     @total_price = @orders.sum(&:price)
   end
 

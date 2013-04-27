@@ -4,11 +4,12 @@ class MaterialOrder < ActiveRecord::Base
   has_many :mat_out_orders
   has_many  :mat_in_orders
   has_many  :m_order_types
+  has_many :materials, :through => :mat_order_items
   belongs_to :supplier
 
   STATUS = {:no_pay => 0, :pay => 1, :cancel => 4}
   M_STATUS = {:no_send => 0, :send => 1, :received => 2, :save_in => 3} #未发货--》已发货 --》已收货 --》已入库
-  PAY_TYPES = {:CHARGE => 1,:LICENSE=>2, :CASH => 3, :STORE_CARD => 4 }
+  PAY_TYPES = {:CHARGE => 1,:LICENSE=>2, :CASH => 3, :STORE_CARD => 4}
   PAY_TYPE_NAME = {1 => "订货付费",2=>"授权码", 3 => "现金", 4 => "门店账户扣款"}
 
   def self.make_order
@@ -28,12 +29,14 @@ class MaterialOrder < ActiveRecord::Base
   end
 
   def self.supplier_order_records page, per_page, store_id
-    self.paginate(:select => "*", :from => "material_orders", :include => [:supplier, {:mat_order_items => :material}], :conditions => "material_orders.supplier_id != 0",
+    self.paginate(:select => "*", :from => "material_orders", :include => [:supplier, {:mat_order_items => :material}], :conditions => "material_orders.supplier_id != 0 and material_orders.store_id = #{store_id}",
       :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
   end
 
-  def self.head_order_records page, per_page, store_id
-    self.paginate(:select => "*", :from => "material_orders", :include => [:mat_order_items => :material],:conditions => "material_orders.supplier_id = 0",
+  def self.head_order_records page, per_page, store_id, status=nil
+    sql = status.nil? ? "" : "and material_orders.m_status=#{status}"
+    self.paginate(:select => "*", :from => "material_orders", :include => [:mat_order_items => :material],
+      :conditions => "material_orders.supplier_id = 0 #{sql} and material_orders.store_id = #{store_id}",
       :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
   end
 
@@ -117,6 +120,25 @@ class MaterialOrder < ActiveRecord::Base
       "已取消"
     else
       "未知"
+    end
+  end
+
+  def supplier_name
+    if supplier_type==0
+      "总部"
+    else
+      supplier.name
+    end
+  end
+
+  def svc_use_price
+    SvcReturnRecord.find_by_target_id(self.id).try(:price)
+  end
+
+  def sale_price
+    if self.sale_id
+      sale = Sale.find self.sale_id 
+      sale.sub_content
     end
   end
 end

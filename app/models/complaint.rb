@@ -21,8 +21,8 @@ class Complaint < ActiveRecord::Base
     10 => "美容技师服务态度不好", 11 => "服务顾问服务态度不好",
     12 => "服务顾问着装或言辞不得体",13 => "休息厅自取茶水或报纸杂志等不完备", 14 => "休息厅环境差",
     15 => "展厅体验不完整", 16 => "施工等待时间过长", 17 => "无效投诉"}
-  CHART_NAMES = {1=>"精洗",2=>"打蜡",3=>"去污",4=>"内饰清洗",5=>"内饰护理",6=>"抛光",7=>"踱晶",8=>"玻璃清洗护理",9=>"施工事故",
-    10=>"美容技师服务",11=>"服务顾问服务",12=>"服务顾问着装",13=>"休息厅设备不完善",14=>"休息厅环境差",15=>"展厅体验",16=>"等待时间过长",
+  CHART_NAMES = {1=>"精洗",2=>"打蜡",3=>"休息厅设备不全",4=>"踱晶",5=>"内饰护理",6=>"展厅体验",7=>"内饰清洗",8=>"玻璃清洗",9=>"施工事故",
+    10=>"美容技师",11=>"服务顾问",12=>"服务顾问着装",13=>"去污",14=>"休息厅环境差",15=>"抛光",16=>"等待时间过长",
     17=>"无效投诉"}
 
   #投诉状态
@@ -47,21 +47,24 @@ class Complaint < ActiveRecord::Base
   end
   
   def self.gchart(store_id)
-    coplaint = Complaint.count_types(store_id).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
-    month = Complaint.get_chart(store_id)
-    unless coplaint.keys.blank?
-      size =(0..10).inject(Array.new){|arr,int| arr << (coplaint.values.max%10==0 ? coplaint.values.max/10 : coplaint.values.max/10+1)*int} #生成图表的y的坐标
-      GoogleChart::BarChart.new('1000x300', "#{Time.now.months_ago(1).strftime('%Y-%m')}投诉情况分类表", :vertical, false) do |bc|
-        bc.data "Trend 2", coplaint.values, 'ff0000'
-        bc.width_spacing_options :bar_width => 15, :bar_spacing => (1000-(15*coplaint.keys.length))/coplaint.keys.length,
-          :group_spacing =>(1000-(15*coplaint.keys.length))/coplaint.keys.length
-        bc.max_value size.max
-        bc.axis :x, :labels => coplaint.keys.inject(Array.new) {|pal,key| pal << Complaint::CHART_NAMES[key] }
-        bc.axis :y, :labels =>size
-        bc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
-        img_url = write_img(URI.escape(URI.unescape(bc.to_url)),store_id,ChartImage::TYPES[:COMPLAINT],store_id)
-        month=ChartImage.create({:store_id=>store_id,:types =>ChartImage::TYPES[:COMPLAINT],:created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1)}) if month.blank?
+    begin
+      coplaint = Complaint.count_types(store_id).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
+      month = Complaint.get_chart(store_id)
+      unless coplaint.keys.blank?
+        size =(0..10).inject(Array.new){|arr,int| arr << (coplaint.values.max%10==0 ? coplaint.values.max/10 : coplaint.values.max/10+1)*int} #生成图表的y的坐标
+        GoogleChart::BarChart.new('1000x300', "#{Time.now.months_ago(1).strftime('%Y-%m')}投诉情况分类表", :vertical, false) do |bc|
+          bc.data "Trend 2", coplaint.values, 'ff0000'
+          bc.width_spacing_options :bar_width => 15, :bar_spacing => (1000-(15*coplaint.keys.length))/coplaint.keys.length,
+            :group_spacing =>(1000-(15*coplaint.keys.length))/coplaint.keys.length
+          bc.max_value size.max
+          bc.axis :x, :labels => coplaint.keys.inject(Array.new) {|pal,key| pal << Complaint::CHART_NAMES[key] }
+          bc.axis :y, :labels =>size
+          bc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
+          img_url = write_img(URI.escape(URI.unescape(bc.to_url)),store_id,ChartImage::TYPES[:COMPLAINT],store_id)
+          month=ChartImage.create({:store_id=>store_id,:types =>ChartImage::TYPES[:COMPLAINT],:created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1)}) if month.blank?
+        end
       end
+    rescue
     end
     return month
   end
@@ -79,22 +82,26 @@ class Complaint < ActiveRecord::Base
 
 
   def self.degree_chart(store_id)
-    month = Complaint.count_pleasant(store_id)
-    sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') and store_id=#{store_id} and status=#{Order::STATUS[:BEEN_PAYMENT]} group by month(created_at),is_pleased"
-    orders =Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|
-      hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
-    unless orders=={}
-      percent ={}
-      orders.each {|k,order| percent[k]=(order.select{|k,v|  k != Order::IS_PLEASED[:BAD]}=={} ? 0 : order.select{|k,v|  k != Order::IS_PLEASED[:BAD]}.values.inject(0){|num,level| num+level}*100)/(order.values.inject(0){|num,level| num+level})}
-      lc = GoogleChart::LineChart.new('1000x300', "满意度月度统计表", true)
-      lc.data "满意度",percent.inject(Array.new){|arr,o|arr << [o[0]-1,o[1]]} , 'ff0000'
-      size =(0..10).inject(Array.new){|arr,int| arr << 10*int} #生成图表的y的坐标
-      lc.max_value [orders.keys.length-1,100]
-      lc.axis :x, :labels =>orders.keys.inject(Array.new){|arr,mon|arr << "#{mon}月"}
-      lc.axis :y, :labels => size
-      lc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
-      img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,ChartImage::TYPES[:SATIFY],store_id)
-      month = ChartImage.create({:store_id=>store_id,:types =>ChartImage::TYPES[:SATIFY],:created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1)})  if month.blank?
+    begin
+      month = Complaint.count_pleasant(store_id)
+      sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') 
+      and store_id=#{store_id} and status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by month(created_at),is_pleased"
+      orders =Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|
+        hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
+      unless orders=={}
+        percent ={}
+        orders.each {|k,order| percent[k]=(order.select{|k,v|  k != Order::IS_PLEASED[:BAD]}=={} ? 0 : order.select{|k,v|  k != Order::IS_PLEASED[:BAD]}.values.inject(0){|num,level| num+level}*100)/(order.values.inject(0){|num,level| num+level})}
+        lc = GoogleChart::LineChart.new('1000x300', "满意度月度统计表", true)
+        lc.data "满意度",percent.inject(Array.new){|arr,o|arr << [o[0]-1,o[1]]} , 'ff0000'
+        size =(0..10).inject(Array.new){|arr,int| arr << 10*int} #生成图表的y的坐标
+        lc.max_value [orders.keys.length-1,100]
+        lc.axis :x, :labels =>orders.keys.inject(Array.new){|arr,mon|arr << "#{mon}月"}
+        lc.axis :y, :labels => size
+        lc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
+        img_url=write_img(URI.escape(URI.unescape(lc.to_url({:chm => "o,0066FF,0,-1,6"}))),store_id,ChartImage::TYPES[:SATIFY],store_id)
+        month = ChartImage.create({:store_id=>store_id,:types =>ChartImage::TYPES[:SATIFY],:created_at => Time.now, :image_url => img_url, :current_day => Time.now.months_ago(1)})  if month.blank?
+      end
+    rescue
     end
     return month
   end
@@ -112,9 +119,9 @@ class Complaint < ActiveRecord::Base
 
   def self.search_detail(store_id,num=nil)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
-    where c.store_id=#{store_id} and date_format(now(),'%Y-%m')=date_format(c.created_at,'%Y-%m') "
+    where c.store_id=#{store_id} and  date_format(c.created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')"
     sql += " and TO_DAYS(c.process_at)=TO_DAYS(c.created_at)"  if num==0
-    sql += " and c.process_at is null " if num==1
+    sql += " and c.process_at is  null" if num==1
     sql += " order by c.created_at desc"
     return Complaint.find_by_sql(sql)
   end

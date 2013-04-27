@@ -33,7 +33,7 @@
                 <% end %>
               </tbody>
         </table>
-        <div class="amount">总计：<%= @total_price %>（元）</div>
+        <div class="amount">总计：<%= sprintf('%.2f', @total_price) %>（元）</div>
      </div>
 </div>
 <div class="mask"></div>

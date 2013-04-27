@@ -3,7 +3,9 @@
   <div class="search"><label>请扫描条形码:</label><input name="mat_code" id="mat_code" data_action="m_in" type="text"/></div>
   <div class="search_alert">*没有查询到系统中您扫描的货物</div>
   <div class="data_box">
-    <div class="data_menu"><a href="#">添加货物名称</a></div>
+    <div class="data_menu">
+      <%= link_to_function "添加货物", "addMaterial()"%>
+    </div>
     <div class="clear"></div>
     <div class="data_body">
       <%= form_tag  create_materials_in_path , :id => "create_mat_in_form" do |f|%>
@@ -27,4 +29,36 @@
       <% end %>
     </div>
   </div>
+
+  <div class="tab_popup add_material_tab" id="add_material_tab">
+  <div class="popup_box">
+    <h1>添加物料<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <%= form_tag "/stores/#{@store_id}/materials/add_material", :id => "add_material_tab_form" do |f| %>
+          <div class="popup_body_area">
+            <div class="item">
+              <%= label_tag "materials[name]","物料名称：" %><%= text_field_tag "materials[name]" %>
+            </div>
+            <div class="item">
+              <%= label_tag "materials[types]","物料类型：" %><%= select(:materials,:types,material_types,{:prompt => "请选择"}) %>
+            </div>
+            <div class="item">
+              <%= label_tag "materials[code]","条形码：" %><%= text_field_tag "materials[code]" %>
+            </div>
+            <div class="item">
+              <%= label_tag "materials[price]","单价：" %><%= text_field_tag "materials[price]" %>
+            </div>
+            <div class="item">
+              <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]" %>
+            </div>
+            <%= hidden_field_tag "materials[status]",false %>
+            <%= hidden_field_tag "materials[check_num]",0 %>
+          </div>
+          <div class="btn_box"><button type="button" onclick="checkMaterial()" class="confirm_btn">确定</button></div>
+          <div class="clear"></div>
+      <% end %>
+    </div>
+  </div>
+</div>
+  
 </div>

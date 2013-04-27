@@ -7,9 +7,9 @@ class StaffsController < ApplicationController
   before_filter :search_work_record, :only => :show
 
   def index
-    type_of_w_sql = "type_of_w = #{Staff::S_COMPANY[:FRONT]} or type_of_w = #{Staff::S_COMPANY[:TECHNICIAN]}"
+    type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
     @staffs_names = @store.staffs.where(type_of_w_sql).select("id, name")
-    @staffs = @store.staffs.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @staffs = @store.staffs.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     @staff =  Staff.new
     @violation_reward = ViolationReward.new
     @train = Train.new
@@ -20,7 +20,7 @@ class StaffsController < ApplicationController
     params[:staff][:password] = params[:staff][:phone]
     @staff = @store.staffs.new(params[:staff])
     @staff.encrypt_password
-    @staff.photo = params[:staff][:photo].original_filename unless params[:staff][:photo].nil?
+    @staff.photo = params[:staff][:photo].original_filename.split(".")[0]+"_#{Constant::STAFF_PICSIZE.first}."+params[:staff][:photo].original_filename.split(".").reverse[0] unless params[:staff][:photo].nil?
     @staff.staff_role_relations.new(:role_id => Constant::STAFF)
     if @staff.save   #save staff info and picture
       @staff.operate_picture(params[:staff][:photo], "create") unless params[:staff][:photo].nil?
@@ -31,9 +31,7 @@ class StaffsController < ApplicationController
     redirect_to store_staffs_path(@store)
   end
 
-  def show
-    @tab = params[:tab] 
-           
+  def show       
     @violations = @staff.violation_rewards.where("types = false").
                   paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("violation_tab")
 
@@ -68,7 +66,7 @@ class StaffsController < ApplicationController
   def update
     @staff = Staff.find_by_id(params[:id])
     photo = params[:staff][:photo]
-    params[:staff][:photo] = photo.original_filename unless photo.nil?
+    params[:staff][:photo] = photo.original_filename.split(".")[0]+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
     @staff.update_attributes(params[:staff]) and flash[:notice] = "更新员工成功" if @staff
     #update picture
     @staff.operate_picture(photo, "update") if !photo.nil? && @staff
@@ -83,8 +81,10 @@ class StaffsController < ApplicationController
 
   def search_work_record
     @staff = Staff.find_by_id(params[:id])
+    @tab = params[:tab]
     if @tab.nil? || @tab.eql?("work_record_tab")
       @cal_style = params[:cal_style]
+
       start_at = (params[:start_at].nil? || params[:start_at].empty?) ? "1 = 1" : "current_day >= '#{params[:start_at]}'"
 
       end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "current_day <= '#{params[:end_at]} 23:59:59'"
@@ -100,7 +100,6 @@ class StaffsController < ApplicationController
           where(start_at).where(end_at).group("#{@cal_style}(current_day)").order("current_day desc").
           paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
       end
-
     end
 
   end

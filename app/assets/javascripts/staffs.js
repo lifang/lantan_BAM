@@ -111,19 +111,6 @@ $(document).ready(function(){
         }
     });
 
-    $("#current_month_salary_detail_table").tablesorter({
-        headers:
-        {
-            1: { sorter: false },
-            2: { sorter: false },
-            3: { sorter: false },
-            4: { sorter: false },
-            5: { sorter: false },
-            6: { sorter: false },
-            7: { sorter: false }
-        }
-    });
-
     $(".sort_u_s, .sort_d_s").click(function(){
         if($(this).attr("class") == "sort_u_s"){
             $(this).attr("class", "sort_d_s");
@@ -311,6 +298,7 @@ $(document).ready(function(){
         var store_id = $("#store_id").val();
         var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
         var sys_score = $(this).parents('tr').find(".data_input_s").val();
+        var manage_score = $(this).parents('tr').find(".manage_score_data").text();
         $.ajax({
             type : 'get',
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
@@ -324,6 +312,7 @@ $(document).ready(function(){
                    this_obj.parents('tr').find(".sys_score_text").text(sys_score).show();
                    this_obj.hide();
                    this_obj.next().show();
+                   this_obj.parents('tr').find('.assess_result').text(assess_result(sys_score, manage_score));
                }
             }
         });
@@ -344,6 +333,7 @@ $(document).ready(function(){
        var this_obj = $(this);
        var sys_score = $("#sys_score_input").val();
        var store_id = $("#store_id").val();
+       var staff_id = $("#staff_id").val();
        var month_score_id = $(this).attr("name");
        var manage_score = $("#month_score_val").text();
        $.ajax({
@@ -351,7 +341,8 @@ $(document).ready(function(){
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
             data : {
                 sys_score : sys_score,
-                month_score_id : month_score_id
+                month_score_id : month_score_id,
+                staff_id : staff_id
             },
             success: function(data){
                if(data == "success"){
@@ -465,7 +456,7 @@ $(document).ready(function(){
 
     //处理培训
     $(".process_train").live("click", function(){
-       if(confirm("确认处理？")){
+       if(confirm("确认已通过考核？")){
            var this_obj = $(this);
            var store_id = $("#store_id").val();
            var staff_id = $("#staff_id").val();
@@ -478,7 +469,7 @@ $(document).ready(function(){
                 },
                 success: function(data){
                    if(data == "success"){
-                       this_obj.parents('tr').find("span.train_status").text("已处理");
+                       this_obj.parents('tr').find("span.train_status").text("");
                        this_obj.hide();
                        this_obj.next().show();
                    }

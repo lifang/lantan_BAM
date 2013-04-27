@@ -5,6 +5,7 @@ class CreateOrderPayTypes < ActiveRecord::Migration
       t.integer :order_id  #订单编号
       t.integer :pay_type  #付款方式
       t.float :price
+      t.datetime :created_at
     end
 
     add_index :order_pay_types, :order_id

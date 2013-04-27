@@ -5,7 +5,7 @@ class Api::OrdersController < ApplicationController
     status = 0
     begin
       @reservations = Reservation.store_reservations params[:store_id]
-      @orders = Order.working_orders Order::STATUS[:SERVICING], params[:store_id]
+      @orders = Order.working_orders params[:store_id]
       status = 1
     rescue
       status = 2
@@ -24,7 +24,7 @@ class Api::OrdersController < ApplicationController
       cookies[:user_id]={:value => @staff.id, :path => "/", :secure  => false}
       cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => false}
       session_role(cookies[:user_id])
-      if is_admin? or is_boss? or is_manager? or is_staff?
+      if has_authority?
         info = ""
       else
         cookies.delete(:user_id)
@@ -40,33 +40,32 @@ class Api::OrdersController < ApplicationController
   def search_car
     order = Order.search_by_car_num params[:store_id],params[:car_num]
     result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2] }.to_json
-    #puts result ,"-=-=-=-=-=-="
     render :json => result
   end
   #发送验证码
   def send_code
-     message = MessageRecord.send_code params[:order_id],params[:phone]
+    message = MessageRecord.send_code params[:order_id],params[:phone]
     render :json => {:status => message}
   end
   #下单
   def add
     user_id = params[:user_id].nil? ? cookies[:user_id] : params[:user_id]
     order = Order.make_record params[:c_id],params[:store_id],params[:car_num_id],params[:start],
-                              params[:end],params[:prods],params[:price],params[:station_id],user_id
+      params[:end],params[:prods],params[:price],params[:station_id],user_id
     info = order[1].nil? ? nil : order[1].get_info
     str = if order[0] == 0 || order[0] == 2
       "数据出现异常"
-          elsif order[0] == 1
+    elsif order[0] == 1
       "success"
-          elsif order[0] == 3
+    elsif order[0] == 3
       "没可用的工位了"
-          end
-    #puts str,order,info
+    end
     render :json => {:status => order[0], :content => str, :order => info}
   end
   #付款
   def pay
-    order = Order.pay params[:order_id],params[:store_id],params[:please],params[:pay_type],params[:billing],params[:code]
+    order = Order.pay(params[:order_id], params[:store_id], params[:please],
+      params[:pay_type], params[:billing], params[:code], params[:is_free])
     content = ""
     if order[0] == 0
       content = ""
@@ -74,7 +73,7 @@ class Api::OrdersController < ApplicationController
       content = "success"
     elsif order[0] == 2
       content = "订单不存在"
-    elsif order[0] = 3
+    elsif order[0] == 3
       content = "储值卡余额不足，请选择其他支付方式"
     end
     render :json => {:status => order[0], :content => content}
@@ -96,7 +95,7 @@ class Api::OrdersController < ApplicationController
     prod_id = params[:prod_ids]
     prod_id = prod_id[0...(prod_id.size-1)] if prod_id
     pre_arr = Order.pre_order params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
-                    params[:email],params[:birth],prod_id,params[:res_time]
+      params[:email],params[:birth],prod_id,params[:res_time]
     content = ""
     if pre_arr[5] == 0
       content = "数据出现异常"
@@ -105,14 +104,16 @@ class Api::OrdersController < ApplicationController
     elsif pre_arr[5] == 2
       content = "选择的产品和服务无法匹配工位"
     end
-    render :json => {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
-                     :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
+    result = {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
+      :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
+    render :json => result.to_json
   end
 
   #确认预约信息
   def confirm_reservation
     reservation = Reservation.find_by_id_and_store_id params[:r_id].to_i,params[:store_id]
     customer = nil
+    product_ids = []
     if reservation && reservation.status == Reservation::STATUS[:normal]
       time = reservation.res_time
       if params[:reserv_at]
@@ -120,24 +121,30 @@ class Api::OrdersController < ApplicationController
       end
       reservation.update_attributes(:status => Reservation::STATUS[:confirmed],:res_time => time) if params[:status].to_i == 0     #确认预约
       reservation.update_attribute(:status, Reservation::STATUS[:cancel]) if params[:status].to_i == 1     #取消预约
+      r_products = ResProdRelation.find(:all, :select => "product_id", :conditions => ["reservation_id = ?", reservation.id])
+      product_ids = r_products.collect { |r_p| r_p.product_id }
+
       if params[:reserv_at]
         customer = Hash.new
-        c = reservation.customer
         car_num = reservation.car_num
+        c = Customer.find_by_sql(["select c.* from customers c left join customer_num_relations cnr
+          on cnr.customer_id = c.id where car_num_id = ?", car_num.id])[0]
         customer[:carNum] = car_num.num
         customer[:car_num_id] = reservation.car_num_id
         customer[:name] = c.name
-        customer[:customer_id] = reservation.customer_id
+        customer[:customer_id] = c.id
         customer[:reserv_at] = reservation.res_time
-        customer[:phone] = c.mobilephone
-        customer[:email] = c.other_way
-        customer[:birth] = c.birthday.strftime("%Y-%m-%d")
+        customer[:phone] = c.mobilephone if c
+        customer[:email] = c.other_way if c
+        customer[:birth] = c.birthday.strftime("%Y-%m-%d") if c and c.birthday
         customer[:year] = car_num.buy_year
       end
     end
+    items = Order.get_brands_products params[:store_id]
     reservations = Reservation.store_reservations params[:store_id]
 
-    render :json => {:status => 1, :reservation => reservations, :customer => customer}
+    render :json => {:status => 1, :reservation => reservations, :customer => customer, :product_ids => product_ids,
+      :brands => items[0], :products => items[1], :count => items[1][4]}
   end
 
   #刷新返回预约信息
@@ -148,37 +155,28 @@ class Api::OrdersController < ApplicationController
 
   #查询订单后的支付
   def pay_order
-     order = Order.find_by_id params[:order_id]
-     status = 0
-     if params[:opt_type].to_i == 1
-       if order && order.status == Order::STATUS[:NORMAL]
-          order.update_attribute(:status, Order::STATUS[:DELETED])
-         status = 1
-       else
-         status = 2
-       end
-       info = order.nil? ? nil : order.get_info
-       render :json  => {:status => status}
-     else
-       info = order.nil? ? nil : order.get_info
-       status = 1
-       render :json  => {:status => status, :order => info}
-     end
+    order = Order.find_by_id params[:order_id]
+    status = 0
+    if params[:opt_type].to_i == 1
+      if order && order.status == Order::STATUS[:NORMAL]
+        order.update_attribute(:status, Order::STATUS[:DELETED])
+        status = 1
+      else
+        status = 2
+      end
+      info = order.nil? ? nil : order.get_info
+      render :json  => {:status => status}
+    else
+      info = order.nil? ? nil : order.get_info
+      status = 1
+      render :json  => {:status => status, :order => info}
+    end
 
   end
 
   def checkin
-    puts "-----------------------------"
-    puts params[:store_id]
-    puts params[:carNum]
-    puts params[:brand]
-    puts params[:year]
-    puts params[:userName]
-    puts params[:phone]
-    puts params[:email]
-    puts params[:birth]
     order = Order.checkin params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
-                          params[:email],params[:birth]
+      params[:email],params[:birth]
     content = ""
     if order == 1
       content = "success"

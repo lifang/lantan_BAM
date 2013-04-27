@@ -46,6 +46,8 @@ class RevisitsController < ApplicationController
           :title => params[:rev_title], :answer => params[:rev_content], :content => params[:rev_answer],
           :complaint_id => (complaint.nil? ? nil : complaint.id))
         RevisitOrderRelation.create(:order_id => params[:rev_order_id].to_i, :revisit_id => revisit.id)
+        order = Order.find(params[:rev_order_id].to_i)
+        order.update_attributes(:is_visited => true) unless order.is_visited
       end
       flash[:notice] = "添加回访成功。"
     end
@@ -70,7 +72,11 @@ class RevisitsController < ApplicationController
       ViolationReward.create(violation_hash.merge({:staff_id => staff_id_2})) if staff_id_2
       flash[:notice] = "处理投诉成功。"
     end
-    redirect_to request.referer
+    if params["is_trains_#{params[:pro_compl_id]}"] == "0"
+      redirect_to request.referer
+    else
+      redirect_to "/stores/#{params[:store_id]}/staffs"
+    end
   end
 
   

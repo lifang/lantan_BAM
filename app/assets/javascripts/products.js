@@ -40,11 +40,11 @@ function add_product(e){
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        tishi_alert("请输入产品的零售价格");
+        tishi_alert("请输入产品的零售价格,价格为数字");
         return false;
     }
     if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
-        tishi_alert("请输入产品的促销价格");
+        tishi_alert("请输入产品的促销价格,价格为数字");
         return false;
     }
     if (standard=="" || standard.length==0){
@@ -115,11 +115,11 @@ function edit_serv(e){
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        tishi_alert("请输入服务的零售价格");
+        tishi_alert("请输入服务的零售价格,价格为数字");
         return false;
     }
     if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
-        tishi_alert("请输入服务的促销价格");
+        tishi_alert("请输入服务的促销价格,价格为数字");
         return false;
     }
     if(deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct))){
@@ -178,22 +178,28 @@ function show_mat(){
     })
     $(".seeProDiv_rWidth .srw_ul").html(mats);
     $('.mat_tab').css('display','none');
+    $(".maskOne").hide();
 }
 
 function prod_delete(id,store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/prod_delete"
-    });
+    if (confirm("确定删除该产品吗？")){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/products/"+ id+"/prod_delete"
+        });
+    }
+  
 }
 
 function serve_delete(id,store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/serve_delete"
-    });
+    if (confirm("确定删除该服务吗？")){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/products/"+ id+"/serve_delete"
+        });
+    }
 }

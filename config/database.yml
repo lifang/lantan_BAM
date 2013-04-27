@@ -28,7 +28,7 @@ test:
   database: lantan_db_test
   pool: 5
   username: root
-  password: root
+  password: comdo2012
   host: localhost
 
 production:
@@ -38,5 +38,5 @@ production:
   database: lantan_db_production
   pool: 5
   username: root
-  password: root
+  password: comdo2012
   host: localhost

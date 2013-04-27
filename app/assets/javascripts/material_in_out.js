@@ -24,6 +24,7 @@ $(document).ready(function(){
                                 $(this).parent('tr').addClass("newTr_red");
                                 var ori_num = parseInt($(this).siblings(".mat_item_num").text());
                                 $(this).siblings(".mat_item_num").text(ori_num+1);
+                                $(this).siblings(".num_box").find('input').val(ori_num+1);
                                 return false;
                             }
                         });
@@ -37,19 +38,19 @@ $(document).ready(function(){
             });
         }
     });
-    $("#staff_id").live('change', function(){
-        var staff_id = $(this).val();
-        $.get("/save_cookies", {
-            staff_id: staff_id
-        })
-        .done(function(data) {})
-    })
 
     setTimeout( function(){
         $('.mat_notice' ).fadeOut();
     }, 3000 );
 
 });
+function chooseCookie(obj){
+    var staff_id = $(obj).val();
+    $.get("/save_cookies", {
+        staff_id: staff_id
+    })
+    .done(function(data) {})
+}
 
 function changeNum(obj){
     var ori_num = $(obj).parent("td").siblings(".mat_item_num").text();
@@ -117,7 +118,7 @@ function checkNums(){
                         },
                         success:function(data2){
                             if(data2=="1")
-                              { tishi_alert("入库成功！");
+                              {tishi_alert("入库成功！");
                                 window.location.href = "/stores/"+ store_id +"/materials_in_outs";
                               }
                         }
@@ -126,7 +127,20 @@ function checkNums(){
             }
         });
     })
+}
 
 
-    
+function checkMatOutNum(obj){
+    $(".mat-out-list").find("tr").each(function(index){
+      var out_num = parseInt($(this).find(".mat_item_num").text());
+      var mat_storage = parseInt($(this).find(".material_storage").text());
+      var mat_name = $(this).find(".mat_name").text();
+      if(out_num > mat_storage){
+          tishi_alert("【" + mat_name + "】出库量(" + out_num +")大于库存量("+ mat_storage+")");
+          $(this).remove();
+      }
+    })
+    if($(".mat-out-list").find("tr").length > 0){
+        $(obj).parents("form").submit();
+    }
 }

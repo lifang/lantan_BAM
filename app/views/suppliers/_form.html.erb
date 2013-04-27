@@ -1,0 +1,36 @@
+<%= form_for [@store,@supplier],:html => {:remote => true, 'data-type' => 'script'} do |f| %>
+<% if @supplier.errors.any? %>
+        <div id="errorExplanation">
+          <h2><%= pluralize(@supplier.errors.count, "error") %> prohibited
+            this post from being saved:</h2>
+          <ul>
+            <% @supplier.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+<div class="popup_body_area">
+    <div class="item">
+      <label>名称：</label>
+      <%= f.text_field :name %></div>
+    <div class="item">
+      <label>联系人：</label>
+      <%= f.text_field :contact %>
+    </div>
+    <div class="item">
+      <label>联系电话：</label>
+      <%= f.text_field :phone %>
+    </div>
+    <div class="item">
+      <label>其他联系方式：</label>
+      <%= f.text_field :email, :placeholder =>"QQ/微信/Email" %>
+    </div>
+    <div class="item_textarea">
+      <label>地址：</label>
+      <%= f.text_field :address %>
+    </div>
+    <%= hidden_field_tag 'supplier[status]', '0' %>
+  </div>
+  <div class="btn_box"><button type="button" onclick="commit_supplier_form(this)" class="confirm_btn">确定</button></div>
+<% end %>

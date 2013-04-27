@@ -31,7 +31,7 @@
             <div class="seeProDiv_rWidth">
               <div class="popup_body_result resultHeight">
                 <ul>
-                  <% @products = Product.is_service %>
+                  <% @products = Product.is_service.is_normal %>
                   <% @products.each do |product| %>
                     <li><%= check_box_tag 'product_ids[]', product.id, @station.nil? ? false : @station.products.include?(product)  %><%= product.name %></li>
                   <% end %>
@@ -42,7 +42,6 @@
         </div>
         <div class="btn_box">
           <button type="submit" class="confirm_btn">确定</button>
-          <a class="cancel_btn"onclick="hide_mask($('#station_form'))" >取消</a>
         </div>
       <% end %>
     </div>

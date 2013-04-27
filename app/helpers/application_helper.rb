@@ -5,6 +5,7 @@ module ApplicationHelper
   require 'openssl'
   include Constant
   include UserRoleHelper
+  include Oauth2Helper
 
   def sign?
     deny_access unless signed_in?
@@ -24,8 +25,8 @@ module ApplicationHelper
       from complaints c inner join orders o on o.id = c.order_id
       inner join customers cu on cu.id = c.customer_id inner join car_nums ca on ca.id = o.car_num_id 
       where c.store_id = ? and c.status = ? ", params[:store_id].to_i, Complaint::STATUS[:UNTREATED]])
-    @notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
-      Notice::TYPES[:BIRTHDAY], Notice::STATUS[:NOMAL])
+    @notices = Customer.find_by_sql("select id, name from customers
+      where birthday is not null and (-((birthday-now())/1000000)%100) <= 7")
   end
 
   def material_types
@@ -41,7 +42,7 @@ module ApplicationHelper
     a.id = 0
     a.name = "总部"
     suppliers = [a] + Supplier.all(:select => "s.id,s.name", :from => "suppliers s",
-                                   :conditions => "s.store_id=#{store_id}")
+      :conditions => "s.store_id=#{store_id} and s.status=0")
     suppliers
   end
 
@@ -51,15 +52,15 @@ module ApplicationHelper
   end
 
   def material_status status, type
-   str = ""
+    str = ""
     if type == 0
-     if status == 0
-       str = "未付款"
-     elsif status == 1
-       str = "已付款"
-     elsif status == 4
-       str = "已取消"
-     end
+      if status == 0
+        str = "未付款"
+      elsif status == 1
+        str = "已付款"
+      elsif status == 4
+        str = "已取消"
+      end
     elsif type == 1
       if status == 0
         str = "未发货"
@@ -111,16 +112,14 @@ module ApplicationHelper
     return JSON back_res.body
   end
 
-  def current_user
-    if cookies[:user_id]
-      user = Staff.find cookies[:user_id]
-    end
-    user
+  def current_user 
+    @current_user ||= Staff.find cookies[:user_id] if cookies[:user_id]
   end
 
   def satisfy
-    orders = Order.find(:all, :select => "is_pleased", :conditions => ["created_at > ? and created_at < ?",
-        Time.mktime(Time.now.year, Time.now.mon-1, 1), Time.mktime(Time.now.year, Time.now.mon, 1)])
+    orders = Order.find(:all, :select => "is_pleased", 
+      :conditions => [" store_id = ? and status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and created_at > ? and created_at < ?",
+        params[:store_id].to_i, Time.mktime(Time.now.year, Time.now.mon-1, 1), Time.mktime(Time.now.year, Time.now.mon, 1)])
     un_pleased_size = 0
     orders.collect { |o| un_pleased_size += 1 if o.is_pleased == Order::IS_PLEASED[:BAD] }
     return orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size

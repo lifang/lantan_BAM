@@ -6,35 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 
-//弹出层
-function show_mask_div(div_id){
-    var doc_height = $(document).height();
-    var doc_width = $(document).width();
-    var layer_height = $("#"+div_id).height();
-    var layer_width = $("#"+div_id).width();
-
-    $(".mask").css({
-        display:'block',
-        height:doc_height
-    });
-
-    var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
-    var win_height = document.documentElement.clientHeight;//jQuery(document).height();
-    var z_layer_height = $(".tab_alert").height();
-
-    $("#"+div_id).css("top",(win_height-z_layer_height)/2 + scolltop).css("left",(doc_width-layer_width)/2).show();
-    $("#"+div_id + "a.close").click(function(){
-        $("#"+div_id).hide();
-        $(".mask").hide();
-    })
-    $(".cancel_btn").click(function(){
-        $("#"+div_id).hide();
-        $(".mask").hide();
-    })
-}
-
 function add_role(store_id){
-    show_mask_div("add_role");
+    popup("#add_role");
     $("#role_input").attr("value","");
 
 }
@@ -114,7 +87,7 @@ function set_role(obj,role_id,store_id){
 }
 
 function set_staff_role(staff_id,r_ids){
-    show_mask_div("set_role");
+    popup("#set_role");
     $(".groupFunc_b input[type='checked']").each(function(idx,item){
         if($(item).attr("checked")){
             $(item).removeAttribute("checked");
@@ -130,7 +103,7 @@ function set_staff_role(staff_id,r_ids){
 
 function search_staff(store_id){
     $.ajax({
-        url:this.href,
+        url:'/stores/'+store_id+'/roles/staff',
         dataType:"script",
         type:"GET",
         data:"name="+ $.trim($("#name").val()),

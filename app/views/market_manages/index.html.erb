@@ -44,7 +44,8 @@
                   <% end unless @goal_hash[sale.id].blank? %>
                 </table>
               </td>
-              <td><%= ((sale.ended_at-Time.now)/86400.00).to_i%>天</td>
+              <td>
+                <%= ((sale.ended_at-Time.now)/86400.00).to_i%>天</td>
             </tr>
           <% end %>
         </tbody>
@@ -99,7 +100,7 @@
 <div class="mask"></div>
 <div class="tab_popup goal_mark" style="display: none;">
   <div class="popup_box">
-    <h1>定制目标销售额<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <h1>定制目标销售额<a href="javascript:void(0)" class="close" onclick="$('.goal_mark input').val('');">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
         <%= form_for :goal,:url=>"/stores/#{params[:store_id]}/market_manages/",:html=>{:id=>"create_goal"},:method=>:POST do%>

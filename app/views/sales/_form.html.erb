@@ -63,11 +63,11 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">是否总店补贴：</div>
   <div class="releaseDiv_r" id="s_sub">
-    <input name="subsidy" type="radio" <% if @sale.disc_types %> checked <%end%>
+    <input name="subsidy" type="radio" <% if @sale.is_subsidy %> checked <%end%>
            value="<%= Sale::SUBSIDY[:YES] %>"  />是&nbsp;&nbsp;
     <input name="sub_content" type="text" id="sub_content"  value="<%= @sale.sub_content %>" />
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <input name="subsidy" type="radio" <% unless @sale.disc_types  %> checked <%end%>
+    <input name="subsidy" type="radio" <% unless @sale.is_subsidy  %> checked <%end%>
            value="<%= Sale::SUBSIDY[:NO] %>" />&nbsp;&nbsp;否
   </div>
 </div>

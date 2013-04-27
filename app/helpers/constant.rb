@@ -20,19 +20,19 @@ module Constant
     #库存
     :materials => {
       :name => "库存",
-      :in => ["入库",2],
-      :out => ["出库",4],
-      :dinghuo =>["订货",8],
-      :add_supplier => ["添加供应商",16],
-      :supplier => ["查看供应商",32],
-      :edit_supplier => ["编辑供应商",64],
-      :print => ["打印库存清单", 128],
-      :check => ["盘点核实",256],
-      :cuihuo => ["催货",512],
-      :cancel => ["取消订单",1024],
-      :pay => ["付款",2048],
-      :del_supplier => ["删除供应商",4096],
-      :receive => ["确认已收货",8192]
+      :in => ["入库",1],
+      :out => ["出库",2],
+      :dinghuo =>["订货",4],
+      :add_supplier => ["添加供应商",8],
+      :supplier => ["查看供应商",16],
+      :edit_supplier => ["编辑供应商",32],
+      :print => ["打印库存清单", 64],
+      :check => ["盘点核实",128],
+      :cuihuo => ["催货",256],
+      :cancel => ["取消订单",512],
+      :pay => ["付款",1024],
+      :del_supplier => ["删除供应商",2048],
+      :receive => ["确认已收货",4096]
     },
     :staffs => {
       :name => "员工",
@@ -79,6 +79,19 @@ module Constant
       :edit_p_card => ["编辑套餐卡",512],
       :del_p_card => ["删除套餐卡",1024],
       :show_sale_records => ["查看销售记录",2048]
+    },
+    :base_datas => {
+      :name => "基础数据",
+      :new_station_data => ["新建工位",1],
+      :edit_station_data => ["编辑工位",2],
+      :del_station_data => ["删除工位",4],
+      :roles => ["权限",8],
+      :role_conf => ["权限配置",16],
+      :role_set => ["用户设定",32],
+      :add_role => ["添加角色",64],
+      :edit_role => ["编辑角色",128],
+      :del_role => ["删除角色",256],
+      :role_role_set => ["角色设定",512]
     }
   }
 
@@ -86,12 +99,13 @@ module Constant
   SALE_PICSIZE =[300,230,663,50]
   P_PICSIZE = [50,154,246,300,356]
   C_PICSIZE = [148,154,50]
+  STAFF_PICSIZE = [100]
  
   #角色
-  SYS_ADMIN = "1"  #系统管理员
-  BOSS = "2" #老板
-  MANAGER = "3" #店长
-  STAFF = "4" #员工
+  SYS_ADMIN = "100001"  #系统管理员
+  BOSS = "100002" #老板
+  MANAGER = "100003" #店长
+  STAFF = "100004" #员工
 
   #活动code码生成文件路径
   CODE_PATH =  LOCAL_DIR + "code_file.txt"
@@ -115,7 +129,10 @@ module Constant
   PASSWORD = "123456"
   
   SERVER_PATH = "http://bam.gankao.co"
+  #  SERVER_PATH = "http://192.168.1.100:3001"
   HEAD_OFFICE_API_PATH = "http://headoffice.gankao.co/"
+  #  HEAD_OFFICE_API_PATH = "http://192.168.1.100:3002/"
+
   HEAD_OFFICE = HEAD_OFFICE_API_PATH + "syncs/upload_file"
   HEAD_OFFICE_REQUEST_ZIP = HEAD_OFFICE_API_PATH + "syncs/is_generate_zip"
   HEAR_OFFICE_IPHOST= HEAD_OFFICE_API_PATH
@@ -124,6 +141,6 @@ module Constant
   #产品和活动的类别  图片名称分别为 product_pics 和service_pics
   PRODUCT = "PRODUCT"
   SERVICE = "SERVICE"
-  UNNEED_UPDATE = ['sync','item']  #不更新的表
+  UNNEED_UPDATE = ['sync','item','model']  #不更新的表
   DATE_START =  "2013-01"
 end

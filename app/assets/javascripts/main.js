@@ -46,18 +46,17 @@ function popup(t){
     });
     var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
     var win_height = document.documentElement.clientHeight;//jQuery(document).height();
-    var z_layer_height = $(".tab_alert").height();
-    $(t).css('top',(win_height-z_layer_height)/2 + scolltop);
+    var layer_height = $(t).height();
+    $(t).css('top',(win_height-layer_height)/2 + scolltop);
 
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
 
-    $(t + " .close").click(function(){
+    $(t + " a.close").click(function(){
         $(t).css('display','none');
         $(".mask").css('display','none');
     })
 }
-
 
 //现场施工
 $(function(){
@@ -115,9 +114,9 @@ function show_center(t){
     var layer_width = $(t).width();
     $(".mask").css({
         display:'block',
-        height:($(t).height()+50)>doc_height?　$(t).height()+180 : doc_height
+        height:($(t).height()+100)>doc_height?　$(t).height()+280 : doc_height+50
     });
-    $(t).css('top',"50px");
+    $(t).css('top',"100px");
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
     $(t + " .close").click(function(){
@@ -132,9 +131,9 @@ function before_center(t){
     var layer_width = $(t).width();
     $(".maskOne").css({
         display:'block',
-        height:($(t).height()+50)>doc_height?　$(t).height()+180 : doc_height
+        height:($(t).height()+100)>doc_height?　$(t).height()+280 : doc_height+50
     });
-    $(t).css('top',"50px");
+    $(t).css('top',"100px");
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
     $(t + " .close").click(function(){
@@ -151,6 +150,14 @@ $(function() {
         var index = $('.groupFunc_h li').index(this);
         $('.groupFunc_b > div').eq(index).show().siblings().hide();
     });
+//排序切换箭头
+    $(".sort_u, .sort_d").click(function(){
+        if($(this).attr("class") == "sort_u"){
+            $(this).attr("class", "sort_d");
+        }else{
+            $(this).attr("class", "sort_u");
+        }
+    });
 });
 
 //提示错误信息
@@ -160,7 +167,6 @@ function tishi_alert(message){
     var win_height = document.documentElement.clientHeight;//jQuery(document).height();
     var z_layer_height = $(".tab_alert").height();
     $(".tab_alert").css('top',(win_height-z_layer_height)/2 + scolltop);
-
     var doc_width = $(document).width();
     var layer_width = $(".tab_alert").width();
     $(".tab_alert").css('left',(doc_width-layer_width)/2);

@@ -53,10 +53,10 @@ textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-
 
 
 /*确定  取消 btn*/
-.btn_box { width: 170px; margin: 10px auto;}
+.btn_box { width: 180px; margin: 10px auto; text-align: center;}
 .btn_box_s { width: 85px; margin: 10px auto;}
 .btn_box_w { width: 195px; margin: 10px auto;}
-.confirm_btn, .cancel_btn { padding: 5px 15px; _padding: 2px 7px; margin: 0 10px; color: #FFF;cursor: pointer}
+.confirm_btn, .cancel_btn { padding: 5px 15px; _padding: 2px 7px; margin: 0 10px; color: #FFF;cursor: pointer; display: inline-block;}
 input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .cancel_btn { background: #999999;}
 
@@ -298,6 +298,12 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 }
 .search input[type="text"], .search select { 
     width: 100px; 
+    height: 23px;
+    line-height: 24px;
+    border: 1px #CCCCCC solid;
+}
+.search select { 
+    width: 100px; 
     height: 24px;
     line-height: 24px;
     border: 1px #CCCCCC solid;
@@ -388,7 +394,7 @@ a.compile_btn { width: 100px;}
 
 
 .item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
-.item input[type="text"].input_s { width: 90px;  margin-right:10px;text-align: right;}
+.item input[type="text"].input_s { width: 115px; margin-right:8px;text-align: right;}
 
 .file {float: left;}
 .show_pic { margin-left: 10px;}
@@ -504,9 +510,9 @@ a.compile_btn { width: 100px;}
 .releaseDiv_r textarea { width: 98%; height: 200px;}
 
 /*查看*/
-.seeProDiv { padding: 10px 0; overflow: hidden; float: left;}
+.seeProDiv { padding: 10px 0; overflow: hidden; float: left; margin: 0 10px;}
 .seeProDiv_l {
-    width: 100px;
+    width: 115px;
     text-align: right;
     float: left;
     font-size: 14px;
@@ -518,7 +524,7 @@ a.compile_btn { width: 100px;}
 .seeProDiv_r { margin-left: 110px;  width: 180px; line-height: 24px;}
 .seeProDiv_rWidth { margin-left: 110px;  width: 460px; line-height: 24px;}
 .seeProDiv_rWidth p, .seeProDiv_rWidth span { text-indent: 24px; line-height: 24px; margin: 0 5px;}
-.seeProDiv_p { padding: 10px 0; overflow: hidden;}
+.seeProDiv_p { padding: 10px 0; overflow: hidden; margin: 0 10px;}
 
 .seeProDiv_textarea { margin: 20px 10px; float: left; overflow: hidden; width: 590px;}
 .seeProDiv_r select {  height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
@@ -765,3 +771,8 @@ a.compile_btn { width: 100px;}
     margin: 0 auto;
     padding: 0 auto;
 }
+#materials_tab_table th, #materials_tab_tabl e td{width:12.5%; word-break:break-all}
+#role_staffs .data_table td{width:33.3%; word-break:break-all}
+.station-data .data_table td{width:25%; word-break:break-all}
+.data_table td.data_table_error, .data_table tr.tbg td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}
+#mat_order_detail_tab .data_tab_table td td{width:33.3%; word-break:break-all}

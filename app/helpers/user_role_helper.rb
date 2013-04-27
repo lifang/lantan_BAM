@@ -31,6 +31,13 @@ module UserRoleHelper
     roles.include? Constant::SYS_ADMIN
   end
 
+  #是否有权限访问后台
+  def has_authority?
+    user = Staff.find cookies[:user_id] if cookies[:user_id]
+    roles = user.roles if user
+    return !roles.blank?
+  end
+
   #罗列当前用户的所有权限
   def session_role(user_id)
     user = Staff.find user_id
@@ -61,6 +68,7 @@ module UserRoleHelper
     function = role[1]
     i = Constant::ROLES[model][function]
     #    session_role cookies[:user_id] unless session[:model_role]
+    return false unless i
     role_flag = nil
     if cookies[:user_id]
       session_role(cookies[:user_id]) unless cookies[:model_role]

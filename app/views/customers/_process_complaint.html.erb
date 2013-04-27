@@ -8,6 +8,7 @@
           <div class="seeProDiv">
             <div class="seeProDiv_l">订单号：</div>
             <div class="seeProDiv_r" id="process_code"><%= @order.code %></div>
+            <input type="hidden" name="store_id" id="store_id" value="<%= @order.store_id %>" />
             <input type="hidden" name="pro_compl_id" id="pro_compl_id" value="<%= @complaint_id %>" />
             <input type="hidden" name="pc_order_id" id="pc_order_id" value="<%= @order.id %>" />
             <input type="hidden" name="pc_code" id="pc_code" value="<%= @order.code %>"/>
@@ -41,7 +42,8 @@
           </div>
         </div>
         <div class="btn_box_w">
-          <button class="confirm_btn" type="button" onclick="javascript:window.location.href='/stores/<%= @order.store_id %>/staffs'">安排培训</button>
+          <input type="hidden" id="is_trains_<%= @complaint_id %>" name="is_trains_<%= @complaint_id %>" value="0" />
+          <button class="confirm_btn" type="button" onclick="is_has_trains(<%= @complaint_id %>, this.form)">安排培训</button>
           <button class="confirm_btn" type="submit">确定</button>
         </div>
       <% end %>
