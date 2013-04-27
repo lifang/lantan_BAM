@@ -282,6 +282,13 @@ class MaterialsController < ApplicationController
   def get_act_count
     #puts params[:code]
     sale = Sale.valid.find_by_code params[:code]
+    if sale
+      material_order = MaterialOrder.find(params[:mo_id])
+      mats_codes = material_order.materials.map(&:code)
+      sale_materials_codes = sale.products.service.map{|p| p.materials.map(&:code)}.flatten
+      match_material = mats_codes&sale_materials_codes
+      sale = nil if match_material.empty?
+    end
     text = sale.nil? ? "" : sale.sub_content
     sale_id = sale.nil? ? "" : sale.id
     render :json => {:status => 1,:text => text,:sale_id => sale_id}

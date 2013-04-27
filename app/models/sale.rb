@@ -1,6 +1,12 @@
 #encoding: utf-8
 class Sale < ActiveRecord::Base
   has_many :sale_prod_relations
+  has_many :products, :through => :sale_prod_relations do
+    def service
+      where("is_service = true")
+    end
+  end
+
   belongs_to :store
   STATUS={:UN_RELEASE =>0,:RELEASE =>1,:DESTROY =>2} #0 未发布 1 发布 2 删除
   STATUS_NAME={0=>"未发布",1=>"已发布"}

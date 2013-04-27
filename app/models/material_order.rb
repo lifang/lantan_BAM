@@ -4,6 +4,7 @@ class MaterialOrder < ActiveRecord::Base
   has_many :mat_out_orders
   has_many  :mat_in_orders
   has_many  :m_order_types
+  has_many :materials, :through => :mat_order_items
   belongs_to :supplier
 
   STATUS = {:no_pay => 0, :pay => 1, :cancel => 4}

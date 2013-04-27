@@ -6,6 +6,7 @@ class Product < ActiveRecord::Base
   has_many :order_prod_relations
   has_many :pcard_prod_relations
   has_many :prod_mat_relations
+  has_many :materials, :through => :prod_mat_relations
   has_many :svcard_prod_relations
   has_many :image_urls
   has_many :stations, :through => :station_service_relations

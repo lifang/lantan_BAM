@@ -394,13 +394,13 @@ if(flag){
     }
 }
 
-function get_act_count(obj){
+function get_act_count(obj,mo_id){
     if($(obj).val()!=""){
         var price_total = parseFloat($("#price_total").text());
         $.ajax({
             url:"/materials/get_act_count",
             dataType:"json",
-            data:"code="+$(obj).val(),
+            data:"code="+$(obj).val()+"&mo_id="+mo_id,
             type:"GET",
             success:function(data,status){
                 if(data.status==1){
@@ -527,7 +527,7 @@ function removeChecked(obj){
         tishi_alert("请输入有效抵用款");
         $(obj).val("");
     }
-  if($(obj).val() <= $("#use_card").val()){
+  if(parseFloat($(obj).val()) <= parseFloat($("#use_card").val())){
     var price_total = parseFloat($("#price_total").text());
     var save_price = 0.0;
     var sale_price = 0.0;
