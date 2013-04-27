@@ -3,10 +3,14 @@
           <tr class="hbg">
             <th><span class="sort_u_s">时间</span></th>
             <th>出勤</th>
+            <% if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN] %>
             <th>施工项目</th>
             <th>物品领用</th>
             <th>物品消耗</th>
             <th>水电消耗</th>
+            <% else %>
+            <th>接单数量</th>
+            <% end %>
             <th>投诉</th>
             <th>培训</th>
             <th>提成</th>
@@ -19,10 +23,14 @@
             <td><%= @cal_style.eql?("week") ? work_record.current_day.beginning_of_week.strftime("%Y-%m-%d") :
                                 work_record.current_day.beginning_of_month.strftime("%Y-%m-%d") %></td>
             <td><%= work_record.attendance_num_sum %></td>
+            <% if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN] %>
             <td><%= work_record.construct_num_sum %></td>
             <td><%= work_record.materials_used_num_sum %></td>
             <td><%= work_record.materials_consume_num_sum %></td>
             <td><%= work_record.water_num_sum %></td>
+            <% else %>
+            <td><%= work_record.construct_num_sum %></td>
+            <% end %>
             <td><%= work_record.complaint_num_sum %></td>
             <td><%= work_record.train_num_sum %></td>
             <td><%= work_record.reward_num_sum %></td>
