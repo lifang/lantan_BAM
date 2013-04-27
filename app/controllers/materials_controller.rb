@@ -163,8 +163,8 @@ class MaterialsController < ApplicationController
       if params[:from].to_i == 0
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
         #headoffice_api_url = "http://117.83.223.243:3001/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-#        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
-        @search_materials = Material.find_by_sql("SELECT `materials`.* FROM `materials` WHERE `materials`.`status` = 0 AND (types=2)")
+        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
+ #       @search_materials = Material.find_by_sql("SELECT `materials`.* FROM `materials` WHERE `materials`.`status` = 0 AND (types=2)")
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
         @search_materials = Material.normal.all(:conditions => str)
