@@ -366,7 +366,7 @@ class MaterialsController < ApplicationController
                 order.update_attribute(:status, MaterialOrder::STATUS[:pay])
                 if order.supplier_type==0
                   headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-                  result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
+                  result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'status' => MaterialOrder::STATUS[:pay]})
                 end
                 #支付记录
                 MOrderType.create(:material_order_id => order.id,:pay_types => MaterialOrder::PAY_TYPES[:CHARGE], :price => order.price)
@@ -426,6 +426,8 @@ class MaterialsController < ApplicationController
       content = "订单取消成功"
       if order && order.status == MaterialOrder::STATUS[:no_pay] && order.m_status == MaterialOrder::M_STATUS[:no_send]
         order.update_attribute(:status,MaterialOrder::STATUS[:cancel])
+        headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
+        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'status' => MaterialOrder::STATUS[:cancel]})
       elsif order.status == MaterialOrder::STATUS[:cancel]
         content = "订单已取消"
       else
@@ -486,7 +488,7 @@ class MaterialsController < ApplicationController
           @current_store.update_attribute(:account, @current_store.account - @mat_order.price) if @current_store
         end
         headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
+        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'status' => MaterialOrder::STATUS[:pay]})
         p "----------------------------------"
         p result
         render :json => {:status => 0}
