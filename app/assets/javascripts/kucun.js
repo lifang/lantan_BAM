@@ -330,10 +330,11 @@ function pay_material_order(parent_id, pay_type,store_id){
     var total_price = $("#final_price").text();
     var sav_price = $("#sav_price").val();
     var sale_id = $("#sale_id").val();
+    var sale_price = $("#sale_price").text();
     $.ajax({
         url:"/stores/"+store_id + "/materials/pay_order",
         dataType:"json",
-        data:"mo_id="+mo_id+"&pay_type="+pay_type+"&total_price="+total_price+"&sav_price="+sav_price+"&sale_id="+sale_id,
+        data:"mo_id="+mo_id+"&pay_type="+pay_type+"&total_price="+total_price+"&sav_price="+sav_price+"&sale_id="+sale_id+"&sale_price="+sale_price,
         type:"GET",
         success:function(data,status){
             if(data["status"]==0){
@@ -395,8 +396,8 @@ if(flag){
 }
 
 function get_act_count(obj,mo_id){
+    var price_total = parseFloat($("#price_total").text());
     if($(obj).val()!=""){
-        var price_total = parseFloat($("#price_total").text());
         $.ajax({
             url:"/materials/get_act_count",
             dataType:"json",
@@ -406,25 +407,30 @@ function get_act_count(obj,mo_id){
                 if(data.status==1){
                     $("#use_code_count").text(data.text);
                     $("#sale_id").attr("value",data.sale_id);
-                    //$("#sale_price").text(data.text);
+                //$("#sale_price").text(data.text);
                 }
-                var save_price = 0.0;
-                var sale_price = 0.0;
-                if($("#use_card").attr('checked')=='checked')
-                {
-                    $('#savecard_price').text($("#sav_price").val()).parent().show();
-                    save_price = $("#sav_price").val()=="" ? 0.0 : $("#sav_price").val();
-                }
-                if($("#use_code").attr('checked')=='checked'){
-                    $('#sale_price').text($("#use_code_count").text()).parent().show();
-                    sale_price = $("#use_code_count").text()=="" ? 0.0 : $("#use_code_count").text();
-                }
-                var final_price = (price_total - parseFloat(save_price) - parseFloat(sale_price)) > 0 ? (price_total - parseFloat(save_price) - parseFloat(sale_price)) : 0.0
-                $("#final_price").text(parseFloat(final_price).toFixed(2));
-
             }
         });
     }
+    else{
+        $("#use_code_count").text("");
+        $('#sale_price').text("").parent().hide();
+        tishi_alert("请输入活动代码")
+        $("#use_code").attr('checked',false);
+    }
+    var save_price = 0.0;
+    var sale_price = 0.0;
+    if($("#use_card").attr('checked')=='checked')
+    {
+        $('#savecard_price').text($("#sav_price").val()).parent().show();
+        save_price = $("#sav_price").val()=="" ? 0.0 : $("#sav_price").val();
+    }
+    if($("#use_code").attr('checked')=='checked'){
+        $('#sale_price').text($("#use_code_count").text()).parent().show();
+        sale_price = $("#use_code_count").text()=="" ? 0.0 : $("#use_code_count").text();
+    }
+    var final_price = (price_total - parseFloat(save_price) - parseFloat(sale_price)) > 0 ? (price_total - parseFloat(save_price) - parseFloat(sale_price)) : 0.0
+    $("#final_price").text(parseFloat(final_price).toFixed(2));
 }
 
 function use_sale(obj, flag){
@@ -542,7 +548,7 @@ function removeChecked(obj){
      }
       var final_price = (price_total - parseFloat(save_price) - parseFloat(sale_price)) > 0 ? (price_total - parseFloat(save_price) - parseFloat(sale_price)) : "0.0"
 
-     $("#final_price").text(final_price.toFixed(2));
+     $("#final_price").text(parseFloat(final_price).toFixed(2));
      }else{
          tishi_alert("请输入小于可使用抵用款");
          $(obj).val("");

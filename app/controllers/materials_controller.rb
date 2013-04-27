@@ -163,7 +163,8 @@ class MaterialsController < ApplicationController
       if params[:from].to_i == 0
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
         #headoffice_api_url = "http://117.83.223.243:3001/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
+#        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
+        @search_materials = Material.find_by_sql("SELECT `materials`.* FROM `materials` WHERE `materials`.`status` = 0 AND (types=2)")
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
         @search_materials = Material.normal.all(:conditions => str)
@@ -193,7 +194,6 @@ class MaterialsController < ApplicationController
 
   #创建订货记录
   def material_order
-    puts params[:store_id],params[:selected_items],params[:supplier],params[:use_count],params[:sale_id],params[:pay_type]
     status = MaterialOrder.make_order
     MaterialOrder.transaction do
       begin
@@ -236,8 +236,10 @@ class MaterialsController < ApplicationController
               Notice.create(:store_id => params[:store_id], :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS],:status => Notice::STATUS[:NORMAL])
 
               material_order.update_attributes(:price => price)
+ p 22222222222222222222222222222222222
 
               headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
+    p headoffice_post_api_url
               result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
               p "----------------------------------"
               p result
@@ -372,8 +374,9 @@ class MaterialsController < ApplicationController
               MaterialOrder.transaction do
                 order.update_attribute(:status, MaterialOrder::STATUS[:pay])
                 if order.supplier_type==0
+                  mat_order_types = order.m_order_types.to_json
                   headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-                  result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
+                  result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:pay], 'mo_price' => order.price, 'mat_order_types' => mat_order_types})
                 end
                 #支付记录
                 MOrderType.create(:material_order_id => order.id,:pay_types => MaterialOrder::PAY_TYPES[:CHARGE], :price => order.price)
@@ -477,10 +480,12 @@ class MaterialsController < ApplicationController
               :price => params[:sav_price], :total_price => use_card_count+params[:sav_price].to_f,
               :target_id => @mat_order.id
             })
+          MOrderType.create(:material_order_id => @mat_order.id,:pay_types => MaterialOrder::PAY_TYPES[:SAV_CARD], :price => params[:sale_price])
         end
         #使用活动代码
-        if params[:sale_id]
+        unless params[:sale_price].blank?
           @mat_order.update_attribute(:sale_id,params[:sale_id])
+          MOrderType.create(:material_order_id => @mat_order.id,:pay_types => MaterialOrder::PAY_TYPES[:SALE_CARD], :price => params[:sale_price])
         end
       if params[:pay_type].to_i == 1   #支付宝
         url = "/stores/#{params[:store_id]}/materials/alipay?f="+@mat_order.price.to_s+"&mo_code="+@mat_order.code
@@ -489,13 +494,14 @@ class MaterialsController < ApplicationController
         @mat_order.update_attribute(:status, MaterialOrder::STATUS[:pay]) unless params[:pay_type].to_i == 5
         
         #支付记录
-        MOrderType.create(:material_order_id => @mat_order.id,:pay_types => params[:pay_type], :price => @mat_order.price)
+        MOrderType.create(:material_order_id => @mat_order.id,:pay_types => params[:pay_type], :price => @mat_order.price) unless params[:pay_type].to_i == 5
         if params[:pay_type].to_i == MaterialOrder::PAY_TYPES[:STORE_CARD]
           @current_store = Store.find_by_id params[:store_id]
           @current_store.update_attribute(:account, @current_store.account - @mat_order.price) if @current_store
         end
+        mat_order_types = @mat_order.m_order_types.to_json
         headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => MaterialOrder::STATUS[:pay]})
+        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'mat_order_types' => mat_order_types})
         p "----------------------------------"
         p result
         render :json => {:status => 0}
