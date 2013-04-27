@@ -281,7 +281,7 @@ class MaterialsController < ApplicationController
 
   def get_act_count
     #puts params[:code]
-    sale = Sale.find_by_code params[:code]
+    sale = Sale.valid.find_by_code params[:code]
     text = sale.nil? ? "" : sale.sub_content
     sale_id = sale.nil? ? "" : sale.id
     render :json => {:status => 1,:text => text,:sale_id => sale_id}
