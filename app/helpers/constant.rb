@@ -102,10 +102,10 @@ module Constant
   STAFF_PICSIZE = [100]
  
   #角色
-  SYS_ADMIN = "1"  #系统管理员
-  BOSS = "2" #老板
-  MANAGER = "3" #店长
-  STAFF = "4" #员工
+  SYS_ADMIN = "100001"  #系统管理员
+  BOSS = "100002" #老板
+  MANAGER = "100003" #店长
+  STAFF = "100004" #员工
 
   #活动code码生成文件路径
   CODE_PATH =  LOCAL_DIR + "code_file.txt"
