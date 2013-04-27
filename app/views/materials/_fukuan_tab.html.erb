@@ -15,7 +15,7 @@
                 <td>总价</td>
               </tr>
               </thead>
-              <tbody id="order_selected_materials">
+              <tbody>
                 <% @material_order.mat_order_items.each do |moi| %>
                 <tr>
                   <td><%= moi.material.try(:code) %></td>
