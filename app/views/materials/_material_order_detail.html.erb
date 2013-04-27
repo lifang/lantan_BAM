@@ -47,16 +47,33 @@
       <% end %>
     </tbody>
   </table>
-  <div class="otherWay">
+ 
+  <% unless @mo.sale_id.blank? %>
+  <h2>活动：</h2>
+   <% sale = Sale.find @mo.sale_id %>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+    <thead>
+      <tr class="hbg">
+        <td>名称</td>
+        <td>描述</td>
+        <td>总部补贴</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><%= sale.name %></td>
+        <td><%= sale.introduction %></td>
+        <td><%= sale.sub_content %></td>
+      </tr>
+    </tbody>
+  </table>
+  <% end %>
+   <div class="otherWay">
     <div class="amount">总计：<%= @total_money %></div>
     <div class="amount">储值卡抵用：<%= @mo.sale_price %></div>
     <div class="amount">活动优惠：<%= @mo.svc_use_price %></div>
     <div class="amount">合计：<%= @mo.price %></div>
   </div>
-  <% unless @mo.sale_id.blank? %>
-   <% sale = Sale.find @mo.sale_id %>
-  <%= sale.name %>
-  <% end %>
 </div>
 <div class="fukuan_btn">
   <% if @mo.supplier_id == 0 && permission?(:materials, :cuihuo) %>

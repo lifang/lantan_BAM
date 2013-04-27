@@ -92,12 +92,14 @@ class Customer < ActiveRecord::Base
   def Customer.create_single_cus(customer, carnum, phone, car_num, user_name, other_way,
       birth, buy_year, car_model_id, sex, address)
     Customer.transaction do
-      customer = Customer.create(:name => user_name, :mobilephone => phone,
-        :other_way => other_way, :birthday => birth, :status => Customer::STATUS[:NOMAL],
-        :types => Customer::TYPES[:NORMAL], :is_vip => Customer::IS_VIP[:NORMAL], :username => user_name,
-        :password => phone, :sex => sex, :address => address)
-      customer.encrypt_password
-      customer.save
+      if customer.nil?
+        customer = Customer.create(:name => user_name, :mobilephone => phone,
+          :other_way => other_way, :birthday => birth, :status => Customer::STATUS[:NOMAL],
+          :types => Customer::TYPES[:NORMAL], :is_vip => Customer::IS_VIP[:NORMAL], :username => user_name,
+          :password => phone, :sex => sex, :address => address)
+        customer.encrypt_password
+        customer.save
+      end
       if carnum
         carnum.update_attributes(:buy_year => buy_year, :car_model_id => car_model_id)
       else
@@ -106,7 +108,7 @@ class Customer < ActiveRecord::Base
       end
       CustomerNumRelation.delete_all(["car_num_id = ?", carnum.id])
       CustomerNumRelation.create(:car_num_id => carnum.id, :customer_id => customer.id)
-    end if customer.nil?
+    end 
     return [customer, carnum]
   end
 

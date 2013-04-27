@@ -426,6 +426,8 @@ class MaterialsController < ApplicationController
       content = "订单取消成功"
       if order && order.status == MaterialOrder::STATUS[:no_pay] && order.m_status == MaterialOrder::M_STATUS[:no_send]
         order.update_attribute(:status,MaterialOrder::STATUS[:cancel])
+        headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
+                  result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:cancel]})
       elsif order.status == MaterialOrder::STATUS[:cancel]
         content = "订单已取消"
       else
