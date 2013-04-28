@@ -16,7 +16,7 @@
                             </select>
                         </div>
                    </div>
-                   <div class="tj_pic"><%= image_tag @chart_url %></div>
+                   <div class="tj_pic"><span id="no_data" style="<%= @chart_url.nil? ? "display:block" : "display:none" %>">绩效统计没有数据！</span><%= image_tag @chart_url, :style => @chart_url.nil? ? "display:none;" : "display:block" %></div>
               </div>
          </div>
     </div>

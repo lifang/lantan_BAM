@@ -29,7 +29,13 @@ $(document).ready(function(){
                 id : id
             },
             success: function(data){
-                $("#staff_month_chart_detail").find(".tj_pic").find('img').attr("src", data);
+                if(data == "no data"){
+                    $("#staff_month_chart_detail").find(".tj_pic").find("#no_data").show();
+                    $("#staff_month_chart_detail").find(".tj_pic").find('img').hide();
+                }else{
+                    $("#staff_month_chart_detail").find(".tj_pic").find('img').attr("src", data).show();
+                    $("#staff_month_chart_detail").find(".tj_pic").find("#no_data").hide();
+                }
             }
         });
         return false;

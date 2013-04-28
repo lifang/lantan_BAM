@@ -4,12 +4,13 @@ class MaterialOrder < ActiveRecord::Base
   has_many :mat_out_orders
   has_many  :mat_in_orders
   has_many  :m_order_types
+  has_many :materials, :through => :mat_order_items
   belongs_to :supplier
 
   STATUS = {:no_pay => 0, :pay => 1, :cancel => 4}
   M_STATUS = {:no_send => 0, :send => 1, :received => 2, :save_in => 3} #未发货--》已发货 --》已收货 --》已入库
-  PAY_TYPES = {:CHARGE => 1,:LICENSE=>2, :CASH => 3, :STORE_CARD => 4}
-  PAY_TYPE_NAME = {1 => "订货付费",2=>"授权码", 3 => "现金", 4 => "门店账户扣款"}
+  PAY_TYPES = {:CHARGE => 1, :SAV_CARD => 2, :CASH => 3, :STORE_CARD => 4, :SALE_CARD => 5}
+  PAY_TYPE_NAME = {1 => "支付宝",2 => "储值卡", 3 => "现金", 4 => "门店账户扣款", 5 => "活动优惠"}
 
   def self.make_order
     status = 0

@@ -1,6 +1,12 @@
 #encoding: utf-8
 class Sale < ActiveRecord::Base
   has_many :sale_prod_relations
+  has_many :products, :through => :sale_prod_relations do
+    def service
+      where("is_service = true")
+    end
+  end
+
   belongs_to :store
   STATUS={:UN_RELEASE =>0,:RELEASE =>1,:DESTROY =>2} #0 未发布 1 发布 2 删除
   STATUS_NAME={0=>"未发布",1=>"已发布"}
@@ -9,6 +15,7 @@ class Sale < ActiveRecord::Base
   DISC_TIME = {:DAY =>1,:MONTH =>2,:YEAR =>3,:WEEK =>4,:TIME =>0} #1 每日 2 每月 3 每年 4 每周 0 时间段
   DISC_TIME_NAME ={1=>"本年度每天",2=>"本年度每月",3=>"本年度每年",4=>"本年度每周" }
   SUBSIDY = { :NO=>0,:YES=>1} # 0 不补贴 1 补贴
+  scope :valid, where("(ended_at > '#{Time.now}' and disc_time_types = #{DISC_TIME[:TIME]}) or disc_time_types!= #{DISC_TIME[:TIME]} and is_subsidy = true")
   require 'mini_magick'
 
   #生成code
