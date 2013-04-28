@@ -20,7 +20,7 @@ class StaffsController < ApplicationController
     params[:staff][:password] = params[:staff][:phone]
     @staff = @store.staffs.new(params[:staff])
     @staff.encrypt_password
-    @staff.photo = params[:staff][:photo].original_filename.split(".")[0]+"_#{Constant::STAFF_PICSIZE.first}."+params[:staff][:photo].original_filename.split(".").reverse[0] unless params[:staff][:photo].nil?
+    @staff.photo = "/uploads/#{@store.id}/#{@staff.id}/"+params[:staff][:photo].original_filename.split(".")[0]+"_#{Constant::STAFF_PICSIZE.first}."+params[:staff][:photo].original_filename.split(".").reverse[0] unless params[:staff][:photo].nil?
     @staff.staff_role_relations.new(:role_id => Constant::STAFF)
     if @staff.save   #save staff info and picture
       @staff.operate_picture(params[:staff][:photo], "create") unless params[:staff][:photo].nil?
@@ -66,7 +66,7 @@ class StaffsController < ApplicationController
   def update
     @staff = Staff.find_by_id(params[:id])
     photo = params[:staff][:photo]
-    params[:staff][:photo] = photo.original_filename.split(".")[0]+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
+    params[:staff][:photo] = "/uploads/#{@store.id}/#{@staff.id}/"+photo.original_filename.split(".")[0]+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
     @staff.update_attributes(params[:staff]) and flash[:notice] = "更新员工成功" if @staff
     #update picture
     @staff.operate_picture(photo, "update") if !photo.nil? && @staff
