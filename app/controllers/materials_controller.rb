@@ -504,7 +504,7 @@ class MaterialsController < ApplicationController
         mat_order_types = @mat_order.m_order_types.to_json
         headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
         p headoffice_post_api_url
-        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'sale_id' => @mat_order.sale_id, 'mat_order_types' => mat_order_types})
+        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => params[:pay_type].to_i == 5 ? 0 :MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'sale_id' => @mat_order.sale_id, 'mat_order_types' => mat_order_types})
         p "----------------------------------"
         p result
         render :json => {:status => 0}
