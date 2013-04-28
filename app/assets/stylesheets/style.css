@@ -435,6 +435,7 @@ a.compile_btn { width: 100px;}
 .otherWay li input { margin: 0 5px;}
 .otherWay li input[type=radio] { float: left; margin-top: 6px;}
 .amount { float: right; font-size: 16px; color: #930205; margin-right: 20px;}
+#final_fukuan_tab .amount, #mat_order_detail_tab .amount{text-align: right; float:none}
 
 .supplier_input input { width: 60px;}
 .supplier_add a {
