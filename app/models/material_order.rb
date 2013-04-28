@@ -132,7 +132,7 @@ class MaterialOrder < ActiveRecord::Base
   end
 
   def svc_use_price
-    SvcReturnRecord.find_by_target_id(self.id).try(:price)
+    MOrderType.find_by_material_order_id_and_pay_types(self.id, PAY_TYPES[:SAV_CARD]).try(:price)
   end
 
   def sale_price

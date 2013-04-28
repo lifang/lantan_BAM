@@ -417,7 +417,6 @@ function get_act_count(obj,mo_id){
     }
   
     if($("#use_code").attr('checked')=='checked'){
-        alert(0)
         $('#sale_price').text($("#use_code_count").text()).parent().show();
         sale_price = $("#use_code_count").text()=="" ? 0.0 : $("#use_code_count").text();
     }
