@@ -193,14 +193,22 @@ class MarketManagesController < ApplicationController
     relation_order_sql = "select srr.*,o.code code,o.id o_id from svc_return_records srr
                           left join orders o on o.id = srr.target_id where #{started_at_sql}
                           and #{ended_at_sql} and srr.store_id=#{store_id} and
-                          srr.types=#{SvcReturnRecord::TYPES[:IN]}"
+                          srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
     order_svc_returns = SvcReturnRecord.find_by_sql(relation_order_sql)
+
+    puts "&&&&&&&&&&&&&"
+    puts order_svc_returns.inspect
+    puts "&&&&&&&&&&&&&"
 
     relation_material_order_sql = "select srr.*,mo.code code,mo.id mo_id from svc_return_records srr
                           left join material_orders mo on mo.id = srr.target_id where #{started_at_sql}
                           and #{ended_at_sql} and srr.store_id=#{store_id} and
-                          srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
+                          srr.types=#{SvcReturnRecord::TYPES[:IN]}"
     material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
+
+    puts "***********"
+    puts material_order_svc_returns.inspect
+    puts "***************"
 
     (order_svc_returns + material_order_svc_returns).sort{|a,b| a[:id] <=> b[:id]}
   end
