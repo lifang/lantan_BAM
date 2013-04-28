@@ -435,6 +435,7 @@ a.compile_btn { width: 100px;}
 .otherWay li input { margin: 0 5px;}
 .otherWay li input[type=radio] { float: left; margin-top: 6px;}
 .amount { float: right; font-size: 16px; color: #930205; margin-right: 20px;}
+#final_fukuan_tab .amount, #mat_order_detail_tab .amount{text-align: right; float:none}
 
 .supplier_input input { width: 60px;}
 .supplier_add a {
@@ -771,7 +772,7 @@ a.compile_btn { width: 100px;}
     margin: 0 auto;
     padding: 0 auto;
 }
-#materials_tab_table th, #materials_tab_tabl e td{width:12.5%; word-break:break-all}
+/*#materials_tab_table th, #materials_tab_table td{width:12.5%; word-break:break-all}*/
 #role_staffs .data_table td{width:33.3%; word-break:break-all}
 .station-data .data_table td{width:25%; word-break:break-all}
 .data_table td.data_table_error, .data_table tr.tbg td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}

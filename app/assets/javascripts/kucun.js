@@ -407,6 +407,9 @@ function get_act_count(obj,mo_id){
                 if(data.status==1){
                     $("#use_code_count").text(data.text);
                     $("#sale_id").attr("value",data.sale_id);
+                    if(data.text == ""){
+                        tishi_alert("当前code不可用")
+                    }
                 //$("#sale_price").text(data.text);
                  var save_price = 0.0;
     var sale_price = 0.0;
@@ -417,7 +420,6 @@ function get_act_count(obj,mo_id){
     }
   
     if($("#use_code").attr('checked')=='checked'){
-        alert(0)
         $('#sale_price').text($("#use_code_count").text()).parent().show();
         sale_price = $("#use_code_count").text()=="" ? 0.0 : $("#use_code_count").text();
     }
@@ -492,7 +494,7 @@ function use_sale(obj, flag){
     }
     if($("#sav_price").val()!="" || sal_price!=""){
         var final_price = parseFloat($("#price_total").text()) - parseFloat($("#sale_price").text()=="" ? 0 : $("#sale_price").text()) - parseFloat($("#savecard_price").text()=="" ? 0 :$("#savecard_price").text())
-        $("#final_price").text(final_price < 0 ? "0.0" : final_price);
+        $("#final_price").text(final_price < 0 ? "0.0" : parseFloat(final_price).toFixed(2));
     }
 }
 
@@ -546,11 +548,20 @@ function add_material_to_selected(obj,order_count){
 }
 
 function removeChecked(obj){
-    if($(obj).val() < 0){
+    if(parseFloat($(obj).val()) < 0 || $(obj).val()==""){
         tishi_alert("请输入有效抵用款");
         $(obj).val("");
-    }
-  if(parseFloat($(obj).val()) <= parseFloat($("#use_card").val())){
+        $("#use_card").attr('checked', false);
+        $('#savecard_price').text("").parent().hide()
+    }else if(parseFloat($(obj).val()) > parseFloat($("#use_card").val())){
+        tishi_alert("请输入小于可使用抵用款");
+        $(obj).val("");
+        $("#use_card").attr('checked', false);
+        $('#savecard_price').text("").parent().hide()
+     }
+    //else if(parseFloat($(obj).val()) <= parseFloat($("#use_card").val())){
+         
+   //  }
     var price_total = parseFloat($("#price_total").text());
     var save_price = 0.0;
     var sale_price = 0.0;
@@ -566,10 +577,6 @@ function removeChecked(obj){
       var final_price = (price_total - parseFloat(save_price) - parseFloat(sale_price)) > 0 ? (price_total - parseFloat(save_price) - parseFloat(sale_price)) : "0.0"
 
      $("#final_price").text(parseFloat(final_price).toFixed(2));
-     }else{
-         tishi_alert("请输入小于可使用抵用款");
-         $(obj).val("");
-     }
 }
 
 function type_name(type){

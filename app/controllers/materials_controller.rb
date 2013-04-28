@@ -162,8 +162,13 @@ class MaterialsController < ApplicationController
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-        #headoffice_api_url = "http://117.83.223.243:3001/api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
-        @search_materials = JSON.parse(open(URI.encode(headoffice_api_url.strip)).read)
+        result = begin
+                   open(URI.encode(headoffice_api_url.strip), &:read)
+                 rescue Errno::ETIMEDOUT
+                   p 1111111111111111111
+                   open(URI.encode(headoffice_api_url.strip), &:read)
+                 end
+        @search_materials = JSON.parse(result)
  #       @search_materials = Material.find_by_sql("SELECT `materials`.* FROM `materials` WHERE `materials`.`status` = 0 AND (types=2)")
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
@@ -236,10 +241,7 @@ class MaterialsController < ApplicationController
               Notice.create(:store_id => params[:store_id], :content => URGE_GOODS_CONTENT, :target_id => material_order.id, :types => Notice::TYPES[:URGE_GOODS],:status => Notice::STATUS[:NORMAL])
 
               material_order.update_attributes(:price => price)
- p 22222222222222222222222222222222222
-
               headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
-    p headoffice_post_api_url
               result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
               p "----------------------------------"
               p result
@@ -480,7 +482,7 @@ class MaterialsController < ApplicationController
               :price => params[:sav_price], :total_price => use_card_count+params[:sav_price].to_f,
               :target_id => @mat_order.id
             })
-          MOrderType.create(:material_order_id => @mat_order.id,:pay_types => MaterialOrder::PAY_TYPES[:SAV_CARD], :price => params[:sale_price])
+          MOrderType.create(:material_order_id => @mat_order.id,:pay_types => MaterialOrder::PAY_TYPES[:SAV_CARD], :price => params[:sav_price])
         end
         #使用活动代码
         unless params[:sale_price].blank?
@@ -501,7 +503,8 @@ class MaterialsController < ApplicationController
         end
         mat_order_types = @mat_order.m_order_types.to_json
         headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'mat_order_types' => mat_order_types})
+        p headoffice_post_api_url
+        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => params[:pay_type].to_i == 5 ? 0 :MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'sale_id' => @mat_order.sale_id, 'mat_order_types' => mat_order_types})
         p "----------------------------------"
         p result
         render :json => {:status => 0}
