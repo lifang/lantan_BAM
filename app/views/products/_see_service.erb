@@ -47,11 +47,11 @@
       <div class="clear"></div>
       <div class="seeProDiv_p">
         <div class="seeProDiv_l">简介：</div>
-        <div class="seeProDiv_rWidth"><p><%= @serv.introduction %></p></div>
+        <div class="seeProDiv_rWidth"><p><%= @serv.description %></p></div>
       </div>
       <div class="seeProDiv_p">
         <div class="seeProDiv_l">描述：</div>
-        <div class="seeProDiv_rWidth"><p><%= @serv.description.nil?? "" : @serv.description.html_safe %></p></div>
+        <div class="seeProDiv_rWidth"><p><%= @serv.introduction.nil?? "" : @serv.introduction.html_safe %></p></div>
       </div>
     </div>
   </div>
