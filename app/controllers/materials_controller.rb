@@ -272,14 +272,14 @@ class MaterialsController < ApplicationController
       rescue
         status = 2
       end
-      render :json => {:status => status, :mat_code => material_order.code}
+      render :json => {:status => status, :mo_id => material_order.id}
     end
   end
 
   def material_order_pay
     @current_store = Store.find_by_id params[:store_id]
     @store_account = @current_store.account if @current_store
-    @material_order = MaterialOrder.find_by_code params[:mat_code]
+    @material_order = MaterialOrder.find_by_id params[:mo_id]
     @use_card_count = SvcReturnRecord.store_return_count(params[:store_id]).try(:abs)
   end
 

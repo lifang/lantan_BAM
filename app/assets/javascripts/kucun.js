@@ -305,7 +305,7 @@ function submit_material_order(form_id){
                 if(data["status"]==0){
                     $.ajax({
                         url: $("#"+form_id).attr("action") + "_pay",
-                        data:{mat_code:data["mat_code"]},
+                        data:{mo_id:data["mo_id"]},
                         dataType:"script",
                         type:"GET",
                         success:function(data){
@@ -834,9 +834,17 @@ function receive_order(order_id,type,store_id){
     });
 }
 
-function pay_order(order_id,store_id){
-    popup("#zhifu_tab");
-    $("#zhifu_tab #pay_order_id").attr("value",order_id);
+function pay_order(mo_id,store_id){
+    hide_mask('#mat_order_detail_tab');
+    $.ajax({
+            url: "/stores/"+store_id+"/materials/material_order" + "_pay",
+            data:{mo_id:mo_id},
+            dataType:"script",
+            type:"GET",
+            success:function(data){
+
+            }
+        })
 }
 
 function toggle_notice(obj){
