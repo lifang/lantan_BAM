@@ -30,15 +30,7 @@ textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-
 }
 .x { width: 10px; height: 10px; background: url(/assets/x.png) no-repeat 0 0; }
 .close { width: 13px; height: 13px; background: url(/assets/close.jpg) no-repeat ; }
-.message {
-    padding: 5px 10px;
-    margin: 5px 0;
-    background: #fffbc1;
-    border: 1px #ed1010 solid;
-    line-height: 24px;
-    position: relative;
-}
-.message a { margin-left: 10px;}
+
 
 .red { color: #F00;}
 
@@ -141,6 +133,16 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 .module li a.m_seven { background: #930205 url(/assets/module.png) no-repeat 0px -310px;}
 .module li a.m_seven:hover { background: #a60205 url(/assets/module.png) no-repeat 0px -310px;}
+
+.module li a.message {
+	width: 31px; 
+	height:24px;
+	background: url(/assets/message.png) no-repeat;
+	position:absolute; 
+	top: 0px;
+	right: 0px;
+	padding-top:3px;
+}
 
 
 /*内页*/
