@@ -245,8 +245,10 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 /*table*/
 .data_table { text-align: center; margin-bottom: 30px;}
+
 .data_table tr.hbg td, .data_table tr.hbg th { background: #c59fa0; color: #FFF; font-weight: bolder; font-size: 14px;}
 .data_table td, .data_table th { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
+
 .data_table tr.tbg td {background-color:#fff5f6}
 .data_table td a { background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
 
@@ -254,12 +256,11 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .data_table td.data_table_img img { margin: 5px 0;}
 
 .data_table td a.other_a {background: none; color: #00F; text-decoration: underline;}
+.data_table td a.no_a {background: none; color: #333; text-decoration: none;}
 
 .data_table td .data_input_s { width: 50px; height: 24px; line-height: 24px; border: 1px #CCCCCC solid; text-align: center;}
 
 .data_table td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}
-
-.td_p { width: 100px; margin: 0 auto; text-align: center;}
 
 /*s_table*/
 .s_table { background:#CCC; margin: 5px 0;}
