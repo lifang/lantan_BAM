@@ -272,14 +272,14 @@ class MaterialsController < ApplicationController
       rescue
         status = 2
       end
-      render :json => {:status => status, :mat_code => material_order.code}
+      render :json => {:status => status, :mo_id => material_order.id}
     end
   end
 
   def material_order_pay
     @current_store = Store.find_by_id params[:store_id]
     @store_account = @current_store.account if @current_store
-    @material_order = MaterialOrder.find_by_code params[:mat_code]
+    @material_order = MaterialOrder.find_by_id params[:mo_id]
     @use_card_count = SvcReturnRecord.store_return_count(params[:store_id]).try(:abs)
   end
 
@@ -504,7 +504,7 @@ class MaterialsController < ApplicationController
         mat_order_types = @mat_order.m_order_types.to_json
         headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
         p headoffice_post_api_url
-        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'mat_order_types' => mat_order_types})
+        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => params[:pay_type].to_i == 5 ? 0 :MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'sale_id' => @mat_order.sale_id, 'mat_order_types' => mat_order_types})
         p "----------------------------------"
         p result
         render :json => {:status => 0}

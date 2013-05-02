@@ -88,7 +88,7 @@
   <% end %>
   <% if permission?(:materials, :pay) %>
     <% if @mo.status == MaterialOrder::STATUS[:no_pay] %>
-      <span><button class="confirm_btn" onclick="hide_mask('#mat_order_detail_tab');pay_order(<%= @mo.id %>,<%= @store_id %>)">付款</button></span>
+      <span><button class="confirm_btn" onclick="pay_order(<%= @mo.id %>,<%= @store_id %>)">付款</button></span>
     <% end %>
   <% end %>
   <% if permission?(:materials, :cancel) %>

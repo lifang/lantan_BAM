@@ -247,7 +247,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .data_table { text-align: center; margin-bottom: 30px;}
 .data_table tr.hbg td, .data_table tr.hbg th { background: #c59fa0; color: #FFF; font-weight: bolder; font-size: 14px;}
 .data_table td, .data_table th { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
-.data_table tr.tbg td { background: #fff5f6;}
+.data_table tr.tbg td {background-color:#fff5f6}
 .data_table td a { background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
 
 .data_table td.data_table_img { line-height: inherit; height: inherit; font-size: 0;}
@@ -256,6 +256,8 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .data_table td a.other_a {background: none; color: #00F; text-decoration: underline;}
 
 .data_table td .data_input_s { width: 50px; height: 24px; line-height: 24px; border: 1px #CCCCCC solid; text-align: center;}
+
+.data_table td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}
 
 .td_p { width: 100px; margin: 0 auto; text-align: center;}
 
@@ -772,8 +774,7 @@ a.compile_btn { width: 100px;}
     margin: 0 auto;
     padding: 0 auto;
 }
-#materials_tab_table th, #materials_tab_tabl e td{width:12.5%; word-break:break-all}
+/*#materials_tab_table th, #materials_tab_table td{width:12.5%; word-break:break-all}*/
 #role_staffs .data_table td{width:33.3%; word-break:break-all}
 .station-data .data_table td{width:25%; word-break:break-all}
-.data_table td.data_table_error, .data_table tr.tbg td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}
 #mat_order_detail_tab .data_tab_table td td{width:33.3%; word-break:break-all}
