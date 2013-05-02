@@ -835,16 +835,16 @@ function receive_order(order_id,type,store_id){
 }
 
 function pay_order(mo_id,store_id){
-    hide_mask('#mat_order_detail_tab');
     $.ajax({
             url: "/stores/"+store_id+"/materials/material_order" + "_pay",
             data:{mo_id:mo_id},
             dataType:"script",
             type:"GET",
             success:function(data){
-
+              $('#mat_order_detail_tab').hide();
             }
         })
+       
 }
 
 function toggle_notice(obj){

@@ -47,7 +47,7 @@
       <% end %>
     </tbody>
   </table>
- 
+
   <% unless @mo.sale_id.blank? %>
   <h2>活动：</h2>
    <% sale = Sale.find @mo.sale_id %>
@@ -70,8 +70,8 @@
   <% end %>
    <div class="otherWay">
     <div class="amount">总计：<%= @total_money %></div>
-    <div class="amount">储值卡抵用：<%= @mo.svc_use_price %></div>
-    <div class="amount">活动优惠：<%= @mo.sale_price %></div>
+    <% if @mo.svc_use_price %><div class="amount">储值卡抵用：<%= @mo.svc_use_price %></div><% end %>
+    <% if @mo.sale_price %><div class="amount">活动优惠：<%= @mo.sale_price %></div><% end %>
     <div class="amount">合计：<%= @mo.price %></div>
   </div>
 </div>
