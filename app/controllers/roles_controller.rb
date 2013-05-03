@@ -56,14 +56,10 @@ class RolesController < ApplicationController
   def set_role
     if params[:role_id]
       role_id = params[:role_id]
+      role = Role.find role_id
       if params[:menu_checks] #处理角色-菜单设置
-        params[:menu_checks].each do |menu_id|
-          if RoleMenuRelation.where(:menu_id => menu_id, :role_id => role_id).empty?
-            RoleMenuRelation.create(:menu_id => menu_id, :role_id => role_id)
-          end
-        end
-        deleted_ids = RoleMenuRelation.where(:role_id => role_id).map(&:menu_id) - params[:menu_checks].map(&:to_i)
-        RoleMenuRelation.delete_all(:role_id => role_id, :menu_id => deleted_ids) unless deleted_ids.empty?
+        menus = Menu.where(:id => params[:menu_checks])
+        role.menus = menus
       end
       if params[:model_nums] #处理角色-功能模块设置
         params[:model_nums].each do |controller, num|
