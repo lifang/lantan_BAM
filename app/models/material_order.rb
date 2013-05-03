@@ -136,9 +136,14 @@ class MaterialOrder < ActiveRecord::Base
   end
 
   def sale_price
-    if self.sale_id
-      sale = Sale.find self.sale_id 
+    if self.sale_id && self.sale_id!=0
+      sale = Sale.find self.sale_id
       sale.sub_content
     end
+  end
+
+  def pay_type_name
+    mot = MOrderType.where("material_order_id = ? and pay_types not in (?)", self.id, [2,5]).first
+    PAY_TYPE_NAME[mot.pay_types] unless mot.nil?
   end
 end
