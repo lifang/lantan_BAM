@@ -48,6 +48,7 @@
     </tbody>
   </table>
   <% unless @mo.sale_id.blank? or @mo.sale_id==0 %>
+  <% sale = Sale.find @mo.sale_id %>
   <h2>活动：</h2>
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
     <thead>
