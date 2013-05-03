@@ -27,7 +27,7 @@ class StationDatasController < ApplicationController
 
   def edit
     @action = 'edit'
-    @station = Station.find(params[:id])
+    @station = Station.includes(:products).find(params[:id])
     render :replace_form
   end
 

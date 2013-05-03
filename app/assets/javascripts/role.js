@@ -167,3 +167,15 @@ function selectAll(obj){
         $(obj).parent().next().find("input[type='checkbox']").attr("checked", false)
     }
 }
+
+function checkValid(obj){
+    if($("#station_name").val()=="")
+    {
+        tishi_alert("名称不能为空！")
+        }
+    else if($("#station_collector_code").val()==""){
+        tishi_alert("采集器编号不能为空！")
+    }else{
+        $(obj).parents("form").submit();
+    }
+}

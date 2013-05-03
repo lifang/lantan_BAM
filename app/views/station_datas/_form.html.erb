@@ -4,17 +4,6 @@
     <div class="popup_body">
       <% @station ||= Station.new %>
       <%= form_for @station, :url => @action == 'new' ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => @action == 'new' ? :post : :put, :remote => true, :html => {"data-type" => 'script'} do |f| %>
-       <% if @station and @station.errors.any? %>
-          <div id="errorExplanation">
-            <h2><%= pluralize(@station.errors.count, "error") %> prohibited
-              this post from being saved:</h2>
-            <ul>
-              <% @station.errors.full_messages.each do |msg| %>
-                <li><%= msg %></li>
-              <% end %>
-            </ul>
-          </div>
-        <% end %>
         <div class="popup_body_area">
           <div class="item">
             <%= f.label :name, '名称：', :style => "width:100px"%>
@@ -33,7 +22,7 @@
                 <ul>
                   <% @products = Product.is_service.is_normal %>
                   <% @products.each do |product| %>
-                    <li><%= check_box_tag 'product_ids[]', product.id, @station.nil? ? false : @station.products.include?(product)  %><%= product.name %></li>
+                    <li><%= check_box_tag 'product_ids[]', product.id, @station.new_record? ? false : @station.products.include?(product)  %><%= product.name %></li>
                   <% end %>
                 </ul>
               </div>
@@ -41,7 +30,7 @@
           </div>
         </div>
         <div class="btn_box">
-          <button type="submit" class="confirm_btn">确定</button>
+          <input onclick="return checkValid(this)" type="button" value="确定" class="confirm_btn"/>
         </div>
       <% end %>
     </div>
