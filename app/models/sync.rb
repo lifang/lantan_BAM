@@ -24,7 +24,7 @@ class Sync < ActiveRecord::Base
         req = Net::HTTP::Post::Multipart.new url.path,query.merge!("upload" => UploadIO.new(file, "application/zip", "#{filename}"))
         http = Net::HTTP.new(url.host, url.port)
         if  http.request(req).body == "success"
-          Sync.create(:store_id=>store_id,:sync_at=>sync_time.strftime("%Y-%m-%d %H").to_datetime,:created_at=>Time.now.strftime("%Y-%m-%d %H").to_datetime,:types=>Sync::SYNC_TYPE[:BUILD])
+          Sync.create(:store_id=>store_id,:sync_at=>sync_time.strftime("%Y-%m-%d %H").to_datetime,:types=>Sync::SYNC_TYPE[:BUILD])
           flog.write("数据上传成功---#{sync_time.strftime("%Y-%m-%d %H")}\r\n")
         end
       end
@@ -87,9 +87,9 @@ class Sync < ActiveRecord::Base
         end
       end
       if is_update
-        filename = input_zip(path+dirs.join,store_id,sync_time)
+        filename = input_zip(path+dirs.join,store_id,file_time)
         flog.write("数据更新并压缩成功---#{Time.now}\r\n")
-        send_file(store_id,path+dirs.join+filename,filename,sync_time)
+        send_file(store_id,path+dirs.join+filename,filename,file_time)
       end
     rescue
       p "#{filename} file updated failed"

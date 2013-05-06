@@ -58,7 +58,7 @@ class WorkRecord < ActiveRecord::Base
 
           work_record.update_attributes(:construct_num => construct_num, :materials_used_num => materials_used_num,
                                         :materials_consume_num => materials_consume_num, :water_num => water_num,
-                                        :elec_num => elec_num, :complaint_num => complaint_num, :train_num => train_num,
+                                        :electricity_num => elec_num, :complaint_num => complaint_num, :train_num => train_num,
                                         :violation_num => violation_num, :reward_num => reward_num)
         else
           if staff.type_of_w == Staff::S_COMPANY[:FRONT]  #前台
