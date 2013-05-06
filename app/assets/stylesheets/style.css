@@ -133,7 +133,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 .module li a.m_seven { background: #930205 url(/assets/module.png) no-repeat 0px -310px;}
 .module li a.m_seven:hover { background: #a60205 url(/assets/module.png) no-repeat 0px -310px;}
-
+/*登录首页信息*/
 .module li a.message {
 	width: 31px; 
 	height:24px;
@@ -143,6 +143,16 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	right: 0px;
 	padding-top:3px;
 }
+/*内容页信息*/
+.message { 
+    padding: 5px 10px;
+	margin: 5px 0; 
+	background: #fffbc1; 
+	border: 1px #ed1010 solid; 
+	line-height: 24px; 
+	position: relative;
+}
+.message a { margin-left: 10px;}
 
 
 /*内页*/
