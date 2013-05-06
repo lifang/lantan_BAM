@@ -102,7 +102,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 /*入口*/
 .module { width: 480px; margin: 50px auto 10px auto;}
 .module ul { overflow: hidden;}
-.module li { width: 150px; height: 150px; float: left; margin: 5px; _margin: 4px;}
+.module li { width: 150px; height: 150px; float: left; margin: 5px; _margin: 4px;position:relative}
 .module li a {
     width: 150px;
     height: 40px;
@@ -398,8 +398,9 @@ a.compile_btn { width: 100px;}
 .item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
 
 
-.item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
+.item input[type="text"], .item select, .item_textarea select{ height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 115px; margin-right:8px;text-align: right;}
+.item_textarea input[type="text"]{ height: 24px; line-height: 24px; width: 320px; border: 1px #CCCCCC solid;}
 
 .file {float: left;}
 .show_pic { margin-left: 10px;}

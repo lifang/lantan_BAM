@@ -21,8 +21,11 @@ class MaterialsController < ApplicationController
     @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id], @status
     @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]
     
-    @material_notices = MaterialOrder.search_orders params[:store_id], nil, nil, -1, 0, 1, 30, 2
-    @notice_ids = @material_notices.collect{ |item| item.id}.join(",")
+    @material_pay_notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
+      Notice::TYPES[:URGE_PAYMENT], Notice::STATUS[:NORMAL])
+    @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:received], 0)
+    @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:send], 0)
+    @material_order_urgent = MaterialOrder.where(:id => @material_pay_notices.map(&:target_id))
   end
 
   #库存列表分页

@@ -77,6 +77,16 @@ function submit_search_form(store_id,type,obj){
         success:function(){
             $("#search_result").show();
             $("#dinghuo_search_result").show();
+            var mat_ids = [];
+            $("#dinghuo_selected_materials").find("tr").each(function(){
+               mat_ids.push($(this).attr('id').split('_')[2])
+            })
+            $("#dinghuo_search_material").find('input').each(function(){
+                var mat_id = $(this).attr('id').split('_')[1];
+                if(mat_ids.indexOf(mat_id)>=0){
+                    $(this).attr("checked", 'checked');
+                }
+            })
         },error:function(){
             tishi_alert("error");
         }
@@ -853,9 +863,9 @@ function pay_order(mo_id,store_id){
 
 function toggle_notice(obj){
     if($(obj).text()=="点击查看"){
-       $(obj).text("隐藏");
+       $(obj).text(" 隐藏");
     }else{$(obj).text("点击查看")}
-    $("#m_notice_div").toggle(); 
+    $(obj).next().toggle();
 }
 
 function close_notice(obj){
