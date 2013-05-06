@@ -3,12 +3,7 @@
   resources :syncs do
     get "upload_file"
   end
-
-  resources :sales do
-    collection do
-      post :delete_sale,:public_sale
-    end
-  end
+  
   resources :package_cards do
     member do
       post :delete_pcard
@@ -48,7 +43,7 @@
     end
     resources :sales do
       collection do
-        post "load_types"
+        post "load_types",:delete_sale,:public_sale
       end
       member do
         post "update_sale"
