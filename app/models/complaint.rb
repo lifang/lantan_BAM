@@ -15,6 +15,7 @@ class Complaint < ActiveRecord::Base
   TYPES = { :WASH => 1, :WAXING=> 2, :DIRT => 3, :INNER_WASH => 4, :INNER_WAXING => 5, :POLISH => 6, :SILVER => 7, :GLASS => 8,
     :ACCIDENT => 9, :TECHNICIAN => 10, :SERVICE => 11,:ADVISER => 12, :REST => 13, :BAD => 14, :PART => 15, :TIMEOUT => 16,
     :LONG_WAIT => 16, :INVALID => 17}
+    TIMELY_DAY = 2 #及时解决的标准
          
   TYPES_NAMES = {1 => "精洗施工质量", 2 => "打蜡施工质量", 3 => "去污施工质量", 4 => "内饰清洗施工质量", 5 => "内饰护理施工质量",
     6 => "抛光施工质量", 7 => "镀晶施工质量", 8 => "玻璃清洗护理施工质量", 9 => "施工事故（施工过程中导致车辆受损）",
@@ -120,7 +121,7 @@ class Complaint < ActiveRecord::Base
   def self.search_detail(store_id,num=nil)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
     where c.store_id=#{store_id} and  date_format(c.created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')"
-    sql += " and timestampdiff(hour,created_at,process_at)<=2"  if num==0
+    sql += " and timestampdiff(hour,c.created_at,c.process_at)<=#{Complaint::TIMELY_DAY}"  if num==0
     sql += " and c.process_at is  null" if num==1
     sql += " order by c.created_at desc"
     return Complaint.find_by_sql(sql)
@@ -129,7 +130,7 @@ class Complaint < ActiveRecord::Base
   def self.search_one(store_id,time,num=nil)
     sql ="select count(*) num from complaints  where store_id=#{store_id} "
     sql += "and date_format(created_at,'%Y-%m')='#{time}'" unless time.nil? || time =="" || time.length==0
-    sql += " and timestampdiff(hour,created_at,process_at)<=2"  if num==0
+    sql += " and timestampdiff(hour,created_at,process_at)<=#{Complaint::TIMELY_DAY}"  if num==0
     sql += " and process_at is null " if num==1
     return Complaint.find_by_sql(sql)[0]
   end
