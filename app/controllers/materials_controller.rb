@@ -472,10 +472,11 @@ class MaterialsController < ApplicationController
       @mat_order = MaterialOrder.find params[:mo_id]
     end
     if @mat_order
+      svc_return_records = SvcReturnRecord.find_by_target_id @mat_order.id
       #支付方式
       @mat_order.update_attributes(:price => params[:total_price])
       #使用储值抵货款
-        if params[:sav_price].to_f > 0
+        if params[:sav_price].to_f > 0 && svc_return_records.blank?
           use_card_count = SvcReturnRecord.store_return_count params[:store_id]
           SvcReturnRecord.create({
               :store_id => params[:store_id],:types => SvcReturnRecord::TYPES[:IN],
@@ -485,7 +486,7 @@ class MaterialsController < ApplicationController
           MOrderType.create(:material_order_id => @mat_order.id,:pay_types => MaterialOrder::PAY_TYPES[:SAV_CARD], :price => params[:sav_price])
         end
         #使用活动代码
-        unless params[:sale_price].blank?
+        if params[:sale_price].to_f > 0 && @mat_order.sale_id.blank?
           @mat_order.update_attribute(:sale_id,params[:sale_id])
           MOrderType.create(:material_order_id => @mat_order.id,:pay_types => MaterialOrder::PAY_TYPES[:SALE_CARD], :price => params[:sale_price])
         end

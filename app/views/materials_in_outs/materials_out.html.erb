@@ -3,7 +3,7 @@
   <div class="search"><label>请扫描条形码:</label><input name="mat_code" id="mat_code" data_action="m_out" type="text"/></div>
   <div class="search_alert">*没有查询到系统中您扫描的货物</div>
   <div class="data_box">
-    <div class="data_menu"><a href="#">添加货物名称</a></div>
+    <div class="data_menu"></div>
     <div class="clear"></div>
     <div class="data_body">
       <%= form_tag  create_materials_out_path, method: :post do |f|%>
@@ -21,6 +21,7 @@
         <div class="clear"></div>
         <div class="btn_box_s">
           <button onclick="checkMatOutNum(this)" type="button" class="confirm_btn">出库</button>
+        </div>
       <% end %>
     </div>
   </div>

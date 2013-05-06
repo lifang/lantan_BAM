@@ -223,8 +223,12 @@ function submit_out_order(form_id){
     var a = true;
     $("#selected_materials").find("input").each(function(){
           var storage = parseInt($(this).parent().prev().text());
-          if($(this).val() > storage){
-              tishi_alert("请输入小于库存量的值");
+          var name = $(this).parent().parent().find("td:first").text();
+          if(parseFloat($(this).val()) > storage){
+              tishi_alert("【"+name+"】请输入小于库存量的值");
+              a = false;
+          }else if(parseFloat($(this).val()) < 0){
+              tishi_alert("【"+name+"】请输入大于0的值");
               a = false;
           }
     })
@@ -835,16 +839,16 @@ function receive_order(order_id,type,store_id){
 }
 
 function pay_order(mo_id,store_id){
-    hide_mask('#mat_order_detail_tab');
     $.ajax({
             url: "/stores/"+store_id+"/materials/material_order" + "_pay",
             data:{mo_id:mo_id},
             dataType:"script",
             type:"GET",
             success:function(data){
-
+              $('#mat_order_detail_tab').hide();
             }
         })
+       
 }
 
 function toggle_notice(obj){

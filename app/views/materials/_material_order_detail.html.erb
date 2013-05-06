@@ -47,10 +47,9 @@
       <% end %>
     </tbody>
   </table>
- 
-  <% unless @mo.sale_id.blank? %>
+  <% unless @mo.sale_id.blank? or @mo.sale_id==0 %>
+  <% sale = Sale.find @mo.sale_id %>
   <h2>活动：</h2>
-   <% sale = Sale.find @mo.sale_id %>
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
     <thead>
       <tr class="hbg">
@@ -70,9 +69,9 @@
   <% end %>
    <div class="otherWay">
     <div class="amount">总计：<%= @total_money %></div>
-    <div class="amount">储值卡抵用：<%= @mo.svc_use_price %></div>
-    <div class="amount">活动优惠：<%= @mo.sale_price %></div>
-    <div class="amount">合计：<%= @mo.price %></div>
+    <% if @mo.svc_use_price %><div class="amount">储值卡抵用：<%= @mo.svc_use_price %></div><% end %>
+    <% if @mo.sale_price %><div class="amount">活动优惠：<%= @mo.sale_price %></div><% end %>
+    <% if @mo.pay_type_name %><div class="amount"><%= @mo.pay_type_name %>：<%= @mo.price %></div><% end %>
   </div>
 </div>
 <div class="fukuan_btn">
