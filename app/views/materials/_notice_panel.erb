@@ -1,4 +1,5 @@
-
+<% unless @material_orders_send.blank? and  @material_orders_received.blank? and @material_pay_notices.blank?%>
+<div class="message">
 <% unless @material_orders_send.blank? %>
   有 <span class="red"><%= @material_orders_send.length %></span> 条订单已发货，请注意查收
   <a href="javascript:void(0);" onclick="toggle_notice(this)">点击查看</a>
@@ -15,5 +16,7 @@
   有 <span class="red"><%= @material_pay_notices.length %></span> 条催款订单，请您及时与总部联系
   <a href="javascript:void(0);" onclick="toggle_notice(this)">点击查看</a>
   <%= render :partial => 'mat_order_notice', :locals => {:mo_notices => @material_order_urgent} %>
+<% end %>
+  </div>
 <% end %>
 

@@ -484,7 +484,7 @@ class MaterialsController < ApplicationController
         if params[:sav_price].to_f > 0 && svc_return_records.blank?
           use_card_count = SvcReturnRecord.store_return_count params[:store_id]
           SvcReturnRecord.create({
-              :store_id => params[:store_id],:types => SvcReturnRecord::TYPES[:IN],
+              :store_id => params[:store_id],:types => SvcReturnRecord::TYPES[:IN],:content => "订货单号为：#{@mat_order.code},消费：#{params[:sav_price]}.",
               :price => params[:sav_price], :total_price => use_card_count+params[:sav_price].to_f,
               :target_id => @mat_order.id
             })

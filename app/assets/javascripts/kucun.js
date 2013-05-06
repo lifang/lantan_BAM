@@ -274,7 +274,7 @@ function add_material(store_id){
   }
   var li = "<tr id='add_li_"+i+"'><td><input type='text' id='add_barcode_"+i+"'/></td><td><input type='text' id='add_name_"+i+"' /></td><td>"+
       $("#select_types").html() +"</td><td><input type='text' id='add_price_"+i+"'/></td><td><input type='text' id='add_count_"+i+"' /></td><td>--</td><td>--</td><td>"+
-      "<a href=\"javascript:void(0);\" onclick=\"add_new_material(this,'"+i+"','"+store_id+"')\">确定</a></td></tr>" ;
+      "<button onclick=\"add_new_material(this,'"+i+"','"+store_id+"')\">确定</button></td></tr>" ;
 //    alert(li);
   $("#dinghuo_selected_materials").append(li);
 }
@@ -526,6 +526,7 @@ function add_new_material(obj,idx,store_id){
        var item = $("#add_li_"+idx).find("select")[0];
        var type = $(item).find("option:selected").index() + 1;
        var order_count = $("#add_count_"+idx).val();
+       $(obj).attr('disabled','disabled');
        $.ajax({
            url:"/stores/" + store_id + "/materials/add",
            dataType:"json",
