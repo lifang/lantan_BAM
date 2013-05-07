@@ -1,7 +1,10 @@
- LantanBAM::Application.routes.draw do
+LantanBAM::Application.routes.draw do
 
   resources :syncs do
     get "upload_file"
+    collection do
+      post "upload_image"
+    end
   end
   
   resources :package_cards do

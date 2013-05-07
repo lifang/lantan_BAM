@@ -1,7 +1,7 @@
 #encoding: utf-8
 class SyncsController < ActionController::Base
 
-  before_filter :sign?
+  before_filter :sign?,:except=>["upload_image"]
   
   def upload_file
     Sync.accept_file(params[:upload])
@@ -9,7 +9,7 @@ class SyncsController < ActionController::Base
   end
 
   def upload_image
-    filename = params[:imgFile].original_filename
+    filename = Time.now.to_i.to_s + params[:imgFile].original_filename
     time = Time.now.strftime("%Y%m%d")
     dir = "#{File.expand_path(Rails.root)}/public/upload_images"
     Dir.mkdir(dir) unless File.directory?(dir)
@@ -19,7 +19,7 @@ class SyncsController < ActionController::Base
     end
     respond_to do |format|
       format.json {
-        data={:error=>0, :url=>"/upload_images/#{time}/#{filename}", :message=>"upload_image error"}
+        data={:error=>0, :url=>"/upload_images/#{time}/#{filename}", :message=>"upload_image success"}
         render :json=>data
       }
     end
