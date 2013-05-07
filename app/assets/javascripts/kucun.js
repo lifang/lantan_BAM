@@ -46,9 +46,13 @@ function check_material_num(m_id, storage, obj){
                        $(obj).parent().siblings(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
                        if($.trim(check_num)=="0")
-                        {$(obj).parent().parent().find('td:first').addClass("data_table_error")}
+                        {
+                            $(obj).parent().parent().find('td:first').addClass("data_table_error");
+                            $(obj).parent().parent().find('.sstatus').text("缺货");
+                        }
                         else{
-                            $(obj).parent().parent().find('td:first').removeClass("data_table_error")
+                            $(obj).parent().parent().find('td:first').removeClass("data_table_error");
+                            $(obj).parent().parent().find('.sstatus').text("存货")
                         }
                     }else{
                         tishi_alert("核实失败")
