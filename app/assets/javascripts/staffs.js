@@ -369,6 +369,18 @@ $(document).ready(function(){
        var staff_id = $("#staff_id").val();
        var month_score_id = $(this).attr("name");
        var manage_score = $("#month_score_val").text();
+       if(manage_score != ""){
+            var total = parseInt(sys_score) + parseInt(manage_score);
+            if(total > 100){
+               tishi_alert("系统打分和店长打分的总和不能超过100！");
+               return false;
+            }
+        }else{
+           if(parseInt(sys_score) > 100){
+               tishi_alert("系统打分不能超过100！");
+               return false;
+            }
+        }
        $.ajax({
             type : 'get',
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
@@ -389,6 +401,17 @@ $(document).ready(function(){
             }
         });
         return false;
+    });
+
+    //验证店长打分和系统打分的和是否超过100
+    $("#manage_score_btn_validate").click(function(){
+       var manage_score = $("#month_score_manage_score").val();
+       var sys_score = $("#sys_score_text").text();
+       var total = parseInt(sys_score) + parseInt(manage_score);
+       if(total > 100){
+           tishi_alert("系统打分和店长打分的和不能超过100！");
+           return false;
+       }
     });
 
     //编辑提成金额扣款金额
