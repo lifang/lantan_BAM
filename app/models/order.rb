@@ -338,7 +338,7 @@ class Order < ActiveRecord::Base
             #产品相关的活动
             if prod.sale_prod_relations
               prod.sale_prod_relations.each{|r|
-                if r.sale and r.sale.status == Sale::STATUS[:RELEASE] and (r.sale.types != Sale::DISC_TIME[:TIME] || (r.sale.types == Sale::DISC_TIME[:TIME] and r.sale.ended_at > Time.now))
+                if r.sale and r.sale.status == Sale::STATUS[:RELEASE] and (r.sale.disc_time_types != Sale::DISC_TIME[:TIME] || (r.sale.disc_time_types == Sale::DISC_TIME[:TIME] and r.sale.ended_at > Time.now))
                   s = Hash.new
                   s[:sale_id] = r.sale_id
                   s[:sale_name] =r.sale.name
