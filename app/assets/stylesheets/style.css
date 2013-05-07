@@ -144,7 +144,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	padding-top:3px;
 }
 /*内容页信息*/
-.message { 
+.box .message {
     padding: 5px 10px;
 	margin: 5px 0; 
 	background: #fffbc1; 
@@ -284,7 +284,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .data_tab_table tr.hbg td { background: #999999; color: #FFF; font-weight: bolder; font-size: 14px;}
 .data_tab_table td { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
 .data_tab_table tr.tbg td { background: #f3f3f3;}
-.data_tab_table td a, .remove_a { background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
+.data_tab_table td a, .remove_a, .data_tab_table td button{ background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
 .data_tab_table td a.other_a {background: none; color: #00F; text-decoration: underline;}
 
 
