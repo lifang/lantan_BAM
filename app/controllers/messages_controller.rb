@@ -22,7 +22,7 @@ class MessagesController < ApplicationController
     session[:started_at] = params[:started_at]
     session[:ended_at] = params[:ended_at]
     session[:is_vip] = params[:is_vip]
-    if params[:is_visited] == "0" or params[:is_visited] == "1"
+    if params[:is_visited] == "-1" or params[:is_visited] == "0" or params[:is_visited] == "1"
       session[:is_visited] = params[:is_visited]
       session[:is_birthday] = nil
     elsif params[:is_visited] == "2"

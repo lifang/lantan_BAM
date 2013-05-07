@@ -1,6 +1,6 @@
 <div class="tab_popup" style="display:none;" id="new_cus_div">
   <%= form_for :customer, :url=>"/stores/#{@store.id}/customers", :method => "post",
-    :html => {:onsubmit => "return check_customer()"} do %>
+    :html => {:onsubmit => "return check_customer()", :id => "new_c_form", :name => "new_c_form"} do %>
     <div class="popup_box">
       <h1>新建用户信息<a href="javascript:void(0)" class="close">关闭</a></h1>
       <div class="popup_body">

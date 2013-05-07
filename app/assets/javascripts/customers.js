@@ -11,8 +11,8 @@ function check_customer() {
         tishi_alert("请输入客户姓名");
         return false;
     }
-    if ($.trim($("#mobilephone").val()) == "") {
-        tishi_alert("请输入客户手机号码");
+    if ($.trim($("#mobilephone").val()) == "" || $.trim($("#mobilephone").val()).length < 6 || $.trim($("#mobilephone").val()).length > 20) {
+        tishi_alert("请输入客户手机号码，且号码长度大于6，小于20");
         return false;
     }
     return true;
@@ -204,4 +204,9 @@ function is_has_trains(complaint_id, obj) {
     if (check_process()) {
         obj.submit();
     }    
+}
+
+function show_new_customer() {
+    $("#new_c_form")[0].reset();
+    popup("#new_cus_div");
 }
