@@ -86,7 +86,7 @@ class Complaint < ActiveRecord::Base
     begin
       month = Complaint.count_pleasant(store_id)
       sql="select count(*) num,is_pleased,month(created_at) day from orders where date_format(created_at,'%Y-%m') < date_format(now(),'%Y-%m') 
-      and store_id=#{store_id} and status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by month(created_at),is_pleased"
+      and store_id=#{store_id} and status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and date_format(created_at,'%Y')=date_format(now(),'%Y') group by month(created_at),is_pleased"
       orders =Order.find_by_sql(sql).inject(Hash.new){|hash,pleased|
         hash[pleased.day].nil? ? hash[pleased.day]={pleased.is_pleased=>pleased.num} : hash[pleased.day].merge!({pleased.is_pleased=>pleased.num});hash}
       unless orders=={}
