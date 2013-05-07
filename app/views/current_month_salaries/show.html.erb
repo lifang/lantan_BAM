@@ -36,8 +36,8 @@
                                 <tr>
                                   <td><%= salary_detail.current_day %></td>
                                   <% if flag %>
-                                  <td rowspan="<%= @salary_details.length %>"><p class="td_p">满意度98%以上每低一个百分点，扣底薪200，100%满意度，奖励<%= @staff.deduct_at %>元。</p></td>
-                                  <td rowspan="<%= @salary_details.length %>"><%= @staff.deduct_at %></td>
+                                  <td rowspan="<%= @salary_details.length %>"><p class="td_p">满意度98%以上每低一个百分点，扣底薪200，100%满意度，奖励200元。</p></td>
+                                  <td rowspan="<%= @salary_details.length %>"><%= @staff.type_of_w == Staff::S_COMPANY[:FRONT] ? @staff.deduct_at : (@salary.nil? ? 0 : @salary.reward_num) %></td>
                                   <% end %>
                                   <td><%= salary_detail.satisfied_perc %></td>
                                   <% if flag %>
