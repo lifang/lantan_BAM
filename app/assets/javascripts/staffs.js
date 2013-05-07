@@ -212,6 +212,25 @@ $(document).ready(function(){
            if($(this).parents('form').find("#staff_photo").val() == ''){
                tishi_alert("照片不能为空!");
                return false;
+           }else{
+               var img_val = $(this).parents('form').find("#staff_photo").val();
+               var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
+               if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
+               }else{
+                  tishi_alert("图片格式不对!");
+                  return false;
+               }
+           }
+       }
+       if($(this).attr("id") == "edit_staff_btn"){
+           if($(this).parents('form').find("#staff_photo").val() != ''){
+               var edit_img_val = $(this).parents('form').find("#staff_photo").val();
+               var edit_img_suff = edit_img_val.substring(edit_img_val.lastIndexOf('.') + 1).toLowerCase();
+               if(edit_img_suff == "gif" || edit_img_suff == "jpg" || edit_img_suff == "png" || edit_img_suff == "bmp"){
+               }else{
+                  tishi_alert("图片格式不对!");
+                  return false;
+               }
            }
        }
        $(this).parents('form').submit();
@@ -483,7 +502,7 @@ $(document).ready(function(){
                 },
                 success: function(data){
                    if(data == "success"){
-                       this_obj.parents('tr').find("span.train_status").text("");
+                       this_obj.parents('tr').find("span.train_status").text("通过");
                        this_obj.hide();
                        this_obj.next().show();
                    }
