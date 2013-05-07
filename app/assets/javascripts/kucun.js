@@ -77,6 +77,16 @@ function submit_search_form(store_id,type,obj){
         success:function(){
             $("#search_result").show();
             $("#dinghuo_search_result").show();
+            var mat_ids = [];
+            $("#dinghuo_selected_materials").find("tr").each(function(){
+               mat_ids.push($(this).attr('id').split('_')[2])
+            })
+            $("#dinghuo_search_material").find('input').each(function(){
+                var mat_id = $(this).attr('id').split('_')[1];
+                if(mat_ids.indexOf(mat_id)>=0){
+                    $(this).attr("checked", 'checked');
+                }
+            })
         },error:function(){
             tishi_alert("error");
         }
@@ -264,7 +274,7 @@ function add_material(store_id){
   }
   var li = "<tr id='add_li_"+i+"'><td><input type='text' id='add_barcode_"+i+"'/></td><td><input type='text' id='add_name_"+i+"' /></td><td>"+
       $("#select_types").html() +"</td><td><input type='text' id='add_price_"+i+"'/></td><td><input type='text' id='add_count_"+i+"' /></td><td>--</td><td>--</td><td>"+
-      "<a href=\"javascript:void(0);\" onclick=\"add_new_material(this,'"+i+"','"+store_id+"')\">确定</a></td></tr>" ;
+      "<button onclick=\"add_new_material(this,'"+i+"','"+store_id+"')\">确定</button></td></tr>" ;
 //    alert(li);
   $("#dinghuo_selected_materials").append(li);
 }
@@ -516,6 +526,7 @@ function add_new_material(obj,idx,store_id){
        var item = $("#add_li_"+idx).find("select")[0];
        var type = $(item).find("option:selected").index() + 1;
        var order_count = $("#add_count_"+idx).val();
+       $(obj).attr('disabled','disabled');
        $.ajax({
            url:"/stores/" + store_id + "/materials/add",
            dataType:"json",
@@ -853,9 +864,9 @@ function pay_order(mo_id,store_id){
 
 function toggle_notice(obj){
     if($(obj).text()=="点击查看"){
-       $(obj).text("隐藏");
+       $(obj).text(" 隐藏");
     }else{$(obj).text("点击查看")}
-    $("#m_notice_div").toggle(); 
+    $(obj).next().toggle();
 }
 
 function close_notice(obj){

@@ -102,7 +102,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 /*入口*/
 .module { width: 480px; margin: 50px auto 10px auto;}
 .module ul { overflow: hidden;}
-.module li { width: 150px; height: 150px; float: left; margin: 5px; _margin: 4px;}
+.module li { width: 150px; height: 150px; float: left; margin: 5px; _margin: 4px;position:relative}
 .module li a {
     width: 150px;
     height: 40px;
@@ -133,7 +133,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 .module li a.m_seven { background: #930205 url(/assets/module.png) no-repeat 0px -310px;}
 .module li a.m_seven:hover { background: #a60205 url(/assets/module.png) no-repeat 0px -310px;}
-
+/*登录首页信息*/
 .module li a.message {
 	width: 31px; 
 	height:24px;
@@ -143,6 +143,16 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 	right: 0px;
 	padding-top:3px;
 }
+/*内容页信息*/
+.box .message {
+    padding: 5px 10px;
+	margin: 5px 0; 
+	background: #fffbc1; 
+	border: 1px #ed1010 solid; 
+	line-height: 24px; 
+	position: relative;
+}
+.message a { margin-left: 10px;}
 
 
 /*内页*/
@@ -274,7 +284,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .data_tab_table tr.hbg td { background: #999999; color: #FFF; font-weight: bolder; font-size: 14px;}
 .data_tab_table td { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
 .data_tab_table tr.tbg td { background: #f3f3f3;}
-.data_tab_table td a, .remove_a { background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
+.data_tab_table td a, .remove_a, .data_tab_table td button{ background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
 .data_tab_table td a.other_a {background: none; color: #00F; text-decoration: underline;}
 
 
@@ -398,8 +408,9 @@ a.compile_btn { width: 100px;}
 .item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
 
 
-.item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
+.item input[type="text"], .item select, .item_textarea select{ height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 115px; margin-right:8px;text-align: right;}
+.item_textarea input[type="text"]{ height: 24px; line-height: 24px; width: 320px; border: 1px #CCCCCC solid;}
 
 .file {float: left;}
 .show_pic { margin-left: 10px;}

@@ -21,8 +21,11 @@ class MaterialsController < ApplicationController
     @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id], @status
     @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]
     
-    @material_notices = MaterialOrder.search_orders params[:store_id], nil, nil, -1, 0, 1, 30, 2
-    @notice_ids = @material_notices.collect{ |item| item.id}.join(",")
+    @material_pay_notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
+      Notice::TYPES[:URGE_PAYMENT], Notice::STATUS[:NORMAL])
+    @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:received], 0)
+    @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:send], 0)
+    @material_order_urgent = MaterialOrder.where(:id => @material_pay_notices.map(&:target_id))
   end
 
   #库存列表分页
@@ -438,8 +441,10 @@ class MaterialsController < ApplicationController
       content = "订单取消成功"
       if order && order.status == MaterialOrder::STATUS[:no_pay] && order.m_status == MaterialOrder::M_STATUS[:no_send]
         order.update_attribute(:status,MaterialOrder::STATUS[:cancel])
-        headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-                  result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:cancel]})
+        if order.supplier_id==0
+         headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
+         result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => order.code, 'mo_status' => MaterialOrder::STATUS[:cancel]})
+        end
       elsif order.status == MaterialOrder::STATUS[:cancel]
         content = "订单已取消"
       else
@@ -479,7 +484,7 @@ class MaterialsController < ApplicationController
         if params[:sav_price].to_f > 0 && svc_return_records.blank?
           use_card_count = SvcReturnRecord.store_return_count params[:store_id]
           SvcReturnRecord.create({
-              :store_id => params[:store_id],:types => SvcReturnRecord::TYPES[:IN],
+              :store_id => params[:store_id],:types => SvcReturnRecord::TYPES[:IN],:content => "订货单号为：#{@mat_order.code},消费：#{params[:sav_price]}.",
               :price => params[:sav_price], :total_price => use_card_count+params[:sav_price].to_f,
               :target_id => @mat_order.id
             })
@@ -502,12 +507,14 @@ class MaterialsController < ApplicationController
           @current_store = Store.find_by_id params[:store_id]
           @current_store.update_attribute(:account, @current_store.account - @mat_order.price) if @current_store
         end
-        mat_order_types = @mat_order.m_order_types.to_json
-        headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-        p headoffice_post_api_url
-        result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => params[:pay_type].to_i == 5 ? 0 :MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'sale_id' => @mat_order.sale_id, 'mat_order_types' => mat_order_types})
-        p "----------------------------------"
-        p result
+        if @mat_order.supplier_id==0
+          mat_order_types = @mat_order.m_order_types.to_json
+          headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
+          p headoffice_post_api_url
+          result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => params[:pay_type].to_i == 5 ? 0 :MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'sale_id' => @mat_order.sale_id, 'mat_order_types' => mat_order_types})
+          p "----------------------------------"
+          p result
+        end
         render :json => {:status => 0}
      
       end
