@@ -17,12 +17,7 @@ class SyncsController < ActionController::Base
     File.open("#{dir}/#{time}/#{filename}", "wb") do |f|
       f.write(params[:imgFile].read)
     end
-    respond_to do |format|
-      format.json {
-        data={:error=>0, :url=>"/upload_images/#{time}/#{filename}", :message=>"upload_image success"}
-        render :json=>data
-      }
-    end
+    render :json => {:error=>0, :url=>"/upload_images/#{time}/#{filename}", :message=>"upload_image success"}.to_json
   end
 
 end
