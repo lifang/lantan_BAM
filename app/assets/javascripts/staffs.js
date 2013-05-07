@@ -299,6 +299,18 @@ $(document).ready(function(){
         var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
         var sys_score = $(this).parents('tr').find(".data_input_s").val();
         var manage_score = $(this).parents('tr').find(".manage_score_data").text();
+        if(manage_score != ""){
+            var total = parseInt(sys_score) + parseInt(manage_score);
+            if(total > 100){
+               tishi_alert("系统打分和店长打分的总和不能超过100！");
+               return false;
+            }
+        }else{
+           if(parseInt(sys_score) > 100){
+               tishi_alert("系统打分不能超过100！");
+               return false;
+            }
+        }
         $.ajax({
             type : 'get',
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
@@ -312,7 +324,9 @@ $(document).ready(function(){
                    this_obj.parents('tr').find(".sys_score_text").text(sys_score).show();
                    this_obj.hide();
                    this_obj.next().show();
-                   this_obj.parents('tr').find('.assess_result').text(assess_result(sys_score, manage_score));
+                   if(manage_score != ""){
+                    this_obj.parents('tr').find('.assess_result').text(assess_result(sys_score, manage_score));
+                   }
                }
             }
         });
