@@ -35,7 +35,7 @@
     </div>
     <div class="data_menu">
       <% if permission?(controller.controller_name.to_sym, :create) %>
-        <a href="javascript:void(0)" onclick="javascript:popup('#new_cus_div')">新建客户</a>
+        <a href="javascript:void(0)" onclick="javascript:show_new_customer()">新建客户</a>
       <% end %></div>
     <div class="clear"></div>
     <div class="data_body">
