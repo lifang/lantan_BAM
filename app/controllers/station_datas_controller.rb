@@ -14,7 +14,9 @@ class StationDatasController < ApplicationController
   end
 
   def create
-    @station = Station.create({:status => 2,:name => params[:station][:name],:collector_code => params[:station][:collector_code],:store_id => @store.id})
+    @station = Station.create(params[:station])
+    @store.stations << @station
+    @station.status=2
     if @station.save
       if params[:product_ids]
         products = Product.where(:id => params[:product_ids])

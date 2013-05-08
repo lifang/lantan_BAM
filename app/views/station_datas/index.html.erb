@@ -11,7 +11,7 @@
               <tr class="hbg">
                 <td>名称</td>
                 <td>可施工服务</td>
-                <td>采集器编号</td>
+                <td>工位状态</td>
                 <td>操作</td>
               </tr>
             </thead>
@@ -20,10 +20,11 @@
                 <tr>
                   <td><%= station.name %></td>
                   <td><%= station.products.valid.map(&:name).join("、") %></td>
-                  <td><%= station.collector_code %></td>
+                  <td><%= Station::STAT_NAME[station.status] %></td>
                   <td><% if permission?(:base_datas, :edit_station_data) %><%= link_to "编辑", edit_store_station_data_path(@store, station), remote: :true, "data-type" => 'script' %><% end %>
                       <% if permission?(:base_datas, :del_station_data) %><%= link_to "删除", "/stores/#{@store.id}/station_datas/#{station.id}", :confirm => "Are you sure?", :method => 'delete' %><% end %>
-                    </td>
+                  </td>
+
                 </tr>
               <% end %>
 
