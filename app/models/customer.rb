@@ -20,7 +20,7 @@ class Customer < ActiveRecord::Base
 
 
   def self.search_customer(c_types, car_num, started_at, ended_at, name, phone, is_vip, page)
-    base_sql = "select cu.id, ca.num, cu.name, cu.mobilephone, cu.is_vip, cu.mark from customers cu
+    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.is_vip, cu.mark from customers cu
         left join customer_num_relations cnr on cnr.customer_id = cu.id
         left join car_nums ca on ca.id = cnr.car_num_id "
     condition_sql = "where cu.status = #{STATUS[:NOMAL]} "
@@ -110,6 +110,12 @@ class Customer < ActiveRecord::Base
       CustomerNumRelation.create(:car_num_id => carnum.id, :customer_id => customer.id)
     end 
     return [customer, carnum]
+  end
+
+  def Customer.customer_car_num(customer_ids)
+    car_nums = CarNum.find_by_sql(["select cn.num, cnr.customer_id from car_nums cn
+      inner join customer_num_relations cnr on cnr.car_num_id = cn.id where cnr.customer_id in (?)", customer_ids])
+    return car_nums.blank? ? {} : car_nums.group_by { |i| i.customer_id }
   end
 
   def has_password?(submitted_password)

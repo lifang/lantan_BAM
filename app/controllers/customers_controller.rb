@@ -16,6 +16,7 @@ class CustomersController < ApplicationController
     @store = Store.find(params[:store_id].to_i)    
     @customers = Customer.search_customer(params[:c_types], params[:car_num], params[:started_at], params[:ended_at],
       params[:name], params[:phone], params[:is_vip], params[:page])
+    @car_nums = Customer.customer_car_num(@customers)
   end
 
   def search
@@ -33,6 +34,7 @@ class CustomersController < ApplicationController
     @store = Store.find(params[:store_id].to_i)
     @customers = Customer.search_customer(session[:c_types], session[:car_num], session[:started_at], session[:ended_at],
       session[:name], session[:phone], session[:is_vip], params[:page])
+    @car_nums = Customer.customer_car_num(@customers)
     render "index"
   end
 

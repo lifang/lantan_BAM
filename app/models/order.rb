@@ -98,8 +98,12 @@ class Order < ActiveRecord::Base
   #查询需要发短信的用户
   def self.get_message_customers(store_id, started_at, ended_at, is_visited, is_time, time, is_price,
       price, is_vip, is_birthday)
-    customer_sql = "select cu.id cu_id, cu.name from customers cu where cu.status = #{Customer::STATUS[:NOMAL]} "
-    customer_condition_sql = self.generate_customer_sql("", [""], store_id, started_at, ended_at, is_visited,
+    customer_sql = "select DISTINCT(cu.id) cu_id, cu.name from customers cu
+      inner join orders o on o.customer_id = cu.id  where cu.status = #{Customer::STATUS[:NOMAL]}
+      and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
+    condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
+    params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
+    customer_condition_sql = self.generate_customer_sql(condition_sql, params_arr, store_id, started_at, ended_at, is_visited,
       is_vip, is_time, time, is_price, price, is_birthday)
     condition_arr = customer_condition_sql[0]
     condition_sql = customer_condition_sql[1]
@@ -334,7 +338,7 @@ class Order < ActiveRecord::Base
             #产品相关的活动
             if prod.sale_prod_relations
               prod.sale_prod_relations.each{|r|
-                if r.sale and r.sale.status == Sale::STATUS[:RELEASE] and (r.sale.types != Sale::DISC_TIME[:TIME] || (r.sale.types == Sale::DISC_TIME[:TIME] and r.sale.ended_at > Time.now))
+                if r.sale and r.sale.status == Sale::STATUS[:RELEASE] and (r.sale.disc_time_types != Sale::DISC_TIME[:TIME] || (r.sale.disc_time_types == Sale::DISC_TIME[:TIME] and r.sale.ended_at > Time.now))
                   s = Hash.new
                   s[:sale_id] = r.sale_id
                   s[:sale_name] =r.sale.name

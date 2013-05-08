@@ -26,6 +26,7 @@ class MaterialsController < ApplicationController
     @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:received], 0)
     @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:send], 0)
     @material_order_urgent = MaterialOrder.where(:id => @material_pay_notices.map(&:target_id))
+    @mat_in = params[:mat_in] if params[:mat_in]
   end
 
   #库存列表分页

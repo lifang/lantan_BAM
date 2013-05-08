@@ -4,6 +4,7 @@
     <a href="javascript:void(0)" onclick="javascript:show_complaint('complaint')">点击查看</a>
   </div>
   <div class="message" id="complaint_s" style="display: none;">
+    有 <span class="red"><%= @complaints.size %></span> 条投诉
     <a href="javascript:void(0)" onclick="javascript:hide_complaint('complaint')" >隐藏</a>
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
       <thead>
@@ -42,6 +43,7 @@
     <a href="javascript:void(0)" onclick="javascript:show_complaint('notice')">点击查看</a>
   </div>
   <div class="message" id="notice_s" style="display: none;">
+    有 <span class="red"><%= @notices.length %></span> 生日提醒
     <a href="javascript:void(0)" onclick="javascript:hide_complaint('notice')" >隐藏</a>
     <% @notices.each do |notice| %>
     <div><span> <%= notice.name %> 即将过生日</span>
