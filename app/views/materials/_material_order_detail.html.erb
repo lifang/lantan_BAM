@@ -15,10 +15,10 @@
   </div>
   <div class="seeProDiv">
     <div class="seeProDiv_l">物流信息：</div>
-    <div class="seeProDiv_r">物流单号:<%= @mo.logistics_code ||= "------" %><br/>承运人：<%= @mo.carrier ||= "------" %></div>
+    <div class="seeProDiv_r">物流单号：<%= @mo.logistics_code ||= "------" %><br/>&nbsp;承运人：<%= @mo.carrier ||= "------" %></div>
   </div>
   <div class="seeProDiv">
-    <div class="seeProDiv_l">付款状态:</div>
+    <div class="seeProDiv_l">付款状态：</div>
     <div class="seeProDiv_r">
        <%= @mo.pay_status %>
     </div>
