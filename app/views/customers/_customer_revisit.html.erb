@@ -3,7 +3,7 @@
     <h1>用户回访<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <%= form_for :revisit, :url=>"/stores/#{@store.id}/revisits", :method => "post",
-        :html => {:onsubmit => "return check_revisit()"} do %>
+        :html => {:onsubmit => "return check_revisit()", :id => "r_v_form", :name => "r_v_form"} do %>
         <div class="popup_body_area">
           <input type="hidden" id="rev_customer_id" name="rev_customer_id" value=""/>
           <input type="hidden" id="rev_order_id" name="rev_order_id" value=""/>

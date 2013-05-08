@@ -25,6 +25,7 @@ function customer_mark(customer_id) {
 }
 
 function single_send_message(customer_id) {
+    $("#s_s_message_form")[0].reset();
     popup("#message_div");
     $("#m_customer_id").val(customer_id);
 }
@@ -145,6 +146,7 @@ function check_e_car_num(c_num_id) {
 }
 
 function customer_revisit(order_id, customer_id) {
+    $("#r_v_form")[0].reset();
     popup("#customer_revisit_div");
     $("#rev_order_id").val(order_id);
     $("#rev_customer_id").val(customer_id);
