@@ -54,7 +54,7 @@
           <% end %>
         </tbody>
       </table>
-      <div class="amount">总计：<%= @total_serv %></div>
+      <div class="amount">总计：<%= format("%.1f",@total_serv) %></div>
     <% else %>
       暂无服务类报表
     <% end %>
@@ -94,7 +94,7 @@
           <% end %>
         </tbody>
       </table>
-      <div class="amount">总计：<%= @total_prod %></div>
+      <div class="amount">总计：<%= format("%.1f",@total_prod) %></div>
     <% else %>
       暂无产品类报表
     <% end %>
@@ -136,7 +136,7 @@
           <% end %>
         </tbody>
       </table>
-      <div class="amount">总计：<%= @total_fee %></div>
+      <div class="amount">总计：<%= format("%.1f",@total_fee) %></div>
     <%else%>
       暂无增值服务类报表
     <%end%>
