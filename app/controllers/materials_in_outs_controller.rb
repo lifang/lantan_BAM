@@ -5,7 +5,7 @@ class MaterialsInOutsController < ApplicationController
   before_filter :find_store, :except => [:index, :save_cookies]
   
   def index
-    @store_id = params[:store_id]
+    @store_id = Store.first.id unless Store.first.nil?
     @staff = Staff.find(cookies[:user_id]) unless cookies[:user_id].nil?
   end
   
