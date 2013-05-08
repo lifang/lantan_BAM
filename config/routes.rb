@@ -139,10 +139,10 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-    resources :materials_in_outs
+    
     resources :station_datas
   end
-
+  resources :materials_in_outs
   match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
   match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
   match 'get_material' => 'materials_in_outs#get_material'
