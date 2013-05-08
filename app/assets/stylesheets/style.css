@@ -7,7 +7,15 @@ img { border: none;}
 button { cursor: pointer; font-family: "微软雅黑"; border: none; background: #CCC;}
 input {font-family: "微软雅黑";}
 input[type="button"] {font-family: "微软雅黑"; border: none; background: #CCC; cursor:pointer;}
-textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
+textarea { 
+    height: 100px; 
+	font-size: 14px; 
+	line-height: 24px; 
+	padding: 5px;
+	font-family: "微软雅黑"; 
+	border: 1px #CCCCCC solid;
+	resize: none;
+}
 .box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
 .red { color: #F00;}
@@ -404,11 +412,16 @@ a.compile_btn { width: 100px;}
     font-weight: bold;
     color: #930205;
 }
+#station_form .item label, #station_form .seeProDiv_l{
+    width: 200px;
+}
+#station_form .item{ width:370px}
+#station_form{ width: 800px;}
 .item_textarea ul { overflow: hidden; padding: 10px 0 0px 115px;}
 .item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
 
 
-.item input[type="text"], .item select, .item_textarea select{ height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
+.item input[type="text"], .item select, .item_textarea select,.seeProDiv input[type="text"]{ height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 115px; margin-right:8px;text-align: right;}
 .item_textarea input[type="text"]{ height: 24px; line-height: 24px; width: 320px; border: 1px #CCCCCC solid;}
 
