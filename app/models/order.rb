@@ -120,7 +120,7 @@ class Order < ActiveRecord::Base
   #施工中的订单
   def self.working_orders store_id
     return Order.find_by_sql(["select o.id,c.num from orders o inner join car_nums c on c.id=o.car_num_id 
-      where o.status in (#{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]})
+      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]})
       and o.store_id = ? order by o.created_at", store_id])
   end
 

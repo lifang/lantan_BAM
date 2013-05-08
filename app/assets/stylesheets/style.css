@@ -7,7 +7,15 @@ img { border: none;}
 button { cursor: pointer; font-family: "微软雅黑"; border: none; background: #CCC;}
 input {font-family: "微软雅黑";}
 input[type="button"] {font-family: "微软雅黑"; border: none; background: #CCC; cursor:pointer;}
-textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
+textarea { 
+    height: 100px; 
+	font-size: 14px; 
+	line-height: 24px; 
+	padding: 5px;
+	font-family: "微软雅黑"; 
+	border: 1px #CCCCCC solid;
+	resize: none;
+}
 .box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
 .red { color: #F00;}
