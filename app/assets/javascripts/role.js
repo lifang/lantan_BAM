@@ -169,13 +169,21 @@ function selectAll(obj){
 }
 
 function checkValid(obj){
-    if($("#station_name").val()=="")
-    {
-        tishi_alert("名称不能为空！")
+    var flag = true;
+    $(".station_form").find("input[type='text']").each(function(){
+        var name = $(this).prev().text().split("：")[0]
+        if($(this).val()==""){
+            tishi_alert(name+"不能为空!")
+            flag = false;
+            return false;
         }
-    else if($("#station_collector_code").val()==""){
-        tishi_alert("采集器编号不能为空！")
-    }else{
+    })
+    if($(".station_form").find("input[type='checkbox']:checked").length==0){
+        tishi_alert("服务不能为空!")
+        flag = false;
+    }
+    if(flag)
+    {
         $(obj).parents("form").submit();
     }
 }
