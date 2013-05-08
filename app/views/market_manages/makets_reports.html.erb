@@ -44,8 +44,8 @@
                     <tr>
                       <td><%= pro.name %></td>
                       <td><%= pro.service_code %></td>
-                      <td><%= pro.prod_num %></td>
-                      <td><%= pro.sum %></td>
+                      <td><%= pro.prod_num.to_i %></td>
+                      <td><%= format("%.2f",pro.sum) %></td>
                     </tr>
                   <% end %>
                 </table>
@@ -84,8 +84,8 @@
                     <tr>
                       <td><%= pro.name %></td>
                       <td><%= pro.service_code %></td>
-                      <td><%= pro.prod_num %></td>
-                      <td><%= pro.sum %></td>
+                      <td><%= pro.prod_num.to_i %></td>
+                      <td><%= format("%.2f",pro.sum) %></td>
                     </tr>
                   <% end %>
                 </table>
@@ -126,8 +126,8 @@
                       <td><%= pro.name %></td>
                       <td><%= pro.service_code %></td>
                       <td><%= pro.is_free ? Order::FREE_TYPE[:PCARD] : Order::FREE_TYPE[:ORDER_FREE] %></td>
-                      <td><%= pro.prod_num %></td>
-                      <td><%= pro.sum %></td>
+                      <td><%= pro.prod_num.to_i %></td>
+                      <td><%= format("%.2f",pro.sum) %></td>
                     </tr>
                   <% end %>
                 </table>
