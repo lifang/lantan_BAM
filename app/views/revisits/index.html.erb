@@ -52,14 +52,14 @@
           <tbody>
             <% @customers.each do |customer| %>
               <tr>
-                <td><%= customer.num %></td>
-                <td><%= customer.name %></td>
-                <td><%= customer.mobilephone %></td>
-                <td>
+                <td width="20%" class="wordBreak"><%= customer.num %></td>
+                <td width="20%" class="wordBreak"><%= customer.name %></td>
+                <td width="20%" class="wordBreak"><%= customer.mobilephone %></td>
+                <td width="20%" class="wordBreak">
                   <%= link_to "#{customer.code}", "/orders/#{customer.o_id}/order_info" ,
                     :remote => "true", "data-type" => "script", :class => "other_a" %>
                 </td>
-                <td>
+                <td width="20%" class="wordBreak">
                   <% if permission?(:customers, :show) %>
                     <a href="javascript:void(0)"
                        onclick="javascript:customer_revisit(<%= customer.o_id %>, <%= customer.cu_id %>)">回访</a>

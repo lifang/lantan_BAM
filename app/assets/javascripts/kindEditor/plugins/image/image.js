@@ -6,7 +6,6 @@
 * @site http://www.kindsoft.net/
 * @licence http://www.kindsoft.net/license.php
 *******************************************************************************/
-
 KindEditor.plugin('image', function(K) {
     var self = this, name = 'image',
     allowImageUpload = K.undef(self.allowImageUpload, true),
@@ -19,7 +18,6 @@ KindEditor.plugin('image', function(K) {
     filePostName = K.undef(self.filePostName, 'imgFile'),
     fillDescAfterUploadImage = K.undef(self.fillDescAfterUploadImage, false),
     lang = self.lang(name + '.');
-
     self.plugin.imageDialog = function(options) {
         var imageUrl = options.imageUrl,
         imageWidth = K.undef(options.imageWidth, ''),
@@ -46,7 +44,6 @@ KindEditor.plugin('image', function(K) {
         '<label for="remoteUrl" style="width:60px;">' + lang.remoteUrl + '</label>',
         '<input type="text" id="remoteUrl" class="ke-input-text" name="url" value="" style="width:200px;" /> &nbsp;',
         '<span class="ke-button-common ke-button-outer">',
-        '<input type="button" class="ke-button-common ke-button" name="viewServer" value="' + lang.viewServer + '" />',
         '</span>',
         '</div>',
         //size
@@ -143,7 +140,6 @@ KindEditor.plugin('image', function(K) {
                 }
             },
             beforeRemove : function() {
-                viewServerBtn.unbind();
                 widthBox.unbind();
                 heightBox.unbind();
                 refreshBtn.unbind();
@@ -153,7 +149,6 @@ KindEditor.plugin('image', function(K) {
 
         var urlBox = K('[name="url"]', div),
         localUrlBox = K('[name="localUrl"]', div),
-        viewServerBtn = K('[name="viewServer"]', div),
         widthBox = K('.tab1 [name="width"]', div),
         heightBox = K('.tab1 [name="height"]', div),
         refreshBtn = K('.ke-refresh-btn', div),
@@ -206,37 +201,17 @@ KindEditor.plugin('image', function(K) {
                     }
                 } else {
                     tishi_alert(data.message);
+                    $(".tab_alert").css("z-index","811214"); 
                 }
             },
             afterError : function(html) {
                 dialog.hideLoading();
-                self.errorDialog(html);
+                tishi_alert("图片上传出错，请检查图片大小及格式，格式为*.jpg;*.gif;*.png")
             }
         });
         uploadbutton.fileBox.change(function(e) {
             localUrlBox.val(uploadbutton.fileBox.val());
         });
-        if (allowFileManager) {
-            viewServerBtn.click(function(e) {
-                self.loadPlugin('filemanager', function() {
-                    self.plugin.filemanagerDialog({
-                        viewType : 'VIEW',
-                        dirName : 'image',
-                        clickFn : function(url, title) {
-                            if (self.dialogs.length > 1) {
-                                K('[name="url"]', div).val(url);
-                                if (self.afterSelectFile) {
-                                    self.afterSelectFile.call(self, url);
-                                }
-                                self.hideDialog();
-                            }
-                        }
-                    });
-                });
-            });
-        } else {
-            viewServerBtn.hide();
-        }
         var originalWidth = 0, originalHeight = 0;
         function setSize(width, height) {
             widthBox.val(width);

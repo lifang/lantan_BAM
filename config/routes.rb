@@ -161,6 +161,7 @@ LantanBAM::Application.routes.draw do
     end
     member do
       post "edit_car_num"
+      get "delete_car_num"
     end
   end
 

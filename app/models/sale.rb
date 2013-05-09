@@ -54,7 +54,7 @@ class Sale < ActiveRecord::Base
   #统计活动订单的数量，金额，及优惠金额
   def self.count_sale_orders(store_id)
     sql ="select count(o.id) o_num,concat_ws('--',date_format(s.started_at,'%Y.%m.%d'),date_format(s.ended_at,'%Y.%m.%d')) day,
-         s.introduction intro,sum(o.price) sum,s.name,s.id,s.disc_time_types from sales s  inner join orders o on s.id=o.sale_id where s.store_id=?
+         s.description intro,sum(o.price) sum,s.name,s.id,s.disc_time_types from sales s  inner join orders o on s.id=o.sale_id where s.store_id=?
          group by s.id;"
     return Sale.find_by_sql([sql,store_id])
   end
