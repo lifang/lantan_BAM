@@ -5,7 +5,8 @@ function publish_sale(e){
     var time=$("#s_time input[name='disc_time']:checked").val();
     var subsidy =$("#s_sub input[name='subsidy']:checked").val();
     var pic_format =["png","gif","jpg","bmp"]
-    var img=$("#img_url").val();
+    var img =$("#img_url").val();
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]") 
     var pic_type =img.substring(img.lastIndexOf(".")).toLowerCase()
     if (name=="" || name.length==0){
         tishi_alert("请输入本次活动的标题")
@@ -51,6 +52,12 @@ function publish_sale(e){
     }
     if ((img != "" || img.length !=0) && pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
         tishi_alert("请选择正确格式的图片,正确格式是："+pic_format )
+        return false;
+    }
+    var img_name = img.substring(img.lastIndexOf("\\")).toLowerCase();
+    var g_name = img_name.substring(1,img_name.length);
+    if ((img != "" || img.length !=0) && pattern.test(g_name.split(".")[0])){
+        tishi_alert("图片名称不能包含特殊字符")
         return false;
     }
     if (parseInt(subsidy)==1 && $("#sub_content").val().length == 0){
@@ -177,7 +184,7 @@ function check_add(e){
         tishi_alert("请输入套餐卡有效时间和失效时间");
         return false;
     }
-     if ( ($("#started_at").val() > $("#ended_at").val())){
+    if ( ($("#started_at").val() > $("#ended_at").val())){
         tishi_alert("套餐卡有效时间不能大于失效时间");
         return false;
     }
@@ -187,6 +194,27 @@ function check_add(e){
     }
     if($("#add_products").children().length == 0){
         tishi_alert("请选择产品或服务");
+        return false;
+    }
+    Array.prototype.indexOf=function(el, index){
+        var n = this.length>>>0, i = ~~index;
+        if(i < 0) i += n;
+        for(; i < n; i++) if(i in this && this[i] === el) return i;
+        return -1;
+    }
+    var img =$("#sale_img").val();
+    var pic_format =["png","gif","jpg","bmp"]
+    var img_name = img.substring(img.lastIndexOf("\\")).toLowerCase();
+    var pic_type =img.substring(img.lastIndexOf(".")).toLowerCase()
+    if ((img != "" || img.length !=0) && pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
+        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format )
+        return false;
+    }
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
+  
+    var g_name = img_name.substring(1,img_name.length);
+    if ((img != "" || img.length !=0) && pattern.test(g_name.split(".")[0])){
+        tishi_alert("图片名称不能包含特殊字符");
         return false;
     }
     $("#add_pcard").submit();

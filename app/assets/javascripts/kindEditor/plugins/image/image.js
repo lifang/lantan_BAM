@@ -6,7 +6,6 @@
 * @site http://www.kindsoft.net/
 * @licence http://www.kindsoft.net/license.php
 *******************************************************************************/
-
 KindEditor.plugin('image', function(K) {
     var self = this, name = 'image',
     allowImageUpload = K.undef(self.allowImageUpload, true),
@@ -19,7 +18,6 @@ KindEditor.plugin('image', function(K) {
     filePostName = K.undef(self.filePostName, 'imgFile'),
     fillDescAfterUploadImage = K.undef(self.fillDescAfterUploadImage, false),
     lang = self.lang(name + '.');
-
     self.plugin.imageDialog = function(options) {
         var imageUrl = options.imageUrl,
         imageWidth = K.undef(options.imageWidth, ''),
@@ -188,6 +186,7 @@ KindEditor.plugin('image', function(K) {
             target : target,
             width: 60,
             afterUpload : function(data) {
+
                 dialog.hideLoading();
                 if (data.error === 0) {
                     var url = data.url;
@@ -210,7 +209,7 @@ KindEditor.plugin('image', function(K) {
             },
             afterError : function(html) {
                 dialog.hideLoading();
-                self.errorDialog(html);
+                tishi_alert("图片上传出错，请检查图片大小及格式，格式为*.jpg;*.gif;*.png")
             }
         });
         uploadbutton.fileBox.change(function(e) {

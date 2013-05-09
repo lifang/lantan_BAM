@@ -52,10 +52,13 @@ function add_product(e){
         return false;
     }
     var img_f  = false
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]") 
     $(".add_img #img_div input[name$='img_url']").each(function (){
         if (this.value!="" || this.value.length!=0){
-            var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase()
-            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
+            var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
+            var img_name = this.value.substring(this.value.lastIndexOf("\\")).toLowerCase();
+            var g_name = img_name.substring(1,img_name.length);
+            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0])){
                 img_f = true
             }else{
                 $(this).attr("name","img_url["+this.id+"]");
@@ -63,7 +66,7 @@ function add_product(e){
         }     
     })
     if(img_f){
-        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format );
+        tishi_alert("请选择"+pic_format+"格式的图片，且名称不能包含非法字符" );
         return false
     }
     $("#desc").val(serv_editor.html());
@@ -131,10 +134,13 @@ function edit_serv(e){
         return false;
     }
     var img_f  = false
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
     $(".add_img #img_div input[name$='img_url']").each(function (){
         if (this.value!="" || this.value.length!=0){
-            var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase()
-            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
+            var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
+            var img_name = this.value.substring(this.value.lastIndexOf("\\")).toLowerCase();
+            var g_name = img_name.substring(1,img_name.length);
+            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0])){
                 img_f = true
             }else{
                 $(this).attr("name","img_url["+this.id+"]");
@@ -142,7 +148,7 @@ function edit_serv(e){
         }
     })
     if(img_f){
-        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format );
+        tishi_alert("请选择"+pic_format+"格式的图片，且名称不能包含非法字符" );
         return false
     }
     $("#desc").val(serv_editor.html());
