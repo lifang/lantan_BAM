@@ -20,14 +20,14 @@
       <tbody>
         <% @complaints.each do |complaint| %>
           <tr>
-            <td><%= complaint.num %></td>
-            <td><%= complaint.name %></td>
-            <td><%= link_to "#{complaint.code}", "/orders/#{complaint.o_id}/order_info" ,
+            <td width="15%" class="wordBreak"><%= complaint.num %></td>
+            <td width="15%" class="wordBreak"><%= complaint.name %></td>
+            <td width="15%" class="wordBreak"><%= link_to "#{complaint.code}", "/orders/#{complaint.o_id}/order_info" ,
                 :remote => "true", "data-type" => "script", :class => "other_a" %>
             </td>
-            <td><%= complaint.reason %></td>
-            <td><%= complaint.suggestion %></td>
-            <td><% if permission?(:customers,:deal_complaint) %>
+            <td width="25%" class="wordBreak"><%= complaint.reason %></td>
+            <td width="20%" class="wordBreak"><%= complaint.suggestion %></td>
+            <td width="10%" class="wordBreak"><% if permission?(:customers,:deal_complaint) %>
                 <a href="/stores/<%= @store.id %>/customers/<%= complaint.cu_id %>?comp=1">处理</a>
               <% end %></td>
           </tr>

@@ -54,7 +54,7 @@ class CustomersController < ApplicationController
         Customer.create_single_cus(customer, car_num, params[:mobilephone].strip, params[:new_car_num].strip,
           params[:new_name].strip, params[:other_way].strip,
           params[:birthday], params[:buy_year], params[:car_models], params[:sex], params[:address])
-          flash[:notice] = "客户信息创建成功。"
+        flash[:notice] = "客户信息创建成功。"
       end
     end
     redirect_to "/stores/#{params[:store_id]}/customers"
@@ -63,10 +63,15 @@ class CustomersController < ApplicationController
   def update
     if params[:new_name] and params[:mobilephone]
       customer = Customer.find(params[:id].to_i)
-      customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
-        :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
-        :address => params[:address])
-      flash[:notice] = "客户信息更新成功。"
+      mobile_c = Customer.find_by_mobilephone(params[:mobilephone].strip)
+      if mobile_c
+        flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
+      else
+        customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
+          :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
+          :address => params[:address])
+        flash[:notice] = "客户信息更新成功。"
+      end
     end
     redirect_to request.referer
   end
@@ -103,7 +108,7 @@ class CustomersController < ApplicationController
   def show
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @car_nums = CarNum.find_by_sql(["select c.id c_id, c.num, cb.name b_name, cm.name m_name, cb.id b_id,
+    @car_nums = CarNum.find_by_sql(["select c.id c_id, c.num, cb.name b_name, cm.name m_name, cb.id b_id, cr.customer_id,
         cm.id m_id, c.buy_year,cb.capital_id
         from car_nums c left join car_models cm on cm.id = c.car_model_id
         left join car_brands cb on cb.id = cm.car_brand_id
@@ -195,6 +200,14 @@ class CustomersController < ApplicationController
         render :json => {:is_has => is_has}
       }
     end
+  end
+
+  def delete_car_num
+    ids = params[:id].split("_")
+    customer_num_relation = CustomerNumRelation.find_by_car_num_id_and_customer_id(ids[0], ids[1])
+    customer_num_relation.destroy
+    flash[:notice] = "删除成功。"
+    redirect_to request.referer
   end
 
 end
