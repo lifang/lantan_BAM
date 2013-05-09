@@ -14,10 +14,15 @@ class SyncsController < ActionController::Base
     dir = "#{File.expand_path(Rails.root)}/public/upload_images"
     Dir.mkdir(dir) unless File.directory?(dir)
     Dir.mkdir("#{dir}/#{time}") unless File.directory?("#{dir}/#{time}")
-    File.open("#{dir}/#{time}/#{filename}", "wb") do |f|
-      f.write(params[:imgFile].read)
+    img_size=params[:imgFile].size*100.0/1024/100
+    if img_size < 1024
+      File.open("#{dir}/#{time}/#{filename}", "wb") do |f|
+        f.write(params[:imgFile].read)
+      end
+      render :json => {:error=>0, :url=>"/upload_images/#{time}/#{filename}", :message=>"upload_image success"}.to_json
+    else
+      render :json => {:error=>1, :message=>"图片大小不能超过1MB"}.to_json
     end
-    render :json => {:error=>0, :url=>"/upload_images/#{time}/#{filename}", :message=>"upload_image success"}.to_json
   end
 
 end

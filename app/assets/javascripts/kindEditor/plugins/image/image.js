@@ -44,7 +44,6 @@ KindEditor.plugin('image', function(K) {
         '<label for="remoteUrl" style="width:60px;">' + lang.remoteUrl + '</label>',
         '<input type="text" id="remoteUrl" class="ke-input-text" name="url" value="" style="width:200px;" /> &nbsp;',
         '<span class="ke-button-common ke-button-outer">',
-        '<input type="button" class="ke-button-common ke-button" name="viewServer" value="' + lang.viewServer + '" />',
         '</span>',
         '</div>',
         //size
@@ -141,7 +140,6 @@ KindEditor.plugin('image', function(K) {
                 }
             },
             beforeRemove : function() {
-                viewServerBtn.unbind();
                 widthBox.unbind();
                 heightBox.unbind();
                 refreshBtn.unbind();
@@ -151,7 +149,6 @@ KindEditor.plugin('image', function(K) {
 
         var urlBox = K('[name="url"]', div),
         localUrlBox = K('[name="localUrl"]', div),
-        viewServerBtn = K('[name="viewServer"]', div),
         widthBox = K('.tab1 [name="width"]', div),
         heightBox = K('.tab1 [name="height"]', div),
         refreshBtn = K('.ke-refresh-btn', div),
@@ -186,7 +183,6 @@ KindEditor.plugin('image', function(K) {
             target : target,
             width: 60,
             afterUpload : function(data) {
-
                 dialog.hideLoading();
                 if (data.error === 0) {
                     var url = data.url;
@@ -205,6 +201,7 @@ KindEditor.plugin('image', function(K) {
                     }
                 } else {
                     tishi_alert(data.message);
+                    $(".tab_alert").css("z-index","811214"); 
                 }
             },
             afterError : function(html) {
@@ -215,27 +212,6 @@ KindEditor.plugin('image', function(K) {
         uploadbutton.fileBox.change(function(e) {
             localUrlBox.val(uploadbutton.fileBox.val());
         });
-        if (allowFileManager) {
-            viewServerBtn.click(function(e) {
-                self.loadPlugin('filemanager', function() {
-                    self.plugin.filemanagerDialog({
-                        viewType : 'VIEW',
-                        dirName : 'image',
-                        clickFn : function(url, title) {
-                            if (self.dialogs.length > 1) {
-                                K('[name="url"]', div).val(url);
-                                if (self.afterSelectFile) {
-                                    self.afterSelectFile.call(self, url);
-                                }
-                                self.hideDialog();
-                            }
-                        }
-                    });
-                });
-            });
-        } else {
-            viewServerBtn.hide();
-        }
         var originalWidth = 0, originalHeight = 0;
         function setSize(width, height) {
             widthBox.val(width);
