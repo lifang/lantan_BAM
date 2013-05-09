@@ -71,13 +71,13 @@ function input_time(){
     }
 }
 
-function delete_sale(sale_id){
+function delete_sale(sale_id,store_id){
     if(confirm("确定要删除这项活动吗？")){
         $.ajax({
             async:true,
             type : 'post',
             dataType : 'json',
-            url : "/sales/delete_sale",
+            url : "/stores/"+ store_id+"/sales/delete_sale",
             data : {
                 sale_id : sale_id
             },
@@ -89,13 +89,13 @@ function delete_sale(sale_id){
     }
 }
 
-function public_sale(sale_id){
+function public_sale(sale_id,store_id){
     if(confirm("确定要发布这项活动吗？")){
         $.ajax({
             async:true,
             type : 'post',
             dataType : 'json',
-            url : "/sales/public_sale",
+            url : "/stores/"+ store_id+"/sales/public_sale",
             data : {
                 sale_id : sale_id
             },
