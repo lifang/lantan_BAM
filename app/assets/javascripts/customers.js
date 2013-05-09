@@ -212,3 +212,14 @@ function show_new_customer() {
     $("#new_c_form")[0].reset();
     popup("#new_cus_div");
 }
+
+function edit_customer() {
+    $("#edit_c_form")[0].reset();
+    popup('#edit_cus_div');
+}
+
+function edit_car_num_f(item_id) {
+    $("#d_c_n_f_" + item_id)[0].reset();
+    popup("#edit_car_num_" + item_id);
+}
+

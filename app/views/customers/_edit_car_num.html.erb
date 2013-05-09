@@ -1,6 +1,7 @@
 <div id="edit_car_num_<%= edit_car_num.c_id %>" class="tab_popup" style="display:none;">
   <%= form_for :customer, :url=>"/customers/#{@customer.id}_#{edit_car_num.c_id}/edit_car_num", :method => "post",
-    :html => {:onsubmit => "return edit_car_num(#{edit_car_num.c_id})"} do %>
+    :html => {:onsubmit => "return edit_car_num(#{edit_car_num.c_id})",
+    :id => "d_c_n_f_#{edit_car_num.c_id}", :name => "d_c_n_f_#{edit_car_num.c_id}"} do %>
     <div class="popup_box">
       <h1>编辑车牌号码<a href="javascript:void(0)" class="close">关闭</a></h1>
       <input type="hidden" name="store_id_<%= edit_car_num.c_id %>" name="store_id_<%= edit_car_num.c_id %>"
