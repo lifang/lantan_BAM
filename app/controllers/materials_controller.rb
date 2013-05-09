@@ -551,11 +551,16 @@ class MaterialsController < ApplicationController
     store = Store.find params[:store_id]
     material = Material.find_by_code(params[:materials][:code])
     if material.nil?
-      store.materials << Material.create(params[:materials])
+      store.materials << Material.create(params[:materials].merge({:status => 0}))
     else
       storage = material.storage + params[:materials][:storage].to_i
       material.update_attributes(:storage => storage)
     end
     redirect_to "/stores/#{params[:store_id]}/materials"
+  end
+
+  def uniq_mat_code
+    material = Material.find_by_code_and_store_id(params[:code], params[:store_id])
+    render :text => material.nil? ? "0" : "1"
   end
 end
