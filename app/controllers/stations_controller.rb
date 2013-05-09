@@ -71,11 +71,10 @@ class StationsController < ApplicationController
 
   def simple_station
     store_id = Store.first.try(:id)
-    @stations = Station.includes(:staffs, :station_staff_relations).where("store_id=#{store_id} and status !=#{Station::STAT[:DELETED]}")
+    @stations = Station.where("store_id=#{store_id} and status !=#{Station::STAT[:DELETED]}")
     @staff_stations = {}
     @stations.each do |station|
-      staffs = station.staffs.where("current_day=DATE_FORMAT(NOW(),'%Y%m%d')")
-      @staff_stations[station.id] = staffs unless staffs.blank?
+      @staff_stations[station.id] = station.staffs.where("current_day=DATE_FORMAT(NOW(),'%Y%m%d')")
     end
     render :layout => false
   end
