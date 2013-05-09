@@ -7,6 +7,7 @@ class Staff < ActiveRecord::Base
   has_many :work_records
   has_many :salaries
   has_many :station_staff_relations
+  has_many :stations, :through => :station_staff_relations
   has_many :train_staff_relations
   has_many :violation_rewards
   has_many :staff_gr_records

@@ -1,7 +1,7 @@
 #encoding: utf-8
 class StationsController < ApplicationController
   # 现场管理 -- 施工现场
-  before_filter :sign?
+  before_filter :sign?, :except => [:simple_station]
   layout 'station'
 
   #施工现场
@@ -67,5 +67,16 @@ class StationsController < ApplicationController
 
   def see_video
     @path=params[:url]
+  end
+
+  def simple_station
+    store_id = Store.first.try(:id)
+    @stations = Station.includes(:staffs, :station_staff_relations).where("store_id=#{store_id} and status !=#{Station::STAT[:DELETED]}")
+    @staff_stations = {}
+    @stations.each do |station|
+      staffs = station.staffs.where("current_day=DATE_FORMAT(NOW(),'%Y%m%d')")
+      @staff_stations[station.id] = staffs unless staffs.blank?
+    end
+    render :layout => false
   end
 end

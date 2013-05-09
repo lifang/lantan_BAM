@@ -12,7 +12,11 @@ LantanBAM::Application.routes.draw do
       post :delete_pcard
     end
   end
-  resources :stations
+  resources :stations do
+    collection do
+      get "simple_station"
+    end
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
