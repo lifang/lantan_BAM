@@ -14,12 +14,11 @@
     <div class="tec_content">
       <dl>
         <dt>技师:</dt>
+        <% @staff_stations[station.id].each do |s| %>
         <dd>
-          <%= @staff_stations[station.id].first.try(:name) unless @staff_stations[station.id].blank?%>
+          <%= s.try(:name)%>
         </dd>
-        <dd>
-          <%= @staff_stations[station.id].last.try(:name) unless @staff_stations[station.id].blank?%>
-        </dd>
+        <% end  unless @staff_stations[station.id].blank?%>
       </dl>
       <dl>
         <dt>工位状态:</dt>
