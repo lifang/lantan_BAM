@@ -44,8 +44,8 @@
                     <tr>
                       <td><%= pro.name %></td>
                       <td><%= pro.service_code %></td>
-                      <td><%= pro.prod_num %></td>
-                      <td><%= pro.sum %></td>
+                      <td><%= pro.prod_num.to_i %></td>
+                      <td><%= format("%.2f",pro.sum) %></td>
                     </tr>
                   <% end %>
                 </table>
@@ -54,7 +54,7 @@
           <% end %>
         </tbody>
       </table>
-      <div class="amount">总计：<%= @total_serv %></div>
+      <div class="amount">总计：<%= format("%.1f",@total_serv) %></div>
     <% else %>
       暂无服务类报表
     <% end %>
@@ -84,8 +84,8 @@
                     <tr>
                       <td><%= pro.name %></td>
                       <td><%= pro.service_code %></td>
-                      <td><%= pro.prod_num %></td>
-                      <td><%= pro.sum %></td>
+                      <td><%= pro.prod_num.to_i %></td>
+                      <td><%= format("%.2f",pro.sum) %></td>
                     </tr>
                   <% end %>
                 </table>
@@ -94,7 +94,7 @@
           <% end %>
         </tbody>
       </table>
-      <div class="amount">总计：<%= @total_prod %></div>
+      <div class="amount">总计：<%= format("%.1f",@total_prod) %></div>
     <% else %>
       暂无产品类报表
     <% end %>
@@ -126,8 +126,8 @@
                       <td><%= pro.name %></td>
                       <td><%= pro.service_code %></td>
                       <td><%= pro.is_free ? Order::FREE_TYPE[:PCARD] : Order::FREE_TYPE[:ORDER_FREE] %></td>
-                      <td><%= pro.prod_num %></td>
-                      <td><%= pro.sum %></td>
+                      <td><%= pro.prod_num.to_i %></td>
+                      <td><%= format("%.2f",pro.sum) %></td>
                     </tr>
                   <% end %>
                 </table>
@@ -136,7 +136,7 @@
           <% end %>
         </tbody>
       </table>
-      <div class="amount">总计：<%= @total_fee %></div>
+      <div class="amount">总计：<%= format("%.1f",@total_fee) %></div>
     <%else%>
       暂无增值服务类报表
     <%end%>

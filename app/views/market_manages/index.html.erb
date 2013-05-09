@@ -37,8 +37,8 @@
                   <% @goal_hash[sale.id].each_with_index do |goal,index| %>
                     <tr>
                       <td><%= goal.type_name %></td>
-                      <td><%= goal.goal_price %></td>
-                      <td><%= goal.current_price %></td>
+                      <td><%= format("%.2f",goal.goal_price) %></td>
+                      <td><%= format("%.2f",goal.current_price) %></td>
                       <td><%= goal.goal_price==0 ? "0%" :"#{format("%.1f",(goal.current_price.nil?? 0 :goal.current_price)*100/goal.goal_price)}%" %></td>
                     </tr>
                   <% end unless @goal_hash[sale.id].blank? %>
@@ -79,8 +79,8 @@
                   <% @goal_hash[sale.id].each_with_index do |goal,index| %>
                     <tr>
                       <td><%= goal.type_name %></td>
-                      <td><%= goal.goal_price %></td>
-                      <td><%= goal.current_price %></td>
+                      <td><%= format("%.2f",goal.goal_price) %></td>
+                      <td><%= format("%.2f",goal.current_price) %></td>
                       <td><%= goal.goal_price==0 ? "0%" :"#{format("%.1f",(goal.current_price.nil?? 0 :goal.current_price)*100/goal.goal_price)}%" %></td>
                     </tr>
                   <% end unless @goal_hash[sale.id].blank? %>

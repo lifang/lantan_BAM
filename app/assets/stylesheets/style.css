@@ -222,7 +222,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .data_body_p span { margin: 0 10px;}
 
 .data_body_ul { color: #930205; padding: 10px 0 10px 10px;}
-.data_body_ul li { list-style: inside circle;}
+.data_body_ul li { list-style: inside circle; margin: 5px 0;}
 
 
 .data_menu { height: 24px; line-height: 24px; margin-bottom: 1px; float: right; overflow: hidden;}

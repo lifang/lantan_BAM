@@ -42,7 +42,7 @@
               <td><%= @staff_name[comp.id] %></td>
               <td><%=Complaint::CHART_NAMES[comp.types]%></td>
               <td width="200px"><%= comp.reason %></td>
-              <td><%= comp.types==Complaint::TYPES[:INVALID]? "否" : "是" %></td>
+              <td><%= comp.types ==Complaint::TYPES[:INVALID]? "否" : "是" %></td>
               <td><%=Complaint::STATUS_NAME[comp.status]  %></td>
               <td><%=comp.process_at.nil? ? "" : comp.process_at.strftime("%Y.%m.%d--%H:%S")  %></td>
               <td width="200px"><%= comp.remark %></td>

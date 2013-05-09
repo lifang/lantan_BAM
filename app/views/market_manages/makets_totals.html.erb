@@ -26,11 +26,11 @@
           <%@months.each do |k,v|%>
             <tr>
               <td><%= k %></td>
-              <td><%= v[OrderPayType::PAY_TYPES[:CASH]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:CASH]]%></td>
-              <td><%= v[OrderPayType::PAY_TYPES[:CREDIT_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:CREDIT_CARD]] %></td>
-              <td><%= v[OrderPayType::PAY_TYPES[:SV_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:SV_CARD]] %></td>
-              <td><%= v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]] %></td>
-              <td><%= v.values.inject(0){|num,price|num+price} %></td>
+              <td><%= format("%.2f",v[OrderPayType::PAY_TYPES[:CASH]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:CASH]])%></td>
+              <td><%= format("%.2f",v[OrderPayType::PAY_TYPES[:CREDIT_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:CREDIT_CARD]]) %></td>
+              <td><%= format("%.2f",v[OrderPayType::PAY_TYPES[:SV_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:SV_CARD]]) %></td>
+              <td><%= format("%.2f",v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]]) %></td>
+              <td><%= format("%.2f",v.values.inject(0){|num,price|num+price}) %></td>
             </tr>
           <% end %>
         </tbody>
@@ -38,7 +38,7 @@
       <div class="pageTurn">
   <%#= will_paginate @month_goal,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
       </div>
-      <div class="amount">总计：<%=@total_num%></div>
+      <div class="amount">总计：<%=format("%.2f",@total_num)%></div>
     <% else %>
       暂无汇总记录
     <% end %>
