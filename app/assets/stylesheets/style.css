@@ -53,7 +53,7 @@ textarea {
 
 
 /*确定  取消 btn*/
-.btn_box, { width: 200px; margin: 10px auto; text-align: center;}
+.btn_box { width: 200px; margin: 10px auto; text-align: center;}
 .btn_box_s { width: 200px; margin: 10px auto; text-align: center;}
 .btn_box_w { width: 200px; margin: 10px auto; text-align: center;}
 .confirm_btn, .cancel_btn { padding: 5px 15px; margin: 0 10px; color: #FFF;cursor: pointer; display: inline-block;}
