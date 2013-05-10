@@ -16,6 +16,16 @@ function publish_sale(e){
         tishi_alert("请选择产品或服务");
         return false;
     }
+    var is_num=false
+    $("#add_products input").each(function(){
+        if(isNaN(parseInt(this.value)) || parseInt(this.value)<=0){
+            is_num=true
+        }
+    })
+    if (is_num){
+        tishi_alert("产品或服务的数量必须大于1");
+        return false;
+    }
     if (disc == undefined){
         tishi_alert("请选择优惠类型");
         return false;
@@ -194,6 +204,16 @@ function check_add(e){
     }
     if($("#add_products").children().length == 0){
         tishi_alert("请选择产品或服务");
+        return false;
+    }
+    var is_num=false
+    $("#add_products input").each(function(){
+        if(isNaN(parseInt(this.value)) || parseInt(this.value)<=0){
+            is_num=true
+        }
+    })
+    if (is_num){
+        tishi_alert("产品或服务的数量必须大于1");
         return false;
     }
     Array.prototype.indexOf=function(el, index){
