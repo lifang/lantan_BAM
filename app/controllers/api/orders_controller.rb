@@ -38,10 +38,18 @@ class Api::OrdersController < ApplicationController
   end
   #根据车牌号查询客户
   def search_car
-    order = Order.search_by_car_num params[:store_id],params[:car_num]
+    order = Order.search_by_car_num params[:store_id],params[:car_num], nil
     result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2] }.to_json
     render :json => result
   end
+
+  #查看订单
+  def show_car
+    order = Order.search_by_car_num params[:store_id],params[:car_num], params[:car_id]
+    result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2] }.to_json
+    render :json => result
+  end
+
   #发送验证码
   def send_code
     message = MessageRecord.send_code params[:order_id],params[:phone]

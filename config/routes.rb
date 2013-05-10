@@ -185,7 +185,7 @@ LantanBAM::Application.routes.draw do
     resources :orders do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
-          "confirm_reservation","refresh","pay_order","checkin"
+          "confirm_reservation","refresh","pay_order","checkin", "show_car"
       end
     end
   end
