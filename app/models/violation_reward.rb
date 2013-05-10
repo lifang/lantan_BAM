@@ -15,7 +15,7 @@ class ViolationReward < ActiveRecord::Base
 
   def self.vio_reward()
     sql = "select sum(score_num) score,staff_id from violation_rewards v inner join staffs s on v.staff_id=s.id where v.types=?
-    and v.process_types=? and date_format(v.process_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') group by staff_id ;"
+    and v.process_types=? and date_format(v.process_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') group by staff_id"
     return ViolationReward.find_by_sql([sql,ViolationReward::TYPES[:VIOLATION],ViolationReward::VIOLATE[:deducate]])
   end
 

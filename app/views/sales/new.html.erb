@@ -6,6 +6,7 @@
         <div>
           <%= form_for @sale, :url=>"/stores/#{params[:store_id]}/sales",:method=>:post,:html=>{:multipart => true,:id=>"one_sale"} do  %>
             <%= render 'form' %>
+          <img id="new_img" />
           <% end %>
         </div>
         <div class="btn_box"><button class="confirm_btn" type="submit" onclick="publish_sale(this)">发布</button></div>

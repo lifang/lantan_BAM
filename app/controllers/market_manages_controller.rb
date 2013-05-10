@@ -13,6 +13,7 @@ class MarketManagesController < ApplicationController
     @months =@month_goal.inject(Hash.new){|hash,order|
       hash[order.day].nil? ? hash[order.day]={order.pay_type=>order.price} : hash[order.day].merge!(order.pay_type=>order.price);hash }
     @total_num =@month_goal.inject(0){|num,order| num+order.price}
+    p @months
   end
 
   #营业额汇总查询
@@ -193,13 +194,13 @@ class MarketManagesController < ApplicationController
     relation_order_sql = "select srr.*,o.code code,o.id o_id from svc_return_records srr
                           left join orders o on o.id = srr.target_id where #{started_at_sql}
                           and #{ended_at_sql} and srr.store_id=#{store_id} and
-                          srr.types=#{SvcReturnRecord::TYPES[:IN]}"
+                          srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
     order_svc_returns = SvcReturnRecord.find_by_sql(relation_order_sql)
 
     relation_material_order_sql = "select srr.*,mo.code code,mo.id mo_id from svc_return_records srr
                           left join material_orders mo on mo.id = srr.target_id where #{started_at_sql}
                           and #{ended_at_sql} and srr.store_id=#{store_id} and
-                          srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
+                          srr.types=#{SvcReturnRecord::TYPES[:IN]}"
     material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
 
     (order_svc_returns + material_order_svc_returns).sort{|a,b| a[:id] <=> b[:id]}

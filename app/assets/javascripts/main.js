@@ -47,7 +47,7 @@ function popup(t){
     var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
     var win_height = document.documentElement.clientHeight;//jQuery(document).height();
     var layer_height = $(t).height();
-    $(t).css('top',(win_height-layer_height)/2 + scolltop);
+    $(t).css('top',(win_height-layer_height)/2 + scolltop + 10);
 
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
@@ -74,7 +74,7 @@ $(function(){
 function add_this(e,name){
     var child="<div id='"+e.value+"'><em>"+name +"</em><a href='javascript:void(0)' class='addre_a'  \n\
    onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a><span><input name='sale_prod["+e.value +"]' \n\
-    type='text' class='addre_input' value='1' id='add_p"+e.value +"' /></span><a href='javascript:void(0)' class='addre_a' \n\
+    type='text' class='addre_input' value='1' id='add_p"+e.value +"' disabled /></span><a href='javascript:void(0)' class='addre_a' \n\
     id='delete_one"+e.value+"'>-</a><a href='javascript:void(0)' class='remove_a' \n\
     onclick='$(this).parent().remove();if($(\"#prod_"+ e.value+"\").length!=0){$(\"#prod_"+ e.value+"\")[0].checked=false;}'>删除</a></div>";
     if ($(e)[0].checked){

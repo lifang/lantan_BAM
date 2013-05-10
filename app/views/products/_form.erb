@@ -31,10 +31,10 @@
   <label>规格：</label><input name="standard" id="standard" type="text" value="<%= @product.standard %>" />
 </div>
 <div class="item_textarea">
-  <label>简介：</label><textarea name="intro" id="intro" cols="" rows="" class="width_textarea"><%=@product.introduction  %></textarea>
+  <label>简介：</label><textarea name="intro" id="intro" cols="" rows="" class="width_textarea"><%=@product.description  %></textarea>
 </div>
 <div class="item_textarea">
-  <label>描述：</label><textarea  id="add_intro" cols="" rows="" class="width_textarea" style="width:470px"><%=@product.description  %></textarea>
+  <label>描述：</label><textarea  id="add_intro" cols="" rows="" class="width_textarea" style="width:470px"><%=@product.introduction.nil? ? "" : @product.introduction  %></textarea>
   <input type="hidden" name="desc" id="desc" />
 </div>
 <script type="text/javascript">

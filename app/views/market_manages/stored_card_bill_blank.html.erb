@@ -21,12 +21,12 @@
                 <%= svc_return.code %></td>
               <td><%= svc_return.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
               <td><%= svc_return.content %></td>
-              <td><%= svc_return.price if svc_return.types == SvcReturnRecord::TYPES[:OUT] %></td>
-              <td><%= "-"+svc_return.price.to_s if svc_return.types == SvcReturnRecord::TYPES[:IN] %></td>
+              <td><%= svc_return.price if svc_return.types == SvcReturnRecord::TYPES[:IN] %></td>
+              <td><%= "-"+svc_return.price.to_s if svc_return.types == SvcReturnRecord::TYPES[:OUT] %></td>
               <td><%= svc_return.total_price %></td>
             </tr>
           <% end %>
         </tbody>
   </table>
-  <div class="amount">总店未支付储值卡余额  总计：<%= @svc_returns.last.nil? ? 0 : @svc_returns.last.total_price %>（元）</div>
+  <div class="amount">总店未支付储值卡余额  总计：<%= @svc_returns.last.nil? ? 0 : sprintf('%.2f',@svc_returns.last.total_price) %>（元）</div>
 </div>

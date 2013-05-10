@@ -6,8 +6,16 @@ ul { list-style: none;}
 img { border: none;}
 button { cursor: pointer; font-family: "微软雅黑"; border: none; background: #CCC;}
 input {font-family: "微软雅黑";}
-input[type="button"] {font-family: "微软雅黑"; border: none; background: #CCC; cursor:pointer;}
-textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-family: "微软雅黑"; border: 1px #CCCCCC solid;}
+input[type="button"] {font-family: "微软雅黑"; border: none;}
+textarea { 
+    height: 100px; 
+	font-size: 14px; 
+	line-height: 24px; 
+	padding: 5px;
+	font-family: "微软雅黑"; 
+	border: 1px #CCCCCC solid;
+	resize: none;
+}
 .box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
 .red { color: #F00;}
@@ -30,15 +38,7 @@ textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-
 }
 .x { width: 10px; height: 10px; background: url(/assets/x.png) no-repeat 0 0; }
 .close { width: 13px; height: 13px; background: url(/assets/close.jpg) no-repeat ; }
-.message {
-    padding: 5px 10px;
-    margin: 5px 0;
-    background: #fffbc1;
-    border: 1px #ed1010 solid;
-    line-height: 24px;
-    position: relative;
-}
-.message a { margin-left: 10px;}
+
 
 .red { color: #F00;}
 
@@ -53,15 +53,14 @@ textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px;font-
 
 
 /*确定  取消 btn*/
-.btn_box { width: 180px; margin: 10px auto; text-align: center;}
-.btn_box_s { width: 85px; margin: 10px auto;}
-.btn_box_w { width: 195px; margin: 10px auto;}
-.confirm_btn, .cancel_btn { padding: 5px 15px; _padding: 2px 7px; margin: 0 10px; color: #FFF;cursor: pointer; display: inline-block;}
-input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
+.btn_box { margin: 10px auto; text-align: center;}
+.btn_box_s { margin: 10px auto; text-align: center;}
+.btn_box_w { margin: 10px auto; text-align: center;}
+.confirm_btn, .cancel_btn { padding: 5px 15px; margin: 0 10px; color: #FFF;cursor: pointer; display: inline-block;}
+.confirm_btn { background: #930205;}
 .cancel_btn { background: #999999;}
 
 .other_btn { padding: 5px 15px; _padding: 2px 7px; margin: 0 10px; background: #CCC;}
-
 /*mask*/
 .mask {
     background: url(/assets/black.png) repeat;
@@ -110,7 +109,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 /*入口*/
 .module { width: 480px; margin: 50px auto 10px auto;}
 .module ul { overflow: hidden;}
-.module li { width: 150px; height: 150px; float: left; margin: 5px; _margin: 4px;}
+.module li { width: 150px; height: 150px; float: left; margin: 5px; _margin: 4px;position:relative}
 .module li a {
     width: 150px;
     height: 40px;
@@ -141,6 +140,26 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 .module li a.m_seven { background: #930205 url(/assets/module.png) no-repeat 0px -310px;}
 .module li a.m_seven:hover { background: #a60205 url(/assets/module.png) no-repeat 0px -310px;}
+/*登录首页信息*/
+.module li a.message {
+	width: 31px; 
+	height:24px;
+	background: url(/assets/message.png) no-repeat;
+	position:absolute; 
+	top: 0px;
+	right: 0px;
+	padding-top:3px;
+}
+/*内容页信息*/
+.box .message {
+    padding: 5px 10px;
+	margin: 5px 0; 
+	background: #fffbc1; 
+	border: 1px #ed1010 solid; 
+	line-height: 24px; 
+	position: relative;
+}
+.message a { margin-left: 10px;}
 
 
 /*内页*/
@@ -202,7 +221,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .data_body_p span { margin: 0 10px;}
 
 .data_body_ul { color: #930205; padding: 10px 0 10px 10px;}
-.data_body_ul li { list-style: inside circle;}
+.data_body_ul li { list-style: inside circle; margin: 5px 0;}
 
 
 .data_menu { height: 24px; line-height: 24px; margin-bottom: 1px; float: right; overflow: hidden;}
@@ -245,19 +264,22 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 
 /*table*/
 .data_table { text-align: center; margin-bottom: 30px;}
+
 .data_table tr.hbg td, .data_table tr.hbg th { background: #c59fa0; color: #FFF; font-weight: bolder; font-size: 14px;}
 .data_table td, .data_table th { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
-.data_table tr.tbg td { background: #fff5f6;}
+
+.data_table tr.tbg td {background-color:#fff5f6}
 .data_table td a { background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
 
 .data_table td.data_table_img { line-height: inherit; height: inherit; font-size: 0;}
 .data_table td.data_table_img img { margin: 5px 0;}
 
 .data_table td a.other_a {background: none; color: #00F; text-decoration: underline;}
+.data_table td a.no_a {background: none; color: #333; text-decoration: none;}
 
 .data_table td .data_input_s { width: 50px; height: 24px; line-height: 24px; border: 1px #CCCCCC solid; text-align: center;}
 
-.td_p { width: 100px; margin: 0 auto; text-align: center;}
+.data_table td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}
 
 /*s_table*/
 .s_table { background:#CCC; margin: 5px 0;}
@@ -269,7 +291,7 @@ input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
 .data_tab_table tr.hbg td { background: #999999; color: #FFF; font-weight: bolder; font-size: 14px;}
 .data_tab_table td { background: #FFF; line-height: 32px; height: 32px; font-size: 12px;}
 .data_tab_table tr.tbg td { background: #f3f3f3;}
-.data_tab_table td a, .remove_a { background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
+.data_tab_table td a, .remove_a, .data_tab_table td button{ background: #026c93; padding: 0px 5px; color: #FFF; font-size: 12px; margin: 0 5px;}
 .data_tab_table td a.other_a {background: none; color: #00F; text-decoration: underline;}
 
 
@@ -389,12 +411,18 @@ a.compile_btn { width: 100px;}
     font-weight: bold;
     color: #930205;
 }
+#station_form .item label, #station_form .seeProDiv_l{
+    width: 200px;
+}
+#station_form .item{ width:370px}
+#station_form{ width: 800px;}
 .item_textarea ul { overflow: hidden; padding: 10px 0 0px 115px;}
 .item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
 
 
-.item input[type="text"], .item select, .item_textarea select { height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
+.item input[type="text"], .item select, .item_textarea select,.seeProDiv input[type="text"]{ height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 .item input[type="text"].input_s { width: 115px; margin-right:8px;text-align: right;}
+.item_textarea input[type="text"]{ height: 24px; line-height: 24px; width: 320px; border: 1px #CCCCCC solid;}
 
 .file {float: left;}
 .show_pic { margin-left: 10px;}
@@ -435,6 +463,7 @@ a.compile_btn { width: 100px;}
 .otherWay li input { margin: 0 5px;}
 .otherWay li input[type=radio] { float: left; margin-top: 6px;}
 .amount { float: right; font-size: 16px; color: #930205; margin-right: 20px;}
+#final_fukuan_tab .amount, #mat_order_detail_tab .amount{text-align: right; float:none}
 
 .supplier_input input { width: 60px;}
 .supplier_add a {
@@ -771,8 +800,7 @@ a.compile_btn { width: 100px;}
     margin: 0 auto;
     padding: 0 auto;
 }
-#materials_tab_table th, #materials_tab_tabl e td{width:12.5%; word-break:break-all}
+/*#materials_tab_table th, #materials_tab_table td{width:12.5%; word-break:break-all}*/
 #role_staffs .data_table td{width:33.3%; word-break:break-all}
 .station-data .data_table td{width:25%; word-break:break-all}
-.data_table td.data_table_error, .data_table tr.tbg td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}
 #mat_order_detail_tab .data_tab_table td td{width:33.3%; word-break:break-all}

@@ -167,3 +167,23 @@ function selectAll(obj){
         $(obj).parent().next().find("input[type='checkbox']").attr("checked", false)
     }
 }
+
+function checkValid(obj){
+    var flag = true;
+    $(".station_form").find("input[type='text']").each(function(){
+        var name = $(this).prev().text().split("：")[0]
+        if($(this).val()==""){
+            tishi_alert(name+"不能为空!")
+            flag = false;
+            return false;
+        }
+    })
+    if($(".station_form").find("input[type='checkbox']:checked").length==0){
+        tishi_alert("服务不能为空!")
+        flag = false;
+    }
+    if(flag)
+    {
+        $(obj).parents("form").submit();
+    }
+}

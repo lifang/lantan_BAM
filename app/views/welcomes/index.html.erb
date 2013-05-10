@@ -24,8 +24,8 @@
       <div class="module">
         <ul>
           <% if permissions_on_menus?(:stations)%><li><a href="/stores/<%= params[:store_id] %>/stations" class="m_one">现场管理</a></li><% end %>
-          <% if permissions_on_menus?(:customers)%><li><a href="/stores/<%= params[:store_id] %>/customers" class="m_two">客户管理</a></li><% end %>
-          <% if permissions_on_menus?(:materials)%><li><a href="/stores/<%= params[:store_id] %>/materials" class="m_three">库存管理</a></li><% end %>
+          <% if permissions_on_menus?(:customers)%><li><a href="/stores/<%= params[:store_id] %>/customers" class="m_two">客户管理</a><% if (@complaints.length + @notices.length) > 0 %><a href="#" class="message"><%= @complaints.length + @notices.length %></a><% end %></li><% end %>
+          <% if permissions_on_menus?(:materials)%><li><a href="/stores/<%= params[:store_id] %>/materials" class="m_three">库存管理</a><% if (@material_notices.length + @material_orders_send + @material_orders_received) > 0 %><a href="#" class="message"><%= @material_notices.length + @material_orders_send + @material_orders_received %></a><% end %></li><% end %>
           <% if permissions_on_menus?(:datas)%><li><a href="/stores/<%= params[:store_id] %>/market_manages" class="m_four">统计管理</a></li><% end %>
           <% if permissions_on_menus?(:sales)%><li><a href="/stores/<%= params[:store_id] %>/sales" class="m_five">营销管理</a></li><% end %>
           <% if permissions_on_menus?(:staffs)%><li><a href="/stores/<%= params[:store_id] %>/staffs" class="m_six">员工管理</a></li><% end %>
@@ -34,27 +34,7 @@
           <% end %>
         </ul>
         <div class="clear"></div>
-        <% unless @complaints.blank? and @notices.blank? and @material_notices.blank? and @material_orders == 0 %>
-          <div class="message">
-            <% unless @complaints.blank? %>
-              有 <span class="red"><%= @complaints.length %></span> 条投诉信息需要您去处理
-              <a href="/stores/<%= params[:store_id] %>/customers">点击查看</a><br/>
-            <% end %>
-            <% unless @notices.blank? %>
-              有 <span class="red"><%= @notices.length %></span> 位客户即将过生日
-              <a href="/stores/<%= params[:store_id] %>/customers">点击查看</a><br/>
-            <% end %>
-            <% unless @material_notices.blank? %>
-              有 <span class="red"><%= @material_notices.length %></span> 条催款信息，请您及时与总部联系
-              <a href="/stores/<%= params[:store_id] %>/materials">点击查看</a><br/>
-            <% end %>
-            <% unless @material_orders == 0 %>
-              有 <span class="red"><%= @material_orders %></span> 条订单已发货，请注意查收
-              <a href="/stores/<%= params[:store_id] %>/materials?status=<%= MaterialOrder::M_STATUS[:send] %>">点击查看</a>
-            <% end %>
-            <!--<span class="x" onclick="$('.message').hide();">Close</span>-->
-          </div>
-        <% end %>
+        
       </div>
     </div>
     <%= render :partial => "/shared/tishi_alert" %>

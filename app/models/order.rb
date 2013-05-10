@@ -98,8 +98,12 @@ class Order < ActiveRecord::Base
   #查询需要发短信的用户
   def self.get_message_customers(store_id, started_at, ended_at, is_visited, is_time, time, is_price,
       price, is_vip, is_birthday)
-    customer_sql = "select cu.id cu_id, cu.name from customers cu where cu.status = #{Customer::STATUS[:NOMAL]} "
-    customer_condition_sql = self.generate_customer_sql("", [""], store_id, started_at, ended_at, is_visited,
+    customer_sql = "select DISTINCT(cu.id) cu_id, cu.name from customers cu
+      inner join orders o on o.customer_id = cu.id  where cu.status = #{Customer::STATUS[:NOMAL]}
+      and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
+    condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
+    params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
+    customer_condition_sql = self.generate_customer_sql(condition_sql, params_arr, store_id, started_at, ended_at, is_visited,
       is_vip, is_time, time, is_price, price, is_birthday)
     condition_arr = customer_condition_sql[0]
     condition_sql = customer_condition_sql[1]
@@ -115,12 +119,12 @@ class Order < ActiveRecord::Base
 
   #施工中的订单
   def self.working_orders store_id
-    return Order.find_by_sql(["select o.id,c.num from orders o inner join car_nums c on c.id=o.car_num_id 
-      where o.status in (#{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]})
+    return Order.find_by_sql(["select o.id, c.num, o.status from orders o inner join car_nums c on c.id=o.car_num_id
+      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]})
       and o.store_id = ? order by o.created_at", store_id])
   end
 
-  def self.search_by_car_num store_id,car_num
+  def self.search_by_car_num store_id,car_num, car_id
     customer = nil
     working_orders = []
     old_orders = []
@@ -159,30 +163,19 @@ class Order < ActiveRecord::Base
         order_hash[:pay_type] = order.order_pay_types.collect{|type|
           OrderPayType::PAY_TYPES_NAME[type.pay_type]
         }.join(",")
-        #if order.sale_id
-        #  s = Hash.new
-        #  s[:name] = "huodong"
-        #  s[:price] = 12
-        #  s[:num] = 22
-        #  order_hash[:products] << s
-        #end
-        #if order.c_pcard_relation_id
-        #
-        #end
-        #if order.c_svc_relation_id
-        #
-        #end
         front_staff = Staff.find_by_id_and_store_id order.front_staff_id,store_id
         order_hash[:staff] = front_staff.name if front_staff
         if order.status == STATUS[:BEEN_PAYMENT] or order.status == STATUS[:FINISHED]
           old_orders << order_hash
         else
-          working_orders << order_hash
+          if car_id and car_id.to_i == order.id
+            working_orders << order_hash
+          elsif car_id.nil?
+            working_orders << order_hash
+          end
         end
       end
       working_orders = working_orders.first if working_orders.size > 0
-    else
-
     end
     [customer,working_orders,old_orders]
   end
@@ -294,13 +287,12 @@ class Order < ActiveRecord::Base
       #根据产品找活动，打折卡，套餐卡
       p_cards = []
       prod_arr = []
-      sale_arr = []
+      #sale_arr = []
+      sale_hash = {}
       svcard_arr = []
       prod_ids.split(",").each do |id|
         if id.split("_")[1].to_i == 3
           #套餐卡
-          #          user_p_card = CPcardRelation.find(:first, :conditions => ["customer_id = ? and ended_at >= ? and package_card_id = ?",
-          #              customer.id, Time.now, id.split("_")[0].to_i])
           has_p_card = 0
           p_c = Hash.new
           p_c = PackageCard.find_by_id_and_status_and_store_id id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id
@@ -332,24 +324,33 @@ class Order < ActiveRecord::Base
             prod_arr << product
             total += product[:price]
             #产品相关的活动
-            if prod.sale_prod_relations
-              prod.sale_prod_relations.each{|r|
-                if r.sale && r.sale.status == Sale::STATUS[:RELEASE]
-                  s = Hash.new
-                  s[:sale_id] = r.sale_id
-                  s[:sale_name] =r.sale.name
-                  if r.sale.disc_types == Sale::DISC_TYPES[:FEE]
-                    s[:price] = r.sale.discount
-                  elsif r.sale.disc_types == Sale::DISC_TYPES[:DIS]
-                    s[:price] = prod.sale_price * (10 - r.sale.discount) / 10
-                  end
-                  s[:selected] = 0
-                  s[:show_price] = "-" + s[:price].to_s
-                  sale_arr << s
-                  total -= s[:price]
+            prod.sale_prod_relations.each{|r|
+              if r.sale and r.sale.status == Sale::STATUS[:RELEASE] and (r.sale.disc_time_types != Sale::DISC_TIME[:TIME] || (r.sale.disc_time_types == Sale::DISC_TIME[:TIME] and r.sale.ended_at > Time.now))
+                s = sale_hash[r.sale_id] ? sale_hash[r.sale_id] : Hash.new
+                s[:sale_id] = r.sale_id
+                s[:sale_name] =r.sale.name
+                if r.sale.disc_types == Sale::DISC_TYPES[:FEE]
+                  s[:price] = r.sale.discount
+                elsif r.sale.disc_types == Sale::DISC_TYPES[:DIS]
+                  s[:price] = prod.sale_price * (10 - r.sale.discount) / 10
                 end
-              }
-            end
+                s[:selected] = 0
+                s[:show_price] = "-" + s[:price].to_s
+                s[:disc_types] = r.sale.disc_types
+                s[:discount] = r.sale.discount
+                s[:sale_products] = []
+                sale_prod_relations = SaleProdRelation.find_by_sql(["select spr.product_id, spr.prod_num, p.name
+                    from sale_prod_relations spr inner join products p
+                    on p.id = spr.product_id where spr.sale_id = ?", r.sale.id])
+                sale_prod_relations.each { |spr| 
+                  s[:sale_products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
+                  }
+                #sale_arr << s
+                total -= s[:price] unless sale_hash[r.sale_id]
+                sale_hash[r.sale_id] = s
+                
+              end
+            } if prod.sale_prod_relations
           end
         end
       end if prod_ids && carNum && customer
@@ -395,7 +396,7 @@ class Order < ActiveRecord::Base
       end
       status = 1 if status == 0
       arr << prod_arr
-      arr << sale_arr
+      arr << sale_hash.values #sale_arr
       arr << svcard_arr
       arr << p_cards
       arr << status
@@ -481,7 +482,6 @@ class Order < ActiveRecord::Base
           c_sv_relation = CSvcRelation.find_by_customer_id_and_sv_card_id c_id,svcard_id
           c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => svcard_id) if c_sv_relation.nil?
           hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
-
         end
         #订单相关的套餐卡
         if arr[3].any?
@@ -627,25 +627,39 @@ class Order < ActiveRecord::Base
     hash[:total] = self.price
     content = ""
     realy_price = 0
+    sale_prod_ids = {}
+    sale = nil
+    unless self.sale_id.blank?
+      h = {}
+      sale = self.sale
+      sale.sale_prod_relations.each { |spr| sale_prod_ids[spr.product_id] = spr.prod_num }
+      h[:name] = sale.name
+      #h[:price] = sale.disc_types == Sale::DISC_TYPES[:FEE] ? sale.discount : realy_price * (10 - sale.discount) / 10
+      h[:type] = 1
+      hash[:sale] = h
+    end
+
     hash[:products] = self.order_prod_relations.collect{|r|
       h = Hash.new
       h[:name] = r.product.name
       h[:price] = r.price
-      realy_price += r.price
+      if sale_prod_ids[r.product_id] < r.pro_num
+        realy_price += r.price.to_f * sale_prod_ids[r.product_id]
+      else
+        realy_price += r.price.to_f * r.pro_num
+      end if sale_prod_ids[r.product_id]
       h[:num] = r.pro_num.to_i
       h[:type] = 0
       content += h[:name] + ","
       h
     }
+    if sale.disc_types == Sale::DISC_TYPES[:FEE]
+      hash[:sale][:price] = sale.discount #realy_price > sale.discount ? sale.discount : realy_price
+    else
+      hash[:sale][:price] = realy_price * (10 - sale.discount) / 10
+    end if sale
     hash[:content] = content.chomp(",")
-    unless self.sale_id.blank?
-      h = {}
-      sale = self.sale
-      h[:name] = sale.name
-      h[:price] = sale.disc_types == Sale::DISC_TYPES[:FEE] ? sale.discount : realy_price * (10 - sale.discount) / 10
-      h[:type] = 1
-      hash[:sale] = h
-    end
+    
     if not self.c_svc_relation_id.blank?
       h = {}
       sv_card = self.c_svc_relation.sv_card

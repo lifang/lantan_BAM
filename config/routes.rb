@@ -1,20 +1,22 @@
- LantanBAM::Application.routes.draw do
+LantanBAM::Application.routes.draw do
 
   resources :syncs do
     get "upload_file"
-  end
-
-  resources :sales do
     collection do
-      post :delete_sale,:public_sale
+      post "upload_image"
     end
   end
+  
   resources :package_cards do
     member do
       post :delete_pcard
     end
   end
-  resources :stations
+  resources :stations do
+    collection do
+      get "simple_station"
+    end
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -48,7 +50,7 @@
     end
     resources :sales do
       collection do
-        post "load_types"
+        post "load_types",:delete_sale,:public_sale
       end
       member do
         post "update_sale"
@@ -141,10 +143,10 @@
       end
     end
 
-    resources :materials_in_outs
+    
     resources :station_datas
   end
-
+  resources :materials_in_outs
   match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
   match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
   match 'get_material' => 'materials_in_outs#get_material'
@@ -153,12 +155,14 @@
   match 'save_cookies' => 'materials_in_outs#save_cookies'
   match 'stores/:store_id/materials/:mo_id/get_mo_remark' => 'materials#get_mo_remark'
   match 'stores/:store_id/materials/:mo_id/order_remark' => 'materials#order_remark'
+  match 'stores/:store_id/uniq_mat_code' => 'materials#uniq_mat_code'
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"
     end
     member do
       post "edit_car_num"
+      get "delete_car_num"
     end
   end
 
@@ -181,7 +185,7 @@
     resources :orders do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
-          "confirm_reservation","refresh","pay_order","checkin"
+          "confirm_reservation","refresh","pay_order","checkin", "show_car"
       end
     end
   end

@@ -6,6 +6,7 @@ class PackageCardsController < ApplicationController
   require 'will_paginate/array'
 
   def index
+    session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at]=nil,nil,nil,nil,nil
     @cards=PackageCard.paginate_by_sql("select name,img_url,started_at,ended_at,id from package_cards where store_id=#{params[:store_id]}
          and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => Constant::PER_PAGE)
     @prods ={}
@@ -66,11 +67,11 @@ class PackageCardsController < ApplicationController
     pcard=PackageCard.find(params[:id])
     parms = {:name=>params[:name],:started_at=>params[:started_at],:ended_at=>params[:ended_at],:price=>params[:price]
     }
-    #    begin
-    parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
-    #    rescue
-    #      flash[:notice] ="图片上传失败，请重新添加！"
-    #    end
+    begin
+      parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+    rescue
+      flash[:notice] ="图片上传失败，请重新添加！"
+    end
     pcard.update_attributes(parms)
     pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
     params[:sale_prod].each do |key,value|

@@ -14,11 +14,12 @@ class StationDatasController < ApplicationController
   end
 
   def create
-    @station = Station.create({:status => 2,:name => params[:station][:name],:collector_code => params[:station][:collector_code],:store_id => @store.id})
+    @station = Station.create(params[:station].merge({:store_id => @store.id, :status => 2}))
     if @station.save
-      params[:product_ids].each do |p|
-        StationServiceRelation.create({:station_id => @station.id, :product_id => p})
-      end if params[:product_ids]
+      if params[:product_ids]
+        products = Product.where(:id => params[:product_ids])
+        @station.products = products
+      end
       render :successful
     else
       render :replace_form
@@ -27,18 +28,17 @@ class StationDatasController < ApplicationController
 
   def edit
     @action = 'edit'
-    @station = Station.find(params[:id])
+    @station = Station.includes(:products).find(params[:id])
     render :replace_form
   end
 
   def update
     @station = Station.find(params[:id])
     if @station.update_attributes(params[:station])
-      StationServiceRelation.delete_all("station_id=#{@station.id}")
-      @station.station_service_relations.map(&:destroy)
-      params[:product_ids].each do |p|
-        StationServiceRelation.create({:station_id => @station.id, :product_id => p})
-      end if params[:product_ids]
+      if params[:product_ids]
+        products = Product.where(:id => params[:product_ids])
+        @station.products = products
+      end
       render :successful
     else
       render :replace_form

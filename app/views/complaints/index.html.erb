@@ -4,19 +4,22 @@
 <div class="search">
   <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/complaints/search" do%>
     <div><label>统计月份：</label><select name="created_at">
-        <% (Constant::DATE_START..Time.now.months_ago(1).strftime("%Y-%m")).each do |month| %>
-          <option <%if (@complaint.nil? ? session[:created_at].nil? ? "" : session[:created_at] : @complaint.current_day.strftime("%Y-%m"))==month%>selected <%end%> value="<%= month %>"><%= month %></option>
-        <% end %>
-      </select>
-    </div>
-    <div><button class="search_btn" >查询</button></div>
-  <% end %>
-</div>
-<div class="clear"></div>
-<div class="data_body">
-  <% if @complaint.nil?%>
-    暂未统计当月结果
-  <% else%>
-    <img src="<%= @complaint.image_url %>" />
-  <% end%>
-</div>
+        <% curr_month = Time.now.months_ago(1)%>
+        <%  while( curr_month.strftime("%Y-%m") >= Constant::DATE_START)%>
+          <% month = curr_month.strftime("%Y-%m")  %>
+            <option <%if (@complaint.nil? ? session[:created_at].nil? ? "" : session[:created_at] : @complaint.current_day.strftime("%Y-%m"))==month%>selected <%end%> value="<%= month %>"><%= month %></option>
+            <% curr_month = curr_month.prev_month%>
+          <% end %>
+        </select>
+      </div>
+      <div><button class="search_btn" >查询</button></div>
+    <% end %>
+  </div>
+  <div class="clear"></div>
+  <div class="data_body">
+    <% if @complaint.nil?%>
+      暂未统计当月结果
+    <% else%>
+      <img src="<%= @complaint.image_url %>" />
+    <% end%>
+  </div>

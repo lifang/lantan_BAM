@@ -11,8 +11,8 @@ function check_customer() {
         tishi_alert("请输入客户姓名");
         return false;
     }
-    if ($.trim($("#mobilephone").val()) == "") {
-        tishi_alert("请输入客户手机号码");
+    if ($.trim($("#mobilephone").val()) == "" || $.trim($("#mobilephone").val()).length < 6 || $.trim($("#mobilephone").val()).length > 20) {
+        tishi_alert("请输入客户手机号码，且号码长度大于6，小于20");
         return false;
     }
     return true;
@@ -25,6 +25,7 @@ function customer_mark(customer_id) {
 }
 
 function single_send_message(customer_id) {
+    $("#s_s_message_form")[0].reset();
     popup("#message_div");
     $("#m_customer_id").val(customer_id);
 }
@@ -145,6 +146,7 @@ function check_e_car_num(c_num_id) {
 }
 
 function customer_revisit(order_id, customer_id) {
+    $("#r_v_form")[0].reset();
     popup("#customer_revisit_div");
     $("#rev_order_id").val(order_id);
     $("#rev_customer_id").val(customer_id);
@@ -205,3 +207,19 @@ function is_has_trains(complaint_id, obj) {
         obj.submit();
     }    
 }
+
+function show_new_customer() {
+    $("#new_c_form")[0].reset();
+    popup("#new_cus_div");
+}
+
+function edit_customer() {
+    $("#edit_c_form")[0].reset();
+    popup('#edit_cus_div');
+}
+
+function edit_car_num_f(item_id) {
+    $("#d_c_n_f_" + item_id)[0].reset();
+    popup("#edit_car_num_" + item_id);
+}
+

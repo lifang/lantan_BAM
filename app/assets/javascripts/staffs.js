@@ -212,6 +212,25 @@ $(document).ready(function(){
            if($(this).parents('form').find("#staff_photo").val() == ''){
                tishi_alert("照片不能为空!");
                return false;
+           }else{
+               var img_val = $(this).parents('form').find("#staff_photo").val();
+               var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
+               if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
+               }else{
+                  tishi_alert("图片格式不对!");
+                  return false;
+               }
+           }
+       }
+       if($(this).attr("id") == "edit_staff_btn"){
+           if($(this).parents('form').find("#staff_photo").val() != ''){
+               var edit_img_val = $(this).parents('form').find("#staff_photo").val();
+               var edit_img_suff = edit_img_val.substring(edit_img_val.lastIndexOf('.') + 1).toLowerCase();
+               if(edit_img_suff == "gif" || edit_img_suff == "jpg" || edit_img_suff == "png" || edit_img_suff == "bmp"){
+               }else{
+                  tishi_alert("图片格式不对!");
+                  return false;
+               }
            }
        }
        $(this).parents('form').submit();
@@ -299,6 +318,18 @@ $(document).ready(function(){
         var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
         var sys_score = $(this).parents('tr').find(".data_input_s").val();
         var manage_score = $(this).parents('tr').find(".manage_score_data").text();
+        if(manage_score != ""){
+            var total = parseInt(sys_score) + parseInt(manage_score);
+            if(total > 100){
+               tishi_alert("系统打分和店长打分的总和不能超过100！");
+               return false;
+            }
+        }else{
+           if(parseInt(sys_score) > 100){
+               tishi_alert("系统打分不能超过100！");
+               return false;
+            }
+        }
         $.ajax({
             type : 'get',
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
@@ -312,7 +343,9 @@ $(document).ready(function(){
                    this_obj.parents('tr').find(".sys_score_text").text(sys_score).show();
                    this_obj.hide();
                    this_obj.next().show();
-                   this_obj.parents('tr').find('.assess_result').text(assess_result(sys_score, manage_score));
+                   if(manage_score != ""){
+                    this_obj.parents('tr').find('.assess_result').text(assess_result(sys_score, manage_score));
+                   }
                }
             }
         });
@@ -336,6 +369,18 @@ $(document).ready(function(){
        var staff_id = $("#staff_id").val();
        var month_score_id = $(this).attr("name");
        var manage_score = $("#month_score_val").text();
+       if(manage_score != ""){
+            var total = parseInt(sys_score) + parseInt(manage_score);
+            if(total > 100){
+               tishi_alert("系统打分和店长打分的总和不能超过100！");
+               return false;
+            }
+        }else{
+           if(parseInt(sys_score) > 100){
+               tishi_alert("系统打分不能超过100！");
+               return false;
+            }
+        }
        $.ajax({
             type : 'get',
             url : "/stores/"+ store_id+"/month_scores/update_sys_score",
@@ -356,6 +401,17 @@ $(document).ready(function(){
             }
         });
         return false;
+    });
+
+    //验证店长打分和系统打分的和是否超过100
+    $("#manage_score_btn_validate").click(function(){
+       var manage_score = $("#month_score_manage_score").val();
+       var sys_score = $("#sys_score_text").text();
+       var total = parseInt(sys_score) + parseInt(manage_score);
+       if(total > 100){
+           tishi_alert("系统打分和店长打分的和不能超过100！");
+           return false;
+       }
     });
 
     //编辑提成金额扣款金额
@@ -469,7 +525,7 @@ $(document).ready(function(){
                 },
                 success: function(data){
                    if(data == "success"){
-                       this_obj.parents('tr').find("span.train_status").text("");
+                       this_obj.parents('tr').find("span.train_status").text("通过");
                        this_obj.hide();
                        this_obj.next().show();
                    }
