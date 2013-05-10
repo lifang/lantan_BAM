@@ -64,7 +64,7 @@ class CustomersController < ApplicationController
     if params[:new_name] and params[:mobilephone]
       customer = Customer.find(params[:id].to_i)
       mobile_c = Customer.find_by_mobilephone(params[:mobilephone].strip)
-      if mobile_c
+      if mobile_c and mobile_c.id != customer.id
         flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
       else
         customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
