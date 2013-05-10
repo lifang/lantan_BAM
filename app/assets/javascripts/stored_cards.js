@@ -120,3 +120,13 @@ function back_n(e){
     }
 }
 
+function return_value(){
+    $('.goal_mark input').val('');
+    var num=0
+    $(".goal_mark div[id^='item']").each(function(){
+        num +=1
+        if (num>=5){
+            $(this).remove();
+        }
+    })
+}
