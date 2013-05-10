@@ -61,10 +61,8 @@
             <div class="item">
               <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]" %>
             </div>
-            <%= hidden_field_tag "materials[status]",false %>
-            <%= hidden_field_tag "materials[check_num]",0 %>
           </div>
-          <div class="btn_box"><button type="button" onclick="checkMaterial(this)" class="confirm_btn">确定</button></div>
+          <div class="btn_box"><button type="button" onclick="checkMaterial(this, <%= params[:store_id] %>)" class="confirm_btn">确定</button></div>
           <div class="clear"></div>
       <% end %>
     </div>

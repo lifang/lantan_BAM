@@ -12,7 +12,11 @@ LantanBAM::Application.routes.draw do
       post :delete_pcard
     end
   end
-  resources :stations
+  resources :stations do
+    collection do
+      get "simple_station"
+    end
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -151,6 +155,7 @@ LantanBAM::Application.routes.draw do
   match 'save_cookies' => 'materials_in_outs#save_cookies'
   match 'stores/:store_id/materials/:mo_id/get_mo_remark' => 'materials#get_mo_remark'
   match 'stores/:store_id/materials/:mo_id/order_remark' => 'materials#order_remark'
+  match 'stores/:store_id/uniq_mat_code' => 'materials#uniq_mat_code'
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"

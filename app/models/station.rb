@@ -2,6 +2,7 @@
 class Station < ActiveRecord::Base
   has_many :word_orders
   has_many :station_staff_relations
+  has_many :staffs, :through => :station_staff_relations
   has_many :station_service_relations
   has_many :wk_or_times
   has_many :products, :through => :station_service_relations do

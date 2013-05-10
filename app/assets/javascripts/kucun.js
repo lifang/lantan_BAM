@@ -633,7 +633,7 @@ function commit_supplier_form(obj){
     }
 }
 
-function checkMaterial(obj){
+function checkMaterial(obj, store_id){
   if($.trim($("#materials_name").val())==""){
        tishi_alert("请输入物料名称");
     }else if($("#materials_types").val()==""){
@@ -645,8 +645,26 @@ function checkMaterial(obj){
     }else if($.trim($("#materials_storage").val())==""){
         tishi_alert("请输入数量");
     }else{
-        $(obj).attr("disabled", "disabled");
-        $("#add_material_tab_form").submit();
+        var code = $("#materials_code").val();
+        $.ajax({
+            url:"/stores/"+store_id+"/uniq_mat_code",
+            type:'get',
+            data:{code:code},
+            success:function(data){
+                if(data=="1"){
+                    if(confirm("相同条形码的物料已经存在，点击确定增加物料数量！")){
+                        $(obj).attr("disabled", "disabled");
+                        $("#add_material_tab_form").submit();
+                    }else{
+                        hide_mask("#add_material_tab");
+                    }
+                }else{
+                    $(obj).attr("disabled", "disabled");
+                    $("#add_material_tab_form").submit();
+                }
+            }
+        })
+        
     }
 }
 
@@ -701,6 +719,8 @@ function commit_in(obj){
 }
 
 function addMaterial(){
+  $("#add_material_tab").find('input').val("");
+  $("#add_material_tab").find('select').get(0).selectedIndex = 0;
   popup('#add_material_tab');
 }
 
