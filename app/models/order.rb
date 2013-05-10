@@ -336,6 +336,10 @@ class Order < ActiveRecord::Base
                 end
                 s[:selected] = 0
                 s[:show_price] = "-" + s[:price].to_s
+                s[:disc_types] = r.sale.disc_types
+                s[:discount] = r.sale.discount
+                s[:sale_products] = []
+                r.sale.sale_prod_relations.each { |spr| s[:sale_products] << {:product_id => spr.product_id, :prod_num => spr.prod_num} }
                 #sale_arr << s
                 total -= s[:price] unless sale_hash[r.sale_id]
                 sale_hash[r.sale_id] = s
@@ -644,9 +648,11 @@ class Order < ActiveRecord::Base
       content += h[:name] + ","
       h
     }
-    if sale
-      hash[:sale][:price] = (sale.disc_types == Sale::DISC_TYPES[:FEE] and realy_price > sale.discount) ? sale.discount : realy_price * (10 - sale.discount) / 10
-    end
+    if sale.disc_types == Sale::DISC_TYPES[:FEE]
+      hash[:sale][:price] = sale.discount #realy_price > sale.discount ? sale.discount : realy_price
+    else
+      hash[:sale][:price] = realy_price * (10 - sale.discount) / 10
+    end if sale
     hash[:content] = content.chomp(",")
     
     if not self.c_svc_relation_id.blank?
