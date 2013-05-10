@@ -339,7 +339,12 @@ class Order < ActiveRecord::Base
                 s[:disc_types] = r.sale.disc_types
                 s[:discount] = r.sale.discount
                 s[:sale_products] = []
-                r.sale.sale_prod_relations.each { |spr| s[:sale_products] << {:product_id => spr.product_id, :prod_num => spr.prod_num} }
+                sale_prod_relations = SaleProdRelation.find_by_sql(["select spr.product_id, spr.prod_num, p.name
+                    from sale_prod_relations spr inner join products p
+                    on p.id = spr.product_id where spr.sale_id = ?", r.sale.id])
+                sale_prod_relations.each { |spr| 
+                  s[:sale_products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
+                  }
                 #sale_arr << s
                 total -= s[:price] unless sale_hash[r.sale_id]
                 sale_hash[r.sale_id] = s
