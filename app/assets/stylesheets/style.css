@@ -53,15 +53,14 @@ textarea {
 
 
 /*确定  取消 btn*/
-.btn_box { width: 180px; margin: 10px auto; text-align: center;}
-.btn_box_s { width: 85px; margin: 10px auto;}
-.btn_box_w { width: 195px; margin: 10px auto;}
-.confirm_btn, .cancel_btn { padding: 5px 15px; _padding: 2px 7px; margin: 0 10px; color: #FFF;cursor: pointer; display: inline-block;}
-input[type="button"].confirm_btn, .confirm_btn { background: #930205;}
+.btn_box, { width: 200px; margin: 10px auto; text-align: center;}
+.btn_box_s { width: 200px; margin: 10px auto; text-align: center;}
+.btn_box_w { width: 200px; margin: 10px auto; text-align: center;}
+.confirm_btn, .cancel_btn { padding: 5px 15px; margin: 0 10px; color: #FFF;cursor: pointer; display: inline-block;}
+.confirm_btn { background: #930205;}
 .cancel_btn { background: #999999;}
 
 .other_btn { padding: 5px 15px; _padding: 2px 7px; margin: 0 10px; background: #CCC;}
-
 /*mask*/
 .mask {
     background: url(/assets/black.png) repeat;
