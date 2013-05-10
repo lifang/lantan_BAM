@@ -143,4 +143,6 @@ module Constant
   SERVICE = "SERVICE"
   UNNEED_UPDATE = ['sync','item','model']  #不更新的表
   DATE_START =  "2013-01"
+
+  PIC_SIZE =1024  #按kb计算
 end
