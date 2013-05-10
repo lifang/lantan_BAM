@@ -162,18 +162,18 @@ class MaterialsController < ApplicationController
 
   #物料查询
   def search
-    str = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%' and types=#{params[:types]} " : "types=#{params[:types]}"
+    str_name = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%'" : "1=1 "
+    str_types = params[:types].strip.length > 0 ? "and types=#{params[:types]}": "and 1=1"
+    str = str_name + str_types
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
         result = begin
                    open(URI.encode(headoffice_api_url.strip), &:read)
                  rescue Errno::ETIMEDOUT
-                   p 1111111111111111111
                    open(URI.encode(headoffice_api_url.strip), &:read)
                  end
         @search_materials = JSON.parse(result)
- #       @search_materials = Material.find_by_sql("SELECT `materials`.* FROM `materials` WHERE `materials`.`status` = 0 AND (types=2)")
       elsif params[:from].to_i > 0
         str += " and store_id=#{params[:store_id]} "
         @search_materials = Material.normal.all(:conditions => str)
@@ -309,7 +309,7 @@ class MaterialsController < ApplicationController
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
         :price => params[:price].strip.to_i, :storage => 0,
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
-        :types => params[:types], :check_num => params[:count].strip}) if material.nil?
+        :types => params[:types], :check_num => nil}) if material.nil?
     x = {:status => 1, :material => material}.to_json
     #puts x
     render :json => x
