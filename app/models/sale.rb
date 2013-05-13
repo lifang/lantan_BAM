@@ -23,7 +23,6 @@ class Sale < ActiveRecord::Base
     chars = (1..9).to_a + ("a".."z").to_a + ("A".."Z").to_a
     code=(1..length).inject(Array.new) {|codes| codes << chars[rand(chars.length)]}.join("")
     codes=eval(model_n.capitalize).all.map(&:"#{code_name}")
-    p codes
     if codes.index(code) 
       set_code(length)
     else
@@ -45,7 +44,7 @@ class Sale < ActiveRecord::Base
     pics_size.each do |size|
       new_file="#{dirs.join}/#{img_code}img#{sale_id}_#{size}."+ file.split(".").reverse[0]
       resize = size > img["width"] ? img["width"] : size
-      height = img["height"].to_f/img["width"].to_f > 5/6 ?  250 : resize
+      height = img["height"].to_f/img["width"].to_f > 5.0/6 ?  250 : resize
       img.run_command("convert #{path+filename}  -resize #{resize}x#{height} #{path+new_file}")
     end
     return filename
