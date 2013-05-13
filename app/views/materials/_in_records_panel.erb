@@ -41,6 +41,17 @@
             }
         }
     });
+
+        //after sort
+    $("#materials_in_tab").bind("sortEnd",function() {
+    $("#materials_in_tab tbody").find('tr').each(function(i){
+      if(i%2==0){
+        $(this).removeClass('tbg');
+      }else{
+        $(this).addClass('tbg');
+      }
+    })
+  });
     
     });
 </script>
@@ -58,7 +69,7 @@
   </thead>
   <tbody>
   <% (@in_records || []).each do |record| %>
-      <tr>
+      <tr class="<%= cycle('', 'tbg') %>">
         <td><%= record.order_code %></td>
         <td><%= record.code %></td>
         <td><%= record.name %></td>

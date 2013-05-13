@@ -41,6 +41,16 @@
             }
         }
     });
+        //after sort
+    $("#materials_out_tab").bind("sortEnd",function() {
+    $("#materials_out_tab tbody").find('tr').each(function(i){
+      if(i%2==0){
+        $(this).removeClass('tbg');
+      }else{
+        $(this).addClass('tbg');
+      }
+    })
+  });
     });
 </script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_out_tab">
@@ -57,7 +67,7 @@
   </thead>
   <tbody>
   <% (@out_records || []).each do |out| %>
-      <tr>
+      <tr class="<%= cycle('', 'tbg') %>">
         <td><%= out.code %></td>
         <td><%= out.name %></td>
         <td><%= Material::TYPES_NAMES[out.types.to_i] %></td>
