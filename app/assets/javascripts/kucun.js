@@ -739,32 +739,27 @@ function addMaterial(){
   $("#add_material_tab").find('input').val("");
   $("#add_material_tab").find('select').get(0).selectedIndex = 0;
   popup('#add_material_tab');
+  return false;
 }
 
 function ruku(){
-    popup('#ruku_tab');
-    $("#name").attr("value","");
-    $("#code").attr("value","");
-    $("#barcode").attr("value","");
-    $("#price").attr("value","");
-    $("#num").attr("value","");
-    var objs = $("#select_types").find("#material_types");
-    for(var x=0;x<objs.length;x++){
-        $(objs[x]).get(0).selectedIndex = 0;
-    }
-    return false;
+  $("#ruku_tab").find('input').val("");
+  $("#ruku_tab").find('select').get(0).selectedIndex = 0;
+  popup('#ruku_tab');
+  return false;
 }
 
 function chuku(){
-    popup('#chuku_tab');
     $("#selected_materials").html("");
     $("#search_result").hide();
     $("#out_order_form").find("#name").attr("value","");
-    var objs = $("#chuku_tab").find("#material_types");
+    var objs = $("#chuku_tab").find("select");
     for(var x=0;x<objs.length;x++){
       $(objs[x]).get(0).selectedIndex = 0;
     }
     $("#selected_items").attr("value","");
+    popup('#chuku_tab');
+    return false;
 }
 
 function dinghuo(s_id){

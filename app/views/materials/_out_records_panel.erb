@@ -64,7 +64,7 @@
         <td><%= out.staff_name %></td>
         <td><%= out.material_num.to_i %></td>
         <td><%= out.out_price %></td>
-        <td><%= out.out_time.strftime("%Y-%m-%d %H:%M") %></td>
+        <td><%= out.out_time.strftime("%Y-%m-%d %H:%M") unless out.out_time.nil?%></td>
       </tr>
   <% end %>
   </tbody>
