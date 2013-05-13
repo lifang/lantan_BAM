@@ -282,7 +282,7 @@ textarea {
 .data_table td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}
 
 /*s_table*/
-.s_table { background:#CCC; margin: 5px 0;}
+.s_table { background:#CCC; margin: 5px 0; text-align: center;}
 .s_table td { background: #fff;}
 .s_table tr.fws td { font-weight: bolder; font-size: 14px; height: 24px; line-height: 24px;}
 
