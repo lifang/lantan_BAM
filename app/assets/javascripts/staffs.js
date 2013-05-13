@@ -29,7 +29,6 @@ function assess_result(sys_score, manage_score){
 }
 
 $(document).ready(function(){
-
     $("#staffs_table").tablesorter({
         headers:
         {
@@ -116,14 +115,6 @@ $(document).ready(function(){
             $(this).attr("class", "sort_d_s");
         }else{
             $(this).attr("class", "sort_u_s");
-        }
-    });
-
-    $(".sort_u, .sort_d").click(function(){
-        if($(this).attr("class") == "sort_u"){
-            $(this).attr("class", "sort_d");
-        }else{
-            $(this).attr("class", "sort_u");
         }
     });
 
@@ -431,6 +422,8 @@ $(document).ready(function(){
        var store_id = $("#store_id").val();
        var reward_num = $(this).parents('tr').find(".reward_num_input").val();
        var deduct_num = $(this).parents('tr').find(".deduct_num_input").val();
+       var base_salary = $(this).parents('tr').find(".base_salary_text").text();
+       var total_price = parseFloat(base_salary) + parseFloat(reward_num) - parseFloat(deduct_num)
        var salary_id = $(this).attr("id");
        $.ajax({
             type : 'put',
@@ -447,6 +440,7 @@ $(document).ready(function(){
                    this_obj.parents('tr').find(".deduct_num_input").hide();
                    this_obj.parents('tr').find(".deduct_num_text").text(deduct_num).show();
                    this_obj.parents('tr').find(".reward_num_text").text(reward_num).show();
+                   this_obj.parents('tr').find(".total_price_text").text(total_price);
                }
             }
         });

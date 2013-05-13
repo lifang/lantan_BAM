@@ -6,6 +6,7 @@ class SalaryDetail < ActiveRecord::Base
   BASE_SCORE = {:SCORE => 90} #90分为标准分，90分以下每低一份按基本工资的百分之一计算
 
   def self.generate_day_salary #生成每日工资单
+    SalaryDetail.destroy_all("current_day = #{(Time.now - 1.days).strftime("%Y%m%d").to_i}") #删除已经生成的日工资，避免出现相同的日工资
     cal_day = (Time.now - 1.days).strftime("%Y-%m-%d")
     start_at_sql = "created_at >= '#{cal_day} 00:00:00'"
     end_at_sql = "created_at <= '#{cal_day} 23:59:59'"
