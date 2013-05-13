@@ -36,7 +36,7 @@
   </thead>
   <tbody>
     <% (@supplier_order_records || []).each do |record| %>
-      <tr>
+      <tr class="<%= cycle('', 'tbg') %>">
         <td><%= record.code %></td>
         <td>
           <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
