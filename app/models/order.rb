@@ -332,10 +332,10 @@ class Order < ActiveRecord::Base
                 if r.sale.disc_types == Sale::DISC_TYPES[:FEE]
                   s[:price] = r.sale.discount
                 elsif r.sale.disc_types == Sale::DISC_TYPES[:DIS]
-                  s[:price] = prod.sale_price * (10 - r.sale.discount) / 10
+                  s[:price] = sale_hash[r.sale_id] ? (s[:price].to_i + (prod.sale_price * (10 - r.sale.discount) / 10)) : (prod.sale_price * (10 - r.sale.discount) / 10)
                 end
-                s[:selected] = 0
-                s[:show_price] = "-" + s[:price].to_s
+                s[:selected] = 1
+                s[:show_price] = 0.0#"-" + s[:price].to_s
                 s[:disc_types] = r.sale.disc_types
                 s[:discount] = r.sale.discount
                 s[:sale_products] = []
@@ -346,7 +346,7 @@ class Order < ActiveRecord::Base
                   s[:sale_products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
                   }
                 #sale_arr << s
-                total -= s[:price] unless sale_hash[r.sale_id]
+                #total -= s[:price] unless sale_hash[r.sale_id]
                 sale_hash[r.sale_id] = s
                 
               end
