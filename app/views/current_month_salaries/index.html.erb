@@ -37,7 +37,7 @@
                                 <tr>
                                   <td><%= staff.name %></td>
                                   <td><%= Staff::N_COMPANY[staff.type_of_w] %></td>
-                                  <td><%= staff.base_salary.to_i %></td>
+                                  <td class="base_salary_text"><%= staff.base_salary.to_i %></td>
                                   <td>
                                     <span class="reward_num_text"><%= staff.reward_num %></span>
                                     <input name="" type="text" value="<%= staff.reward_num %>" class="data_input_s reward_num_input" style="display: none;"/>
@@ -46,7 +46,7 @@
                                     <span class="deduct_num_text"><%= staff.deduct_num %></span>
                                     <input name="" type="text" value="<%= staff.deduct_num %>" class="data_input_s deduct_num_input" style="display: none;"/>
                                   </td>
-                                  <td><%= staff.total.to_i %></td>
+                                  <td class="total_price_text"><%= staff.total.to_i %></td>
                                   <td>
                                     <a href="javascript:void(0)" class="edit_reward_deduct_submit" style="display: none;" id="<%= staff.s_id %>">提交</a>
                                     <% if permission?(:staffs, :edit_salary) %><a href="javascript:void(0)" class="bz_btn">编辑</a><% end %>

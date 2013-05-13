@@ -6,6 +6,7 @@ class Salary < ActiveRecord::Base
     #说明:员工的工资 = 奖励违规金额 + 基本工资 + 提成金额
 
     start_time = Time.now.months_ago(1).at_beginning_of_month
+    Salary.destroy_all("current_month = #{start_time.strftime("%Y%m")}") #删除已经生成的月工资，避免重复生成
     end_time = Time.now.months_ago(1).at_end_of_month
     salary_infos = SalaryDetail.where("current_day >= #{start_time.strftime("%Y%m%d").to_i}").
                 where("current_day <= '#{end_time.strftime("%Y%m%d").to_i}'").group_by{|s|s.staff_id}

@@ -17,8 +17,11 @@ class SalariesController < ApplicationController
 
   def update
     salary = Salary.find_by_id(params[:id])
+    staff = salary.staff
+    base_salary = staff.base_salary.nil? ? 0 : staff.base_salary
+    total_price = base_salary + params[:reward_num].to_f - params[:deduct_num].to_f
     salary.update_attributes(:reward_num => params[:reward_num],
-      :deduct_num => params[:deduct_num]) if salary
+      :deduct_num => params[:deduct_num], :total => total_price) if salary
     render :text => "success"
   end
   

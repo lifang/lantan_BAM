@@ -537,7 +537,8 @@ class MaterialsController < ApplicationController
     end
     render :json => {:status => 0}
   end
-
+  
+  #查看订货单详情
   def mat_order_detail
     @mo = MaterialOrder.find params[:id]
     @store_id = params[:store_id]
@@ -546,7 +547,8 @@ class MaterialsController < ApplicationController
       @total_money += moi.price * moi.material_num
     end
   end
-
+  
+  #添加物料
   def add_material
     store = Store.find params[:store_id]
     material = Material.find_by_code(params[:materials][:code])
@@ -558,7 +560,8 @@ class MaterialsController < ApplicationController
     end
     redirect_to "/stores/#{params[:store_id]}/materials"
   end
-
+  
+ #判断物料条形码是否唯一
   def uniq_mat_code
     material = Material.find_by_code_and_store_id(params[:code], params[:store_id])
     render :text => material.nil? ? "0" : "1"
