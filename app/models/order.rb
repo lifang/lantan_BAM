@@ -70,7 +70,8 @@ class Order < ActiveRecord::Base
       customer_params_arr << is_vip.to_i
     end
     unless is_birthday.nil?
-      customer_condition_sql += " and datediff(now(), cu.birthday)%365 >= 355 "
+      customer_condition_sql += " and ((month(now())*30 + day(now()))-(month(cu.birthday)*30 + day(cu.birthday))) <= 0
+        and ((month(now())*30 + day(now()))-(month(cu.birthday)*30 + day(cu.birthday))) > -7 "
     end
     customer_ids = self.get_revisit_orders(store_id, started_at, ended_at, nil, is_time, time, is_price, price)
     unless customer_ids.nil? or customer_ids.blank?
