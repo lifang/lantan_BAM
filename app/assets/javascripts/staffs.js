@@ -29,7 +29,6 @@ function assess_result(sys_score, manage_score){
 }
 
 $(document).ready(function(){
-
     $("#staffs_table").tablesorter({
         headers:
         {
@@ -116,14 +115,6 @@ $(document).ready(function(){
             $(this).attr("class", "sort_d_s");
         }else{
             $(this).attr("class", "sort_u_s");
-        }
-    });
-
-    $(".sort_u, .sort_d").click(function(){
-        if($(this).attr("class") == "sort_u"){
-            $(this).attr("class", "sort_d");
-        }else{
-            $(this).attr("class", "sort_u");
         }
     });
 
