@@ -279,7 +279,7 @@ textarea {
 
 .data_table td .data_input_s { width: 50px; height: 24px; line-height: 24px; border: 1px #CCCCCC solid; text-align: center;}
 
-.data_table td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 36px;}
+.data_table td.data_table_error {  background: url(../assets/alert.png) no-repeat 0px center; padding-left: 10px;}
 
 /*s_table*/
 .s_table { background:#CCC; margin: 5px 0; text-align: center;}
