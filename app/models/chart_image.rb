@@ -38,7 +38,8 @@ class ChartImage < ActiveRecord::Base
         if scores[key_value].nil?
           data_array << 0
         else
-          total_amount = (scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))/scores[key_value].size
+          #total_amount = (scores[key_value].sum(&:manage_score) + scores[key_value].sum(&:sys_score))/scores[key_value].size
+          total_amount = (scores[key_value].sum{ |p| p.manage_score ||= 0 } + scores[key_value].sum(&:sys_score))/scores[key_value].size
           data_array << (total_amount > 100 ? 100 : total_amount)
         end
       }
