@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 //保存material remark
+    var reg1 =  /^\d+$/;
 function save_material_remark(mat_id,store_id,obj){
     var content = $("#remark").val();
     if(mat_id!=null && content.length>0){
@@ -33,7 +34,6 @@ function save_material_remark(mat_id,store_id,obj){
 
 function check_material_num(m_id, storage, obj){
     var check_num = $("#check_num_"+m_id).val();
-    var reg1 =  /^\d+$/;
     if(check_num.match(reg1)==null){
         tishi_alert("请输入有效数字");
     }else{
@@ -386,7 +386,6 @@ function pay_material_order(parent_id, pay_type,store_id){
 
 function confirm_pay(){
     var flag = true;
-    var reg1 =  /^\d+$/;
     $("#dinghuo_selected_materials .in_mat_selected").find("input").each(function(){
         var count = $(this).val();
         var storage = parseInt($(this).parent().next().next().text());
@@ -651,16 +650,17 @@ function commit_supplier_form(obj){
 }
 
 function checkMaterial(obj, store_id){
+    var reg2 = /^\d+\.{0,1}\d*$/;
   if($.trim($("#materials_name").val())==""){
        tishi_alert("请输入物料名称");
     }else if($("#materials_types").val()==""){
        tishi_alert("请选择物料类型");
     }else if($.trim($("#materials_code").val())==""){
         tishi_alert("请输入条形码");
-    }else if($.trim($("#materials_price").val())==""){
-        tishi_alert("请输入单价");
-    }else if($.trim($("#materials_storage").val())==""){
-        tishi_alert("请输入数量");
+    }else if($("#materials_price").val().match(reg2)==null){
+        tishi_alert("请输入合法单价");
+    }else if($("#materials_storage").val().match(reg1)==null){
+        tishi_alert("请输入合法数量");
     }else{
         var code = $("#materials_code").val();
         $.ajax({
