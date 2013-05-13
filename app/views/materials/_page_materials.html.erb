@@ -42,15 +42,15 @@
         }
     });
         //after sort
-    $("#materials_tab_table").bind("sortEnd",function() {
-    $("#materials_tab_table tbody").find('tr').each(function(i){
-      if(i%2==0){
-        $(this).removeClass('tbg');
-      }else{
-        $(this).addClass('tbg');
-      }
-    })
-  });
+        $("#materials_tab_table").bind("sortEnd",function() {
+            $("#materials_tab_table tbody").find('tr').each(function(i){
+            if(i%2==0){
+              $(this).removeClass('tbg');
+            }else{
+              $(this).addClass('tbg');
+            }
+            })
+         });
     });
 
 </script>
