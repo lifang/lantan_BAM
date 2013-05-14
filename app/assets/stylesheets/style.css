@@ -552,7 +552,7 @@ a.compile_btn { width: 100px;}
 }
 .seeProDiv_r { margin-left: 110px;  width: 180px; line-height: 24px;}
 .seeProDiv_rWidth { margin-left: 110px;  width: 460px; line-height: 24px;}
-.seeProDiv_rWidth.width640 { width: 640px; height:100px; overflow:auto;}
+.seeProDiv_rWidth.width640 { width: 640px;}
 .seeProDiv_rWidth p, .seeProDiv_rWidth span { text-indent: 24px; line-height: 24px; margin: 0 5px;}
 .seeProDiv_p { padding: 10px 0; overflow: hidden; margin: 0 10px;}
 
