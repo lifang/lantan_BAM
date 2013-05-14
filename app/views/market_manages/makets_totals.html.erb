@@ -30,7 +30,7 @@
               <td><%= format("%.2f",v[OrderPayType::PAY_TYPES[:CREDIT_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:CREDIT_CARD]]) %></td>
               <td><%= format("%.2f",v[OrderPayType::PAY_TYPES[:SV_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:SV_CARD]]) %></td>
               <td><%= format("%.2f",v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]].nil? ? 0 : v[OrderPayType::PAY_TYPES[:PACJAGE_CARD]]) %></td>
-              <td><%= format("%.2f",v.values.inject(0){|num,price|num+price}) %></td>
+              <td><%= format("%.2f",v.select{|key,value|key >=OrderPayType::PAY_TYPES[:CASH] && key <=OrderPayType::PAY_TYPES[:PACJAGE_CARD] }.values.inject(0){|num,price|num+price}) %></td>
             </tr>
           <% end %>
         </tbody>
