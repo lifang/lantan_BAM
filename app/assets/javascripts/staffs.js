@@ -38,7 +38,15 @@ $(document).ready(function(){
             6: { sorter: false }
         }
     });
-
+    $("#staffs_table").bind("sortEnd",function() {
+        $("#staffs_table tbody").find('tr').each(function(i){
+        if(i%2==0){
+          $(this).removeClass('tbg');
+        }else{
+          $(this).addClass('tbg');
+        }
+        })
+    });
     $("#work_record_table").tablesorter({
         headers:
         {
@@ -53,6 +61,15 @@ $(document).ready(function(){
             9: { sorter: false }
         }
     });
+    $("#work_record_table").bind("sortEnd",function() {
+        $("#work_record_table").find('tr').each(function(i){
+        if(i%2==0){
+          $(this).removeClass('tbg');
+        }else{
+          $(this).addClass('tbg');
+        }
+        })
+    });     
     $("#month_score_table").tablesorter({
         headers:
         {
@@ -61,6 +78,15 @@ $(document).ready(function(){
             3: { sorter: false }
         }
     });
+    $("#month_score_table").bind("sortEnd",function() {
+        $("#month_score_table").find('tr').each(function(i){
+        if(i%2==0){
+          $(this).removeClass('tbg');
+        }else{
+          $(this).addClass('tbg');
+        }
+        })
+     });
     $("#reward_table").tablesorter({
         headers:
         {
@@ -69,6 +95,15 @@ $(document).ready(function(){
             3: { sorter: false },
             4: { sorter: false }
         }
+    });
+    $("#reward_table").bind("sortEnd",function() {
+        $("#reward_table").find('tr').each(function(i){
+        if(i%2==0){
+          $(this).removeClass('tbg');
+        }else{
+          $(this).addClass('tbg');
+        }
+        })
     });
     $("#salary_table").tablesorter({
         headers:
@@ -80,6 +115,15 @@ $(document).ready(function(){
             5: { sorter: false }
         }
     });
+    $("#salary_table").bind("sortEnd",function() {
+        $("#salary_table").find('tr').each(function(i){
+        if(i%2==0){
+          $(this).removeClass('tbg');
+        }else{
+          $(this).addClass('tbg');
+        }
+        })
+    });
     $("#train_table").tablesorter({
         headers:
         {
@@ -90,6 +134,15 @@ $(document).ready(function(){
             5: { sorter: false }
         }
     });
+    $("#train_table").bind("sortEnd",function() {
+        $("#train_table").find('tr').each(function(i){
+        if(i%2==0){
+          $(this).removeClass('tbg');
+        }else{
+          $(this).addClass('tbg');
+        }
+        })
+    });
     $("#violation_table").tablesorter({
         headers:
         {
@@ -99,7 +152,15 @@ $(document).ready(function(){
             4: { sorter: false }
         }
     });
-
+    $("#violation_table").bind("sortEnd",function() {
+        $("#violation_table").find('tr').each(function(i){
+        if(i%2==0){
+          $(this).removeClass('tbg');
+        }else{
+          $(this).addClass('tbg');
+        }
+        })
+    });
     $("#current_month_salary_table").tablesorter({
         headers:
         {
@@ -109,7 +170,15 @@ $(document).ready(function(){
             6: { sorter: false }
         }
     });
-
+    $("#current_month_salary_table").bind("sortEnd",function() {
+        $("#current_month_salary_table").find('tr').each(function(i){
+        if(i%2==0){
+          $(this).removeClass('tbg');
+        }else{
+          $(this).addClass('tbg');
+        }
+        })
+    });
     $(".sort_u_s, .sort_d_s").click(function(){
         if($(this).attr("class") == "sort_u_s"){
             $(this).attr("class", "sort_d_s");
