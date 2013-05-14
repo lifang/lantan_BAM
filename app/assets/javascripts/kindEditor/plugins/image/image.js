@@ -207,6 +207,7 @@ KindEditor.plugin('image', function(K) {
             afterError : function(html) {
                 dialog.hideLoading();
                 tishi_alert("图片上传出错，请检查图片大小及格式，格式为*.jpg;*.gif;*.png")
+                $(".tab_alert").css("z-index","811214");
             }
         });
         uploadbutton.fileBox.change(function(e) {
