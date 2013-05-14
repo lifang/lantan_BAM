@@ -22,8 +22,8 @@ class MonthScore < ActiveRecord::Base
 
   def self.kind_order(store_id)
     return Order.find_by_sql("select p.id,p.name,p.is_service,p.service_code,op.price,sum(op.pro_num) prod_num,sum(op.price*op.pro_num) sum,date_format(o.created_at,'%Y-%m-%d')
-    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id} 
-    and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by p.id,date_format(o.created_at,'%Y-%m-%d') ")
+    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id} and (is_free=#{Order::IS_FREE[:NO]}
+    or c_pcard_relation_id is null) and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by p.id,date_format(o.created_at,'%Y-%m-%d') ")
   end
 
   def self.sort_pcard(store_id)
@@ -34,8 +34,8 @@ class MonthScore < ActiveRecord::Base
 
   def self.search_kind_order(store_id,created,ended,time)
     sql ="select p.id,p.name,p.is_service,p.service_code,op.price,sum(op.pro_num) prod_num,sum(op.price*op.pro_num) sum,date_format(o.created_at,'%Y-%m-%d')
-    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id}
-    and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
+    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id} and (is_free=#{Order::IS_FREE[:NO]}
+    or c_pcard_relation_id is null) and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
     sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql +=" group by p.id,date_format(o.created_at,'%Y-%m-%d')"  if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
