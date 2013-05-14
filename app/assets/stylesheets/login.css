@@ -38,3 +38,26 @@ button { font-family:"微软雅黑"; cursor: pointer; border: none;}
 	color: #FFF;
 	background: url(/assets/btn_bg.jpg) no-repeat;
 }
+/*tab提示*/
+.tab_popup.tab_alert { width: 500px;}
+.alert_h { width: 400px; margin: 20px auto; line-height: 24px; font-size: 16px; color:#930205; text-align: center;}
+.tab_popup { 
+    width: 650px; 
+	padding: 10px; 
+	background: url(/assets/black.png) repeat; 
+	border-radius: 0.6em;
+	position: absolute;
+	z-index: 100;
+}
+.popup_box { background: #FFF;}
+.popup_box h1 { 
+    height: 32px; 
+	line-height: 32px; 
+	background: #930205; 
+	color: #FFF; 
+	font-size: 16px; 
+	padding-left: 20px; 
+	position: relative;
+}
+.popup_body { overflow: hidden; padding: 10px; position: relative;}
+.popup_body_area { overflow: hidden;}
