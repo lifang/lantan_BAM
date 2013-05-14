@@ -126,4 +126,11 @@ module ApplicationHelper
     orders.collect { |o| un_pleased_size += 1 if o.is_pleased == Order::IS_PLEASED[:BAD] }
     return orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size
   end
+
+  def material_order_tips
+    @material_pay_notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
+      Notice::TYPES[:URGE_PAYMENT], Notice::STATUS[:NORMAL])
+    @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:received], 0)
+    @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:send], 0)
+  end
 end

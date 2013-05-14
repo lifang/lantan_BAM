@@ -117,6 +117,16 @@ function edit_serv(e){
         tishi_alert("请输入服务的名称");
         return false;
     }
+    var is_num=false
+    $("#add_products input").each(function(){
+        if(isNaN(parseInt(this.value)) || parseInt(this.value)<=0){
+            is_num=true
+        }
+    })
+    if (is_num){
+        tishi_alert("产品或服务的数量必须大于1");
+        return false;
+    }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
         tishi_alert("请输入服务的零售价格,价格为数字");
         return false;
