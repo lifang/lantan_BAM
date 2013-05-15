@@ -274,6 +274,14 @@ $(document).ready(function(){
                return false;
            }else{
                var img_val = $(this).parents('form').find("#staff_photo").val();
+               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
+               var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
+               var g_name_val = img_name_val.substring(1,img_name_val.length);
+               if(pattern_str.test(g_name_val.split(".")[0])){
+                  tishi_alert(g_name_val+"不能包含特殊字符!");
+                  return false;
+               }
+
                var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
                if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
                }else{
@@ -285,6 +293,13 @@ $(document).ready(function(){
        if($(this).attr("id") == "edit_staff_btn"){
            if($(this).parents('form').find("#staff_photo").val() != ''){
                var edit_img_val = $(this).parents('form').find("#staff_photo").val();
+               var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
+               var img_name = edit_img_val.substring(edit_img_val.lastIndexOf("\\")).toLowerCase();
+               var g_name = img_name.substring(1,img_name.length);
+               if(pattern.test(g_name.split(".")[0])){
+                  tishi_alert(g_name+"不能包含特殊字符!");
+                  return false;
+               }
                var edit_img_suff = edit_img_val.substring(edit_img_val.lastIndexOf('.') + 1).toLowerCase();
                if(edit_img_suff == "gif" || edit_img_suff == "jpg" || edit_img_suff == "png" || edit_img_suff == "bmp"){
                }else{
@@ -377,6 +392,10 @@ $(document).ready(function(){
         var store_id = $("#store_id").val();
         var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
         var sys_score = $(this).parents('tr').find(".data_input_s").val();
+        if(isNaN(sys_score)){
+           tishi_alert("系统打分必须为数字!");
+           return false;
+        }
         var manage_score = $(this).parents('tr').find(".manage_score_data").text();
         if(manage_score != ""){
             var total = parseInt(sys_score) + parseInt(manage_score);
@@ -425,6 +444,10 @@ $(document).ready(function(){
     $("#edit_sys_score_submit").click(function(){
        var this_obj = $(this);
        var sys_score = $("#sys_score_input").val();
+       if(isNaN(sys_score)){
+           tishi_alert("系统打分必须为数字!");
+           return false;
+       }
        var store_id = $("#store_id").val();
        var staff_id = $("#staff_id").val();
        var month_score_id = $(this).attr("name");
@@ -466,6 +489,10 @@ $(document).ready(function(){
     //验证店长打分和系统打分的和是否超过100
     $("#manage_score_btn_validate").click(function(){
        var manage_score = $("#month_score_manage_score").val();
+       if(isNaN(manage_score)){
+           tishi_alert("店长打分必须为数字!");
+           return false;
+       }
        var sys_score = $("#sys_score_text").text();
        var total = parseInt(sys_score) + parseInt(manage_score);
        if(total > 100){

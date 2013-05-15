@@ -258,19 +258,38 @@ function delete_pcard(pcard_id){
 }
 
 function check_station(){
-    var status =true
+    var status =true;
+    var stations =[];
     $("select[name^=select]").each(function(){
         var station_id =$("#stat"+this.id.split("_")[1]+" option:selected").val();
         if(parseInt(station_id)==$("#station_id").val() && $(this).find("option:selected").val()== "0" 　){
             tishi_alert("工位状态正常的必须设置技师");
             status=false;
-            return false
-        } 
+            return false;
+        }
+        if (parseInt(station_id)==$("#station_id").val()){
+            stations.push([$(this).find("option:selected").html(),$(this).find("option:selected").val()]);
+        }
     })
+    for(var n=0;n< stations.length-1;n +=2){
+        if (stations[n][0]==stations[n+1][0] && stations[n][1]==stations[n+1][1] ){
+            tishi_alert("同一个工位必须设置不同的技师");
+            status=false;
+            return false;
+        }
+    }
+    var nary=stations.sort();
+    for(var i=0;i<nary.length-1;i++){
+        if (nary[i][0]==nary[i+1][0] && nary[i][1]==nary[i+1][1] ){
+            if (!confirm("技师重复使用："+nary[i][0])){
+                status=false;
+                return false;
+            }
+        }
+    }
     if(status){
         $("#change_station").submit();
     }
-
 }
 
 function show_pic(){

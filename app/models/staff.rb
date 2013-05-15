@@ -15,7 +15,7 @@ class Staff < ActiveRecord::Base
   belongs_to :store
   #门店员工职务
   S_COMPANY = {:BOSS=>0,:CHIC=>2,:FRONT=>3,:TECHNICIAN=>1} #0 老板 2 店长 3接待 1 技师
-  N_COMPANY = {0=>"老板",2=>"店长",3=>"接待",1=>"技师"}
+  N_COMPANY = {1=>"技师",3=>"接待",0=>"老板",2=>"店长"}
   LEVELS = {0=>"高级",1=>"中级",2=>"初级"}  #技师等级
   #总部员工职务
 
@@ -24,7 +24,7 @@ class Staff < ActiveRecord::Base
   scope :normal, where(:status => STATUS[:normal])
 
   S_HEAD = {:BOSS=>0,:MANAGER=>2,:NORMAL=>1} #0老板 2 店长 1员工
-  N_HEAD = {0=>"老板", 2=>"店长", 1=>"员工"}
+  N_HEAD = {1=>"员工",0=>"老板", 2=>"店长"}
 
   #教育程度
   N_EDUCATION = {0 => "研究生", 1 => "本科", 2 => "专科", 3 => "高中", 4 => "初中",
