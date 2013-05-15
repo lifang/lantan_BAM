@@ -278,7 +278,7 @@ $(document).ready(function(){
                var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
                var g_name_val = img_name_val.substring(1,img_name_val.length);
                if(pattern_str.test(g_name_val.split(".")[0])){
-                  tishi_alert("图片不能包含特殊字符!");
+                  tishi_alert(g_name_val+"不能包含特殊字符!");
                   return false;
                }
 
@@ -297,7 +297,7 @@ $(document).ready(function(){
                var img_name = edit_img_val.substring(edit_img_val.lastIndexOf("\\")).toLowerCase();
                var g_name = img_name.substring(1,img_name.length);
                if(pattern.test(g_name.split(".")[0])){
-                  tishi_alert("图片不能包含特殊字符!");
+                  tishi_alert(g_name+"不能包含特殊字符!");
                   return false;
                }
                var edit_img_suff = edit_img_val.substring(edit_img_val.lastIndexOf('.') + 1).toLowerCase();
