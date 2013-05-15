@@ -8,7 +8,7 @@ button { cursor: pointer; font-family: "微软雅黑"; border: none; background:
 input {font-family: "微软雅黑";}
 input[type="button"] {font-family: "微软雅黑"; border: none;}
 textarea { 
-    height: 100px; 
+    height: 80px; 
 	font-size: 14px; 
 	line-height: 24px; 
 	padding: 5px;
@@ -434,7 +434,7 @@ a.compile_btn { width: 100px;}
 .item_textarea { margin: 20px 10px; float: left; overflow: hidden; width: 590px;}
 .width_textarea { width: 460px;}
 
-.width_div { width: 460px; height:100px; overflow: auto; line-height:24px; float: left; padding-top: 2px;}
+.width_div { width: 460px; height:60px;border: 1px #CCCCCC solid; overflow: auto; line-height:24px; float: left; padding-top: 2px;}
 .width_div span { margin: 0px 8px; float: left;}
 
 .item_addItem { 
