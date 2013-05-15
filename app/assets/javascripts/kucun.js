@@ -736,14 +736,14 @@ function commit_in(obj){
 }
 
 function addMaterial(){
-  $("#add_material_tab").find('input').val("");
+  $("#add_material_tab").find('input[type="text"]').val("");
   $("#add_material_tab").find('select').get(0).selectedIndex = 0;
   popup('#add_material_tab');
   return false;
 }
 
 function ruku(){
-  $("#ruku_tab").find('input').val("");
+  $("#ruku_tab").find('input[type="text"]').val("");
   $("#ruku_tab").find('select').get(0).selectedIndex = 0;
   popup('#ruku_tab');
   return false;
@@ -763,7 +763,6 @@ function chuku(){
 }
 
 function dinghuo(s_id){
-    popup("#dinghuo_tab");
     $("#dinghuo_selected_materials").html("");
     $("#dinghuo_search_result").hide();
     $("#total_count").text("0");
@@ -772,6 +771,7 @@ function dinghuo(s_id){
         $(objs[x]).get(0).selectedIndex = 0;
     }
     $("#selected_items_dinghuo").attr("value","");
+    popup("#dinghuo_tab");
     if(s_id==0)
      {
          $("#from").get(0).selectedIndex = 0;
