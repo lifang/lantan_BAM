@@ -271,19 +271,21 @@ function check_station(){
             stations.push([$(this).find("option:selected").html(),$(this).find("option:selected").val()]);
         }
     })
-    for(var n=0;n< stations.length-1;n +=2){
-        if (stations[n][0]==stations[n+1][0] && stations[n][1]==stations[n+1][1] ){
-            tishi_alert("同一个工位必须设置不同的技师");
-            status=false;
-            return false;
-        }
-    }
-    var nary=stations.sort();
-    for(var i=0;i<nary.length-1;i++){
-        if (nary[i][0]==nary[i+1][0] && nary[i][1]==nary[i+1][1] ){
-            if (!confirm("技师重复使用："+nary[i][0])){
+    if(status){
+        for(var n=0;n< stations.length-1;n +=2){
+            if (stations[n][0]==stations[n+1][0] && stations[n][1]==stations[n+1][1] ){
+                tishi_alert("同一个工位必须设置不同的技师");
                 status=false;
                 return false;
+            }
+        }
+        var nary=stations.sort();
+        for(var i=0;i<nary.length-1;i++){
+            if (nary[i][0]==nary[i+1][0] && nary[i][1]==nary[i+1][1] ){
+                if (!confirm("技师重复使用："+nary[i][0])){
+                    status=false;
+                    return false;
+                }
             }
         }
     }

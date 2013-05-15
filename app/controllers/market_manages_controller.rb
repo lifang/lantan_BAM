@@ -10,9 +10,10 @@ class MarketManagesController < ApplicationController
   def makets_totals
     session[:created],session[:ended]=nil,nil
     @month_goal =MonthScore.sort_order(params[:store_id])
+    p @month_goal
     @months =@month_goal.inject(Hash.new){|hash,order|
       hash[order.day].nil? ? hash[order.day]={order.pay_type=>order.price} : hash[order.day].merge!(order.pay_type=>order.price);hash }
-    @total_num =@month_goal.inject(0){|num,order| num+order.price if order.pay_type>=OrderPayType::PAY_TYPES[:CASH] && order.pay_type <= OrderPayType::PAY_TYPES[:PACJAGE_CARD]}
+    @total_num = @month_goal.inject(0){|num,order| num + order.price}
     p @months
   end
 
