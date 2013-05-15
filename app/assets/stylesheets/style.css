@@ -383,7 +383,7 @@ a.compile_btn { width: 100px;}
 .popup_body_fieldset { border: 1px #CCCCCC solid;}
 .popup_body_title { font-size: 14px; line-height: 28px; padding: 0 5px; margin-left: 10px; font-weight:bold;}
 .popup_body_result { padding: 10px; height: 80px; overflow:auto;}
-.popup_body_result.resultHeight {padding: 10px; height: inherit; overflow:auto; border: 1px #CCCCCC solid;}
+.popup_body_result.resultHeight { border: 1px #CCCCCC solid;}
 .popup_body_result li, .popup_body_result div { padding: 6px 10px; margin: 5px 10px; float: left; background: #f0f0f0;}
 .popup_body_result li input { margin-right: 5px; _margin-right: 0px;}
 
@@ -434,7 +434,7 @@ a.compile_btn { width: 100px;}
 .item_textarea { margin: 20px 10px; float: left; overflow: hidden; width: 590px;}
 .width_textarea { width: 460px;}
 
-.width_div { width: 460px; line-height:24px; float: left; padding-top: 2px;}
+.width_div { width: 460px; height:100px; overflow: auto; line-height:24px; float: left; padding-top: 2px;}
 .width_div span { margin: 0px 8px; float: left;}
 
 .item_addItem { 
@@ -552,6 +552,7 @@ a.compile_btn { width: 100px;}
 }
 .seeProDiv_r { margin-left: 110px;  width: 180px; line-height: 24px;}
 .seeProDiv_rWidth { margin-left: 110px;  width: 460px; line-height: 24px;}
+.seeProDiv_rWidth.width640 { width: 640px;}
 .seeProDiv_rWidth p, .seeProDiv_rWidth span { text-indent: 24px; line-height: 24px; margin: 0 5px;}
 .seeProDiv_p { padding: 10px 0; overflow: hidden; margin: 0 10px;}
 
