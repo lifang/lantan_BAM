@@ -128,7 +128,11 @@ class MaterialsController < ApplicationController
     else
       mio_num = MatInOrder.where(:material_id => material.id, :material_order_id => material_order.id).sum(:material_num)
       moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
-      render :text => !mio_num.nil? && (mio_num+num) > moi_num ? 1 : 0
+      if moi_num.nil?
+        render :text => "error" 
+      else
+        render :text => !mio_num.nil? && (mio_num+num) > moi_num ? 1 : 0
+      end
     end
   end
 
