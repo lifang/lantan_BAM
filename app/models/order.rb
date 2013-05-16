@@ -650,6 +650,12 @@ class Order < ActiveRecord::Base
       sale = self.sale
       sale.sale_prod_relations.each { |spr| sale_prod_ids[spr.product_id] = spr.prod_num }
       h[:name] = sale.name
+      self.order_pay_types.each do |o_p_t|
+        if o_p_t.pay_type == OrderPayType::PAY_TYPES[:SALE]
+          h[:price] = o_p_t.price
+          break
+        end
+      end
       #h[:price] = sale.disc_types == Sale::DISC_TYPES[:FEE] ? sale.discount : realy_price * (10 - sale.discount) / 10
       h[:type] = 1
       hash[:sale] = h
@@ -659,28 +665,34 @@ class Order < ActiveRecord::Base
       h = Hash.new
       h[:name] = r.product.name
       h[:price] = r.price
-      if sale_prod_ids[r.product_id] < r.pro_num
-        realy_price += r.price.to_f * sale_prod_ids[r.product_id]
-      else
-        realy_price += r.price.to_f * r.pro_num
-      end if sale_prod_ids[r.product_id]
+#      if sale_prod_ids[r.product_id] < r.pro_num
+#        realy_price += r.price.to_f * sale_prod_ids[r.product_id]
+#      else
+#        realy_price += r.price.to_f * r.pro_num
+#      end if sale_prod_ids[r.product_id]
       h[:num] = r.pro_num.to_i
       h[:type] = 0
       content += h[:name] + ","
       h
     }
-    if sale.disc_types == Sale::DISC_TYPES[:FEE]
-      hash[:sale][:price] = sale.discount #realy_price > sale.discount ? sale.discount : realy_price
-    else
-      hash[:sale][:price] = realy_price * (10 - sale.discount) / 10
-    end if sale
+#    if sale.disc_types == Sale::DISC_TYPES[:FEE]
+#      hash[:sale][:price] = sale.discount #realy_price > sale.discount ? sale.discount : realy_price
+#    else
+#      hash[:sale][:price] = realy_price * (10 - sale.discount) / 10
+#    end if sale
     hash[:content] = content.chomp(",")
     
-    if not self.c_svc_relation_id.blank?
+    unless self.c_svc_relation_id.blank?
       h = {}
       sv_card = self.c_svc_relation.sv_card
       h[:name] = sv_card.name
-      h[:price] = sv_card.price * (10 - sv_card.discount) / 10
+      #h[:price] = sv_card.price * (10 - sv_card.discount) / 10
+      self.order_pay_types.each do |o_p_t|
+        if o_p_t.pay_type == OrderPayType::PAY_TYPES[:SV_CARD]
+          h[:price] = o_p_t.price
+          break
+        end
+      end
       h[:discount] = sv_card.discount
       h[:type] = 2
       hash[:c_svc_relation] = h
