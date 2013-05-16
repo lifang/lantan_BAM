@@ -309,6 +309,7 @@ $(document).ready(function(){
            }
        }
        $(this).parents('form').submit();
+       $(this).attr("disabled", "disabled");
     });
 
     //新建奖励信息验证
@@ -326,6 +327,7 @@ $(document).ready(function(){
            return false;
        }
        $(this).parents('form').submit();
+       $(this).attr("disabled", "disabled");
     });
 
     //新建违规信息验证
@@ -343,6 +345,7 @@ $(document).ready(function(){
            return false;
        }
        $(this).parents('form').submit();
+       $(this).attr("disabled", "disabled");
     });
 
     //新建培训信息验证
@@ -368,6 +371,7 @@ $(document).ready(function(){
            return false;
        }
        $(this).parents('form').submit();
+       $(this).attr("disabled", "disabled");
     });
 
     //取消按钮
@@ -518,6 +522,22 @@ $(document).ready(function(){
        var store_id = $("#store_id").val();
        var reward_num = $(this).parents('tr').find(".reward_num_input").val();
        var deduct_num = $(this).parents('tr').find(".deduct_num_input").val();
+       if(reward_num == ""){
+          tishi_alert("提成金额不能为空！");
+          return false;
+       }
+       if(isNaN(reward_num)){
+           tishi_alert("提成金额必须为数字!");
+           return false;
+       }
+       if(deduct_num == ""){
+          tishi_alert("扣款金额不能为空！");
+          return false;
+       }
+       if(isNaN(deduct_num)){
+           tishi_alert("扣款金额必须为数字!");
+           return false;
+       }
        var base_salary = $(this).parents('tr').find(".base_salary_text").text();
        var total_price = parseFloat(base_salary) + parseFloat(reward_num) - parseFloat(deduct_num)
        var salary_id = $(this).attr("id");

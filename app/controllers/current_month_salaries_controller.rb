@@ -29,6 +29,7 @@ class CurrentMonthSalariesController < ApplicationController
 
   private
   def get_store
+    @title = "本月工资"
     @store = Store.find_by_id(params[:store_id])
   end
 
