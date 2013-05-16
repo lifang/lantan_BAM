@@ -22,7 +22,7 @@
                   <td><%= station.products.valid.map(&:name).join("、") %></td>
                   <td><%= Station::STAT_NAME[station.status] %></td>
                   <td><% if permission?(:base_datas, :edit_station_data) %><%= link_to "编辑", edit_store_station_data_path(@store, station), remote: :true, "data-type" => 'script' %><% end %>
-                      <% if permission?(:base_datas, :del_station_data) %><%= link_to "删除", "/stores/#{@store.id}/station_datas/#{station.id}", :confirm => "Are you sure?", :method => 'delete' %><% end %>
+                      <% if permission?(:base_datas, :del_station_data) %><%= link_to "删除", "/stores/#{@store.id}/station_datas/#{station.id}", :confirm => "确定需要删除工位吗？", :method => 'delete' %><% end %>
                   </td>
 
                 </tr>
