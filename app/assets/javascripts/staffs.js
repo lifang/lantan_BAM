@@ -309,6 +309,7 @@ $(document).ready(function(){
            }
        }
        $(this).parents('form').submit();
+       $(this).attr("disabled", "disabled");
     });
 
     //新建奖励信息验证
@@ -326,6 +327,7 @@ $(document).ready(function(){
            return false;
        }
        $(this).parents('form').submit();
+       $(this).attr("disabled", "disabled");
     });
 
     //新建违规信息验证
@@ -343,6 +345,7 @@ $(document).ready(function(){
            return false;
        }
        $(this).parents('form').submit();
+       $(this).attr("disabled", "disabled");
     });
 
     //新建培训信息验证
@@ -368,6 +371,7 @@ $(document).ready(function(){
            return false;
        }
        $(this).parents('form').submit();
+       $(this).attr("disabled", "disabled");
     });
 
     //取消按钮
