@@ -461,6 +461,7 @@ class Order < ActiveRecord::Base
         cost_time = 0
         prod_ids = []
         is_has_service = false #用来记录是否有服务
+        product_prices = {}
         #创建订单的相关产品 OrdeProdRelation
         (arr[0] || []).each do |prod|
           product = Product.find_by_id_and_store_id_and_status prod[1],store_id,Product::IS_VALIDATE[:YES]
@@ -471,20 +472,26 @@ class Order < ActiveRecord::Base
             cost_time += product.cost_time.to_i
             prod_ids << product.id if product.is_service
             is_has_service = true if product.is_service
+            product_prices[product.id] = product.sale_price
           end
         end
         hash[:types] = x > 0 ? TYPES[:SERVICE] : TYPES[:PRODUCT]
         #订单相关的活动
         if sale_id != "" && Sale.find_by_id_and_store_id_and_status(sale_id,store_id,Sale::STATUS[:RELEASE])
+          OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SALE], 
+            :price => arr[1][0][2]) if arr[1][0][2]
           hash[:sale_id] = sale_id
         end
         #订单相关的打折卡
         if svcard_id != "" && SvCard.find_by_id(svcard_id)
           c_sv_relation = CSvcRelation.find_by_customer_id_and_sv_card_id c_id,svcard_id
           c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => svcard_id) if c_sv_relation.nil?
+          OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD], 
+            :price => arr[2][0][2]) if arr[2][0][2]
           hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
         end
         #订单相关的套餐卡
+        prod_hash = {}  #用来记录套餐卡中总共使用了多少
         if arr[3].any?
           p_c_ids = {} #统计有多少套餐卡中消费
           pc_ids = {} #套餐卡同种套餐卡数量
@@ -496,6 +503,7 @@ class Order < ActiveRecord::Base
               id = p_f.split("=")[0].to_i
               num = p_f.split("=")[1].to_i
               pro_infos[id] = pro_infos[id].nil? ? num : (pro_infos[id].to_i + num)
+              prod_hash[id] = prod_hash[id].nil? ? num : (prod_hash[id].to_i + num)
             end if pinfos and pinfos.any?
             p_c_ids[a_pc[1].to_i] = pro_infos
           end
@@ -549,6 +557,13 @@ class Order < ActiveRecord::Base
                 end
               end
             end
+            #创建套餐卡优惠的价格
+            pcard_dis_price = 0
+            unless prod_hash.empty?
+              prod_hash.each { |k, v| pcard_dis_price += (product_prices[k].to_f * v) }
+            end
+            OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
+              :price => pcard_dis_price) if pcard_dis_price > 0
           end
         end
 

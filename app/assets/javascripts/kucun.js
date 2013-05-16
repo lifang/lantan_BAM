@@ -258,7 +258,6 @@ function submit_out_order(form_id){
           }
     })
     if(a){
-     // $("#"+form_id).find("input.confirm_btn").attr("disabled","disabled");
     if($("#selected_items").val()!=null && $("#selected_items").val()!=""){
         $("#"+form_id).find("input[class='confirm_btn']").attr("disabled","disabled");
         $.ajax({
@@ -644,8 +643,8 @@ function commit_supplier_form(obj){
     }else if($.trim($("#supplier_phone").val())==""){
         tishi_alert("请输入联系电话");
     }else{
-       $(obj).attr('disabled','disabled');
        $(obj).parents("form").submit();
+       $(obj).attr('disabled','disabled');
     }
 }
 
@@ -670,14 +669,14 @@ function checkMaterial(obj, store_id){
             success:function(data){
                 if(data=="1"){
                     if(confirm("相同条形码的物料已经存在，点击确定增加物料数量！")){
-                        $(obj).attr("disabled", "disabled");
                         $("#add_material_tab_form").submit();
+                        $(obj).attr("disabled", "disabled");
                     }else{
                         hide_mask("#add_material_tab");
                     }
                 }else{
-                    $(obj).attr("disabled", "disabled");
                     $("#add_material_tab_form").submit();
+                    $(obj).attr("disabled", "disabled");
                 }
             }
         })
@@ -722,13 +721,15 @@ function commit_in(obj){
                       }
                }else if(data=="0"){$("#ruku_tab_form").submit();}
                else{
-                   $(obj).attr("disabled",false);
+                  $(obj).attr("disabled",false);
                   tishi_alert("未找到物料或者订单！");
                   return false;
                }
            },
            error:function(err){
-              tishi_alert("正在入库...");
+              $(obj).attr("disabled",false);
+              tishi_alert("出错了...");
+              return false;
            }
        });
       
