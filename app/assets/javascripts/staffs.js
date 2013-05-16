@@ -274,7 +274,7 @@ $(document).ready(function(){
                return false;
            }else{
                var img_val = $(this).parents('form').find("#staff_photo").val();
-               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
+               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
                var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
                var g_name_val = img_name_val.substring(1,img_name_val.length);
                if(pattern_str.test(g_name_val.split(".")[0])){
@@ -522,7 +522,7 @@ $(document).ready(function(){
        var store_id = $("#store_id").val();
        var reward_num = $(this).parents('tr').find(".reward_num_input").val();
        var deduct_num = $(this).parents('tr').find(".deduct_num_input").val();
-       if(reward_num == ""){
+       if($.trim(reward_num) == ""){
           tishi_alert("提成金额不能为空！");
           return false;
        }
@@ -530,7 +530,7 @@ $(document).ready(function(){
            tishi_alert("提成金额必须为数字!");
            return false;
        }
-       if(deduct_num == ""){
+       if($.trim(deduct_num) == ""){
           tishi_alert("扣款金额不能为空！");
           return false;
        }
