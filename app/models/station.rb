@@ -63,12 +63,14 @@ class Station < ActiveRecord::Base
         # 相应等级无staff的删除  并将符合筛选条件但没选中的staff 删除等级
       end
     }
+    StationStaffRelation.find_all_by_current_day(Time.now.strftime("%Y%m%d")).each {|station| station.destroy}
     s_levels.each  {|station_id,staffs|
       if staffs.include?(nil)
         Station.find(station_id).update_attributes(:status=>Station::STAT[:LACK])
       else
         Station.find(station_id).update_attributes(:status=>Station::STAT[:NORMAL])
       end
+      
       staffs.each {|staff|   
         if staff
           StationStaffRelation.create(:station_id=>station_id,:staff_id=>staff[0],:current_day=>Time.now.strftime("%Y%m%d"))
