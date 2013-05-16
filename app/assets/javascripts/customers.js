@@ -15,6 +15,9 @@ function check_customer() {
         tishi_alert("请输入客户手机号码，且号码长度大于6，小于20");
         return false;
     }
+    if ($("#new_c_form").length > 0) {
+        $("#new_c_form button").attr("disabled", "true");
+    }    
     return true;
 }
 
@@ -147,6 +150,7 @@ function check_e_car_num(c_num_id) {
 
 function customer_revisit(order_id, customer_id) {
     $("#r_v_form")[0].reset();
+    $("#r_v_form button").removeAttr("disabled");
     popup("#customer_revisit_div");
     $("#rev_order_id").val(order_id);
     $("#rev_customer_id").val(customer_id);
@@ -169,6 +173,7 @@ function check_revisit() {
         tishi_alert("请输入客户留言");
         return false;
     }
+    $("#r_v_form button").attr("disabled", "true");
     return true;
 }
 
@@ -209,6 +214,7 @@ function is_has_trains(complaint_id, obj) {
 }
 
 function show_new_customer() {
+    $("#new_c_form button").removeAttr("disabled");
     $("#new_c_form")[0].reset();
     popup("#new_cus_div");
 }
