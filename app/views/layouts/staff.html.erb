@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>员工管理--员工一览</title>
+    <title>员工管理--<%= @title.nil? ? "员工一览" : @title %></title>
     <%= stylesheet_link_tag    "application" %>
     <%= javascript_include_tag "application", "jquery.tablesorter.min" %>
     <script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
