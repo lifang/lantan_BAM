@@ -216,23 +216,23 @@ $(document).ready(function(){
 
     //创建员工信息验证, 编辑员工信息验证
     $("#new_staff_btn, #edit_staff_btn").live("click", function(){
-       if($(this).parents('form').find("#staff_name").val() == ''){
+       if($.trim($(this).parents('form').find("#staff_name").val()) == ''){
            tishi_alert("名称不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_phone").val() == ''){
+       if($.trim($(this).parents('form').find("#staff_phone").val()) == ''){
            tishi_alert("联系方式不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_id_card").val() == ''){
+       if($.trim($(this).parents('form').find("#staff_id_card").val()) == ''){
            tishi_alert("身份证不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_address").val() == ''){
+       if($.trim($(this).parents('form').find("#staff_address").val()) == ''){
            tishi_alert("地址不能为空!");
            return false;
        }
-       if($(this).parents('form').find("#staff_base_salary").val() == ''){
+       if($.trim($(this).parents('form').find("#staff_base_salary").val()) == ''){
            tishi_alert("薪资标准不能为空!");
            return false;
        }
@@ -240,7 +240,7 @@ $(document).ready(function(){
            tishi_alert("薪资标准必须为数字!");
            return false;
        }
-       if($(this).parents('form').find("#staff_deduct_at").val() == ''){
+       if($.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
            tishi_alert("提成起始额不能为空!");
            return false;
        }
@@ -248,7 +248,7 @@ $(document).ready(function(){
            tishi_alert("提成起始额必须为数字!");
            return false;
        }
-       if($(this).parents('form').find("#staff_deduct_end").val() == ''){
+       if($.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
            tishi_alert("结束额度不能为空!");
            return false;
        }
@@ -260,7 +260,7 @@ $(document).ready(function(){
            tishi_alert("起始额必须不能大于结束额度!");
            return false;
        }
-       if($(this).parents('form').find("#staff_deduct_percent").val() == ''){
+       if($.trim($(this).parents('form').find("#staff_deduct_percent").val()) == ''){
            tishi_alert("提成率不能为空!");
            return false;
        }
@@ -318,11 +318,11 @@ $(document).ready(function(){
            tishi_alert("至少选择一个奖励人员!");
            return false;
        }
-       if($("#new_reward_area #violation_reward_situation").val() == ''){
+       if($.trim($("#new_reward_area #violation_reward_situation").val()) == ''){
            tishi_alert("奖励原因不能为空!");
            return false;
        }
-       if($("#new_reward_area #violation_reward_mark").val() == ''){
+       if($.trim($("#new_reward_area #violation_reward_mark").val()) == ''){
            tishi_alert("补充说明不能为空!");
            return false;
        }
@@ -336,11 +336,11 @@ $(document).ready(function(){
            tishi_alert("至少选择一个违规人员!");
            return false;
        }
-       if($("#new_violation_area #violation_reward_situation").val() == ''){
+       if($.trim($("#new_violation_area #violation_reward_situation").val()) == ''){
            tishi_alert("违规原因不能为空!");
            return false;
        }
-       if($("#new_violation_area #violation_reward_mark").val() == ''){
+       if($.trim($("#new_violation_area #violation_reward_mark").val()) == ''){
            tishi_alert("补充说明不能为空!");
            return false;
        }
@@ -366,7 +366,7 @@ $(document).ready(function(){
            tishi_alert("至少选择一个培训人员!");
            return false;
        }
-       if($("#new_train_area #train_content").val() == ''){
+       if($.trim($("#new_train_area #train_content").val()) == ''){
            tishi_alert("培训原因不能为空!");
            return false;
        }
