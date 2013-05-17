@@ -4,25 +4,25 @@ class Api::OrdersController < ApplicationController
   def index_list
     status = 0
     begin
-      @reservations = Reservation.store_reservations params[:store_id]
-      @orders = Order.working_orders params[:store_id]
+      reservations = Reservation.store_reservations params[:store_id]
+      orders = Order.working_orders params[:store_id]
       status = 1
     rescue
       status = 2
     end
-    render :json => {:status => status,:orders => @orders,:reservations => @reservations}.to_json
+    render :json => {:status => status,:orders => orders,:reservations => reservations}.to_json
   end
 
   def login
-    @staff = Staff.find_by_username(params[:user_name])
+    staff = Staff.find_by_username(params[:user_name])
     info = ""
-    if  @staff.nil? or !@staff.has_password?(params[:user_password])
+    if  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
-    elsif @staff.status != Staff::STATUS[:normal]
+    elsif staff.status != Staff::STATUS[:normal]
       info = "用户不存在"
     else
-      cookies[:user_id]={:value => @staff.id, :path => "/", :secure  => false}
-      cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => false}
+      cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
+      cookies[:user_name]={:value =>staff.name, :path => "/", :secure  => false}
       session_role(cookies[:user_id])
       if has_authority?
         info = ""
@@ -34,7 +34,7 @@ class Api::OrdersController < ApplicationController
         info = "抱歉，您没有访问权限"
       end
     end
-    render :json => {:staff => @staff, :info => info}.to_json
+    render :json => {:staff => staff, :info => info}.to_json
   end
   #根据车牌号查询客户
   def search_car
