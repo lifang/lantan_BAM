@@ -21,7 +21,16 @@ class MaterialsInOutsController < ApplicationController
       render :text => 'fail'
     else
       if params[:action_name]=='m_in'
-        @material_orders = @material.material_orders.not_all_in
+        material_orders = @material.material_orders.not_all_in
+        @material_orders = []
+        material_orders.each do |material_order|
+          mio_num = MatInOrder.where(:material_id => @material.id, :material_order_id => material_order.id).sum(:material_num)
+          moi_num = MatOrderItem.find_by_material_id_and_material_order_id(@material.id, material_order.id).try(:material_num)
+          if mio_num < moi_num
+            @material_orders <<  material_order
+          end
+        end
+
         if @material_orders.empty?
           render :text => 'fail'
         else
