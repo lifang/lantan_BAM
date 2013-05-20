@@ -366,10 +366,10 @@ class Order < ActiveRecord::Base
           s[:scard_name] = r.sv_card.name
           s[:scard_discount] = r.sv_card.discount
           s[:price] = total * (10 - r.sv_card.discount) / 10
-          s[:selected] = 0
-          s[:show_price] = "-" + s[:price].to_s
+          s[:selected] = 1
+          s[:show_price] = 0.0#"-" + s[:price].to_s
           svcard_arr << s
-          total -= s[:price]
+          #total -= s[:price]
         }
       end
       #产品相关套餐卡
