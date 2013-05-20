@@ -169,10 +169,11 @@ class Order < ActiveRecord::Base
         if order.status == STATUS[:BEEN_PAYMENT] or order.status == STATUS[:FINISHED]
           old_orders << order_hash
         else
-          if car_id and car_id.to_i == order.id
+          if (car_id && car_id.to_i == order.id) || car_id.nil?
             working_orders << order_hash
-          elsif car_id.nil?
-            working_orders << order_hash
+#mark
+#          elsif car_id.nil?
+#            working_orders << order_hash
           end
         end
       end
