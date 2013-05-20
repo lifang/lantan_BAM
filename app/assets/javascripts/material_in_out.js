@@ -15,6 +15,8 @@ $(document).ready(function(){
                 success:function(data) {
                     if(data=="fail"){
                         $(".search_alert").show();
+                        $("#mat_code").val('');
+                        $("#mat_code").focus();
                     }
                     else{
                         $(".search_alert").hide();
@@ -119,7 +121,7 @@ function checkNums(){
                         success:function(data2){
                             if(data2=="1")
                               {tishi_alert("入库成功！");
-                                window.location.href = "/stores/"+ store_id +"/materials_in_outs";
+                                window.location.href = "/materials_in_outs";
                               }
                         }
                     });
@@ -142,5 +144,7 @@ function checkMatOutNum(obj){
     })
     if($(".mat-out-list").find("tr").length > 0){
         $(obj).parents("form").submit();
+    }else{
+        tishi_alert("请录入商品")
     }
 }

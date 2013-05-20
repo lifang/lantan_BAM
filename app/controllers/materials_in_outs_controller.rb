@@ -73,7 +73,7 @@ class MaterialsInOutsController < ApplicationController
       end
     end
     flash[:notice] = '商品已成功出库！'
-    redirect_to "/stores/#{@store_id}/materials_in_outs"
+    redirect_to "/materials_in_outs"
   end
 
   def save_cookies
