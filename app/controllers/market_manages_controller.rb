@@ -159,17 +159,20 @@ class MarketManagesController < ApplicationController
     @search_time = params[:search_time] || Time.now.strftime("%Y-%m-%d")
     
     @current_day_total = Order.where("created_at <= '#{Time.now}'").
-      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").sum(:price)
+      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
+      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
 
     @orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
-      where("created_at >= '#{@search_time} 00:00:00'")
+      where("created_at >= '#{@search_time} 00:00:00'").
+      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
     @search_total = @orders.sum(:price)
   end
 
   def daily_consumption_receipt_blank
     @search_time = params[:search_time]
     @orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
-      where("created_at >= '#{@search_time} 00:00:00'")
+      where("created_at >= '#{@search_time} 00:00:00'").
+      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
     @search_total = @orders.sum(:price)
   end
 
