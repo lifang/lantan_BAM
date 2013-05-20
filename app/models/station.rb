@@ -18,6 +18,7 @@ class Station < ActiveRecord::Base
   scope :valid, where("status != 4")
   
   def self.set_stations(store_id)
+    p store_id
     s_levels ={}  #所需技师等级
     l_staffs ={}  #现有等级的技师
     next_turn=[]
@@ -64,6 +65,7 @@ class Station < ActiveRecord::Base
       end
     }
     StationStaffRelation.find_all_by_current_day(Time.now.strftime("%Y%m%d")).each {|station| station.destroy}
+    p s_levels
     s_levels.each  {|station_id,staffs|
       if staffs.include?(nil)
         Station.find(station_id).update_attributes(:status=>Station::STAT[:LACK])

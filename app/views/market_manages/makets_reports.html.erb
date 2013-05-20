@@ -125,7 +125,7 @@
                     <tr>
                       <td><%= pro.name %></td>
                       <td><%= pro.service_code %></td>
-                      <td><%= pro.is_free ? Order::FREE_TYPE[:ORDER_FREE] : Order::FREE_TYPE[:PCARD] %></td>
+                      <td><%= pro.pay_type==OrderPayType::PAY_TYPES[:PACJAGE_CARD] ? Order::FREE_TYPE[:ORDER_FREE] : Order::FREE_TYPE[:PCARD] %></td>
                       <td><%= pro.prod_num.to_i %></td>
                       <td><%= format("%.2f",pro.sum) %></td>
                     </tr>

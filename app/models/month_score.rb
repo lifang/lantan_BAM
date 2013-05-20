@@ -23,20 +23,22 @@ class MonthScore < ActiveRecord::Base
 
   def self.kind_order(store_id)
     return Order.find_by_sql("select p.id,p.name,p.is_service,p.service_code,op.price,sum(op.pro_num) prod_num,sum(op.price*op.pro_num) sum,date_format(o.created_at,'%Y-%m-%d')
-    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id} and is_free !=#{Order::IS_FREE[:YES]}
-    and c_pcard_relation_id is null and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by p.id,date_format(o.created_at,'%Y-%m-%d') ")
-  end
+    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id inner join order_pay_types ot
+    on ot.order_id=o.id where  o.store_id=#{store_id} and ot.pay_type not in (#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:IS_FREE]})
+    and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by p.id,date_format(o.created_at,'%Y-%m-%d') ")
+  end   
 
   def self.sort_pcard(store_id)
-    return Order.find_by_sql("select p.id,p.name,p.service_code,o.is_free,op.price,sum(op.pro_num) prod_num,sum(op.price*op.pro_num) sum,date_format(o.created_at,'%Y-%m-%d')
-    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id} and (is_free=#{Order::IS_FREE[:YES]}
-    or c_pcard_relation_id is not null) and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by p.id,date_format(o.created_at,'%Y-%m-%d') ")
+    return Order.find_by_sql("select p.id,p.name,p.service_code,ot.pay_type,o.is_free,op.price,sum(op.pro_num) prod_num,sum(op.price*op.pro_num) sum,date_format(o.created_at,'%Y-%m-%d')
+    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id inner join order_pay_types ot
+    on ot.order_id=o.id where o.store_id=#{store_id} and ot.pay_type  in (#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:IS_FREE]}) and
+    o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by p.id,date_format(o.created_at,'%Y-%m-%d') ")
   end
 
   def self.search_kind_order(store_id,created,ended,time)
     sql ="select p.id,p.name,p.is_service,p.service_code,op.price,sum(op.pro_num) prod_num,sum(op.price*op.pro_num) sum,date_format(o.created_at,'%Y-%m-%d')
-    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id} and (is_free !=#{Order::IS_FREE[:YES]}
-    or c_pcard_relation_id is null) and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
+    day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id} 
+    on and ot.pay_type not in (#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:IS_FREE]})  and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
     sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql +=" group by p.id,date_format(o.created_at,'%Y-%m-%d')"  if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
@@ -47,9 +49,9 @@ class MonthScore < ActiveRecord::Base
   end
 
   def self.search_sort_pcard(store_id,created,ended,time)
-    sql = "select p.id,p.name,p.service_code,o.is_free,op.price,sum(op.pro_num) prod_num,sum(op.price*op.pro_num) sum,date_format(o.created_at,'%Y-%m-%d')
+    sql = "select p.id,p.name,p.service_code,o.is_free,op.price,ot.pay_type,sum(op.pro_num) prod_num,sum(op.price*op.pro_num) sum,date_format(o.created_at,'%Y-%m-%d')
     day  from orders o inner join order_prod_relations op on o.id=op.order_id inner join products p on p.id=op.product_id where  o.store_id=#{store_id} and 
-    is_free !=#{Order::IS_FREE[:YES]} and c_pcard_relation_id is  null and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
+    on ot.pay_type in (#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:IS_FREE]})  and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
     sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created == "" || created.length==0
     sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql +=" group by p.id,date_format(o.created_at,'%Y-%m-%d')"  if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
