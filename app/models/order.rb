@@ -366,10 +366,10 @@ class Order < ActiveRecord::Base
           s[:scard_name] = r.sv_card.name
           s[:scard_discount] = r.sv_card.discount
           s[:price] = total * (10 - r.sv_card.discount) / 10
-          s[:selected] = 0
-          s[:show_price] = "-" + s[:price].to_s
+          s[:selected] = 1
+          s[:show_price] = 0.0#"-" + s[:price].to_s
           svcard_arr << s
-          total -= s[:price]
+          #total -= s[:price]
         }
       end
       #产品相关套餐卡
@@ -495,7 +495,7 @@ class Order < ActiveRecord::Base
         if arr[3].any?
           p_c_ids = {} #统计有多少套餐卡中消费
           pc_ids = {} #套餐卡同种套餐卡数量
-          arr[3].collect do |a_pc|
+          arr[3].collect do |a_pc|            
             pc_ids[a_pc[1].to_i] = pc_ids[a_pc[1].to_i].nil? ? 1 : (pc_ids[a_pc[1].to_i] + 1)
             pro_infos = p_c_ids[a_pc[1].to_i].nil? ? {} : p_c_ids[a_pc[1].to_i]
             pinfos = a_pc[3].split("-") if a_pc[3]
@@ -510,26 +510,41 @@ class Order < ActiveRecord::Base
           #获取套餐卡
           p_cards = PackageCard.find(:all, :conditions => ["status = ? and store_id = ? and id in (?)",
               PackageCard::STAT[:NORMAL], store_id, p_c_ids.keys])
-          if p_cards.any?
+          if p_cards.any?            
+            p_cards_hash = p_cards.group_by { |p_c| p_c.id }
             c_pcard_relations = CPcardRelation.find(:all,
               :conditions => ["status = ? and ended_at >= ? and customer_id = ? and package_card_id in (?)",
                 CPcardRelation::STATUS[:NORMAL], Time.now, c_id, p_cards]).group_by { |c_p_r| c_p_r.package_card_id }
-            p_cards_hash = p_cards.group_by { |p_c| p_c.id }
-            #新增的套餐卡
-            pc_ids.each do |key, value|
-              alreay_has = 0
-              alreay_has = c_pcard_relations[key].length if (c_pcard_relations and c_pcard_relations[key])
-              (1..(value - alreay_has)).each do |i|
-                cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id => key.to_i,
-                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[key][0].ended_at,
-                  :content => CPcardRelation.set_content(key), :order_id => order.id, :price => p_cards_hash[key][0].price)
-                if c_pcard_relations and c_pcard_relations[key]
-                  c_pcard_relations[key] << cpr
+             arr[3].collect do |a_pc|
+               if a_pc[2].to_i == 0 #has_p_card是0，表示是新买的套餐卡
+                 p_card_id = a_pc[1].to_i
+                 cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id =>p_card_id,
+                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[p_card_id][0].ended_at,
+                  :content => CPcardRelation.set_content(p_card_id), :order_id => order.id, 
+                  :price => p_cards_hash[p_card_id][0].price)
+                if c_pcard_relations and c_pcard_relations[p_card_id]
+                  c_pcard_relations[p_card_id] << cpr
                 else
-                  c_pcard_relations[key] = [cpr]
+                  c_pcard_relations[p_card_id] = [cpr]
                 end
-              end if value - alreay_has > 0
-            end
+               end
+             end
+            
+#            新增的套餐卡
+#            pc_ids.each do |key, value|
+#              alreay_has = 0
+#              alreay_has = c_pcard_relations[key].length if (c_pcard_relations and c_pcard_relations[key])
+#              (1..(value - alreay_has)).each do |i|
+#                cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id => key.to_i,
+#                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[key][0].ended_at,
+#                  :content => CPcardRelation.set_content(key), :order_id => order.id, :price => p_cards_hash[key][0].price)
+#                if c_pcard_relations and c_pcard_relations[key]
+#                  c_pcard_relations[key] << cpr
+#                else
+#                  c_pcard_relations[key] = [cpr]
+#                end
+#              end if value - alreay_has > 0
+#            end
             #更新数量
             p_c_ids.each do |key, value|
               c_pcard_relations[key].each do |c_p_r|

@@ -152,7 +152,7 @@ class Complaint < ActiveRecord::Base
   end
 
   def self.write_img(url,store_id,types,object_id)  #上传图片
-    file_name ="#{Time.now.strftime("%Y%m%d").to_s}_#{object_id}.jpg"
+    file_name ="#{Time.now.strftime("%Y%m").to_s}_#{object_id}.jpg"
     dir = "#{File.expand_path(Rails.root)}/public/chart_images"
     Dir.mkdir(dir) unless File.directory?(dir)
     total_dir ="#{dir}/#{store_id}/"
