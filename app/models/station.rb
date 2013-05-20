@@ -70,8 +70,7 @@ class Station < ActiveRecord::Base
       else
         Station.find(station_id).update_attributes(:status=>Station::STAT[:NORMAL])
       end
-      
-      staffs.each {|staff|   
+      staffs.each {|staff|
         if staff
           StationStaffRelation.create(:station_id=>station_id,:staff_id=>staff[0],:current_day=>Time.now.strftime("%Y%m%d"))
         end

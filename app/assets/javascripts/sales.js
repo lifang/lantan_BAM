@@ -8,8 +8,8 @@ function publish_sale(e){
     var img =$("#img_url").val();
     var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]") 
     var pic_type =img.substring(img.lastIndexOf(".")).toLowerCase()
-    if (name=="" || name.length==0){
-        tishi_alert("请输入本次活动的标题")
+    if (name=="" || name.length==0 || pattern.test(name)){
+        tishi_alert("请输入本次活动的标题,不能包含非法字符")
         return false;
     }
     if($("#add_products").children().length == 0){
@@ -186,8 +186,9 @@ function edit_pcard(id,store_id){
 function check_add(e){
     var name=$("#name").val();
     var base=$("#price").val();
-    if (name=="" || name.length==0){
-        tishi_alert("请输入套餐卡的名称");
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
+    if (name=="" || name.length==0 || pattern.test(name)){
+        tishi_alert("请输入套餐卡的名称,不能包含非法字符");
         return false;
     }
     if ( ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0)){
@@ -229,9 +230,7 @@ function check_add(e){
     if ((img != "" || img.length !=0) && pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
         tishi_alert("请选择正确格式的图片,正确格式是："+pic_format )
         return false;
-    }
-    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
-  
+    } 
     var g_name = img_name.substring(1,img_name.length);
     if ((img != "" || img.length !=0) && pattern.test(g_name.split(".")[0])){
         tishi_alert("图片名称不能包含特殊字符");

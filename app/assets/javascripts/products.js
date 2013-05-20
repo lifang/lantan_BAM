@@ -30,13 +30,14 @@ function show_prod(id,store_id){
 
 //添加或者编辑产品
 function add_product(e){
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
     var name=$("#name").val();
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
     var standard =$("#standard").val();
     var pic_format =["png","gif","jpg","bmp"];
-    if (name=="" || name.length==0){
-        tishi_alert("请输入产品的名称");
+    if (name=="" || name.length==0 || pattern.test(name)){
+        tishi_alert("请输入产品的名称,不能包含非法字符");
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
@@ -52,7 +53,7 @@ function add_product(e){
         return false;
     }
     var img_f  = false
-    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]") 
+   
     $(".add_img #img_div input[name$='img_url']").each(function (){
         if (this.value!="" || this.value.length!=0){
             var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
@@ -107,14 +108,15 @@ function edit_service(store_id,id){
 
 //添加或者编辑服务
 function edit_serv(e){
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
     var name=$("#name").val();
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
     var time=$("#cost_time").val();
     var deduct =$("#deduct_percent").val();
     var pic_format =["png","gif","jpg","bmp"];
-    if (name=="" || name.length==0){
-        tishi_alert("请输入服务的名称");
+    if (name=="" || name.length==0 || pattern.test(name)){
+        tishi_alert("请输入服务的名称,不能包含非法字符");
         return false;
     }
     var is_num=false
@@ -144,7 +146,7 @@ function edit_serv(e){
         return false;
     }
     var img_f  = false
-    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+    
     $(".add_img #img_div input[name$='img_url']").each(function (){
         if (this.value!="" || this.value.length!=0){
             var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
