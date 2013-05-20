@@ -144,7 +144,5 @@ function checkMatOutNum(obj){
     })
     if($(".mat-out-list").find("tr").length > 0){
         $(obj).parents("form").submit();
-    }else{
-        tishi_alert("请录入商品")
     }
 }

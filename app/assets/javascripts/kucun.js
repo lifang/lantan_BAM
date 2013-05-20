@@ -367,7 +367,7 @@ function pay_material_order(parent_id, pay_type,store_id){
         success:function(data,status){
             if(data["status"]==0){
                 tishi_alert("支付成功");
-                window.location.reload();
+                window.location.href = "/stores/"+store_id + "/materials";
             }else if(data["status"]== -1){
                 hide_mask("#"+parent_id);
                 popup("#alipay_confirm");
