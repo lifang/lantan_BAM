@@ -557,9 +557,9 @@ class Order < ActiveRecord::Base
               end
               prod_nums_hash = {}
               (prod_nums||[]).map{|pn| pn.split("=")}.map{|pn| prod_nums_hash[pn[0]] = pn[1]}
-                cpr_content = cpr.content.split(",")
+                cpr_content = cpr.content.split(",") if cpr
                 content = []
-                cpr_content.each do |pnn|
+                (cpr_content ||[]).each do |pnn|
                   prod_name_num = pnn.split("-")
                   prod_id = prod_name_num[0]
                   if prod_nums_hash[prod_id]
@@ -568,7 +568,7 @@ class Order < ActiveRecord::Base
                     content << pnn
                   end
                 end
-                cpr.update_attribute(:content, content.join(","))
+                cpr.update_attribute(:content, content.join(",")) if cpr
               
             end
             
