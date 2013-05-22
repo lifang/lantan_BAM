@@ -547,7 +547,7 @@ class Order < ActiveRecord::Base
 #                  c_pcard_relations[p_card_id] = [cpr] if a_pc[3]
 #                end
               else
-                cpr = CPcardRelation.find a_pc[4]
+                cpr = CPcardRelation.find_by_id a_pc[4]
                 (prod_nums||[]).each do |pn|
                   prod_id = pn.split("=")[0]
                   p_num = pn.split("=")[1]
@@ -555,9 +555,10 @@ class Order < ActiveRecord::Base
                       :product_id =>prod_id, :product_num => p_num})
                 end
               end
-              prod_nums_hash = {}
-              (prod_nums||[]).map{|pn| pn.split("=")}.map{|pn| prod_nums_hash[pn[0]] = pn[1]}
-                cpr_content = cpr.content.split(",") if cpr
+              if cpr
+                prod_nums_hash = {}
+                (prod_nums||[]).map{|pn| pn.split("=")}.map{|pn| prod_nums_hash[pn[0]] = pn[1]}
+                cpr_content = cpr.content.split(",") 
                 content = []
                 (cpr_content ||[]).each do |pnn|
                   prod_name_num = pnn.split("-")
@@ -568,8 +569,8 @@ class Order < ActiveRecord::Base
                     content << pnn
                   end
                 end
-                cpr.update_attribute(:content, content.join(",")) if cpr
-              
+                cpr.update_attribute(:content, content.join(","))
+              end
             end
             
 #            新增的套餐卡
