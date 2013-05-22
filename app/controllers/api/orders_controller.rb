@@ -167,6 +167,15 @@ class Api::OrdersController < ApplicationController
     status = 0
     if params[:opt_type].to_i == 1
       if order && order.status == Order::STATUS[:NORMAL]
+        oprs = OPcardRelation.find_all_by_order_id(order.id)
+        oprs.each do |opr|
+          cpr = CPcardRelation.find(opr.c_pcard_relation_id)
+          pns = cpr.content.split(",").map{|pn| pn.split("-")} if cpr
+          pns.each do |pn|
+            pn[2] = pn[2].to_i + opr.product_num if pn[0].to_i == opr.product_id
+          end if pns
+          cpr.update_attribute(:content,pns.map{|pn| pn.join("-")}.join(",")) if cpr
+        end unless oprs.blank?
         order.update_attribute(:status, Order::STATUS[:DELETED])
         status = 1
       else

@@ -412,6 +412,7 @@ class Order < ActiveRecord::Base
 
   #获取产品相关的活动，打折卡，套餐卡
   def self.get_prod_sale_card prods
+    #"prods"=>"0_311_1,0_310_1,3_10_1_310=1-311=1-"
     arr = prods.split(",")
     prod_arr = []
     sale_arr = []
@@ -437,12 +438,14 @@ class Order < ActiveRecord::Base
 
   #生成订单
   def self.make_record c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id
+    #"prods"=>"0_311_1,0_310_1,3_10_1_310=1-311=1-"
     arr = []
     status = 0
     order = nil
     Order.transaction do
       #begin
-      arr = self.get_prod_sale_card prods
+      arr = self.get_prod_sale_card prods  
+      #[[["0", "311", "9"], ["0", "310", "2"]], [], [], [["3", "10", "0", "310=2-311=7-"], ["3", "11", "0"], ["3", "10", "1", "311=2-"]]]
       sale_id = arr[1].size > 0 ? arr[1][0][1] : ""
       svcard_id = arr[2].size > 0 ? arr[2][0][1] : ""
       order = Order.create({
@@ -494,6 +497,7 @@ class Order < ActiveRecord::Base
         #订单相关的套餐卡
         prod_hash = {}  #用来记录套餐卡中总共使用了多少
         if arr[3].any?
+          #[["3", "10", "0", "310=2-311=7-"], ["3", "11", "0"], ["3", "10", "1", "311=2-"]]
           p_c_ids = {} #统计有多少套餐卡中消费
           pc_ids = {} #套餐卡同种套餐卡数量
           arr[3].collect do |a_pc|            
@@ -509,6 +513,7 @@ class Order < ActiveRecord::Base
             p_c_ids[a_pc[1].to_i] = pro_infos
           end
           #获取套餐卡
+          #arr[3]=[["3", "10", "0", "310=2-311=7-"], ["3", "11", "0"], ["3", "10", "1", "311=2-"]]
           p_cards = PackageCard.find(:all, :conditions => ["status = ? and store_id = ? and id in (?)",
               PackageCard::STAT[:NORMAL], store_id, p_c_ids.keys])
           if p_cards.any?            
@@ -524,9 +529,9 @@ class Order < ActiveRecord::Base
                   :content => CPcardRelation.set_content(p_card_id), :order_id => order.id, 
                   :price => p_cards_hash[p_card_id][0].price)
                 if c_pcard_relations and c_pcard_relations[p_card_id]
-                  c_pcard_relations[p_card_id] << cpr
+                  c_pcard_relations[p_card_id] << cpr if a_pc[3]
                 else
-                  c_pcard_relations[p_card_id] = [cpr]
+                  c_pcard_relations[p_card_id] = [cpr] if a_pc[3]
                 end
                end
              end
@@ -547,31 +552,46 @@ class Order < ActiveRecord::Base
 #              end if value - alreay_has > 0
 #            end
             #更新数量
+            #{10=>{310=>2, 311=>9}, 11=>{}}
             p_c_ids.each do |key, value|
               c_pcard_relations[key].each do |c_p_r|
                 left_ps = c_p_r.content.split(",")
+
                 content = []
+                mark_prod_id = {}
                 is_has = 1 #用来记录一个套餐卡是否够用
                 (left_ps || []).each do |l_p|
-                  l_id = l_p.split("-")[0].to_i
+                  
+                  l_id = l_p.split("-")[0].to_i #content里面的product_id
+                  mark_prod_id[l_id] = true
                   l_num = l_p.split("-")[2].to_i
                   if value[l_id].nil?
                     content << l_p
                   else
-                    if (l_num - value[l_id]) > 0
+                 
+                    opr = OPcardRelation.where(:order_id => order.id, :c_pcard_relation_id => c_p_r.id,:product_id =>value[l_id])
+                    OPcardRelation.create({:order_id => order.id, :c_pcard_relation_id => c_p_r.id,
+                                         :product_id =>l_id, :product_num => value[l_id]}) if opr.blank? && mark_prod_id[l_id] && value[l_id]!=0
+                    if (l_num - value[l_id]) > 0  
                       content << "#{l_id}-#{l_p.split("-")[1]}-#{l_num - value[l_id]}"
+                      value[l_id] = 0
                     else
                       is_has = 0
+                      mark_prod_id[l_id] = false
                       content << "#{l_id}-#{l_p.split("-")[1]}-0"
                       value[l_id] = value[l_id] - l_num
                     end
+                   
                   end
                 end
+       
+
                 c_p_r.update_attribute(:content, content.join(","))
                 if is_has == 1 #说明一个套餐卡已经够消费了
                   break
                 end
-              end
+              end unless value.blank?
+              
             end
             #创建套餐卡优惠的价格
             pcard_dis_price = 0
