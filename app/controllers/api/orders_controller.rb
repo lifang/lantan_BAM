@@ -100,7 +100,7 @@ class Api::OrdersController < ApplicationController
 
   #点击完成按钮，确定选择的产品和服务
   def finish
-    prod_id = params[:prod_ids]
+    prod_id = params[:prod_ids] #"10_3,311_0,226_2,"
     prod_id = prod_id[0...(prod_id.size-1)] if prod_id
     pre_arr = Order.pre_order params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
       params[:email],params[:birth],prod_id,params[:res_time]
