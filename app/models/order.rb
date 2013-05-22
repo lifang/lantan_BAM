@@ -360,7 +360,7 @@ class Order < ActiveRecord::Base
       end if prod_ids && carNum && customer
       #产品相关的打折卡
       discont_card = CSvcRelation.find(:all, :select => "c_svc_relations.*",
-        :conditions => ["c_svc_relations.customer_id = ?", customer.id],
+        :conditions => ["c_svc_relations.customer_id = ? and s.types= ?", customer.id, SvCard::FAVOR[:DISCOUNT]],
         :joins => ["inner join sv_cards s on s.id = c_svc_relations.sv_card_id"])
       if discont_card.any?
         discont_card.each{|r|
