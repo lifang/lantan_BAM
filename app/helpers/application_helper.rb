@@ -130,7 +130,12 @@ module ApplicationHelper
   def material_order_tips
     @material_pay_notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
       Notice::TYPES[:URGE_PAYMENT], Notice::STATUS[:NORMAL])
-    @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:received], 0)
-    @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:send], 0)
+    @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ? and store_id = ?", MaterialOrder::M_STATUS[:received], 0, params[:store_id])
+    @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ? and store_id = ?", MaterialOrder::M_STATUS[:send], 0, params[:store_id])
+  end
+
+  def random_file_name(file_name)
+    name = File.basename(file_name)
+    return (Digest::SHA1.hexdigest Time.now.to_s + name)[0..20] + File.extname(file_name)
   end
 end
