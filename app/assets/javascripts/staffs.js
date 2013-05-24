@@ -274,8 +274,8 @@ $(document).ready(function(){
                return false;
            }else{
                var input_s = document.getElementById('staff_photo');
-               var file_size = (input_s.files[0].size/1024).toFixed(2);
-               if(file_size > 500){
+               var file_size = input_s.files[0].size;
+               if(file_size > 500*1024){
                   tishi_alert("图片大小不能超过500k！");
                   return false;
                }
@@ -299,8 +299,8 @@ $(document).ready(function(){
        if($(this).attr("id") == "edit_staff_btn"){
            if($(this).parents('form').find("#staff_photo").val() != ''){
                var input_e = document.getElementById('staff_photo');
-               var file_size_e = (input_e.files[0].size/1024).toFixed(2);
-               if(file_size_e > 500){
+               var file_size_e = input_e.files[0].size;
+               if(file_size_e > 500*1024){
                   tishi_alert("图片大小不能超过500k！");
                   return false;
                }
