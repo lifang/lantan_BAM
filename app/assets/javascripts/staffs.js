@@ -273,6 +273,12 @@ $(document).ready(function(){
                tishi_alert("照片不能为空!");
                return false;
            }else{
+               var input_s = document.getElementById('staff_photo');
+               var file_size = (input_s.files[0].size/1024).toFixed(2);
+               if(file_size > 500){
+                  tishi_alert("图片大小不能超过500k！");
+                  return false;
+               }
                var img_val = $(this).parents('form').find("#staff_photo").val();
                var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
                var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
@@ -292,6 +298,12 @@ $(document).ready(function(){
        }
        if($(this).attr("id") == "edit_staff_btn"){
            if($(this).parents('form').find("#staff_photo").val() != ''){
+               var input_e = document.getElementById('staff_photo');
+               var file_size_e = (input_e.files[0].size/1024).toFixed(2);
+               if(file_size_e > 500){
+                  tishi_alert("图片大小不能超过500k！");
+                  return false;
+               }
                var edit_img_val = $(this).parents('form').find("#staff_photo").val();
                var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
                var img_name = edit_img_val.substring(edit_img_val.lastIndexOf("\\")).toLowerCase();
