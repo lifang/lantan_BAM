@@ -23,20 +23,21 @@ li { list-style: none;}
 .io_menu li a.outa { background: #930205 url(/assets/icon.png) no-repeat -32px -78px;}
 .io_menu li a:hover { background-color: #b10609; box-shadow: 1px 1px 5px rgba(0,0,0,0.5);}
 
-.search { height: 35px; overflow: hidden; margin-top: 40px;}
-.search label, .search_select label{
-    width: 120px; 
+.search{ height: 35px; overflow: hidden; margin: 30px 0 0 20px;}
+.scan-upload{height: 35px; overflow: hidden; margin: 10px 0 0 20px;}
+.mat_in_out .search label, .search_select label, .mat_in_out .scan-upload label{
+    width: 150px;
 	display: inline-block; 
 	height: 32px; 
 	line-height: 32px; 
-	text-align: right; 
+	text-align: left;
 	padding-right: 5px; 
 	color:#930205;
 	font-weight:bold;
 	font-size: 18px;
 	 float: left;
 }
-.search input { width: 220px; height: 32px; border: 1px #999999 solid; float: left;}
+.mat_in_out .search input[type="text"] { width: 220px; height: 32px; border: 1px #999999 solid; float: left;}
 
 .search_alert { color: #F00; line-height: 32px; padding-left: 120px; display: none}
 .search_select { width: 350px; height: 35px; overflow: hidden; margin: 60px auto 0 auto;}
@@ -82,3 +83,11 @@ button { border: none; cursor: pointer; font-family: "微软雅黑", "宋体", A
 .confirm_btn { padding: 5px 15px; _padding: 2px 7px; margin: 0 10px; color: #FFF;}
 input[type="submit"].confirm_btn, .confirm_btn { background: #930205;cursor: pointer}
 input[type="submit"].confirm_btn:hover{background: #d42b2f;}
+.message {
+    padding: 5px 10px;
+	margin: 5px 0;
+	background: #fffbc1;
+	border: 1px #ed1010 solid;
+	line-height: 24px;
+	position: relative;
+}

@@ -566,4 +566,42 @@ class MaterialsController < ApplicationController
     material = Material.find_by_code_and_store_id(params[:code], params[:store_id])
     render :text => material.nil? ? "0" : "1"
   end
+
+  def upload_checknum
+    check_file = params[:check_file]
+    if check_file
+      new_name = random_file_name(check_file.original_filename)
+      FileUtils.mkdir_p Material::MAT_CHECKNUM_PATH % @store_id
+      file_path = Material::MAT_CHECKNUM_PATH % @store_id + "/#{new_name}"
+      File.new(file_path, 'a+')
+      File.open(file_path, 'wb') do |file|
+        file.write(check_file.read)
+      end
+
+      if File.exists?(file_path)
+        @check_nums = {}
+        File.open(file_path, "r").each_line do |line|
+          #6922233613731,10
+          data = line.strip.split(',')
+          @check_nums[data[0]] = data[1]
+        end
+        @materials = Material.where(:code => @check_nums.keys)
+      end
+    end
+  end
+
+  def batch_check
+    failed_updates = []
+    params[:materials].each do |id,cn|
+      material = Material.find_by_id(id)
+      unless material && material.update_attribute(:storage, cn[:num])
+        failed_updates << cn[:code]
+      end
+    end unless params[:materials].blank?
+    if failed_updates.length > 0
+      flash[:notice] = "#{failed_updates.join('、')} 等物料核实失败！"
+    end
+    flash[:notice] = "批量核实成功！"
+    redirect_to "/stores/#{params[:store_id]}/materials"
+  end
 end

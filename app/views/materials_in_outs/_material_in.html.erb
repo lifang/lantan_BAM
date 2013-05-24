@@ -1,12 +1,13 @@
-<% @material_orders.each do |mo| %>
-  <tr class="newTr_red">
-    <td class="mo_code"><%= mo.code %></td>
-    <td class="mat_code"><%= @material.code %></td>
-    <td class="mat_name"><%= @material.name %></td>
-    <td class ="mat_item_num">1</td>
-    <td class ="num_box" style="display:none"><%= text_field_tag "material_num", nil, :style => 'width:50px', :onblur=>"hideInput(this)" %></td>
-    <td><a href="javascript:void(0)" onclick="changeNum(this)" class="bz_btn">编辑</a><a href="javascript:void(0)" onclick="removeRow(this)">删除</a></td>
-    <%= hidden_field_tag "material_price", @material.price, :class=>"material_price"%>
-    
-  </tr>
+<% material_in.each do |material, mos| %>
+  <% mos.each do |mo|%>
+    <tr class="<% unless @code_num %>newTr_red<% end %>">
+      <td class="mo_code"><%= mo.code %></td>
+      <td class="mat_code"><%= material.code %></td>
+      <td class="mat_name"><%= material.name %></td>
+      <td class ="mat_item_num"><%= (@code_num and @code_num[material.code])? @code_num[material.code] : 1%></td>
+      <td class ="num_box" style="display:none"><%= text_field_tag "material_num", nil, :style => 'width:50px', :onblur=>"hideInput(this)" %></td>
+      <td><a href="javascript:void(0)" onclick="changeNum(this)" class="bz_btn">编辑</a><a href="javascript:void(0)" onclick="removeRow(this)">删除</a></td>
+      <%= hidden_field_tag "material_price", material.price, :class=>"material_price"%>
+    </tr>
+  <% end %>
 <% end %>

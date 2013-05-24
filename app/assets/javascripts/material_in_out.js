@@ -8,6 +8,7 @@ $(document).ready(function(){
             $.ajax({
                 url:"/get_material",
                 dataType:"text",
+                type: "get",
                 data:{
                     code: codeVal,
                     action_name: action_name
@@ -40,12 +41,8 @@ $(document).ready(function(){
             });
         }
     });
-
-    setTimeout( function(){
-        $('.mat_notice' ).fadeOut();
-    }, 3000 );
-
 });
+
 function chooseCookie(obj){
     var staff_id = $(obj).val();
     $.get("/save_cookies", {
@@ -144,5 +141,16 @@ function checkMatOutNum(obj){
     })
     if($(".mat-out-list").find("tr").length > 0){
         $(obj).parents("form").submit();
+    }
+}
+
+function disbaleSib(obj, flag){
+    if(flag=="next"){
+        $(obj).parents(".search").siblings(".scan-upload").find("input[type='submit']").attr("disabled", "disabled");
+        $(obj).parent().next().attr("disabled", false);
+    }else{
+        $(obj).parents(".scan-upload").siblings(".search").find("input[type='text']").attr("disabled", "disabled");
+        $('.search_alert').hide();
+        $(obj).parent().next().find("input[type='submit']").attr("disabled", false);
     }
 }

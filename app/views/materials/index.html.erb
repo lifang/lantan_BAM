@@ -6,6 +6,7 @@
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store]), :class => "",:target => "_blank" %><% end %>
+    <% if permission?(:materials, :check) %><%= link_to_function "批量盘点", "checkMatNum()" %><% end %>
   </div>
   <div class="clear"></div>
   <div class="tab_head">
@@ -45,25 +46,25 @@
     <h1>添加物料<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <%= form_tag "/stores/#{params[:store_id]}/materials/add_material", :id => "add_material_tab_form" do |f| %>
-          <div class="popup_body_area">
-            <div class="item">
-              <%= label_tag "materials[name]","物料名称：" %><%= text_field_tag "materials[name]" %>
-            </div>
-            <div class="item">
-              <%= label_tag "materials[types]","物料类型：" %><%= select(:materials,:types,material_types,{:prompt => "请选择"}) %>
-            </div>
-            <div class="item">
-              <%= label_tag "materials[code]","条形码：" %><%= text_field_tag "materials[code]" %>
-            </div>
-            <div class="item">
-              <%= label_tag "materials[price]","单价：" %><%= text_field_tag "materials[price]" %>
-            </div>
-            <div class="item">
-              <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]" %>
-            </div>
+        <div class="popup_body_area">
+          <div class="item">
+            <%= label_tag "materials[name]","物料名称：" %><%= text_field_tag "materials[name]" %>
           </div>
-          <div class="btn_box"><button type="button" onclick="checkMaterial(this, <%= params[:store_id] %>)" class="confirm_btn">确定</button></div>
-          <div class="clear"></div>
+          <div class="item">
+            <%= label_tag "materials[types]","物料类型：" %><%= select(:materials,:types,material_types,{:prompt => "请选择"}) %>
+          </div>
+          <div class="item">
+            <%= label_tag "materials[code]","条形码：" %><%= text_field_tag "materials[code]" %>
+          </div>
+          <div class="item">
+            <%= label_tag "materials[price]","单价：" %><%= text_field_tag "materials[price]" %>
+          </div>
+          <div class="item">
+            <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]" %>
+          </div>
+        </div>
+        <div class="btn_box"><button type="button" onclick="checkMaterial(this, <%= params[:store_id] %>)" class="confirm_btn">确定</button></div>
+        <div class="clear"></div>
       <% end %>
     </div>
   </div>
@@ -74,29 +75,29 @@
     <h1>入库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <%= form_tag store_materials_url(params[:store_id]), :id => "ruku_tab_form" do |f| %>
-          <div class="popup_body_area">
-            <div class="item">
-              <%= label_tag "name","物料名称：" %><%= text_field_tag "name" %>
-            </div>
-            <div class="item">
-              <%= label_tag "types","物料类型：" %><%= select(:material,:types,material_types,{:prompt => "请选择"}) %>
-            </div>
-            <div class="item">
-              <%= label_tag "code","订货单号：" %><%= text_field_tag "code" %>
-            </div>
-            <div class="item">
-              <%= label_tag "barcode","条形码：" %><%= text_field_tag "barcode" %>
-            </div>
-            <div class="item">
-              <%= label_tag "price","单价：" %><%= text_field_tag "price" %>
-            </div>
-            <div class="item">
-              <%= label_tag "num","数量：" %><%= text_field_tag "num" %>
-            </div>
+        <div class="popup_body_area">
+          <div class="item">
+            <%= label_tag "name","物料名称：" %><%= text_field_tag "name" %>
           </div>
-          <%= hidden_field_tag "hidden_store_id", params[:store_id] %>
-          <div class="btn_box"><button onclick="commit_in(this)" type="button" class="confirm_btn">确定</button></div>
-          <div class="clear"></div>
+          <div class="item">
+            <%= label_tag "types","物料类型：" %><%= select(:material,:types,material_types,{:prompt => "请选择"}) %>
+          </div>
+          <div class="item">
+            <%= label_tag "code","订货单号：" %><%= text_field_tag "code" %>
+          </div>
+          <div class="item">
+            <%= label_tag "barcode","条形码：" %><%= text_field_tag "barcode" %>
+          </div>
+          <div class="item">
+            <%= label_tag "price","单价：" %><%= text_field_tag "price" %>
+          </div>
+          <div class="item">
+            <%= label_tag "num","数量：" %><%= text_field_tag "num" %>
+          </div>
+        </div>
+        <%= hidden_field_tag "hidden_store_id", params[:store_id] %>
+        <div class="btn_box"><button onclick="commit_in(this)" type="button" class="confirm_btn">确定</button></div>
+        <div class="clear"></div>
       <% end %>
     </div>
   </div>
@@ -106,12 +107,12 @@
   <div class="popup_box">
     <h1>出库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <%= form_tag out_order_store_materials_url(params[:store_id]), :id => "out_order_form" do |f| %>
-        <div class="popup_body">
-          <div class="popup_body_area">
-            <%= render :partial => "/common/search_panel", :object => @type %>
-            <div class="pq pq_mb"></div>
-            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
-              <thead>
+      <div class="popup_body">
+        <div class="popup_body_area">
+          <%= render :partial => "/common/search_panel", :object => @type %>
+          <div class="pq pq_mb"></div>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+            <thead>
               <tr class="hbg">
                 <td>物料名称</td>
                 <td>物料类别</td>
@@ -119,36 +120,36 @@
                 <td>出库量（个）</td>
                 <td>操作</td>
               </tr>
-              </thead>
-              <tbody id="selected_materials"></tbody>
-            </table>
-            <div class="search"><%= hidden_field_tag "selected_items" %>
-              <div><%= label_tag "staff","申请人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
-            </div>
+            </thead>
+            <tbody id="selected_materials"></tbody>
+          </table>
+          <div class="search"><%= hidden_field_tag "selected_items" %>
+            <div><%= label_tag "staff","申请人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
           </div>
-          <div class="btn_box"><%= button_to_function "确定","submit_out_order('out_order_form')", :class => "confirm_btn" %>
-          </div>
-          <div class="clear"></div>
         </div>
+        <div class="btn_box"><%= button_to_function "确定","submit_out_order('out_order_form')", :class => "confirm_btn" %>
+        </div>
+        <div class="clear"></div>
+      </div>
     <% end %>
   </div>
 </div>
 <div class="tab_popup beizhu_tab" id="order_remark_div">
-  
+
 </div>
 <div class="tab_popup" id="zhifu_tab">
   <div class="popup_box">
     <h1>付款<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
-      <div class="fukuan_btn">
-        <%= hidden_field_tag "pay_order_id","0" %>
-        <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('zhifu_tab', 1,<%= params[:store_id] %>)"></a></span>
-        <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order('zhifu_tab', 3,<%= params[:store_id] %>)}">现金</button></span>
+        <div class="fukuan_btn">
+          <%= hidden_field_tag "pay_order_id","0" %>
+          <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('zhifu_tab', 1,<%= params[:store_id] %>)"></a></span>
+          <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order('zhifu_tab', 3,<%= params[:store_id] %>)}">现金</button></span>
+        </div>
+        <div class="clear"></div>
       </div>
-      <div class="clear"></div>
     </div>
-      </div>
   </div>
 </div>
 <div class="tab_popup" id="alipay_confirm">
@@ -157,14 +158,14 @@
     <div class="popup_body">
       <div class="popup_body_area">
         <div style="text-align:center">完成付款后请根据你的情况点击下面的按钮:</div>
-      <div class="fukuan_btn">
-        <%= hidden_field_tag "pay_order_id","0" %>
-        <span><a href="javascript:void(0)" class="confirm_btn" onclick="pay_material_order('alipay_confirm',1,<%= params[:store_id] %>)">重新付款</a></span>
-        <span><button class="confirm_btn" type="button" onclick="window.location.reload()">支付完成</button></span>
+        <div class="fukuan_btn">
+          <%= hidden_field_tag "pay_order_id","0" %>
+          <span><a href="javascript:void(0)" class="confirm_btn" onclick="pay_material_order('alipay_confirm',1,<%= params[:store_id] %>)">重新付款</a></span>
+          <span><button class="confirm_btn" type="button" onclick="window.location.reload()">支付完成</button></span>
+        </div>
+        <div class="clear"></div>
       </div>
-      <div class="clear"></div>
     </div>
-      </div>
   </div>
 </div>
 
@@ -172,21 +173,45 @@
   <div class="popup_box">
     <h1>详情<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
-      
+
     </div>
   </div>
 </div>
 <%= render :partial => "dinghuo_panel" %>
+
+<div class="tab_popup" id="batch_check_tab">
+  <div class="popup_box">
+    <h1>批量核实<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <hr></hr>
+    <%= form_tag "/upload_checknum", :remote => true, :multipart => true  do |f|%>
+      <input type="file" name="check_file"/>
+      <button class="confirm_btn" type="submit">上传文件</button>
+    <% end %>
+    <%= form_tag "/stores/#{params[:store_id]}/materials/batch_check" do |f|%>
+      <div class="popup_body">
+        <%= hidden_field_tag "store_id", params[:store_id] %>
+        <div class="popup_body_area">
+          <div class="file_data">
+            
+          </div>
+          <div class="btn_box"><button onclick="return confirm('确定核实？')" type="submit" class="confirm_btn">确定</button></div>
+          <div class="clear"></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <script type="text/javascript">
   $(function() {
-    <% if @status %>
-          $('div.tab_head li').eq(3).addClass('hover').siblings().removeClass('hover');
-          $('div.data_body > div').eq(3).show().siblings().hide();
-          $('#select_h_order').find("option[value=1]").attr('selected', 'selected');
-    <% end %>
-    <% if @mat_in %>
-          $("a.am_btn").click();
-    <% end %>
+<% if @status %>
+      $('div.tab_head li').eq(3).addClass('hover').siblings().removeClass('hover');
+      $('div.data_body > div').eq(3).show().siblings().hide();
+      $('#select_h_order').find("option[value=1]").attr('selected', 'selected');
+<% end %>
+<% if @mat_in %>
+      $("a.am_btn").click();
+<% end %>
   })
 </script>
 
