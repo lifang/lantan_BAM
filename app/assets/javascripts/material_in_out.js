@@ -71,6 +71,7 @@ function checkNums(){
     var store_id = $("#store_id").val();
     var form_action_url = $("#create_mat_in_form").attr("action");
     var saved_mat_mos = "";
+    var notice = "";
     var mat_in_length = $(".mat-out-list").find("tr").length - 1;
     if(mat_in_length==-1){
         alert('请录入商品！');
@@ -81,6 +82,10 @@ function checkNums(){
         var num = $(this).find(".mat_item_num").text();
         var mat_name = $(this).find(".mat_name").text();
         var each_item = "";
+        each_item += mat_code + "_";
+        each_item += mo_code + "_";
+        each_item += num;
+        saved_mat_mos += each_item + ",";
         $.ajax({
             url:"/stores/" + store_id + "/materials/check_nums",
             dataType:"text",
@@ -94,38 +99,32 @@ function checkNums(){
             success:function(data){
                 if(data=="1")
                 {
-                    if(confirm("【"+mat_name+"】入库数目已经大于订单中的商品数目，仍然要入库吗？")){
-                        each_item += mat_code + "_";
-                        each_item += mo_code + "_";
-                        each_item += num;
-                        saved_mat_mos += each_item + ",";
+                    notice += "条形码为" + mat_code + ", 订货单号为" + mo_code + "的物料入库数目已经大于订单中的商品数目，仍然要入库吗？"+ '\n';
+                }
+                if(mat_in_length == index && saved_mat_mos != ""){
+                    if(confirm(notice))
+                    {
+                        $.ajax({
+                            url: form_action_url,
+                            dataType:"text",
+                            type:"POST",
+                            data:{
+                                mat_in_items: saved_mat_mos
+                            },
+                            success:function(data2){
+                                if(data2=="1")
+                                {
+                                    tishi_alert("入库成功！");
+                                    window.location.href = "/materials_in_outs";
+                                }
+                            }
+                        });
                     }
-                }else if(data=="0"){
-                    each_item += mat_code + "_";
-                    each_item += mo_code + "_";
-                    each_item += num;
-                    saved_mat_mos += each_item + ",";
                 }
-                if(mat_in_length == index && saved_mat_mos != "")
-                {
-                    $.ajax({
-                        url: form_action_url,
-                        dataType:"text",
-                        type:"POST",
-                        data:{
-                            mat_in_items: saved_mat_mos
-                        },
-                        success:function(data2){
-                            if(data2=="1")
-                              {tishi_alert("入库成功！");
-                                window.location.href = "/materials_in_outs";
-                              }
-                        }
-                    });
-                }
+               
             }
         });
-    })
+    });
 }
 
 

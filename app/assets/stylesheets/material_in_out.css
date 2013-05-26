@@ -37,6 +37,9 @@ li { list-style: none;}
 	font-size: 18px;
 	 float: left;
 }
+.search_select label{
+    width: 100px;
+}
 .mat_in_out .search input[type="text"] { width: 220px; height: 32px; border: 1px #999999 solid; float: left;}
 
 .search_alert { color: #F00; line-height: 32px; padding-left: 120px; display: none}

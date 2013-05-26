@@ -38,7 +38,6 @@ class MaterialsInOutsController < ApplicationController
   end
 
   def create_materials_in
-    if params['mat_in_items']
       params['mat_in_items'].split(",").each do |mat_in_item|
         mii = mat_in_item.split("_")
         mat_code = mii[0]
@@ -57,9 +56,7 @@ class MaterialsInOutsController < ApplicationController
           material.storage += mat_in_order.material_num
           material.save
         end
-
-      end
-    end
+      end unless params['mat_in_items'].blank?
     render :text => "1"
   end
   
