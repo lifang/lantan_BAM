@@ -129,7 +129,8 @@ class Order < ActiveRecord::Base
     customer = nil
     working_orders = []
     old_orders = []
-    sql = "select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,cn.buy_year year,cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
+    sql = "select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,c.sex,cn.buy_year year,
+      cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
       from customer_num_relations cnr
       inner join car_nums cn on cn.id=cnr.car_num_id and cn.num='#{car_num}'
       inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}
@@ -244,7 +245,7 @@ class Order < ActiveRecord::Base
   end
 
   #arr = [车牌和用户信息，选择的产品和服务，相关的活动，相关的打折卡，选择的套餐卡，状态，总价]
-  def self.pre_order store_id,car_num,brand,car_year,user_name,phone,email,birth,prod_ids,res_time
+  def self.pre_order store_id,car_num,brand,car_year,user_name,phone,email,birth,prod_ids,res_time,sex
     arr  = []
     status = 0
     total = 0
@@ -252,10 +253,10 @@ class Order < ActiveRecord::Base
       #begin
       customer = Customer.find_by_mobilephone(phone)
       customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
-        :other_way => email, :birthday => birth) if customer
+        :other_way => email, :birthday => birth, :sex => sex) if customer
       carNum = CarNum.find_by_num car_num
       customer_infos = Customer.create_single_cus(customer, carNum, phone, car_num,
-        user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, nil, nil)
+        user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil)
       customer = customer_infos[0]
       carNum = customer_infos[1]
       info = Hash.new
@@ -858,7 +859,7 @@ class Order < ActiveRecord::Base
     [status]
   end
 
-  def self.checkin store_id,car_num,brand,car_year,user_name,phone,email,birth
+  def self.checkin store_id,car_num,brand,car_year,user_name,phone,email,birth,sex
     car_num_r = CarNum.find_by_num car_num
     customer = Customer.find_by_mobilephone(phone)
     status = 0
@@ -866,9 +867,9 @@ class Order < ActiveRecord::Base
       if car_num
         Customer.transaction do
           customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
-            :other_way => email, :birthday => birth) if customer
+            :other_way => email, :birthday => birth, :sex => sex) if customer
           Customer.create_single_cus(customer, car_num_r, phone, car_num,
-            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, nil, nil)
+            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil)
         end
         status = 1
       end
