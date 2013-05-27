@@ -60,16 +60,19 @@ class RevisitsController < ApplicationController
       staff_ids = params[:c_staff_id].split(",") unless params[:c_staff_id].nil?
       staff_id_1, staff_id_2 = staff_ids[0], staff_ids[1] if staff_ids
       is_violation = params[:prod_type].to_i < Complaint::TYPES[:INVALID] ? true : false
+      status = params[:cfs].to_i == Complaint::STATUS[:PROCESSED] ? true : false
       complaint = Complaint.find(params[:pro_compl_id].to_i)
       complaint.update_attributes(:types => params[:prod_type].to_i, :remark => params[:pro_remark],
-        :status => Complaint::STATUS[:PROCESSED], :is_violation => is_violation, :process_at => Time.now,
-        :staff_id_1 => staff_id_1, :staff_id_2 => staff_id_2)
-
+        :status => status, :is_violation => is_violation, :process_at => status ? Time.now : nil,
+        :staff_id_1 => staff_id_1, :staff_id_2 => staff_id_2, :c_feedback_suggestion => status)
+      vr1 = ViolationReward.find_by_target_id_and_staff_id(complaint.id, staff_id_1)
+      vr2 = ViolationReward.find_by_target_id_and_staff_id(complaint.id, staff_id_2)
+      
       violation_hash = {:status => ViolationReward::STATUS[:NOMAL],
         :situation => "订单#{params[:pc_code]}产生投诉，#{Complaint::TYPES_NAMES[params[:prod_type].to_i]}",
         :types => ViolationReward::TYPES[:VIOLATION], :target_id => complaint.id}
-      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_1})) if staff_id_1
-      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_2})) if staff_id_2
+      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_1})) if staff_id_1 and !vr1
+      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_2})) if staff_id_2 and !vr2
       flash[:notice] = "处理投诉成功。"
     end
     if params["is_trains_#{params[:pro_compl_id]}"] == "0"

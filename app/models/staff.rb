@@ -19,9 +19,11 @@ class Staff < ActiveRecord::Base
   LEVELS = {0=>"高级",1=>"中级",2=>"初级"}  #技师等级
   #总部员工职务
 
-  STATUS = {:normal => FALSE, :delete => TRUE}
-
+  STATUS = {:normal => 0, :afl => 1, :vacation => 2, :resigned => 3, :deleted => 4}
+  VALID_STATUS = [STATUS[:normal], STATUS[:afl], STATUS[:vacation]]
+  STATUS_NAME = {0 => "在职", 1 => "请假", 2 => "休假", 3 => "离职", 4 => "删除"}
   scope :normal, where(:status => STATUS[:normal])
+  scope :valid, where(:status => VALID_STATUS)
 
   S_HEAD = {:BOSS=>0,:MANAGER=>2,:NORMAL=>1} #0老板 2 店长 1员工
   N_HEAD = {1=>"员工",0=>"老板", 2=>"店长"}

@@ -80,4 +80,12 @@ class ComplaintsController < ApplicationController
     @undo =((total.num-un_done.num)*100.0/total.num).round(1)
     render 'show_detail'
   end
+
+  #客户-投诉-点击详细
+  def complaint_detail
+    @store = Store.find_by_id(params[:store_id])
+    @complaint = @store.complaints.find_by_id(params[:id])
+    @staff_names = Staff.where(:id => [@complaint.staff_id_1, @complaint.staff_id_2].compact).map(&:name).join(", ")
+    @violation_rewards = ViolationReward.find_by_sql("select vr.*, s.name name from violation_rewards vr inner join staffs s on vr.staff_id = s.id where target_id = #{ @complaint.id}")
+  end
 end
