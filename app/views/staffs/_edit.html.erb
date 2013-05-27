@@ -78,7 +78,7 @@
                        <%= f.check_box :is_score_ge_salary %>
                   </div>
                 <div class="item_textarea">
-                     <label>上传照片：</label><%= f.file_field :photo, :class => "file", :style => "width:200px" %>
+                     <label>上传照片：</label><%= f.file_field :photo, :class => "file" %>
                        <span class="show_pic"><%= image_tag "#{f.object.photo}" %>
                      </span>
                 </div>

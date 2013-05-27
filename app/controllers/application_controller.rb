@@ -18,4 +18,11 @@ class ApplicationController < ActionController::Base
       ActiveRecord::Base.connection.execute 'SET NAMES UTF8'
     end
   end
+
+  def not_found
+    #    raise ActionController::RoutingError.new('Not Found')
+      render(:file  => "#{Rails.root}/public/404.html",
+             :layout => nil,
+             :status   => "404 Not Found")  
+  end
 end

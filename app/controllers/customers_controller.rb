@@ -13,7 +13,8 @@ class CustomersController < ApplicationController
     session[:name] = nil
     session[:phone] = nil
     session[:is_vip] = nil
-    @store = Store.find(params[:store_id].to_i)    
+
+    @store = @store = Store.find_by_id(params[:store_id]) || not_found
     @customers = Customer.search_customer(params[:c_types], params[:car_num], params[:started_at], params[:ended_at],
       params[:name], params[:phone], params[:is_vip], params[:page])
     @car_nums = Customer.customer_car_num(@customers)
@@ -210,4 +211,10 @@ class CustomersController < ApplicationController
     redirect_to request.referer
   end
 
+  def show_complaint_detail    #显示投诉详情
+    @revisit = Revisit.find_by_id(params[:r_id].to_i)
+    respond_to do |format|
+      format.js
+    end
+  end
 end
