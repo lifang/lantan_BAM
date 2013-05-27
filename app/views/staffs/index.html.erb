@@ -5,7 +5,7 @@
         <div>统计时间：<%= DateTime.now.months_ago(1).strftime("%Y-%m") %></div>
       </div>
       <div class="data_body_title">
-        <p class="data_body_p">员工数量：<span class="red"><%= @staffs_names.size %></span>位</p>
+        <p class="data_body_p">员工数量：<span class="red"><%= @staffs.total_entries %></span>位</p>
       </div>
       <div class="data_menu">
         <% if permission?(:staffs,:add_staff) %><a href="javascript:void(0)" id="new_staff">新建员工</a><% end %>
