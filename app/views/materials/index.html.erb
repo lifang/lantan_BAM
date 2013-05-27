@@ -7,6 +7,7 @@
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store]), :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :check) %><%= link_to_function "批量盘点", "checkMatNum()" %><% end %>
+    <%= link_to_function "设置库存预警", "setMaterialLow()", :class => "" %>
   </div>
   <div class="clear"></div>
   <div class="tab_head">
@@ -68,6 +69,24 @@
       <% end %>
     </div>
   </div>
+</div>
+<div class="tab_popup" id="setMaterialLow">
+<div class="popup_box" >
+  <h1>设置库存预警<a href="javascript:void(0)" class="close">关闭</a></h1>
+  <div class="popup_body">
+    <%= form_tag "/stores/#{@current_store.id}/materials/set_material_low_commit" do %>
+    <div class="popup_body_area">
+      <div class="item" >    
+        <%= label_tag "库存预警值:" %>&nbsp;<%= text_field_tag "material_low_value", @current_store.material_low.to_i %>
+      </div>
+    </div>
+    <div class="btn_box">
+      <button type="commit" onclick="return set_validate()" class="confirm_btn" id="set_material_low_commit_button">确定</button>
+    </div>
+    <% end %>
+    <div class="clear"></div>
+  </div>
+</div>
 </div>
 
 <div class="tab_popup ruku_tab" id="ruku_tab">
@@ -134,6 +153,7 @@
     <% end %>
   </div>
 </div>
+
 <div class="tab_popup beizhu_tab" id="order_remark_div">
 
 </div>

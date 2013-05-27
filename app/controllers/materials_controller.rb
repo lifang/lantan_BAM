@@ -11,6 +11,7 @@ class MaterialsController < ApplicationController
 
   #库存列表
   def index
+    @current_store = Store.find_by_id(params[:store_id].to_i)
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
       :per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]
@@ -603,5 +604,16 @@ class MaterialsController < ApplicationController
     end
     flash[:notice] = "批量核实成功！"
     redirect_to "/stores/#{params[:store_id]}/materials"
+  end
+
+  def set_material_low_commit
+    store = Store.find_by_id(params[:store_id])
+    if store.update_attribute("material_low", params[:material_low_value])
+      flash[:notice] = "设置成功!"
+      redirect_to store_materials_path(store)
+    else
+      flash[:notice] = "设置失败!"
+      redirect_to store_materials_path(store)
+    end
   end
 end

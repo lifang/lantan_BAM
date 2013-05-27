@@ -211,7 +211,7 @@ class CustomersController < ApplicationController
     redirect_to request.referer
   end
 
-  def show_revisit_detail
+  def show_complaint_detail    #显示投诉详情
     @revisit = Revisit.find_by_id(params[:r_id].to_i)
     respond_to do |format|
       format.js

@@ -79,7 +79,7 @@ LantanBAM::Application.routes.draw do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","receive_order","pay_order","update_notices","check_nums","material_order_pay"
-        post "out_order","material_order","add","alipay_complete","add_material","batch_check"
+        post "out_order","material_order","add","alipay_complete","add_material","batch_check","set_material_low_commit"
       end
       member do
         get "mat_order_detail","get_remark"
@@ -161,7 +161,7 @@ LantanBAM::Application.routes.draw do
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"
-      get "show_revisit_detail"
+      get "show_complaint_detail"
     end
     member do
       post "edit_car_num"

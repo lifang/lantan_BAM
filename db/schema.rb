@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051452) do
+ActiveRecord::Schema.define(:version => 20130701051453) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -815,6 +815,7 @@ ActiveRecord::Schema.define(:version => 20130701051452) do
     t.datetime "updated_at"
     t.integer  "city_id"
     t.integer  "status"
+    t.integer  "material_low"
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"
