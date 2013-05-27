@@ -32,15 +32,15 @@ class ViolationRewardsController < ApplicationController
   end
 
   def update
-    violation_reward = ViolationReward.find_by_id(params[:id])
+    @violation_reward = ViolationReward.find_by_id(params[:id])
     params[:violation_reward][:process_at] = Time.now
-    violation_reward.update_attributes(params[:violation_reward]) if violation_reward
+    @violation_reward.update_attributes(params[:violation_reward]) if @violation_reward
 
-    if violation_reward.types
-      @rewards = violation_reward.staff.violation_rewards.where("types = true").
+    if @violation_reward.types
+      @rewards = @violation_reward.staff.violation_rewards.where("types = true").
                 paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     else
-      @violations = violation_reward.staff.violation_rewards.where("types = false").
+      @violations = @violation_reward.staff.violation_rewards.where("types = false").
                 paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     end
 

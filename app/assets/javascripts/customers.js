@@ -228,6 +228,26 @@ function edit_car_num_f(item_id) {
     $("#d_c_n_f_" + item_id)[0].reset();
     popup("#edit_car_num_" + item_id);
 }
+
+$(document).ready(function(){
+    //处理违规
+    $(".process_violation").live("click", function(){
+       var store_id = $(this).attr("name");
+       var id = $(this).attr("id");
+       $.ajax({
+            async:true,
+            type : 'get',
+            dataType : 'script',
+            url : "/stores/"+ store_id+"/violation_rewards/"+ id +"/edit",
+            data : {
+                id : id,
+                store_id : store_id
+            }
+        });
+       return false;
+    });
+})
+
 function show_complaint_detail(revisit_id,store_id){   //显示投诉详情
     $.ajax({
         async:true,
@@ -240,4 +260,3 @@ function show_complaint_detail(revisit_id,store_id){   //显示投诉详情
         }
     })
 }
-

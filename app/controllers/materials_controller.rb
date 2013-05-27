@@ -17,8 +17,8 @@ class MaterialsController < ApplicationController
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id]
     @type = 0
-    @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
-      :conditions => "s.store_id=#{params[:store_id]} and s.status=#{Staff::STATUS[:normal]}")
+    @staffs = Staff.valid.all(:select => "id,name,status",:from => "staffs",
+      :conditions => "staffs.store_id=#{params[:store_id]}")
     @status = params[:status] if params[:status]
     @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id], @status
     @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]

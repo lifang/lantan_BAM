@@ -41,6 +41,9 @@ LantanBAM::Application.routes.draw do
         post "search","search_degree","detail_s"
         get "search_list","show_detail","satisfy_degree","degree_list","detail_list"
       end
+      member do
+        get "complaint_detail"
+      end
     end
     resources :stations do
       collection do
@@ -87,7 +90,11 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-    resources :staffs
+    resources :staffs do
+      collection do
+        post "search"
+      end
+    end
     resources :violation_rewards
     resources :trains
     resources :month_scores do

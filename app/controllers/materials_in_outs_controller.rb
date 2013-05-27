@@ -85,8 +85,6 @@ class MaterialsInOutsController < ApplicationController
   end
 
   def upload_code
-    p 11111111111
-    p params[:code_file]
     code_file = params[:code_file]
     if code_file
       new_name = random_file_name(code_file.original_filename)
