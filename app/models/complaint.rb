@@ -15,7 +15,7 @@ class Complaint < ActiveRecord::Base
   TYPES = { :WASH => 1, :WAXING=> 2, :DIRT => 3, :INNER_WASH => 4, :INNER_WAXING => 5, :POLISH => 6, :SILVER => 7, :GLASS => 8,
     :ACCIDENT => 9, :TECHNICIAN => 10, :SERVICE => 11,:ADVISER => 12, :REST => 13, :BAD => 14, :PART => 15, :TIMEOUT => 16,
     :LONG_WAIT => 16, :INVALID => 17}
-    TIMELY_DAY = 2 #及时解决的标准
+  TIMELY_DAY = 2 #及时解决的标准
          
   TYPES_NAMES = {1 => "精洗施工质量", 2 => "打蜡施工质量", 3 => "去污施工质量", 4 => "内饰清洗施工质量", 5 => "内饰护理施工质量",
     6 => "抛光施工质量", 7 => "镀晶施工质量", 8 => "玻璃清洗护理施工质量", 9 => "施工事故（施工过程中导致车辆受损）",
@@ -40,6 +40,14 @@ class Complaint < ActiveRecord::Base
           left join staffs st on st.id = c.staff_id_1 left join staffs st2 on st2.id = c.staff_id_2
           where c.store_id = ? and c.customer_id = ? ", store_id, customer_id],
       :per_page => per_page, :page => page)
+  end
+  
+  def show_types(store_id,created,ended,sex)
+    sql = "select count(*) total_num,types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id} "
+    sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
+    sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
+    sql += " and s.sex=#{sex}" unless sex.nil? || sex =="" || sex.length==0
+    coplaints = Complaint.find_by_sql(sql).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
   end
 
   def self.count_types(store_id)
@@ -170,4 +178,5 @@ class Complaint < ActiveRecord::Base
     return "/chart_images/#{store_id}/#{types}/#{file_name}"
     puts "Chart #{object_id} success generated"
   end
+  
 end
