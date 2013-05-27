@@ -19,8 +19,18 @@
 </div>
 <%= render :partial => "edit_customers" %>
 <%= render :partial => "customer_revisit" %>
+<div class="tab_popup" id="complaint_detail_tab">
+  <div class="popup_box">
+    <h1>详情<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+
+    </div>
+  </div>
+</div>
 <div id="related_order_div"></div>
 <div id="process_complaint_div"></div>
+<div id="process"></div>
+<div id="show_complaint_detail" class="tab_popup"></div>
 <script type="text/javascript">
 <% if params[:comp] == "1" %>
     $(".tab_head ul li").removeClass("hover");

@@ -27,7 +27,9 @@
             </td>
             <td width="25%" class="wordBreak"><%= complaint.reason %></td>
             <td width="20%" class="wordBreak"><%= complaint.suggestion %></td>
-            <td width="10%" class="wordBreak"><% if permission?(:customers,:deal_complaint) %>
+            <td width="10%" class="wordBreak">
+              <%= link_to "详细", complaint_detail_store_complaint_path(params[:store_id], complaint.id), remote: :true, "data-type" => "script" %>
+              <% if permission?(:customers,:deal_complaint) %>
                 <a href="/stores/<%= @store.id %>/customers/<%= complaint.cu_id %>?comp=1">处理</a>
               <% end %></td>
           </tr>

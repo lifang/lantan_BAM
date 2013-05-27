@@ -4,7 +4,6 @@ gem 'rails', '3.1.2'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
-
 gem 'mysql2', '0.3.10'
 gem "will_paginate", '3.0.3'
 gem 'mini_magick'
@@ -23,6 +22,7 @@ end
 
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
+gem 'remotipart', '~> 1.0'
 #gem 'iconv'
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'

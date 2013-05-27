@@ -911,7 +911,6 @@ function toggle_notice(obj){
     }else{$(obj).text("点击查看")}
     $(obj).next().toggle();
 }
-
 function close_notice(obj){
     $(obj).parent().hide();
     $(obj).parent().next().hide();
@@ -926,3 +925,23 @@ function close_notice(obj){
         }
     });*/
 }
+function checkMatNum(){
+    $("#batch_check_tab").find('input[type="file"]').val("");
+    $("#batch_check_tab .file_data").html("");
+    popup('#batch_check_tab');
+}
+  function setMaterialLow(){            //设置库存预警
+    popup("#setMaterialLow");
+    $("#material_low_value").focus();
+  }
+  function set_validate(){
+    var num_flag = (new RegExp(/^\d+$/)).test($.trim($("#material_low_value").val()));
+    if(num_flag == false ){
+         tishi_alert("请输入正确的正整数!");
+         return false;
+    }else{
+        $("#set_material_low_commit_button").click(function(){
+            return false;
+        })
+    }
+  }

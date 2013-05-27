@@ -1,7 +1,8 @@
 class SuppliersController < ApplicationController
   layout "storage"
   before_filter :sign?
-  before_filter :find_record, :only => [:edit, :update, :destroy]
+  before_filter :find_record, :only => [:index]
+  before_filter :find_supplier, :only => [:edit, :update, :destroy]
 
   def index
     @suppliers = Supplier.paginate(:conditions => "status= #{Supplier::STATUS[:normal]} and store_id=#{params[:store_id]}",
@@ -47,8 +48,11 @@ class SuppliersController < ApplicationController
   private
 
   def find_record
-    @store = Store.find params[:store_id]
-    @supplier = Supplier.find params[:id]
+    @store = Store.find_by_id(params[:store_id]) || not_found
+  end
+
+  def find_supplier
+    @supplier = Supplier.find_by_id(params[:id]) || not_found
   end
 
 end

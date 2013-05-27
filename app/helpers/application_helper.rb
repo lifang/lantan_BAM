@@ -21,7 +21,7 @@ module ApplicationHelper
 
   #客户管理提示信息
   def customer_tips
-    @complaints = Complaint.find_by_sql(["select c.reason, c.suggestion, o.code, cu.name, ca.num, cu.id cu_id, o.id o_id
+    @complaints = Complaint.find_by_sql(["select c.id, c.reason, c.suggestion, o.code, cu.name, ca.num, cu.id cu_id, o.id o_id
       from complaints c inner join orders o on o.id = c.order_id
       inner join customers cu on cu.id = c.customer_id inner join car_nums ca on ca.id = o.car_num_id 
       where c.store_id = ? and c.status = ? ", params[:store_id].to_i, Complaint::STATUS[:UNTREATED]])
@@ -130,7 +130,12 @@ module ApplicationHelper
   def material_order_tips
     @material_pay_notices = Notice.find_all_by_store_id_and_types_and_status(params[:store_id].to_i,
       Notice::TYPES[:URGE_PAYMENT], Notice::STATUS[:NORMAL])
-    @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:received], 0)
-    @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ?", MaterialOrder::M_STATUS[:send], 0)
+    @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ? and store_id = ?", MaterialOrder::M_STATUS[:received], 0, params[:store_id])
+    @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ? and store_id = ?", MaterialOrder::M_STATUS[:send], 0, params[:store_id])
+  end
+
+  def random_file_name(file_name)
+    name = File.basename(file_name)
+    return (Digest::SHA1.hexdigest Time.now.to_s + name)[0..20] + File.extname(file_name)
   end
 end

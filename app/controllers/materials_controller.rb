@@ -11,13 +11,14 @@ class MaterialsController < ApplicationController
 
   #库存列表
   def index
+    @current_store = Store.find_by_id(params[:store_id].to_i)
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
       :per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id]
     @type = 0
-    @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
-      :conditions => "s.store_id=#{params[:store_id]} and s.status=#{Staff::STATUS[:normal]}")
+    @staffs = Staff.valid.all(:select => "id,name,status",:from => "staffs",
+      :conditions => "staffs.store_id=#{params[:store_id]}")
     @status = params[:status] if params[:status]
     @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id], @status
     @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]
@@ -565,5 +566,54 @@ class MaterialsController < ApplicationController
   def uniq_mat_code
     material = Material.find_by_code_and_store_id(params[:code], params[:store_id])
     render :text => material.nil? ? "0" : "1"
+  end
+
+  def upload_checknum
+    check_file = params[:check_file]
+    if check_file
+      new_name = random_file_name(check_file.original_filename)
+      FileUtils.mkdir_p Material::MAT_CHECKNUM_PATH % @store_id
+      file_path = Material::MAT_CHECKNUM_PATH % @store_id + "/#{new_name}"
+      File.new(file_path, 'a+')
+      File.open(file_path, 'wb') do |file|
+        file.write(check_file.read)
+      end
+
+      if File.exists?(file_path)
+        @check_nums = {}
+        File.open(file_path, "r").each_line do |line|
+          #6922233613731,10
+          data = line.strip.split(',')
+          @check_nums[data[0]] = data[1]
+        end
+        @materials = Material.where(:code => @check_nums.keys)
+      end
+    end
+  end
+
+  def batch_check
+    failed_updates = []
+    params[:materials].each do |id,cn|
+      material = Material.find_by_id(id)
+      unless material && material.update_attribute(:storage, cn[:num])
+        failed_updates << cn[:code]
+      end
+    end unless params[:materials].blank?
+    if failed_updates.length > 0
+      flash[:notice] = "#{failed_updates.join('、')} 等物料核实失败！"
+    end
+    flash[:notice] = "批量核实成功！"
+    redirect_to "/stores/#{params[:store_id]}/materials"
+  end
+
+  def set_material_low_commit
+    store = Store.find_by_id(params[:store_id])
+    if store.update_attribute("material_low", params[:material_low_value])
+      flash[:notice] = "设置成功!"
+      redirect_to store_materials_path(store)
+    else
+      flash[:notice] = "设置失败!"
+      redirect_to store_materials_path(store)
+    end
   end
 end

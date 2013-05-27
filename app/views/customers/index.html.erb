@@ -29,7 +29,8 @@
 
     <div class="data_body_title">
       <h2 class="data_body_h">
-        上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints/satisfy_degree"><%= "#{satisfy}%" %></a>
+        上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints/satisfy_degree"><%= "#{satisfy}%" %></a>&nbsp;&nbsp;&nbsp;
+        上月门店不满意度 ：<a href="/stores/<%= @store.id %>/complaints"><%= "#{100-satisfy}%" %></a>
       </h2>
       <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries %></span>位</p>
     </div>
@@ -82,3 +83,12 @@
 <%= render :partial => "customer_mark" %>
 <%= render :partial => "single_send_message" %>
 <div id="related_order_div"></div>
+<div class="tab_popup" id="complaint_detail_tab">
+  <div class="popup_box">
+    <h1>详情<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+
+    </div>
+  </div>
+</div>
+<div id="process"></div>

@@ -54,7 +54,6 @@ class StationDatasController < ApplicationController
   private
 
   def find_store
-    store_id = Staff.find(cookies[:user_id]).store_id
-    @store = Store.find(store_id)
+    @store = Store.find_by_id(params[:store_id]) || not_found
   end
 end
