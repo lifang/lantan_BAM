@@ -911,7 +911,6 @@ function toggle_notice(obj){
     }else{$(obj).text("点击查看")}
     $(obj).next().toggle();
 }
-
 function close_notice(obj){
     $(obj).parent().hide();
     $(obj).parent().next().hide();
@@ -925,4 +924,9 @@ function close_notice(obj){
             window.location.reload();
         }
     });*/
+}
+function checkMatNum(){
+    $("#batch_check_tab").find('input[type="file"]').val("");
+    $("#batch_check_tab .file_data").html("");
+    popup('#batch_check_tab');
 }

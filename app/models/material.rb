@@ -14,6 +14,8 @@ class Material < ActiveRecord::Base
   STATUS = {:NORMAL => 0, :DELETE => 1}
   TYPES_NAMES = {1 => "施工耗材",2 => "辅助工具", 3 => "劳动保护", 4 =>"一次性用品", 5=>"产品"}
   TYPES = { :COST_M =>1,:HELP_TOOL =>2,:PROTECTED_L =>3,:ONE_USE =>4,:PRODUCT =>5}
+  MAT_IN_PATH = "#{File.expand_path(Rails.root)}/public/uploads/mat_in/%s"
+  MAT_CHECKNUM_PATH = "#{File.expand_path(Rails.root)}/public/uploads/mat_check/%s"
 
   scope :normal, where(:status => STATUS[:NORMAL])
   after_save :strip_material_name

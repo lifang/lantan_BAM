@@ -805,3 +805,4 @@ a.compile_btn { width: 100px;}
 #role_staffs .data_table td{width:33.3%; word-break:break-all}
 .station-data .data_table td{width:25%; word-break:break-all}
 #mat_order_detail_tab .data_tab_table td td{width:33.3%; word-break:break-all}
+#batch_check_tab .file_data{height: 300px;overflow-y: auto;}
