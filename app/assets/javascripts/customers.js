@@ -228,6 +228,7 @@ function edit_car_num_f(item_id) {
     $("#d_c_n_f_" + item_id)[0].reset();
     popup("#edit_car_num_" + item_id);
 }
+
 $(document).ready(function(){
     //处理违规
     $(".process_violation").live("click", function(){
@@ -246,3 +247,16 @@ $(document).ready(function(){
        return false;
     });
 })
+
+function show_complaint_detail(revisit_id,store_id){   //显示投诉详情
+    $.ajax({
+        async:true,
+        dataType: "script",
+        type: "get",
+        url: "/customers/show_complaint_detail",
+        data: {
+            r_id : revisit_id,
+            store_id : store_id
+        }
+    })
+}
