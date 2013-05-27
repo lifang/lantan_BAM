@@ -188,6 +188,14 @@ LantanBAM::Application.routes.draw do
           "confirm_reservation","refresh","pay_order","checkin", "show_car"
       end
     end
+    resources :syncs_datas do
+      collection do
+        post :syncs_db_to_all, :syncs_pics
+      end
+      member do
+        get :return_sync_all_to_db
+      end
+    end
   end
 
 end
