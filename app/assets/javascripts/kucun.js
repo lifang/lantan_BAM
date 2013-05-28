@@ -47,7 +47,7 @@ function check_material_num(m_id, storage, obj){
                 success:function(data,status){
                     if(data.status=="1"){
                         tishi_alert("操作成功")
-                       $(obj).parent().siblings(".storage").text(check_num);
+                       $(obj).parent().siblings(".su").find(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
                        if(check_num==0)
                         {
@@ -257,13 +257,17 @@ function submit_out_order(form_id){
               a = false;
           }
     })
+    if($("#mat_out_types").val()==""){
+        tishi_alert("请选择出库类型")
+        a = false;
+    }
     if(a){
     if($("#selected_items").val()!=null && $("#selected_items").val()!=""){
         $("#"+form_id).find("input[class='confirm_btn']").attr("disabled","disabled");
         $.ajax({
            url:$("#"+form_id).attr("action"),
            dataType:"json",
-           data:"staff="+$("#staff").val()+"&selected_items="+$("#selected_items").val(),
+           data:"staff="+$("#staff").val()+"&selected_items="+$("#selected_items").val()+"&types="+$("#mat_out_types").val(),
            type:"POST",
            success:function(data,status){
                if(data["status"]==0){
@@ -658,8 +662,12 @@ function checkMaterial(obj, store_id){
         tishi_alert("请输入条形码");
     }else if($("#materials_price").val().match(reg2)==null){
         tishi_alert("请输入合法单价");
+    }else if($("#materials_sale_price").val().match(reg2)==null){
+        tishi_alert("请输入合法零售价");
     }else if($("#materials_storage").val().match(reg1)==null){
         tishi_alert("请输入合法数量");
+    }else if($("#materials_unit").val()==""){
+        tishi_alert("请输入物料规格");
     }else{
         var code = $("#materials_code").val();
         $.ajax({

@@ -842,3 +842,6 @@ a.compile_btn { width: 100px;}
 .station-data .data_table td{width:25%; word-break:break-all}
 #mat_order_detail_tab .data_tab_table td td{width:33.3%; word-break:break-all}
 #batch_check_tab .file_data{height: 300px;overflow-y: auto;}
+.mat_hint{
+    margin-left:440px;font-size:11px;color:#999;
+}

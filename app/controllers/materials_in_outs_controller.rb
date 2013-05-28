@@ -32,7 +32,7 @@ class MaterialsInOutsController < ApplicationController
           render :partial => 'material_in', :locals =>{:material_in => material_in}
 #        end
       else
-        render :partial => 'material_out'
+        render :partial => 'material_out', :locals =>{:material => material}
       end
     end
   end
@@ -66,7 +66,7 @@ class MaterialsInOutsController < ApplicationController
       redirect_to "/stores/#{@store_id}/materials_out" and return
     end
     params['material_order'].values.each do |mo|
-      mat_out_order = MatOutOrder.create(mo)
+      mat_out_order = MatOutOrder.create(mo.merge(params[:mat_out]))
       if mat_out_order.save
         material = Material.find(mat_out_order.material_id)
         material.storage -= mat_out_order.material_num

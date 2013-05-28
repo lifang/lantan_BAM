@@ -60,8 +60,10 @@
     <th><span class="sort_u">物料名称</span></th>
     <th><span class="sort_d">物料类别</span></th>
     <th>申请人</th>
+    <th>出库类型</th>
     <th>出库量</th>
     <th>成本价（元）</th>
+    <th>零售价（元）</th>
     <th>出库时间</th>
   </tr>
   </thead>
@@ -72,8 +74,10 @@
         <td><%= out.name %></td>
         <td><%= Material::TYPES_NAMES[out.types.to_i] %></td>
         <td><%= out.staff_name %></td>
+        <td><%= MatOutOrder::TYPES[out.out_types] %></td>
         <td><%= out.material_num.to_i %></td>
         <td><%= out.out_price %></td>
+        <td><%= out.sale_price %></td>
         <td><%= out.out_time.strftime("%Y-%m-%d %H:%M") unless out.out_time.nil?%></td>
       </tr>
   <% end %>

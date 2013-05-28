@@ -129,6 +129,7 @@ function checkNums(){
 
 
 function checkMatOutNum(obj){
+    var f = true;
     $(".mat-out-list").find("tr").each(function(index){
       var out_num = parseInt($(this).find(".mat_item_num").text());
       var mat_storage = parseInt($(this).find(".material_storage").text());
@@ -138,7 +139,11 @@ function checkMatOutNum(obj){
           $(this).remove();
       }
     })
-    if($(".mat-out-list").find("tr").length > 0){
+   if($("#mat_out_types").val()==""){
+        tishi_alert("请选择出库类型")
+        f = false;
+    }
+    if(f && $(".mat-out-list").find("tr").length > 0){
         $(obj).parents("form").submit();
     }
 }

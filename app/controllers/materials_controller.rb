@@ -28,6 +28,7 @@ class MaterialsController < ApplicationController
 
   #库存列表分页
   def page_materials
+    @current_store = Store.find_by_id(params[:store_id].to_i)
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
       :per_page => Constant::PER_PAGE, :page => params[:page])
     respond_with(@materials_storages) do |format|
@@ -192,14 +193,8 @@ class MaterialsController < ApplicationController
 
   #出库
   def out_order
-    status = MatOutOrder.new_out_order params[:selected_items],params[:store_id],params[:staff]
+    status = MatOutOrder.new_out_order params[:selected_items],params[:store_id],params[:staff], params[:types]
     render :json => {:status => status}
-  end
-
-  #订货页面
-  def order
-    @type = 1
-    @use_card_count = SvcReturnRecord.store_return_count params[:store_id]
   end
 
   #创建订货记录
@@ -280,7 +275,7 @@ class MaterialsController < ApplicationController
       render :json => {:status => status, :mo_id => material_order.id}
     end
   end
-
+#付款页面
   def material_order_pay
     @current_store = Store.find_by_id params[:store_id]
     @store_account = @current_store.account if @current_store
@@ -288,6 +283,7 @@ class MaterialsController < ApplicationController
     @use_card_count = SvcReturnRecord.store_return_count(params[:store_id]).try(:abs)
   end
 
+#检验付款页面的"活动代码"
   def get_act_count
     #puts params[:code]
     sale = Sale.valid.find_by_code params[:code]
@@ -407,6 +403,7 @@ class MaterialsController < ApplicationController
 
   #打印
   def print
+    @current_store = Store.find_by_id(params[:store_id])
     @materials_storages = Material.normal.all(:conditions => "store_id=#{params[:store_id]}")
   end
 
@@ -568,6 +565,7 @@ class MaterialsController < ApplicationController
     render :text => material.nil? ? "0" : "1"
   end
 
+  #上传核实文件
   def upload_checknum
     check_file = params[:check_file]
     if check_file
