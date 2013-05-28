@@ -600,7 +600,16 @@ a.compile_btn { width: 100px;}
 .data_loadList { padding: 5px 0;}
 .data_loadList li { height:24px; margin: 10px 0;}
 
-.loadList_name { height:24px; line-height:24px; float: left; font-weight:bolder; color: #930205;}
+.loadList_name { 
+    width: 80px; 
+	display:inline-block; 
+	text-align: right; 
+	height:24px; 
+	line-height:24px; 
+	float: left; 
+	font-weight:bolder; 
+	color: #930205;
+}
 
 .loadList_box, .loadList_line {height: 16px; display: inline-block;}
 .loadList_box { width:600px; overflow: hidden; border: 1px #e1e1e1 solid; position: relative; margin-top: 5px;}
