@@ -29,7 +29,7 @@
         <td>
           <%= link_to "详细", complaint_detail_store_complaint_path(params[:store_id], complaint.c_id), remote: :true, "data-type" => "script" %>
           <% if complaint.status == true %>
-            已处理
+            <span style="padding:0 5px">已处理</span>
           <% else %>
             <% if permission?(:customers,:deal_complaint) %>
               <%= link_to "处理", "/orders/#{complaint.c_id}_#{complaint.o_id}/order_staff" ,

@@ -58,11 +58,16 @@
             <%= label_tag "materials[code]","条形码：" %><%= text_field_tag "materials[code]" %>
           </div>
           <div class="item">
-            <%= label_tag "materials[price]","单价：" %><%= text_field_tag "materials[price]" %>
+            <%= label_tag "materials[price]","成本价：" %><%= text_field_tag "materials[price]" %>
           </div>
           <div class="item">
-            <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]" %>
+            <%= label_tag "materials[sale_price]","零售价：" %><%= text_field_tag "materials[sale_price]" %>
           </div>
+          <div class="item">
+            <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]", nil, :style => "width:100px" %>
+            <%= text_field_tag "materials[unit]", nil, :style => "width:60px" %>
+          </div>
+          <em class="mat_hint">输入数量如（40），规格如（个）</em>
         </div>
         <div class="btn_box"><button type="button" onclick="checkMaterial(this, <%= params[:store_id] %>)" class="confirm_btn">确定</button></div>
         <div class="clear"></div>
@@ -135,8 +140,8 @@
               <tr class="hbg">
                 <td>物料名称</td>
                 <td>物料类别</td>
-                <td>库存量（个）</td>
-                <td>出库量（个）</td>
+                <td>库存量</td>
+                <td>出库量</td>
                 <td>操作</td>
               </tr>
             </thead>
@@ -144,6 +149,7 @@
           </table>
           <div class="search"><%= hidden_field_tag "selected_items" %>
             <div><%= label_tag "staff","申请人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
+            <div><%= label_tag "out_types"," 出库类型：" %><%= select("mat_out", "types", MatOutOrder::TYPES.invert.to_a, { :prompt => "选择出库类型" }) %></div>
           </div>
         </div>
         <div class="btn_box"><%= button_to_function "确定","submit_out_order('out_order_form')", :class => "confirm_btn" %>

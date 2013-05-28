@@ -15,8 +15,7 @@
                 <tr class="hbg">
                   <td>&nbsp;</td>
                   <td>名称</td>
-                  <td>开始时间</td>
-                  <td>截止时间</td>
+                  <td>有效时间</td>
                   <td>套餐内容</td>
                   <td>操作</td>
                 </tr>
@@ -26,8 +25,12 @@
                   <tr>
                     <td class="data_table_img"><img src="<%= card.img_url.nil? ? "" : card.img_url.gsub("img#{card.id}","img#{card.id}_#{Constant::C_PICSIZE[0]}")  %>" /></td>
                     <td><%= card.name %></td>
-                    <td><%= card.started_at.nil?? "" : card.started_at.strftime("%Y-%m-%d") %></td>
-                    <td><%= card.ended_at.nil??  "" : card.ended_at.strftime("%Y-%m-%d") %></td>
+                    <td><%= if card.date_types == PackageCard::TIME_SELCTED[:END_TIME]
+                        "#{card.date_month}天"
+                      else
+                        "#{card.started_at.nil?? "" : card.started_at.strftime("%Y.%m.%d")}-#{card.ended_at.nil??  "" : card.ended_at.strftime("%Y.%m.%d")}"
+                      end
+                    %></td>
                     <td>
                       <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                         <%unless @prods[card.id].blank? %>
