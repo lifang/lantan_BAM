@@ -6,10 +6,13 @@ class ComplaintsController < ApplicationController
 
   #投诉分类统计
   def index
-    session[:created_at]=nil
     @complaint = Complaint.get_chart(params[:store_id])
     @complaint = Complaint.gchart(params[:store_id])  if @complaints.blank?
     @complaint = ChartImage.where("store_id=#{params[:store_id]} and types=#{ChartImage::TYPES[:COMPLAINT]}").order("created_at desc")[0]  if @complaint.nil?
+    session[:created_at]=@complaint.nil? ? nil : @complaint.current_day.strftime("%Y-%m")
+    session[:start_sex],session[:end_sex],session[:sex]=Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d"),2
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex])
+    @size =(0..10).inject(Array.new){|arr,int| arr << (@total_com.values.max%10==0 ? @total_com.values.max/10 : @total_com.values.max/10+1)*int}.max #生成图表的y的坐标
   end
 
   #投诉分类查询
@@ -22,6 +25,22 @@ class ComplaintsController < ApplicationController
   #投诉分类查询列表
   def search_list
     @complaint =Complaint.search_lis(params[:store_id],session[:created_at])
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex])
+    @size =(0..10).inject(Array.new){|arr,int| arr << (@total_com.values.max%10==0 ? @total_com.values.max/10 : @total_com.values.max/10+1)*int}.max #生成图表的y的坐标
+    render 'index'
+  end
+
+  #投诉分类按时间和性别查询统计
+  def search_time
+    session[:start_sex],session[:end_sex],session[:sex]=nil,nil,nil
+    session[:start_sex],session[:end_sex],session[:sex]=params[:start_sex],params[:end_sex],params[:sex]
+    redirect_to "/stores/#{params[:store_id]}/complaints/date_list"
+  end
+  #投诉分类按时间和性别查询统计列表
+  def date_list
+    @complaint =Complaint.search_lis(params[:store_id],session[:created_at])
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex])
+    @size =(0..10).inject(Array.new){|arr,int| arr << (@total_com.values.max%10==0 ? @total_com.values.max/10 : @total_com.values.max/10+1)*int}.max #生成图表的y的坐标
     render 'index'
   end
 

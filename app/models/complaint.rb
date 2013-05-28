@@ -32,6 +32,7 @@ class Complaint < ActiveRecord::Base
   STATUS_NAME ={0=>"未处理",1=>"已处理"}
   VIOLATE = {:NORMAL=>1,:INVALID=>0} #0  不纳入  1 纳入
   VIOLATE_N = {true=>"是",false=>"否"}
+  SEX = {:MALE =>1,:FEMALE =>0,:NONE=>2} # 0 未选择 1 男 2 女
 
 
   def self.one_customer_complaint(store_id, customer_id, per_page, page)
@@ -43,12 +44,14 @@ class Complaint < ActiveRecord::Base
       :per_page => per_page, :page => page)
   end
   
-  def show_types(store_id,created,ended,sex)
-    sql = "select count(*) total_num,types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id} "
+  def self.show_types(store_id,created,ended,sex)
+    sql = "select count(*) total_num,c.types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id} "
     sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
-    sql += " and s.sex=#{sex}" unless sex.nil? || sex =="" || sex.length==0
-    coplaints = Complaint.find_by_sql(sql).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
+    sql += " and s.sex=#{sex}" unless sex.to_i==2
+    sql += " group by c.types"
+    return  Complaint.find_by_sql(sql).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
+    
   end
 
   def self.count_types(store_id)
