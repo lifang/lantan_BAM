@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051453) do
+ActiveRecord::Schema.define(:version => 20130701051455) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -316,6 +316,7 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.datetime "updated_at"
     t.string   "remark",     :limit => 1000
     t.integer  "check_num"
+    t.boolean  "is_ignore",                  :default => false
   end
 
   add_index "materials", ["name"], :name => "index_materials_on_name"
@@ -712,7 +713,7 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.string   "hometown"
     t.integer  "education"
     t.string   "nation"
-    t.integer  "political"
+    t.string   "political"
     t.string   "phone"
     t.string   "address"
     t.string   "photo"
@@ -728,6 +729,10 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.string   "username"
     t.string   "salt"
     t.boolean  "is_score_ge_salary", :default => false
+    t.integer  "working_stats"
+    t.float    "probation_salary"
+    t.boolean  "is_deduct"
+    t.integer  "probation_days"
   end
 
   add_index "staffs", ["level"], :name => "index_staffs_on_level"

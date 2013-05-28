@@ -25,7 +25,10 @@ class Staff < ActiveRecord::Base
 
   S_HEAD = {:BOSS=>0,:MANAGER=>2,:NORMAL=>1} #0老板 2 店长 1员工
   N_HEAD = {1=>"员工",0=>"老板", 2=>"店长"}
-
+  WORKING_STATS = {:FORMAL => 1, :PROBATION => 0}   #在职状态 0试用 1正式
+  S_WORKING_STATS = {1 => "正式", 0 => "实习"}
+  IS_DEDUCT = {:YES => 1, :NO =>0} #是否参加提成，1是 0否
+  S_IS_DEDUCT = {1 => "是", 0 => "否"}
   #教育程度
   N_EDUCATION = {0 => "研究生", 1 => "本科", 2 => "专科", 3 => "高中", 4 => "初中",
     5 => "小学", 6 => "无"}

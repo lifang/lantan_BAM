@@ -12,22 +12,25 @@ class MaterialsController < ApplicationController
   #库存列表
   def index
     @current_store = Store.find_by_id(params[:store_id].to_i)
-    @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
+    @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id].to_i}",
       :per_page => Constant::PER_PAGE, :page => params[:page])
-    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]
-    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id]
+    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @type = 0
     @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
-      :conditions => "s.store_id=#{params[:store_id]} and s.status=#{Staff::STATUS[:normal]}")
+      :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=#{Staff::STATUS[:normal]}")
     @status = params[:status] if params[:status]
-    @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id], @status
-    @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]
+    @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id].to_i, @status
+    @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id].to_i
     @material_order_urgent = MaterialOrder.where(:id => @material_pay_notices.map(&:target_id))
     @mat_in = params[:mat_in] if params[:mat_in]
+    @low_materials = Material.where(["status = ? and store_id = ? and storage <= ? and is_ignore = ?", Material::STATUS[:NORMAL],
+        @current_store.id, @current_store.material_low, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
   end
 
   #库存列表分页
   def page_materials
+    @current_store = Store.find_by_id(params[:store_id].to_i)
     @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id]}",
       :per_page => Constant::PER_PAGE, :page => params[:page])
     respond_with(@materials_storages) do |format|
@@ -97,7 +100,7 @@ class MaterialsController < ApplicationController
           @material = Material.create({:code => params[:barcode].strip,:name => params[:name].strip,
               :price => params[:price].strip, :storage => params[:num].strip,
               :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
-              :types => params[:material][:types]})
+              :types => params[:material][:types], :is_ignore => Material::IS_IGNORE[:NO]})
         end
         if @material_order
           MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
@@ -153,9 +156,10 @@ class MaterialsController < ApplicationController
   #核实
   def check
     #puts params[:num],"m_id:#{params[:id]}"
-    material = Material.find_by_id(params[:id])
+    material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
+    current_store = Store.find_by_id(params[:store_id].to_i)
     if material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
-      render :json => {:status => 1}
+      render :json => {:status => 1, :material_low => current_store.material_low}
     else
       render :json => {:status => 0}
     end
@@ -310,7 +314,7 @@ class MaterialsController < ApplicationController
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
         :price => params[:price].strip.to_i, :storage => 0,
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
-        :types => params[:types], :check_num => nil}) if material.nil?
+        :types => params[:types], :check_num => nil, :is_ignore => Material::IS_IGNORE[:NO]}) if material.nil?
     x = {:status => 1, :material => material}.to_json
     #puts x
     render :json => x
@@ -407,6 +411,7 @@ class MaterialsController < ApplicationController
 
   #打印
   def print
+    @current_store = Store.find_by_id(params[:store_id].to_i)
     @materials_storages = Material.normal.all(:conditions => "store_id=#{params[:store_id]}")
   end
 
@@ -607,13 +612,40 @@ class MaterialsController < ApplicationController
   end
 
   def set_material_low_commit
-    store = Store.find_by_id(params[:store_id])
+    store = Store.find_by_id(params[:store_id].to_i)
     if store.update_attribute("material_low", params[:material_low_value])
       flash[:notice] = "设置成功!"
       redirect_to store_materials_path(store)
     else
       flash[:notice] = "设置失败!"
       redirect_to store_materials_path(store)
+    end
+  end
+
+  def set_ignore   #设置物料忽略预警
+    material = Material.find_by_id_and_store_id(params[:m_id].to_i, params[:store_id])
+    if material
+      if material.update_attribute("is_ignore", Material::IS_IGNORE[:YES])
+        render :json => {:status => 1}
+      else
+        render :json => {:status => 0}
+      end
+    else
+      render :json => {:status => 0}
+    end
+  end
+
+  def cancel_ignore   #取消设置物料预警
+    material = Material.find_by_id_and_store_id(params[:m_id].to_i,params[:store_id].to_i)
+    current_store = Store.find_by_id(params[:store_id].to_i)
+    if material
+      if material.update_attribute("is_ignore", Material::IS_IGNORE[:NO])
+        render :json => {:status => 1, :material_low => current_store.material_low, :material_storage => material.storage}
+      else
+        render :json => {:status => 0}
+      end
+    else
+      render :json => {:status => 0}
     end
   end
 end

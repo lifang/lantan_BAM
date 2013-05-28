@@ -37,22 +37,33 @@ $(function(){
 
 //弹出层
 function popup(t){
-    var doc_height = $(document).height();
-    var doc_width = $(document).width();
-    var layer_width = $(t).width();
-    $(".mask").css({
-        display:'block',
-        height:doc_height
-    });
-    var scolltop = document.body.scrollTop|document.documentElement.scrollTop;
-    var win_height = document.documentElement.clientHeight;//jQuery(document).height();
-    var layer_height = $(t).height();
-    $(t).css('top',(win_height-layer_height)/2 + scolltop + 10);
-
+var scolltop = document.body.scrollTop|document.documentElement.scrollTop; //滚动条高度
+    var doc_height = $(document).height(); //页面高度
+    var doc_width = $(document).width(); //页面宽度
+    //var win_height = document.documentElement.clientHeight;//jQuery(document).height();
+    var win_height = window.height; //窗口高度
+    var layer_height = $(t).height(); //弹出层高度
+    var layer_width = $(t).width(); //弹出层宽度
+    $(t).css('top',scolltop+100);
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
 
-    $(t + " a.close").click(function(){
+     if((scolltop+100+layer_height)>doc_height){
+         $(".mask").css({
+       display:'block',
+       height: scolltop+100+layer_height
+    })
+    }else{
+        $(".mask").css({
+       display:'block',
+       height: doc_height
+    })
+    }
+    $(t+" a.close").live("click",function(){
+        $(t).css('display','none');
+        $(".mask").css('display','none');
+    })
+    $(".cancel_btn").live("click",function(){
         $(t).css('display','none');
         $(".mask").css('display','none');
     })

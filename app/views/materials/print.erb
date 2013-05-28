@@ -55,7 +55,7 @@
         <td width="160" class="wordBreak"><%= material.code %></td>
         <td width="160" class="wordBreak"><%= material.name %></td>
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
-        <td><%= material.storage.to_i > 0 ? "存货" : "缺货" %></td>
+        <td><%= material.storage.to_i > @current_store.material_low ? "存货" : "缺货" %></td>
         <td><%= material.storage.to_i %></td>
         <td><%= material.price %></td>
       </tr>

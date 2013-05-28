@@ -70,15 +70,21 @@
   <tbody>
 <% (@materials_storages || []).each do |material| %>
       <tr class="<%= cycle('', 'tbg') %>">
-        <td <% if material.storage.to_i <= @current_store.material_low.to_i %>class="data_table_error"<% end %>><%= material.code %></td>
+        <td <% if !material.is_ignore && material.storage.to_i <= @current_store.material_low.to_i %>class="data_table_error"<% end %>><%= material.code %></td>
         <td><%= material.name %></td>
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
-        <td class="sstatus"><%= material.storage.to_i > @current_store.material_low.to_i ? "存货" : "缺货" %></td>
+        <td class="sstatus"><%= material.is_ignore || material.storage.to_i > @current_store.material_low.to_i ? "存货" : "缺货" %></td>
         <td class="storage"><%= material.storage.to_i %></td>
         <td><%= material.price %></td>
         <td class="check_num_field"><%= text_field_tag "check_num_#{material.id}",material.check_num,{:style =>"width:50px;"} %></td>
         <td><%= link_to "备注", "/stores/#{params[:store_id]}/materials/#{material.id}/get_remark", :remote => true, 'data-type' => 'script', :class => "bz_btn" %>
-          <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{material.storage.to_i}, this)" %><% end %></td>
+          <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this)" %><% end %>
+          <% if material.is_ignore %>
+            <%= link_to_function "取消忽略","cancel_ignore(#{material.id},#{@current_store.id},this)"  %>
+            <% else %>
+          <%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %>
+          <% end %>
+        </td>
       </tr>
 <% end %>
   </tbody>

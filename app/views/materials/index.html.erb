@@ -1,4 +1,11 @@
 <%= render :partial => "notice_panel" %>
+<% unless  @low_materials.blank? %>
+  <div class="message">
+    有 <span class="red"><%=  @low_materials.length %></span>个物料库存量过低,
+    <a href="javascript:void(0);" onclick="toggle_low_materials(this)">点击查看</a>
+    <%= render :partial => 'show_low_materials', :locals => {:low_materials => @low_materials} %>
+  </div>
+<% end %>
 <div class="data_box">
   <div class="data_menu">
     <%= link_to_function "添加物料", "addMaterial()", :class => "am_btn" %>

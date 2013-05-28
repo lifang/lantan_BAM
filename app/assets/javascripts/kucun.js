@@ -32,7 +32,7 @@ function save_material_remark(mat_id,store_id,obj){
     }
 }
 
-function check_material_num(m_id, storage, obj){
+function check_material_num(m_id, store_id, obj){
     var check_num = $("#check_num_"+m_id).val();
     if(check_num.match(reg1)==null){
         tishi_alert("请输入有效数字");
@@ -42,14 +42,16 @@ function check_material_num(m_id, storage, obj){
             $.ajax({
                 url:"/materials/"+m_id + "/check",
                 dataType:"json",
-                data:"num="+check_num,
+                data:{
+                    num : check_num, store_id : store_id
+                },
                 type:"GET",
-                success:function(data,status){
+                success:function(data){
                     if(data.status=="1"){
                         tishi_alert("操作成功")
                        $(obj).parent().siblings(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
-                       if(check_num==0)
+                       if(check_num <= data.material_low)
                         {
                             $(obj).parent().parent().find('td:first').addClass("data_table_error");
                             $(obj).parent().parent().find('.sstatus').text("缺货");
@@ -911,6 +913,12 @@ function toggle_notice(obj){
     }else{$(obj).text("点击查看")}
     $(obj).next().toggle();
 }
+function toggle_low_materials(obj){
+    if($(obj).text()=="点击查看"){
+       $(obj).text(" 隐藏");
+    }else{$(obj).text("点击查看")};
+     $(obj).next().toggle();
+}
 function close_notice(obj){
     $(obj).parent().hide();
     $(obj).parent().next().hide();
@@ -944,4 +952,50 @@ function checkMatNum(){
             return false;
         })
     }
+  }
+  function set_ignore(m_id, store_id,obj){   //忽略库存预警
+      var obj_td = $(obj).parent();
+      $.ajax({
+          url: "/stores/"+store_id+"/materials/set_ignore",
+          dataType: "json",
+          type: "get",
+          data: {
+              m_id : m_id, store_id : store_id
+          },
+          success: function(data){
+              if(data.status==0){
+                  tishi_alert("操作失败!");
+              }else if(data.status==1){
+                tishi_alert("操作成功!");
+                $(obj).parent().parent().find("td:first").removeAttr("class");
+                $(obj).parent().parent().find("td:nth-child(4)").text("存货");
+                obj_td.append("<a href='JavaScript:void(0)' onclick='cancel_ignore("+m_id+","+store_id+","+"this); return false;'>取消忽略</a>");
+                $(obj).remove();
+              }
+          }
+      })
+  }
+  function cancel_ignore(m_id,store_id,obj){   //取消忽略库存预警
+      var obj_td = $(obj).parent();
+      $.ajax({
+           url: "/stores/"+store_id+"/materials/cancel_ignore",
+           dataType: "json",
+           type: "get",
+           data: {
+               m_id : m_id, store_id : store_id
+           },
+           success: function(data){
+                if(data.status==0){
+                  tishi_alert("操作失败!");
+                }else if(data.status==1){
+                   tishi_alert("操作成功!");
+                   if(data.material_storage <= data.material_low){
+                      $(obj).parent().parent().find("td:first").attr("class", "data_table_error")
+                      $(obj).parent().parent().find("td:nth-child(4)").text("缺货");
+                   };
+                   obj_td.append("<a href='JavaScript:void(0)' onclick='set_ignore("+m_id+","+store_id+","+"this);return false;'>忽略</a>");
+                   $(obj).remove();
+                }
+           }
+      })
   }

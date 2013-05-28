@@ -16,7 +16,7 @@ class Material < ActiveRecord::Base
   TYPES = { :COST_M =>1,:HELP_TOOL =>2,:PROTECTED_L =>3,:ONE_USE =>4,:PRODUCT =>5}
   MAT_IN_PATH = "#{File.expand_path(Rails.root)}/public/uploads/mat_in/%s"
   MAT_CHECKNUM_PATH = "#{File.expand_path(Rails.root)}/public/uploads/mat_check/%s"
-
+  IS_IGNORE = {:YES => 1, :NO => 0} #是否忽略库存预警， 1是 0否
   scope :normal, where(:status => STATUS[:NORMAL])
   after_save :strip_material_name
 
