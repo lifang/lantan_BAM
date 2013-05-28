@@ -605,7 +605,6 @@ a.compile_btn { width: 100px;}
 .loadList_box, .loadList_line {height: 16px; display: inline-block;}
 .loadList_box { width:600px; overflow: hidden; border: 1px #e1e1e1 solid; position: relative; margin-top: 5px;}
 .loadList_line { 
-    width:30%;
 	background: #F92328; 
 	position: absolute; 
 	top: 0; 
