@@ -601,7 +601,7 @@ a.compile_btn { width: 100px;}
 .data_loadList li { height:24px; margin: 10px 0;}
 
 .loadList_name { 
-    width: 130px; 
+    width: 80px; 
 	display:inline-block; 
 	text-align: right; 
 	height:24px; 
