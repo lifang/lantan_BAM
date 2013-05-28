@@ -186,18 +186,26 @@ function edit_pcard(id,store_id){
 function check_add(e){
     var name=$("#name").val();
     var base=$("#price").val();
+    var end_time = $("#end_time").val();
     var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？-]")
     if (name=="" || name.length==0 || pattern.test(name)){
         tishi_alert("请输入套餐卡的名称,不能包含非法字符");
         return false;
     }
-    if ( ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0)){
-        tishi_alert("请输入套餐卡有效时间和失效时间");
-        return false;
-    }
-    if ( ($("#started_at").val() > $("#ended_at").val())){
-        tishi_alert("套餐卡有效时间不能大于失效时间");
-        return false;
+    if($("[name='time_select']:checked").val()==$("#date1").val()){
+        if ( ($("#started_at").val().length == 0 || $("#ended_at").val().length == 0)){
+            tishi_alert("请输入套餐卡有效时间和失效时间");
+            return false;
+        }
+        if ( ($("#started_at").val() > $("#ended_at").val())){
+            tishi_alert("套餐卡有效时间不能大于失效时间");
+            return false;
+        }
+    }else{
+        if(end_time == "" || end_time.length==0 || isNaN(parseFloat(end_time))){
+            tishi_alert("请输入套餐卡的有效时长，且为整数");
+            return false;
+        }
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){
         tishi_alert("请输入套餐卡的价格");

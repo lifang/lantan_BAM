@@ -17,9 +17,14 @@ class PackageCardsController < ApplicationController
   end #套餐卡列表
   
   def create
-    parms = {:name=>params[:name],:started_at=>params[:started_at],:ended_at=>params[:ended_at],
-      :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL],:price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d")
+    parms = {:name=>params[:name], :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL],
+      :price=>params[:price],:created_at=>Time.now.strftime("%Y-%M-%d"),:date_types =>params[:time_select]
     }
+    if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
+      parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at])
+    else
+      parms.merge!(:date_month =>params[:end_time])
+    end
     pcard =PackageCard.create(parms)
     begin
       pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
@@ -65,8 +70,13 @@ class PackageCardsController < ApplicationController
   #更新套餐卡
   def update_pcard
     pcard=PackageCard.find(params[:id])
-    parms = {:name=>params[:name],:started_at=>params[:started_at],:ended_at=>params[:ended_at],:price=>params[:price]
+    parms = {:name=>params[:name],:price=>params[:price],:date_types =>params[:time_select]
     }
+    if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
+      parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at])
+    else
+      parms.merge!(:date_month =>params[:end_time])
+    end
     begin
       parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
     rescue
