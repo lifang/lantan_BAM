@@ -7,12 +7,12 @@ class PackageCardsController < ApplicationController
 
   def index
     session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at]=nil,nil,nil,nil,nil
-    @cards=PackageCard.paginate_by_sql("select name,img_url,started_at,ended_at,id from package_cards where store_id=#{params[:store_id]}
-         and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => Constant::PER_PAGE)
-    @prods ={}
-    @cards.each do |card|
-      @prods[card.id]=Product.find_by_sql("select s.name,p.product_num num from products s inner join
-     pcard_prod_relations p on s.id=p.product_id  where p.package_card_id=#{card.id}")
+    @cards =PackageCard.paginate_by_sql("select name,img_url,started_at,ended_at,id,date_types,date_month from package_cards where
+    store_id=#{params[:store_id]} and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => Constant::PER_PAGE)
+    unless @cards.blank?
+      prods =Product.find_by_sql("select s.name,p.product_num num,package_card_id from products s inner join
+    pcard_prod_relations p on s.id=p.product_id  where p.package_card_id in (#{@cards.map(&:id).join(",")})")
+      @prods =prods.inject(Hash.new){|hash,prod| hash[prod.package_card_id].nil? ? hash[prod.package_card_id]=[prod] : hash[prod.package_card_id] << prod;hash  }
     end
   end #套餐卡列表
   

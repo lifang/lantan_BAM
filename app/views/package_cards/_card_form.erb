@@ -8,14 +8,14 @@
 </div>
 <div class="item_textarea">
   <span class="item_radio"><input name="time_select" type="radio" checked value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>"
-                                  onclick="$('#end_time').attr('disabled',true);" /></span>
+                                  onclick="$('#end_time').attr('disabled',true).val('');$('#started_at,#ended_at').attr('disabled',false)" /></span>
   <label>有效时间：</label> <input name="started_at" id="started_at"  value="<%= @pcard.started_at.nil?? "" : @pcard.started_at.strftime("%Y-%m-%d") %>"
                               type="text" onclick="WdatePicker()" class="Wdate item_areaInput_s" readonly />&nbsp;&nbsp;至&nbsp;&nbsp;
   <input name="ended_at" id="ended_at" type="text" value="<%= @pcard.ended_at.nil?? "" : @pcard.ended_at.strftime("%Y-%m-%d") %>"
          onclick="WdatePicker()" class="Wdate item_areaInput_s" readonly />
 </div>
 <div class="item_textarea">
-  <span class="item_radio"><input name="time_select" type="radio" onclick="$('#end_time').attr('disabled',false)"
+  <span class="item_radio"><input name="time_select" type="radio" onclick="$('#end_time').attr('disabled',false);$('#started_at,#ended_at').attr('disabled',true).val('')"
    <% if @pcard.date_types==PackageCard::TIME_SELCTED[:END_TIME] %> checked <%end%> value="<%= PackageCard::TIME_SELCTED[:END_TIME] %>" /></span>
   <label>有效天数：</label><input name="end_time" type="text" class="item_areaInput_s" id="end_time"
           <% if @pcard.date_types!=PackageCard::TIME_SELCTED[:END_TIME] %> disabled <%end%> value="<%=@pcard.date_month  %>" />&nbsp;&nbsp;天
