@@ -5,13 +5,15 @@ class ProductsController < ApplicationController
   layout 'sale'
 
   def index
-    @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,id,store_id from products where  store_id in (#{params[:store_id]},1)
+    @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,t_price,base_price,id,store_id from products where  store_id in (#{params[:store_id]},1)
     and is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]} order by created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
   end  #产品列表页
 
   #新建
   def add_prod
     @product=Product.new
+    @materials =Material.find_by_sql( "select id,name,code,storage from materials  where  store_id=#{params[:store_id]} and
+              status=#{Material::STATUS[:NORMAL]} and types=#{Material::TYPES[:PRODUCT]}")
   end
   
   def create
@@ -21,7 +23,7 @@ class ProductsController < ApplicationController
 
 
   def prod_services
-    @services = Product.paginate_by_sql("select id, service_code code,store_id,name,types,base_price,cost_time,staff_level level1,staff_level_1
+    @services = Product.paginate_by_sql("select id, service_code code,store_id,name,types,base_price,cost_time,t_price,sale_price,staff_level level1,staff_level_1
     level2 from products where store_id in (#{params[:store_id]},1) and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}
     order by created_at asc", :page => params[:page], :per_page => Constant::PER_PAGE)
     @materials={}
@@ -38,7 +40,7 @@ class ProductsController < ApplicationController
 
   def set_product(types)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
-      :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],
+      :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],:t_price=>params[:t_price],
       :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product","service_code")}"
     }
     product =Product.create(parms)
@@ -49,6 +51,7 @@ class ProductsController < ApplicationController
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
       end if params[:sale_prod]
     else
+      ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
       product.update_attributes({:standard=>params[:standard]})
     end
     begin
@@ -65,8 +68,11 @@ class ProductsController < ApplicationController
   end   #为新建产品或者服务提供参数
 
   def edit_prod
-    @product=Product.find(params[:id])
+    @product =Product.find(params[:id])
     @img_urls=@product.image_urls
+    @materials =Material.find_by_sql( "select id,name,code,storage from materials  where  store_id=#{params[:store_id]} and
+              status=#{Material::STATUS[:NORMAL]} and types=#{Material::TYPES[:PRODUCT]}")
+   p @material = @product.prod_mat_relations[0]
   end
 
   def show_prod
@@ -76,7 +82,7 @@ class ProductsController < ApplicationController
 
   def update_product(types,product)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
-      :types=>params[:prod_types],:introduction=>params[:desc]
+      :types=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price],
     }
     if types == Constant::SERVICE
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],:deduct_percent=>params[:deduct_percent] })
@@ -87,6 +93,7 @@ class ProductsController < ApplicationController
         end
       end
     else
+      product.prod_mat_relations.first.update_attributes(:material_id=>params[:prod_material].to_i)
       parms.merge!({:standard=>params[:standard]})
     end
     begin

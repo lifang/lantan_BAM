@@ -33,11 +33,20 @@ function add_product(e){
     var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？-]")
     var name=$("#name").val();
     var base=$("#base_price").val();
+    var t_price =$("#t_price").val();
     var sale=$("#sale_price").val();
     var standard =$("#standard").val();
     var pic_format =["png","gif","jpg","bmp"];
+    if ($("#prod_material option").length==0){
+        tishi_alert("请添加产品的物料");
+        return false;
+    }
     if (name=="" || name.length==0 || pattern.test(name)){
         tishi_alert("请输入产品的名称,不能包含非法字符");
+        return false;
+    }
+    if(t_price == "" || t_price.length==0 || isNaN(parseFloat(t_price))){
+        tishi_alert("请输入产品的成本价,价格为数字");
         return false;
     }
     if(base == "" || base.length==0 || isNaN(parseFloat(base))){

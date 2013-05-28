@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051453) do
+ActiveRecord::Schema.define(:version => 20130701051452) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.integer  "order_id"
   end
 
+  add_index "c_pcard_relations", ["updated_at"], :name => "index_c_pcard_relations_on_updated_at"
   add_index "c_pcard_relations", ["customer_id"], :name => "index_c_pcard_relations_on_customer_id"
   add_index "c_pcard_relations", ["order_id"], :name => "index_c_pcard_relations_on_order_id"
   add_index "c_pcard_relations", ["package_card_id"], :name => "index_c_pcard_relations_on_package_card_id"
@@ -226,6 +227,16 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
 
   add_index "jv_syncs", ["current_day"], :name => "index_jv_syncs_on_current_day"
 
+  create_table "jv_syncs", :force => true do |t|
+    t.integer  "types"
+    t.datetime "current_day"
+    t.integer  "hours"
+    t.string   "zip_name"
+    t.integer  "target_id"
+  end
+
+  add_index "jv_syncs", ["current_day"], :name => "index_jv_syncs_on_current_day"
+
   create_table "m_order_types", :force => true do |t|
     t.integer  "material_order_id"
     t.integer  "pay_types"
@@ -392,6 +403,15 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.datetime "updated_at"
   end
 
+  create_table "o_pcard_relations", :force => true do |t|
+    t.integer  "order_id"
+    t.integer  "c_pcard_relation_id"
+    t.integer  "product_id"
+    t.integer  "product_num"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "order_pay_types", :force => true do |t|
     t.integer  "order_id"
     t.integer  "pay_type"
@@ -467,6 +487,8 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.integer  "price"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "date_types"
+    t.integer  "date_month"
   end
 
   add_index "package_cards", ["created_at"], :name => "index_package_cards_on_created_at"
@@ -515,6 +537,7 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.float    "deduct_percent"
+    t.float    "t_price"
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"
@@ -799,6 +822,7 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
 
   add_index "store_pleasants", ["created_at"], :name => "index_store_pleasants_on_created_at"
   add_index "store_pleasants", ["store_id"], :name => "index_store_pleasants_on_store_id"
+  add_index "store_pleasants", ["updated_at"], :name => "index_store_pleasants_on_updated_at"
 
   create_table "stores", :force => true do |t|
     t.string   "name"
@@ -815,7 +839,6 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.datetime "updated_at"
     t.integer  "city_id"
     t.integer  "status"
-    t.integer  "material_low"
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"
@@ -892,8 +915,8 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.datetime "sync_at"
     t.datetime "created_at"
     t.boolean  "data_status", :default => false
-    t.string   "zip_name",    :default => "0"
     t.boolean  "sync_status", :default => false
+    t.string   "zip_name"
     t.integer  "types"
     t.boolean  "has_data",    :default => true
   end
@@ -937,9 +960,11 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.datetime "process_at"
   end
 
-  add_index "violation_rewards", ["created_at"], :name => "index_violation_rewards_on_created_at"
-  add_index "violation_rewards", ["staff_id"], :name => "index_violation_rewards_on_staff_id"
-
+  create_table "wk_or_times", :force => true do |t|
+    t.integer  "current_time"
+    add_index "violation_rewards", ["created_at"], :name => "index_violation_rewards_on_created_at"
+    add_index "violation_rewards", ["staff_id"], :name => "index_violation_rewards_on_staff_id"
+  end
   create_table "w_o_times", :force => true do |t|
     t.integer  "current_time"
     t.integer  "current_day"
@@ -958,6 +983,8 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.datetime "created_at"
   end
 
+  add_index "wk_or_times", ["updated_at"], :name => "index_wk_or_times_on_updated_at"
+
   add_index "wk_or_times", ["current_day"], :name => "index_w_o_times_on_current_day"
   add_index "wk_or_times", ["station_id"], :name => "index_w_o_times_on_station_id"
 
@@ -975,6 +1002,7 @@ ActiveRecord::Schema.define(:version => 20130701051453) do
     t.float    "electricity_num"
     t.integer  "store_id"
     t.datetime "created_at"
+    t.datetime "updated_at"
     t.float    "gas_num"
   end
 

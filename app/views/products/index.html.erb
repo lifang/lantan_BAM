@@ -16,7 +16,9 @@
                 <tr class="hbg">
                   <td>产品编号</td>
                   <td>产品名称</td>
-                  <td>价格</td>
+                  <td>成本价</td>
+                  <td>零售价格</td>
+                  <td>促销价</td>
                   <td>类别</td>
                   <td>操作</td>
                 </tr>
@@ -26,6 +28,8 @@
                   <tr>
                     <td><%= prod.code %></td>
                     <td><%= prod.name %></td>
+                    <td><%= prod.t_price %></td>
+                    <td><%= prod.base_price %></td>
                     <td><%= prod.sale_price %></td>
                     <td><%= Product::PRODUCT_TYPES[prod.types] %></td>
                     <td>

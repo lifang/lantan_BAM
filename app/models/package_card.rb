@@ -5,7 +5,7 @@ class PackageCard < ActiveRecord::Base
   belongs_to :store
 
   STAT = {:INVALID =>0,:NORMAL =>1}  #0 为失效或删除  1 为正常使用
-
+  TIME_SELCTED = {:PERIOD =>0,:END_TIME =>1} #0 时间段  1  有效时间长度
   #查询卡信息
   def self.search_pcard(store_id,pcard=nil,car_num=nil,c_name=nil,created_at=nil,ended_at=nil)
     sql="select cp.id,c.name,c.mobilephone,p.name p_name,cp.content,p.price,cp.status,p.id p_id from c_pcard_relations cp inner join customers c on c.id=cp.customer_id

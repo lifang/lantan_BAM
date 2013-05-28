@@ -8,11 +8,26 @@ class StaffsController < ApplicationController
 
   def index
     type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
-    @staffs_names = @store.staffs.where(type_of_w_sql).select("id, name")
-    @staffs = @store.staffs.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @staffs_names = @store.staffs.valid.where(type_of_w_sql).select("id, name")
+    @staffs = @store.staffs.valid.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    staff_scores = MonthScore.where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")} and store_id = ?", @store.id)
+    @staff_scores_hash = staff_scores.group_by{|ms| ms.staff_id}
     @staff =  Staff.new
     @violation_reward = ViolationReward.new
     @train = Train.new
+    @count_time = staff_scores.last.updated_at
+  end
+
+  def search
+    sql = []
+    name_sql = params[:name].blank? ? nil : "name like '%#{params[:name]}%'"
+    types_sql = params[:types]=="-1" ? nil : "type_of_w = #{params[:types]}"
+    status_sql = params[:status]=="-1" ? nil : "status = #{params[:status]}"
+    sql<< name_sql << types_sql << status_sql
+    sql = sql.compact.join(" and ")
+    @staffs = @store.staffs.valid.where(sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    staff_scores = MonthScore.where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")} and store_id = ?", @store.id)
+    @staff_scores_hash = staff_scores.group_by{|ms| ms.staff_id}
   end
 
   def create
@@ -71,6 +86,13 @@ class StaffsController < ApplicationController
     #update picture
     @staff.operate_picture(photo, "update") if !photo.nil? && @staff
     redirect_to store_staff_path(@store, @staff)
+  end
+
+  def destroy
+    @staff = @store.staffs.find_by_id(params[:id])
+    @staff.update_attribute(:status,Staff::STATUS[:deleted] ) if @staff
+    flash[:notice] = "成功删除员工"
+    redirect_to store_staffs_path(@store)
   end
 
   private

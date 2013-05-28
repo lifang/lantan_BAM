@@ -13,4 +13,6 @@ class Store < ActiveRecord::Base
   has_many :staffs
   has_many :materials
   has_many :suppliers
+  has_many :month_scores
+  has_many :complaints
 end
