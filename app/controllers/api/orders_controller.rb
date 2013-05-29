@@ -16,10 +16,12 @@ class Api::OrdersController < ApplicationController
   def login
     staff = Staff.find_by_username(params[:user_name])
     info = ""
+    puts "--------------------------"
+    puts staff.status
     if  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
-    elsif !Staff::VALID_STATUS.include?(staff.status)
-      info = "用户不存在"
+    #elsif !Staff::VALID_STATUS.include?(staff.status)
+      #info = "用户不存在"
     else
       cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
       cookies[:user_name]={:value =>staff.name, :path => "/", :secure  => false}
@@ -103,7 +105,7 @@ class Api::OrdersController < ApplicationController
     prod_id = params[:prod_ids] #"10_3,311_0,226_2,"
     prod_id = prod_id[0...(prod_id.size-1)] if prod_id
     pre_arr = Order.pre_order params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
-      params[:email],params[:birth],prod_id,params[:res_time]
+      params[:email],params[:birth],prod_id,params[:res_time],params[:sex]
     content = ""
     if pre_arr[5] == 0
       content = "数据出现异常"
@@ -193,7 +195,7 @@ class Api::OrdersController < ApplicationController
 
   def checkin
     order = Order.checkin params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
-      params[:email],params[:birth]
+      params[:email],params[:birth],params[:sex]
     content = ""
     if order == 1
       content = "success"

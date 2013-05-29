@@ -129,7 +129,8 @@ class Order < ActiveRecord::Base
     customer = nil
     working_orders = []
     old_orders = []
-    sql = "select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,cn.buy_year year,cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
+    sql = "select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,c.sex,cn.buy_year year,
+      cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
       from customer_num_relations cnr
       inner join car_nums cn on cn.id=cnr.car_num_id and cn.num='#{car_num}'
       inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}
@@ -171,9 +172,9 @@ class Order < ActiveRecord::Base
         else
           if (car_id && car_id.to_i == order.id) || car_id.nil?
             working_orders << order_hash
-#mark
-#          elsif car_id.nil?
-#            working_orders << order_hash
+            #mark
+            #          elsif car_id.nil?
+            #            working_orders << order_hash
           end
         end
       end
@@ -196,8 +197,14 @@ class Order < ActiveRecord::Base
     product_arr = []
     clean_arr = []
     prod_arr = []
-    maint_arr = []
-    products = Product.find_all_by_store_id_and_status store_id, Product::IS_VALIDATE[:YES]
+    maint_arr = []    
+    prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id from prod_mat_relations pmr
+      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
+      and m.storage > 0 and m.store_id = ? ", store_id])
+    p_ids = prod_mat_relations.collect { |i| i.p_id  } if prod_mat_relations.any?
+    products = Product.find_by_sql(["select * from products p where p.status = ? 
+      and p.id in (?) and p.store_id = ?", Product::IS_VALIDATE[:YES], p_ids, store_id])
+ 
     (products || []).each do |p|
       h = Hash.new
       h[:id] = p.id
@@ -216,7 +223,9 @@ class Order < ActiveRecord::Base
     product_arr << clean_arr
     product_arr << maint_arr
     product_arr << prod_arr
-    cards = PackageCard.find(:all, :conditions => ["status = ? and store_id = ? and ended_at >= ?",
+    cards = PackageCard.find(:all,
+      :conditions => ["status = ? and store_id = ? and
+          ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?) or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})",
         PackageCard::STAT[:NORMAL], store_id, Time.now])
 
     product_arr << (cards || []).collect{|c|
@@ -244,7 +253,7 @@ class Order < ActiveRecord::Base
   end
 
   #arr = [车牌和用户信息，选择的产品和服务，相关的活动，相关的打折卡，选择的套餐卡，状态，总价]
-  def self.pre_order store_id,car_num,brand,car_year,user_name,phone,email,birth,prod_ids,res_time
+  def self.pre_order store_id,car_num,brand,car_year,user_name,phone,email,birth,prod_ids,res_time,sex
     arr  = []
     status = 0
     total = 0
@@ -252,10 +261,10 @@ class Order < ActiveRecord::Base
       #begin
       customer = Customer.find_by_mobilephone(phone)
       customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
-        :other_way => email, :birthday => birth) if customer
+        :other_way => email, :birthday => birth, :sex => sex) if customer
       carNum = CarNum.find_by_num car_num
       customer_infos = Customer.create_single_cus(customer, carNum, phone, car_num,
-        user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, nil, nil)
+        user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil)
       customer = customer_infos[0]
       carNum = customer_infos[1]
       info = Hash.new
@@ -271,7 +280,12 @@ class Order < ActiveRecord::Base
         ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 3
       end
       #ids = [311, 226]
-      products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", ids]) if ids.any?
+      prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
+      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
+      and m.storage > 0 and m.store_id = ? and pmr.product_id in (?) ", store_id, ids]).group_by { |i| i.product_id } if ids.any?
+      products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", 
+          prod_mat_relations.keys]) unless prod_mat_relations.empty?
+      
       unless products.blank?
         service_ids = products.collect { |p| p.id  } #[311]
         time_arr = Station.arrange_time store_id, service_ids, res_time
@@ -325,6 +339,7 @@ class Order < ActiveRecord::Base
             product[:name] = prod.name
             product[:price] = prod.sale_price
             product[:count] = 1
+            product[:num] = prod_mat_relations[prod.id][0].storage if prod.is_service == false
             prod_arr << product
             total += product[:price]
             #产品相关的活动
@@ -348,7 +363,7 @@ class Order < ActiveRecord::Base
                     on p.id = spr.product_id where spr.sale_id = ?", r.sale.id])
                 sale_prod_relations.each { |spr| 
                   s[:sale_products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
-                  }
+                }
                 #sale_arr << s
                 #total -= s[:price] unless sale_hash[r.sale_id]
                 sale_hash[r.sale_id] = s
@@ -472,7 +487,7 @@ class Order < ActiveRecord::Base
         #创建订单的相关产品 OrdeProdRelation
         (arr[0] || []).each do |prod|
           product = Product.find_by_id_and_store_id_and_status prod[1],store_id,Product::IS_VALIDATE[:YES]
-          if product
+          if product            
             OrderProdRelation.create(:order_id => order.id, :product_id => prod[1],
               :pro_num => prod[2], :price => product.sale_price)
             x += 1 if product.is_service?
@@ -522,16 +537,21 @@ class Order < ActiveRecord::Base
               PackageCard::STAT[:NORMAL], store_id, p_c_ids.keys])
           if p_cards.any?            
             p_cards_hash = p_cards.group_by { |p_c| p_c.id }
-#            c_pcard_relations = CPcardRelation.find(:all,
-#              :conditions => ["status = ? and ended_at >= ? and customer_id = ? and package_card_id in (?)",
-#                CPcardRelation::STATUS[:NORMAL], Time.now, c_id, p_cards]).group_by { |c_p_r| c_p_r.package_card_id }
+            #            c_pcard_relations = CPcardRelation.find(:all,
+            #              :conditions => ["status = ? and ended_at >= ? and customer_id = ? and package_card_id in (?)",
+            #                CPcardRelation::STATUS[:NORMAL], Time.now, c_id, p_cards]).group_by { |c_p_r| c_p_r.package_card_id }
             arr[3].collect do |a_pc|
               prod_nums = a_pc[3].split("-") if a_pc[3]
               if a_pc[2].to_i == 0 #has_p_card是0，表示是新买的套餐卡
                 p_card_id = a_pc[1].to_i
+                if p_cards_hash[p_card_id][0].date_types == PackageCard::TIME_SELCTED[:END_TIME]  #根据套餐卡的类型设置截止时间
+                  ended_at = (Time.now + (p_cards_hash[p_card_id][0].date_month).days).to_date
+                else
+                  ended_at = p_cards_hash[p_card_id][0].ended_at
+                end
                 cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id =>p_card_id,
-                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[p_card_id][0].ended_at,
-                  :content => CPcardRelation.set_content(p_card_id), :order_id => order.id, 
+                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => ended_at,
+                  :content => CPcardRelation.set_content(p_card_id), :order_id => order.id,
                   :price => p_cards_hash[p_card_id][0].price)
                 if a_pc[3] # 如果使用套餐卡，把使用的次数保存
                   (prod_nums||[]).each do |pn|
@@ -541,11 +561,11 @@ class Order < ActiveRecord::Base
                         :product_id =>prod_id, :product_num => p_num})
                   end
                 end
-#                if c_pcard_relations and c_pcard_relations[p_card_id]
-#                  c_pcard_relations[p_card_id] << cpr if a_pc[3]
-#                else
-#                  c_pcard_relations[p_card_id] = [cpr] if a_pc[3]
-#                end
+                #                if c_pcard_relations and c_pcard_relations[p_card_id]
+                #                  c_pcard_relations[p_card_id] << cpr if a_pc[3]
+                #                else
+                #                  c_pcard_relations[p_card_id] = [cpr] if a_pc[3]
+                #                end
               else
                 cpr = CPcardRelation.find_by_id a_pc[4]
                 (prod_nums||[]).each do |pn|
@@ -573,21 +593,21 @@ class Order < ActiveRecord::Base
               end
             end
             
-#            新增的套餐卡
-#            pc_ids.each do |key, value|
-#              alreay_has = 0
-#              alreay_has = c_pcard_relations[key].length if (c_pcard_relations and c_pcard_relations[key])
-#              (1..(value - alreay_has)).each do |i|
-#                cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id => key.to_i,
-#                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[key][0].ended_at,
-#                  :content => CPcardRelation.set_content(key), :order_id => order.id, :price => p_cards_hash[key][0].price)
-#                if c_pcard_relations and c_pcard_relations[key]
-#                  c_pcard_relations[key] << cpr
-#                else
-#                  c_pcard_relations[key] = [cpr]
-#                end
-#              end if value - alreay_has > 0
-#            end
+            #            新增的套餐卡
+            #            pc_ids.each do |key, value|
+            #              alreay_has = 0
+            #              alreay_has = c_pcard_relations[key].length if (c_pcard_relations and c_pcard_relations[key])
+            #              (1..(value - alreay_has)).each do |i|
+            #                cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id => key.to_i,
+            #                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[key][0].ended_at,
+            #                  :content => CPcardRelation.set_content(key), :order_id => order.id, :price => p_cards_hash[key][0].price)
+            #                if c_pcard_relations and c_pcard_relations[key]
+            #                  c_pcard_relations[key] << cpr
+            #                else
+            #                  c_pcard_relations[key] = [cpr]
+            #                end
+            #              end if value - alreay_has > 0
+            #            end
             #更新数量
             #{10=>{310=>2, 311=>9}, 11=>{}}
 =begin            p_c_ids.each do |key, value|
@@ -738,21 +758,21 @@ class Order < ActiveRecord::Base
       h = Hash.new
       h[:name] = r.product.name
       h[:price] = r.price
-#      if sale_prod_ids[r.product_id] < r.pro_num
-#        realy_price += r.price.to_f * sale_prod_ids[r.product_id]
-#      else
-#        realy_price += r.price.to_f * r.pro_num
-#      end if sale_prod_ids[r.product_id]
+      #      if sale_prod_ids[r.product_id] < r.pro_num
+      #        realy_price += r.price.to_f * sale_prod_ids[r.product_id]
+      #      else
+      #        realy_price += r.price.to_f * r.pro_num
+      #      end if sale_prod_ids[r.product_id]
       h[:num] = r.pro_num.to_i
       h[:type] = 0
       content += h[:name] + ","
       h
     }
-#    if sale.disc_types == Sale::DISC_TYPES[:FEE]
-#      hash[:sale][:price] = sale.discount #realy_price > sale.discount ? sale.discount : realy_price
-#    else
-#      hash[:sale][:price] = realy_price * (10 - sale.discount) / 10
-#    end if sale
+    #    if sale.disc_types == Sale::DISC_TYPES[:FEE]
+    #      hash[:sale][:price] = sale.discount #realy_price > sale.discount ? sale.discount : realy_price
+    #    else
+    #      hash[:sale][:price] = realy_price * (10 - sale.discount) / 10
+    #    end if sale
     hash[:content] = content.chomp(",")
     
     unless self.c_svc_relation_id.blank?
@@ -814,6 +834,16 @@ class Order < ActiveRecord::Base
             hash[:is_free] = true
             hash[:price] = 0
           end
+          #更新产品数量
+          order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
+          if order_products  #如果是产品,则减掉对应库存
+              materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
+                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
+            materials.each do |m|
+              m.update_attributes(:storage => (m.storage - order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
+            end unless materials.blank?
+          end
           #如果有套餐卡，则更新状态
           c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
           c_pcard_relations.each do |cpr|
@@ -858,7 +888,7 @@ class Order < ActiveRecord::Base
     [status]
   end
 
-  def self.checkin store_id,car_num,brand,car_year,user_name,phone,email,birth
+  def self.checkin store_id,car_num,brand,car_year,user_name,phone,email,birth,sex
     car_num_r = CarNum.find_by_num car_num
     customer = Customer.find_by_mobilephone(phone)
     status = 0
@@ -866,9 +896,9 @@ class Order < ActiveRecord::Base
       if car_num
         Customer.transaction do
           customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
-            :other_way => email, :birthday => birth) if customer
+            :other_way => email, :birthday => birth, :sex => sex) if customer
           Customer.create_single_cus(customer, car_num_r, phone, car_num,
-            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, nil, nil)
+            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil)
         end
         status = 1
       end

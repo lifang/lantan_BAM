@@ -146,10 +146,17 @@ class MarketManagesController < ApplicationController
                                 op.order_id = o.id inner join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
                                 #{started_at_sql} and #{ended_at_sql}")
+
+    pcar_relations = CPcardRelation.find_by_sql(["select cpr.order_id order_id, 1 pro_num, pc.price price, pc.name name
+        from c_pcard_relations cpr inner join package_cards pc
+        on pc.id = cpr.package_card_id where cpr.order_id in (?)", order_details])
     
     orders = {}
     order_details.each do |order|
       orders.keys.include?(order.id) ? orders[order.id][:product_name] += (","+order.product_name) : orders[order.id] = order
+    end
+    pcar_relations.each do |pr|
+      orders.keys.include?(pr.order_id) ? orders[pr.order_id][:product_name] += (","+pr.name) : orders[pr.order_id] = pr
     end
     @orders = orders.values
     @total_price = @orders.sum(&:price)
