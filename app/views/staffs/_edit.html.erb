@@ -13,7 +13,7 @@
                     <%= f.select :position, Staff::N_HEAD.invert %>
                   </div>
                   <div class="item">
-                    <label>在职状态:</label>
+                    <label>员工状态:</label>
                     <%= f.select :working_stats, Staff::S_WORKING_STATS.invert %>
                   </div>
                 <div class="item">
@@ -93,6 +93,10 @@
                   <div class="item">
                        <label>按考核分发底薪：</label>
                        <%= f.check_box :is_score_ge_salary %>
+                  </div>
+                <div class="item">
+                       <label>在职状态：</label>
+                       <%= f.select :status, Staff::STATUS_NAME.invert.delete_if {|key, value| key == "删除" } %>
                   </div>
                 <div class="item_textarea">
                      <label>上传照片：</label><%= f.file_field :photo, :class => "file" %>
