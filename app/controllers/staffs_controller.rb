@@ -15,7 +15,7 @@ class StaffsController < ApplicationController
     @staff =  Staff.new
     @violation_reward = ViolationReward.new
     @train = Train.new
-    @count_time = staff_scores.last.updated_at
+    @count_time = staff_scores.last.try(:updated_at)
   end
 
   def search
