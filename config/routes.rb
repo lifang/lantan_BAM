@@ -38,8 +38,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :complaints do
       collection do
-        post "search","search_degree","detail_s","search_time"
-        get "search_list","show_detail","satisfy_degree","degree_list","detail_list","date_list"
+        post "search","search_degree","detail_s","search_time","degree_time"
+        get "search_list","show_detail","satisfy_degree","degree_list","detail_list","date_list","time_list"
       end
       member do
         get "complaint_detail"

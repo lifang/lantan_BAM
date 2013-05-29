@@ -4,7 +4,7 @@
 <div class="third_menu">
   <ul>
     <li><a href="javascript:void(0)" onclick="$('#month').css('display','');$('#day').css('display','none');$('.third_menu a').toggleClass('hover')"
-       <%if params[:action]=="index" || params[:action]=="search_list"%>    class="hover" <%end%>>月份统计</a></li>
+           <%if params[:action]=="index" || params[:action]=="search_list"%>    class="hover" <%end%>>月份统计</a></li>
     <li><a href="javascript:void(0)" onclick="$('#month').css('display','none');$('#day').css('display','');$('.third_menu a').toggleClass('hover')"
            <%if params[:action]=="date_list"%>    class="hover" <%end%>>查询统计</a></li>
   </ul>
@@ -52,7 +52,6 @@
           <option <%if Complaint::SEX[:FEMALE]==session[:sex].to_i%>selected<%end%> value="<%= Complaint::SEX[:FEMALE] %>">女</option>
         </select>
       </div>
-
       <div>
         <button class="search_btn">查询</button>
       </div>
@@ -62,9 +61,14 @@
   <div class="data_body">
     <div class="data_loadList">
       <ul>
-        <li><span class="loadList_name">洗车：</span><span class="loadList_box"><span class="loadList_line">111</span></span></li>
-        <li><span class="loadList_name">喷漆：</span><span class="loadList_box"><span class="loadList_line">112</span></span></li>
-        <li><span class="loadList_name">补胎：</span><span class="loadList_box"><span class="loadList_line">113</span></span></li>
+        <% unless @total_com.blank?%>
+          <%@total_com.each do |key,num|%>
+            <li><span class="loadList_name"><%= Complaint::TYPES_NAMES[key] %>：</span><span class="loadList_box">
+                <span class="loadList_line" style="width:<%=600.0/@size*num  %>px"><%= num %></span></span></li>
+              <% end%>
+            <%else%>
+          <li>无统计记录</li>
+        <% end %>
       </ul>
     </div>
   </div>
