@@ -4,14 +4,22 @@
          <%= form_for(@staff, :url => store_staff_path(@store, @staff), :html => {:method => :put, :multipart => true}) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
-                  <div class="item">
-                       <label>名称：</label>
-                       <%= f.text_field :name %>
+                <div class="item">
+                    <label>名称：</label>
+                    <%= f.text_field :name %>
                   </div>
                   <div class="item">
-                       <label>岗位：</label>
-                       <%= f.select :position, Staff::N_HEAD.invert %>
+                    <label>岗位：</label>
+                    <%= f.select :position, Staff::N_HEAD.invert %>
                   </div>
+                  <div class="item">
+                    <label>员工状态:</label>
+                    <%= f.select :working_stats, Staff::S_WORKING_STATS.invert %>
+                  </div>
+                <div class="item">
+            <label>实习时长(天):</label>
+            <%= f.text_field :probation_days, :disabled => f.object.working_stats == 1 ? true : false %>
+          </div>
                   <div class="item">
                        <label>性别：</label>
                        <%= f.radio_button :sex, 0, :checked => f.object.sex ? false : true %> 男&nbsp;&nbsp;
@@ -31,7 +39,8 @@
                   </div>
                   <div class="item">
                        <label>出生年月：</label>
-                       <%= f.text_field :birthday, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();", :value => f.object.birthday.strftime("%Y-%m-%d") %>
+                       <%= f.text_field :birthday, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();",
+                         :value => f.object.birthday.nil? ? "" : f.object.birthday.strftime("%Y-%m-%d") %>
                   </div>
                   <div class="item">
                        <label>联系方式：</label>
@@ -57,25 +66,37 @@
                        <label>地址：</label>
                        <%= f.text_field :address %>
                   </div>
+                <div class="item">
+            <label>实习薪资标准:</label>
+            <%= f.text_field :probation_salary, :disabled => f.object.working_stats == 1 ? true : false %>
+          </div>
                   <div class="item">
-                       <label>薪资标准：</label>
+                       <label>正式薪资标准：</label>
                        <%= f.text_field :base_salary %>
                   </div>
+                <div class="item">
+            <label>是否参加提成:</label>
+            <%= f.check_box :is_deduct %>
+          </div>
                   <div class="item">
                        <label>提成起始额：</label>
-                       <%= f.text_field :deduct_at %>
+                       <%= f.text_field :deduct_at, :disabled => f.object.is_deduct ? false :true %>
                   </div>
                   <div class="item">
                        <label>结束额度：</label>
-                       <%= f.text_field :deduct_end %>
+                       <%= f.text_field :deduct_end, :disabled => f.object.is_deduct ? false :true %>
                   </div>
                   <div class="item">
                        <label>提成率：</label>
-                       <%= f.text_field :deduct_percent %>
+                       <%= f.text_field :deduct_percent, :disabled => f.object.is_deduct ? false :true %>
                   </div>
                   <div class="item">
                        <label>按考核分发底薪：</label>
                        <%= f.check_box :is_score_ge_salary %>
+                  </div>
+                <div class="item">
+                       <label>在职状态：</label>
+                       <%= f.select :status, Staff::STATUS_NAME.invert.delete_if {|key, value| key == "删除" } %>
                   </div>
                 <div class="item_textarea">
                      <label>上传照片：</label><%= f.file_field :photo, :class => "file" %>

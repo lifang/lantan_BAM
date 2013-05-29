@@ -32,18 +32,12 @@ $(document).ready(function(){
     $("#staffs_table").tablesorter({
         headers:
         {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            5: {
-                sorter: false
-            },
-            6: {
-                sorter: false
-            }
+
+            1: {sorter: false},
+            2: {sorter: false},
+            5: {sorter: false},
+            6: {sorter: false}
+
         }
     });
     $("#staffs_table").bind("sortEnd",function() {
@@ -58,33 +52,17 @@ $(document).ready(function(){
     $("#work_record_table").tablesorter({
         headers:
         {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            },
-            5: {
-                sorter: false
-            },
-            6: {
-                sorter: false
-            },
-            7: {
-                sorter: false
-            },
-            8: {
-                sorter: false
-            },
-            9: {
-                sorter: false
-            }
+
+            1: {sorter: false},
+            2: {sorter: false},
+            3: {sorter: false},
+            4: {sorter: false},
+            5: {sorter: false},
+            6: {sorter: false},
+            7: {sorter: false},
+            8: {sorter: false},
+            9: {sorter: false}
+
         }
     });
     $("#work_record_table").bind("sortEnd",function() {
@@ -99,15 +77,11 @@ $(document).ready(function(){
     $("#month_score_table").tablesorter({
         headers:
         {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            }
+
+            1: {sorter: false},
+            2: {sorter: false},
+            3: {sorter: false}
+
         }
     });
     $("#month_score_table").bind("sortEnd",function() {
@@ -122,18 +96,12 @@ $(document).ready(function(){
     $("#reward_table").tablesorter({
         headers:
         {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            }
+
+            1: {sorter: false},
+            2: {sorter: false},
+            3: {sorter: false},
+            4: {sorter: false}
+
         }
     });
     $("#reward_table").bind("sortEnd",function() {
@@ -148,21 +116,10 @@ $(document).ready(function(){
     $("#salary_table").tablesorter({
         headers:
         {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            },
-            5: {
-                sorter: false
-            }
+            1: {sorter: false},
+            2: {sorter: false},
+            3: {sorter: false},
+            4: {sorter: false}
         }
     });
     $("#salary_table").bind("sortEnd",function() {
@@ -177,21 +134,13 @@ $(document).ready(function(){
     $("#train_table").tablesorter({
         headers:
         {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            },
-            5: {
-                sorter: false
-            }
+
+            1: {sorter: false},
+            2: {sorter: false},
+            3: {sorter: false},
+            4: {sorter: false},
+            5: {sorter: false}
+
         }
     });
     $("#train_table").bind("sortEnd",function() {
@@ -206,18 +155,12 @@ $(document).ready(function(){
     $("#violation_table").tablesorter({
         headers:
         {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            }
+
+            1: {sorter: false},
+            2: {sorter: false},
+            3: {sorter: false},
+            4: {sorter: false}
+
         }
     });
     $("#violation_table").bind("sortEnd",function() {
@@ -232,18 +175,12 @@ $(document).ready(function(){
     $("#current_month_salary_table").tablesorter({
         headers:
         {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            5: {
-                sorter: false
-            },
-            6: {
-                sorter: false
-            }
+
+            1: {sorter: false},
+            2: {sorter: false},
+            5: {sorter: false},
+            6: {sorter: false}
+
         }
     });
     $("#current_month_salary_table").bind("sortEnd",function() {
@@ -290,10 +227,43 @@ $(document).ready(function(){
         return false;
     });
 
+    $("#staff_working_stats").live("change", function(){        //选择在职状态时
+        if($(this).val() == 1){
+            $(this).parent().parent().find($("#staff_probation_days")).attr("disabled", "disabled");
+            $(this).parent().parent().find($("#staff_probation_days")).val("");
+            $(this).parent().parent().find($("#staff_probation_salary")).attr("disabled", "disabled");
+            $(this).parent().parent().find($("#staff_probation_salary")).val("");
+        }else{
+            $(this).parent().parent().find($("#staff_probation_days")).removeAttr("disabled");
+            $(this).parent().parent().find($("#staff_probation_salary")).removeAttr("disabled");
+        }
+    });
+    $("#staff_is_deduct").live("click", function(){             //是否参加提成
+        if($(this).attr("checked")=="checked"){
+            $(this).parent().parent().find($("#staff_deduct_at")).removeAttr("disabled");
+            $(this).parent().parent().find($("#staff_deduct_end")).removeAttr("disabled");
+            $(this).parent().parent().find($("#staff_deduct_percent")).removeAttr("disabled");
+        }else{
+            $(this).parent().parent().find($("#staff_deduct_at")).attr("disabled", "disabled");
+            $(this).parent().parent().find($("#staff_deduct_at")).val("");
+            $(this).parent().parent().find($("#staff_deduct_end")).attr("disabled", "disabled");
+            $(this).parent().parent().find($("#staff_deduct_end")).val("");
+            $(this).parent().parent().find($("#staff_deduct_percent")).attr("disabled", "disabled");
+            $(this).parent().parent().find($("#staff_deduct_percent")).val("");
+        }
+    })
     //创建员工信息验证, 编辑员工信息验证
     $("#new_staff_btn, #edit_staff_btn").live("click", function(){
        if($.trim($(this).parents('form').find("#staff_name").val()) == ''){
            tishi_alert("名称不能为空!");
+           return false;
+       }
+       if($(this).parents('form').find("#staff_working_stats").val() == 0 && $(this).parents('form').find("#staff_probation_days").val()==''){
+           tishi_alert("请输入实习时间!");
+           return false;
+       }
+       if($(this).parents('form').find("#staff_working_stats").val() == 0 && isNaN($(this).parents('form').find("#staff_probation_days").val())){
+           tishi_alert("请输入有效的实习期!");
            return false;
        }
        if($.trim($(this).parents('form').find("#staff_phone").val()) == ''){
@@ -308,39 +278,47 @@ $(document).ready(function(){
            tishi_alert("地址不能为空!");
            return false;
        }
+       if($(this).parents('form').find("#staff_working_stats").val() == 0 && $.trim($(this).parents('form').find("#staff_probation_salary").val()) == ''){
+           tishi_alert("实习期薪资标准不能为空!");
+           return false;
+       }
+       if($(this).parents('form').find("#staff_working_stats").val() == 0 && isNaN($(this).parents('form').find("#staff_probation_salary").val())){
+           tishi_alert("实习薪资必须为数字!");
+           return false;
+       }
        if($.trim($(this).parents('form').find("#staff_base_salary").val()) == ''){
-           tishi_alert("薪资标准不能为空!");
+           tishi_alert("正式薪资标准不能为空!");
            return false;
        }
        if(isNaN($(this).parents('form').find("#staff_base_salary").val())){
-           tishi_alert("薪资标准必须为数字!");
+           tishi_alert("正式薪资标准必须为数字!");
            return false;
        }
-       if($.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
+       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
            tishi_alert("提成起始额不能为空!");
            return false;
        }
-       if(isNaN($(this).parents('form').find("#staff_deduct_at").val())){
+       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_at").val())){
            tishi_alert("提成起始额必须为数字!");
            return false;
        }
-       if($.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
+       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
            tishi_alert("结束额度不能为空!");
            return false;
        }
-       if(isNaN($(this).parents('form').find("#staff_deduct_end").val())){
+       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_end").val())){
            tishi_alert("结束额度必须为数字!");
            return false;
        }
-       if(parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val())){
+       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && (parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val()))){
            tishi_alert("起始额必须不能大于结束额度!");
            return false;
        }
-       if($.trim($(this).parents('form').find("#staff_deduct_percent").val()) == ''){
+       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_percent").val()) == ''){
            tishi_alert("提成率不能为空!");
            return false;
        }
-       if(isNaN($(this).parents('form').find("#staff_deduct_percent").val())){
+       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_percent").val())){
            tishi_alert("提成率必须为数字!");
            return false;
        }

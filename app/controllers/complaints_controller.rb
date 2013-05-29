@@ -6,10 +6,13 @@ class ComplaintsController < ApplicationController
 
   #投诉分类统计
   def index
-    session[:created_at]=nil
     @complaint = Complaint.get_chart(params[:store_id])
     @complaint = Complaint.gchart(params[:store_id])  if @complaints.blank?
     @complaint = ChartImage.where("store_id=#{params[:store_id]} and types=#{ChartImage::TYPES[:COMPLAINT]}").order("created_at desc")[0]  if @complaint.nil?
+    session[:created_at]=@complaint.nil? ? nil : @complaint.current_day.strftime("%Y-%m")
+    session[:start_sex],session[:end_sex],session[:sex]=Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d"),Complaint::SEX[:NONE] 
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex])
+    @size = ((@total_com.values.max.nil? ? 1 :@total_com.values.max)/10+1)*10#生成图表的y的坐标
   end
 
   #投诉分类查询
@@ -22,6 +25,23 @@ class ComplaintsController < ApplicationController
   #投诉分类查询列表
   def search_list
     @complaint =Complaint.search_lis(params[:store_id],session[:created_at])
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex])
+    @size = ((@total_com.values.max.nil? ? 1 :@total_com.values.max)/10+1)*10#生成图表的y的坐标
+    render 'index'
+  end
+
+  #投诉分类按时间和性别查询统计
+  def search_time
+    session[:start_sex],session[:end_sex],session[:sex]=nil,nil,nil
+    session[:start_sex],session[:end_sex],session[:sex]=params[:start_sex],params[:end_sex],params[:sex]
+    redirect_to "/stores/#{params[:store_id]}/complaints/date_list"
+  end
+  
+  #投诉分类按时间和性别查询统计列表
+  def date_list
+    @complaint =Complaint.search_lis(params[:store_id],session[:created_at])
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex])
+    @size = ((@total_com.values.max.nil? ? 1 :@total_com.values.max)/10+1)*10#生成图表的y的坐标
     render 'index'
   end
 
@@ -44,6 +64,23 @@ class ComplaintsController < ApplicationController
     @degree = Complaint.count_pleasant(params[:store_id])
     @degree = Complaint.degree_chart(params[:store_id])  if @degree.blank?
     @degree = ChartImage.where("store_id=#{params[:store_id]} and types=#{ChartImage::TYPES[:SATIFY]}").order("created_at desc")[0]  if @degree.nil?
+    session[:degree]= @degree.nil? ? nil : @degree.current_day.strftime("%Y-%m")
+    session[:start_degree],session[:end_degree],session[:sex_degree]=Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d"),Complaint::SEX[:NONE]
+    @total_com = Complaint.degree_day(params[:store_id],session[:start_degree],session[:end_degree],session[:sex_degree])
+  end
+
+  #满意度图标
+  def degree_time
+    session[:start_degree],session[:end_degree],session[:sex_degree]=nil,nil,nil
+    session[:start_degree],session[:end_degree],session[:sex_degree]=params[:start_degree],params[:end_degree],params[:sex]
+    redirect_to "/stores/#{params[:store_id]}/complaints/time_list"
+  end
+  
+  #按照查询的日期生成满意度
+  def time_list
+    @degree =Complaint.degree_lis(params[:store_id],session[:degree])
+    @total_com = Complaint.degree_day(params[:store_id],session[:start_degree],session[:end_degree],session[:sex_degree])
+    render 'satisfy_degree'
   end
 
   #满意度查询
@@ -56,6 +93,8 @@ class ComplaintsController < ApplicationController
   #满意度查询列表
   def degree_list
     @degree =Complaint.degree_lis(params[:store_id],session[:degree])
+    @total_com = Complaint.degree_day(params[:store_id],session[:start_degree],session[:end_degree],session[:sex_degree])
+    p @total_com
     render 'satisfy_degree'
   end
 

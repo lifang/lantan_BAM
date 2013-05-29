@@ -308,7 +308,7 @@ textarea {
 /*search*/
 .search { padding-top: 8px; overflow: hidden; margin-bottom: 5px;}
 
-.search div { float: left; margin: 0px 20px 10px 0px;overflow: hidden;}
+.search div { float: left; margin: 0px 20px 10px 0px;overflow: hidden; height: 28px;}
 .search label {
     height: 24px;
     line-height: 24px;
@@ -324,12 +324,7 @@ textarea {
     line-height: 24px;
     border: 1px #CCCCCC solid;
 }
-.search select { 
-    width: 100px; 
-    height: 24px;
-    line-height: 24px;
-    border: 1px #CCCCCC solid;
-}
+
 
 .search select.select_marginRight { margin-right: 10px;}
 .input[type="button"].search_btn, .search .search_btn, .search_btn, .compile_btn, a.compile_btn {

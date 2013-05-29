@@ -38,8 +38,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :complaints do
       collection do
-        post "search","search_degree","detail_s"
-        get "search_list","show_detail","satisfy_degree","degree_list","detail_list"
+        post "search","search_degree","detail_s","search_time","degree_time"
+        get "search_list","show_detail","satisfy_degree","degree_list","detail_list","date_list","time_list"
       end
       member do
         get "complaint_detail"
@@ -81,8 +81,9 @@ LantanBAM::Application.routes.draw do
       collection do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
-          "search_supplier_orders","receive_order","pay_order","update_notices","check_nums","material_order_pay"
-        post "out_order","material_order","add","alipay_complete","add_material","batch_check","set_material_low_commit"
+          "search_supplier_orders","receive_order","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
+          "cancel_ignore"
+        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"
       end
       member do
         get "mat_order_detail","get_remark"

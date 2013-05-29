@@ -1,0 +1,37 @@
+  <div class="popup_box">
+    <h1><%= @material.new_record? ? "添加" : "编辑"%>物料<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <%= form_for [@current_store, @material], :id => "material_tab_form" do |f| %>
+        <div class="popup_body_area">
+          <div class="item">
+            <%= f.label :name,"物料名称：" %>
+            <%= f.text_field :name %>
+          </div>
+          <div class="item">
+            <%= f.label :types,"物料类型：" %>
+            <%= f.select :types, Material::TYPES_NAMES.invert,{:prompt => "请选择"} %>
+          </div>
+          <div class="item">
+            <%= f.label :code,"条形码：" %>
+            <%= f.text_field :code %>
+          </div>
+          <div class="item">
+            <%= f.label :price,"成本价：" %>
+            <%= f.text_field :price %>
+          </div>
+          <div class="item">
+            <%= f.label :sale_price,"零售价：" %>
+            <%= f.text_field :sale_price %>
+          </div>
+          <div class="item">
+            <%= f.label :storage,"数量：" %>
+            <%= f.text_field :storage, :style => "width:100px" %>
+            <%= f.text_field :unit, :style => "width:60px" %>
+          </div>
+          <em class="mat_hint">输入数量如（40），规格如（个）</em>
+        </div>
+        <div class="btn_box"><button type="submit" onclick="return checkMaterial(this, <%= params[:store_id] %>)" class="confirm_btn">确定</button></div>
+        <div class="clear"></div>
+      <% end %>
+    </div>
+  </div>
