@@ -93,6 +93,10 @@
                        <label>按考核分发底薪：</label>
                        <%= f.check_box :is_score_ge_salary %>
                   </div>
+                <div class="item">
+                       <label>状态：</label>
+                       <%= f.select :status, Staff::STATUS_NAME.invert %>
+                  </div>
                 <div class="item_textarea">
                      <label>上传照片：</label><%= f.file_field :photo, :class => "file" %>
                        <span class="show_pic"><%= image_tag "#{f.object.photo}" %>
