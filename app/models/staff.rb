@@ -52,11 +52,10 @@ class Staff < ActiveRecord::Base
      if (self.level_changed? || self.base_salary_changed? || self.deduct_at_changed? || self.deduct_end_changed? || self.deduct_percent_changed? || self.working_stats_changed?)
        StaffGrRecord.create(:staff_id => self.id, :base_salary => self.base_salary,
                 :deduct_at => self.deduct_at, :deduct_end => self.deduct_end,
-                :deduct_percent => self.deduct_percent, :working_stats => self.working_stats)
+                :deduct_percent => self.deduct_percent, :working_stats => self.working_stats,
+                :level => self.level)
      end
   end
-
-
 
   def has_password?(submitted_password)
 		encrypted_password == encrypt(submitted_password)

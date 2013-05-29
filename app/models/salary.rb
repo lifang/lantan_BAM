@@ -33,6 +33,7 @@ class Salary < ActiveRecord::Base
       else
         base_salary = staff.probation_salary
       end
+      base_salary = base_salary.nil? ? 0 : base_salary
       if staff.type_of_w == Staff::S_COMPANY[:FRONT] || staff.type_of_w == Staff::S_COMPANY[:CHIC] #前台或者店长
         front_amount = staff.is_deduct ? (front_deduct_amount[staff.id].nil? ? 0 : front_deduct_amount[staff.id]) : 0
         total = base_salary + reward_amount - deduct_amount + front_amount
