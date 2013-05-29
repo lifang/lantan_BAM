@@ -127,4 +127,36 @@ class ComplaintsController < ApplicationController
     @staff_names = Staff.where(:id => [@complaint.staff_id_1, @complaint.staff_id_2].compact).map(&:name).join(", ")
     @violation_rewards = ViolationReward.find_by_sql("select vr.*, s.name name from violation_rewards vr inner join staffs s on vr.staff_id = s.id where target_id = #{ @complaint.id}")
   end
+
+  #客户消费统计
+  def consumer_list
+    @consumers = Complaint.consumer_types(params[:store_id],1)
+    unless @consumers.blank?
+      @products =Product.find_by_sql("select p.name,o.price,o.pro_num,o.order_id from products p inner join order_prod_relations o on o.product_id=p.id where
+      o.order_id in (#{@consumers.map(&:id).uniq.join(",")})").inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]=[prod]:hash[prod.order_id]<<prod}
+      @sum =@consumers.map(&:price).compact.inject(0){|sum,price| sum +=price}
+    end
+  end
+
+  #消费客户查询
+  def consumer_search
+    session[:list_start],session[:list_end],session[:list_prod],session[:list_sex],session[:list_year]=nil,nil,nil,nil,nil
+    session[:list_fee],session[:list_model],session[:list_name]=nil,nil,nil
+    session[:list_start],session[:list_end],session[:list_prod],session[:list_sex]=params[:list_start],params[:list_end],params[:list_prod],params[:list_sex]
+    session[:list_year],session[:list_fee],session[:list_model],session[:list_name]=params[:list_year],params[:list_fee],params[:list_model],params[:list_name]
+    redirect_to "/stores/#{params[:store_id]}/complaints/con_list"
+  end
+
+  #客户消费统计查询
+  def con_list
+    @consumers = Complaint.consumer_types(params[:store_id],0,session[:list_start],session[:list_end],session[:list_sex],session[:list_model],session[:list_year],session[:list_name],session[:list_fee])
+    unless @consumers.blank?
+      sql ="select p.name,o.price,o.pro_num,o.order_id from products p inner join order_prod_relations o on o.product_id=p.id where
+      o.order_id in (#{@consumers.map(&:id).uniq.join(",")})"
+      sql += " and p.types =#{session[:list_prod]}" unless session[:list_prod].nil? || session[:list_prod] =="" || session[:list_prod].length==0
+      @products =Product.find_by_sql(sql).inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]=[prod]:hash[prod.order_id]<<prod;hash}
+      @sum =@consumers.map(&:price).compact.inject(0){|sum,price| sum +=price}
+    end
+    render "consumer_list"
+  end
 end
