@@ -40,7 +40,7 @@ module UserRoleHelper
 
   #罗列当前用户的所有权限
   def session_role(user_id)
-    user = Staff.find user_id
+    user = Staff.includes(:roles => :role_model_relations).find user_id
     roles = user.roles
     user_roles = []
     model_role = {}
@@ -89,6 +89,7 @@ module UserRoleHelper
   #判断菜单的权限
   def permissions_on_menus?(menu)
     user_roles = []
+    current_user = Staff.includes(:roles => :menus).find cookies[:user_id] if cookies[:user_id]
     if current_user
       current_user.roles.each do |role|
         user_roles << role.menus.map(&:controller)

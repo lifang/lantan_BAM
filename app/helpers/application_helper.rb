@@ -114,10 +114,6 @@ module ApplicationHelper
     return JSON back_res.body
   end
 
-  def current_user 
-    @current_user ||= Staff.find cookies[:user_id] if cookies[:user_id]
-  end
-
   def satisfy
     orders = Order.find(:all, :select => "is_pleased", 
       :conditions => [" store_id = ? and status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and created_at > ? and created_at < ?",
