@@ -32,7 +32,9 @@ module Constant
       :cancel => ["取消订单",512],
       :pay => ["付款",1024],
       :del_supplier => ["删除供应商",2048],
-      :receive => ["确认已收货",4096]
+      :receive => ["确认已收货",4096],
+      :mat_edit => ["编辑", 8192],
+      :delete => ["删除", 16384]
     },
     :staffs => {
       :name => "员工",
@@ -47,9 +49,11 @@ module Constant
       :edit_salary => ["修改工资",256],
       :detail_salary => ["工资详情",512],
       :edit_show_staff => ["编辑查看员工信息",1024],
-      :manager_score => ["店长打分",2048],
-      :del_salary => ["删除工资",4096],
-      :deal_violation => ["处理奖励违规",8192]
+      :del_staff =>["删除员工", 2048],
+      :manager_score => ["店长打分",4096],
+      :del_salary => ["删除工资",8192],
+      :deal_violation => ["处理奖励违规",16384],
+      :search_staff => ["搜索员工", 32768]
 
     },
     :datas => {

@@ -16,7 +16,9 @@
                 <tr class="hbg">
                   <td>服务代码</td>
                   <td>服务名称</td>
-                  <td>价格</td>
+                  <td>成本价</td>
+                  <td>零售价格</td>
+                  <td>促销价</td>
                   <td>施工时间（分钟）</td>
                   <td>类别</td>
                   <td>技师</td>
@@ -29,7 +31,9 @@
                   <tr>
                     <td><%= service.code %></td>
                     <td><%= service.name %></td>
+                    <td><%= service.t_price %></td>
                     <td><%= service.base_price %></td>
+                    <td><%= service.sale_price %></td>
                     <td><%= service.cost_time %></td>
                     <td><%= Product::PRODUCT_TYPES[service.types] %></td>
                     <td><%= "#{Staff::LEVELS[service.level1]} - #{Staff::LEVELS[service.level2]}" %></td>

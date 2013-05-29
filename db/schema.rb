@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051455) do
+ActiveRecord::Schema.define(:version => 20130701051466) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -126,7 +126,7 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.text     "reason"
     t.text     "suggestion"
     t.text     "remark"
-    t.boolean  "status",       :default => false
+    t.boolean  "status",                :default => false
     t.integer  "types"
     t.integer  "staff_id_1"
     t.integer  "staff_id_2"
@@ -136,6 +136,7 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "c_feedback_suggestion"
   end
 
   add_index "complaints", ["customer_id"], :name => "index_complaints_on_customer_id"
@@ -270,6 +271,7 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.float    "price"
     t.integer  "material_order_id"
     t.datetime "created_at"
+    t.integer  "types",             :limit => 1
   end
 
   add_index "mat_out_orders", ["created_at"], :name => "index_mat_out_orders_on_created_at"
@@ -317,6 +319,8 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.string   "remark",     :limit => 1000
     t.integer  "check_num"
     t.boolean  "is_ignore",                  :default => false
+    t.float    "sale_price"
+    t.string   "unit"
   end
 
   add_index "materials", ["name"], :name => "index_materials_on_name"
@@ -353,6 +357,7 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.string   "reason"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "month_scores", ["current_month"], :name => "index_month_scores_on_current_month"
@@ -378,11 +383,13 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.boolean  "status"
     t.integer  "store_id"
     t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   add_index "notices", ["status"], :name => "index_notices_on_status"
   add_index "notices", ["store_id"], :name => "index_notices_on_store_id"
   add_index "notices", ["types"], :name => "index_notices_on_types"
+  add_index "notices", ["updated_at"], :name => "index_notices_on_updated_at"
 
   create_table "o_pcard_relations", :force => true do |t|
     t.integer  "order_id"
@@ -468,6 +475,8 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.integer  "price"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "date_types", :default => 0
+    t.integer  "date_month"
   end
 
   add_index "package_cards", ["created_at"], :name => "index_package_cards_on_created_at"
@@ -516,6 +525,7 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.float    "deduct_percent"
+    t.float    "t_price"
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"
@@ -721,14 +731,14 @@ ActiveRecord::Schema.define(:version => 20130701051455) do
     t.integer  "deduct_at"
     t.integer  "deduct_end"
     t.float    "deduct_percent"
-    t.boolean  "status",             :default => false
+    t.integer  "status",             :limit => 1, :default => 0
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "encrypted_password"
     t.string   "username"
     t.string   "salt"
-    t.boolean  "is_score_ge_salary", :default => false
+    t.boolean  "is_score_ge_salary",              :default => false
     t.integer  "working_stats"
     t.float    "probation_salary"
     t.boolean  "is_deduct"

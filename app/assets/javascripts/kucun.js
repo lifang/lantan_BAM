@@ -49,7 +49,7 @@ function check_material_num(m_id, store_id, obj){
                 success:function(data){
                     if(data.status=="1"){
                         tishi_alert("操作成功")
-                       $(obj).parent().siblings(".storage").text(check_num);
+                       $(obj).parent().siblings(".su").find(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
                        if(check_num <= data.material_low)
                         {
@@ -259,13 +259,17 @@ function submit_out_order(form_id){
               a = false;
           }
     })
+    if($("#mat_out_types").val()==""){
+        tishi_alert("请选择出库类型")
+        a = false;
+    }
     if(a){
     if($("#selected_items").val()!=null && $("#selected_items").val()!=""){
         $("#"+form_id).find("input[class='confirm_btn']").attr("disabled","disabled");
         $.ajax({
            url:$("#"+form_id).attr("action"),
            dataType:"json",
-           data:"staff="+$("#staff").val()+"&selected_items="+$("#selected_items").val(),
+           data:"staff="+$("#staff").val()+"&selected_items="+$("#selected_items").val()+"&types="+$("#mat_out_types").val(),
            type:"POST",
            success:function(data,status){
                if(data["status"]==0){
@@ -652,44 +656,61 @@ function commit_supplier_form(obj){
 
 function checkMaterial(obj, store_id){
     var reg2 = /^\d+\.{0,1}\d*$/;
-  if($.trim($("#materials_name").val())==""){
+    var f = true;
+  if($.trim($("#material_name").val())==""){
        tishi_alert("请输入物料名称");
-    }else if($("#materials_types").val()==""){
-       tishi_alert("请选择物料类型");
-    }else if($.trim($("#materials_code").val())==""){
+       f = false;
+    }else if($.trim($("#material_code").val())==""){
         tishi_alert("请输入条形码");
-    }else if($("#materials_price").val().match(reg2)==null){
+        f = false;
+    }else if($("#material_div #material_types").val()==""){
+        tishi_alert("请输入类型");
+        f = false;
+    }else if($("#material_price").val().match(reg2)==null){
         tishi_alert("请输入合法单价");
-    }else if($("#materials_storage").val().match(reg1)==null){
+        f = false;
+    }else if($("#material_sale_price").val().match(reg2)==null){
+        tishi_alert("请输入合法零售价");
+        f = false;
+    }else if($("#material_storage").val().match(reg1)==null){
         tishi_alert("请输入合法数量");
-    }else{
+        f = false;
+    }else if($("#material_unit").val()==""){
+        tishi_alert("请输入物料规格");
+        f = false;
+    }
+    if(f){
         var code = $("#materials_code").val();
         $.ajax({
             url:"/stores/"+store_id+"/uniq_mat_code",
             type:'get',
             data:{code:code},
             success:function(data){
+                alert(data)
                 if(data=="1"){
                     if(confirm("相同条形码的物料已经存在，点击确定增加物料数量！")){
-                        $("#add_material_tab_form").submit();
+                       // $("#material_tab_form").submit();
+                       //return true;
                         $(obj).attr("disabled", "disabled");
                     }else{
                         hide_mask("#add_material_tab");
                     }
                 }else{
-                    $("#add_material_tab_form").submit();
+                   // $("#material_tab_form").submit();
+                   //return true;
                     $(obj).attr("disabled", "disabled");
                 }
             }
-        })
-        
+        }) 
+    }else{
+        return f;
     }
 }
 
 function commit_in(obj){
     if($.trim($("#name").val())==""){
        tishi_alert("请输入物料名称");
-    }else if($("#material_types").val()==""){
+    }else if($("#ruku_tab #material_types").val()==""){
        tishi_alert("请选择物料类型");
     }
     else if($.trim($("#code").val())==""){
@@ -736,13 +757,6 @@ function commit_in(obj){
        });
       
     }
-}
-
-function addMaterial(){
-  $("#add_material_tab").find('input[type="text"]').val("");
-  $("#add_material_tab").find('select').get(0).selectedIndex = 0;
-  popup('#add_material_tab');
-  return false;
 }
 
 function ruku(){

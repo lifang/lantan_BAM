@@ -1,5 +1,15 @@
 <div class="item">
-  <label>名称：</label><input name="name" id="name" type="text" value="<%= @product.name %>" />
+  <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="$('#name').val($('#prod_material option:selected').html().split('-')[0])">
+    <% @materials.each do |material| %>
+      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.id) == material.id%> selected<%end%> ><%= "#{material.name}-#{material.code}-#{material.storage}" %></option>
+    <% end %>
+  </select>
+</div>
+<div class="item">
+  <label>名称：</label><input name="name" id="name" type="text" value="<%= @product.name.nil? ? @materials[0].nil? ? "" : @materials[0].name : @product.name  %>" />
+</div>
+<div class="item">
+  <label>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @product.t_price %>" />
 </div>
 <div class="item">
   <label>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @product.base_price %>" />
@@ -7,6 +17,7 @@
 <div class="item">
   <label>全国促销价：</label><input name="sale_price" id="sale_price" type="text" value="<%= @product.sale_price %>" />
 </div>
+
 <div class="item">
   <label>类别：</label><select  id="prod_types" name="prod_types">
     <% Product::PRODUCT_TYPES.select {|k,v| k < Product::PRODUCT_END}.each do |key,value| %>
@@ -45,6 +56,7 @@
     });
   });
 </script>
+
 
 
 

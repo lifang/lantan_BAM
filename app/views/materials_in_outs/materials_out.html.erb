@@ -19,6 +19,7 @@
           <tbody class="mat-out-list"></tbody>
         </table>
         <div class="clear"></div>
+        <div><%= label_tag "out_types"," 出库类型：" %><%= select("mat_out", "types", MatOutOrder::TYPES.invert.to_a, { :prompt => "选择出库类型" }) %></div>
         <div class="btn_box_s">
           <button onclick="checkMatOutNum(this)" type="button" class="confirm_btn">出库</button>
         </div>

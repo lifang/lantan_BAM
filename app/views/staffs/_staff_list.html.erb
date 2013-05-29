@@ -1,0 +1,65 @@
+<script>
+  <% if controller.action_name=="search" %>
+    $(document).ready(function(){
+      $(".pageTurn a").unbind("click");
+      $(".pageTurn a").bind("click", function() {
+
+        var url = this.href + "&name="+$("#name").val()+"&types="+$("#s_types").val()+"&status="+$("#s_status").val();
+        $.ajax({
+          async:true,
+          url:url,
+          dataType:"script",
+          type:"POST",
+          success:function(){
+            // alert(1);
+          },error:function(){
+            // alert("error");
+          }
+        });
+        /* alert(this.href); */
+        return false;
+      });
+    });
+  <% end %>
+</script>
+<div>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="staffs_table">
+    <thead>
+      <tr class="hbg">
+        <th><span class="sort_u_s">姓名</span></th>
+        <th>工作岗位</th>
+        <th>职务</th>
+        <th><span class="sort_u">系统得分</span></th>
+        <th><span class="sort_d">店长打分</span></th>
+        <th>状态</th>
+        <th>本月评估</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @staffs.each do |staff| %>
+        <tr>
+          <td><%= staff.name %></td>
+          <td><%= Staff::N_HEAD[staff.position] %></td>
+          <td><%= Staff::N_COMPANY[staff.type_of_w] %></td>
+          <% month_score = @staff_scores_hash[staff.id].first unless @staff_scores_hash[staff.id].nil? %>
+          <td>
+            <label class="sys_score_text"><%= month_score.try(:sys_score) %></label>
+            <input name="" type="text" value="<%= month_score.try(:sys_score) %>" class="data_input_s" style="display: none;" id="<%= month_score.id unless month_score.nil? %>"/>
+          </td>
+          <td class="manage_score_data"><%= month_score.try(:manage_score) %></td>
+          <td><%= Staff::STATUS_NAME[staff.status] %></td>
+          <td class="assess_result"><%= current_month_access_result(month_score) %></td>
+          <td>
+            <a href="javascript:void(0)" class="edit_btn" style="display: none;">提交</a>
+            <% if permission?(:staffs,:edit_sys_score) %><a href="javascript:void(0)" class="bz_btn" id="<%= staff.id %>" name="<%= @store.id %>">系统打分</a><% end %>
+            <% if permission?(:staffs,:detail_staff) %><%= link_to "详细", store_staff_path(@store, staff.id) %><% end %>
+            <% if permission?(:staffs,:del_staff) %><%= link_to "删除", store_staff_path(@store, staff.id), :method => :delete, :confirm => "确定删除该员工吗？" %><% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%= will_paginate @staffs, :class => "pageTurn", :previous_label => "上一页",
+    :next_label => "下一页" %>
+</div>
