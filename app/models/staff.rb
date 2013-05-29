@@ -46,6 +46,16 @@ class Staff < ActiveRecord::Base
   attr_accessor :password
   #validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
 
+  after_update :insert_staff_gr_record
+
+  def insert_staff_gr_record
+     if (self.level_changed? || self.base_salary_changed? || self.deduct_at_changed? || self.deduct_end_changed? || self.deduct_percent_changed? || self.working_stats_changed?)
+       StaffGrRecord.create(:staff_id => self.id, :base_salary => self.base_salary,
+                :deduct_at => self.deduct_at, :deduct_end => self.deduct_end,
+                :deduct_percent => self.deduct_percent, :working_stats => self.working_stats)
+     end
+  end
+
 
 
   def has_password?(submitted_password)
