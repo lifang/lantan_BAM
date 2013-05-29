@@ -1,7 +1,14 @@
 <%= render :partial => "notice_panel" %>
+<% unless  @low_materials.blank? %>
+  <div class="message">
+    有 <span class="red"><%=  @low_materials.length %></span>个物料库存量过低,
+    <a href="javascript:void(0);" onclick="toggle_low_materials(this)">点击查看</a>
+    <%= render :partial => 'show_low_materials', :locals => {:low_materials => @low_materials} %>
+  </div>
+<% end %>
 <div class="data_box">
   <div class="data_menu">
-    <%= link_to_function "添加物料", "addMaterial()", :class => "am_btn" %>
+    <%= link_to "添加物料", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
@@ -42,39 +49,6 @@
 <div class="tab_popup beizhu_tab" id="remark_div">
 </div>
 
-<div class="tab_popup add_material_tab" id="add_material_tab">
-  <div class="popup_box">
-    <h1>添加物料<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <div class="popup_body">
-      <%= form_tag "/stores/#{params[:store_id]}/materials/add_material", :id => "add_material_tab_form" do |f| %>
-        <div class="popup_body_area">
-          <div class="item">
-            <%= label_tag "materials[name]","物料名称：" %><%= text_field_tag "materials[name]" %>
-          </div>
-          <div class="item">
-            <%= label_tag "materials[types]","物料类型：" %><%= select(:materials,:types,material_types,{:prompt => "请选择"}) %>
-          </div>
-          <div class="item">
-            <%= label_tag "materials[code]","条形码：" %><%= text_field_tag "materials[code]" %>
-          </div>
-          <div class="item">
-            <%= label_tag "materials[price]","成本价：" %><%= text_field_tag "materials[price]" %>
-          </div>
-          <div class="item">
-            <%= label_tag "materials[sale_price]","零售价：" %><%= text_field_tag "materials[sale_price]" %>
-          </div>
-          <div class="item">
-            <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]", nil, :style => "width:100px" %>
-            <%= text_field_tag "materials[unit]", nil, :style => "width:60px" %>
-          </div>
-          <em class="mat_hint">输入数量如（40），规格如（个）</em>
-        </div>
-        <div class="btn_box"><button type="button" onclick="checkMaterial(this, <%= params[:store_id] %>)" class="confirm_btn">确定</button></div>
-        <div class="clear"></div>
-      <% end %>
-    </div>
-  </div>
-</div>
 <div class="tab_popup" id="setMaterialLow">
 <div class="popup_box" >
   <h1>设置库存预警<a href="javascript:void(0)" class="close">关闭</a></h1>
@@ -98,7 +72,7 @@
   <div class="popup_box">
     <h1>入库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
-      <%= form_tag store_materials_url(params[:store_id]), :id => "ruku_tab_form" do |f| %>
+      <%= form_tag mat_in_store_materials_url(params[:store_id]), :id => "ruku_tab_form" do |f| %>
         <div class="popup_body_area">
           <div class="item">
             <%= label_tag "name","物料名称：" %><%= text_field_tag "name" %>
@@ -226,6 +200,9 @@
       </div>
     <% end %>
   </div>
+</div>
+
+<div class="tab_popup" id="material_div">
 </div>
 
 <script type="text/javascript">
