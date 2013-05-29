@@ -76,6 +76,15 @@ class Staff < ActiveRecord::Base
     end
   end
 
+  def self.update_staff_working_stats
+    Staff.where("working_stats = 0").each do |staff|
+      diff_day = (Time.now - staff.created_at).to_i / (24 * 60 * 60)
+      if diff_day == staff.probation_days
+        staff.update_attribute(:working_stats, 1)
+      end
+    end
+  end
+
   private
   def encrypt(string)
     self.salt = make_salt if new_record?
