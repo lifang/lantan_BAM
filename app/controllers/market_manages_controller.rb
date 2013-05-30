@@ -195,6 +195,7 @@ class MarketManagesController < ApplicationController
   def gross_profit
     @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => :products}).where(:status => Order::VALID_STATUS)
       .where("date_format(created_at,'%Y-%m-%d') = curdate()")
+      .select("distinct orders.*")
       .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
   end
 
@@ -208,7 +209,7 @@ class MarketManagesController < ApplicationController
     @orders = Order.includes(:order_prod_relations, :order_pay_types, :o_pcard_relations, :c_pcard_relations)
     .joins(:products)
     .where(:status => Order::VALID_STATUS)
-    .where(sql)
+    .where(sql).select("orders.*, products.types").uniq
     .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
   end
 
