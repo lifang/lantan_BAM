@@ -1,14 +1,16 @@
 #encoding: utf-8
 class Order < ActiveRecord::Base
   has_many :order_prod_relations
+  has_many :products, :through => :order_prod_relations
   has_many :order_pay_types
   has_many :work_orders
   belongs_to :car_num
-  belongs_to :c_pcard_relation
+  has_many :c_pcard_relations
   belongs_to :c_svc_relation
   belongs_to :customer
   belongs_to :sale
   has_many :revisit_order_relations
+  has_many :o_pcard_relations
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
   STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6}
@@ -19,6 +21,7 @@ class Order < ActiveRecord::Base
   #是否满意
   IS_PLEASED = {:BAD => 0, :SOSO => 1, :GOOD => 2, :VERY_GOOD => 3}  #0 不满意  1 一般  2 好  3 很好
   IS_PLEASED_NAME = {0 => "不满意", 1 => "一般", 2 => "好", 3 => "很好"}
+  VALID_STATUS = [STATUS[:BEEN_PAYMENT], STATUS[:FINISHED]]
 
   #组装查询order的sql语句
   def self.generate_order_sql(started_at, ended_at, is_visited)
@@ -735,20 +738,20 @@ class Order < ActiveRecord::Base
       content += cp.name + ","
       realy_price += cp.price
     end unless customer_pcards.blank?
-    if not self.c_pcard_relation_id.blank?
-      h = {}
-      pcard = self.c_pcard_relation.package_card
-      h[:name] = pcard.name
-      h[:price] = pcard.price
-      h[:type] = 3
-      h[:prods] = self.c_pcard_relation.content.split(",").collect{|p|
-        s = {}
-        s[:name] = p.split("-")[1]
-        s[:num] = p.split("-")[2]
-        s
-      }
-      hash[:c_pcard_relation] <<  h
-    end
+#    if not self.c_pcard_relation_id.blank?
+#      h = {}
+#      pcard = self.c_pcard_relation.package_card
+#      h[:name] = pcard.name
+#      h[:price] = pcard.price
+#      h[:type] = 3
+#      h[:prods] = self.c_pcard_relation.content.split(",").collect{|p|
+#        s = {}
+#        s[:name] = p.split("-")[1]
+#        s[:num] = p.split("-")[2]
+#        s
+#      }
+#      hash[:c_pcard_relation] <<  h
+#    end
     hash
   end
 
@@ -842,5 +845,46 @@ class Order < ActiveRecord::Base
       status = 2
     end
     status
+  end
+
+  def calculate_gross_profit
+    #使用过套餐卡计算毛利
+    used_pcards_gross_profit = 0
+    self.o_pcard_relations.each do |opr|
+      oprod_r = self.order_prod_relations.where(:product_id => opr.product_id).first
+      total_price = oprod_r.total_price.to_f  #每项商品总价
+      deals_price = (opr.product_num * oprod_r.price).to_f #每项商品使用套餐卡抵付的价格
+      prod_full_price_num = oprod_r.pro_num - opr.product_num #未使用套餐卡抵付的商品数目
+      gross_profit = total_price - deals_price - prod_full_price_num *(oprod_r.t_price.to_f) #一个商品使用套餐卡后的毛利
+      used_pcards_gross_profit += gross_profit
+    end
+    
+    ###### 计算order中的总零售价
+
+    # 商品跟服务的总零售价
+    sum_products_price = self.order_prod_relations.inject(0){|sum,opr| sum += opr.total_price.to_f}
+    # 购买套餐卡总价格
+    sum_pcard_price = self.c_pcard_relations.inject(0){|sum,cpr| sum += cpr.price.to_f}
+
+    #### 商品跟套餐卡购买总零售价
+    total_sale_price = sum_products_price + sum_pcard_price
+
+    # 使用活动优惠总价
+    sum_sale_price = self.order_pay_types.where(:pay_type => OrderPayType::PAY_TYPES[:SALE]).inject(0){|sum,opr| sum += opr.price.to_f}
+    # 使用打折卡优惠总价
+    sum_savcard_price = self.order_pay_types.where(:pay_type => OrderPayType::PAY_TYPES[:SV_CARD]).inject(0){|sum,opr| sum += opr.price.to_f}
+
+    ######  计算总成本价
+
+    #order中的商品跟服务的总成本价
+    products_sum_cost_price = self.order_prod_relations.inject(0){|sum,opr| sum+=(opr.t_price.to_f)*opr.pro_num}
+    #购买套餐卡总成本
+    pcards_sum_cost_price = self.c_pcard_relations.map{|cpr| cpr.package_card}.compact.map{|pc| pc.products.inject(0){|sum,opr| sum += opr.t_price.to_f}}.inject(0){|sum,pc| sum += pc}
+
+    ##### 商品跟套餐卡购买总成本价
+    total_cost_price = products_sum_cost_price + pcards_sum_cost_price
+
+    total_gross_price = total_sale_price - sum_sale_price - sum_savcard_price - total_cost_price + used_pcards_gross_profit
+  return [total_cost_price.to_f, total_sale_price.to_f, total_gross_price.to_f > 0 ? total_gross_price.to_f : 0]
   end
 end

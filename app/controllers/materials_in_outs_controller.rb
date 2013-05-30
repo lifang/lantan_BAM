@@ -17,7 +17,7 @@ class MaterialsInOutsController < ApplicationController
   end
 
   def get_material
-    material = Material.find_by_code(params[:code])
+    material = Material.normal.find_by_code_and_store_id(params[:code], @store_id)
     if material.nil?
       render :text => 'fail'
     else

@@ -146,10 +146,17 @@ class MarketManagesController < ApplicationController
                                 op.order_id = o.id inner join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
                                 #{started_at_sql} and #{ended_at_sql}")
+
+    pcar_relations = CPcardRelation.find_by_sql(["select cpr.order_id order_id, 1 pro_num, pc.price price, pc.name name
+        from c_pcard_relations cpr inner join package_cards pc
+        on pc.id = cpr.package_card_id where cpr.order_id in (?)", order_details])
     
     orders = {}
     order_details.each do |order|
       orders.keys.include?(order.id) ? orders[order.id][:product_name] += (","+order.product_name) : orders[order.id] = order
+    end
+    pcar_relations.each do |pr|
+      orders.keys.include?(pr.order_id) ? orders[pr.order_id][:product_name] += (","+pr.name) : orders[pr.order_id] = pr
     end
     @orders = orders.values
     @total_price = @orders.sum(&:price)
@@ -183,6 +190,26 @@ class MarketManagesController < ApplicationController
 
   def stored_card_bill_blank
     @svc_returns = shared_stored_card_bill(params[:started_at], params[:ended_at], params[:store_id])
+  end
+
+  def gross_profit
+    @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => :products}).where(:status => Order::VALID_STATUS)
+      .where("date_format(created_at,'%Y-%m-%d') = curdate()")
+      .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+  end
+
+  def search_gross_profit
+    sql = []
+    start_sql = params[:o_started].blank? ? nil : "date_format(orders.created_at,'%Y-%m-%d') >= '#{params[:o_started]}'"
+    end_sql = params[:o_ended].blank? ? nil : "date_format(orders.created_at,'%Y-%m-%d') <= '#{params[:o_ended]}'"
+    types_sql = params[:prod_types] =="-1" ? nil : "products.types = #{params[:prod_types]}"
+    sql<< start_sql << end_sql << types_sql
+    sql = sql.compact.join(" and ")
+    @orders = Order.includes(:order_prod_relations, :order_pay_types, :o_pcard_relations, :c_pcard_relations)
+    .joins(:products)
+    .where(:status => Order::VALID_STATUS)
+    .where(sql)
+    .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
   end
 
   private

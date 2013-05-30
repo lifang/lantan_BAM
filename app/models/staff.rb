@@ -46,7 +46,16 @@ class Staff < ActiveRecord::Base
   attr_accessor :password
   #validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
 
+  after_update :insert_staff_gr_record
 
+  def insert_staff_gr_record
+     if (self.level_changed? || self.base_salary_changed? || self.deduct_at_changed? || self.deduct_end_changed? || self.deduct_percent_changed? || self.working_stats_changed?)
+       StaffGrRecord.create(:staff_id => self.id, :base_salary => self.base_salary,
+                :deduct_at => self.deduct_at, :deduct_end => self.deduct_end,
+                :deduct_percent => self.deduct_percent, :working_stats => self.working_stats,
+                :level => self.level)
+     end
+  end
 
   def has_password?(submitted_password)
 		encrypted_password == encrypt(submitted_password)
@@ -73,6 +82,15 @@ class Staff < ActiveRecord::Base
       resize_file_name = photo.original_filename.split(".")[0]+"_#{resize}."+photo.original_filename.split(".").reverse[0]
       self.update_attribute(:photo, "/uploads/#{store_id}/#{self.id}/#{resize_file_name}") if status == "create"
       img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
+    end
+  end
+
+  def self.update_staff_working_stats
+    Staff.where("working_stats = 0").each do |staff|
+      diff_day = (Time.now - staff.created_at).to_i / (24 * 60 * 60)
+      if diff_day == staff.probation_days
+        staff.update_attribute(:working_stats, 1)
+      end
     end
   end
 
