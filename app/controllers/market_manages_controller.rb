@@ -207,7 +207,7 @@ class MarketManagesController < ApplicationController
     sql<< start_sql << end_sql << types_sql
     sql = sql.compact.join(" and ")
     @orders = Order.includes(:order_prod_relations, :order_pay_types, :o_pcard_relations, :c_pcard_relations)
-    .joins(:products)
+    .joins(:order_prod_relations => :product)
     .where(:status => Order::VALID_STATUS)
     .where(sql).select("orders.*, products.types").uniq
     .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
