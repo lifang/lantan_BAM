@@ -41,7 +41,7 @@ class RevisitsController < ApplicationController
       Revisit.transaction do
         complaint = Complaint.create(:order_id => params[:rev_order_id].to_i, :reason => params[:rev_answer],
           :status => Complaint::STATUS[:UNTREATED], :customer_id => params[:rev_customer_id].to_i,
-          :store_id => params[:store_id].to_i) if params[:is_complaint]
+          :store_id => params[:store_id].to_i, :types => Complaint::TYPES[:OTHERS]) if params[:is_complaint]
         revisit = Revisit.create(:customer_id => params[:rev_customer_id].to_i, :types => params[:rev_types].to_i,
           :title => params[:rev_title], :answer => params[:rev_content], :content => params[:rev_answer],
           :complaint_id => (complaint.nil? ? nil : complaint.id))

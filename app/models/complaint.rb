@@ -16,15 +16,13 @@ class Complaint < ActiveRecord::Base
   TYPES = {:CONSTRUCTION => 0, :SERVICE => 1, :PRODUCTION => 2, :INSTALLATION => 3, :ACCIDENT => 4, :OTHERS => 5, :INVALID => 6}
   TIMELY_DAY = 2 #及时解决的标准
   TYPES_NAMES = {0 => "施工质量", 1 => "服务质量", 2 => "产品质量", 3 => "门店设施", 4 => "意外时间", 5 => "其他", 6 => "无效投诉"}
-  CHART_NAMES = {1=>"精洗",2=>"打蜡",3=>"休息厅设备不全",4=>"踱晶",5=>"内饰护理",6=>"展厅体验",7=>"内饰清洗",8=>"玻璃清洗",9=>"施工事故",
-    10=>"美容技师",11=>"服务顾问",12=>"服务顾问着装",13=>"去污",14=>"休息厅环境差",15=>"抛光",16=>"等待时间过长",
-    17=>"无效投诉"}
 
   #投诉状态
   STATUS = {:UNTREATED => 0, :PROCESSED => 1} #0 未处理  1 已处理
   STATUS_NAME ={0=>"未处理",1=>"已处理"}
   VIOLATE = {:NORMAL=>1,:INVALID=>0} #0  不纳入  1 纳入
   VIOLATE_N = {true=>"是",false=>"否"}
+  SEX = {:MALE =>1,:FEMALE =>0,:NONE=>2} # 0 未选择 1 男 2 女
 
 
   def self.one_customer_complaint(store_id, customer_id, per_page, page)
@@ -36,12 +34,14 @@ class Complaint < ActiveRecord::Base
       :per_page => per_page, :page => page)
   end
   
-  def show_types(store_id,created,ended,sex)
-    sql = "select count(*) total_num,types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id} "
+  def self.show_types(store_id,created,ended,sex)
+    sql = "select count(*) total_num,c.types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id} "
     sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
-    sql += " and s.sex=#{sex}" unless sex.nil? || sex =="" || sex.length==0
-    coplaints = Complaint.find_by_sql(sql).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
+    sql += " and s.sex=#{sex}" unless sex.to_i==2
+    sql += " group by c.types"
+    return  Complaint.find_by_sql(sql).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
+    
   end
 
   def self.count_types(store_id)
@@ -60,7 +60,7 @@ class Complaint < ActiveRecord::Base
           bc.width_spacing_options :bar_width => 15, :bar_spacing => (1000-(15*coplaint.keys.length))/coplaint.keys.length,
             :group_spacing =>(1000-(15*coplaint.keys.length))/coplaint.keys.length
           bc.max_value size.max
-          bc.axis :x, :labels => coplaint.keys.inject(Array.new) {|pal,key| pal << Complaint::CHART_NAMES[key] }
+          bc.axis :x, :labels => coplaint.keys.inject(Array.new) {|pal,key| pal << Complaint::TYPES_NAMES[key] }
           bc.axis :y, :labels =>size
           bc.grid :x_step => 3.333, :y_step => 10, :length_segment => 1, :length_blank => 3
           img_url = write_img(URI.escape(URI.unescape(bc.to_url)),store_id,ChartImage::TYPES[:COMPLAINT],store_id)
@@ -120,6 +120,18 @@ class Complaint < ActiveRecord::Base
     return ChartImage.find_by_sql(sql)[0]
   end
 
+
+  def self.degree_day(store_id,created,ended,sex)
+    sql="select count(*) num,is_pleased from orders o inner join customers c on c.id=o.customer_id where o.store_id=#{store_id}
+     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]})"
+    sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
+    sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
+    sql += " and c.sex=#{sex}" unless sex.to_i==2
+    sql += " group by is_pleased"
+    orders =Order.find_by_sql(sql).inject(Hash.new){|hash,order| hash[order.is_pleased].nil? ? hash[order.is_pleased]=order.num : hash[order.is_pleased] +=order.num;hash}
+    return orders=={} ? nil : orders.select{|k,v|  k != Order::IS_PLEASED[:BAD]}=={} ? 0 :
+      orders.select{|k,v|  k != Order::IS_PLEASED[:BAD]}.values.inject(0){|num,level| num+level}*100/(orders.values.inject(0){|num,level| num+level})
+  end
   def self.search_detail(store_id,num=nil)
     sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
     where c.store_id=#{store_id} and  date_format(c.created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')"
