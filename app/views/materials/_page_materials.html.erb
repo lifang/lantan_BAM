@@ -74,7 +74,6 @@
         <td <% if !material.is_ignore && material.storage.to_i <= @current_store.material_low.to_i %>class="data_table_error"<% end %>><%= material.code %></td>
         <td><%= material.name %></td>
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
-
         <td class="sstatus"><%= material.is_ignore || material.storage.to_i > @current_store.material_low.to_i ? "存货" : "缺货" %></td>
         <td class="su"><span class="storage"><%= material.storage.to_i %></span>(<%= material.unit.nil? ? "无" : material.unit %>)</td>
         <td><%= material.price %></td>
@@ -95,4 +94,4 @@
 <% end %>
   </tbody>
 </table>
-<%= will_paginate_remote(@materials_storages,"",{:url => page_materials_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @materials_storages.size > 0 %>
+<%= will_paginate_remote(@materials_storages,"mat_code=#{@mat_code}&mat_name=#{@mat_name}&mat_type=#{@mat_type}",{:url => page_materials_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @materials_storages.size > 0 %>

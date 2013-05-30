@@ -1013,3 +1013,19 @@ function checkMatNum(){
            }
       })
   }
+  function search_materials(store_id){
+      var mat_code = $.trim($("#search_material_code").val());
+      var mat_name = $.trim($("#search_material_name").val());
+      var mat_type = $.trim($("#search_material_type").val());
+      $.ajax({
+          url: "/stores/"+store_id+"/materials",
+          dataType: "script",
+          type: "get",
+          data: {
+              mat_code : mat_code,
+              mat_name : mat_name,
+              mat_type : mat_type,
+              store_id : store_id
+          }
+      })
+  }
