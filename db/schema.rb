@@ -18,14 +18,23 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.integer  "package_card_id"
     t.datetime "ended_at"
     t.boolean  "status"
-    t.text     "content"
+    t.string   "content"
     t.datetime "created_at"
+<<<<<<< HEAD
     t.integer  "price"
+=======
+    t.float    "price",           :default => 0.0
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
     t.datetime "updated_at"
     t.integer  "order_id"
   end
 
   add_index "c_pcard_relations", ["order_id"], :name => "index_c_pcard_relations_on_order_id"
+<<<<<<< HEAD
+=======
+  add_index "c_pcard_relations", ["package_card_id"], :name => "index_c_pcard_relations_on_package_card_id"
+  add_index "c_pcard_relations", ["status"], :name => "index_c_pcard_relations_on_status"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "c_pcard_relations", ["updated_at"], :name => "index_c_pcard_relations_on_updated_at"
 
   create_table "c_svc_relations", :force => true do |t|
@@ -39,6 +48,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.string   "verify_code"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "c_svc_relations", ["customer_id"], :name => "index_c_svc_relations_on_customer_id"
+  add_index "c_svc_relations", ["sv_card_id"], :name => "index_c_svc_relations_on_sv_card_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "c_svc_relations", ["updated_at"], :name => "index_c_svc_relations_on_updated_at"
 
   create_table "capitals", :force => true do |t|
@@ -58,6 +72,10 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "car_brands", ["created_at"], :name => "index_car_brands_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "car_brands", ["name"], :name => "index_car_brands_on_name"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "car_brands", ["updated_at"], :name => "index_car_brands_on_updated_at"
 
   create_table "car_models", :force => true do |t|
@@ -68,6 +86,10 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "car_models", ["created_at"], :name => "index_car_models_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "car_models", ["name"], :name => "index_car_models_on_name"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "car_models", ["updated_at"], :name => "index_car_models_on_updated_at"
 
   create_table "car_nums", :force => true do |t|
@@ -79,6 +101,10 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "car_nums", ["created_at"], :name => "index_car_nums_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "car_nums", ["num"], :name => "index_car_nums_on_num"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "car_nums", ["updated_at"], :name => "index_car_nums_on_updated_at"
 
   create_table "chart_images", :force => true do |t|
@@ -105,6 +131,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "cities", ["created_at"], :name => "index_cities_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "cities", ["order_index"], :name => "index_cities_on_order_index"
+  add_index "cities", ["parent_id"], :name => "index_cities_on_parent_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "cities", ["updated_at"], :name => "index_cities_on_updated_at"
 
   create_table "complaints", :force => true do |t|
@@ -133,6 +164,10 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "customer_num_relations", ["created_at"], :name => "index_customer_num_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "customer_num_relations", ["customer_id"], :name => "index_customer_num_relations_on_customer_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "customer_num_relations", ["updated_at"], :name => "index_customer_num_relations_on_updated_at"
 
   create_table "customers", :force => true do |t|
@@ -179,6 +214,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "goal_sales", ["created_at"], :name => "index_goal_sales_on_created_at"
+  add_index "goal_sales", ["store_id"], :name => "index_goal_sales_on_store_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "goal_sales", ["updated_at"], :name => "index_goal_sales_on_updated_at"
 
   create_table "image_urls", :force => true do |t|
@@ -189,6 +229,10 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "image_urls", ["created_at"], :name => "index_image_urls_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "image_urls", ["product_id"], :name => "index_image_urls_on_product_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "image_urls", ["updated_at"], :name => "index_image_urls_on_updated_at"
 
   create_table "jv_syncs", :force => true do |t|
@@ -210,6 +254,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "m_order_types", ["created_at"], :name => "index_m_order_types_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "m_order_types", ["material_order_id"], :name => "index_m_order_types_on_material_order_id"
+  add_index "m_order_types", ["pay_types"], :name => "index_m_order_types_on_pay_types"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "m_order_types", ["updated_at"], :name => "index_m_order_types_on_updated_at"
 
   create_table "mat_in_orders", :force => true do |t|
@@ -222,6 +271,13 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "mat_in_orders", ["created_at"], :name => "index_mat_in_orders_on_created_at"
+  add_index "mat_in_orders", ["material_id"], :name => "index_mat_in_orders_on_material_id"
+  add_index "mat_in_orders", ["material_order_id"], :name => "index_mat_in_orders_on_material_order_id"
+  add_index "mat_in_orders", ["staff_id"], :name => "index_mat_in_orders_on_staff_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "mat_in_orders", ["updated_at"], :name => "index_mat_in_orders_on_updated_at"
 
   create_table "mat_order_items", :force => true do |t|
@@ -234,6 +290,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "mat_order_items", ["created_at"], :name => "index_mat_order_items_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "mat_order_items", ["material_id"], :name => "index_mat_order_items_on_material_id"
+  add_index "mat_order_items", ["material_order_id"], :name => "index_mat_order_items_on_material_order_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "mat_order_items", ["updated_at"], :name => "index_mat_order_items_on_updated_at"
 
   create_table "mat_out_orders", :force => true do |t|
@@ -247,6 +308,13 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.integer  "types",             :limit => 1
   end
 
+<<<<<<< HEAD
+=======
+  add_index "mat_out_orders", ["created_at"], :name => "index_mat_out_orders_on_created_at"
+  add_index "mat_out_orders", ["material_id"], :name => "index_mat_out_orders_on_material_id"
+  add_index "mat_out_orders", ["material_order_id"], :name => "index_mat_out_orders_on_material_order_id"
+  add_index "mat_out_orders", ["staff_id"], :name => "index_mat_out_orders_on_staff_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "mat_out_orders", ["updated_at"], :name => "index_mat_out_orders_on_updated_at"
 
   create_table "material_orders", :force => true do |t|
@@ -299,6 +367,7 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+<<<<<<< HEAD
   end
 
   add_index "message_records", ["updated_at"], :name => "index_message_records_on_updated_at"
@@ -311,6 +380,18 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "models", ["updated_at"], :name => "index_models_on_updated_at"
+=======
+  end
+
+  add_index "message_records", ["status"], :name => "index_message_records_on_status"
+  add_index "message_records", ["store_id"], :name => "index_message_records_on_store_id"
+  add_index "message_records", ["updated_at"], :name => "index_message_records_on_updated_at"
+
+  create_table "models", :force => true do |t|
+    t.string  "name"
+    t.integer "num"
+  end
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
 
   create_table "month_scores", :force => true do |t|
     t.integer  "sys_score"
@@ -362,6 +443,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "order_pay_types", ["created_at"], :name => "index_order_pay_types_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "order_pay_types", ["order_id"], :name => "index_order_pay_types_on_order_id"
+  add_index "order_pay_types", ["pay_type"], :name => "index_order_pay_types_on_pay_type"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "order_pay_types", ["updated_at"], :name => "index_order_pay_types_on_updated_at"
 
   create_table "order_prod_relations", :force => true do |t|
@@ -376,12 +462,21 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "order_prod_relations", ["created_at"], :name => "index_order_prod_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "order_prod_relations", ["order_id"], :name => "index_order_prod_relations_on_order_id"
+  add_index "order_prod_relations", ["product_id"], :name => "index_order_prod_relations_on_product_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "order_prod_relations", ["updated_at"], :name => "index_order_prod_relations_on_updated_at"
 
   create_table "orders", :force => true do |t|
     t.string   "code"
     t.integer  "car_num_id"
+<<<<<<< HEAD
     t.boolean  "status"
+=======
+    t.integer  "status"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
     t.datetime "started_at"
     t.datetime "ended_at"
     t.float    "price"
@@ -428,6 +523,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "pcard_prod_relations", ["created_at"], :name => "index_pcard_prod_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "pcard_prod_relations", ["package_card_id"], :name => "index_pcard_prod_relations_on_package_card_id"
+  add_index "pcard_prod_relations", ["product_id"], :name => "index_pcard_prod_relations_on_product_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "pcard_prod_relations", ["updated_at"], :name => "index_pcard_prod_relations_on_updated_at"
 
   create_table "prod_mat_relations", :force => true do |t|
@@ -439,13 +539,18 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "prod_mat_relations", ["created_at"], :name => "index_prod_mat_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "prod_mat_relations", ["material_id"], :name => "index_prod_mat_relations_on_material_id"
+  add_index "prod_mat_relations", ["product_id"], :name => "index_prod_mat_relations_on_product_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "prod_mat_relations", ["updated_at"], :name => "index_prod_mat_relations_on_updated_at"
 
   create_table "products", :force => true do |t|
     t.string   "name"
     t.float    "base_price"
     t.float    "sale_price"
-    t.text     "description"
+    t.string   "description"
     t.integer  "types"
     t.string   "service_code"
     t.boolean  "status"
@@ -471,6 +576,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "res_prod_relations", ["created_at"], :name => "index_res_prod_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "res_prod_relations", ["product_id"], :name => "index_res_prod_relations_on_product_id"
+  add_index "res_prod_relations", ["reservation_id"], :name => "index_res_prod_relations_on_reservation_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "res_prod_relations", ["updated_at"], :name => "index_res_prod_relations_on_updated_at"
 
   create_table "reservations", :force => true do |t|
@@ -482,6 +592,13 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "reservations", ["car_num_id"], :name => "index_reservations_on_car_num_id"
+  add_index "reservations", ["created_at"], :name => "index_reservations_on_created_at"
+  add_index "reservations", ["status"], :name => "index_reservations_on_status"
+  add_index "reservations", ["store_id"], :name => "index_reservations_on_store_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "reservations", ["updated_at"], :name => "index_reservations_on_updated_at"
 
   create_table "revisit_order_relations", :force => true do |t|
@@ -492,6 +609,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "revisit_order_relations", ["created_at"], :name => "index_revisit_order_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "revisit_order_relations", ["order_id"], :name => "index_revisit_order_relations_on_order_id"
+  add_index "revisit_order_relations", ["revisit_id"], :name => "index_revisit_order_relations_on_revisit_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "revisit_order_relations", ["updated_at"], :name => "index_revisit_order_relations_on_updated_at"
 
   create_table "revisits", :force => true do |t|
@@ -513,6 +635,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "role_menu_relations", ["created_at"], :name => "index_role_menu_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "role_menu_relations", ["menu_id"], :name => "index_role_menu_relations_on_menu_id"
+  add_index "role_menu_relations", ["role_id"], :name => "index_role_menu_relations_on_role_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "role_menu_relations", ["updated_at"], :name => "index_role_menu_relations_on_updated_at"
 
   create_table "role_model_relations", :force => true do |t|
@@ -524,6 +651,10 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "role_model_relations", ["created_at"], :name => "index_role_model_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "role_model_relations", ["role_id"], :name => "index_role_model_relations_on_role_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "role_model_relations", ["updated_at"], :name => "index_role_model_relations_on_updated_at"
 
   create_table "roles", :force => true do |t|
@@ -547,6 +678,12 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "salaries", ["current_month"], :name => "index_salaries_on_current_month"
+  add_index "salaries", ["staff_id"], :name => "index_salaries_on_staff_id"
+  add_index "salaries", ["status"], :name => "index_salaries_on_status"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "salaries", ["updated_at"], :name => "index_salaries_on_updated_at"
 
   create_table "salary_details", :force => true do |t|
@@ -559,6 +696,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "salary_details", ["current_day"], :name => "index_salary_details_on_current_day"
+  add_index "salary_details", ["staff_id"], :name => "index_salary_details_on_staff_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "salary_details", ["updated_at"], :name => "index_salary_details_on_updated_at"
 
   create_table "sale_prod_relations", :force => true do |t|
@@ -570,6 +712,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "sale_prod_relations", ["created_at"], :name => "index_sale_prod_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "sale_prod_relations", ["product_id"], :name => "index_sale_prod_relations_on_product_id"
+  add_index "sale_prod_relations", ["sale_id"], :name => "index_sale_prod_relations_on_sale_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "sale_prod_relations", ["updated_at"], :name => "index_sale_prod_relations_on_updated_at"
 
   create_table "sales", :force => true do |t|
@@ -605,6 +752,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "send_messages", ["created_at"], :name => "index_send_messages_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "send_messages", ["message_record_id"], :name => "index_send_messages_on_message_record_id"
+  add_index "send_messages", ["status"], :name => "index_send_messages_on_status"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "send_messages", ["updated_at"], :name => "index_send_messages_on_updated_at"
 
   create_table "staff_gr_records", :force => true do |t|
@@ -616,9 +768,16 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.float    "deduct_percent"
     t.datetime "created_at"
     t.datetime "updated_at"
+<<<<<<< HEAD
     t.integer  "working_stats"
   end
 
+=======
+  end
+
+  add_index "staff_gr_records", ["created_at"], :name => "index_staff_gr_records_on_created_at"
+  add_index "staff_gr_records", ["staff_id"], :name => "index_staff_gr_records_on_staff_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "staff_gr_records", ["updated_at"], :name => "index_staff_gr_records_on_updated_at"
 
   create_table "staff_role_relations", :force => true do |t|
@@ -629,6 +788,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "staff_role_relations", ["created_at"], :name => "index_staff_role_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "staff_role_relations", ["role_id"], :name => "index_staff_role_relations_on_role_id"
+  add_index "staff_role_relations", ["staff_id"], :name => "index_staff_role_relations_on_staff_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "staff_role_relations", ["updated_at"], :name => "index_staff_role_relations_on_updated_at"
 
   create_table "staffs", :force => true do |t|
@@ -679,6 +843,12 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "station_staff_relations", ["current_day"], :name => "index_station_staff_relations_on_current_day"
+  add_index "station_staff_relations", ["staff_id"], :name => "index_station_staff_relations_on_staff_id"
+  add_index "station_staff_relations", ["station_id"], :name => "index_station_staff_relations_on_station_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "station_staff_relations", ["updated_at"], :name => "index_station_staff_relations_on_updated_at"
 
   create_table "stations", :force => true do |t|
@@ -701,6 +871,7 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.string   "once_water_use"
   end
 
+<<<<<<< HEAD
   create_table "store_complaints", :force => true do |t|
     t.string   "store_id"
     t.string   "img_url",    :limit => 1000
@@ -720,6 +891,10 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   add_index "store_pleasants", ["created_at"], :name => "index_store_pleasants_on_created_at"
   add_index "store_pleasants", ["store_id"], :name => "index_store_pleasants_on_store_id"
   add_index "store_pleasants", ["updated_at"], :name => "index_store_pleasants_on_updated_at"
+=======
+  add_index "stations", ["status"], :name => "index_stations_on_status"
+  add_index "stations", ["store_id"], :name => "index_stations_on_store_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
 
   create_table "stores", :force => true do |t|
     t.string   "name"
@@ -753,7 +928,7 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.string   "name"
     t.string   "img_url"
     t.integer  "types"
-    t.integer  "price"
+    t.float    "price"
     t.float    "discount"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -782,6 +957,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "svcard_prod_relations", ["created_at"], :name => "index_svcard_prod_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "svcard_prod_relations", ["product_id"], :name => "index_svcard_prod_relations_on_product_id"
+  add_index "svcard_prod_relations", ["sv_card_id"], :name => "index_svcard_prod_relations_on_sv_card_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "svcard_prod_relations", ["updated_at"], :name => "index_svcard_prod_relations_on_updated_at"
 
   create_table "svcard_use_records", :force => true do |t|
@@ -794,6 +974,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "svcard_use_records", ["c_svc_relation_id"], :name => "index_svcard_use_records_on_c_svc_relation_id"
+  add_index "svcard_use_records", ["types"], :name => "index_svcard_use_records_on_types"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "svcard_use_records", ["updated_at"], :name => "index_svcard_use_records_on_updated_at"
 
   create_table "syncs", :force => true do |t|
@@ -821,6 +1006,12 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
   end
 
   add_index "train_staff_relations", ["created_at"], :name => "index_train_staff_relations_on_created_at"
+<<<<<<< HEAD
+=======
+  add_index "train_staff_relations", ["staff_id"], :name => "index_train_staff_relations_on_staff_id"
+  add_index "train_staff_relations", ["status"], :name => "index_train_staff_relations_on_status"
+  add_index "train_staff_relations", ["train_id"], :name => "index_train_staff_relations_on_train_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "train_staff_relations", ["updated_at"], :name => "index_train_staff_relations_on_updated_at"
 
   create_table "trains", :force => true do |t|
@@ -850,8 +1041,16 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "process_at"
   end
 
+<<<<<<< HEAD
   create_table "wk_or_times", :force => true do |t|
     t.integer  "current_time"
+=======
+  add_index "violation_rewards", ["created_at"], :name => "index_violation_rewards_on_created_at"
+  add_index "violation_rewards", ["staff_id"], :name => "index_violation_rewards_on_staff_id"
+
+  create_table "wk_or_times", :force => true do |t|
+    t.string   "current_times"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
     t.integer  "current_day"
     t.integer  "station_id"
     t.integer  "worked_num"
@@ -860,6 +1059,11 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "wk_or_times", ["current_day"], :name => "index_wk_or_times_on_current_day"
+  add_index "wk_or_times", ["station_id"], :name => "index_wk_or_times_on_station_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "wk_or_times", ["updated_at"], :name => "index_wk_or_times_on_updated_at"
 
   create_table "work_orders", :force => true do |t|
@@ -880,6 +1084,14 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.float    "gas_num"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "work_orders", ["current_day"], :name => "index_work_orders_on_current_day"
+  add_index "work_orders", ["order_id"], :name => "index_work_orders_on_order_id"
+  add_index "work_orders", ["station_id"], :name => "index_work_orders_on_station_id"
+  add_index "work_orders", ["status"], :name => "index_work_orders_on_status"
+  add_index "work_orders", ["store_id"], :name => "index_work_orders_on_store_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "work_orders", ["updated_at"], :name => "index_work_orders_on_updated_at"
 
   create_table "work_records", :force => true do |t|
@@ -899,6 +1111,12 @@ ActiveRecord::Schema.define(:version => 20130701051467) do
     t.datetime "updated_at"
   end
 
+<<<<<<< HEAD
+=======
+  add_index "work_records", ["created_at"], :name => "index_work_records_on_created_at"
+  add_index "work_records", ["current_day"], :name => "index_work_records_on_current_day"
+  add_index "work_records", ["staff_id"], :name => "index_work_records_on_staff_id"
+>>>>>>> e643d94800d98db689abb77679b96b71f656c74f
   add_index "work_records", ["updated_at"], :name => "index_work_records_on_updated_at"
 
 end

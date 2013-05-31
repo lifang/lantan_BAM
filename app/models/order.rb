@@ -1,14 +1,16 @@
 #encoding: utf-8
 class Order < ActiveRecord::Base
   has_many :order_prod_relations
+#  has_many :products, :through => :order_prod_relations
   has_many :order_pay_types
   has_many :work_orders
   belongs_to :car_num
-  belongs_to :c_pcard_relation
+  has_many :c_pcard_relations
   belongs_to :c_svc_relation
   belongs_to :customer
   belongs_to :sale
   has_many :revisit_order_relations
+  has_many :o_pcard_relations
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
   STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6}
@@ -19,6 +21,7 @@ class Order < ActiveRecord::Base
   #是否满意
   IS_PLEASED = {:BAD => 0, :SOSO => 1, :GOOD => 2, :VERY_GOOD => 3}  #0 不满意  1 一般  2 好  3 很好
   IS_PLEASED_NAME = {0 => "不满意", 1 => "一般", 2 => "好", 3 => "很好"}
+  VALID_STATUS = [STATUS[:BEEN_PAYMENT], STATUS[:FINISHED]]
 
   #组装查询order的sql语句
   def self.generate_order_sql(started_at, ended_at, is_visited)
@@ -284,9 +287,9 @@ class Order < ActiveRecord::Base
       inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
       and m.storage > 0 and m.store_id = ? and pmr.product_id in (?) ", store_id, ids]).group_by { |i| i.product_id } if ids.any?
       products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", 
-          prod_mat_relations.keys]) unless prod_mat_relations.empty?
+          prod_mat_relations.keys]) unless (prod_mat_relations.nil? or prod_mat_relations.keys.blank?)
       
-      unless products.blank?
+      unless products.nil? or products.blank?
         service_ids = products.collect { |p| p.id  } #[311]
         time_arr = Station.arrange_time store_id, service_ids, res_time
         info[:start] = time_arr[0]
@@ -441,7 +444,9 @@ class Order < ActiveRecord::Base
         #p  0_id_count
         prod_arr << p.split("_")
       elsif p.split("_")[0].to_i == 1
-        #p 1_id
+        puts "------------------------------------------------"
+        p p
+        #p 1_id_prod1=price1_prod2=price2_totalprice_realy_price
         sale_arr << p.split("_")
       elsif p.split("_")[0].to_i == 2
         #p 2_id
@@ -483,13 +488,15 @@ class Order < ActiveRecord::Base
         cost_time = 0
         prod_ids = []
         is_has_service = false #用来记录是否有服务
+        order_prod_relations = [] #用来记录订单中的所有的产品
         product_prices = {}
         #创建订单的相关产品 OrdeProdRelation
         (arr[0] || []).each do |prod|
           product = Product.find_by_id_and_store_id_and_status prod[1],store_id,Product::IS_VALIDATE[:YES]
-          if product            
-            OrderProdRelation.create(:order_id => order.id, :product_id => prod[1],
-              :pro_num => prod[2], :price => product.sale_price)
+          if product
+            order_p_r = OrderProdRelation.create(:order_id => order.id, :product_id => prod[1],
+              :pro_num => prod[2], :price => product.sale_price, :t_price => product.t_price, :total_price => prod[3].to_f)
+            order_prod_relations << order_p_r
             x += 1 if product.is_service?
             cost_time += product.cost_time.to_i
             prod_ids << product.id if product.is_service
@@ -500,17 +507,29 @@ class Order < ActiveRecord::Base
         hash[:types] = x > 0 ? TYPES[:SERVICE] : TYPES[:PRODUCT]
         #订单相关的活动
         if sale_id != "" && Sale.find_by_id_and_store_id_and_status(sale_id,store_id,Sale::STATUS[:RELEASE])
-          OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SALE], 
-            :price => arr[1][0][2]) if arr[1][0][2]
+          if arr[1][0][2]
+            p_prcent = arr[1][0][-1].to_f/arr[1][0][-2].to_f
+
+            (2..(arr[1][0].length - 3)).each do |i|
+              p_info = arr[1][0][i].split("=")
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SALE],
+                :product_id => p_info[0].to_i, :price => p_info[1].to_f * p_prcent)
+            end
+          end
           hash[:sale_id] = sale_id
         end
         #订单相关的打折卡
-        if svcard_id != "" && SvCard.find_by_id(svcard_id)
-          c_sv_relation = CSvcRelation.find_by_customer_id_and_sv_card_id c_id,svcard_id
-          c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => svcard_id) if c_sv_relation.nil?
-          OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD], 
-            :price => arr[2][0][2]) if arr[2][0][2]
-          hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
+        if svcard_id != "" 
+          sv_card = SvCard.find_by_id(svcard_id)
+          if sv_card
+            c_sv_relation = CSvcRelation.find_by_customer_id_and_sv_card_id c_id,svcard_id
+            c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => svcard_id) if c_sv_relation.nil?
+            order_prod_relations.each do |o_p_r|
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD],
+                :product_id => o_p_r.product_id, :price => (o_p_r.total_price.to_f) *((10 - sv_card.discount).to_f/10))
+            end if arr[2][0][2] and order_prod_relations.any?
+            hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
+          end
         end
         #订单相关的套餐卡
         prod_hash = {}  #用来记录套餐卡中总共使用了多少
@@ -537,9 +556,6 @@ class Order < ActiveRecord::Base
               PackageCard::STAT[:NORMAL], store_id, p_c_ids.keys])
           if p_cards.any?            
             p_cards_hash = p_cards.group_by { |p_c| p_c.id }
-            #            c_pcard_relations = CPcardRelation.find(:all,
-            #              :conditions => ["status = ? and ended_at >= ? and customer_id = ? and package_card_id in (?)",
-            #                CPcardRelation::STATUS[:NORMAL], Time.now, c_id, p_cards]).group_by { |c_p_r| c_p_r.package_card_id }
             arr[3].collect do |a_pc|
               prod_nums = a_pc[3].split("-") if a_pc[3]
               if a_pc[2].to_i == 0 #has_p_card是0，表示是新买的套餐卡
@@ -561,12 +577,8 @@ class Order < ActiveRecord::Base
                         :product_id =>prod_id, :product_num => p_num})
                   end
                 end
-                #                if c_pcard_relations and c_pcard_relations[p_card_id]
-                #                  c_pcard_relations[p_card_id] << cpr if a_pc[3]
-                #                else
-                #                  c_pcard_relations[p_card_id] = [cpr] if a_pc[3]
-                #                end
-              else
+              else #已经买过套餐卡
+                ## 如果使用套餐卡，把使用的次数保存
                 cpr = CPcardRelation.find_by_id a_pc[4]
                 (prod_nums||[]).each do |pn|
                   prod_id = pn.split("=")[0]
@@ -591,72 +603,15 @@ class Order < ActiveRecord::Base
                 end
                 cpr.update_attribute(:content, content.join(","))
               end
-            end
-            
-            #            新增的套餐卡
-            #            pc_ids.each do |key, value|
-            #              alreay_has = 0
-            #              alreay_has = c_pcard_relations[key].length if (c_pcard_relations and c_pcard_relations[key])
-            #              (1..(value - alreay_has)).each do |i|
-            #                cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id => key.to_i,
-            #                  :status => CPcardRelation::STATUS[:INVALID], :ended_at => p_cards_hash[key][0].ended_at,
-            #                  :content => CPcardRelation.set_content(key), :order_id => order.id, :price => p_cards_hash[key][0].price)
-            #                if c_pcard_relations and c_pcard_relations[key]
-            #                  c_pcard_relations[key] << cpr
-            #                else
-            #                  c_pcard_relations[key] = [cpr]
-            #                end
-            #              end if value - alreay_has > 0
-            #            end
-            #更新数量
-            #{10=>{310=>2, 311=>9}, 11=>{}}
-=begin            p_c_ids.each do |key, value|
-              c_pcard_relations[key].each do |c_p_r|
-                left_ps = c_p_r.content.split(",")
-
-                content = []
-                mark_prod_id = {}
-                is_has = 1 #用来记录一个套餐卡是否够用
-                (left_ps || []).each do |l_p|
-                  
-                  l_id = l_p.split("-")[0].to_i #content里面的product_id
-                  mark_prod_id[l_id] = true
-                  l_num = l_p.split("-")[2].to_i
-                  if value[l_id].nil?
-                    content << l_p
-                  else
-                 
-                    opr = OPcardRelation.where(:order_id => order.id, :c_pcard_relation_id => c_p_r.id,:product_id =>value[l_id])
-                    OPcardRelation.create({:order_id => order.id, :c_pcard_relation_id => c_p_r.id,
-                                         :product_id =>l_id, :product_num => value[l_id]}) if opr.blank? && mark_prod_id[l_id] && value[l_id]!=0
-                    if (l_num - value[l_id]) > 0  
-                      content << "#{l_id}-#{l_p.split("-")[1]}-#{l_num - value[l_id]}"
-                      value[l_id] = 0
-                    else
-                      is_has = 0
-                      mark_prod_id[l_id] = false
-                      content << "#{l_id}-#{l_p.split("-")[1]}-0"
-                      value[l_id] = value[l_id] - l_num
-                    end
-                   
-                  end
-                end
-       
-
-                c_p_r.update_attribute(:content, content.join(","))
-                if is_has == 1 #说明一个套餐卡已经够消费了
-                  break
-                end
-              end unless value.blank?
-              
-=end            end
+            end            
             #创建套餐卡优惠的价格
-            pcard_dis_price = 0
             unless prod_hash.empty?
-              prod_hash.each { |k, v| pcard_dis_price += (product_prices[k].to_f * v) }
+              prod_hash.each { |k, v|
+                pcard_dis_price = product_prices[k].to_f * v
+                OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
+                 :product_id => k, :price => pcard_dis_price)
+              }
             end
-            OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-              :price => pcard_dis_price) if pcard_dis_price > 0
           end
         end
 
@@ -736,54 +691,39 @@ class Order < ActiveRecord::Base
     hash[:total] = self.price
     content = ""
     realy_price = 0
-    sale_prod_ids = {}
     sale = nil
     unless self.sale_id.blank?
       h = {}
       sale = self.sale
-      sale.sale_prod_relations.each { |spr| sale_prod_ids[spr.product_id] = spr.prod_num }
       h[:name] = sale.name
       self.order_pay_types.each do |o_p_t|
         if o_p_t.pay_type == OrderPayType::PAY_TYPES[:SALE]
-          h[:price] = o_p_t.price
-          break
+          h[:price] = h[:price].nil? ? o_p_t.price.to_f : (h[:price] + o_p_t.price.to_f)
         end
       end
-      #h[:price] = sale.disc_types == Sale::DISC_TYPES[:FEE] ? sale.discount : realy_price * (10 - sale.discount) / 10
       h[:type] = 1
       hash[:sale] = h
     end
 
     hash[:products] = self.order_prod_relations.collect{|r|
       h = Hash.new
+      h[:id] = r.product_id
       h[:name] = r.product.name
       h[:price] = r.price
-      #      if sale_prod_ids[r.product_id] < r.pro_num
-      #        realy_price += r.price.to_f * sale_prod_ids[r.product_id]
-      #      else
-      #        realy_price += r.price.to_f * r.pro_num
-      #      end if sale_prod_ids[r.product_id]
       h[:num] = r.pro_num.to_i
       h[:type] = 0
       content += h[:name] + ","
       h
     }
-    #    if sale.disc_types == Sale::DISC_TYPES[:FEE]
-    #      hash[:sale][:price] = sale.discount #realy_price > sale.discount ? sale.discount : realy_price
-    #    else
-    #      hash[:sale][:price] = realy_price * (10 - sale.discount) / 10
-    #    end if sale
     hash[:content] = content.chomp(",")
     
     unless self.c_svc_relation_id.blank?
       h = {}
       sv_card = self.c_svc_relation.sv_card
       h[:name] = sv_card.name
-      #h[:price] = sv_card.price * (10 - sv_card.discount) / 10
       self.order_pay_types.each do |o_p_t|
         if o_p_t.pay_type == OrderPayType::PAY_TYPES[:SV_CARD]
-          h[:price] = o_p_t.price
-          break
+          h[:price] = h[:price] ? h[:price] + o_p_t.price : o_p_t.price
         end
       end
       h[:discount] = sv_card.discount
@@ -799,19 +739,11 @@ class Order < ActiveRecord::Base
       content += cp.name + ","
       realy_price += cp.price
     end unless customer_pcards.blank?
-    if not self.c_pcard_relation_id.blank?
-      h = {}
-      pcard = self.c_pcard_relation.package_card
-      h[:name] = pcard.name
-      h[:price] = pcard.price
-      h[:type] = 3
-      h[:prods] = self.c_pcard_relation.content.split(",").collect{|p|
-        s = {}
-        s[:name] = p.split("-")[1]
-        s[:num] = p.split("-")[2]
-        s
-      }
-      hash[:c_pcard_relation] <<  h
+    self.o_pcard_relations.group_by{|opr| opr.c_pcard_relation_id}.each do |c_pcard_relarion_id, oprs|
+      cpr = CPcardRelation.find_by_id c_pcard_relarion_id
+      name = cpr.package_card.name
+      price = oprs.map{|opr| [opr.product.sale_price.to_f, opr.product_num]}.inject(0){|sum, pn| sum += pn[0]*pn[1]}.to_f
+      hash[:c_pcard_relation] << {:name => name, :price => -price, :num => 1, :type => 3}
     end
     hash
   end
@@ -837,7 +769,7 @@ class Order < ActiveRecord::Base
           #更新产品数量
           order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
           if order_products  #如果是产品,则减掉对应库存
-              materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+            materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
                 on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
                 where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
             materials.each do |m|
@@ -906,5 +838,46 @@ class Order < ActiveRecord::Base
       status = 2
     end
     status
+  end
+
+  def calculate_gross_profit
+    #使用过套餐卡计算毛利
+    used_pcards_gross_profit = 0
+    self.o_pcard_relations.each do |opr|
+      oprod_r = self.order_prod_relations.where(:product_id => opr.product_id).first
+      total_price = oprod_r.total_price.to_f  #每项商品总价
+      deals_price = (opr.product_num * oprod_r.price).to_f #每项商品使用套餐卡抵付的价格
+      prod_full_price_num = oprod_r.pro_num - opr.product_num #未使用套餐卡抵付的商品数目
+      gross_profit = total_price - deals_price - prod_full_price_num *(oprod_r.t_price.to_f) #一个商品使用套餐卡后的毛利
+      used_pcards_gross_profit += gross_profit
+    end
+    
+    ###### 计算order中的总零售价
+
+    # 商品跟服务的总零售价
+    sum_products_price = self.order_prod_relations.inject(0){|sum,opr| sum += opr.total_price.to_f}
+    # 购买套餐卡总价格
+    sum_pcard_price = self.c_pcard_relations.inject(0){|sum,cpr| sum += cpr.price.to_f}
+
+    #### 商品跟套餐卡购买总零售价
+    total_sale_price = sum_products_price + sum_pcard_price
+
+    # 使用活动优惠总价
+    sum_sale_price = self.order_pay_types.where(:pay_type => OrderPayType::PAY_TYPES[:SALE]).inject(0){|sum,opr| sum += opr.price.to_f}
+    # 使用打折卡优惠总价
+    sum_savcard_price = self.order_pay_types.where(:pay_type => OrderPayType::PAY_TYPES[:SV_CARD]).inject(0){|sum,opr| sum += opr.price.to_f}
+
+    ######  计算总成本价
+
+    #order中的商品跟服务的总成本价
+    products_sum_cost_price = self.order_prod_relations.inject(0){|sum,opr| sum+=(opr.t_price.to_f)*opr.pro_num}
+    #购买套餐卡总成本
+    pcards_sum_cost_price = self.c_pcard_relations.map{|cpr| cpr.package_card}.compact.map{|pc| pc.pcard_prod_relations.map{|ppr| ppr.product}.inject(0){|sum,opr| sum += opr.t_price.to_f}}.inject(0){|sum,pc| sum += pc}
+
+    ##### 商品跟套餐卡购买总成本价
+    total_cost_price = products_sum_cost_price + pcards_sum_cost_price
+
+    total_gross_price = total_sale_price - sum_sale_price - sum_savcard_price - total_cost_price + used_pcards_gross_profit
+  return [total_cost_price.to_f, total_sale_price.to_f, total_gross_price.to_f > 0 ? total_gross_price.to_f : 0]
   end
 end

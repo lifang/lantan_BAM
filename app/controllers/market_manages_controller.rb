@@ -214,6 +214,33 @@ class MarketManagesController < ApplicationController
     @svc_returns = shared_stored_card_bill(params[:started_at], params[:ended_at], params[:store_id])
   end
 
+  def gross_profit
+    @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
+      .where("date_format(created_at,'%Y-%m-%d') = curdate()")
+      .select("distinct orders.*")
+      .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+  end
+
+  def search_gross_profit
+    sql = []
+    start_sql = params[:o_started].blank? ? nil : "date_format(orders.created_at,'%Y-%m-%d') >= '#{params[:o_started]}'"
+    end_sql = params[:o_ended].blank? ? nil : "date_format(orders.created_at,'%Y-%m-%d') <= '#{params[:o_ended]}'"
+    types_sql = params[:prod_types] =="-1" ? nil : "products.types = #{params[:prod_types]}"
+    sql<< start_sql << end_sql << types_sql
+    sql = sql.compact.join(" and ")
+    @orders = Order.includes(:order_prod_relations, :order_pay_types, :o_pcard_relations, :c_pcard_relations)
+    .joins(:order_prod_relations => :product)
+    .where(:status => Order::VALID_STATUS)
+    .where(sql).select("orders.*, products.types").uniq
+    .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
+    @order_prod_relations = OrderProdRelation.includes(:order, :product)
+    .joins(:order)
+    .where(:order_id => @orders.map(&:id))
+    .group_by{|opr| opr.order_id}
+#    p 111111111111
+#    p @order_prod_relations
+  end
+
   private
   def get_store
     @store = Store.find_by_id(params[:store_id])

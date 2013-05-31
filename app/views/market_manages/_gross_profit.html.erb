@@ -1,0 +1,57 @@
+<script>
+    $(document).ready(function(){
+      $(".pageTurn a").unbind("click");
+      $(".pageTurn a").bind("click", function() {
+        var url = this.href + "&o_started="+$("#o_gross_started").val()+"&o_ended="+$("#o_gross_ended").val()+"&prod_types="+$("#prod_types").val();
+        $.ajax({
+          async:true,
+          url:url,
+          dataType:"script",
+          type:"POST",
+          success:function(){
+            // alert(1);
+          },error:function(){
+            // alert("error");
+          }
+        });
+        /* alert(this.href); */
+        return false;
+      });
+    });
+</script>
+<div>
+    <% unless @orders.blank? %>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+        <thead>
+          <tr class="hbg">
+            <td>日期</td>
+            <td>相关订单</td>
+            <td>成本价</td>
+            <td>零售价</td>
+            <td>毛利</td>
+          </tr>
+        </thead>
+        <tbody>
+            <% @order_prod_relations.each do |order_id, oprrs| %>
+          <% order = Order.find_by_id  order_id%>
+              <% oprrs.each do |oprr| %>
+                <% prod_cost_price =  prod_gross_price(order_id, oprr)%>
+                <tr>
+                  <td><%= order.created_at.strftime("%Y-%m-%d") if order.created_at%></td>
+                  <td><%= link_to "#{order.code}", "/orders/#{order_id}/order_info" ,
+            :remote => "true", "data-type" => "script", :class => "other_a"  %></td>
+                  <td><%= format("%.2f",prod_cost_price[0]) %></td>
+                  <td><%= format("%.2f",prod_cost_price[1]) %></td>
+                  <td><%= format("%.2f",prod_cost_price[2] > 0 ? prod_cost_price[2] : 0) %></td>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+      </table>
+      <div class="pageTurn">
+        <%= will_paginate @orders,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+      </div>
+    <%else%>
+      暂无记录
+    <%end%>
+  </div>
