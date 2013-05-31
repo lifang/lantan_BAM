@@ -90,12 +90,12 @@
                 </table></td>
               <td><%= consumer.name %></td>
               <td><%= consumer.buy_year %></td>
-              <td><%= consumer.price %></td>
+              <td><%= @sums[consumer.id] %></td>
             </tr>
           <%end%>
         </tbody>
       </table>
-      <div class="amount">总计：<%= @sum %></div>
+      <div class="amount">总计：<%= @sums.values.inject(0){|num,sum| num+sum} %></div>
     <%else%>
       无相关记录
     <%end%>
