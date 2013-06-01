@@ -87,7 +87,7 @@ class MaterialsController < ApplicationController
   end
 
   #入库
-  def create
+  def mat_in
     @material = Material.find_by_code_and_status_and_store_id params[:barcode].strip,Material::STATUS[:NORMAL],params[:store_id]
     @material_order = MaterialOrder.find_by_code params[:code].strip
     Material.transaction do
@@ -545,20 +545,7 @@ class MaterialsController < ApplicationController
       @total_money += moi.price * moi.material_num
     end
   end
-  
-  #添加物料
-  def add_material
-    store = Store.find params[:store_id]
-    material = Material.find_by_code(params[:materials][:code])
-    if material.nil?
-      store.materials << Material.create(params[:materials].merge({:status => 0}))
-    else
-      storage = material.storage + params[:materials][:storage].to_i
-      material.update_attributes(:storage => storage)
-    end
-    redirect_to "/stores/#{params[:store_id]}/materials"
-  end
-  
+
  #判断物料条形码是否唯一
   def uniq_mat_code
     material = Material.find_by_code_and_store_id(params[:code], params[:store_id])
@@ -584,13 +571,15 @@ class MaterialsController < ApplicationController
           data = line.strip.split(',')
           @check_nums[data[0]] = data[1]
         end
-        @materials = Material.where(:code => @check_nums.keys)
+        @materials = Material.where(:code => @check_nums.keys, :status => Material::STATUS[:NORMAL])
       end
     end
   end
 
+  #批量核实
   def batch_check
     failed_updates = []
+    flash[:notice] = "批量核实成功！"
     params[:materials].each do |id,cn|
       material = Material.find_by_id(id)
       unless material && material.update_attribute(:storage, cn[:num])
@@ -600,10 +589,10 @@ class MaterialsController < ApplicationController
     if failed_updates.length > 0
       flash[:notice] = "#{failed_updates.join('、')} 等物料核实失败！"
     end
-    flash[:notice] = "批量核实成功！"
     redirect_to "/stores/#{params[:store_id]}/materials"
   end
 
+  #设置库存预警数目
   def set_material_low_commit
     store = Store.find_by_id(params[:store_id])
     if store.update_attribute("material_low", params[:material_low_value])
@@ -613,5 +602,42 @@ class MaterialsController < ApplicationController
       flash[:notice] = "设置失败!"
       redirect_to store_materials_path(store)
     end
+  end
+
+  #添加物料
+  def new
+    @current_store = Store.find_by_id(params[:store_id])
+    @material = Material.new
+    render :edit
+  end
+
+  def create
+    store = Store.find params[:store_id]
+    material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id])
+    if material.nil?
+      store.materials << Material.create(params[:material].merge({:status => 0}))
+    else
+      storage = material.storage + params[:material][:storage].to_i
+      material.update_attributes(:storage => storage)
+    end
+    redirect_to "/stores/#{params[:store_id]}/materials"
+  end
+
+  #编辑物料
+  def edit
+    @current_store = Store.find_by_id(params[:store_id])
+    @material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
+  end
+
+  def update
+    material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id])
+    material.update_attributes(params[:material])
+    redirect_to "/stores/#{params[:store_id]}/materials"
+  end
+
+  def destroy
+    material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
+    material.update_attribute(:status, Material::STATUS[:DELETE])
+    redirect_to "/stores/#{params[:store_id]}/materials"
   end
 end
