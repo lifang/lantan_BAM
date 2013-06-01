@@ -64,8 +64,8 @@
             <%= label_tag "materials[sale_price]","零售价：" %><%= text_field_tag "materials[sale_price]" %>
           </div>
           <div class="item">
-            <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]", nil, :placeholder => "40", :style => "width:100px" %>
-            <%= text_field_tag "materials[unit]", nil, :placeholder => "个", :style => "width:60px" %>
+            <%= label_tag "materials[storage]","数量：" %><%= text_field_tag "materials[storage]", nil, :style => "width:100px" %>
+            <%= text_field_tag "materials[unit]", nil, :style => "width:60px" %>
           </div>
           <em class="mat_hint">输入数量如（40），规格如（个）</em>
         </div>
@@ -140,8 +140,8 @@
               <tr class="hbg">
                 <td>物料名称</td>
                 <td>物料类别</td>
-                <td>库存量（规格）</td>
-                <td>出库量（规格）</td>
+                <td>库存量</td>
+                <td>出库量</td>
                 <td>操作</td>
               </tr>
             </thead>
