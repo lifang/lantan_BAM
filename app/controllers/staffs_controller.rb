@@ -15,17 +15,14 @@ class StaffsController < ApplicationController
     @staff =  Staff.new
     @violation_reward = ViolationReward.new
     @train = Train.new
-    @count_time = staff_scores.last.try(:updated_at)
+    @latest_updated_at = Staff.maximum("updated_at").strftime("%Y-%m-%d") unless Staff.maximum("updated_at").blank?
   end
 
   def search
-    sql = []
-    name_sql = params[:name].blank? ? nil : "name like '%#{params[:name]}%'"
-    types_sql = params[:types]=="-1" ? nil : "type_of_w = #{params[:types]}"
-    status_sql = params[:status]=="-1" ? nil : "status = #{params[:status]}"
-    sql<< name_sql << types_sql << status_sql
-    sql = sql.compact.join(" and ")
-    @staffs = @store.staffs.valid.where(sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    name_sql = params[:name].blank? ? "1=1" : ["name like ?", "%#{params[:name]}%"]
+    types_sql = params[:types]=="-1" ? "1=1" : ["type_of_w = ?", "#{params[:types]}"]
+    status_sql = params[:status]=="-1" ? "1=1" : ["status = ?", "#{params[:status]}"]
+    @staffs = @store.staffs.valid.where(name_sql).where(types_sql).where(status_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     staff_scores = MonthScore.where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")} and store_id = ?", @store.id)
     @staff_scores_hash = staff_scores.group_by{|ms| ms.staff_id}
   end

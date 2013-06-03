@@ -228,17 +228,24 @@ class MarketManagesController < ApplicationController
     types_sql = params[:prod_types] =="-1" ? nil : "products.types = #{params[:prod_types]}"
     sql<< start_sql << end_sql << types_sql
     sql = sql.compact.join(" and ")
-    @orders = Order.includes(:order_prod_relations, :order_pay_types, :o_pcard_relations, :c_pcard_relations)
-    .joins(:order_prod_relations => :product)
-    .where(:status => Order::VALID_STATUS)
-    .where(sql).select("orders.*, products.types").uniq
+    @orders = Order.joins(:order_prod_relations => :product).where(:status => Order::VALID_STATUS)
+    .where(sql).select("orders.id, date_format(orders.created_at,'%Y-%m-%d') o_created_at, orders.code, products.types").uniq
     .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
-    @order_prod_relations = OrderProdRelation.includes(:order, :product)
-    .joins(:order)
-    .where(:order_id => @orders.map(&:id))
-    .group_by{|opr| opr.order_id}
-#    p 111111111111
-#    p @order_prod_relations
+#    @orders = Order.includes(:order_prod_relations, :order_pay_types, :o_pcard_relations, :c_pcard_relations)
+#    .joins(:order_prod_relations => :product)
+#    .where(:status => Order::VALID_STATUS)
+#    .where(sql).select("orders.*, products.types").uniq
+#    .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
+
+    @order_pay_types = OrderPayType.where(:order_id => @orders.map(&:id) ).where("product_id is not null").group_by{|opt| opt.order_id}
+    @o_pcard_relations = OPcardRelation.where(:order_id => @orders.map(&:id)).group_by{|opt| opt.order_id}
+    @order_prod_relations = OrderProdRelation.where(:order_id => @orders.map(&:id)).group_by{|opt| opt.order_id}
+#    @orders = Order.find_by_sql("select o.id,o.code,o.created_at,oprr.order_id,oprr.*,opcr.*,p.types, opt.* from orders o inner join order_prod_relations oprr on o.id = oprr.order_id inner join products p on oprr.product_id = p.id inner join order_pay_types opt on opt.order_id = o.id inner join o_pcard_relations opcr on opcr.order_id = o.id")
+#    .group_by{|o| o.id}
+#    @order_prod_relations = OrderProdRelation.includes(:order, :product)
+#    .joins(:order)
+#    .where(:order_id => @orders.map(&:id))
+#    .group_by{|opr| opr.order_id}
   end
 
   private
