@@ -15,7 +15,7 @@ class StaffsController < ApplicationController
     @staff =  Staff.new
     @violation_reward = ViolationReward.new
     @train = Train.new
-    @count_time = staff_scores.last.try(:updated_at)
+    @latest_updated_at = Staff.maximum("updated_at").strftime("%Y-%m-%d") unless Staff.maximum("updated_at").blank?
   end
 
   def search
