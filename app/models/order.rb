@@ -1,7 +1,7 @@
 #encoding: utf-8
 class Order < ActiveRecord::Base
   has_many :order_prod_relations
-  has_many :products, :through => :order_prod_relations
+#  has_many :products, :through => :order_prod_relations
   has_many :order_pay_types
   has_many :work_orders
   belongs_to :car_num
@@ -575,7 +575,8 @@ class Order < ActiveRecord::Base
                         :product_id =>prod_id, :product_num => p_num})
                   end
                 end
-              else
+              else #已经买过套餐卡
+                ## 如果使用套餐卡，把使用的次数保存
                 cpr = CPcardRelation.find_by_id a_pc[4]
                 (prod_nums||[]).each do |pn|
                   prod_id = pn.split("=")[0]
@@ -736,20 +737,12 @@ class Order < ActiveRecord::Base
       content += cp.name + ","
       realy_price += cp.price
     end unless customer_pcards.blank?
-#    if not self.c_pcard_relation_id.blank?
-#      h = {}
-#      pcard = self.c_pcard_relation.package_card
-#      h[:name] = pcard.name
-#      h[:price] = pcard.price
-#      h[:type] = 3
-#      h[:prods] = self.c_pcard_relation.content.split(",").collect{|p|
-#        s = {}
-#        s[:name] = p.split("-")[1]
-#        s[:num] = p.split("-")[2]
-#        s
-#      }
-#      hash[:c_pcard_relation] <<  h
-#    end
+    self.o_pcard_relations.group_by{|opr| opr.c_pcard_relation_id}.each do |c_pcard_relarion_id, oprs|
+      cpr = CPcardRelation.find_by_id c_pcard_relarion_id
+      name = cpr.package_card.name
+      price = oprs.map{|opr| [opr.product.sale_price.to_f, opr.product_num]}.inject(0){|sum, pn| sum += pn[0]*pn[1]}.to_f
+      hash[:c_pcard_relation] << {:name => name, :price => -price, :num => 1, :type => 3}
+    end
     hash
   end
 
@@ -877,7 +870,7 @@ class Order < ActiveRecord::Base
     #order中的商品跟服务的总成本价
     products_sum_cost_price = self.order_prod_relations.inject(0){|sum,opr| sum+=(opr.t_price.to_f)*opr.pro_num}
     #购买套餐卡总成本
-    pcards_sum_cost_price = self.c_pcard_relations.map{|cpr| cpr.package_card}.compact.map{|pc| pc.products.inject(0){|sum,opr| sum += opr.t_price.to_f}}.inject(0){|sum,pc| sum += pc}
+    pcards_sum_cost_price = self.c_pcard_relations.map{|cpr| cpr.package_card}.compact.map{|pc| pc.pcard_prod_relations.map{|ppr| ppr.product}.inject(0){|sum,opr| sum += opr.t_price.to_f}}.inject(0){|sum,pc| sum += pc}
 
     ##### 商品跟套餐卡购买总成本价
     total_cost_price = products_sum_cost_price + pcards_sum_cost_price

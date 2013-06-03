@@ -10,4 +10,30 @@ module MarketManagesHelper
     #p.is_service=#{Product::PROD_TYPES[:SERVICE]} 
   end
 
+  def prod_gross_price(order_id, oprr,order_pay_types, o_pcard_relations)
+    total_price = oprr.total_price.to_f  #每项商品总价
+    opcr = o_pcard_relations[order_id].select{|opcr| opcr.product_id == oprr.product_id }.first unless o_pcard_relations[order_id].blank?
+    unless opcr.blank?
+      deals_price = (opcr.product_num * oprr.price).to_f #每项商品使用套餐卡抵付的价格
+      prod_full_price_num = oprr.pro_num - opcr.product_num #未使用套餐卡抵付的商品数目
+      prod_cost_price = prod_full_price_num *(oprr.t_price.to_f) #未使用套餐卡抵付的商品成本价
+    end
+    # 使用活动优惠总价
+    opt_sale = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:SALE]}.first unless order_pay_types[order_id].blank?
+    unless opt_sale.blank?
+      sale_price = opt_sale.price
+    end
+
+    # 使用打折卡优惠总价
+    opt_sav = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:SV_CARD]}.first  unless order_pay_types[order_id].blank?
+    unless opt_sav.blank?
+      sav_price = opt_sav.price
+    end
+
+    ssale_price = total_price - deals_price.to_f - sale_price.to_f - sav_price.to_f  #零售价
+
+    gross_profit = ssale_price - prod_cost_price.to_f #一个商品的毛利
+
+    return [prod_cost_price.to_f, ssale_price,gross_profit]
+  end
 end
