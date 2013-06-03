@@ -13,7 +13,6 @@ class MarketManagesController < ApplicationController
     @months =@month_goal.inject(Hash.new){|hash,order|
       hash[order.day].nil? ? hash[order.day]={order.pay_type=>order.price} : hash[order.day].merge!(order.pay_type=>order.price);hash }
     @total_num = @month_goal.inject(0){|num,order| num + order.price}
-    p @months
   end
 
   #营业额汇总查询
@@ -36,18 +35,29 @@ class MarketManagesController < ApplicationController
   def makets_reports
     session[:r_created],session[:r_ended],session[:time]=nil,nil,nil
     @total_prod,@total_serv,@total_fee =0,0,0
-    reports =MonthScore.kind_order(params[:store_id]).inject(Hash.new){
+    @total_price = {}
+    orders =MonthScore.kind_order(params[:store_id])
+    pays =MonthScore.normal_ids(orders.map(&:id)).inject(Hash.new){
+      |hash,pay| hash["#{pay.product_id}-#{pay.day}"].nil? ? hash["#{pay.product_id}-#{pay.day}"]=(pay.price.nil? ? 0 : pay.price) : hash["#{pay.product_id}-#{pay.day}"] += (pay.price.nil? ? 0 : pay.price);hash
+    }
+    orders.inject(Hash.new){|hash,order|
+      hash["#{order.id}-#{order.day}"].nil? ? hash["#{order.id}-#{order.day}"]= order.sum : hash["#{order.id}-#{order.day}"] += order.sum;hash}.each {
+      |key,value|@total_price[key] = (value.nil? ? 0 : value)- (pays[key].nil? ? 0 : pays[key])
+    }
+    reports =orders.inject(Hash.new){
       |hash,prod| hash[prod.is_service].nil? ? hash[prod.is_service]= [prod] : hash[prod.is_service] << prod ;hash
     }
     @prods =reports[Product::PROD_TYPES[:PRODUCT]].inject(Hash.new){
-      |hash,prod| @total_prod += prod.sum;hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      |hash,prod|@total_prod += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
     } unless reports[Product::PROD_TYPES[:PRODUCT]].nil?
     @serv =reports[Product::PROD_TYPES[:SERVICE]].inject(Hash.new){
-      |hash,prod| @total_serv += prod.sum;hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      |hash,prod| @total_serv += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
     } unless reports[Product::PROD_TYPES[:SERVICE]].nil?
-    @pcards =MonthScore.sort_pcard(params[:store_id]).inject(Hash.new){
-      |hash,prod| @total_fee += prod.sum;hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+    pcards=MonthScore.sort_pay_types(params[:store_id])
+    @pcards = pcards.inject(Hash.new){
+      |hash,prod| @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
     }
+    @products =orders.inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
   end
 
   #销售报表查询
@@ -60,18 +70,29 @@ class MarketManagesController < ApplicationController
   #销售报表查询列表
   def makets_views
     @total_prod,@total_serv,@total_fee =0,0,0
-    reports =MonthScore.search_kind_order(params[:store_id],session[:r_created],session[:r_ended],session[:time]).inject(Hash.new){
+    @total_price = {}
+    orders = MonthScore.search_kind_order(session[:r_created],session[:r_ended],session[:time],params[:store_id])
+    pays =MonthScore.normal_ids(orders.map(&:id),session[:time]).inject(Hash.new){
+      |hash,pay| hash["#{pay.product_id}-#{pay.day}"].nil? ? hash["#{pay.product_id}-#{pay.day}"]=(pay.price.nil? ? 0 : pay.price) : hash["#{pay.product_id}-#{pay.day}"] += (pay.price.nil? ? 0 : pay.price);hash
+    }
+    orders.inject(Hash.new){|hash,order|
+      hash["#{order.id}-#{order.day}"].nil? ? hash["#{order.id}-#{order.day}"]= order.sum : hash["#{order.id}-#{order.day}"] += order.sum;hash}.each {
+      |key,value|@total_price[key] = (value.nil? ? 0 : value)- (pays[key].nil? ? 0 : pays[key])
+    }
+    reports =orders.inject(Hash.new){
       |hash,prod| hash[prod.is_service].nil? ? hash[prod.is_service]= [prod] : hash[prod.is_service] << prod ;hash
     }
     @prods =reports[Product::PROD_TYPES[:PRODUCT]].inject(Hash.new){
-      |hash,prod| @total_prod += prod.sum;hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      |hash,prod|@total_prod += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
     } unless reports[Product::PROD_TYPES[:PRODUCT]].nil?
     @serv =reports[Product::PROD_TYPES[:SERVICE]].inject(Hash.new){
-      |hash,prod| @total_serv += prod.sum;hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      |hash,prod| @total_serv += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
     } unless reports[Product::PROD_TYPES[:SERVICE]].nil?
-    @pcards =MonthScore.search_sort_pcard(params[:store_id],session[:r_created],session[:r_ended],session[:time]).inject(Hash.new){
-      |hash,prod| @total_fee += prod.sum;hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+    pcards=MonthScore.sort_pay_types(params[:store_id],session[:time],session[:r_created],session[:r_ended])
+    @pcards = pcards.inject(Hash.new){
+      |hash,prod| @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
     }
+    @products =orders.inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
     render 'makets_reports'
   end
 
@@ -108,12 +129,12 @@ class MarketManagesController < ApplicationController
   def sale_orders
     session[:o_created],session[:o_ended],session[:order_name]=nil,nil,nil
     orders = Sale.count_sale_orders(params[:store_id])
-    p orders
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
-      @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
-     p on p.order_id=o.id where o.sale_id in (#{@sale_orders.map(&:id).join(',')}) ").inject(Hash.new)  {|hash,order_pay|
-        hash[order_pay.sale_id].nil? ? hash[order_pay.sale_id]=order_pay.price : hash[order_pay.sale_id] += order_pay.price  if order_pay.pay_type == OrderPayType::PAY_TYPES[:SALE];hash }
+      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{@sale_orders.map(&:o_id).join(',')}) ").inject(Hash.new) {
+        |hash,order_pay| hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=[order_pay] : hash[order_pay.order_id] << order_pay;hash }
+      @hash_favor = {}
+      pays.each {|key,value| @hash_favor[key]=value.inject(Hash.new){|hash,pay| hash[pay.pay_type].nil? ? hash[pay.pay_type]=pay.price : hash[pay.pay_type] += pay.price;hash }}
       @sale_names =orders.map(&:name)
     end
   end
@@ -128,9 +149,10 @@ class MarketManagesController < ApplicationController
     orders = Sale.count_sale_orders_search(params[:store_id],session[:o_created],session[:o_ended],session[:order_name])
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
-      @hash_favor = OrderPayType.find_by_sql("select p.price,o.sale_id,p.pay_type from orders o inner join order_pay_types
-     p on p.order_id=o.id where o.sale_id in (#{@sale_orders.map(&:id).join(',')}) ").inject(Hash.new)  {|hash,order_pay|
-        hash[order_pay.sale_id].nil? ? hash[order_pay.sale_id]=order_pay.price : hash[order_pay.sale_id] += order_pay.price  if order_pay.pay_type == OrderPayType::PAY_TYPES[:SALE];hash }
+      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{@sale_orders.map(&:o_id).join(',')}) ").inject(Hash.new) {
+        |hash,order_pay| hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=[order_pay] : hash[order_pay.order_id] << order_pay;hash }
+      @hash_favor = {}
+      pays.each {|key,value| @hash_favor[key]=value.inject(Hash.new){|hash,pay| hash[pay.pay_type].nil? ? hash[pay.pay_type]=pay.price : hash[pay.pay_type] += pay.price;hash }}
     end
     @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     render 'sale_orders'
@@ -193,8 +215,9 @@ class MarketManagesController < ApplicationController
   end
 
   def gross_profit
-    @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => :products}).where(:status => Order::VALID_STATUS)
+    @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
       .where("date_format(created_at,'%Y-%m-%d') = curdate()")
+      .select("distinct orders.*")
       .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
   end
 
@@ -206,10 +229,16 @@ class MarketManagesController < ApplicationController
     sql<< start_sql << end_sql << types_sql
     sql = sql.compact.join(" and ")
     @orders = Order.includes(:order_prod_relations, :order_pay_types, :o_pcard_relations, :c_pcard_relations)
-    .joins(:products)
+    .joins(:order_prod_relations => :product)
     .where(:status => Order::VALID_STATUS)
-    .where(sql)
+    .where(sql).select("orders.*, products.types").uniq
     .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
+    @order_prod_relations = OrderProdRelation.includes(:order, :product)
+    .joins(:order)
+    .where(:order_id => @orders.map(&:id))
+    .group_by{|opr| opr.order_id}
+#    p 111111111111
+#    p @order_prod_relations
   end
 
   private

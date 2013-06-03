@@ -184,5 +184,20 @@ class Complaint < ActiveRecord::Base
     return "/chart_images/#{store_id}/#{types}/#{file_name}"
     puts "Chart #{object_id} success generated"
   end
+
+  def self.consumer_types(store_id,sear,created=nil,ended=nil,sex=nil,car_model=nil,year=nil,name=nil,price=nil)
+    sql = "select o.created_at,o.code,m.name,n.buy_year,o.id from orders o inner join customers c on c.id=o.customer_id inner join
+    car_nums n on o.car_num_id=n.id inner join car_models m on m.id=n.car_model_id where store_id=#{store_id}"
+    sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
+    sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
+    sql += " and c.sex=#{sex}" unless sex.nil? || sex =="" || sex.length==0
+    sql += " and m.name='#{car_model}'" unless car_model.nil? || car_model =="" || car_model.length==0
+    sql += " and n.buy_year ='#{year}'" unless year.nil? || year =="" || year.length==0
+    sql += " and c.name='#{name}'" unless name.nil? || name =="" || name.length==0
+    sql += " and #{price}" unless price.nil? || price =="" || price.length==0
+    sql += " and date_format(o.created_at,'%Y-%m')=date_format(now(),'%Y-%m')"   if sear == 1
+    sql += " order by created_at desc"
+    return Order.find_by_sql(sql)
+  end
   
 end
