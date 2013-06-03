@@ -26,13 +26,12 @@
              <% end %>
            </div>
            <% end %>
-           <div class="search">
-             <div>统计时间：<%= @count_time.strftime("%Y-%m-%d") if @count_time %></div>
-           </div>
            <div class="data_body_title">
-             <p class="data_body_p">员工数量：<span class="red"><%= @staffs.total_entries %></span>位</p>
+             <p class="data_body_p">员工数量：<span class="red"><%= @staffs.total_entries %></span>位， 最新更新时间：<%= @latest_updated_at %></p>
            </div>
+           <div class="data_body_p" style="padding: 0 10px 0px 10px;float:left">统计时间：<%= DateTime.now.months_ago(1).strftime("%Y%m") %></div>
               <div class="data_menu">
+                 
                    <% if permission?(:staffs,:add_staff) %><a href="javascript:void(0)" id="new_staff">新建员工</a><% end %>
                    <% if permission?(:staffs,:add_priase) %><a href="javascript:void(0)" id="new_reward">新建奖励</a><% end %>
                    <% if permission?(:staffs,:add_violation) %><a href="javascript:void(0)" id="new_violation">新建违规</a><% end %>
