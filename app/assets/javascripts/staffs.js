@@ -230,9 +230,9 @@ $(document).ready(function(){
     $("#staff_working_stats").live("change", function(){        //选择在职状态时
         if($(this).val() == 1){
             $(this).parent().parent().find($("#staff_probation_days")).attr("disabled", "disabled");
-            $(this).parent().parent().find($("#staff_probation_days")).val("");
+            //$(this).parent().parent().find($("#staff_probation_days")).val("");
             $(this).parent().parent().find($("#staff_probation_salary")).attr("disabled", "disabled");
-            $(this).parent().parent().find($("#staff_probation_salary")).val("");
+            //$(this).parent().parent().find($("#staff_probation_salary")).val("");
         }else{
             $(this).parent().parent().find($("#staff_probation_days")).removeAttr("disabled");
             $(this).parent().parent().find($("#staff_probation_salary")).removeAttr("disabled");
@@ -245,11 +245,11 @@ $(document).ready(function(){
             $(this).parent().parent().find($("#staff_deduct_percent")).removeAttr("disabled");
         }else{
             $(this).parent().parent().find($("#staff_deduct_at")).attr("disabled", "disabled");
-            $(this).parent().parent().find($("#staff_deduct_at")).val("");
+            //$(this).parent().parent().find($("#staff_deduct_at")).val("");
             $(this).parent().parent().find($("#staff_deduct_end")).attr("disabled", "disabled");
-            $(this).parent().parent().find($("#staff_deduct_end")).val("");
+            //$(this).parent().parent().find($("#staff_deduct_end")).val("");
             $(this).parent().parent().find($("#staff_deduct_percent")).attr("disabled", "disabled");
-            $(this).parent().parent().find($("#staff_deduct_percent")).val("");
+            //$(this).parent().parent().find($("#staff_deduct_percent")).val("");
         }
     })
     //创建员工信息验证, 编辑员工信息验证
