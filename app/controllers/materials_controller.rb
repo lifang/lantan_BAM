@@ -577,7 +577,7 @@ class MaterialsController < ApplicationController
   def upload_checknum
     check_file = params[:check_file]
     if check_file
-      new_name = random_file_name(check_file.original_filename)
+      new_name = random_file_name(check_file.original_filename) + check_file.original_filename.split(".").reverse[0]
       FileUtils.mkdir_p Material::MAT_CHECKNUM_PATH % @store_id
       file_path = Material::MAT_CHECKNUM_PATH % @store_id + "/#{new_name}"
       File.new(file_path, 'a+')

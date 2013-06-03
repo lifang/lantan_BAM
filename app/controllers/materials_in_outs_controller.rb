@@ -87,7 +87,7 @@ class MaterialsInOutsController < ApplicationController
   def upload_code
     code_file = params[:code_file]
     if code_file
-      new_name = random_file_name(code_file.original_filename)
+      new_name = random_file_name(code_file.original_filename) + code_file.original_filename.split(".").reverse[0]
       FileUtils.mkdir_p Material::MAT_IN_PATH % @store_id
       file_path = Material::MAT_IN_PATH % @store_id + "/#{new_name}"
       File.new(file_path, 'a+')
