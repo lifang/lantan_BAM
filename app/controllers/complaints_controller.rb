@@ -166,7 +166,7 @@ class ComplaintsController < ApplicationController
       sql += " and p.types =#{session[:list_prod]}" unless session[:list_prod].nil? || session[:list_prod] =="" || session[:list_prod].length==0
       prices =OrderPayType.find_by_sql(pay_sql).inject(Hash.new){|hash,order_pay|hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=order_pay.price : hash[order_pay.order_id]+=order_pay.price;hash}
       @sums ={}
-      products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]= prod.total_price : hash[prod.order_id]+= prod.total_price;hash}.each {|key,value|@sums[key]=value-(prices[key].nil? ? 0 :prices[key])  }
+      products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]= prod.total_price : hash[prod.order_id]+= prod.total_price;hash}.each {|key,value|@sums[key]=(value.nil? ? 0 : value)-(prices[key].nil? ? 0 :prices[key])  }
     end
     render "consumer_list"
   end
