@@ -84,6 +84,7 @@ routes=
 salary_list\:salary_of_day=
 salary_list\:salary_of_month=
 secret=
+staff_working_stats\:update_staff_working_stats=
 stats=
 test=
 test\:benchmark=
