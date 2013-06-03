@@ -69,9 +69,6 @@ class Staff < ActiveRecord::Base
     store_id = self.store.id
     FileUtils.remove_dir "#{File.expand_path(Rails.root)}/public/uploads/#{store_id}/#{self.id}" if status.eql?("update") && FileTest.directory?("#{File.expand_path(Rails.root)}/public/uploads/#{store_id}/#{self.id}")
     FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/uploads/#{store_id}/#{self.id}"
-   p 1111
-   p original_filename
-
     File.new(Rails.root.join('public', "uploads", "#{store_id}", "#{self.id}", original_filename), 'a+')
     File.open(Rails.root.join('public', "uploads", "#{store_id}", "#{self.id}", original_filename), 'wb') do |file|
       file.write(photo.read)
@@ -83,8 +80,6 @@ class Staff < ActiveRecord::Base
       resize = size > img["width"] ? img["width"] : size
       new_file = file_path.split(".")[0]+"_#{resize}."+file_path.split(".").reverse[0]
       resize_file_name = original_filename.split(".")[0]+"_#{resize}."+original_filename.split(".").reverse[0]
-      p 33333333333
-      p resize_file_name
       self.update_attribute(:photo, "/uploads/#{store_id}/#{self.id}/#{resize_file_name}")
       img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
     end
