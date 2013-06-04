@@ -158,13 +158,14 @@ class MarketManagesController < ApplicationController
 
   def stored_card_record
     @start_at, @end_at = params[:started_at], params[:ended_at]
-    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "o.started_at >= '#{@start_at}'"
-    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "o.ended_at <= '#{@end_at} 23:59:59'"
+    started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "o.created_at >= '#{@start_at}'"
+    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "o.created_at <= '#{@end_at} 23:59:59'"
 
     order_details = Order.find_by_sql("select o.id,o.code,opt.price price,opt.created_at created_at,p.name product_name from orders o
                                 inner join order_pay_types opt on opt.order_id = o.id inner join order_prod_relations op on
                                 op.order_id = o.id inner join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
+                                o.status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and
                                 #{started_at_sql} and #{ended_at_sql}")
 
     pcar_relations = CPcardRelation.find_by_sql(["select cpr.order_id order_id, 1 pro_num, pc.price price, pc.name name
@@ -205,7 +206,7 @@ class MarketManagesController < ApplicationController
 
   def stored_card_bill
     @start_at, @end_at = params[:started_at], params[:ended_at]
-    @svc_returns = shared_stored_card_bill(@start_at, @start_at, @store.id)
+    @svc_returns = shared_stored_card_bill(@start_at, @end_at, @store.id)
   end
 
   def stored_card_bill_blank
@@ -257,12 +258,14 @@ class MarketManagesController < ApplicationController
 
     relation_order_sql = "select srr.*,o.code code,o.id o_id from svc_return_records srr
                           left join orders o on o.id = srr.target_id where #{started_at_sql}
+                          and o.status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) 
                           and #{ended_at_sql} and srr.store_id=#{store_id} and
                           srr.types=#{SvcReturnRecord::TYPES[:OUT]}"
     order_svc_returns = SvcReturnRecord.find_by_sql(relation_order_sql)
 
     relation_material_order_sql = "select srr.*,mo.code code,mo.id mo_id from svc_return_records srr
                           left join material_orders mo on mo.id = srr.target_id where #{started_at_sql}
+                          and mo.status = #{MaterialOrder::STATUS[:pay]}
                           and #{ended_at_sql} and srr.store_id=#{store_id} and
                           srr.types=#{SvcReturnRecord::TYPES[:IN]}"
     material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
