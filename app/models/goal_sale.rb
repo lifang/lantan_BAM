@@ -25,12 +25,13 @@ class GoalSale < ActiveRecord::Base
     price={}
     unless pays.blank?
       pay_sql = "select sum(price) price,product_id p_id from order_pay_types  where product_id in (#{pays.map(&:p_id).uniq.join(",")}) and
-    pay_type in (#{OrderPayType::PAY_TYPES[:SV_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]},#{OrderPayType::PAY_TYPES[:IS_FREE]}) group by product_id"
+    pay_type in (#{OrderPayType::PAY_TYPES[:SV_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]},#{OrderPayType::PAY_TYPES[:IS_FREE]}) and
+    date_format(created_at,'%Y-%m-%d')=date_format(now(),'%Y-%m-%d') group by product_id"
       prices = OrderPayType.find_by_sql(pay_sql).inject(Hash.new){|hash,prod|hash[prod.p_id].nil? ? hash[prod.p_id]= prod.price : hash[prod.p_id] += prod.price;hash}
-      pro_price = pays.inject(Hash.new){|hash,pay| hash[pay.p_id] =(pay.sum.nil? ? 0 : pay.sum)-(prices[pay.p_id].nil? ? 0 : prices[pay.p_id]);hash}
+      pro_price = pays.inject(Hash.new){|hash,pay|hash[pay.p_id] =(pay.sum.nil? ? 0 : pay.sum)-(prices[pay.p_id].nil? ? 0 : prices[pay.p_id]);hash}
       orders = pays.inject(Hash.new){|hash,order|hash[order.types].nil? ? hash[order.types]= [order] : hash[order.types] << [order];hash}
       price =orders.select {|key,value| key!=Product::TYPES_NAME[:OTHER_PROD] && key!=Product::TYPES_NAME[:OTHER_SERV] }.values.flatten.inject(Hash.new){|hash,order|
-        hash[order.is_service].nil? ? hash[order.is_service]= pro_price[order.p_id] : hash[order.is_service] += pro_price[order.p_id] ;hash}
+        hash[order.is_service].nil? ? hash[order.is_service]= pro_price[order.p_id] : hash[order.is_service] += pro_price[order.p_id];hash}
       price.merge!(GoalSale::TYPES[:OTHER]=>orders.select {|key,value|
           key==Product::TYPES_NAME[:OTHER_PROD] || key==Product::TYPES_NAME[:OTHER_SERV] }.values.flatten.inject(0){|num,order| num+=order.sum})
     end
