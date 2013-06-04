@@ -656,11 +656,16 @@ function commit_supplier_form(obj){
 
 function checkMaterial(obj, store_id){
     var reg2 = /^\d+\.{0,1}\d*$/;
+    var pattern = new RegExp("[=,-]")
     var f = true;
   if($.trim($("#material_name").val())==""){
        tishi_alert("请输入物料名称");
        f = false;
-    }else if($.trim($("#material_code").val())==""){
+    }else if($("#material_name").val().match(pattern)!=null){
+        tishi_alert("物料名称不能包含非法字符");
+        f = false;
+    }
+    else if($.trim($("#material_code").val())==""){
         tishi_alert("请输入条形码");
         f = false;
     }else if($("#material_div #material_types").val()==""){
