@@ -191,7 +191,7 @@ class Complaint < ActiveRecord::Base
     sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql += " and c.sex=#{sex}" unless sex.nil? || sex =="" || sex.length==0
-    sql += " and m.name='#{car_model}'" unless car_model.nil? || car_model =="" || car_model.length==0
+    sql += " and m.id='#{car_model}'" unless car_model.nil? || car_model =="" || car_model.length==0
     sql += " and n.buy_year ='#{year}'" unless year.nil? || year =="" || year.length==0
     sql += " and c.name='#{name}'" unless name.nil? || name =="" || name.length==0
     sql += " and #{price}" unless price.nil? || price =="" || price.length==0

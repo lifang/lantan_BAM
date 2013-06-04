@@ -72,7 +72,7 @@ class ProductsController < ApplicationController
     @img_urls=@product.image_urls
     @materials =Material.find_by_sql( "select id,name,code,storage from materials  where  store_id=#{params[:store_id]} and
               status=#{Material::STATUS[:NORMAL]} and types=#{Material::TYPES[:PRODUCT]}")
-   p @material = @product.prod_mat_relations[0]
+    p @material = @product.prod_mat_relations[0]
   end
 
   def show_prod
@@ -93,7 +93,11 @@ class ProductsController < ApplicationController
         end
       end
     else
-      product.prod_mat_relations.first.update_attributes(:material_id=>params[:prod_material].to_i) if product.prod_mat_relations.first
+      if product.prod_mat_relations.first
+        product.prod_mat_relations.first.update_attributes(:material_id=>params[:prod_material].to_i)
+      else
+        ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
+      end
       parms.merge!({:standard=>params[:standard]})
     end
     begin

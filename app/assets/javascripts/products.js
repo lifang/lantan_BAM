@@ -30,7 +30,7 @@ function show_prod(id,store_id){
 
 //添加或者编辑产品
 function add_product(e){
-    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？-]")
+    var pattern = new RegExp("[`~!@#$^&*={}:;,\\[\\].<>?~！@#￥……&*（）——'。，、？-]")
     var name=$("#name").val();
     var base=$("#base_price").val();
     var t_price =$("#t_price").val();
@@ -117,7 +117,7 @@ function edit_service(store_id,id){
 
 //添加或者编辑服务
 function edit_serv(e){
-    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？-]");
+    var pattern = new RegExp("[`~!@#$^&*={}:;,\\[\\].<>?~！@#￥……&*（）——'。，、？-]");
     var name=$("#name").val();
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();

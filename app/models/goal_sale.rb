@@ -24,7 +24,7 @@ class GoalSale < ActiveRecord::Base
     pays =Order.find_by_sql(sql)
     price={}
     unless pays.blank?
-      pay_sql = "select sum(price) price,product_id p_id from order_pay_types  where product_id in (#{pays.map(&:id).uniq.join(",")}) and
+      pay_sql = "select sum(price) price,product_id p_id from order_pay_types  where product_id in (#{pays.map(&:p_id).uniq.join(",")}) and
     pay_type in (#{OrderPayType::PAY_TYPES[:SV_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]},#{OrderPayType::PAY_TYPES[:IS_FREE]}) group by product_id"
       prices = OrderPayType.find_by_sql(pay_sql).inject(Hash.new){|hash,prod|hash[prod.p_id].nil? ? hash[prod.p_id]= prod.price : hash[prod.p_id] += prod.price;hash}
       pro_price = pays.inject(Hash.new){|hash,pay| hash[pay.p_id] =(pay.sum.nil? ? 0 : pay.sum)-(prices[pay.p_id].nil? ? 0 : prices[pay.p_id]);hash}
