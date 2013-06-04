@@ -29,26 +29,7 @@ function assess_result(sys_score, manage_score){
 }
 
 $(document).ready(function(){
-    $("#staffs_table").tablesorter({
-        headers:
-        {
-
-            1: {sorter: false},
-            2: {sorter: false},
-            5: {sorter: false},
-            6: {sorter: false}
-
-        }
-    });
-    $("#staffs_table").bind("sortEnd",function() {
-        $("#staffs_table tbody").find('tr').each(function(i){
-            if(i%2==0){
-                $(this).removeClass('tbg');
-            }else{
-                $(this).addClass('tbg');
-            }
-        })
-    });
+   
     $("#work_record_table").tablesorter({
         headers:
         {
