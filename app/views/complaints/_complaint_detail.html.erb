@@ -17,13 +17,16 @@
   </div>
   <div class="seeProDiv">
     <div class="seeProDiv_l">相关订单：</div>
-    <div class="seeProDiv_r"><%= @complaint.created_at ? @complaint.created_at.strftime("%Y-%m-%d %H:%M:%S") : "---" %></div>
+    <div class="seeProDiv_r"><%= link_to "#{@complaint.order.code}", "/orders/#{@complaint.order.id}/order_info" ,
+            :remote => "true", "data-type" => "script", :class => "other_a", :style => "text-decoration: underline" %>
+</div>
   </div>
   <div class="seeProDiv">
     <div class="seeProDiv_l">处理结果：</div>
-    <div class="seeProDiv_r"><%= @complaint.created_at ? @complaint.created_at.strftime("%Y-%m-%d %H:%M:%S") : "---" %></div>
+    <div class="seeProDiv_r"><%= @complaint.remark %></div>
   </div>
 
+  <% if !@violation_rewards.blank? %>
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="reward_table">
     <thead>
       <tr class="hbg">
@@ -51,6 +54,10 @@
         </tr>
       <% end %>
     </tbody>
+    客户反馈意见：<%= @complaint.status==false ? "不满意" : "满意" %>
   </table>
+  <% else %>
+  投诉未处理
+  <% end %>
 </div>
 

@@ -65,22 +65,22 @@ class Staff < ActiveRecord::Base
     self.encrypted_password=encrypt(password)
   end
 
-  def operate_picture(photo, status)
+  def operate_picture(photo,original_filename, status)
     store_id = self.store.id
     FileUtils.remove_dir "#{File.expand_path(Rails.root)}/public/uploads/#{store_id}/#{self.id}" if status.eql?("update") && FileTest.directory?("#{File.expand_path(Rails.root)}/public/uploads/#{store_id}/#{self.id}")
     FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/uploads/#{store_id}/#{self.id}"
-    File.new(Rails.root.join('public', "uploads", "#{store_id}", "#{self.id}", photo.original_filename), 'a+')
-    File.open(Rails.root.join('public', "uploads", "#{store_id}", "#{self.id}", photo.original_filename), 'wb') do |file|
+    File.new(Rails.root.join('public', "uploads", "#{store_id}", "#{self.id}", original_filename), 'a+')
+    File.open(Rails.root.join('public', "uploads", "#{store_id}", "#{self.id}", original_filename), 'wb') do |file|
       file.write(photo.read)
     end
-    file_path = "#{File.expand_path(Rails.root)}/public/uploads/#{store_id}/#{self.id}/#{photo.original_filename}"
+    file_path = "#{File.expand_path(Rails.root)}/public/uploads/#{store_id}/#{self.id}/#{original_filename}"
     img = MiniMagick::Image.open file_path,"rb"
 
     Constant::STAFF_PICSIZE.each do |size|
       resize = size > img["width"] ? img["width"] : size
       new_file = file_path.split(".")[0]+"_#{resize}."+file_path.split(".").reverse[0]
-      resize_file_name = photo.original_filename.split(".")[0]+"_#{resize}."+photo.original_filename.split(".").reverse[0]
-      self.update_attribute(:photo, "/uploads/#{store_id}/#{self.id}/#{resize_file_name}") if status == "create"
+      resize_file_name = original_filename.split(".")[0]+"_#{resize}."+original_filename.split(".").reverse[0]
+      self.update_attribute(:photo, "/uploads/#{store_id}/#{self.id}/#{resize_file_name}")
       img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
     end
   end

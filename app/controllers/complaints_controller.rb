@@ -123,7 +123,7 @@ class ComplaintsController < ApplicationController
   #客户-投诉-点击详细
   def complaint_detail
     @store = Store.find_by_id(params[:store_id])
-    @complaint = @store.complaints.find_by_id(params[:id])
+    @complaint = @store.complaints.includes(:order).find_by_id(params[:id])
     @staff_names = Staff.where(:id => [@complaint.staff_id_1, @complaint.staff_id_2].compact).map(&:name).join(", ")
     @violation_rewards = ViolationReward.find_by_sql("select vr.*, s.name name from violation_rewards vr inner join staffs s on vr.staff_id = s.id where target_id = #{ @complaint.id}")
   end
@@ -166,7 +166,7 @@ class ComplaintsController < ApplicationController
       sql += " and p.types =#{session[:list_prod]}" unless session[:list_prod].nil? || session[:list_prod] =="" || session[:list_prod].length==0
       prices =OrderPayType.find_by_sql(pay_sql).inject(Hash.new){|hash,order_pay|hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=order_pay.price : hash[order_pay.order_id]+=order_pay.price;hash}
       @sums ={}
-      products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]= prod.total_price : hash[prod.order_id]+= prod.total_price;hash}.each {|key,value|@sums[key]=value-(prices[key].nil? ? 0 :prices[key])  }
+      products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]= prod.total_price : hash[prod.order_id]+= prod.total_price;hash}.each {|key,value|@sums[key]=(value.nil? ? 0 : value)-(prices[key].nil? ? 0 :prices[key])  }
     end
     render "consumer_list"
   end

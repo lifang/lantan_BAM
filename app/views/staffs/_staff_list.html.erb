@@ -21,6 +21,30 @@
       });
     });
   <% end %>
+$(document).ready(function(){
+    $("#staffs_table").tablesorter({
+        headers:
+        {
+
+            1: {sorter: false},
+            2: {sorter: false},
+            5: {sorter: false},
+            6: {sorter: false}
+
+        }
+    });
+    $("#staffs_table").bind("sortEnd",function() {
+        $("#staffs_table tbody").find('tr').each(function(i){
+            if(i%2==0){
+                $(this).removeClass('tbg');
+            }else{
+                $(this).addClass('tbg');
+            }
+        })
+    });
+
+    $(".data_table > tbody > tr:odd").addClass("tbg");
+});
 </script>
 <div>
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="staffs_table">

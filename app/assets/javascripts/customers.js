@@ -183,7 +183,7 @@ function check_process() {
         return false;
     }
     if ($.trim($("#pro_remark").val()) == "") {
-        tishi_alert("请您填写处理意见");
+        tishi_alert("请您填写处理结果");
         return false;
     }
     return true;
