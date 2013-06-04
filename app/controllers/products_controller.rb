@@ -93,7 +93,7 @@ class ProductsController < ApplicationController
         end
       end
     else
-      product.prod_mat_relations.first.update_attributes(:material_id=>params[:prod_material].to_i)
+      product.prod_mat_relations.first.update_attributes(:material_id=>params[:prod_material].to_i) if product.prod_mat_relations.first
       parms.merge!({:standard=>params[:standard]})
     end
     begin

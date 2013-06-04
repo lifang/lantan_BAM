@@ -1,13 +1,20 @@
 <div class="item">
-  <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="$('#name').val($('#prod_material option:selected').html().split('-')[0])">
+  <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="modify_value()">
     <% @materials.each do |material| %>
-      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.id) == material.id%> selected<%end%> ><%= "#{material.name}-#{material.code}-#{material.storage}" %></option>
+      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.id) == material.id%> selected<%end%> o_value="<%= "#{material.code}-#{material.storage}" %>" ><%= material.name%></option>
     <% end %>
   </select>
 </div>
 <div class="item">
   <label>名称：</label><input name="name" id="name" type="text" value="<%= @product.name.nil? ? @materials[0].nil? ? "" : @materials[0].name : @product.name  %>" />
 </div>
+<div class="item">
+  <label>条形码：</label><label id="item_txm"><%=@materials[0].nil? ? "" : @materials[0].code  %></label>
+</div>
+<div class="item">
+  <label>库存：</label><label id="item_kc"><%= @materials[0].nil? ? "" : @materials[0].storage%></label>
+</div>
+
 <div class="item">
   <label>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @product.t_price %>" />
 </div>
@@ -55,6 +62,12 @@
       allowFileManager : true
     });
   });
+  function modify_value(){
+    var html = $('#prod_material option:selected')
+    $('#name').val(html.html());
+    $("#item_txm").html(html.attr("o_value").split("-")[0]);
+    $("#item_kc").html(html.attr("o_value").split("-")[1]);
+  }
 </script>
 
 

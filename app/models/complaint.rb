@@ -195,7 +195,7 @@ class Complaint < ActiveRecord::Base
     sql += " and n.buy_year ='#{year}'" unless year.nil? || year =="" || year.length==0
     sql += " and c.name='#{name}'" unless name.nil? || name =="" || name.length==0
     sql += " and #{price}" unless price.nil? || price =="" || price.length==0
-    sql += " and date_format(o.created_at,'%Y-%m')=date_format(now(),'%Y-%m')"   if sear == 1
+    sql += " and TO_DAYS(NOW())-TO_DAYS(o.created_at)<=15 "   if sear == 1
     sql += " order by created_at desc"
     return Order.find_by_sql(sql)
   end
