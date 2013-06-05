@@ -173,13 +173,13 @@ $(document).ready(function(){
             }
         })
     });
-    $(".sort_u_s, .sort_d_s").click(function(){
-        if($(this).attr("class") == "sort_u_s"){
-            $(this).attr("class", "sort_d_s");
-        }else{
-            $(this).attr("class", "sort_u_s");
-        }
-    });
+//    $(".sort_u_s, .sort_d_s").click(function(){
+//        if($(this).attr("class") == "sort_u_s"){
+//            $(this).attr("class", "sort_d_s");
+//        }else{
+//            $(this).attr("class", "sort_u_s");
+//        }
+//    });
 
     //提示信息居中
     //popup(".tab_alert");

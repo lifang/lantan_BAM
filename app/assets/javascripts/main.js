@@ -160,15 +160,21 @@ $(function() {
         var index = $('.groupFunc_h li').index(this);
         $('.groupFunc_b > div').eq(index).show().siblings().hide();
     });
-    //排序切换箭头
-    $(".sort_u, .sort_d").click(function(){
-        if($(this).attr("class") == "sort_u"){
-            $(this).attr("class", "sort_d");
-        }else{
-            $(this).attr("class", "sort_u");
-        }
     });
-});
+
+   //排序切换箭头
+function sort_change(obj){
+    if($(obj).attr("class") == "sort_u"){
+        $(obj).attr("class", "sort_d");
+    }else if($(obj).attr("class") == "sort_d"){
+        $(obj).attr("class", "sort_u");
+    }else if($(obj).attr("class") == "sort_u_s"){
+        $(obj).attr("class", "sort_d_s");
+    }else{
+        $(obj).attr("class", "sort_u_s");
+    }
+}
+
 
 //提示错误信息
 function tishi_alert(message){
