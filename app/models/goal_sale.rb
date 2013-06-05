@@ -20,7 +20,8 @@ class GoalSale < ActiveRecord::Base
   #更新每天的销售报表
   def self.update_curr_price(store_id)
     sql ="select sum(op.total_price) sum,p.is_service,p.types,p.id p_id,o.id  from orders o inner join order_prod_relations op on o.id=op.order_id
-     inner join products p on p.id=op.product_id where date_format(o.created_at,'%Y-%m-%d')=date_format(now(),'%Y-%m-%d') and o.store_id=#{store_id} group by p.id"
+     inner join products p on p.id=op.product_id where date_format(o.created_at,'%Y-%m-%d')=date_format(now(),'%Y-%m-%d') and o.store_id=#{store_id}
+     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) group by p.id"
     pays =Order.find_by_sql(sql)
     price={}
     unless pays.blank?
@@ -33,7 +34,7 @@ class GoalSale < ActiveRecord::Base
       price =orders.select {|key,value| key!=Product::TYPES_NAME[:OTHER_PROD] && key!=Product::TYPES_NAME[:OTHER_SERV] }.values.flatten.inject(Hash.new){|hash,order|
         hash[order.is_service].nil? ? hash[order.is_service]= pro_price[order.p_id] : hash[order.is_service] += pro_price[order.p_id];hash}
       price.merge!(GoalSale::TYPES[:OTHER]=>orders.select {|key,value|
-          key==Product::TYPES_NAME[:OTHER_PROD] || key==Product::TYPES_NAME[:OTHER_SERV] }.values.flatten.inject(0){|num,order| num+=order.sum})
+          key==Product::TYPES_NAME[:OTHER_PROD] || key==Product::TYPES_NAME[:OTHER_SERV] }.values.flatten.inject(0){|num,order| num+= pro_price[order.p_id]})
     end
     car_price =CPcardRelation.find_by_sql("select sum(c.price) sum_price from c_pcard_relations c inner join package_cards p on p.id=c.package_card_id
       where p.store_id=#{store_id} and date_format(c.created_at,'%Y-%m-%d')=date_format(now(),'%Y-%m-%d')")[0]

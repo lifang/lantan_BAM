@@ -1,4 +1,3 @@
-<%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
 <%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
 <%= javascript_include_tag "complaints.js" %>
 <%= render 'directory' %>
@@ -90,7 +89,7 @@
                 </table></td>
               <td><%= consumer.name %></td>
               <td><%= consumer.buy_year %></td>
-              <td><%= @sums[consumer.id] %></td>
+              <td><%=format("%.1f", @sums[consumer.id].nil? ? 0 : @sums[consumer.id])  %></td>
             </tr>
           <%end%>
         </tbody>
