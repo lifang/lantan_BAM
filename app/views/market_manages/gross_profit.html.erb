@@ -19,39 +19,6 @@
 <div class="clear"></div>
 
 <div class="data_body" id="search_gross_profit">
-  <div>
-    <% unless @orders.blank? %>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-        <thead>
-          <tr class="hbg">
-            <td>日期</td>
-            <td>相关订单</td>
-            <td>成本价</td>
-            <td>零售价</td>
-            <td>毛利</td>
-          </tr>
-        </thead>
-        <tbody>
-          <% @orders.each do |order| %>
-          <% order_cost_price = orderCostPrice(order) %>
-            <tr>
-              <td><%= order.created_at.strftime("%Y-%m-%d") if order.created_at %></td>
-              <td>
-              <%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
-            :remote => "true", "data-type" => "script", :class => "other_a" %></td>
-              <td><%= format("%.2f",order_cost_price) %></td>
-              <td><%= format("%.2f",order.price) %></td>
-              <td><%= format("%.2f",(order.price.to_f - order_cost_price.to_f) > 0 ? (order.price.to_f - order_cost_price.to_f) : 0) %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <div class="pageTurn">
-        <%= will_paginate @orders,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
-      </div>
-    <%else%>
-      暂无记录
-    <%end%>
-  </div>
+  <%= render :partial => 'gross_order_profit' %>
 </div>
 <div id="related_order_div"></div>
