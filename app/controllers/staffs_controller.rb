@@ -40,7 +40,7 @@ class StaffsController < ApplicationController
       @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create") unless photo.nil?
       flash[:notice] = "创建员工成功!"
     else
-      flash[:notice] = "创建员工失败!"
+      flash[:notice] = "创建员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
     end
     redirect_to store_staffs_path(@store)
   end
@@ -82,7 +82,11 @@ class StaffsController < ApplicationController
     photo = params[:staff][:photo]
     encrypt_name = random_file_name(photo.original_filename) if photo
     params[:staff][:photo] = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
-    @staff.update_attributes(params[:staff]) and flash[:notice] = "更新员工成功" if @staff
+    if  @staff && @staff.update_attributes(params[:staff])
+      flash[:notice] = "更新员工成功"
+    else
+      flash[:notice] = "更新员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
+    end
     #update picture
     @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "update") if !photo.nil? && @staff
     redirect_to store_staff_path(@store, @staff)
