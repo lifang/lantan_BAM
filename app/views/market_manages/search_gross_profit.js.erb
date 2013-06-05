@@ -1,1 +1,5 @@
-$("#search_gross_profit").html("<%= j(render :partial => 'gross_profit') %>")
+<% if @flag == "product" %>
+  $("#search_gross_profit").html("<%= j(render :partial => 'gross_product_profit') %>")
+<% else %>
+  $("#search_gross_profit").html("<%= j(render :partial => 'gross_order_profit') %>")
+<% end %>
