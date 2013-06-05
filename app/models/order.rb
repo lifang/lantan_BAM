@@ -444,8 +444,6 @@ class Order < ActiveRecord::Base
         #p  0_id_count
         prod_arr << p.split("_")
       elsif p.split("_")[0].to_i == 1
-        puts "------------------------------------------------"
-        p p
         #p 1_id_prod1=price1_prod2=price2_totalprice_realy_price
         sale_arr << p.split("_")
       elsif p.split("_")[0].to_i == 2

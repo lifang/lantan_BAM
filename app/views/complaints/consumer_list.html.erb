@@ -9,7 +9,7 @@
     <div><label>产品/服务类型：</label><select  name="list_prod">
         <option value="">--</option>
         <% Product::PRODUCT_TYPES.each do |key,value| %>
-          <option value="<%= key %>" <%if session[:list_prod]==key%> selected<%end%> ><%= value %></option>
+          <option value="<%= key %>" <%if session[:list_prod]== "#{key}" %> selected<%end%> ><%= value %></option>
         <% end %>
       </select></div>
     <div><label>客户性别：</label> <select style="width: 80px;" name="list_sex">
@@ -20,7 +20,7 @@
     <div><label>购车年份：</label> <select name="list_year">
         <option value="">--</option>
         <%  (Constant::DATE_YEAR..Time.now.strftime("%Y").to_i).inject(Array.new){|arr,n| arr << n }.reverse.each do |year| %>
-          <option <%if  session[:list_year]== year%>selected <%end%> value="<%= year %>"><%= year %></option>
+          <option <%  if  session[:list_year] == "#{year}" %>selected <%end%> value="<%= year %>"><%= year %></option>
         <% end %>
       </select></div>
     <div><label>车型：</label> <select class="ymd" id="capital_div" onchange="choose_brand('#capital_div', '#car_brands', '#car_models')">
@@ -95,7 +95,7 @@
           <%end%>
         </tbody>
       </table>
-      <div class="amount">总计：<%= @sums.values.inject(0){|num,sum| num+sum} %></div>
+      <div class="amount">总计：<%=format("%.1f", @sums.values.inject(0){|num,sum| num+sum}) %></div>
     <%else%>
       无相关记录
     <%end%>
