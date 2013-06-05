@@ -47,16 +47,39 @@ class ComplaintsController < ApplicationController
 
   #投诉详细页
   def show_detail
-    total = Complaint.search_detail(params[:store_id])
+    session[:start_detail],session[:end_detail] =Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d")
+    total = Complaint.search_detail(params[:store_id],session[:start_detail],session[:end_detail])
     @complaint = total.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    non_time = Complaint.search_detail(params[:store_id],0)
-    un_done = Complaint.search_detail(params[:store_id],1)
+    non_time =total.inject(0){|num,complaint|num +=1 if complaint.diff_time && complaint.diff_time <= Complaint::TIMELY_DAY;num }
+    un_done = total.inject(0){|num,complaint| num +=1 if complaint.process_at;num}
     @staff_name ={}
     @complaint.each do |comp|
       @staff_name[comp.id]=Staff.where("id in (#{comp.staff_id_1},#{comp.staff_id_2})").map(&:name).join("、 ") if comp.staff_id_1 and comp.staff_id_2
     end
-    @non =(non_time.size*100.0/total.size).round(1)
-    @undo =((total.size-un_done.size)*100.0/total.size).round(1)
+    @non =(non_time*100.0/total.size).round(1)
+    @undo =((un_done)*100.0/total.size).round(1)
+  end
+
+  #投诉详细查询
+  def detail_s
+    session[:start_detail],session[:end_detail]=nil,nil
+    session[:start_detail],session[:end_detail] =params[:start_detail],params[:end_detail]
+    redirect_to "/stores/#{params[:store_id]}/complaints/detail_list"
+  end
+  
+  #投诉详细查询列表
+  def detail_list
+    total = Complaint.search_detail(params[:store_id],session[:start_detail],session[:end_detail])
+    non_time =total.inject(0){|num,complaint|num +=1 if complaint.diff_time && complaint.diff_time <= Complaint::TIMELY_DAY;num }
+    un_done = total.inject(0){|num,complaint| num +=1 if complaint.process_at;num}
+    @complaint = total.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+    @staff_name ={}
+    @complaint.each do |comp|
+      @staff_name[comp.id]=Staff.where("id in (#{comp.staff_id_1},#{comp.staff_id_2})").map(&:name).join("、 ") if comp.staff_id_1 and comp.staff_id_2
+    end
+    @non =(non_time*100.0/total.size).round(1)
+    @undo =((un_done)*100.0/total.size).round(1)
+    render 'show_detail'
   end
 
   #满意度统计页
@@ -94,31 +117,10 @@ class ComplaintsController < ApplicationController
   def degree_list
     @degree =Complaint.degree_lis(params[:store_id],session[:degree])
     @total_com = Complaint.degree_day(params[:store_id],session[:start_degree],session[:end_degree],session[:sex_degree])
-    p @total_com
     render 'satisfy_degree'
   end
 
-  #投诉详细查询
-  def detail_s
-    session[:detail]=nil
-    session[:detail] =params[:detail]
-    redirect_to "/stores/#{params[:store_id]}/complaints/detail_list"
-  end
   
-  #投诉详细查询列表
-  def detail_list
-    @complaint =Complaint.detail_one(params[:store_id],params[:page],session[:detail])
-    total =Complaint.search_one(params[:store_id],session[:detail])
-    non_time =Complaint.search_one(params[:store_id],session[:detail],0)
-    un_done =Complaint.search_one(params[:store_id],session[:detail],1)
-    @staff_name ={}
-    @complaint.each do |comp|
-      @staff_name[comp.id]=Staff.where("id in (#{comp.staff_id_1},#{comp.staff_id_2})").map(&:name).join("、 ") if comp.staff_id_1 and comp.staff_id_2
-    end
-    @non =(non_time.num*100.0/total.num).round(1)
-    @undo =((total.num-un_done.num)*100.0/total.num).round(1)
-    render 'show_detail'
-  end
 
   #客户-投诉-点击详细
   def complaint_detail
@@ -137,7 +139,6 @@ class ComplaintsController < ApplicationController
       products =Product.find_by_sql("select p.name,o.price,o.pro_num,o.order_id,o.total_price from products p inner join order_prod_relations o on o.product_id=p.id where
       o.order_id in (#{@consumers.map(&:id).uniq.join(",")})")
       @products = products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]=[prod]:hash[prod.order_id]<<prod;hash}
-      p @products
       pay_sql = "select * from order_pay_types  where order_id in (#{@consumers.map(&:id).uniq.join(",")}) and
        pay_type in (#{OrderPayType::PAY_TYPES[:SV_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]})"
       prices =OrderPayType.find_by_sql(pay_sql).inject(Hash.new){|hash,order_pay|hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=order_pay.price : hash[order_pay.order_id]+=order_pay.price;hash}
