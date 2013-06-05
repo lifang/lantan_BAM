@@ -37,10 +37,12 @@ module MarketManagesHelper
     return [prod_cost_price.to_f, ssale_price,gross_profit]
   end
 
-  def orderCostPrice(order)
+  def order_cost_price(order)
+    #购买套餐卡里面的商品与服务成本价
     unless order.c_pcard_relations.blank?
       pp_price = order.c_pcard_relations.map{|cpr| cpr.package_card}.compact.map{|pc| pc.pcard_prod_relations.map{|ppr| ppr.product}.inject(0){|sum,opr| sum += opr.t_price.to_f}}.inject(0){|sum,pc| sum += pc}
     end
+    #跟order直接关联的商品与服务的价钱
     sum = order.order_prod_relations.inject(0){|sum,opr| sum+=(opr.t_price.to_f)*opr.pro_num}
     order_cost_price = sum + pp_price.to_f
   end
