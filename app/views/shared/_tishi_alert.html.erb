@@ -10,6 +10,6 @@
 </div>
 <% if flash[:notice] %>
 <script type="text/javascript">
-  tishi_alert("<%= flash[:notice] %>");
+  tishi_alert("<%= flash[:notice].html_safe %>");
 </script>
 <% end %>
