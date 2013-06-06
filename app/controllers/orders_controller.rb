@@ -10,8 +10,6 @@ class OrdersController < ApplicationController
       ifnull(sum(opt.product_num), 0) total_num, opt.pay_type from order_pay_types opt
       where opt.order_id = ? group by opt.pay_type",
         @order[0].id]).group_by { |item| item.pay_type } if @order[0]
-    p "====================="
-    p @order_pay_types
     respond_to do |format|
       format.js
     end
