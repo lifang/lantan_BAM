@@ -6,7 +6,11 @@ LantanBAM::Application.routes.draw do
       post "upload_image"
     end
   end
-  
+  resources :work_orders do
+    collection do
+      get "work_orders_status"
+    end
+  end
   resources :package_cards do
     member do
       post :delete_pcard
@@ -198,7 +202,7 @@ LantanBAM::Application.routes.draw do
     resources :orders do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
-          "confirm_reservation","refresh","pay_order","checkin", "show_car"
+          "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer"
       end
     end
     resources :syncs_datas do
