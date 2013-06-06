@@ -92,5 +92,5 @@ class WorkOrdersController < ApplicationController
         current_info[:station_infos] = stations if stations
       end
       render :json => current_info
-    end# find 方法结束标记
+    end# work_orders_status 方法结束标记
 end

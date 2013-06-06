@@ -54,22 +54,44 @@
     });
 
 </script>
+<div class="search">
+  <div>
+    <label>条形码:</label>
+    <input type="text" id="search_material_code" value="<%= @mat_code %>"/>
+  </div>
+  <div>
+    <label>物料名称:</label>
+    <input type="text" id="search_material_name" value="<%= @mat_name %>"/>
+  </div>
+  <div>
+    <label>物料类别:</label>
+    <select id="search_material_type">
+      <option value="0">全部</option>
+      <% Material::TYPES_NAMES.each do |key,value| %>
+        <option value="<%= key %>" <% if @mat_type.to_i == key %>selected<% end %>><%= value %></option>
+      <% end %>
+    </select>
+  </div>
+  <div>
+    <button class="search_btn" onclick="search_materials(<%= @current_store.id %>)">查询物料</button>
+  </div>
+</div>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_tab_table">
   <thead>
-  <tr class="hbg">
-    <th width="150">条形码</th>
-    <th><span class="sort_u" onclick="sort_change(this)">物料名称</span></th>
-    <th><span class="sort_d" onclick="sort_change(this)">物料类别</span></th>
-    <th>库存状态</th>
-    <th>库存量（规格）</th>
-    <th>成本价（元）</th>
-    <th>零售价（元）</th>
-    <th>盘点实数</th>
-    <th>操作</th>
-  </tr>
+    <tr class="hbg">
+      <th width="150">条形码</th>
+      <th><span class="sort_u" onclick="sort_change(this)">物料名称</span></th>
+      <th><span class="sort_d" onclick="sort_change(this)">物料类别</span></th>
+      <th>库存状态</th>
+      <th>库存量（规格）</th>
+      <th>成本价（元）</th>
+      <th>零售价（元）</th>
+      <th>盘点实数</th>
+      <th>操作</th>
+    </tr>
   </thead>
   <tbody>
-<% (@materials_storages || []).each do |material| %>
+    <% (@materials_storages || []).each do |material| %>
       <tr class="<%= cycle('', 'tbg') %>">
         <td <% if !material.is_ignore && material.storage.to_i <= @current_store.material_low.to_i %>class="data_table_error"<% end %>><%= material.code %></td>
         <td><%= material.name %></td>
@@ -81,17 +103,17 @@
         <td class="check_num_field"><%= text_field_tag "check_num_#{material.id}",material.check_num,{:style =>"width:50px;"} %></td>
 
         <td><%= link_to "备注", "/stores/#{params[:store_id]}/materials/#{material.id}/get_remark", :remote => true, 'data-type' => 'script' %>
-          <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this)" %><% end %>          
+          <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this)" %><% end %>
           <% if permission?(:materials, :mat_edit) %><%= link_to "编辑", edit_store_material_path(params[:store_id], material.id), :remote => true, 'data-type' => 'script' %><% end %>
           <% if permission?(:materials, :delete) %><%= link_to "删除", store_material_path(params[:store_id], material.id), :method => :delete, :confirm => "确定删除物料？" %><% end %>
           <% if material.is_ignore %>
             <%= link_to_function "取消忽略","cancel_ignore(#{material.id},#{@current_store.id},this)"  %>
-            <% else %>
-          <%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %>
+          <% else %>
+            <%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %>
           <% end %>
         </td>
       </tr>
-<% end %>
+    <% end %>
   </tbody>
 </table>
 <%= will_paginate_remote(@materials_storages,"mat_code=#{@mat_code}&mat_name=#{@mat_name}&mat_type=#{@mat_type}",{:url => page_materials_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @materials_storages.size > 0 %>
