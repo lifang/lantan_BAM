@@ -170,7 +170,7 @@ LantanBAM::Application.routes.draw do
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"
-      get "show_complaint_detail"
+      get "show_revisit_detail"
     end
     member do
       post "edit_car_num"
