@@ -1,4 +1,5 @@
 #encoding: utf-8
+require 'json'
 class Api::OrdersController < ApplicationController
   #首页,登录后的页面
   def index_list
@@ -201,5 +202,61 @@ class Api::OrdersController < ApplicationController
       content = "数据操作失败"
     end
     render :json => {:status => order, :content => content}
+  end
+
+  def sync_orders_and_customer
+    sync_info = JSON.parse(params[:syncInfo])
+    flag = true
+    Customer.transaction do
+      begin
+        #同步客户信息
+        customers_info = sync_info["customer"]
+        customers_info.each do |customer|
+          old_customer = Customer.find_by_mobilephone(customer["phone"])
+          old_customer.update_attributes(:name => customer["name"].strip, :other_way => customer["email"],
+            :birthday => customer["birth"], :sex => customer["sex"]) if old_customer
+          carNum = CarNum.find_by_num(customer["carNum"])
+          Customer.create_single_cus(old_customer, carNum, customer["phone"], customer["carNum"], customer["name"],
+            customer["email"], customer["birth"], customer["year"], customer["brand"].split("_")[1].to_i, customer["sex"], nil)
+        end
+
+        #同步订单信息
+        orders_info = sync_info["order"]
+        orders_info.each do |order_info|
+          carNum = CarNum.find_by_num(order_info["carNum"])
+
+          customer_id = carNum.customer_num_relation.customer.id
+
+          order = Order.new(:is_billing => order_info["billing"], :created_at => order_info["time"], :store_id => order_info["store_id"],
+                            :price => order_info["price"], :front_staff_id => order_info["user_id"], :is_pleased => order_info["is_please"],
+                            :status => order_info["status"], :code => MaterialOrder.material_order_code(order_info["store_id"].to_i, order_info["time"]),
+                            :car_num_id => carNum.try(:id), :customer_id => customer_id)
+          order.order_pay_types.new(:pay_type => order_info["pay_type"], :price => order_info["price"], :created_at => order_info["time"])
+          order.complaints.new(:reason => order_info["complaint"]["reason"], :suggestion => order_info["complaint"]["request"], :created_at => order_info["time"]) if order_info.keys.include?("complaint")
+
+          prod_arr = Order.get_prod_sale_card(order_info["prods"])
+          (prod_arr[0] || []).each do |prod|
+            product = Product.find_by_id_and_store_id_and_status(prod[1].to_i,order_info["store_id"],Product::IS_VALIDATE[:YES])
+            if product
+              order.order_prod_relations.new(:product_id => product.id, :pro_num => prod[2], :total_price => prod[3], :price => product.sale_price, :t_price => product.t_price, :created_at => order_info["time"])
+            end
+          end
+
+          (prod_arr[3] || []).each do |pcard|
+            package_card = PackageCard.find_by_id(pcard[1])
+            if order_info["status"] == Order::STATUS[:BEEN_PAYMENT]
+              order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1], :status => CPcardRelation::STATUS[:NORMAL], :price => package_card.try(:price), :created_at => order_info["time"])
+            else
+              order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1], :status => CPcardRelation::STATUS[:INVALID], :price => package_card.try(:price), :created_at => order_info["time"])
+            end
+          end
+          order.save
+        end
+      rescue
+        flag = false
+      end
+    end
+    resp_text = flag ? "success" : "error"
+    render :json => {:status => resp_text}
   end
 end
