@@ -34,21 +34,22 @@
             <% if @sale %>
               <tr>
                 <td colspan="3">
-                  参加活动：<%= @sale.name %>&nbsp;<%= Sale::DISC_TYPES_NAME[@sale.disc_types] %>&nbsp;<%= @sale.discount %>
+                  参加活动：<%= @sale.name %>&nbsp;<%= Sale::DISC_TYPES_NAME[@sale.disc_types] %>&nbsp;
+                  <%= format("%.2f", @order_pay_types[OrderPayType::PAY_TYPES[:SALE]][0].total_price) if @order_pay_types and @order_pay_types[OrderPayType::PAY_TYPES[:SALE]] %>
                 </td>
               </tr>
             <% end %>
-            <% if @order[0].c_pcard_relation_id %>
-              <tr><td colspan="3">使用套餐卡一次</td></tr>
+            <% if @order_pay_types and @order_pay_types[OrderPayType::PAY_TYPES[:PACJAGE_CARD]] %>
+              <tr><td colspan="3">使用套餐卡<%= @order_pay_types[OrderPayType::PAY_TYPES[:PACJAGE_CARD]][0].total_num.to_i %>次</td></tr>
             <% end %>
-            <% if @order[0].c_svc_relation_id %>
-              <tr><td colspan="3">使用储值卡一次</td></tr>
+            <% if @order_pay_types and @order_pay_types[OrderPayType::PAY_TYPES[:SV_CARD]] %>
+              <tr><td colspan="3">使用储值卡优惠<%= format("%.2f", @order_pay_types[OrderPayType::PAY_TYPES[:SV_CARD]][0].total_price) %>元</td></tr>
             <% end %>
           </tbody>
         </table>
         <div class="otherWay">
           <div class="amount">
-            总计(元)：<%= @order[0].price %>&nbsp;&nbsp;<% if @order[0].is_free %>(本次免单)<% end %>
+            总计(元)：<%= format("%.2f", @order[0].price) %>&nbsp;&nbsp;<% if @order[0].is_free %>(本次免单)<% end %>
           </div>
         </div>
       </div>
