@@ -10,14 +10,17 @@ module MarketManagesHelper
     #p.is_service=#{Product::PROD_TYPES[:SERVICE]} 
   end
 
-  def prod_gross_price(order_id, oprr,order_pay_types, o_pcard_relations)
+  def prod_gross_price(order_id, oprr,order_pay_types)
     total_price = oprr.total_price.to_f  #每项商品总价
-    opcr = o_pcard_relations[order_id].select{|opcr| opcr.product_id == oprr.product_id }.first unless o_pcard_relations[order_id].blank?
-    unless opcr.blank?
-      deals_price = (opcr.product_num * oprr.price).to_f #每项商品使用套餐卡抵付的价格
-      prod_full_price_num = oprr.pro_num - opcr.product_num #未使用套餐卡抵付的商品数目
+
+    #计算套餐卡优惠总价
+   opt_pcard = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:PACJAGE_CARD]}.first unless order_pay_types[order_id].blank?
+    unless opt_pcard.blank?
+      deals_price = opt_pcard.price
+      prod_full_price_num = oprr.pro_num - opt_pcard.product_num #未使用套餐卡抵付的商品数目
       prod_cost_price = prod_full_price_num *(oprr.t_price.to_f) #未使用套餐卡抵付的商品成本价
     end
+
     # 使用活动优惠总价
     opt_sale = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:SALE]}.first unless order_pay_types[order_id].blank?
     unless opt_sale.blank?

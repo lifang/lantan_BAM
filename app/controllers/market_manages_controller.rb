@@ -242,7 +242,7 @@ class MarketManagesController < ApplicationController
       .where(sql).select("orders.id, date_format(orders.created_at,'%Y-%m-%d') o_created_at, orders.code, products.types").uniq
       .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
       @order_pay_types = OrderPayType.where(:order_id => @orders.map(&:id) ).where("product_id is not null").group_by{|opt| opt.order_id}
-      @o_pcard_relations = OPcardRelation.where(:order_id => @orders.map(&:id)).group_by{|opt| opt.order_id}
+#      @o_pcard_relations = OPcardRelation.where(:order_id => @orders.map(&:id)).group_by{|opt| opt.order_id}
       @order_prod_relations = OrderProdRelation.joins(:product).where(:order_id => @orders.map(&:id)).where(types_sql).group_by{|opt| opt.order_id}
     end
   end

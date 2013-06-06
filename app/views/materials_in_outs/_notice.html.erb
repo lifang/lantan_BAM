@@ -5,7 +5,7 @@
     <% end%>
   </div>
 <% end %>
-<% unless @material_ins.blank? %>
+<% if @material_ins.map{|arr| arr.values.flatten.length}.select{|l| l > 1}.length > 0 %>
   <div class="message">
     <% @material_ins.each do |mi| %>
       <% mi.each do |material, mos| %>

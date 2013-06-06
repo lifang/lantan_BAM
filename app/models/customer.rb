@@ -30,8 +30,8 @@ class Customer < ActiveRecord::Base
       params_arr << c_types.to_i
     end
     unless name.nil? or name.strip.empty?
-      condition_sql += " and cu.name = ? "
-      params_arr << name.strip
+      condition_sql += " and cu.name like ? "
+      params_arr << "%#{name.strip}%"
     end
     unless phone.nil? or phone.strip.empty?
       condition_sql += " and cu.mobilephone = ? "
@@ -42,8 +42,8 @@ class Customer < ActiveRecord::Base
       params_arr << is_vip.to_i
     end
     unless car_num.nil? or car_num.strip.empty?
-      condition_sql += " and ca.num = ? "
-      params_arr << car_num.strip
+      condition_sql += " and ca.num like ? "
+      params_arr << "%#{car_num.strip}%"
     end
     is_has_order = false
     unless started_at.nil? or started_at.strip.empty?

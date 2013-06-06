@@ -102,7 +102,7 @@ function checkNums(){
                     notice += "条形码为" + mat_code + ", 订货单号为" + mo_code + "的物料入库数目已经大于订单中的商品数目，仍然要入库吗？"+ '\n';
                 }
                 if(mat_in_length == index && saved_mat_mos != ""){
-                    if(confirm(notice))
+                    if(notice=="" || confirm(notice))
                     {
                         $.ajax({
                             url: form_action_url,

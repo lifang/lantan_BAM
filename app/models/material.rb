@@ -18,12 +18,4 @@ class Material < ActiveRecord::Base
   MAT_CHECKNUM_PATH = "#{File.expand_path(Rails.root)}/public/uploads/mat_check/%s"
   IS_IGNORE = {:YES => 1, :NO => 0} #是否忽略库存预警， 1是 0否
   scope :normal, where(:status => STATUS[:NORMAL])
-  after_save :strip_material_name
-
-  private
-
-  def strip_material_name
-    name = self.name.strip
-    self.update_column(:name,name)
-  end
 end

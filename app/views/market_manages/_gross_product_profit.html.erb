@@ -34,7 +34,7 @@
         <tbody>
             <% @orders.each do |order| %>
               <% @order_prod_relations[order.id].each do |oprr| %>
-                <% prod_cost_price =  prod_gross_price(order.id, oprr, @order_pay_types, @o_pcard_relations)%>
+                <% prod_cost_price =  prod_gross_price(order.id, oprr, @order_pay_types)%>
                 <tr>
                   <td><%= order.o_created_at %></td>
                   <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
