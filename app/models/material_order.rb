@@ -1,4 +1,5 @@
 #encoding: utf-8
+require 'date'
 class MaterialOrder < ActiveRecord::Base
   has_many :mat_order_items
   has_many :mat_out_orders
@@ -18,14 +19,14 @@ class MaterialOrder < ActiveRecord::Base
     status
   end
 
-  def self.material_order_code store_id
+  def self.material_order_code(store_id, time=nil)
     store = store_id.to_s
     if store_id < 10
       store =   "00" + store_id.to_s
     elsif store_id < 100
       store =    "0" + store_id.to_s
     end
-    store + Time.now.strftime("%Y%m%d%H%M%S")
+    store + (time.nil? ? Time.now.strftime("%Y%m%d%H%M%S") : DateTime.parse(time).strftime("%Y%m%d%H%M%S"))
   end
 
   def self.supplier_order_records page, per_page, store_id
