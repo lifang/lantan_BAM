@@ -16,7 +16,7 @@
                <div><label>员工状态：</label>
                  <select id="s_status" name="status">
                    <option value="-1">全部</option>
-                   <% Staff::STATUS_NAME.each do |k, v| %>
+                   <% Staff::STATUS_NAME.except(4).each do |k, v| %>
                      <option value="<%= k %>"><%= v %></option>
                    <% end %>
                  </select>
