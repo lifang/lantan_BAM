@@ -607,7 +607,7 @@ class Order < ActiveRecord::Base
               prod_hash.each { |k, v|
                 pcard_dis_price = product_prices[k].to_f * v
                 OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-                 :product_id => k, :price => pcard_dis_price)
+                 :product_id => k, :price => pcard_dis_price, :product_num => v)
               }
             end
           end

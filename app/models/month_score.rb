@@ -65,7 +65,7 @@ class MonthScore < ActiveRecord::Base
   end
 
   def self.sort_pay_types(store_id,time=nil,created=nil,ended=nil)
-    sql ="select op.product_id,sum(op.price) sum,op.order_id,count(op.id) prod_num,pay_type,"
+    sql ="select op.product_id,sum(op.price) sum,op.order_id,sum(op.product_num) prod_num,pay_type,"
     sql += "date_format(op.created_at,'%Y-%m-%d') day" if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
     sql += "date_format(op.created_at,'%X-%V') day" if time.to_i==Sale::DISC_TIME[:WEEK]
     sql += "date_format(op.created_at,'%X-%m') day"  if time.to_i==Sale::DISC_TIME[:MONTH]

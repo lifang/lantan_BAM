@@ -36,7 +36,7 @@
               <td><%= order.intro.nil? ? "" : order.intro %></td>
               <td><%=order.o_num.to_i %></td>
               <td><%= format("%.2f",@hash_favor[order.id].nil? ? 0 : @hash_favor[order.id].values.inject(0){|num,price| num+price}) %></td>
-              <td><%= @hash_favor[order.id].nil? ? 0 : format("%.2f",@hash_favor[order.id].nil? ? 0 : @hash_favor[order.id].select{|k,v|
+              <td><%= format("%.2f",@hash_favor[order.id].nil? ? 0 : @hash_favor[order.id].select{|k,v|
                     k>=OrderPayType::PAY_TYPES[:SV_CARD] && k<=OrderPayType::PAY_TYPES[:SALE]}.values.inject(0){|num,price| num+price})  %></td>
             </tr>
           <% end %>

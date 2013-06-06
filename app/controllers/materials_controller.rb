@@ -664,6 +664,7 @@ class MaterialsController < ApplicationController
     store = Store.find params[:store_id]
     material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id])
     if material.nil?
+      params[:material][:name] = params[:material][:name].strip
       store.materials << Material.create(params[:material].merge({:status => 0}))
     else
       storage = material.storage + params[:material][:storage].to_i
@@ -680,6 +681,7 @@ class MaterialsController < ApplicationController
 
   def update
     material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id])
+    params[:material][:name] = params[:material][:name].strip
     material.update_attributes(params[:material])
     redirect_to "/stores/#{params[:store_id]}/materials"
   end

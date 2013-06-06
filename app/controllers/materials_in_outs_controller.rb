@@ -26,11 +26,7 @@ class MaterialsInOutsController < ApplicationController
         material_orders = get_mo(material, temp_material_orders)
         material_in ={}
         material_in[material] = material_orders
-#        if @material_orders.empty?
-#          render :text => 'fail'
-#        else
-          render :partial => 'material_in', :locals =>{:material_in => material_in}
-#        end
+        render :partial => 'material_in', :locals =>{:material_in => material_in}
       else
         render :partial => 'material_out', :locals =>{:material => material}
       end
@@ -102,11 +98,9 @@ class MaterialsInOutsController < ApplicationController
           data = line.strip.split(',')
           @code_num[data[0]] = data[1]
         end
-        p "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        p @code_num
         @material_ins = []
         materials = Material.where(:code => @code_num.keys)
-        @no_material_codes = @code_num.keys - materials.map(&:code) || []
+        @no_material_codes = (@code_num.keys - materials.map(&:code)) || []
         materials.each do |material|
             temp_material_orders = material.material_orders.not_all_in
             material_orders = get_mo(material, temp_material_orders)

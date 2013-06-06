@@ -35,7 +35,8 @@ class Complaint < ActiveRecord::Base
   end
   
   def self.show_types(store_id,created,ended,sex)
-    sql = "select count(*) total_num,c.types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id} "
+    sql = "select count(c.id) total_num,c.types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id}
+      and c.status=#{Complaint::STATUS[:PROCESSED]} "
     sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql += " and s.sex=#{sex}" unless sex.to_i==2
@@ -45,8 +46,8 @@ class Complaint < ActiveRecord::Base
   end
 
   def self.count_types(store_id)
-    return Complaint.find_by_sql("select count(*) total_num,types from complaints where store_id=#{store_id} and
-           date_format(created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') group by types")
+    return Complaint.find_by_sql("select count(*) total_num,types from complaints where store_id=#{store_id} and 
+    date_format(created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') and status=#{Complaint::STATUS[:PROCESSED]}  group by types")
   end
   
   def self.gchart(store_id)
@@ -132,28 +133,13 @@ class Complaint < ActiveRecord::Base
     return orders=={} ? nil : orders.select{|k,v|  k != Order::IS_PLEASED[:BAD]}=={} ? 0 :
       orders.select{|k,v|  k != Order::IS_PLEASED[:BAD]}.values.inject(0){|num,level| num+level}*100/(orders.values.inject(0){|num,level| num+level})
   end
-  def self.search_detail(store_id,num=nil)
-    sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id
-    where c.store_id=#{store_id} and  date_format(c.created_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')"
-    sql += " and timestampdiff(hour,c.created_at,c.process_at)<=#{Complaint::TIMELY_DAY}"  if num==0
-    sql += " and c.process_at is  null" if num==1
+  
+  def self.search_detail(store_id,created,ended)
+    sql ="select c.*,o.code,o.id o_id,timestampdiff(hour,c.created_at,c.process_at) diff_time,c.process_at from complaints c inner join orders o on o.id=c.order_id  where c.store_id=#{store_id} "
+    sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
+    sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql += " order by c.created_at desc"
     return Complaint.find_by_sql(sql)
-  end
-
-  def self.search_one(store_id,time,num=nil)
-    sql ="select count(*) num from complaints  where store_id=#{store_id} "
-    sql += "and date_format(created_at,'%Y-%m')='#{time}'" unless time.nil? || time =="" || time.length==0
-    sql += " and timestampdiff(hour,created_at,process_at)<=#{Complaint::TIMELY_DAY}"  if num==0
-    sql += " and process_at is null " if num==1
-    return Complaint.find_by_sql(sql)[0]
-  end
-
-  def self.detail_one(store_id,page,time)
-    sql ="select c.*,o.code,o.id o_id from complaints c inner join orders o on o.id=c.order_id where c.store_id=#{store_id} "
-    sql += "and date_format(c.created_at,'%Y-%m')='#{time}'" unless time.nil? || time =="" || time.length==0
-    sql += " order by created_at desc"
-    return Complaint.paginate_by_sql(sql, :page => page, :per_page => 15)
   end
 
   def self.mk_record store_id ,order_id,reason,request
