@@ -7,51 +7,49 @@ class MaterialsController < ApplicationController
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
   before_filter :material_order_tips, :only =>[:index]
+  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
   @@m = Mutex.new
 
   #库存列表
   def index
-    mat_code_sql = params[:mat_code].nil? || params[:mat_code].empty? ? "1 = 1" : ["code = ?", params[:mat_code]]
-    mat_name_sql = params[:mat_name].nil? || params[:mat_name].empty? ? "1 = 1" : ["name like ?", "%#{params[:mat_name]}%"]
-    mat_type_sql = params[:mat_type].nil? || params[:mat_type].to_i == 0 ? "1 = 1" : ["types = ?", params[:mat_type].to_i]
-    @mat_code = params[:mat_code].nil? ? nil : params[:mat_code]
-    @mat_name = params[:mat_name].nil? ? nil : params[:mat_name]
-    @mat_type = params[:mat_type].nil? ? nil : params[:mat_type]
-    flag = (params[:mat_code].nil? && params[:mat_name].nil? && params[:mat_type].nil?) ? true : false  #防止查询物料时重复查询其他数据
     @current_store = Store.find_by_id(params[:store_id].to_i)
-    #    @materials_storages = Material.normal.paginate(:conditions => "store_id=#{params[:store_id].to_i}",
-    #      :per_page => Constant::PER_PAGE, :page => params[:page])
-    @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).where(
-      mat_code_sql).where(mat_name_sql).where(mat_type_sql).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
-    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i if flag
-    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i if flag
+    @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
+    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
     @type = 0
     @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
-      :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=#{Staff::STATUS[:normal]}") if flag
+      :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=#{Staff::STATUS[:normal]}")
     @status = params[:status] if params[:status]
-    @head_order_records = MaterialOrder.head_order_records(params[:page], Constant::PER_PAGE, params[:store_id].to_i, @status) if flag
-    @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id].to_i if flag
-    @material_order_urgent = MaterialOrder.where(:id => @material_pay_notices.map(&:target_id)) if flag
+    @head_order_records = MaterialOrder.head_order_records(params[:page], Constant::PER_PAGE, params[:store_id].to_i, @status)
+    @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id].to_i
+    @material_order_urgent = MaterialOrder.where(:id => @material_pay_notices.map(&:target_id))
     @mat_in = params[:mat_in] if params[:mat_in]
     @low_materials = Material.where(["status = ? and store_id = ? and storage <= ? and is_ignore = ?", Material::STATUS[:NORMAL],
-        @current_store.id, @current_store.material_low, Material::IS_IGNORE[:NO]]) if flag #查出所有该门店的低于门店物料预警数目的物料
+        @current_store.id, @current_store.material_low, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
     respond_to do |format|
       format.html
       format.js
     end
   end
 
+  def search_materials
+    @current_store = Store.find_by_id(params[:store_id].to_i)
+    @tab_name = params[:tab_name]
+    if @tab_name == 'materials'
+      @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).where(
+        @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    elsif  @tab_name == 'in_records'
+      @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
+    elsif @tab_name == 'out_records'
+      @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
+    end
+  end
+
   #库存列表分页
   def page_materials
-    mat_code_sql = params[:mat_code].nil? || params[:mat_code].empty? ? "1 = 1" : ["code = ?", params[:mat_code]]
-    mat_name_sql = params[:mat_name].nil? || params[:mat_name].empty? ? "1 = 1" : ["name like ?", "%#{params[:mat_name]}%"]
-    mat_type_sql = params[:mat_type].nil? || params[:mat_type].to_i == 0 ? "1 = 1" : ["types = ?", params[:mat_type].to_i]
-    @mat_code = params[:mat_code].nil? ? nil : params[:mat_code]
-    @mat_name = params[:mat_name].nil? ? nil : params[:mat_name]
-    @mat_type = params[:mat_type].nil? ? nil : params[:mat_type]
     @current_store = Store.find_by_id(params[:store_id].to_i)
     @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).where(
-      mat_code_sql).where(mat_name_sql).where(mat_type_sql).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+      @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     respond_with(@materials_storages) do |format|
       format.js
     end
@@ -59,7 +57,8 @@ class MaterialsController < ApplicationController
 
   #入库列表分页
   def page_ins
-    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id]
+    @current_store = Store.find_by_id(params[:store_id].to_i)
+    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id], @s_sql
     respond_with(@in_records) do |f|
       f.html
       f.js
@@ -68,7 +67,8 @@ class MaterialsController < ApplicationController
 
   #出库列表分页
   def page_outs
-    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id]
+    @current_store = Store.find_by_id(params[:store_id].to_i)
+    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id], @s_sql
     respond_with(@out_records) do |f|
       f.html
       f.js
@@ -690,6 +690,19 @@ class MaterialsController < ApplicationController
     material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
     material.update_attribute(:status, Material::STATUS[:DELETE])
     redirect_to "/stores/#{params[:store_id]}/materials"
+  end
 
+
+  private
+  
+  def make_search_sql
+    mat_code_sql = params[:mat_code].nil? || params[:mat_code].empty? ? "1 = 1" : ["materials.code = ?", params[:mat_code]]
+    mat_name_sql = params[:mat_name].nil? || params[:mat_name].empty? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name]}%"]
+    mat_type_sql = params[:mat_type].nil? || params[:mat_type].to_i == 0 ? "1 = 1" : ["materials.types = ?", params[:mat_type].to_i]
+    @s_sql = []
+    @s_sql << mat_code_sql << mat_name_sql << mat_type_sql
+    @mat_code = params[:mat_code].nil? ? nil : params[:mat_code]
+    @mat_name = params[:mat_name].nil? ? nil : params[:mat_name]
+    @mat_type = params[:mat_type].nil? ? nil : params[:mat_type]
   end
 end

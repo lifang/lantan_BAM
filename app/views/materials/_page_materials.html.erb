@@ -1,7 +1,7 @@
 <script>
     $(document).ready(function(){
-        $(".pageTurn a").unbind("click");
-        $(".pageTurn a").bind("click", function() {
+        $("#kucunliebiao .pageTurn a").unbind("click");
+        $("#kucunliebiao .pageTurn a").bind("click", function() {
             var url = this.href;
             $.ajax({
                 async:true,
@@ -54,28 +54,7 @@
     });
 
 </script>
-<div class="search">
-  <div>
-    <label>条形码:</label>
-    <input type="text" id="search_material_code" value="<%= @mat_code %>"/>
-  </div>
-  <div>
-    <label>物料名称:</label>
-    <input type="text" id="search_material_name" value="<%= @mat_name %>"/>
-  </div>
-  <div>
-    <label>物料类别:</label>
-    <select id="search_material_type">
-      <option value="0">全部</option>
-      <% Material::TYPES_NAMES.each do |key,value| %>
-        <option value="<%= key %>" <% if @mat_type.to_i == key %>selected<% end %>><%= value %></option>
-      <% end %>
-    </select>
-  </div>
-  <div>
-    <button class="search_btn" onclick="search_materials(<%= @current_store.id %>)">查询物料</button>
-  </div>
-</div>
+<%= render :partial => 'search_materials', :locals => {:tab_name => "materials"} %>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_tab_table">
   <thead>
     <tr class="hbg">
