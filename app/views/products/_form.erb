@@ -1,7 +1,7 @@
 <div class="item">
   <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="modify_value()">
     <% @materials.each do |material| %>
-      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.id) == material.id%> selected<%end%> o_value="<%= "#{material.code}-#{material.storage}" %>" ><%= material.name%></option>
+      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}-#{material.storage}" %>" ><%= material.name%></option>
     <% end %>
   </select>
 </div>
