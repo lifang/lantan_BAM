@@ -6,7 +6,11 @@ LantanBAM::Application.routes.draw do
       post "upload_image"
     end
   end
-  
+  resources :work_orders do
+    collection do
+      get "work_orders_status"
+    end
+  end
   resources :package_cards do
     member do
       post :delete_pcard
