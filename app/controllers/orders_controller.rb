@@ -5,7 +5,7 @@ class OrdersController < ApplicationController
   def order_info
     @order = Order.one_order_info(params[:id].to_i)
     @order_prods = OrderProdRelation.order_products(@order)
-    @sale = Sale.find(@order[0].sale_id) if @order[0] and @order[0].sale_id
+    @sale = Sale.find_by_id(@order[0].sale_id) if @order[0] and @order[0].sale_id
     respond_to do |format|
       format.js
     end
