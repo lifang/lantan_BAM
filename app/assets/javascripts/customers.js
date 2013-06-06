@@ -248,12 +248,12 @@ $(document).ready(function(){
     });
 })
 
-function show_complaint_detail(revisit_id,store_id){   //显示投诉详情
+function show_revisit_detail(revisit_id,store_id){   //显示投诉详情
     $.ajax({
         async:true,
         dataType: "script",
         type: "get",
-        url: "/customers/show_complaint_detail",
+        url: "/customers/show_revisit_detail",
         data: {
             r_id : revisit_id,
             store_id : store_id
