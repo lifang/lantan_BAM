@@ -18,8 +18,8 @@
                 onclick="javascript:edit_car_num_f('<%= car.c_id %>')">编辑</button>
       </span>
       <span>
-        <button class="compile_btn" data-confirm="您确定要删除当前车牌号码与当前客户的关系吗？" type="button"
-                onclick="javascript:window.location.href='/customers/<%= car.c_id %>_<%= car.customer_id %>/delete_car_num'">删除</button>
+        <button class="compile_btn" type="button"
+                onclick="javascript:if(confirm('您确定要删除当前车牌号码与当前客户的关系吗？')){window.location.href='/customers/<%= car.c_id %>_<%= car.customer_id %>/delete_car_num'}">删除</button>
       </span>
       <%= render :partial => "/customers/edit_car_num", :object => car %>
     </li>
