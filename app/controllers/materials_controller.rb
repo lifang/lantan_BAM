@@ -8,11 +8,11 @@ class MaterialsController < ApplicationController
   before_filter :sign?,:except=>["alipay_complete"]
   before_filter :material_order_tips, :only =>[:index]
   before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
+  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs]
   @@m = Mutex.new
 
   #库存列表
   def index
-    @current_store = Store.find_by_id(params[:store_id].to_i)
     @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
@@ -33,7 +33,6 @@ class MaterialsController < ApplicationController
   end
 
   def search_materials
-    @current_store = Store.find_by_id(params[:store_id].to_i)
     @tab_name = params[:tab_name]
     if @tab_name == 'materials'
       @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).where(
@@ -47,7 +46,6 @@ class MaterialsController < ApplicationController
 
   #库存列表分页
   def page_materials
-    @current_store = Store.find_by_id(params[:store_id].to_i)
     @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).where(
       @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     respond_with(@materials_storages) do |format|
@@ -57,7 +55,6 @@ class MaterialsController < ApplicationController
 
   #入库列表分页
   def page_ins
-    @current_store = Store.find_by_id(params[:store_id].to_i)
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id], @s_sql
     respond_with(@in_records) do |f|
       f.html
@@ -67,7 +64,6 @@ class MaterialsController < ApplicationController
 
   #出库列表分页
   def page_outs
-    @current_store = Store.find_by_id(params[:store_id].to_i)
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id], @s_sql
     respond_with(@out_records) do |f|
       f.html
@@ -704,5 +700,9 @@ class MaterialsController < ApplicationController
     @mat_code = params[:mat_code].nil? ? nil : params[:mat_code]
     @mat_name = params[:mat_name].nil? ? nil : params[:mat_name]
     @mat_type = params[:mat_type].nil? ? nil : params[:mat_type]
+  end
+
+  def get_store
+    @current_store = Store.find_by_id(params[:store_id].to_i)
   end
 end
