@@ -62,7 +62,8 @@
       <th><span class="sort_u" onclick="sort_change(this)">物料名称</span></th>
       <th><span class="sort_d" onclick="sort_change(this)">物料类别</span></th>
       <th>库存状态</th>
-      <th>库存量（规格）</th>
+      <th>库存量</th>
+      <th>规格</th>
       <th>成本价（元）</th>
       <th>零售价（元）</th>
       <th>盘点实数</th>
@@ -76,7 +77,8 @@
         <td><%= material.name %></td>
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
         <td class="sstatus"><%= material.is_ignore || material.storage.to_i > @current_store.material_low.to_i ? "存货" : "缺货" %></td>
-        <td class="su"><span class="storage"><%= material.storage.to_i %></span>(<%= material.unit.nil? ? "无" : material.unit %>)</td>
+        <td class="su"><span class="storage"><%= material.storage.to_i %></span></td>
+        <td><%= material.unit %></td>
         <td><%= material.price %></td>
         <td><%= material.sale_price %></td>
         <td class="check_num_field"><%= text_field_tag "check_num_#{material.id}",material.check_num,{:style =>"width:50px;"} %></td>

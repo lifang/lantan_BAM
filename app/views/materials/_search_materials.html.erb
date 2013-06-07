@@ -1,14 +1,14 @@
 <div class="search">
   <div>
-    <label>条形码:</label>
+    <label>条形码：</label>
     <input type="text" id="search_material_code" value="<%= @mat_code %>"/>
   </div>
   <div>
-    <label>物料名称:</label>
+    <label>物料名称：</label>
     <input type="text" id="search_material_name" value="<%= @mat_name %>"/>
   </div>
   <div>
-    <label>物料类别:</label>
+    <label>物料类别：</label>
     <select id="search_material_type">
       <option value="0">全部</option>
       <% Material::TYPES_NAMES.each do |key,value| %>
