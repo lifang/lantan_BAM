@@ -207,9 +207,13 @@ class Order < ActiveRecord::Base
       and m.storage > 0 and m.store_id = ? ", store_id])
     p_ids = prod_mat_relations.collect { |i| i.p_id  } if prod_mat_relations.any?
     products = Product.find_by_sql(["select * from products p where p.status = ? 
-      and p.id in (?) and p.store_id = ?", Product::IS_VALIDATE[:YES], p_ids, store_id])
+      and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?", 
+        Product::IS_VALIDATE[:YES], p_ids, store_id])
+    services = Product.find_by_sql(["select * from products p where p.status = ?
+      and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
+        Product::IS_VALIDATE[:YES], store_id])
  
-    (products || []).each do |p|
+    ((products + services) || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
