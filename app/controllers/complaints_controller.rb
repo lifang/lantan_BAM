@@ -132,7 +132,7 @@ class ComplaintsController < ApplicationController
 
   #客户消费统计
   def consumer_list
-     @order_price = {}
+    @order_price = {}
     session[:list_start],session[:list_end],session[:list_prod],session[:list_sex],session[:list_year]=nil,nil,nil,nil,nil
     session[:list_fee],session[:list_model],session[:list_name]=nil,nil,nil
     complaints = Complaint.consumer_types(params[:store_id],1)
@@ -182,6 +182,7 @@ class ComplaintsController < ApplicationController
           @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p
         } if pcar_relations.any?
       end
+      @total_price = complaints.inject(0){|num,prod|num +(prod.price.nil? ? 0 : prod.price)}
     else
       sql ="select p.name p_name,o.price order_price,o.pro_num,o.order_id,o.total_price from products p inner join order_prod_relations o on o.product_id=p.id where p.types =#{session[:list_prod]}"
       proucts =Product.find_by_sql(sql)
@@ -193,10 +194,9 @@ class ComplaintsController < ApplicationController
           @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p;
           @order_price[p.order_id].nil? ? @order_price[p.order_id] =(p.total_price.nil? ? 0:p.total_price) : @order_price[p.order_id]+= (p.total_price.nil? ? 0:p.total_price)
         } if proucts.any?
+       @total_price= complaints.inject(0){|total,prod|total += (@order_price[prod.id].nil? ? 0 : @order_price[prod.id])  }
       end
     end
-    p @order_price
-    @total_price = complaints.inject(0){|num,prod|num +(prod.price.nil? ? 0 : prod.price)}
     render "consumer_list"
   end
 end
