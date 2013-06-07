@@ -126,7 +126,7 @@
                       <td><%= @products[pro.product_id].name %></td>
                       <td><%= @products[pro.product_id].service_code %></td>
                       <td><%= OrderPayType::PAY_TYPES_NAME[pro.pay_type] %></td>
-                      <td><%= pro.prod_num %></td>
+                      <td><%= pro.prod_num.nil? ? "未统计" : pro.prod_num %></td>
                       <td><%= format("%.2f",pro.sum) %></td>
                     </tr>
                   <% end %>

@@ -32,7 +32,7 @@ class Station < ActiveRecord::Base
         Station.find(station.id).update_attributes(:status=>Station::STAT[:NO_SERVICE])
       end
     end
-    Staff.find_by_sql("select name,id,level from staffs where store_id=#{store_id} and type_of_w=#{Staff::S_COMPANY[:TECHNICIAN]}").each {|staff|
+    Staff.find_by_sql("select name,id,level from staffs where store_id=#{store_id} and type_of_w=#{Staff::S_COMPANY[:TECHNICIAN]} and status=#{Staff::STATUS[:normal]}").each {|staff|
       if l_staffs[staff.level]
         l_staffs[staff.level].push([staff.id,staff.name])
       else

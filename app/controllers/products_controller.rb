@@ -72,7 +72,7 @@ class ProductsController < ApplicationController
     @img_urls=@product.image_urls
     @materials =Material.find_by_sql( "select id,name,code,storage from materials  where  store_id=#{params[:store_id]} and
               status=#{Material::STATUS[:NORMAL]} and types=#{Material::TYPES[:PRODUCT]}")
-    p @material = @product.prod_mat_relations[0]
+    @material = @product.prod_mat_relations[0]
   end
 
   def show_prod
