@@ -89,7 +89,7 @@
                 </table></td>
               <td><%= consumer.name %></td>
               <td><%= consumer.buy_year %></td>
-              <td><%=format("%.1f",@order_price[consumer.id].nil? ? consumer.price : @order_price[consumer.id] )  %></td>
+              <td><%=format("%.1f", @order_price[consumer.id].nil? ? consumer.price : @order_price[consumer.id] )  %></td>
             </tr>
           <%end%>
         </tbody>
