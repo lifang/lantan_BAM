@@ -132,6 +132,7 @@ class ComplaintsController < ApplicationController
 
   #客户消费统计
   def consumer_list
+     @order_price = {}
     session[:list_start],session[:list_end],session[:list_prod],session[:list_sex],session[:list_year]=nil,nil,nil,nil,nil
     session[:list_fee],session[:list_model],session[:list_name]=nil,nil,nil
     complaints = Complaint.consumer_types(params[:store_id],1)
