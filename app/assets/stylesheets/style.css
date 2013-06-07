@@ -847,3 +847,8 @@ a.compile_btn { width: 100px;}
 .mat_hint{
     margin-left:440px;font-size:11px;color:#999;
 }
+#materials_tab_table td.operation{
+    text-align: left;
+    line-height: 24px;
+    padding: 5px 0;
+}
