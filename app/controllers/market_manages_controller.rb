@@ -74,20 +74,22 @@ class MarketManagesController < ApplicationController
     @total_prod,@total_serv,@total_fee =0,0,0
     @total_price = {}
     orders = MonthScore.search_kind_order(session[:r_created],session[:r_ended],session[:time],params[:store_id])
-    pays =MonthScore.normal_ids(orders.map(&:id),session[:time]).inject(Hash.new){ |hash,pay|
-      hash["#{pay.product_id}-#{pay.day}"].nil? ? hash["#{pay.product_id}-#{pay.day}"]=(pay.price.nil? ? 0 : pay.price) :
-        hash["#{pay.product_id}-#{pay.day}"] += (pay.price.nil? ? 0 : pay.price);hash}
-    orders.inject(Hash.new){|hash,order|
-      hash["#{order.id}-#{order.day}"].nil? ? hash["#{order.id}-#{order.day}"]= order.sum : hash["#{order.id}-#{order.day}"] += order.sum;hash}.each {
-      |key,value|@total_price[key] = (value.nil? ? 0 : value)- (pays[key].nil? ? 0 : pays[key])}
-    reports =orders.inject(Hash.new){
-      |hash,prod| hash[prod.is_service].nil? ? hash[prod.is_service]= [prod] : hash[prod.is_service] << prod ;hash }
-    @prods =reports[Product::PROD_TYPES[:PRODUCT]].inject(Hash.new){
-      |hash,prod|@total_prod += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-    } unless reports[Product::PROD_TYPES[:PRODUCT]].nil?
-    @serv =reports[Product::PROD_TYPES[:SERVICE]].inject(Hash.new){
-      |hash,prod| @total_serv += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-    } unless reports[Product::PROD_TYPES[:SERVICE]].nil?
+    unless orders.blank?
+      pays =MonthScore.normal_ids(orders.map(&:id),session[:time]).inject(Hash.new){ |hash,pay|
+        hash["#{pay.product_id}-#{pay.day}"].nil? ? hash["#{pay.product_id}-#{pay.day}"]=(pay.price.nil? ? 0 : pay.price) :
+          hash["#{pay.product_id}-#{pay.day}"] += (pay.price.nil? ? 0 : pay.price);hash}
+      orders.inject(Hash.new){|hash,order|
+        hash["#{order.id}-#{order.day}"].nil? ? hash["#{order.id}-#{order.day}"]= order.sum : hash["#{order.id}-#{order.day}"] += order.sum;hash}.each {
+        |key,value|@total_price[key] = (value.nil? ? 0 : value)- (pays[key].nil? ? 0 : pays[key])}
+      reports =orders.inject(Hash.new){
+        |hash,prod| hash[prod.is_service].nil? ? hash[prod.is_service]= [prod] : hash[prod.is_service] << prod ;hash }
+      @prods =reports[Product::PROD_TYPES[:PRODUCT]].inject(Hash.new){
+        |hash,prod|@total_prod += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      } unless reports[Product::PROD_TYPES[:PRODUCT]].nil?
+      @serv =reports[Product::PROD_TYPES[:SERVICE]].inject(Hash.new){
+        |hash,prod| @total_serv += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      } unless reports[Product::PROD_TYPES[:SERVICE]].nil?
+    end
     pcards=MonthScore.sort_pay_types(params[:store_id],session[:time],session[:r_created],session[:r_ended])
     @pcards = pcards.inject(Hash.new){
       |hash,prod| @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
