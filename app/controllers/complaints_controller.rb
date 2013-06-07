@@ -190,11 +190,14 @@ class ComplaintsController < ApplicationController
       unless proucts.blank?
         complaints =Complaint.consumer_t(params[:store_id],proucts.map(&:order_id),session[:list_start],session[:list_end],session[:list_sex],session[:list_model],session[:list_year],session[:list_name],session[:list_fee])
         @consumers = complaints.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-        prices =OrderPayType.find_by_sql("select sum(price) price,order_id,product_id from order_pay_types o where o.order_id in (#{complaints.map(&:id).join(",")}) and product_id in (#{proucts.map(&:id).uniq.join(",")})
+        prices = {}
+        unless @consumers.blank?
+          prices =OrderPayType.find_by_sql("select sum(price) price,order_id,product_id from order_pay_types o where o.order_id in (#{complaints.map(&:id).join(",")}) and product_id in (#{proucts.map(&:id).uniq.join(",")})
           group by product_id,order_id").inject(Hash.new){|hash,pay|hash["#{pay.product_id}-#{pay.order_id}"].nil? ? hash["#{pay.product_id}-#{pay.order_id}"]=(pay.price.nil? ? 0 : pay.price) : hash["#{pay.product_id}-#{pay.order_id}"] += (pay.price.nil? ? 0 : pay.price);hash}
+        end
         proucts.each { |p|
           @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p;
-          @order_price[p.order_id].nil? ? @order_price[p.order_id] =(p.total_price.nil? ? 0:p.total_price)-(prices["#{p.id}-#{p.order_id}"].nil? ? 0 :prices["#{p.id}-#{p.order_id}"]) : @order_price[p.order_id]+= (p.total_price.nil? ? 0:p.total_price)-(prices["#{p.id}-#{p.order_id}"].nil? ? 0 :prices["#{p.id}-#{p.order_id}"])
+          @order_price[p.order_id].nil? ? @order_price[p.order_id] =(p.total_price.nil? ? 0:p.total_price)-(prices["#{p.id}-#{p.order_id}"].nil? ? 0 :prices["#{p.id}-#{p.order_id}"]) : @order_price[p.order_id]+= (p.total_price.nil? ? 0:p.total_price)-(prices["#{p.id}-#{p.order_id}"].nil? ? 0 : prices["#{p.id}-#{p.order_id}"])
         } if proucts.any?
         @total_price= complaints.inject(0){|total,prod|total += (@order_price[prod.id].nil? ? 0 : @order_price[prod.id])  }
       end
