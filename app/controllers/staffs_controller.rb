@@ -8,8 +8,8 @@ class StaffsController < ApplicationController
 
   def index
     type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
-    @staffs_names = @store.staffs.valid.where(type_of_w_sql).select("id, name")
-    @staffs = @store.staffs.valid.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @staffs_names = @store.staffs.not_deleted.where(type_of_w_sql).select("id, name")
+    @staffs = @store.staffs.not_deleted.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     staff_scores = MonthScore.where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")} and store_id = ?", @store.id)
     @staff_scores_hash = staff_scores.group_by{|ms| ms.staff_id}
     @staff =  Staff.new
@@ -22,7 +22,7 @@ class StaffsController < ApplicationController
     name_sql = params[:name].blank? ? "1=1" : ["name like ?", "%#{params[:name]}%"]
     types_sql = params[:types]=="-1" ? "1=1" : ["type_of_w = ?", "#{params[:types]}"]
     status_sql = params[:status]=="-1" ? "1=1" : ["status = ?", "#{params[:status]}"]
-    @staffs = @store.staffs.valid.where(name_sql).where(types_sql).where(status_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @staffs = @store.staffs.where(name_sql).where(types_sql).where(status_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
     staff_scores = MonthScore.where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")} and store_id = ?", @store.id)
     @staff_scores_hash = staff_scores.group_by{|ms| ms.staff_id}
   end

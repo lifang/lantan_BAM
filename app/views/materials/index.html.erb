@@ -7,28 +7,6 @@
   </div>
 <% end %>
 <div class="data_box">
-  <div class="search">
-    <div>
-      <label>条形码:</label>
-      <input type="text" id="search_material_code"/>
-        </div>
-    <div>
-      <label>物料名称:</label>
-      <input type="text" id="search_material_name"/>
-    </div>
-    <div>
-       <label>物料类别:</label>
-       <select id="search_material_type">
-         <option value="0">全部</option>
-         <% Material::TYPES_NAMES.each do |key,value| %>
-         <option value="<%= key %>"><%= value %></option>
-         <% end %>
-       </select>
-    </div>
-    <div>
-      <button class="search_btn" onclick="search_materials(<%= @current_store.id %>)">查询物料</button>
-    </div>
-  </div>
   <div class="data_menu">
     <%= link_to "添加物料", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>

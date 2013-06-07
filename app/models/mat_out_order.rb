@@ -5,11 +5,11 @@ class MatOutOrder < ActiveRecord::Base
 
   TYPES = {0 => "消耗", 1 => "调拨", 2 => "赠送", 3 => "销售"}
 
-  def self.out_list page,per_page, store_id
-    MatOutOrder.paginate(:select =>"m.*,o.material_num,s.name staff_name,o.price out_price,o.created_at out_time, o.types out_types",
+  def self.out_list page,per_page, store_id,sql = [nil,nil,nil]
+    MatOutOrder.where(sql[0]).where(sql[1]).where(sql[2]).where("materials.status=#{Material::STATUS[:NORMAL]} and materials.store_id=#{store_id}")
+    .paginate(:select =>"materials.*,o.material_num,s.name staff_name,o.price out_price,o.created_at out_time, o.types out_types",
                          :from => "mat_out_orders o",
-                         :joins => "inner join materials m on m.id=o.material_id inner join staffs s on s.id=o.staff_id",
-                         :conditions => "m.status=#{Material::STATUS[:NORMAL]} and m.store_id=#{store_id}",
+                         :joins => "inner join materials on materials.id=o.material_id inner join staffs s on s.id=o.staff_id",
                          :order => "o.created_at desc",
                          :page => page,:per_page => per_page)
   end

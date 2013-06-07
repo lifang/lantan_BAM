@@ -87,7 +87,7 @@ LantanBAM::Application.routes.draw do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","receive_order","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
-          "cancel_ignore"
+          "cancel_ignore","search_materials"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"
       end
       member do
