@@ -132,18 +132,24 @@ class ComplaintsController < ApplicationController
 
   #客户消费统计
   def consumer_list
+    @order_price = {}
     session[:list_start],session[:list_end],session[:list_prod],session[:list_sex],session[:list_year]=nil,nil,nil,nil,nil
     session[:list_fee],session[:list_model],session[:list_name]=nil,nil,nil
-    @consumers = Complaint.consumer_types(params[:store_id],1)
+    complaints = Complaint.consumer_types(params[:store_id],1)
+    @consumers = complaints.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+    @total_price = complaints.inject(0){|num,prod|num +(prod.price.nil? ? 0 : prod.price)}
     unless @consumers.blank?
-      products =Product.find_by_sql("select p.name,o.price,o.pro_num,o.order_id,o.total_price from products p inner join order_prod_relations o on o.product_id=p.id where
-      o.order_id in (#{@consumers.map(&:id).uniq.join(",")})")
-      @products = products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]=[prod]:hash[prod.order_id]<<prod;hash}
-      pay_sql = "select * from order_pay_types  where order_id in (#{@consumers.map(&:id).uniq.join(",")}) and
-       pay_type in (#{OrderPayType::PAY_TYPES[:SV_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]})"
-      prices =OrderPayType.find_by_sql(pay_sql).inject(Hash.new){|hash,order_pay|hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=order_pay.price : hash[order_pay.order_id]+=order_pay.price;hash}
-      @sums ={}
-      products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]= prod.total_price : hash[prod.order_id]+= prod.total_price;hash}.each {|key,value|@sums[key]=(value.nil? ? 0 : value)-(prices[key].nil? ? 0 :prices[key])  }
+      products = OrderProdRelation.find_by_sql("select opr.order_id, opr.pro_num, opr.price order_price, p.name p_name from order_prod_relations opr
+   left join products p on p.id = opr.product_id where opr.order_id in (#{@consumers.map(&:id).uniq.join(",")})")
+      @order_prods = {}
+      products.each { |p|
+        @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p
+      } if products.any?
+      pcar_relations = CPcardRelation.find_by_sql("select cpr.order_id,1 pro_num, pc.price order_price, pc.name p_name from c_pcard_relations cpr
+    inner join package_cards pc on pc.id = cpr.package_card_id where cpr.order_id in (#{@consumers.map(&:id).uniq.join(",")})")
+      pcar_relations.each { |p|
+        @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p
+      } if pcar_relations.any?
     end
   end
 
@@ -158,19 +164,43 @@ class ComplaintsController < ApplicationController
 
   #客户消费统计查询
   def con_list
-    @consumers = Complaint.consumer_types(params[:store_id],0,session[:list_start],session[:list_end],session[:list_sex],session[:list_model],session[:list_year],session[:list_name],session[:list_fee])
-    unless @consumers.blank?
-      sql ="select p.name,o.price,o.pro_num,o.order_id,o.total_price from products p inner join order_prod_relations o on o.product_id=p.id where
-      o.order_id in (#{@consumers.map(&:id).uniq.join(",")})"
-      sql += " and p.types =#{session[:list_prod]}" unless session[:list_prod].nil? || session[:list_prod] =="" || session[:list_prod].length==0
-      products =Product.find_by_sql(sql)
-      @products = products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]=[prod]:hash[prod.order_id]<<prod;hash}
-      pay_sql = "select * from order_pay_types o inner join products p on p.id=o.product_id where o.order_id in (#{@consumers.map(&:id).uniq.join(",")}) and
-       o.pay_type in (#{OrderPayType::PAY_TYPES[:SV_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]})"
-      sql += " and p.types =#{session[:list_prod]}" unless session[:list_prod].nil? || session[:list_prod] =="" || session[:list_prod].length==0
-      prices =OrderPayType.find_by_sql(pay_sql).inject(Hash.new){|hash,order_pay|hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=order_pay.price : hash[order_pay.order_id]+=order_pay.price;hash}
-      @sums ={}
-      products.inject(Hash.new){|hash,prod|hash[prod.order_id].nil? ? hash[prod.order_id]= prod.total_price : hash[prod.order_id]+= prod.total_price;hash}.each {|key,value|@sums[key]=(value.nil? ? 0 : value)-(prices[key].nil? ? 0 :prices[key])  }
+    @order_prods = {}
+    @order_price = {}
+    if session[:list_prod].nil? || session[:list_prod] =="" || session[:list_prod].length==0
+      complaints =Complaint.consumer_types(params[:store_id],0,session[:list_start],session[:list_end],session[:list_sex],session[:list_model],session[:list_year],session[:list_name],session[:list_fee])
+      @consumers = complaints.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+      unless @consumers.blank?
+        products = OrderProdRelation.find_by_sql("select opr.order_id, opr.pro_num, opr.price order_price, p.name p_name from order_prod_relations opr
+        left join products p on p.id = opr.product_id where opr.order_id in (#{@consumers.map(&:id).uniq.join(",")})")
+        @order_prods = {}
+        products.each { |p|
+          @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p
+        } if products.any?
+        pcar_relations = CPcardRelation.find_by_sql("select cpr.order_id,1 pro_num, pc.price order_price, pc.name p_name from c_pcard_relations cpr
+        inner join package_cards pc on pc.id = cpr.package_card_id where cpr.order_id in (#{@consumers.map(&:id).uniq.join(",")})")
+        pcar_relations.each { |p|
+          @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p
+        } if pcar_relations.any?
+      end
+      @total_price = complaints.inject(0){|num,prod|num +(prod.price.nil? ? 0 : prod.price)}
+    else
+      sql ="select p.name p_name,o.price order_price,o.pro_num,o.order_id,o.total_price,p.id from products p inner join order_prod_relations o on o.product_id=p.id where p.types =#{session[:list_prod]}"
+      proucts =Product.find_by_sql(sql)
+      @consumers = []
+      unless proucts.blank?
+        complaints =Complaint.consumer_t(params[:store_id],proucts.map(&:order_id),session[:list_start],session[:list_end],session[:list_sex],session[:list_model],session[:list_year],session[:list_name],session[:list_fee])
+        @consumers = complaints.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+        prices = {}
+        unless @consumers.blank?
+          prices =OrderPayType.find_by_sql("select sum(price) price,order_id,product_id from order_pay_types o where o.order_id in (#{complaints.map(&:id).join(",")}) and product_id in (#{proucts.map(&:id).uniq.join(",")})
+          group by product_id,order_id").inject(Hash.new){|hash,pay|hash["#{pay.product_id}-#{pay.order_id}"].nil? ? hash["#{pay.product_id}-#{pay.order_id}"]=(pay.price.nil? ? 0 : pay.price) : hash["#{pay.product_id}-#{pay.order_id}"] += (pay.price.nil? ? 0 : pay.price);hash}
+        end
+        proucts.each { |p|
+          @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p;
+          @order_price[p.order_id].nil? ? @order_price[p.order_id] =(p.total_price.nil? ? 0:p.total_price)-(prices["#{p.id}-#{p.order_id}"].nil? ? 0 :prices["#{p.id}-#{p.order_id}"]) : @order_price[p.order_id]+= (p.total_price.nil? ? 0:p.total_price)-(prices["#{p.id}-#{p.order_id}"].nil? ? 0 : prices["#{p.id}-#{p.order_id}"])
+        } if proucts.any?
+        @total_price= complaints.inject(0){|total,prod|total += (@order_price[prod.id].nil? ? 0 : @order_price[prod.id])  }
+      end
     end
     render "consumer_list"
   end

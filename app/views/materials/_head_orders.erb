@@ -1,7 +1,7 @@
 <script>
     $(document).ready(function(){
-        $(".pageTurn a").unbind("click");
-        $(".pageTurn a").bind("click", function() {
+        $("#page_head_orders .pageTurn a").unbind("click");
+        $("#page_head_orders .pageTurn a").bind("click", function() {
             var url = this.href + "&m_status="+$("#select_h_order").val()+"&from="+$("#date01").val()+"&to="+$("#date02").val();
             url += "&status="+$("#h_pay_status").val();
             $.ajax({

@@ -207,9 +207,13 @@ class Order < ActiveRecord::Base
       and m.storage > 0 and m.store_id = ? ", store_id])
     p_ids = prod_mat_relations.collect { |i| i.p_id  } if prod_mat_relations.any?
     products = Product.find_by_sql(["select * from products p where p.status = ? 
-      and p.id in (?) and p.store_id = ?", Product::IS_VALIDATE[:YES], p_ids, store_id])
+      and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?", 
+        Product::IS_VALIDATE[:YES], p_ids, store_id])
+    services = Product.find_by_sql(["select * from products p where p.status = ?
+      and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
+        Product::IS_VALIDATE[:YES], store_id])
  
-    (products || []).each do |p|
+    ((products + services) || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
@@ -284,11 +288,8 @@ class Order < ActiveRecord::Base
         ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 3
       end
       #ids = [311, 226]
-      prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
-      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
-      and m.storage > 0 and m.store_id = ? and pmr.product_id in (?) ", store_id, ids]).group_by { |i| i.product_id } if ids.any?
       products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", 
-          prod_mat_relations.keys]) unless (prod_mat_relations.nil? or prod_mat_relations.keys.blank?)
+          ids]) if ids.any?
       
       unless products.nil? or products.blank?
         service_ids = products.collect { |p| p.id  } #[311]

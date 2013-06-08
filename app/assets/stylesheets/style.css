@@ -413,6 +413,7 @@ a.compile_btn { width: 100px;}
 #station_form{ width: 800px;}
 .item_textarea ul { overflow: hidden; padding: 10px 0 0px 115px;}
 .item_textarea ul li { height: 24px; line-height: 24px; margin: 5px 0;}
+.item_textarea_text { width: 460px; height: 120px; overflow: auto;}
 
 
 .item input[type="text"], .item select, .item_textarea select, .seeProDiv input[type="text"]{ 
@@ -846,4 +847,9 @@ a.compile_btn { width: 100px;}
 #batch_check_tab .file_data{height: 300px;overflow-y: auto;}
 .mat_hint{
     margin-left:440px;font-size:11px;color:#999;
+}
+#materials_tab_table td.operation{
+    text-align: left;
+    line-height: 24px;
+    padding: 5px 0;
 }

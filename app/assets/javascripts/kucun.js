@@ -1018,15 +1018,16 @@ function checkMatNum(){
            }
       })
   }
-  function search_materials(store_id){
-      var mat_code = $.trim($("#search_material_code").val());
-      var mat_name = $.trim($("#search_material_name").val());
-      var mat_type = $.trim($("#search_material_type").val());
+  function search_materials(tab_name, store_id, obj){
+      var mat_code = $.trim($(obj).parents(".search").find("#search_material_code").val());
+      var mat_name = $.trim($(obj).parents(".search").find("#search_material_name").val());
+      var mat_type = $.trim($(obj).parents(".search").find("#search_material_type").val());
       $.ajax({
-          url: "/stores/"+store_id+"/materials",
+          url: "/stores/"+store_id+"/materials/search_materials",
           dataType: "script",
           type: "get",
           data: {
+              tab_name : tab_name,
               mat_code : mat_code,
               mat_name : mat_name,
               mat_type : mat_type,

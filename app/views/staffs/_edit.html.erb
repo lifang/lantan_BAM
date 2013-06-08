@@ -96,7 +96,7 @@
                   </div>
                 <div class="item">
                        <label>在职状态：</label>
-                       <%= f.select :status, Staff::STATUS_NAME.invert.delete_if {|key, value| key == "删除" } %>
+                       <%= f.select :status, Staff::STATUS_NAME.invert.except("删除") %>
                   </div>
                 <div class="item_textarea">
                      <label>上传照片：</label><%= f.file_field :photo, :class => "file" %>
