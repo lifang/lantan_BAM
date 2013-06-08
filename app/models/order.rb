@@ -288,11 +288,8 @@ class Order < ActiveRecord::Base
         ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 3
       end
       #ids = [311, 226]
-      prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
-      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
-      and m.storage > 0 and m.store_id = ? and pmr.product_id in (?) ", store_id, ids]).group_by { |i| i.product_id } if ids.any?
       products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", 
-          prod_mat_relations.keys]) unless (prod_mat_relations.nil? or prod_mat_relations.keys.blank?)
+          ids]) if ids.any?
       
       unless products.nil? or products.blank?
         service_ids = products.collect { |p| p.id  } #[311]
