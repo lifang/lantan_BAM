@@ -254,7 +254,7 @@ function submit_out_order(form_id){
           if(parseFloat($(this).val()) > storage){
               tishi_alert("【"+name+"】请输入小于库存量的值");
               a = false;
-          }else if(parseFloat($(this).val()) < 0){
+          }else if(parseFloat($(this).val()) <= 0){
               tishi_alert("【"+name+"】请输入大于0的值");
               a = false;
           }
