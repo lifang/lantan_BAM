@@ -54,7 +54,7 @@ class CustomersController < ApplicationController
       else
         Customer.create_single_cus(customer, car_num, params[:mobilephone].strip, params[:new_car_num].strip,
           params[:new_name].strip, params[:other_way].strip,
-          params[:birthday], params[:buy_year], params[:car_models], params[:sex], params[:address])
+          params[:birthday], params[:buy_year], params[:car_models], params[:sex], params[:address], params[:is_vip])
         flash[:notice] = "客户信息创建成功。"
       end
     end
@@ -70,7 +70,7 @@ class CustomersController < ApplicationController
       else
         customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
           :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
-          :address => params[:address])
+          :address => params[:address], :is_vip => params[:is_vip])
         flash[:notice] = "客户信息更新成功。"
       end
     end
