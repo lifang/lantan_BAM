@@ -10,16 +10,16 @@
         <td>成本价</td>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="low_materials_tbody">
         <% low_materials.each do |lm| %>
-      <tr>
+      <tr id="material<%= lm.id %>tr">
         <td width="15%"><%= lm.code %></td>
         <td><%= lm.name %></td>
         <td><%= Material::TYPES_NAMES[lm.types.to_i] %></td>
         <td>缺货</td>
         <td><%= lm.storage %></td>
         <td><%= lm.price %></td>
-              </tr>
+       </tr>
         <% end %>
     </tbody>
   </table>
