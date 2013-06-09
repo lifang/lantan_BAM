@@ -9,7 +9,7 @@ class MaterialOrder < ActiveRecord::Base
   belongs_to :supplier
 
   STATUS = {:no_pay => 0, :pay => 1, :cancel => 4}
-  M_STATUS = {:no_send => 0, :send => 1, :received => 2, :save_in => 3} #未发货--》已发货 --》已收货 --》已入库
+  M_STATUS = {:no_send => 0, :send => 1, :received => 2, :save_in => 3, :returned => 4} #0未发货，1已发货，2已收货，3已入库，4已退货
   PAY_TYPES = {:CHARGE => 1, :SAV_CARD => 2, :CASH => 3, :STORE_CARD => 4, :SALE_CARD => 5}
   PAY_TYPE_NAME = {1 => "支付宝",2 => "储值卡", 3 => "现金", 4 => "门店账户扣款", 5 => "活动优惠"}
 
@@ -106,6 +106,8 @@ class MaterialOrder < ActiveRecord::Base
       "已收货"
     when M_STATUS[:save_in]
       "已入库"
+    when M_STATUS[:returned]
+      "已退货"
     else
       "未知"
     end

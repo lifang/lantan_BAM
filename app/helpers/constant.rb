@@ -34,7 +34,8 @@ module Constant
       :del_supplier => ["删除供应商",2048],
       :receive => ["确认已收货",4096],
       :mat_edit => ["编辑", 8192],
-      :delete => ["删除", 16384]
+      :delete => ["删除", 16384],
+      :return => ["退货", 32768]
     },
     :staffs => {
       :name => "员工",

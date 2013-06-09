@@ -451,7 +451,24 @@ class MaterialsController < ApplicationController
     end
     render :json => {:status => 1}.to_json
   end
-
+  
+  #退货
+  def tuihuo
+    order = MaterialOrder.find_by_id(params[:order_id].to_i)
+    if order
+      if order.m_status == 3 || order.m_status == 4
+        render :json => {:status => 0}
+      else
+        if order.update_attribute("m_status", MaterialOrder::M_STATUS[:returned])
+          render :json => {:status => 1}
+        else
+          render :json => {:status => 0}
+        end
+      end
+    else
+      render :json => {:status => 0}
+    end
+  end
   #取消订货订单
   def cancel_order
     if params[:order_id]

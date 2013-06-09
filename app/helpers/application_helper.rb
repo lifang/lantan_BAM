@@ -72,6 +72,8 @@ module ApplicationHelper
         str = "已收货"
       elsif status == 3
         str = "已入库"
+      elsif status == 4
+        str = "已退货"
       end
     end
     str

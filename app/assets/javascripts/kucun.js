@@ -894,6 +894,25 @@ function cuihuo(order_id,type,store_id){
     });
 }
 
+function tuihuo(order_id, store_id){        //退货
+    $.ajax({
+        url: "/stores/"+store_id+"/materials/tuihuo",
+        dataType: "json",
+        type: "get",
+        data: {
+            order_id : order_id
+        },
+        success: function(data){
+            if(data.status == 0){
+                tishi_alert("操作失败!");
+            }else{
+                tishi_alert("操作成功!");
+                window.location.reload();
+            }
+        }
+    })
+}
+
 function cancel_order(order_id,type,store_id){
   if(confirm("确认要取消订单吗？")){
       $.ajax({
