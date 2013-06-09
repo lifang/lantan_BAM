@@ -38,6 +38,7 @@ LantanBAM::Application.routes.draw do
           "sale_orders","sale_order_list","stored_card_record","daily_consumption_receipt",
           "stored_card_bill", "daily_consumption_receipt_blank", "stored_card_bill_blank","gross_profit"
         post "search_month","search_report","search_sale_order","search_gross_profit"
+        get "load_service","load_product","load_pcard"
       end
     end
     resources :complaints do
@@ -85,7 +86,7 @@ LantanBAM::Application.routes.draw do
     resources :materials do
       collection do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
-          "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
+          "print","cuihuo","tuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","receive_order","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
           "cancel_ignore","search_materials"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"

@@ -22,7 +22,8 @@
           <span class="site_name"><%= @f_working[key][0].name %></span>
           <ul>
             <%@f_working[key].each do |num|%>
-              <li><%= num.num %></li>
+              <li><%= link_to "#{num.num}", "/orders/#{num.order_id}/order_info" ,
+                  :remote => "true", "data-type" => "script", :class => "other_a" %></li>
             <% end unless @f_working[key].blank? %>
           </ul>
         </div>
