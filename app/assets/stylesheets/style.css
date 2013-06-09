@@ -150,6 +150,15 @@ textarea {
 	right: 0px;
 	padding-top:3px;
 }
+.module li a.message01 {
+	width: 31px; 
+	height:24px;
+	background: url(/assets/message01.png) no-repeat;
+	position:absolute; 
+	top: 0px;
+	right: 0px;
+	padding-top:3px;
+}
 /*内容页信息*/
 .box .message {
     padding: 5px 10px;
