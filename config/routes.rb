@@ -38,6 +38,7 @@ LantanBAM::Application.routes.draw do
           "sale_orders","sale_order_list","stored_card_record","daily_consumption_receipt",
           "stored_card_bill", "daily_consumption_receipt_blank", "stored_card_bill_blank","gross_profit"
         post "search_month","search_report","search_sale_order","search_gross_profit"
+        get "load_service","load_product","load_pcard"
       end
     end
     resources :complaints do
@@ -207,7 +208,7 @@ LantanBAM::Application.routes.draw do
     resources :orders do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
-          "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer"
+          "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard","use_svcard"
       end
     end
     resources :syncs_datas do

@@ -8,93 +8,87 @@ class MarketManagesController < ApplicationController
 
   #营业额汇总表
   def makets_totals
-    session[:created],session[:ended]=nil,nil
-    @month_goal =MonthScore.sort_order(params[:store_id])
-    @months =@month_goal.inject(Hash.new){|hash,order|
-      hash[order.day].nil? ? hash[order.day]={order.pay_type=>order.price} : hash[order.day].merge!(order.pay_type=>order.price);hash }
+    session[:created],session[:ended]=(Time.now - Constant::PRE_DAY.days).strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d")
+    months =[]
+    @month_goal =MonthScore.sort_order_date(params[:store_id],session[:created],session[:ended])
+    @month_goal.inject(Hash.new){|hash,order|
+      hash[order.day].nil? ? hash[order.day]={order.pay_type=>order.price} : 
+        hash[order.day].merge!(order.pay_type=>order.price);hash }.sort.reverse.each {|k,v| months << [k,v]}
+    @months =months.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @total_num = @month_goal.inject(0){|num,order| num + order.price}
   end
 
   #营业额汇总查询
   def search_month
-    session[:created],session[:ended]=nil,nil
     session[:created],session[:ended]=params[:created],params[:ended]
     redirect_to "/stores/#{params[:store_id]}/market_manages/makets_list"
   end
 
   #营业额汇总查询列表
   def makets_list
+    months =[]
     @month_goal =MonthScore.sort_order_date(params[:store_id],session[:created],session[:ended])
-    @months =@month_goal.inject(Hash.new){|hash,order|
-      hash[order.day].nil? ? hash[order.day]={order.pay_type=>order.price} : hash[order.day].merge!(order.pay_type=>order.price);hash }
+    @month_goal.inject(Hash.new){|hash,order|
+      hash[order.day].nil? ? hash[order.day]={order.pay_type=>order.price} : 
+        hash[order.day].merge!(order.pay_type=>order.price);hash }.sort.reverse.each {|k,v| months << [k,v]}
+    @months =months.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @total_num =@month_goal.inject(0){|num,order| num+order.price}
     render 'makets_totals'
   end
 
   #销售报表
   def makets_reports
-    session[:r_created],session[:r_ended],session[:time]=nil,nil,nil
-    @total_prod,@total_serv,@total_fee =0,0,0
-    @total_price = {}
-    orders =MonthScore.kind_order(params[:store_id])
+    session[:r_created],session[:r_ended],session[:time]=(Time.now - Constant::PRE_DAY.days).strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d"),Sale::DISC_TIME[:DAY]
+  end
+
+
+  def load_service
+    @total_service,@total_serv,serv = {},0,[]
+    session[:r_created],session[:r_ended],session[:time]=params[:created],params[:ended],params[:time].to_i
+    orders = MonthScore.search_kind_order(session[:r_created],session[:r_ended],session[:time],params[:store_id],Product::PROD_TYPES[:SERVICE])
     unless orders.blank?
-      pays =MonthScore.normal_ids(orders.map(&:id)).inject(Hash.new){
-        |hash,pay| hash["#{pay.product_id}-#{pay.day}"].nil? ? hash["#{pay.product_id}-#{pay.day}"]=(pay.price.nil? ? 0 : pay.price) : hash["#{pay.product_id}-#{pay.day}"] += (pay.price.nil? ? 0 : pay.price);hash
-      }
+      pays =MonthScore.normal_ids(orders.map(&:id),Product::PROD_TYPES[:SERVICE],session[:time]).inject(Hash.new){ |hash,pay|
+        hash["#{pay.product_id}-#{pay.day}"].nil? ? hash["#{pay.product_id}-#{pay.day}"]=(pay.price.nil? ? 0 : pay.price) :
+          hash["#{pay.product_id}-#{pay.day}"] += (pay.price.nil? ? 0 : pay.price);hash}
       orders.inject(Hash.new){|hash,order|
         hash["#{order.id}-#{order.day}"].nil? ? hash["#{order.id}-#{order.day}"]= order.sum : hash["#{order.id}-#{order.day}"] += order.sum;hash}.each {
-        |key,value|@total_price[key] = (value.nil? ? 0 : value)- (pays[key].nil? ? 0 : pays[key])
-      }
-      reports =orders.inject(Hash.new){
-        |hash,prod| hash[prod.is_service].nil? ? hash[prod.is_service]= [prod] : hash[prod.is_service] << prod ;hash
-      }
-      @prods =reports[Product::PROD_TYPES[:PRODUCT]].inject(Hash.new){
-        |hash,prod|@total_prod += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-      } unless reports[Product::PROD_TYPES[:PRODUCT]].nil?
-      @serv =reports[Product::PROD_TYPES[:SERVICE]].inject(Hash.new){
-        |hash,prod| @total_serv += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-      } unless reports[Product::PROD_TYPES[:SERVICE]].nil?
+        |key,value|@total_service[key] = (value.nil? ? 0 : value)- (pays[key].nil? ? 0 : pays[key])}
+      orders.inject(Hash.new){
+        |hash,prod|@total_serv += @total_service["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      }.sort.reverse.each {|k,v| serv << [k,v]} if orders.any?
+      @serv = serv.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     end
-    pcards=MonthScore.sort_pay_types(params[:store_id])
-    @pcards = pcards.inject(Hash.new){
-      |hash,prod| @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-    }
-    @products =orders.inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
   end
 
-  #销售报表查询
-  def search_report
-    session[:r_created],session[:r_ended],session[:time]=nil,nil,nil
+  def load_product
+    @total_product,@total_prod,prods = {},0,[]
     session[:r_created],session[:r_ended],session[:time]=params[:created],params[:ended],params[:time].to_i
-    redirect_to "/stores/#{params[:store_id]}/market_manages/makets_views"
+    orders = MonthScore.search_kind_order(session[:r_created],session[:r_ended],session[:time],params[:store_id],Product::PROD_TYPES[:PRODUCT])
+    unless orders.blank?
+      pays =MonthScore.normal_ids(orders.map(&:id),Product::PROD_TYPES[:PRODUCT],session[:time]).inject(Hash.new){ |hash,pay|
+        hash["#{pay.product_id}-#{pay.day}"].nil? ? hash["#{pay.product_id}-#{pay.day}"]=(pay.price.nil? ? 0 : pay.price) :
+          hash["#{pay.product_id}-#{pay.day}"] += (pay.price.nil? ? 0 : pay.price);hash}
+      orders.inject(Hash.new){|hash,order|
+        hash["#{order.id}-#{order.day}"].nil? ? hash["#{order.id}-#{order.day}"]= order.sum : hash["#{order.id}-#{order.day}"] += order.sum;hash}.each {
+        |key,value|@total_product[key] = (value.nil? ? 0 : value)- (pays[key].nil? ? 0 : pays[key])}
+      orders.inject(Hash.new){
+        |hash,prod|@total_prod += @total_product["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      }.sort.reverse.each {|k,v| prods << [k,v]} if orders.any?
+      @prods = prods.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+    end
   end
 
-  #销售报表查询列表
-  def makets_views
-    @total_prod,@total_serv,@total_fee =0,0,0
-    @total_price = {}
-    orders = MonthScore.search_kind_order(session[:r_created],session[:r_ended],session[:time],params[:store_id])
-    pays =MonthScore.normal_ids(orders.map(&:id),session[:time]).inject(Hash.new){ |hash,pay|
-      hash["#{pay.product_id}-#{pay.day}"].nil? ? hash["#{pay.product_id}-#{pay.day}"]=(pay.price.nil? ? 0 : pay.price) :
-        hash["#{pay.product_id}-#{pay.day}"] += (pay.price.nil? ? 0 : pay.price);hash}
-    orders.inject(Hash.new){|hash,order|
-      hash["#{order.id}-#{order.day}"].nil? ? hash["#{order.id}-#{order.day}"]= order.sum : hash["#{order.id}-#{order.day}"] += order.sum;hash}.each {
-      |key,value|@total_price[key] = (value.nil? ? 0 : value)- (pays[key].nil? ? 0 : pays[key])}
-    reports =orders.inject(Hash.new){
-      |hash,prod| hash[prod.is_service].nil? ? hash[prod.is_service]= [prod] : hash[prod.is_service] << prod ;hash }
-    @prods =reports[Product::PROD_TYPES[:PRODUCT]].inject(Hash.new){
-      |hash,prod|@total_prod += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-    } unless reports[Product::PROD_TYPES[:PRODUCT]].nil?
-    @serv =reports[Product::PROD_TYPES[:SERVICE]].inject(Hash.new){
-      |hash,prod| @total_serv += @total_price["#{prod.id}-#{prod.day}"];hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-    } unless reports[Product::PROD_TYPES[:SERVICE]].nil?
-    pcards=MonthScore.sort_pay_types(params[:store_id],session[:time],session[:r_created],session[:r_ended])
-    @pcards = pcards.inject(Hash.new){
-      |hash,prod| @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-    }
-    @products =orders.inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
-    render 'makets_reports'
+  def load_pcard
+    @total_product,@total_fee,pcards = {},0,[]
+    session[:r_created],session[:r_ended],session[:time]=params[:created],params[:ended],params[:time].to_i
+    pays = MonthScore.sort_pay_types(params[:store_id],session[:time],session[:r_created],session[:r_ended])
+    pays.inject(Hash.new){ |hash,prod|
+      @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+    }.sort.reverse.each {|k,v| pcards << [k,v]}
+    @pcards = pcards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+    @products = Product.where("id in (#{pays.map(&:product_id).join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
   end
+
 
   #目标销售额
   def index

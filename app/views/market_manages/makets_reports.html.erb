@@ -1,144 +1,35 @@
+<%= javascript_include_tag "complaints.js" %>
 <%=  render 'second_menu'%>
+<input type="hidden" value="<%= params[:store_id] %>" id="store_id" />
 <div class="search">
-  <%= form_for :complaint,:url=>"/stores/#{params[:store_id]}/market_manages/search_report" do%>
-    <div><label>时间：</label>
-      <input name="created" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_created] %>"  class="Wdate"/>&nbsp;到&nbsp;
-      <input name="ended" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_ended] %>" class="Wdate"/></div>
-    <div><input name="time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>"  checked />日&nbsp;&nbsp;
-      <input name="time" type="radio" value="<%= Sale::DISC_TIME[:WEEK] %>" <%if session[:time]==Sale::DISC_TIME[:WEEK]%>checked<%end%> />周&nbsp;&nbsp;
-      <input name="time" type="radio" value="<%= Sale::DISC_TIME[:MONTH] %>" <%if session[:time]==Sale::DISC_TIME[:MONTH]%>checked<%end%> />月</div>
-    <div><button class="search_btn">查询</button></div>
-  <% end %>
+  <div><label>时间：</label>
+    <input name="created" type="text" id="created" readonly onclick="WdatePicker()" value="<%= session[:r_created] %>"  class="Wdate"/>&nbsp;到&nbsp;
+    <input name="ended" id="ended" type="text" readonly onclick="WdatePicker()" value="<%= session[:r_ended] %>" class="Wdate"/></div>
+  <div><input name="time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>"  checked />日&nbsp;&nbsp;
+    <input name="time" type="radio" value="<%= Sale::DISC_TIME[:WEEK] %>" <%if session[:time]==Sale::DISC_TIME[:WEEK]%>checked<%end%> />周&nbsp;&nbsp;
+    <input name="time" type="radio" value="<%= Sale::DISC_TIME[:MONTH] %>" <%if session[:time]==Sale::DISC_TIME[:MONTH]%>checked<%end%> />月</div>
+  <div><button class="search_btn" onclick="search_first()">查询</button></div>
 </div>
 <div class="clear"></div>
 <div class="tab_head">
   <ul>
-    <li class="hover">服务类</li>
-    <li>商品类</li>
-    <li>增值服务类</li>
+    <li class="hover" id="0">服务类</li>
+    <li id="1">商品类</li>
+    <li id="2">增值服务类</li>
   </ul>
 </div>
+
 <div class="data_body">
-  <div>
-    <%unless @serv.blank? %>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-        <thead>
-          <tr class="hbg">
-            <td>时间</td>
-            <td>详细</td>
-          </tr>
-        </thead>
-        <tbody>
-          <%@serv.sort.reverse.each do |key,prod|%>
-            <tr>
-              <td><%= key %></td>
-              <td>
-                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-                  <tr class="fws">
-                    <td width="300px">服务项目</td>
-                    <td>服务代码</td>
-                    <td>数量</td>
-                    <td>合计（元）</td>
-                  </tr>
-                  <%prod.each_with_index do |pro,index|%>
-                    <tr>
-                      <td><%= pro.name %></td>
-                      <td><%= pro.service_code %></td>
-                      <td><%= pro.prod_num.to_i %></td>
-                      <td><%= format("%.2f",@total_price["#{pro.id}-#{pro.day}"]) %></td>
-                    </tr>
-                  <% end %>
-                </table>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <div class="amount">总计：<%= format("%.1f",@total_serv) %></div>
-    <% else %>
-      暂无服务类报表
-    <% end %>
-  </div>
-  <div style="display:none;">
-    <% unless @prods.blank? %>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-        <thead>
-          <tr class="hbg">
-            <td>时间</td>
-            <td>详细</td>
-          </tr>
-        </thead>
-        <tbody>
-          <%@prods.sort.reverse.each do |key,prod|%>
-            <tr>
-              <td><%= key %></td>
-              <td>
-                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-                  <tr class="fws">
-                    <td width="300px">商品名称</td>
-                    <td>商品编号</td>
-                    <td>数量</td>
-                    <td>合计（元）</td>
-                  </tr>
-                  <%prod.each_with_index do |pro,index|%>
-                    <tr>
-                      <td><%= pro.name %></td>
-                      <td><%= pro.service_code %></td>
-                      <td><%= pro.prod_num.to_i %></td>
-                      <td><%= format("%.2f",@total_price["#{pro.id}-#{pro.day}"]) %></td>
-                    </tr>
-                  <% end %>
-                </table>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <div class="amount">总计：<%=format("%.1f",@total_prod) %></div>
-    <% else %>
-      暂无产品类报表
-    <% end %>
-  </div>
-  <div style="display:none;">
-    <%unless @pcards.blank?%>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-        <thead>
-          <tr class="hbg">
-            <td>时间</td>
-            <td>详细</td>
-          </tr>
-        </thead>
-        <tbody>
-          <%@pcards.sort.reverse.each do |key,prod|%>
-            <tr>
-              <td><%= key %></td>
-              <td>
-                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-                  <tr class="fws">
-                    <td width="320px">商品名称</td>
-                    <td>商品编号</td>
-                    <td>免费性质</td>
-                    <td>数量</td>
-                    <td>合计（元）</td>
-                  </tr>
-                  <%prod.each_with_index do |pro,index|%>
-                    <tr>
-                      <td><%= @products[pro.product_id].name %></td>
-                      <td><%= @products[pro.product_id].service_code %></td>
-                      <td><%= OrderPayType::PAY_TYPES_NAME[pro.pay_type] %></td>
-                      <td><%= pro.prod_num.nil? ? "未统计" : pro.prod_num %></td>
-                      <td><%= format("%.2f",pro.sum) %></td>
-                    </tr>
-                  <% end %>
-                </table>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <div class="amount">总计：<%= format("%.1f",@total_fee) %></div>
-    <%else%>
-      暂无增值服务类报表
-    <%end%>
-  </div>
+  <div id="service_list">数据加载中。。。。。</div>
+  <div style="display:none;" id="product_list">数据加载中。。。。。</div>
+  <div style="display:none;" id="pcard_list">数据加载中。。。。。</div>
+  <script type="text/javascript">
+    load_goal("/stores/<%= params[:store_id] %>/market_manages/load_service");
+    setTimeout(function(){
+      load_goal("/stores/<%= params[:store_id] %>/market_manages/load_product");
+    },2000)
+    setTimeout(function(){
+      load_goal("/stores/<%= params[:store_id] %>/market_manages/load_pcard");
+    },4000)
+  </script>
 </div>

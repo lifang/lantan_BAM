@@ -173,7 +173,9 @@ class MaterialsController < ApplicationController
     material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     current_store = Store.find_by_id(params[:store_id].to_i)
     if material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
-      render :json => {:status => 1, :material_low => current_store.material_low}
+      render :json => {:status => 1, :material_low => current_store.material_low, :material_storage => material.storage,
+                          :material_code => material.code, :material_name => material.name,
+                          :material_type => Material::TYPES_NAMES[material.types], :material_price => material.price}
     else
       render :json => {:status => 0}
     end
@@ -297,7 +299,7 @@ class MaterialsController < ApplicationController
     @current_store = Store.find_by_id params[:store_id]
     @store_account = @current_store.account if @current_store
     @material_order = MaterialOrder.find_by_id params[:mo_id]
-    @use_card_count = SvcReturnRecord.store_return_count(params[:store_id]).try(:abs)
+#    @use_card_count = SvcReturnRecord.store_return_count(params[:store_id]).try(:abs) # 先不提交
   end
 
 #检验付款页面的"活动代码"
@@ -623,10 +625,11 @@ class MaterialsController < ApplicationController
 
 
   def set_ignore   #设置物料忽略预警
+    current_store = Store.find_by_id(params[:store_id].to_i)
     material = Material.find_by_id_and_store_id(params[:m_id].to_i, params[:store_id])
     if material
       if material.update_attribute("is_ignore", Material::IS_IGNORE[:YES])
-        render :json => {:status => 1}
+        render :json => {:status => 1, :material_low => current_store.material_low, :material_storage => material.storage}
       else
         render :json => {:status => 0}
       end
@@ -640,7 +643,9 @@ class MaterialsController < ApplicationController
     current_store = Store.find_by_id(params[:store_id].to_i)
     if material
       if material.update_attribute("is_ignore", Material::IS_IGNORE[:NO])
-        render :json => {:status => 1, :material_low => current_store.material_low, :material_storage => material.storage}
+        render :json => {:status => 1, :material_low => current_store.material_low, :material_storage => material.storage,
+                          :material_code => material.code, :material_name => material.name,
+                          :material_type => Material::TYPES_NAMES[material.types], :material_price => material.price}
       else
         render :json => {:status => 0}
       end
