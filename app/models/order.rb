@@ -935,7 +935,7 @@ class Order < ActiveRecord::Base
           customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
             :other_way => email, :birthday => birth, :sex => sex) if customer
           Customer.create_single_cus(customer, car_num_r, phone, car_num,
-            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil)
+            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil)
         end
         status = 1
       end
