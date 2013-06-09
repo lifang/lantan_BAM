@@ -1,7 +1,7 @@
 #encoding: utf-8
 class Order < ActiveRecord::Base
   has_many :order_prod_relations
-#  has_many :products, :through => :order_prod_relations
+  #  has_many :products, :through => :order_prod_relations
   has_many :order_pay_types
   has_many :work_orders
   belongs_to :car_num
@@ -163,6 +163,10 @@ class Order < ActiveRecord::Base
             order_hash[:products] << p
           end          
         }
+        csvc_relations = CSvcRelation.includes(:sv_card).where(:order_id => order.id)
+        csvc_relations.each do |csvc_r|
+          order_hash[:products] << {:name => csvc_r.sv_card.try(:name), :price => csvc_r.total_price.to_f}
+        end unless csvc_relations.blank?
         package_cards[order.id].each do |o_pc|
           order_hash[:products] << {:name => o_pc.name, :price => o_pc.price}
         end if package_cards and package_cards[order.id]
@@ -235,19 +239,25 @@ class Order < ActiveRecord::Base
       :conditions => ["status = ? and store_id = ? and
           ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?) or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})",
         PackageCard::STAT[:NORMAL], store_id, Time.now])
+    sv_cards = SvCard.find_by_sql("select * from sv_cards where store_id = #{store_id}")
 
-    product_arr << (cards || []).collect{|c|
+    product_arr << (cards + sv_cards || []).collect{|c|
+      if c.is_a?(SvCard) and c.types==SvCard::FAVOR[:SAVE]
+        price = c.svcard_prod_relations[0].try(:base_price).to_f
+      else
+        price = c.price
+      end
       h = Hash.new
       h[:id] = c.id
       h[:name] = c.name
-      h[:price] = c.price
+      h[:price] = price
       h[:img] = c.img_url
+      h[:type] = c.is_a?(PackageCard) ? '0' : '1'
       h
     }
     arr << product_arr
     count = maint_arr.length if count < maint_arr.length
     count = prod_arr.length if count < prod_arr.length
-    count = cards.length if count < cards.length
     product_arr << count
     arr
   end
@@ -288,6 +298,9 @@ class Order < ActiveRecord::Base
         ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 3
       end
       #ids = [311, 226]
+      prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
+      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
+      and m.storage > 0 and m.store_id = ? and pmr.product_id in (?) ", store_id, ids]).group_by { |i| i.product_id } if ids.any?
       products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", 
           ids]) if ids.any?
       
@@ -313,38 +326,60 @@ class Order < ActiveRecord::Base
       #sale_arr = []
       sale_hash = {}
       svcard_arr = []
-      prod_ids.split(",").each do |id| #["10_3","311_0","226_2"]
+      p 11111111111111
+      p prod_ids
+      prod_ids.split(",").each do |id| #["1_3_1","22_3_0","311_0","226_2"]
         if id.split("_")[1].to_i == 3
           #套餐卡
-          has_p_card = 0
-          p_c = Hash.new
-          p_c = PackageCard.find_by_id_and_status_and_store_id id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id
-          if p_c
-            p_c[:products] = p_c.pcard_prod_relations.collect{|r|
-              p = Hash.new
-              p[:name] = r.product.name
-              p[:num] = r.product_num
-              p[:p_card_id] = r.package_card_id
-              p[:product_id] = r.product_id
-              p[:product_price] = r.product.sale_price
-              p[:selected] = 1
-              p
-            }
+          if id.split("_")[2].to_i == 0
+            has_p_card = 0
+            p_c = Hash.new
+            p_c = PackageCard.find_by_id_and_status_and_store_id id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id
+            if p_c
+              p_c[:products] = p_c.pcard_prod_relations.collect{|r|
+                p = Hash.new
+                p[:name] = r.product.name
+                p[:num] = r.product_num
+                p[:p_card_id] = r.package_card_id
+                p[:product_id] = r.product_id
+                p[:product_price] = r.product.sale_price
+                p[:selected] = 1
+                p
+              }
+            end
+            p_c[:has_p_card] = has_p_card
+            p_c[:show_price] = p_c[:price]
+            p_cards << p_c
+            total += p_c.price
+          else #储值卡，打折卡
+            sv_card = SvCard.find_by_id(id.split("_")[0])
+            if sv_card
+              show_price =  sv_card.types== SvCard::FAVOR[:DISCOUNT] ? sv_card.price : (sv_card.svcard_prod_relations[0].try(:base_price)||0)
+              s = Hash.new
+              s[:scard_id] = sv_card.id
+              s[:scard_name] = sv_card.name
+              s[:scard_discount] = sv_card.discount
+              s[:price] = show_price
+              s[:selected] = sv_card.types== SvCard::FAVOR[:DISCOUNT] ? 1 : 0
+              s[:show_price] = 0
+              s[:card_type] = sv_card.types  #卡类型 0：打折卡， 1：储值卡
+              s[:is_new] = 1  #是新买的打折或者储值卡
+              svcard_arr << s
+              #total -= s[:price]
+              total += show_price
+            end
           end
-          p_c[:has_p_card] = has_p_card
-          p_c[:show_price] = p_c[:price]
-          p_cards << p_c
-          total += p_c.price
         else
           #产品
           prod = Product.find_by_store_id_and_id_and_status store_id,id.split("_")[0].to_i,Product::IS_VALIDATE[:YES]
+          prod_mat_num = prod.materials[0].try(:storage) || 0
           if prod
             product = Hash.new
             product[:id] = prod.id
             product[:name] = prod.name
             product[:price] = prod.sale_price
             product[:count] = 1
-            product[:num] = prod_mat_relations[prod.id][0].storage if prod.is_service == false
+            product[:num] = prod_mat_num if prod.is_service == false
             prod_arr << product
             total += product[:price]
             #产品相关的活动
@@ -378,9 +413,9 @@ class Order < ActiveRecord::Base
           end
         end
       end if prod_ids && carNum && customer
-      #产品相关的打折卡
+      #用户相关的打折卡
       discont_card = CSvcRelation.find(:all, :select => "c_svc_relations.*",
-        :conditions => ["c_svc_relations.customer_id = ? and s.types= ?", customer.id, SvCard::FAVOR[:DISCOUNT]],
+        :conditions => ["c_svc_relations.customer_id = ? and c_svc_relations.status = ? and s.types= ?", customer.id, true, SvCard::FAVOR[:DISCOUNT]],
         :joins => ["inner join sv_cards s on s.id = c_svc_relations.sv_card_id"])
       if discont_card.any?
         discont_card.each{|r|
@@ -388,9 +423,11 @@ class Order < ActiveRecord::Base
           s[:scard_id] = r.sv_card_id
           s[:scard_name] = r.sv_card.name
           s[:scard_discount] = r.sv_card.discount
-          s[:price] = total * (10 - r.sv_card.discount) / 10
+          s[:price] = 0
           s[:selected] = 1
           s[:show_price] = 0.0#"-" + s[:price].to_s
+          s[:card_type] = 0
+          s[:is_new] = 0
           svcard_arr << s
           #total -= s[:price]
         }
@@ -435,7 +472,7 @@ class Order < ActiveRecord::Base
 
   #获取产品相关的活动，打折卡，套餐卡
   def self.get_prod_sale_card prods
-    #"prods"=>"0_311_1,0_310_1,3_10_1_310=1-311=1-"
+    #"prods"=>"0_311_1,0_310_1,3_10_1_310=1-311=1-" # 打着卡：2_id_price(优惠jine)
     arr = prods.split(",")
     prod_arr = []
     sale_arr = []
@@ -456,21 +493,26 @@ class Order < ActiveRecord::Base
         pcard_arr << p.split("_")
       end
     end
+    p "--------------------------------"
+     p svcard_arr
     [prod_arr,sale_arr,svcard_arr,pcard_arr]
   end
 
   #生成订单
   def self.make_record c_id,store_id,car_num_id,start,end_at,prods,price,station_id,user_id
-    #"prods"=>"0_311_1,0_310_1,3_10_1_310=1-311=1-"
+    #"prods"=>"0_311_1,0_310_1,3_10_1_310=1-311=1-" # 产品／服务 ：0，活动：1， 打折卡：2， 套餐卡：3
+    p 3333333333333333333333333
+    p prods
     arr = []
     status = 0
     order = nil
     Order.transaction do
       #begin
-      arr = self.get_prod_sale_card prods  
-      #[[["0", "311", "9"], ["0", "310", "2"]], [], [], [["3", "10", "0", "310=2-311=7-"], ["3", "11", "0"], ["3", "10", "1", "311=2-"]]]
-      sale_id = arr[1].size > 0 ? arr[1][0][1] : ""
-      svcard_id = arr[2].size > 0 ? arr[2][0][1] : ""
+      arr = self.get_prod_sale_card prods
+      #2_id_card_type_（is_new）_price 储值卡格式
+      #[[["0", "311", "9"], ["0", "310", "2"]], [], [[2,1,0,0,20],...], [["3", "10", "0", "310=2-311=7-"], ["3", "11", "0"], ["3", "10", "1", "311=2-"]]]
+      sale_id = arr[1].size > 0 ? arr[1][0][1] : ""  #活动
+
       order = Order.create({
           :code => MaterialOrder.material_order_code(store_id.to_i),
           :car_num_id => car_num_id,
@@ -488,8 +530,34 @@ class Order < ActiveRecord::Base
         cost_time = 0
         prod_ids = []
         is_has_service = false #用来记录是否有服务
-        order_prod_relations = [] #用来记录订单中的所有的产品
+        order_prod_relations = [] #用来记录订单中的所有的产品+物料
         product_prices = {}
+        #存储sv_cards
+        if arr[2].size > 0
+        used_cards = arr[2].select{|ele| ele[4].to_f > 0} || []
+        used_svcard_id = used_cards.flatten[1] #已经使用的打折卡的id
+        #2_id_card_type_（is_new）_price 储值卡格式
+        arr[2].select{|ele| ele[3].to_i == 1}.each do |uc|
+          if uc[3]=="1" #新套餐卡
+              sv_card = SvCard.find_by_id uc[1]
+              if sv_card
+                if sv_card.types== SvCard::FAVOR[:SAVE]  #储值卡
+                  sv_prod_relation = sv_card.svcard_prod_relations[0]
+                  if sv_prod_relation
+                    total_price = sv_prod_relation.base_price.to_f+sv_prod_relation.more_price.to_f
+                    c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, :status => false)
+                    SvcardUseRecord.create(:c_svc_relation_id =>c_sv_relation.id,:types=>SvcardUseRecord::TYPES[:IN],:use_price=>0,
+                      :left_price=>total_price,:content=>"#{total_price}产品付费")
+                    Customer.find(c_id).update_attributes(:is_vip=>Customer::IS_VIP[:VIP])
+                  end
+                else   #打折卡
+                  CSvcRelation.create!(:customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => sv_card.price)
+                end
+              end
+            end
+        end
+
+      end
         #创建订单的相关产品 OrdeProdRelation
         (arr[0] || []).each do |prod|
           product = Product.find_by_id_and_store_id_and_status prod[1],store_id,Product::IS_VALIDATE[:YES]
@@ -505,6 +573,15 @@ class Order < ActiveRecord::Base
           end
         end
         hash[:types] = x > 0 ? TYPES[:SERVICE] : TYPES[:PRODUCT]
+        if order_prod_relations  #如果是产品,则减掉对应库存
+          order_prod_h = order_prod_relations.group_by { |o_p| o_p.product_id }
+          materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
+                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_prod_h.keys])
+          materials.each do |m|
+            m.update_attributes(:storage => (m.storage - order_prod_h[m.product_id][0].pro_num)) if order_prod_h[m.product_id]
+          end unless materials.blank?
+        end
         #订单相关的活动
         if sale_id != "" && Sale.find_by_id_and_store_id_and_status(sale_id,store_id,Sale::STATUS[:RELEASE])
           if arr[1][0][2]
@@ -518,19 +595,7 @@ class Order < ActiveRecord::Base
           end
           hash[:sale_id] = sale_id
         end
-        #订单相关的打折卡
-        if svcard_id != "" 
-          sv_card = SvCard.find_by_id(svcard_id)
-          if sv_card
-            c_sv_relation = CSvcRelation.find_by_customer_id_and_sv_card_id c_id,svcard_id
-            c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => svcard_id) if c_sv_relation.nil?
-            order_prod_relations.each do |o_p_r|
-              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD],
-                :product_id => o_p_r.product_id, :price => (o_p_r.total_price.to_f) *((10 - sv_card.discount).to_f/10))
-            end if arr[2][0][2] and order_prod_relations.any?
-            hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
-          end
-        end
+        
         #订单相关的套餐卡
         prod_hash = {}  #用来记录套餐卡中总共使用了多少
         if arr[3].any?
@@ -609,9 +674,41 @@ class Order < ActiveRecord::Base
               prod_hash.each { |k, v|
                 pcard_dis_price = product_prices[k].to_f * v
                 OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-                 :product_id => k, :price => pcard_dis_price, :product_num => v)
+                  :product_id => k, :price => pcard_dis_price, :product_num => v)
               }
             end
+          end
+        end
+
+        #订单相关的打折卡(使用的)
+        p "lllllllllllllllllllllllllllll"
+        p arr[2]
+        p arr[2][0][2]
+        unless used_svcard_id.blank?
+          sv_card = SvCard.find_by_id(used_svcard_id)
+          if sv_card
+            c_sv_relation = CSvcRelation.find_by_customer_id_and_sv_card_id c_id,used_svcard_id
+            c_sv_relation = CSvcRelation.create(:customer_id => c_id, :sv_card_id => used_svcard_id) if c_sv_relation.nil?
+            order_prod_relations.each do |o_p_r|
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD],
+                :product_id => o_p_r.product_id, :price => (o_p_r.total_price.to_f) *((10 - sv_card.discount).to_f/10))
+            end if arr[2][0][2] and order_prod_relations.any?
+            csvc_relations = CSvcRelation.where(:order_id => order.id)
+            p "ccccccccccccccccccccccccccsccvvvvvvvvvvv"
+            p csvc_relations
+            csvc_relations.each do |csvc_relation|
+              sv_price =  sv_card.types== SvCard::FAVOR[:DISCOUNT] ? sv_card.price : (sv_card.svcard_prod_relations[0].try(:base_price)||0)
+               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD],
+                 :price => (sv_price.to_f) *((10 - sv_card.discount).to_f/10))
+            end
+            c_pcard_relations = CPcardRelation.where(:order_id => order.id)
+            p  "========================"
+             p c_pcard_relations
+            c_pcard_relations.each do |cpr|
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD],
+                 :price => (cpr.price.to_f) *((10 - sv_card.discount).to_f/10))
+            end
+            hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
           end
         end
 
@@ -716,20 +813,36 @@ class Order < ActiveRecord::Base
       h
     }
     hash[:content] = content.chomp(",")
-    
+
+    #订单确认后显示页面上面关于打折卡信息
+    hash[:c_svc_relation] = []
+    csvc_relations = CSvcRelation.where(:order_id => self.id).each{|csvc| csvc[:is_new] = 1}
+    p 1111111111111
+    p csvc_relations
     unless self.c_svc_relation_id.blank?
-      h = {}
-      sv_card = self.c_svc_relation.sv_card
-      h[:name] = sv_card.name
-      self.order_pay_types.each do |o_p_t|
-        if o_p_t.pay_type == OrderPayType::PAY_TYPES[:SV_CARD]
-          h[:price] = h[:price] ? h[:price] + o_p_t.price : o_p_t.price
-        end
-      end
-      h[:discount] = sv_card.discount
-      h[:type] = 2
-      hash[:c_svc_relation] = h
+      csvc_relation = CSvcRelation.find_by_id(self.c_svc_relation_id)
+      csvc_relation[:is_new] = 0 if csvc_relation
+      csvc_relations << csvc_relation
     end
+
+    sav_price = 0
+    self.order_pay_types.each do |o_p_t|
+        if o_p_t.pay_type == OrderPayType::PAY_TYPES[:SV_CARD]
+          sav_price += o_p_t.price
+        end
+    end
+    csvc_relations.each do |csvc|
+      h = {}
+      sv_card = SvCard.find_by_id(csvc.sv_card_id)
+      price =  sv_card.types== SvCard::FAVOR[:DISCOUNT] ? sv_card.price : (sv_card.svcard_prod_relations[0].try(:base_price)||0)
+      h[:name] = sv_card.name
+      h[:price] = ((csvc.id == self.c_svc_relation_id) ? sav_price : price)
+      h[:discount] = sv_card.types==SvCard::FAVOR[:DISCOUNT] ? sv_card.discount : 0  #0表示是储值卡
+      h[:type] = 2
+      h[:card_type] = sv_card.types #0 打折卡 1 储值卡
+      h[:is_new] = csvc.is_new
+      hash[:c_svc_relation] << h
+    end unless csvc_relations.blank?
     hash[:c_pcard_relation] = []
     customer_pcards = CPcardRelation.find_by_sql(["select pc.* from c_pcard_relations cpr
         inner join package_cards pc on pc.id = cpr.package_card_id
@@ -765,22 +878,14 @@ class Order < ActiveRecord::Base
             hash[:status] = STATUS[:FINISHED]
             hash[:is_free] = true
             hash[:price] = 0
-          end
-          #更新产品数量
-          order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
-          if order_products  #如果是产品,则减掉对应库存
-            materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
-                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
-                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
-            materials.each do |m|
-              m.update_attributes(:storage => (m.storage - order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
-            end unless materials.blank?
-          end
+          end          
           #如果有套餐卡，则更新状态
           c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
           c_pcard_relations.each do |cpr|
             cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
           end unless c_pcard_relations.blank?
+          #如果有买储值卡，则更新状态
+          CSvcRelation.where(:order_id => order.id).each{|csvc_relation| csvc_relation.update_attribute(:status, CSvcRelation::STATUS[:valid])}
           #如果是选择储值卡支付
           if pay_type.to_i == OrderPayType::PAY_TYPES[:SV_CARD] && code
             #c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
@@ -830,7 +935,7 @@ class Order < ActiveRecord::Base
           customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
             :other_way => email, :birthday => birth, :sex => sex) if customer
           Customer.create_single_cus(customer, car_num_r, phone, car_num,
-            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil)
+            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil)
         end
         status = 1
       end
@@ -878,6 +983,6 @@ class Order < ActiveRecord::Base
     total_cost_price = products_sum_cost_price + pcards_sum_cost_price
 
     total_gross_price = total_sale_price - sum_sale_price - sum_savcard_price - total_cost_price + used_pcards_gross_profit
-  return [total_cost_price.to_f, total_sale_price.to_f, total_gross_price.to_f > 0 ? total_gross_price.to_f : 0]
+    return [total_cost_price.to_f, total_sale_price.to_f, total_gross_price.to_f > 0 ? total_gross_price.to_f : 0]
   end
 end

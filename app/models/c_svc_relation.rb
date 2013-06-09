@@ -4,4 +4,6 @@ class CSvcRelation < ActiveRecord::Base
  belongs_to :sv_card
  has_many :orders
  belongs_to :customer
+
+  STATUS = {:valid => true, :invalid => false}
 end

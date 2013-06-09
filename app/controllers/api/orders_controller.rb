@@ -162,7 +162,7 @@ class Api::OrdersController < ApplicationController
     render :json => {:status => 1, :reservation => reservations }
   end
 
-  #查询订单后的支付
+  #查询订单后的支付，取消订单
   def pay_order
     order = Order.find_by_id params[:order_id]
     status = 0
@@ -170,13 +170,22 @@ class Api::OrdersController < ApplicationController
       if order && order.status == Order::STATUS[:NORMAL]
         oprs = OPcardRelation.find_all_by_order_id(order.id)
         oprs.each do |opr|
-          cpr = CPcardRelation.find(opr.c_pcard_relation_id)
+          cpr = CPcardRelation.find_by_id(opr.c_pcard_relation_id)
           pns = cpr.content.split(",").map{|pn| pn.split("-")} if cpr
           pns.each do |pn|
             pn[2] = pn[2].to_i + opr.product_num if pn[0].to_i == opr.product_id
           end if pns
           cpr.update_attribute(:content,pns.map{|pn| pn.join("-")}.join(",")) if cpr
         end unless oprs.blank?
+        order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
+        if order_products  #如果是产品,则减掉对应库存
+          materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
+                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
+          materials.each do |m|
+            m.update_attributes(:storage => (m.storage + order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
+          end unless materials.blank?
+        end
         order.update_attribute(:status, Order::STATUS[:DELETED])
         status = 1
       else
@@ -217,7 +226,7 @@ class Api::OrdersController < ApplicationController
             :birthday => customer["birth"], :sex => customer["sex"]) if old_customer
           carNum = CarNum.find_by_num(customer["carNum"])
           Customer.create_single_cus(old_customer, carNum, customer["phone"], customer["carNum"], customer["name"],
-            customer["email"], customer["birth"], customer["year"], customer["brand"].split("_")[1].to_i, customer["sex"], nil)
+            customer["email"], customer["birth"], customer["year"], customer["brand"].split("_")[1].to_i, customer["sex"], nil, nil)
         end
 
         #同步订单信息
@@ -228,9 +237,9 @@ class Api::OrdersController < ApplicationController
           customer_id = carNum.customer_num_relation.customer.id
 
           order = Order.new(:is_billing => order_info["billing"], :created_at => order_info["time"], :store_id => order_info["store_id"],
-                            :price => order_info["price"], :front_staff_id => order_info["user_id"], :is_pleased => order_info["is_please"],
-                            :status => order_info["status"], :code => MaterialOrder.material_order_code(order_info["store_id"].to_i, order_info["time"]),
-                            :car_num_id => carNum.try(:id), :customer_id => customer_id)
+            :price => order_info["price"], :front_staff_id => order_info["user_id"], :is_pleased => order_info["is_please"],
+            :status => order_info["status"], :code => MaterialOrder.material_order_code(order_info["store_id"].to_i, order_info["time"]),
+            :car_num_id => carNum.try(:id), :customer_id => customer_id)
           order.order_pay_types.new(:pay_type => order_info["pay_type"], :price => order_info["price"], :created_at => order_info["time"])
           order.complaints.new(:reason => order_info["complaint"]["reason"], :suggestion => order_info["complaint"]["request"], :created_at => order_info["time"]) if order_info.keys.include?("complaint")
 
@@ -258,5 +267,46 @@ class Api::OrdersController < ApplicationController
     end
     resp_text = flag ? "success" : "error"
     render :json => {:status => resp_text}
+  end
+
+  #发送短信code
+  def get_user_svcard
+    record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
+      left join lantan_db_all.customers c on c.id = csr.customer_id where c.mobilephone = ?",
+        params[:mobilephone].strip])[0]
+    status = 0
+    send_message = "余额不足，您的储值卡余额为#{record.left_price}元。" if record
+
+    if record and  record.left_price >= params[:price].to_f
+      record.verify_code = proof_code(6)
+      record.save
+      status = 1
+      send_message = "感谢您使用澜泰储值卡，您本次的消费验证码为：#{record.verify_code}。"
+      message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{params[:mobilephone].strip}&Content=#{send_message}&Exno=0"
+      create_get_http(Constant::MESSAGE_URL, message_route)
+      message = "发送成功。"
+    elsif record.nil?
+      message = "账号不存在。"
+    end
+    render :json => {:content => message, :status => status}
+  end
+
+  #使用储值卡支付
+  def use_svcard
+    record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
+      left join lantan_db_all.customers c on c.id = csr.customer_id where c.mobilephone = ? and csr.verify_code = ?",
+        params[:mobilephone].strip, params[:verify_code].strip])[0]
+    status = 0
+    message = "支付失败。"
+    if record and  record.left_price >= params[:price].to_f
+      left_price = record.left_price - params[:price].to_f
+      SvcardUseRecord.create(:c_svc_relation_id => record.id, :types => SvcardUseRecord::TYPES[:OUT],
+        :use_price => params[:price].to_f, :left_price => left_price, :content => params[:content].strip)
+      record.left_price = left_price
+      record.save
+      status = 1
+      message = "支付成功。"
+    end
+    render :json => {:content => message, :status => status}
   end
 end
