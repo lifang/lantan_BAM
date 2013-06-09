@@ -36,7 +36,7 @@
         </tbody>
       </table>
       <div class="pageTurn">
-  <%#= will_paginate @month_goal,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+        <%= will_paginate @months,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
       </div>
       <div class="amount">总计：<%=format("%.2f",@total_num)%></div>
     <% else %>

@@ -137,4 +137,11 @@ module ApplicationHelper
     name = File.basename(file_name)
     return (Digest::SHA1.hexdigest Time.now.to_s + name)[0..20]
   end
+
+  def proof_code(len)
+    chars = ('A'..'Z').to_a + ('a'..'z').to_a + (0..9).to_a
+    code_array = []
+    1.upto(len) {code_array << chars[rand(chars.length)]}
+    return code_array.join("")
+  end
 end

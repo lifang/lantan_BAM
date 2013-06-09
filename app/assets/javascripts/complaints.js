@@ -47,3 +47,25 @@ function choose_model(car_brands, car_models) {
 }
 
 
+function load_goal(url){
+    $.ajax({
+        async : true,
+        url : url,
+        type:'get',
+        dataType : 'script',
+        data : {
+            created : $("#created").val(),
+            ended : $("#ended").val(),
+            time : $("input[name=time]:checked").val()
+        }
+    });
+    return false;
+}
+
+function search_first(){
+    var arr =["load_service","load_product","load_pcard"]
+    var store_id = $("#store_id").val();
+    load_goal("/stores/"+ store_id+"/market_manages/"+arr[parseInt($(".tab_head .hover").attr("id"))]);
+}
+
+

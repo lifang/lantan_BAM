@@ -1,0 +1,24 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <thead>
+    <tr class="hbg">
+      <td>时间</td>
+      <td>金额（元）</td>
+      <td>原因</td>
+      <td>余额（元）</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% (@svcard_records || []).each do |record| %>
+      <tr>
+        <td><%= record.created_at.strftime('%Y-%m-%d') if record.created_at %></td>
+        <td><%= record.types==SvcardUseRecord::TYPES[:IN]? "+": "-" %><%= record.use_price %></td>
+        <td><%= record.content %> </td>
+        <td><%= record.left_price %></td>
+      </tr>
+    <%end%>
+  </tbody>
+</table>
+<div class="pageTurn">
+  <%= will_paginate  @svcard_records, :class => "pagination", :previous_label => "<<",
+    :next_label=> ">>" %>
+</div>
