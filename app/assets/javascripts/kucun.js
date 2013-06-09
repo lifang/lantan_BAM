@@ -32,7 +32,7 @@ function save_material_remark(mat_id,store_id,obj){
     }
 }
 
-function check_material_num(m_id, store_id, obj){
+function check_material_num(m_id, store_id, obj){                       //核实库存
     var check_num = $("#check_num_"+m_id).val();
     if(check_num.match(reg1)==null){
         tishi_alert("请输入有效数字");
@@ -51,14 +51,29 @@ function check_material_num(m_id, store_id, obj){
                         tishi_alert("操作成功")
                        $(obj).parent().siblings(".su").find(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
-                       if(check_num <= data.material_low)
+                       if(check_num <= data.material_low)       //如果小于预警值，则加上样式,并且在缺货信息提示里加上对应的元素
                         {
                             $(obj).parent().parent().find('td:first').addClass("data_table_error");
                             $(obj).parent().parent().find('.sstatus').text("缺货");
+                            var l = $("#low_materials_tbody").find("#material"+m_id+"tr").length;  //判断该物料是否已经在缺货信息提示里
+                            if(l<=0){    //如果不在......
+                                var low_materials_count = parseInt($("#low_materials_span").text());
+                                $("#low_materials_span").text(low_materials_count+1);
+                                var class_name = ($("#low_materials_tbody").find("tr:last").attr("class")=="tbg" ? "" : "tbg");
+                                $("#low_materials_tbody").append("<tr id='material"+m_id+"tr' class="+class_name+"><td width='15%'>"+data.material_code+"</td><td>"+
+                                                        data.material_name+"</td><td>"+data.material_type+"</td><td>缺货</td><td>"+
+                                                        data.material_storage+"</td><td>"+data.material_price+"</td></tr>")
+                            }
+                           
                         }
-                        else{
+                        else{                                   //如果大于.....
                             $(obj).parent().parent().find('td:first').removeClass("data_table_error");
-                            $(obj).parent().parent().find('.sstatus').text("存货")
+                            $(obj).parent().parent().find('.sstatus').text("存货");
+                            var low_materials_count = parseInt($("#low_materials_span").text());
+                            $("#low_materials_span").text(low_materials_count-1);
+                            $("#material"+m_id+"tr").remove();
+                            $("#low_materials_tbody").find("tr").removeAttr("class");
+                            $("#low_materials_tbody").find("tr:odd").attr("class", "tbg");
                         }
                     }else{
                         tishi_alert("核实失败")
@@ -254,7 +269,7 @@ function submit_out_order(form_id){
           if(parseFloat($(this).val()) > storage){
               tishi_alert("【"+name+"】请输入小于库存量的值");
               a = false;
-          }else if(parseFloat($(this).val()) < 0){
+          }else if(parseFloat($(this).val()) <= 0){
               tishi_alert("【"+name+"】请输入大于0的值");
               a = false;
           }
@@ -990,6 +1005,13 @@ function checkMatNum(){
                 $(obj).parent().parent().find("td:nth-child(4)").text("存货");
                 obj_td.append("<a href='JavaScript:void(0)' onclick='cancel_ignore("+m_id+","+store_id+","+"this); return false;'>取消忽略</a>");
                 $(obj).remove();
+                if(data.material_storage <= data.material_low){         //如果设置忽略,且该物料小于库存预警，则要在缺货信息提示里把相应的物料删除掉
+                    var low_materials_count = parseInt($("#low_materials_span").text());
+                    $("#low_materials_span").text(low_materials_count-1);
+                    $("#material"+m_id+"tr").remove();
+                    $("#low_materials_tbody").find("tr").removeAttr("class");
+                    $("#low_materials_tbody").find("tr:odd").attr("class", "tbg");
+                }
               }
           }
       })
@@ -1011,6 +1033,12 @@ function checkMatNum(){
                    if(data.material_storage <= data.material_low){
                       $(obj).parent().parent().find("td:first").attr("class", "data_table_error")
                       $(obj).parent().parent().find("td:nth-child(4)").text("缺货");
+                      var low_materials_count = parseInt($("#low_materials_span").text()); //如果取消该物料预警忽略，则当该物料库存低于预警值时，在缺货信息提示里加上它
+                      $("#low_materials_span").text(low_materials_count+1);
+                      var class_name = ($("#low_materials_tbody").find("tr:last").attr("class")=="tbg" ? "" : "tbg");
+                      $("#low_materials_tbody").append("<tr id='material"+m_id+"tr' class="+class_name+"><td width='15%'>"+data.material_code+"</td><td>"+
+                                                        data.material_name+"</td><td>"+data.material_type+"</td><td>缺货</td><td>"+
+                                                        data.material_storage+"</td><td>"+data.material_price+"</td></tr>");                    
                    };
                    obj_td.append("<a href='JavaScript:void(0)' onclick='set_ignore("+m_id+","+store_id+","+"this);return false;'>忽略</a>");
                    $(obj).remove();

@@ -1,0 +1,26 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+       <thead>
+            <tr class="hbg">
+              <td>时间</td>
+              <td>金额（元）</td>
+              <td>原因</td>
+              <td>余额（元）</td>
+            </tr>
+        </thead>
+        <tbody>
+          <% if @svcard_use_records.size == 0 %>
+          <tr>
+            <th colspan="4">无记录</th>
+          </tr>
+          <% else %>
+            <% @svcard_use_records.each do |svcard_use_record| %>
+              <tr>
+                <td><%= svcard_use_record.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
+                <td><%= svcard_use_record.types == SvcardUseRecord::TYPES[:IN] ? "+"+svcard_use_record.use_price.to_s : "-"+svcard_use_record.use_price.to_s %></td>
+                <td><%= svcard_use_record.content %></td>
+                <td><%= svcard_use_record.left_price %></td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+  </table>

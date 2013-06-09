@@ -175,21 +175,23 @@ class MarketManagesController < ApplicationController
     pcar_relations.each do |pr|
       orders.keys.include?(pr.order_id) ? orders[pr.order_id][:product_name] += (","+pr.name) : orders[pr.order_id] = pr
     end
-    @orders = orders.values
-    @total_price = @orders.sum(&:price)
+    @total_price = orders.values.sum(&:price)
+    @orders = orders.values.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    
   end
 
   def daily_consumption_receipt
     @search_time = params[:search_time] || Time.now.strftime("%Y-%m-%d")
     
-    @current_day_total = Order.where("created_at <= '#{Time.now}'").
-      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
-      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
+#    @current_day_total = Order.where("created_at <= '#{Time.now}'").
+#      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
+#      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
 
-    @orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
+    orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
       where("created_at >= '#{@search_time} 00:00:00'").
       where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
-    @search_total = @orders.sum(:price)
+    @search_total = orders.sum(:price)
+    @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 
   def daily_consumption_receipt_blank
@@ -202,7 +204,10 @@ class MarketManagesController < ApplicationController
 
   def stored_card_bill
     @start_at, @end_at = params[:started_at], params[:ended_at]
-    @svc_returns = shared_stored_card_bill(@start_at, @end_at, @store.id)
+    
+    svc_returns = shared_stored_card_bill(@start_at, @end_at, @store.id)
+    @price = svc_returns.last.nil? ? 0 : sprintf('%.2f', svc_returns.last.total_price)
+    @svc_returns = svc_returns.paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE)
   end
 
   def stored_card_bill_blank

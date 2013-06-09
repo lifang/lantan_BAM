@@ -2,7 +2,7 @@
 <html>
   <head>
     <%= stylesheet_link_tag    "application" %>
-    <%= javascript_include_tag "application" %>
+    <%= javascript_include_tag "application","sv_cards" %>
     <script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
     <title><%= @title.nil? ? "营销管理--营销" : @title %></title>
     <%= csrf_meta_tags %>
@@ -13,6 +13,8 @@
         <%= render :partial => "/common/login_header" %>
         <div class="nav">
           <ul>
+            <li><a href="/stores/<%= params[:store_id] %>/sv_cards"
+                <% if  controller.controller_name=="sv_cards" %> class="hover" <%end%>>优惠卡</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/sales" 
                    <% if  controller.controller_name=="sales" %> class="hover" <%end%>>活动</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/products" 

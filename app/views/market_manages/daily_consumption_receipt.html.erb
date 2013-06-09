@@ -1,24 +1,24 @@
 <%= render 'second_menu'%>
 <form accept-charset="UTF-8" action="/stores/<%= @store.id %>/market_manages/daily_consumption_receipt" method="get">
-<div class="search">
-      <div><label>时间：</label>
-        <input name="search_time" type="text" id="search_time_at" value="<%= @search_time %>" class="Wdate" readonly onClick="WdatePicker();"/></div>
-      <div><button class="search_btn">查询</button></div>
-</div>
+  <div class="search">
+    <div><label>时间：</label>
+      <input name="search_time" type="text" id="search_time_at" value="<%= @search_time %>" class="Wdate" readonly onClick="WdatePicker();"/></div>
+    <div><button class="search_btn">查询</button></div>
+  </div>
 </form>
 <input type="hidden" id="store_id" value="<%= @store.id %>"/>
 <div class="data_body_title">
-     <h2 class="data_body_h">当日销售额：<%= sprintf('%.2f', @search_total) %>（元）</h2>
+  <h2 class="data_body_h">当日销售额：<%= sprintf('%.2f', @search_total) %>（元）</h2>
 </div>
 <div class="data_menu">
   <% if permission?(:datas, :print) %>
-  <a href="/stores/<%= @store.id %>/market_manages/daily_consumption_receipt_blank?search_time=<%=@search_time%>" class="add_btn" id="print_daily_receipt" target="_blank">打印单据</a>
+    <a href="/stores/<%= @store.id %>/market_manages/daily_consumption_receipt_blank?search_time=<%=@search_time%>" class="add_btn" id="print_daily_receipt" target="_blank">打印单据</a>
   <% end %>
 </div>
 <div class="clear"></div>
 
 <div class="data_body">
-     <%= render :partial => "/market_manages/daily_receipt_partial" %>
+  <%= render :partial => "/market_manages/daily_receipt_partial" %>
 </div>
 <div class="mask"></div>
 <div id="related_order_div"></div>

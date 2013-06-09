@@ -32,5 +32,7 @@
           <% end %>
         </tbody>
   </table>
-  <div class="amount">总店未支付储值卡余额  总计：<%= @svc_returns.last.nil? ? 0 : sprintf('%.2f', @svc_returns.last.total_price) %>（元）</div>
+  <%= will_paginate @svc_returns, :class => "pageTurn", :previous_label => "上一页",
+    :next_label => "下一页" %>
+  <div class="amount">总店未支付储值卡余额  总计：<%= @price %>（元）</div>
 </div>
