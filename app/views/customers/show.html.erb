@@ -8,12 +8,16 @@
         <li class="hover">消费记录</li>
         <li>回访记录</li>
         <li>投诉记录</li>
+        <li>储值卡收支记录</li>
+        <li>套餐卡</li>
       </ul>
     </div>
     <div class="data_body">
       <div id="order_prods_partial"><%= render :partial => "order_prods_p" %></div>
       <div id="revisits_partial" style="display: none;"><%= render :partial => "revisits" %></div>
       <div id="complaints_partial" style="display: none;"><%= render :partial => "complaints" %></div>
+      <div id="sav_card_records" style="display: none;" ><%= render :partial =>'sav_card_records' %></div>
+      <div id="pac_card_records" style="display: none;"><%= render :partial =>'pac_card_records' %></div>
     </div>
   </div>
 </div>
