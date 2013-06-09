@@ -80,9 +80,14 @@
       <span><button class="confirm_btn" onclick="cuihuo(<%= @mo.id %>,1,<%= @store_id %>)">催货</button></span>
     <% end %>
   <% end %>
+  <% if permission?(:materials, :return) %>
+      <% if @mo.m_status != MaterialOrder::M_STATUS[:save_in] && @mo.m_status != MaterialOrder::M_STATUS[:returned] %>
+      <span><button class="confirm_btn" onclick="tuihuo(<%= @mo.id %>, <%= @store_id %>)">退货</button></span>
+      <% end %>
+  <% end %>
   <% if permission?(:materials, :receive) %>
     <% if @mo.m_status == MaterialOrder::M_STATUS[:send] %>
-      <span><button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,1,<%= @store_id %>)">已收货</button></span>
+      <span><button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,1,<%= @store_id %>)">确认收货</button></span>
     <% end %>
   <% end %>
   <% if permission?(:materials, :pay) %>

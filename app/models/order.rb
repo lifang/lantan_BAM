@@ -1,7 +1,7 @@
 #encoding: utf-8
 class Order < ActiveRecord::Base
   has_many :order_prod_relations
-#  has_many :products, :through => :order_prod_relations
+  #  has_many :products, :through => :order_prod_relations
   has_many :order_pay_types
   has_many :work_orders
   belongs_to :car_num
@@ -298,6 +298,9 @@ class Order < ActiveRecord::Base
         ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 3
       end
       #ids = [311, 226]
+      prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
+      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
+      and m.storage > 0 and m.store_id = ? and pmr.product_id in (?) ", store_id, ids]).group_by { |i| i.product_id } if ids.any?
       products = Product.find(:all, :conditions => ["id in (?) and is_service = #{Product::PROD_TYPES[:SERVICE]}", 
           ids]) if ids.any?
       
@@ -527,7 +530,7 @@ class Order < ActiveRecord::Base
         cost_time = 0
         prod_ids = []
         is_has_service = false #用来记录是否有服务
-        order_prod_relations = [] #用来记录订单中的所有的产品
+        order_prod_relations = [] #用来记录订单中的所有的产品+物料
         product_prices = {}
         #存储sv_cards
         if arr[2].size > 0
@@ -570,6 +573,15 @@ class Order < ActiveRecord::Base
           end
         end
         hash[:types] = x > 0 ? TYPES[:SERVICE] : TYPES[:PRODUCT]
+        if order_prod_relations  #如果是产品,则减掉对应库存
+          order_prod_h = order_prod_relations.group_by { |o_p| o_p.product_id }
+          materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
+                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_prod_h.keys])
+          materials.each do |m|
+            m.update_attributes(:storage => (m.storage - order_prod_h[m.product_id][0].pro_num)) if order_prod_h[m.product_id]
+          end unless materials.blank?
+        end
         #订单相关的活动
         if sale_id != "" && Sale.find_by_id_and_store_id_and_status(sale_id,store_id,Sale::STATUS[:RELEASE])
           if arr[1][0][2]
@@ -662,7 +674,7 @@ class Order < ActiveRecord::Base
               prod_hash.each { |k, v|
                 pcard_dis_price = product_prices[k].to_f * v
                 OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-                 :product_id => k, :price => pcard_dis_price, :product_num => v)
+                  :product_id => k, :price => pcard_dis_price, :product_num => v)
               }
             end
           end
@@ -866,17 +878,7 @@ class Order < ActiveRecord::Base
             hash[:status] = STATUS[:FINISHED]
             hash[:is_free] = true
             hash[:price] = 0
-          end
-          #更新产品数量
-          order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
-          if order_products  #如果是产品,则减掉对应库存
-            materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
-                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
-                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
-            materials.each do |m|
-              m.update_attributes(:storage => (m.storage - order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
-            end unless materials.blank?
-          end
+          end          
           #如果有套餐卡，则更新状态
           c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
           c_pcard_relations.each do |cpr|
@@ -933,7 +935,7 @@ class Order < ActiveRecord::Base
           customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
             :other_way => email, :birthday => birth, :sex => sex) if customer
           Customer.create_single_cus(customer, car_num_r, phone, car_num,
-            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil)
+            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil)
         end
         status = 1
       end
@@ -981,6 +983,6 @@ class Order < ActiveRecord::Base
     total_cost_price = products_sum_cost_price + pcards_sum_cost_price
 
     total_gross_price = total_sale_price - sum_sale_price - sum_savcard_price - total_cost_price + used_pcards_gross_profit
-  return [total_cost_price.to_f, total_sale_price.to_f, total_gross_price.to_f > 0 ? total_gross_price.to_f : 0]
+    return [total_cost_price.to_f, total_sale_price.to_f, total_gross_price.to_f > 0 ? total_gross_price.to_f : 0]
   end
 end
