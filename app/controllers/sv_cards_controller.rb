@@ -2,6 +2,8 @@
 class SvCardsController < ApplicationController
   require 'will_paginate/array'
   layout "sale"
+  before_filter :get_store
+
   def index
     @sv_cards = SvCard.where(["store_id = ?", params[:store_id].to_i]).order("created_at desc")
     .paginate(:page => params[:page] ||= 1, :per_page => SvCard::PER_PAGE)
@@ -140,5 +142,39 @@ class SvCardsController < ApplicationController
         render :json => {:status => 0}
       end
     end
+  end
+
+  def use_detail
+    @started_time = params[:started_time]
+    @ended_time = params[:ended_time]
+    base_sql = (@started_time.nil? || @started_time.blank?) ? "1=1" : "o.started_at >= '#{@started_time}'"
+    base_sql << " and "
+    base_sql << ((@ended_time.nil? || @ended_time.blank?) ? "1=1" : "o.ended_at <= '#{@ended_time}'")
+    @orders = Order.find_by_sql("select o.id id, o.code code,o.price price, c.name name, cn.num num from orders o left join customers c on c.id = o.customer_id
+                                 left join car_nums cn on cn.id = o.car_num_id inner join order_pay_types opt on opt.order_id = o.id
+                                 where o.store_id = #{@store.id} and opt.pay_type = #{OrderPayType::PAY_TYPES[:SV_CARD]} and #{base_sql}").
+                                 paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+  end
+
+  def search_left_price
+    @customer_name = params[:customer_name]
+    @customer_tel = params[:customer_tel]
+    base_sql = (@customer_name.nil? || @customer_name.blank?) ? "1=1" : "c.name like '%#{@customer_name}%'"
+    base_sql << " and "
+    base_sql << ((@customer_tel.nil? || @customer_tel.blank?) ? "1=1" : "c.mobilephone like '%#{@customer_tel}%'")
+    @customers = Customer.find_by_sql("select csr.id csr_id, c.name name, cn.num num, c.mobilephone mobilephone, sc.name s_name, csr.left_price left_price from customers c
+                                       inner join c_svc_relations csr on csr.customer_id = c.id left join sv_cards sc on sc.id = csr.sv_card_id
+                                       left join customer_num_relations cnr on cnr.customer_id = c.id left join car_nums cn on cn.id = cnr.car_num_id
+                                       where c.status = #{Customer::STATUS[:NOMAL]} and #{base_sql}").
+                                       paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+  end
+
+  def left_price
+    @svcard_use_records = SvcardUseRecord.where("c_svc_relation_id = #{params[:c_svc_relation_id]}")
+  end
+
+  private
+  def get_store
+    @store = Store.find_by_id(params[:store_id])
   end
 end
