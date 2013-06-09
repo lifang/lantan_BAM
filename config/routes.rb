@@ -160,9 +160,7 @@ LantanBAM::Application.routes.draw do
     resources :station_datas
     resources :sv_cards do
       collection do
-        get "sell_situation"
-        get "make_billing"
-        get "use_collect"
+        get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
       end
   end
   end

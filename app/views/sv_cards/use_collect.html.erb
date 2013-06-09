@@ -1,11 +1,6 @@
 <div class="box">
   <div class="data_box">
-    <div class="second_menu">
-      <a href="/stores/<%= @store_id %>/sv_cards">优惠卡</a>
-      <a href="/stores/<%= @store_id %>/sv_cards/sell_situation">销售情况</a>
-      <a href="#">使用情况明细</a>
-      <a href="/stores/<%= @store_id %>/sv_cards/use_collect" class="hover">使用情况汇总</a>
-    </div>
+    <%= render :partial => "menu_partial" %>
     <div class="search">
       <%= form_tag "/stores/#{@store_id}/sv_cards/use_collect", :method => :get do %>
         <div><label>时间：</label>
