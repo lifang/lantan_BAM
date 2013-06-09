@@ -10,7 +10,6 @@ class SvCardsController < ApplicationController
   end
 
   def new
-    @store = Store.find_by_id(params[:store_id].to_i)
     @card = @store.sv_cards.new
     respond_to do |format|
       format.js
@@ -48,7 +47,6 @@ class SvCardsController < ApplicationController
   end
   def show
     @sv_card = SvCard.find_by_id(params[:id])
-    @store = Store.find_by_id(params[:store_id])
     @spr = @sv_card.svcard_prod_relations[0]
     respond_to do |format|
       format.js
