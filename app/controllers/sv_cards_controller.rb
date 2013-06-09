@@ -1,3 +1,4 @@
+#encoding: utf-8
 class SvCardsController < ApplicationController
   require 'will_paginate/array'
   layout "sale"
