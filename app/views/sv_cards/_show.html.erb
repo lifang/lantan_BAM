@@ -1,0 +1,55 @@
+<div class="popup_box">
+  <h1>新建优惠卡<a href="JavaScript:void(0)" class="close">关闭</a></h1>
+  <%= form_for(@sv_card, :url => store_sv_card_path(@store), :html => {:method => :put, :multipart => true, :id => "edit_svcard_form"}) do |f| %>
+    <div class="popup_body">
+      <div id="popup_body_area" class="popup_body_area">
+        <div class="item">
+          <label>名称：</label>
+          <%= f.text_field :name %>
+        </div>
+        <div class="item">
+          <label>类型：</label>
+          <%= f.select :types, SvCard::S_FAVOR.invert,{}, :disabled => true %>
+        </div>
+        <div class="item">
+          <label>折扣：</label>
+          <%= f.text_field :discount, :disabled => (@sv_card.types==SvCard::FAVOR[:SAVE] ?  true : false) %>
+        </div>
+        <div class="item">
+          <label>打折卡金额：</label>
+          <%= f.text_field :price, :disabled => (@sv_card.types==SvCard::FAVOR[:SAVE] ? true : false) %>
+        </div>
+        <div class="item">
+          <label>使用范围:</label>
+          <%= f.select :use_range, SvCard::S_USE_RNGE.invert %>
+        </div>
+        <div class="item_textarea">
+          <label>图片：</label>
+          <%= f.file_field :img_url, :class => "file" %>
+          <span class="show_pic">
+            <img src="<%= @sv_card.img_url.nil? ? "" : @sv_card.img_url.gsub("img#{@sv_card.id}", "img#{@sv_card.id}_#{Constant::SVCARD_PICSIZE[2]}") %>"/>
+          </span>
+        </div>
+        <div class="item_textarea">
+          <label>具体内容：</label>
+          <%= f.text_area :description, :class => "width_textarea" %>
+        </div>
+        <% if @sv_card.types == SvCard::FAVOR[:SAVE] %>
+          <div id="setObj" class="setObj">
+            <div class="setobj_name">项目：</div>
+            <div class="setobj_box">
+              <div class="seto_list">
+                <span>充<input id="started_money" name="started_money" type="text" class="input_s" value="<%= @spr.base_price %>"/>元</span>&nbsp;&nbsp;
+                <span>送<input id="ended_money" name="ended_money" type="text" class="input_s" value="<%= @spr.more_price %>"/>元</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <div class="btn_box">
+        <button class="confirm_btn" id="edit_svcard_btn" onclick="return edit_card_validation()">确定</button>
+        <button type="button"class="cancel_btn">取消</button>
+      </div>
+    </div>
+  <% end %>
+</div>

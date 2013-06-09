@@ -1,0 +1,36 @@
+<div class="main">
+  <div class="box">
+    <div class="data_box">
+      <%= render :partial => "menu_partial" %>
+      <div class="data_menu"><a href="JavaScript:void(0)" class="add_btn" onclick="new_sv_card(<%= params[:store_id] %>)">
+          新建优惠卡</a>
+      </div>
+      <div class="clear"></div>
+      <div class="data_body">
+        <div>
+          <div class="card_list">
+            <% @sv_cards.each do |sc| %>
+              <div class="card_list_box">
+                <a href="JavaScript:void(0)" onclick="show_svcard_detail(<%= sc.id %>,<%= params[:store_id] %>)"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>"/></a>
+                <h2>名称:<%= sc.name %></h2>
+                <p>类型：<%= SvCard::S_FAVOR[sc.types] %></p>
+                <p>内容：<%= sc.description  %></p>
+                <p>使用范围:<%= SvCard::S_USE_RNGE[sc.use_range] %></p>
+              </div>
+            <% end %>
+          </div>
+          <% if !@sv_cards.blank? %>
+            <%= will_paginate  @sv_cards, :class => "pageTurn", :previous_label => "上一页",
+              :next_label=> "下一页" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="new_sv_card" class="tab_popup" style="display: none;" > <!--优惠卡弹出层-->
+ </div>
+  <div id="show_sv_card" class="tab_popup" style="display:none"> <!--优惠卡显示层-->
+  </div>
+</div>
+<div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+<div class="mask"></div>

@@ -1,0 +1,58 @@
+<div class="box">
+  <div class="data_box">
+    <%= render :partial => "menu_partial" %>
+    <div class="search">
+    <%= form_tag "/stores/#{@store_id}/sv_cards/sell_situation", :method => :get do %>
+      <div><label>会员卡类型：</label>
+        <select name="card_type">
+          <option value="2" <%= @card_type==2 ? "selected" : "" %>>全部</option>
+          <option value="0" <%= @card_type==0 ? "selected" : "" %>>打折卡</option>
+         <option value="1" <%= @card_type==1 ? "selected" : "" %>>储值卡</option>
+        </select>
+      </div>
+      <div>
+        <label>时间：</label>
+        <input name="started_time" type="text" value="<%= @started_time if @started_time %>" class="Wdate" onclick="date_picker()" readonly/>
+        &nbsp;到&nbsp;<input name="ended_time" type="text" value="<%= @ended_time if @ended_time %>" class="Wdate" onclick="date_picker()" readonly/>
+      </div>
+      <div><button id="use_search" class="search_btn">查询</button></div>
+  <% end %>
+    </div>
+    <div class="data_body_title">
+      <span class="data_body_p">总销售量：<span class="red"><%= @count %></span>张&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        总金额：<span class="red"><%= @total_money.nil? ? "" : format("%.2f",@total_money).to_f %></span>元</span>
+    </div>
+    <div class="clear"></div>
+    <div class="data_body">
+      <div>
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+          <thead>
+            <tr class="hbg">
+              <td>客户名称</td>
+              <td>手机号码</td>
+              <td>卡类型</td>
+              <td>金额</td>
+              <td>是否开据发票</td>
+              <td>操作</td>
+            </tr>
+          </thead>
+          <tbody>
+            <%  @sell_records.each do |sr| %>
+            <tr>
+              <td><%= sr.name %></td>
+              <td><%= sr.phone %></td>
+              <td><%= SvCard::S_FAVOR[sr.type] %></td>
+             <td><%= sr.price %></td>
+             <td id="is_billing<%= sr.id %>"><%= sr.is_billing ? "是" : "否" %></td>
+              <td><% if sr.is_billing %>----<% else %><a href="JavaScript:void(0)" onclick="make_billing(<%= sr.id %>,<%= @store_id %>,this)">开具发票</a><% end %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+          <% if !@sell_records.blank? %>
+           <%= will_paginate  @sell_records, :previous_label => "上一页", :next_label=> "下一页", :class => "pageTurn" %>
+          <% end %>
+      </div>
+    </div>
+  </div>
+</div>

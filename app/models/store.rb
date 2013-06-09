@@ -15,4 +15,5 @@ class Store < ActiveRecord::Base
   has_many :suppliers
   has_many :month_scores
   has_many :complaints
+  has_many :sv_cards
 end

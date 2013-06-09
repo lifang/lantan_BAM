@@ -104,7 +104,7 @@ module Constant
   P_PICSIZE = [50,154,246,300,356]
   C_PICSIZE = [148,154,50]
   STAFF_PICSIZE = [100]
- 
+  SVCARD_PICSIZE = [148,154,50]
   #角色
   SYS_ADMIN = "100001"  #系统管理员
   BOSS = "100002" #老板
@@ -142,6 +142,7 @@ module Constant
   HEAR_OFFICE_IPHOST= HEAD_OFFICE_API_PATH
   PCARD_PICS = "pcard_pics"
   SALE_PICS = "sale_pics"
+  SVCARD_PICS = "svcardimg"
   #产品和活动的类别  图片名称分别为 product_pics 和service_pics
   PRODUCT = "PRODUCT"
   SERVICE = "SERVICE"
@@ -150,6 +151,7 @@ module Constant
 
   PIC_SIZE =1024  #按kb计算
   DATE_YEAR = 1990
+  STORE_PICSIZE = [1000,50]
   #消费金额区间段
   CONSUME_P = {"0-1000"=>"o.price>0 and o.price <=1000","1000-5000"=>"o.price>1000 and o.price <=5000",
     "5000-10000"=>"o.price > 5000 and o.price <=10000","10000以上"=>"o.price > 10000"}

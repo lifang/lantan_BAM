@@ -158,6 +158,11 @@ LantanBAM::Application.routes.draw do
 
     
     resources :station_datas
+    resources :sv_cards do
+      collection do
+        get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
+      end
+  end
   end
   resources :materials_in_outs
   match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
@@ -197,7 +202,7 @@ LantanBAM::Application.routes.draw do
       get "get_act_count", "out"
     end
   end
-
+  
   namespace :api do
     resources :orders do
       collection do
