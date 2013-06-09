@@ -34,7 +34,8 @@ module Constant
       :del_supplier => ["删除供应商",2048],
       :receive => ["确认已收货",4096],
       :mat_edit => ["编辑", 8192],
-      :delete => ["删除", 16384]
+      :delete => ["删除", 16384],
+      :return => ["退货", 32768]
     },
     :staffs => {
       :name => "员工",
@@ -155,6 +156,6 @@ module Constant
   #消费金额区间段
   CONSUME_P = {"0-1000"=>"o.price>0 and o.price <=1000","1000-5000"=>"o.price>1000 and o.price <=5000",
     "5000-10000"=>"o.price > 5000 and o.price <=10000","10000以上"=>"o.price > 10000"}
- PRE_DAY = 15
+  PRE_DAY = 15
   ##    上面修改部分 在此处添加
 end

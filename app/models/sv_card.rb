@@ -27,4 +27,8 @@ class SvCard < ActiveRecord::Base
     end
     return filename
   end
+
+  def sale_price
+    self.types== SvCard::FAVOR[:DISCOUNT] ? self.price : (self.svcard_prod_relations[0].try(:base_price)||0)
+  end
 end
