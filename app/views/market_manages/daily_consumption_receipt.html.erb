@@ -8,7 +8,7 @@
 </form>
 <input type="hidden" id="store_id" value="<%= @store.id %>"/>
 <div class="data_body_title">
-     <h2 class="data_body_h">当日销售额：<%= sprintf('%.2f', @current_day_total) %>（元）</h2>
+     <h2 class="data_body_h">当日销售额：<%= sprintf('%.2f', @search_total) %>（元）</h2>
 </div>
 <div class="data_menu">
   <% if permission?(:datas, :print) %>

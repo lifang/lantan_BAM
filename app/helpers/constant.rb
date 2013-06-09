@@ -153,6 +153,6 @@ module Constant
   #消费金额区间段
   CONSUME_P = {"0-1000"=>"o.price>0 and o.price <=1000","1000-5000"=>"o.price>1000 and o.price <=5000",
     "5000-10000"=>"o.price > 5000 and o.price <=10000","10000以上"=>"o.price > 10000"}
-
+ PRE_DAY = 15
   ##    上面修改部分 在此处添加
 end

@@ -1,7 +1,7 @@
 <div class="item">
   <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="modify_value()">
     <% @materials.each do |material| %>
-      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}-#{material.storage}" %>" ><%= material.name%></option>
+      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{material.price}||#{material.sale_price}" %>" ><%= material.name%></option>
     <% end %>
   </select>
 </div>
@@ -12,14 +12,14 @@
   <label>条形码：</label><label id="item_txm"><%=@materials[0].nil? ? "" : @materials[0].code  %></label>
 </div>
 <div class="item">
-  <label>库存：</label><label id="item_kc"><%= @materials[0].nil? ? "" : @materials[0].storage%></label>
+  <label>库存：</label><label id="item_kc"><%= @materials[0].nil? ? "" : @materials[0].storage %></label>
 </div>
 
 <div class="item">
-  <label>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @product.t_price %>" />
+  <label>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @product.t_price.nil? ? @materials[0].nil? ? "" : @materials[0].price : @product.t_price %>" />
 </div>
 <div class="item">
-  <label>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @product.base_price %>" />
+  <label>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @product.base_price.nil? ? @materials[0].nil? ? "" : @materials[0].sale_price : @product.base_price %>" />
 </div>
 <div class="item">
   <label>全国促销价：</label><input name="sale_price" id="sale_price" type="text" value="<%= @product.sale_price %>" />
@@ -62,12 +62,17 @@
       allowFileManager : true
     });
   });
+
   function modify_value(){
     var html = $('#prod_material option:selected')
     $('#name').val(html.html());
-    $("#item_txm").html(html.attr("o_value").split("-")[0]);
-    $("#item_kc").html(html.attr("o_value").split("-")[1]);
+    $("#item_txm").html(html.attr("o_value").split("||")[0]);
+    $("#item_kc").html(html.attr("o_value").split("||")[1]);
+    $("#t_price").val(html.attr("o_value").split("||")[2]);
+    $("#base_price").val(html.attr("o_value").split("||")[3]);
   }
+  $("#item_txm").html($('#prod_material option:selected').attr("o_value").split("||")[0]);
+  $("#item_kc").html($('#prod_material option:selected').attr("o_value").split("||")[1]);
 </script>
 
 
