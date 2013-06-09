@@ -272,7 +272,7 @@ class Api::OrdersController < ApplicationController
   #发送短信code
   def get_user_svcard
     record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join lantan_db_all.customers c on c.id = csr.customer_id where c.mobilephone = ?",
+      left join customers c on c.id = csr.customer_id where c.mobilephone = ?",
         params[:mobilephone].strip])[0]
     status = 0
     send_message = "余额不足，您的储值卡余额为#{record.left_price}元。" if record
@@ -294,7 +294,7 @@ class Api::OrdersController < ApplicationController
   #使用储值卡支付
   def use_svcard
     record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join lantan_db_all.customers c on c.id = csr.customer_id where c.mobilephone = ? and csr.verify_code = ?",
+      left join customers c on c.id = csr.customer_id where c.mobilephone = ? and csr.verify_code = ?",
         params[:mobilephone].strip, params[:verify_code].strip])[0]
     status = 0
     message = "支付失败。"
