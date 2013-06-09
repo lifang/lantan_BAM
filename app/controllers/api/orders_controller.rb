@@ -162,7 +162,7 @@ class Api::OrdersController < ApplicationController
     render :json => {:status => 1, :reservation => reservations }
   end
 
-  #查询订单后的支付
+  #查询订单后的支付，取消订单
   def pay_order
     order = Order.find_by_id params[:order_id]
     status = 0
@@ -177,6 +177,15 @@ class Api::OrdersController < ApplicationController
           end if pns
           cpr.update_attribute(:content,pns.map{|pn| pn.join("-")}.join(",")) if cpr
         end unless oprs.blank?
+        order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
+        if order_products  #如果是产品,则减掉对应库存
+          materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
+                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
+          materials.each do |m|
+            m.update_attributes(:storage => (m.storage + order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
+          end unless materials.blank?
+        end
         order.update_attribute(:status, Order::STATUS[:DELETED])
         status = 1
       else
@@ -228,9 +237,9 @@ class Api::OrdersController < ApplicationController
           customer_id = carNum.customer_num_relation.customer.id
 
           order = Order.new(:is_billing => order_info["billing"], :created_at => order_info["time"], :store_id => order_info["store_id"],
-                            :price => order_info["price"], :front_staff_id => order_info["user_id"], :is_pleased => order_info["is_please"],
-                            :status => order_info["status"], :code => MaterialOrder.material_order_code(order_info["store_id"].to_i, order_info["time"]),
-                            :car_num_id => carNum.try(:id), :customer_id => customer_id)
+            :price => order_info["price"], :front_staff_id => order_info["user_id"], :is_pleased => order_info["is_please"],
+            :status => order_info["status"], :code => MaterialOrder.material_order_code(order_info["store_id"].to_i, order_info["time"]),
+            :car_num_id => carNum.try(:id), :customer_id => customer_id)
           order.order_pay_types.new(:pay_type => order_info["pay_type"], :price => order_info["price"], :created_at => order_info["time"])
           order.complaints.new(:reason => order_info["complaint"]["reason"], :suggestion => order_info["complaint"]["request"], :created_at => order_info["time"]) if order_info.keys.include?("complaint")
 
