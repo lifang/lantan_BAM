@@ -271,22 +271,27 @@ class Api::OrdersController < ApplicationController
 
   #发送短信code
   def get_user_svcard
-    record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
+    csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
       left join customers c on c.id = csr.customer_id where c.mobilephone = ?",
-        params[:mobilephone].strip])[0]
+        params[:mobilephone].strip])
+    sum_left_total = csvc_relaions.inject(0){|sum, csv| sum = sum+csv.left_price}
+    record = csvc_relaions[0]
     status = 0
-    send_message = "余额不足，您的储值卡余额为#{record.left_price}元。" if record
-
-    if record and  record.left_price >= params[:price].to_f
-      record.verify_code = proof_code(6)
-      record.save
-      status = 1
-      send_message = "感谢您使用澜泰储值卡，您本次的消费验证码为：#{record.verify_code}。"
+    
+    if record.nil?
+      message = "账号不存在。"
+    else
+      if sum_left_total >= params[:price].to_f
+        record.update_attribute(:verify_code, proof_code(6))
+        status = 1
+        send_message = "感谢您使用澜泰储值卡，您本次的消费验证码为：#{record.verify_code}。"
+        message = "发送成功。"
+      else
+        send_message = "余额不足，您的储值卡余额为#{sum_left_total}元。"
+        message = "余额不足。"
+      end
       message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{params[:mobilephone].strip}&Content=#{send_message}&Exno=0"
       create_get_http(Constant::MESSAGE_URL, message_route)
-      message = "发送成功。"
-    elsif record.nil?
-      message = "账号不存在。"
     end
     render :json => {:content => message, :status => status}
   end
@@ -298,12 +303,33 @@ class Api::OrdersController < ApplicationController
         params[:mobilephone].strip, params[:verify_code].strip])[0]
     status = 0
     message = "支付失败。"
-    if record and  record.left_price >= params[:price].to_f
-      left_price = record.left_price - params[:price].to_f
-      SvcardUseRecord.create(:c_svc_relation_id => record.id, :types => SvcardUseRecord::TYPES[:OUT],
-        :use_price => params[:price].to_f, :left_price => left_price, :content => params[:content].strip)
-      record.left_price = left_price
-      record.save
+    price = params[:price].to_f
+    if record
+      if record.left_price >= price
+        left_price = record.left_price - price
+        SvcardUseRecord.create(:c_svc_relation_id => record.id, :types => SvcardUseRecord::TYPES[:OUT],
+          :use_price => price, :left_price => left_price, :content => params[:content].strip)
+        record.update_attribute(:left_price, left_price)
+      else
+        csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
+      left join customers c on c.id = csr.customer_id where c.mobilephone = ? and left_price != ?",
+            params[:mobilephone].strip, 0])
+        csvc_relaions.each do |csv|
+          if price > 0
+            if price - csv.left_price >= 0
+              SvcardUseRecord.create(:c_svc_relation_id => csv.id, :types => SvcardUseRecord::TYPES[:OUT],
+                :use_price => csv.left_price, :left_price => 0, :content => params[:content].strip)
+              price = price - csv.left_price
+              csv.update_attribute(:left_price, 0)
+            else
+              SvcardUseRecord.create(:c_svc_relation_id => csv.id, :types => SvcardUseRecord::TYPES[:OUT],
+                :use_price => price, :left_price => csv.left_price - price, :content => params[:content].strip)
+              csv.update_attribute(:left_price, csv.left_price - price)
+              price = 0
+            end
+          end
+        end
+      end
       status = 1
       message = "支付成功。"
     end
