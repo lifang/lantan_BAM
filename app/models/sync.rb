@@ -24,7 +24,7 @@ class Sync < ActiveRecord::Base
         req = Net::HTTP::Post::Multipart.new url.path,query.merge!("upload" => UploadIO.new(file, "application/zip", "#{filename}"))
         http = Net::HTTP.new(url.host, url.port)
         if  http.request(req).body == "success"
-          Sync.create(:store_id=>store_id,:sync_at=>sync_time.strftime("%Y-%m-%d %H").to_datetime,:types=>Sync::SYNC_TYPE[:BUILD])
+          Sync.create(:store_id=>store_id,:sync_at=>Time.zone.parse(sync_time.strftime("%Y-%m-%d %H")),:types=>Sync::SYNC_TYPE[:BUILD])
           flog.write("数据上传成功---#{sync_time.strftime("%Y-%m-%d %H")}\r\n")
         end
       end

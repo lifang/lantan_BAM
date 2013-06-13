@@ -543,9 +543,8 @@ class Order < ActiveRecord::Base
                     
                   end
                 else   #打折卡
-                  CSvcRelation.create!(:customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => sv_card.price)
+                  CSvcRelation.create!(:customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => sv_card.price, :status => false)
                 end
-                Customer.find(c_id).update_attributes(:is_vip=>Customer::IS_VIP[:VIP])
               end
             end
         end
@@ -712,16 +711,16 @@ class Order < ActiveRecord::Base
           if station
             woTime = WkOrTime.find_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i
             if woTime
-              t =  woTime.current_times.to_datetime + Constant::W_MIN.minutes
-              start  = t > start.to_datetime ? t : start.to_datetime
+              t =  Time.zone.parse(woTime.current_times) + Constant::W_MIN.minutes
+              start  = t > Time.zone.parse(start) ? t : Time.zone.parse(start)
               end_at = start + cost_time.minutes
               woTime.update_attributes(:current_times => end_at.strftime("%Y%m%d%H%M").to_i, :wait_num => woTime.wait_num.to_i + 1)
             else
-              end_at = start.to_datetime + cost_time.minutes
+              end_at = Time.zone.parse(start) + cost_time.minutes
               WkOrTime.create(:current_times => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
                 :station_id => station_id, :worked_num => 1)
             end
-            work_order = WorkOrder.create({
+            WorkOrder.create({
                 :order_id => order.id,
                 :current_day => Time.now.strftime("%Y%m%d"),
                 :station_id => station_id,
@@ -870,7 +869,11 @@ class Order < ActiveRecord::Base
             cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
           end unless c_pcard_relations.blank?
           #如果有买储值卡，则更新状态
-          CSvcRelation.where(:order_id => order.id).each{|csvc_relation| csvc_relation.update_attribute(:status, CSvcRelation::STATUS[:valid])}
+          csvc_relations = CSvcRelation.where(:order_id => order.id)
+          csvc_relations.each{|csvc_relation| csvc_relation.update_attribute(:status, CSvcRelation::STATUS[:valid])}
+          if c_pcard_relations.present? || csvc_relations.present?
+            order.customer.update_attributes(:is_vip=>Customer::IS_VIP[:VIP])
+          end
           #如果是选择储值卡支付
           if pay_type.to_i == OrderPayType::PAY_TYPES[:SV_CARD] && code
             #c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
