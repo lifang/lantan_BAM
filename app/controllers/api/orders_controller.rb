@@ -177,15 +177,8 @@ class Api::OrdersController < ApplicationController
           end if pns
           cpr.update_attribute(:content,pns.map{|pn| pn.join("-")}.join(",")) if cpr
         end unless oprs.blank?
-        order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
-        if order_products  #如果是产品,则减掉对应库存
-          materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
-                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
-                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
-          materials.each do |m|
-            m.update_attributes(:storage => (m.storage + order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
-          end unless materials.blank?
-        end
+        #如果是产品,则减掉要加回来
+        order.return_order_materials
         order.update_attribute(:status, Order::STATUS[:DELETED])
         status = 1
       else
@@ -232,54 +225,69 @@ class Api::OrdersController < ApplicationController
         #同步订单信息
         orders_info = sync_info["order"]
         orders_info.each do |order_info|
-          carNum = CarNum.find_by_num(order_info["carNum"])
-
-          customer_id = carNum.customer_num_relation.customer.id
-
-          order = Order.new(:is_billing => order_info["billing"].to_i, :created_at => order_info["time"], :store_id => order_info["store_id"],
-            :price => order_info["price"], :front_staff_id => order_info["user_id"], :is_pleased => order_info["is_please"],
-            :status => order_info["status"], :code => MaterialOrder.material_order_code(order_info["store_id"].to_i, order_info["time"]),
-            :car_num_id => carNum.try(:id), :customer_id => customer_id)
-          order.order_pay_types.new(:pay_type => order_info["pay_type"], :price => order_info["price"], :created_at => order_info["time"])
-          order.complaints.new(:reason => order_info["complaint"]["reason"], :suggestion => order_info["complaint"]["request"], :created_at => order_info["time"]) if order_info.keys.include?("complaint")
-
-          prod_arr = Order.get_prod_sale_card(order_info["prods"])
-          (prod_arr[0] || []).each do |prod|
-            product = Product.find_by_id_and_store_id_and_status(prod[1].to_i,order_info["store_id"],Product::IS_VALIDATE[:YES])
-            if product
-              order.order_prod_relations.new(:product_id => product.id, :pro_num => prod[2], :total_price => prod[3], :price => product.sale_price, :t_price => product.t_price, :created_at => order_info["time"])
+          if order_info["code"]
+            order = Order.find_by_code(order_info["code"])
+            if order_info["status"].to_i == Order::STATUS[:DELETED]
+              order.return_order_materials
+              order.update_attribute(:status, Order::STATUS[:DELETED])
+            elsif order_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT]
+              OrderPayType.create(:pay_type => order_info["pay_type"], :price => order_info["price"],
+                :created_at => order_info["time"], :order_id => order.id)
+              Complaint.create(:reason => order_info["complaint"]["reason"], :suggestion => order_info["complaint"]["request"],
+                :created_at => order_info["time"], :order_id => order.id, :customer_id => order.customer_id) if order_info["complaint"]
+              order.c_pcard_relations.each {|cpr| cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL])} if order.c_pcard_relations
+              CSvcRelation.find_all_by_order_id(order.id).each { |csr| csr.update_attributes(:status => CSvcRelation::STATUS[:valid]) }
             end
-          end
-          (prod_arr[2] || []).each do |svcard|
-            sv_card = SvCard.find_by_id(svcard[1].to_i)
-            sv_price =SvcardProdRelation.find_by_sv_card_id(sv_card.id)
-            if sv_card
-              c_svc_r_hash = {:customer_id => customer_id, :sv_card_id => sv_card.id, :is_billing => order_info["billing"].to_i}
-              c_svc_status = order_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT] ? CSvcRelation::STATUS[:valid] : CSvcRelation::STATUS[:invalid]
-              c_svc_r_hash.merge(:status => c_svc_status)
-              if sv_card.types == SvCard::FAVOR[:SAVE]
-                c_svc_r_hash.merge(:total_price => sv_price.base_price + sv_price.more_price,
-                  :left_price => sv_price.base_price + sv_price.more_price)
-               c_sv_relation = CSvcRelation.create(c_svc_r_hash)
-                SvcardUseRecord.create(:c_svc_relation_id => c_sv_relation.id, :types => SvcardUseRecord::TYPES[:IN],
-                  :use_price => sv_price.base_price + sv_price.more_price,
-                  :left_price=> sv_price.base_price + sv_price.more_price,:content=>"购买#{sv_card.name}")
-                carNum.customer_num_relation.customer.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
-              else
-                c_sv_relation = CSvcRelation.create(c_svc_r_hash)
+          else
+            carNum = CarNum.find_by_num(order_info["carNum"])
+            customer_id = carNum.customer_num_relation.customer.id
+            order = Order.new(:is_billing => order_info["billing"].to_i, :created_at => order_info["time"], :store_id => order_info["store_id"],
+              :price => order_info["price"], :front_staff_id => order_info["user_id"], :is_pleased => order_info["is_please"],
+              :status => order_info["status"], :code => MaterialOrder.material_order_code(order_info["store_id"].to_i, order_info["time"]),
+              :car_num_id => carNum.try(:id), :customer_id => customer_id)
+
+            prod_arr = Order.get_prod_sale_card(order_info["prods"])
+            (prod_arr[0] || []).each do |prod|
+              product = Product.find_by_id_and_store_id_and_status(prod[1].to_i,order_info["store_id"],Product::IS_VALIDATE[:YES])
+              if product
+                order.order_prod_relations.new(:product_id => product.id, :pro_num => prod[2], :total_price => prod[3], :price => product.sale_price, :t_price => product.t_price, :created_at => order_info["time"])
               end
             end
-          end
-
-          (prod_arr[3] || []).each do |pcard|
-            package_card = PackageCard.find_by_id(pcard[1].to_i)
-            if order_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT]
-              order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1], :status => CPcardRelation::STATUS[:NORMAL], :price => package_card.try(:price), :created_at => order_info["time"])
-            else
-              order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1], :status => CPcardRelation::STATUS[:INVALID], :price => package_card.try(:price), :created_at => order_info["time"])
+            
+            order.order_pay_types.new(:pay_type => order_info["pay_type"], :price => order_info["price"], :created_at => order_info["time"])
+            order.complaints.new(:reason => order_info["complaint"]["reason"], :suggestion => order_info["complaint"]["request"], 
+              :created_at => order_info["time"], :customer_id => order.customer_id) if order_info.keys.include?("complaint")
+            (prod_arr[2] || []).each do |svcard|
+              sv_card = SvCard.find_by_id(svcard[1].to_i)
+              sv_price =SvcardProdRelation.find_by_sv_card_id(sv_card.id)
+              if sv_card
+                c_svc_r_hash = {:customer_id => customer_id, :sv_card_id => sv_card.id, :is_billing => order_info["billing"].to_i,
+                  :order_id => order.id}
+                c_svc_status = order_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT] ? CSvcRelation::STATUS[:valid] : CSvcRelation::STATUS[:invalid]
+                c_svc_r_hash.merge(:status => c_svc_status)
+                if sv_card.types == SvCard::FAVOR[:SAVE]
+                  c_svc_r_hash.merge(:total_price => sv_price.base_price + sv_price.more_price,
+                    :left_price => sv_price.base_price + sv_price.more_price)
+                  c_sv_relation = CSvcRelation.create(c_svc_r_hash)
+                  SvcardUseRecord.create(:c_svc_relation_id => c_sv_relation.id, :types => SvcardUseRecord::TYPES[:IN],
+                    :use_price => sv_price.base_price + sv_price.more_price,
+                    :left_price=> sv_price.base_price + sv_price.more_price,:content=>"购买#{sv_card.name}")
+                  carNum.customer_num_relation.customer.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
+                else
+                  c_sv_relation = CSvcRelation.create(c_svc_r_hash)
+                end
+              end
             end
+            (prod_arr[3] || []).each do |pcard|
+              package_card = PackageCard.find_by_id(pcard[1].to_i)
+              if order_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT]
+                order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1], :status => CPcardRelation::STATUS[:NORMAL], :price => package_card.try(:price), :created_at => order_info["time"])
+              else
+                order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1], :status => CPcardRelation::STATUS[:INVALID], :price => package_card.try(:price), :created_at => order_info["time"])
+              end
+            end
+            order.save
           end
-          order.save
         end
       rescue
         flag = false

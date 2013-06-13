@@ -81,7 +81,7 @@ class CustomersController < ApplicationController
     customer = Customer.find(params[:c_customer_id].to_i)
     customer.update_attributes(:mark => params[:mark].strip) if params[:mark]
     flash[:notice] = "备注成功。"
-    redirect_to "/stores/#{params[:store_id]}/customers"
+    redirect_to request.referer
   end
 
   def single_send_message
@@ -103,7 +103,7 @@ class CustomersController < ApplicationController
         flash[:notice] = "短信发送成功。"
       end
     end
-    redirect_to "/stores/#{params[:store_id]}/customers"
+    redirect_to request.referer
   end
 
   def show

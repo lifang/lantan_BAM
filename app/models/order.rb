@@ -526,11 +526,11 @@ class Order < ActiveRecord::Base
         product_prices = {}
         #存储sv_cards
         if arr[2].size > 0
-        used_cards = arr[2].select{|ele| ele[4].to_f > 0} || []
-        used_svcard_id = used_cards.flatten[1] #已经使用的打折卡的id
-        #2_id_card_type_（is_new）_price 储值卡格式
-        arr[2].select{|ele| ele[3].to_i == 1}.each do |uc|
-          if uc[3]=="1" #新套餐卡
+          used_cards = arr[2].select{|ele| ele[4].to_f > 0} || []
+          used_svcard_id = used_cards.flatten[1] #已经使用的打折卡的id
+          #2_id_card_type_（is_new）_price 储值卡格式
+          arr[2].select{|ele| ele[3].to_i == 1}.each do |uc|
+            if uc[3]=="1" #新套餐卡
               sv_card = SvCard.find_by_id uc[1]
               if sv_card
                 if sv_card.types== SvCard::FAVOR[:SAVE]  #储值卡
@@ -548,9 +548,9 @@ class Order < ActiveRecord::Base
                 Customer.find(c_id).update_attributes(:is_vip=>Customer::IS_VIP[:VIP])
               end
             end
-        end
+          end
 
-      end
+        end
         #创建订单的相关产品 OrdeProdRelation
         (arr[0] || []).each do |prod|
           product = Product.find_by_id_and_store_id_and_status prod[1],store_id,Product::IS_VALIDATE[:YES]
@@ -559,7 +559,7 @@ class Order < ActiveRecord::Base
               :pro_num => prod[2], :price => product.sale_price, :t_price => product.t_price, :total_price => prod[3].to_f)
             order_prod_relations << order_p_r
             x += 1 if product.is_service?
-            cost_time += product.cost_time.to_i
+            cost_time += product.cost_time.to_i * prod[2].to_i if product.is_service
             prod_ids << product.id if product.is_service
             is_has_service = true if product.is_service
             product_prices[product.id] = product.sale_price
@@ -688,12 +688,12 @@ class Order < ActiveRecord::Base
               sv_card_new = SvCard.find_by_id(csvc_relation.sv_card_id)
               sv_price =  sv_card_new.sale_price
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:DISCOUNT_CARD],
-                 :price => (sv_price.to_f) *((10 - sv_card.discount).to_f/10))
+                :price => (sv_price.to_f) *((10 - sv_card.discount).to_f/10))
             end
             c_pcard_relations = CPcardRelation.where(:order_id => order.id)
             c_pcard_relations.each do |cpr|
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:DISCOUNT_CARD],
-                 :price => (cpr.price.to_f) *((10 - sv_card.discount).to_f/10))
+                :price => (cpr.price.to_f) *((10 - sv_card.discount).to_f/10))
             end
             hash[:c_svc_relation_id] = c_sv_relation.id if c_sv_relation
           end
@@ -812,9 +812,9 @@ class Order < ActiveRecord::Base
 
     sav_price = 0
     self.order_pay_types.each do |o_p_t|
-        if o_p_t.pay_type == OrderPayType::PAY_TYPES[:DISCOUNT_CARD]
-          sav_price += o_p_t.price
-        end
+      if o_p_t.pay_type == OrderPayType::PAY_TYPES[:DISCOUNT_CARD]
+        sav_price += o_p_t.price
+      end
     end
     csvc_relations.each do |csvc|
       h = {}
@@ -855,7 +855,7 @@ class Order < ActiveRecord::Base
         begin
           hash = Hash.new
           hash[:is_billing] = billing.to_i == 0 ? false : true
-          hash[:is_pleased] = please.to_i == 0 ? false : true
+          hash[:is_pleased] = please.to_i
           if is_free.to_i == 0
             hash[:status] = STATUS[:BEEN_PAYMENT]
             hash[:is_free] = false
@@ -970,4 +970,18 @@ class Order < ActiveRecord::Base
     total_gross_price = total_sale_price - sum_sale_price - sum_savcard_price - total_cost_price + used_pcards_gross_profit
     return [total_cost_price.to_f, total_sale_price.to_f, total_gross_price.to_f > 0 ? total_gross_price.to_f : 0]
   end
+
+
+  def return_order_materials
+    order_products = self.order_prod_relations.group_by { |opr| opr.product_id }
+    if order_products  #如果是产品,则减掉要加回来
+      materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
+                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
+      materials.each do |m|
+        m.update_attributes(:storage => (m.storage + order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
+      end unless materials.blank?
+    end
+  end
+
 end
