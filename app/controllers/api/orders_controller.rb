@@ -167,7 +167,7 @@ class Api::OrdersController < ApplicationController
     order = Order.find_by_id params[:order_id]
     status = 0
     if params[:opt_type].to_i == 1
-      if order && order.status == Order::STATUS[:NORMAL]
+      if order && (order.status == Order::STATUS[:NORMAL] or order.status == Order::STATUS[:SERVICING] or order.status == Order::STATUS[:WAIT_PAYMENT])
         oprs = OPcardRelation.find_all_by_order_id(order.id)
         oprs.each do |opr|
           cpr = CPcardRelation.find_by_id(opr.c_pcard_relation_id)
@@ -210,7 +210,7 @@ class Api::OrdersController < ApplicationController
     sync_info = JSON.parse(params[:syncInfo])
     flag = true
     Customer.transaction do
-      begin
+     # begin
         #同步客户信息
         customers_info = sync_info["customer"]
         customers_info.each do |customer|
@@ -292,9 +292,9 @@ class Api::OrdersController < ApplicationController
           end
           order.save
         end
-      rescue
-        flag = false
-      end
+     # rescue
+        #flag = false
+     # end
     end
     resp_text = flag ? "success" : "error"
     render :json => {:status => resp_text}

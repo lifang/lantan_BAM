@@ -368,7 +368,7 @@ class Order < ActiveRecord::Base
         else
           #产品
           prod = Product.find_by_store_id_and_id_and_status store_id,id.split("_")[0].to_i,Product::IS_VALIDATE[:YES]
-          prod_mat_num = prod.materials[0].try(:storage) || 0
+          prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
           if prod
             product = Hash.new
             product[:id] = prod.id
