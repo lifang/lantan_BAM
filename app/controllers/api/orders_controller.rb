@@ -305,7 +305,7 @@ class Api::OrdersController < ApplicationController
     csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
       left join customers c on c.id = csr.customer_id where c.mobilephone = ?",
         params[:mobilephone].strip])
-    sum_left_total = csvc_relaions.inject(0){|sum, csv| sum = sum+csv.left_price}
+    sum_left_total = csvc_relaions.inject(0){|sum, csv| sum = sum+csv.left_price.to_f}
     record = csvc_relaions[0]
     status = 0
     

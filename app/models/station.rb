@@ -133,13 +133,13 @@ class Station < ActiveRecord::Base
     end
 
     #按照工位的忙闲获取预计时间
-    time = Time.now.strftime("%Y%m%d%H%M").to_i
+    time = Time.now.strftime("%Y%m%d%H%M")
     station_id = 0
     (station_arr || []).each do |station|
       w_o_time = WkOrTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
       if w_o_time
-        t = w_o_time.current_times.to_s.to_datetime
-        s = time.to_s.to_datetime
+        t = Time.zone.parse(w_o_time.current_times)
+        s = Time.zone.parse(time)
         if (t >= s)
           time = w_o_time.current_times
           station_id = station.id
@@ -154,8 +154,8 @@ class Station < ActiveRecord::Base
         break
       end
     end
-    time = res_time && time.to_i < res_time.to_datetime.strftime("%Y%m%d%H%M").to_i ? res_time.to_datetime.strftime("%Y%m%d%H%M").to_i : time
-    time = time.to_s.to_datetime
+    time = res_time && time < Time.zone.parse(res_time).strftime("%Y%m%d%H%M") ? Time.zone.parse(res_time).strftime("%Y%m%d%H%M") : time
+    time = Time.zone.parse(time)
     time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),
       (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]
     #puts time_arr,"-----------------"
