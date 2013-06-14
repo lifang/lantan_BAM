@@ -68,7 +68,7 @@
   </table>
   <% end %>
    <div class="otherWay">
-    <div class="amount">总计：<%= @total_money %></div>
+    <div class="amount">总计：<%= '%.2f' % @total_money.to_f %></div>
     <% if @mo.svc_use_price %><div class="amount">储值卡抵用：<%= @mo.svc_use_price %></div><% end %>
     <% if @mo.sale_price %><div class="amount">活动优惠：<%= @mo.sale_price %></div><% end %>
     <% if @mo.pay_type_name %><div class="amount"><%= @mo.pay_type_name %>：<%= @mo.price %></div><% end %>
@@ -97,7 +97,7 @@
   <% end %>
   <% if permission?(:materials, :cancel) %>
     <% if @mo.status == MaterialOrder::STATUS[:no_pay] && @mo.m_status == MaterialOrder::M_STATUS[:no_send] %>
-      <span><button class="confirm_btn" onclick="cancel_order(<%= @mo.id %>,1,<%= @store_id %>)">取消订单</button></span>
+      <span><button class="confirm_btn" onclick="cancel_order(<%= @mo.id %>,1,<%= @store_id %>, <%= @mo.supplier_type %>)">取消订单</button></span>
     <% end %>
   <% end %>
 </div>

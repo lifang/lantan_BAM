@@ -5,7 +5,7 @@ tishi_alert("编辑失败!");
 <% else %>
 tishi_alert("编辑成功!");
 $("#showmaterial<%= @material.id %>span").text(<%= @material.storage %>);
-<% if @material.storage <= @current_store.material_low %>       <!--如果小于预警值，则要加上信息提示-->
+<% if @material.storage <= @current_store.material_low.to_i %>       <!--如果小于预警值，则要加上信息提示-->
 $("#showmaterial<%= @material.id %>tr").find("td:first").removeAttr("class");
 $("#showmaterial<%= @material.id %>tr").find("td:first").attr("class", "data_table_error");
 $("#showmaterial<%= @material.id %>span").parent().parent().find('.sstatus').text("缺货");

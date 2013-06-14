@@ -351,8 +351,6 @@ function change_supplier(obj){
 }
 
 function submit_material_order(form_id){
-//    alert($("#selected_items").val());
-
         var data = "";
         if(parseInt($("#from").val())==0){
            data = "supplier="+$("#from").val()+"&selected_items="+$("#selected_items_dinghuo").val()+"&use_count="+$("#use_card").attr("value");
@@ -362,7 +360,7 @@ function submit_material_order(form_id){
         }else{
            data = "supplier="+$("#from").val()+"&selected_items="+$("#selected_items_dinghuo").val();
         }
-       // $("#"+form_id).find("button[class='confirm_btn']").attr("disabled","disabled");
+       
         $.ajax({
             url:$("#"+form_id).attr("action"),
             dataType:"json",
@@ -394,6 +392,8 @@ function submit_material_order(form_id){
 
 function pay_material_order(parent_id, pay_type,store_id){
     var mo_id = $("#"+parent_id+" #pay_order_id").val();
+    var mo_type = $("#"+parent_id+" #pay_order_type").val();
+    var if_refresh = $('#final_fukuan_tab #if_refresh').val();
     var total_price = $("#final_price").text();
     var sav_price = $("#sav_price").val();
     var sale_id = $("#sale_id").val();
@@ -406,7 +406,21 @@ function pay_material_order(parent_id, pay_type,store_id){
         success:function(data,status){
             if(data["status"]==0){
                 tishi_alert("支付成功");
-                window.location.href = "/stores/"+store_id + "/materials";
+                if(if_refresh=="0"){
+                    if(pay_type!=5)
+                    {
+                        if(mo_type==1)
+                        {
+                            $("#page_supplier_orders").find("#" + mo_id).find("td:nth-child(8)").text("已付款")
+                        }else{
+                            $("#page_head_orders").find("#" + mo_id).find("td:nth-child(8)").text("已付款")
+                        }
+                    }
+                    hide_mask("#" + parent_id);
+                }
+                else{
+                    window.location.href = "/stores/"+store_id + "/materials";
+                }
             }else if(data["status"]== -1){
                 hide_mask("#"+parent_id);
                 popup("#alipay_confirm");
@@ -910,7 +924,7 @@ function tuihuo(order_id, store_id){        //退货
     })
 }
 
-function cancel_order(order_id,type,store_id){
+function cancel_order(order_id,type,store_id,mo_type){
   if(confirm("确认要取消订单吗？")){
       $.ajax({
           url:"/stores/"+store_id+"/materials/cancel_order",
@@ -919,7 +933,12 @@ function cancel_order(order_id,type,store_id){
           data:"order_id="+order_id+"&type="+type,
           success:function(data,status){
               tishi_alert(data["content"]);
-              window.location.reload();
+              if(mo_type==1){
+                  $("#page_supplier_orders").find("#" + order_id).find("td:nth-child(8)").text("已取消")
+              }else{
+              $("#page_head_orders").find("#" + order_id).find("td:nth-child(8)").text("已取消")}
+              
+              hide_mask("#mat_order_detail_tab")
           },
           error:function(){
 //              alert("error");
@@ -952,6 +971,7 @@ function pay_order(mo_id,store_id){
             type:"GET",
             success:function(data){
               $('#mat_order_detail_tab').hide();
+              $('#final_fukuan_tab #if_refresh').val("0")
             }
         })
        
