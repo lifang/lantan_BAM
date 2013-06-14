@@ -469,7 +469,7 @@ class MaterialsController < ApplicationController
   def cancel_order
     if params[:order_id]
       order = MaterialOrder.find_by_id params[:order_id]
-      content = "订单取消成功"
+      content = "订单已取消成功"
       if order && order.status == MaterialOrder::STATUS[:no_pay] && order.m_status == MaterialOrder::M_STATUS[:no_send]
         order.update_attribute(:status,MaterialOrder::STATUS[:cancel])
         if order.supplier_id==0
