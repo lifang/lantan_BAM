@@ -17,7 +17,7 @@
         <td><%= lm.name %></td>
         <td><%= Material::TYPES_NAMES[lm.types.to_i] %></td>
         <td>缺货</td>
-        <td><%= lm.storage %></td>
+        <td id="materialstorage<%= lm.id %>td"><%= lm.storage %></td>
         <td><%= lm.price %></td>
        </tr>
         <% end %>

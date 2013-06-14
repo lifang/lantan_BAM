@@ -32,7 +32,7 @@
               <td>手机号码</td>
               <td>卡类型</td>
               <td>金额</td>
-              <td>是否开据发票</td>
+             <td>是否开据发票</td>
               <td>操作</td>
             </tr>
           </thead>
@@ -42,7 +42,7 @@
               <td><%= sr.name %></td>
               <td><%= sr.phone %></td>
               <td><%= SvCard::S_FAVOR[sr.type] %></td>
-             <td><%= sr.price %></td>
+             <td><%= sr.total_price %></td>
              <td id="is_billing<%= sr.id %>"><%= sr.is_billing ? "是" : "否" %></td>
               <td><% if sr.is_billing %>----<% else %><a href="JavaScript:void(0)" onclick="make_billing(<%= sr.id %>,<%= @store_id %>,this)">开具发票</a><% end %></td>
             </tr>
