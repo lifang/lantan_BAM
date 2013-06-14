@@ -248,8 +248,6 @@ class MaterialsController < ApplicationController
                   m = Material.create(:name => name, :code => code, :price => s_price,
                     :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
                 end
-                p "-------------------"
-                p m
                 mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
                     :price => s_price})   if m
 
@@ -262,8 +260,6 @@ class MaterialsController < ApplicationController
               material_order.update_attributes(:price => price)
               headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
               result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
-              p "----------------------------------"
-              p result
             end
             #material = Material.find_by_id_and_store_id
             #向供应商订货
@@ -547,8 +543,6 @@ class MaterialsController < ApplicationController
           headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
           p headoffice_post_api_url
           result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => params[:pay_type].to_i == 5 ? 0 :MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'sale_id' => @mat_order.sale_id, 'mat_order_types' => mat_order_types})
-          p "----------------------------------"
-          p result
         end
         render :json => {:status => 0}
      
@@ -679,16 +673,17 @@ class MaterialsController < ApplicationController
   end
 
   def create
-    store = Store.find params[:store_id]
-    material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id])
+    material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id].to_i)
     if material.nil?
       params[:material][:name] = params[:material][:name].strip
-      store.materials << Material.create(params[:material].merge({:status => 0}))
+      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i}))
+        @status = 1
+      else
+        @status = 0
+      end
     else
-      storage = material.storage + params[:material][:storage].to_i
-      material.update_attributes(:storage => storage)
+      @status = 2
     end
-    redirect_to "/stores/#{params[:store_id]}/materials"
   end
 
   #编辑物料
@@ -698,10 +693,23 @@ class MaterialsController < ApplicationController
   end
 
   def update
-    material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id])
+    material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     params[:material][:name] = params[:material][:name].strip
-    material.update_attributes(params[:material])
-    redirect_to "/stores/#{params[:store_id]}/materials"
+    uniq_mat = Material.where("code = ? and store_id = ? and id != ?", params[:material][:code], params[:store_id].to_i, params[:id].to_i)
+    if uniq_mat.blank?   #如果code唯一
+      if material.update_attributes(params[:material])
+        @status = 1
+        @material = material
+        @current_store = Store.find_by_id(params[:store_id].to_i)
+      else
+        @status = 0
+      end
+    else
+        @status = 2
+    end
+#    respond_to do |format|
+#      format.js
+#    end
   end
 
   def destroy

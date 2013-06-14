@@ -1,0 +1,8 @@
+<tr id="material<%= material.id %>tr">
+  <td width="15%"><%= material.code %></td>
+  <td><%= material.name %></td>
+  <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
+  <td>缺货</td>
+  <td id="materialstorage<%= material.id %>td"><%= material.storage %></td>
+  <td><%=  material.price %></td>
+</tr>
