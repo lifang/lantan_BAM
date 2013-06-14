@@ -4,7 +4,16 @@ tishi_alert("编辑失败，当前门店已有相同条形码的物料存在!");
 tishi_alert("编辑失败!");
 <% else %>
 tishi_alert("编辑成功!");
+
+$("#showmaterial<%= @material.id %>tr").find("td:nth-child(1)").text("<%= @material.code %>");
+$("#showmaterial<%= @material.id %>tr").find("td:nth-child(2)").text("<%= @material.name %>");
+$("#showmaterial<%= @material.id %>tr").find("td:nth-child(3)").text("<%= Material::TYPES_NAMES[@material.types.to_i] %>");
+$("#showmaterial<%= @material.id %>tr").find("td:nth-child(4)").text("<%= @material.is_ignore || @material.storage.to_i > @current_store.material_low.to_i ? '存货' : '缺货' %>");
+$("#showmaterial<%= @material.id %>tr").find("td:nth-child(6)").text("<%= @material.unit %>");
+$("#showmaterial<%= @material.id %>tr").find("td:nth-child(7)").text("<%= @material.price %>");
+$("#showmaterial<%= @material.id %>tr").find("td:nth-child(8)").text("<%= @material.sale_price %>");
 $("#showmaterial<%= @material.id %>span").text(<%= @material.storage %>);
+
 <% if @material.storage <= @current_store.material_low %>       <!--如果小于预警值，则要加上信息提示-->
 $("#showmaterial<%= @material.id %>tr").find("td:first").removeAttr("class");
 $("#showmaterial<%= @material.id %>tr").find("td:first").attr("class", "data_table_error");
@@ -23,7 +32,11 @@ $("#low_materials_tbody").append("<%= escape_javascript(render :partial => 'add_
 $("#low_materials_tbody").find("tr").removeAttr("class");
 $("#low_materials_tbody").find("tr:odd").attr("class", "tbg");
 }else{      <!--如果在确货信息提示里-->
- $("#materialstorage"+<%= @material.id %>+"td").text(<%= @material.storage %>);
+$("#material<%= @material.id %>tr").find("td:nth-child(1)").text("<%= @material.code %>");
+$("#material<%= @material.id %>tr").find("td:nth-child(2)").text("<%= @material.name %>");
+$("#material<%= @material.id %>tr").find("td:nth-child(3)").text("<%= Material::TYPES_NAMES[@material.types.to_i] %>");
+$("#material<%= @material.id %>tr").find("td:nth-child(6)").text("<%= @material.price %>");
+$("#materialstorage"+<%= @material.id %>+"td").text(<%= @material.storage %>);
 }
 }
 <% else %>        <!--如果不小于预警值，则要去掉信息提示-->

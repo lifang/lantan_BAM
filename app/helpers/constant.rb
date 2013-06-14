@@ -83,7 +83,10 @@ module Constant
       :add_p_card => ["添加套餐卡",256],
       :edit_p_card => ["编辑套餐卡",512],
       :del_p_card => ["删除套餐卡",1024],
-      :show_sale_records => ["查看销售记录",2048]
+      :show_sale_records => ["查看销售记录",2048],
+      :add_sv_card => ["添加套餐卡", 4096],
+      :edit_sv_card => ["编辑套餐卡", 8192],
+      :del_sv_card => ["删除套餐卡", 16384]
     },
     :base_datas => {
       :name => "基础数据",
