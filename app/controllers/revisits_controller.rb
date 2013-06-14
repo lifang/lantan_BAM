@@ -51,7 +51,9 @@ class RevisitsController < ApplicationController
       end
       flash[:notice] = "添加回访成功。"
     end
-    redirect_to request.referer
+    rev_page = params[:rev_page].empty? ? 1 : params[:rev_page]
+    return_url = "/stores/#{params[:store_id]}/customers/#{params[:rev_customer_id].to_i}?rev_page=#{rev_page}"
+    redirect_to return_url
   end
 
   def process_complaint
@@ -76,9 +78,10 @@ class RevisitsController < ApplicationController
       flash[:notice] = "处理投诉成功。"
     end
     if params["is_trains_#{params[:pro_compl_id]}"] == "0"
-      redirect_to request.referer
+      return_url = "/stores/#{params[:pc_store_id]}/customers/#{params[:pc_cust_id]}?comp_page=#{params[:comp_page]}"
+      redirect_to return_url
     else
-      redirect_to "/stores/#{params[:store_id]}/staffs"
+      redirect_to "/stores/#{params[:pc_store_id]}/staffs"
     end
   end
 

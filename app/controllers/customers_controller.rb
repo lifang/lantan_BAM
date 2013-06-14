@@ -115,12 +115,14 @@ class CustomersController < ApplicationController
         left join car_brands cb on cb.id = cm.car_brand_id
         inner join customer_num_relations cr on cr.car_num_id = c.id
         where cr.customer_id = ?", @customer.id])
-    @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 10, params[:page])
+    order_page = params[:rev_page] ? params[:rev_page] : 1
+    @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 10, order_page)
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
     
-    @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, params[:page])
-    @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, params[:page])
+    @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, 1)
+    comp_page = params[:comp_page] ? params[:comp_page] : 1
+    @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, comp_page)
     svc_pc_card_records(@customer.id)  #储值卡and套餐卡记录   【先不传】
   end
   

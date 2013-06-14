@@ -8,10 +8,13 @@
           <div class="seeProDiv">
             <div class="seeProDiv_l">订单号：</div>
             <div class="seeProDiv_r" id="process_code"><%= @order.code %></div>
-            <input type="hidden" name="store_id" id="store_id" value="<%= @order.store_id %>" />
+            <input type="hidden" name="pc_store_id" id="pc_store_id" value="<%= @order.store_id %>" />
             <input type="hidden" name="pro_compl_id" id="pro_compl_id" value="<%= @complaint_id %>" />
             <input type="hidden" name="pc_order_id" id="pc_order_id" value="<%= @order.id %>" />
             <input type="hidden" name="pc_code" id="pc_code" value="<%= @order.code %>"/>
+            <input type="hidden" name="pc_code" id="pc_code" value="<%= @order.code %>"/>
+            <input type="hidden" name="pc_cust_id" id="pc_cust_id" value="<%= @order.customer_id %>"/>
+            <input type="hidden" name="comp_page" id="comp_page" value="<%= @comp_page %>"/>
           </div>
           <div class="seeProDiv">
             <div class="seeProDiv_l">投诉类型：</div>

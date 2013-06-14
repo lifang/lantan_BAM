@@ -7,7 +7,7 @@
       <ul>
         <li class="hover">消费记录</li>
         <li>回访记录</li>
-        <li>投诉记录</li>
+        <li id="comp_li">投诉记录</li>
         <li>储值卡收支记录</li>
         <li>套餐卡</li>
       </ul>
@@ -38,8 +38,14 @@
 <script type="text/javascript">
 <% if params[:comp] == "1" %>
     $(".tab_head ul li").removeClass("hover");
-    $(".tab_head ul li:last").addClass("hover");
-    $(".data_body div").hide();
-    $("#complaints_partial, #complaints_partial .pageTurn").show();
+    $("#comp_li").addClass("hover");
+    $(".data_body > div").hide();
+    $("#complaints_partial").show();
+<% end %>
+<% if params[:comp_page] %>
+    $(".tab_head ul li").removeClass("hover");
+    $("#comp_li").addClass("hover");
+    $(".data_body > div").hide();
+    $("#complaints_partial").show();
 <% end %>
 </script>

@@ -4,7 +4,7 @@ class OrderPayType < ActiveRecord::Base
 
   PAY_TYPES = {:CASH => 0, :CREDIT_CARD => 1, :SV_CARD => 2, 
     :PACJAGE_CARD => 3, :SALE => 4, :IS_FREE => 5, :DISCOUNT_CARD => 6} #0 现金  1 刷卡  2 储值卡   3 套餐卡  4  活动优惠  5免单
-  PAY_TYPES_NAME = {0 => "现金", 1 => "刷卡", 2 => "优惠卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单"}
+  PAY_TYPES_NAME = {0 => "现金", 1 => "刷卡", 2 => "储值卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单", 6 => "打折卡"}
   
   def self.order_pay_types(orders)
     pay_types = OrderPayType.find(:all, :conditions => ["order_id in (?)", orders])
