@@ -214,7 +214,7 @@ class Api::OrdersController < ApplicationController
         #同步客户信息
         customers_info = sync_info["customer"]
         customers_info.each do |customer|
-          old_customer = Customer.find_by_mobilephone(customer["phone"])
+          old_customer = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], customer["phone"])
           old_customer.update_attributes(:name => customer["name"].strip, :other_way => customer["email"],
             :birthday => customer["birth"], :sex => customer["sex"]) if old_customer
           carNum = CarNum.find_by_num(customer["carNum"])

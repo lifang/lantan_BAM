@@ -28,7 +28,7 @@ module MarketManagesHelper
     end
 
     # 使用打折卡优惠总价
-    opt_sav = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:SV_CARD]}.first  unless order_pay_types[order_id].blank?
+    opt_sav = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:DISCOUNT_CARD]}.first  unless order_pay_types[order_id].blank?
     unless opt_sav.blank?
       sav_price = opt_sav.price
     end

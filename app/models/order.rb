@@ -224,6 +224,7 @@ class Order < ActiveRecord::Base
       h[:id] = p.id
       h[:name] = p.name
       h[:price] = p.sale_price
+      h[:description] = p.description
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
       if p.types.to_i <= Product::TYPES_NAME[:OTHER_PROD]
         prod_arr << h
@@ -245,10 +246,12 @@ class Order < ActiveRecord::Base
 
     product_arr << (cards + sv_cards || []).collect{|c|
       price = c.is_a?(SvCard) ? c.sale_price : c.price
+      description = c.is_a?(SvCard) ? c.description : c.content.split(",").collect{ |con| con[1] + ":" + con[2] + "次" }.join("，&nbsp;")
       h = Hash.new
       h[:id] = c.id
       h[:name] = c.name
       h[:price] = price
+      h[:description] = description
       h[:img] = c.img_url
       h[:type] = c.is_a?(PackageCard) ? '0' : '1'
       h
@@ -275,7 +278,7 @@ class Order < ActiveRecord::Base
     total = 0
     Customer.transaction do
       #begin
-      customer = Customer.find_by_mobilephone(phone)
+      customer = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], phone)
       customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
         :other_way => email, :birthday => birth, :sex => sex) if customer
       carNum = CarNum.find_by_num car_num
@@ -915,7 +918,7 @@ class Order < ActiveRecord::Base
 
   def self.checkin store_id,car_num,brand,car_year,user_name,phone,email,birth,sex
     car_num_r = CarNum.find_by_num car_num
-    customer = Customer.find_by_mobilephone(phone)
+    customer = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], phone)
     status = 0
     begin
       if car_num
@@ -958,7 +961,7 @@ class Order < ActiveRecord::Base
     # 使用活动优惠总价
     sum_sale_price = self.order_pay_types.where(:pay_type => OrderPayType::PAY_TYPES[:SALE]).inject(0){|sum,opr| sum += opr.price.to_f}
     # 使用打折卡优惠总价
-    sum_savcard_price = self.order_pay_types.where(:pay_type => OrderPayType::PAY_TYPES[:SV_CARD]).inject(0){|sum,opr| sum += opr.price.to_f}
+    sum_savcard_price = self.order_pay_types.where(:pay_type => OrderPayType::PAY_TYPES[:DISCOUNT_CARD]).inject(0){|sum,opr| sum += opr.price.to_f}
 
     ######  计算总成本价
 

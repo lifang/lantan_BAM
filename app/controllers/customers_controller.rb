@@ -47,7 +47,7 @@ class CustomersController < ApplicationController
 
   def create
     if params[:new_name] and params[:mobilephone]
-      customer = Customer.find_by_mobilephone(params[:mobilephone].strip)
+      customer = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], params[:mobilephone].strip)
       car_num = CarNum.find_by_num(params[:new_car_num].strip)
       if customer
         flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
@@ -64,7 +64,7 @@ class CustomersController < ApplicationController
   def update
     if params[:new_name] and params[:mobilephone]
       customer = Customer.find(params[:id].to_i)
-      mobile_c = Customer.find_by_mobilephone(params[:mobilephone].strip)
+      mobile_c = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], params[:mobilephone].strip)
       if mobile_c and mobile_c.id != customer.id
         flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
       else
