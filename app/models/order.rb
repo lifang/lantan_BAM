@@ -182,9 +182,6 @@ class Order < ActiveRecord::Base
         else
           if (car_id && car_id.to_i == order.id) || car_id.nil?
             working_orders << order_hash
-            #mark
-            #          elsif car_id.nil?
-            #            working_orders << order_hash
           end
         end
       end
@@ -242,18 +239,21 @@ class Order < ActiveRecord::Base
       :conditions => ["status = ? and store_id = ? and
           ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?) or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})",
         PackageCard::STAT[:NORMAL], store_id, Time.now])
-    pcard_prod_relations = PcardProdRelation.find_by_sql(["select concat(p.name, ppr.product_num, '次'), ppr.package_card_id
+    pcard_prod_relations = PcardProdRelation.find_by_sql(["select p.name, ppr.product_num, ppr.package_card_id
       from pcard_prod_relations ppr
       inner join products p on p.id = ppr.product_id where ppr.package_card_id in (?)", cards]).group_by{ |pcr| pcr.package_card_id }
-    sv_cards = SvCard.find_by_sql("select * from sv_cards where store_id = #{store_id}")
+    sv_cards = SvCard.find_by_sql("select * from sv_cards where store_id = #{store_id} and status = #{SvCard::STATUS[:NORMAL]}")
 
     product_arr << (cards + sv_cards || []).collect{|c|
       price = c.is_a?(SvCard) ? c.sale_price : c.price
+      description = ""
       if c.is_a?(SvCard)
         description = c.description
       else
-        description = pcard_prod_relations[c.id] ? pcard_prod_relations[c.id].join("，") : ""
-      end       
+        pcard_prod_relations[c.id].each do |ppr|
+          description += ppr.name + ppr.product_num.to_s + "次 \n"
+        end if pcard_prod_relations[c.id]
+      end
       h = Hash.new
       h[:id] = c.id
       h[:name] = c.name
