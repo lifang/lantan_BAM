@@ -807,9 +807,9 @@ a.compile_btn { width: 100px;}
 
 .groupFunc_b { padding: 10px; overflow: hidden; clear: both;}
 .groupFunc_b li { display: inline; margin: 5px 10px; line-height: 24px;}
-.groupFunc_b dl { float: left; margin: 0 10px;}
+.groupFunc_b dl { margin: 0 10px 10px 0;}
 .groupFunc_b dt { font-size: 14px; font-weight: bold; line-height: 32px;}
-.groupFunc_b dd { margin-left: 15px; line-height: 24px;}
+.groupFunc_b dd { margin-left: 15px; line-height: 24px; display: inline;}
 
 
 /*套餐卡*/
