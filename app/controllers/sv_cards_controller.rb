@@ -5,7 +5,7 @@ class SvCardsController < ApplicationController
   before_filter :get_store
 
   def index
-    @sv_cards = SvCard.where(["store_id = ?", params[:store_id].to_i]).order("created_at desc")
+    @sv_cards = SvCard.where(["store_id = ? ", params[:store_id].to_i]).where(["status = ?", SvCard::STATUS[:NORMAL]]).order("created_at desc")
     .paginate(:page => params[:page] ||= 1, :per_page => SvCard::PER_PAGE)
   end
 
@@ -21,7 +21,7 @@ class SvCardsController < ApplicationController
     img_obj = params[:sv_card][:img_url]
     params[:sv_card].delete_if{|key, value| key=="img_url"}
     if params[:sv_card][:types].to_i == 0
-      sv_card = SvCard.new(params[:sv_card])
+      sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL]}))
       if sv_card.save  #打折卡
          begin
           url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, params[:sv_card][:store_id], Constant::SVCARD_PICSIZE)
@@ -31,7 +31,7 @@ class SvCardsController < ApplicationController
         end
       end
     else
-      sv_card = SvCard.new(params[:sv_card])
+      sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL]}))
       if sv_card.save
         SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
         begin
@@ -51,6 +51,20 @@ class SvCardsController < ApplicationController
     respond_to do |format|
       format.js
     end
+  end
+
+  def destroy
+    sc = SvCard.find_by_id(params[:id].to_i)
+    if sc.nil?
+      flash[:notice] = "删除失败!"
+    else
+      if sc.update_attribute("status", SvCard::STATUS[:DELETED])
+        flash[:notice] = "删除成功!"
+      else
+        flash[:notice] = "删除失败!"
+      end
+    end
+       redirect_to request.referer
   end
 
   def update
