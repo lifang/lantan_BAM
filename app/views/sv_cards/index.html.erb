@@ -3,7 +3,7 @@
     <div class="data_box">
       <%= render :partial => "menu_partial" %>
       <div class="data_menu">
-        <% if permission?(:sales, :add_sv_card) %>
+        <% if permission?(:sales, :svcard) %>
             <a href="JavaScript:void(0)" class="add_btn" onclick="new_sv_card(<%= params[:store_id] %>)">新建优惠卡</a>
 
         <% end %>         
@@ -32,10 +32,10 @@
                 <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
                 <td><%= SvCard::S_USE_RNGE[sc.use_range] %></td>
                 <td>
-                  <% if permission?(:sales, :edit_sv_card) %>
+                  <% if permission?(:sales, :edit_svcard) %>
                   <a href="JavaScript:void(0)" onclick="show_svcard_detail(<%= sc.id %>,<%= params[:store_id] %>)">编辑</a>
                   <% end %>
-                  <% if permission?(:sales, :del_sv_card) %>
+                  <% if permission?(:sales, :delete_svcard) %>
                   <%= link_to "删除", store_sv_card_path(@store, sc), :method => :delete, :confirm => "确定删除该优惠卡?" %>
                   <% end %>
                 </td>
