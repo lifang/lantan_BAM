@@ -131,46 +131,31 @@ class Station < ActiveRecord::Base
         station_arr << station if (prods & prod_ids).sort == prod_ids.sort
       end
     end
-    p "+++++++++++++++++++++++++"
-    p station_arr
     time_now = Time.now.strftime("%Y%m%d%H%M")
     station_id = 0
     
     #如果用户连续多次下单并且购买的服务可以在原工位上施工，则排在原来工位上。
     if order
-      p "ooooooooooooooooooooooooooooooo"
       work_orders = WorkOrder.joins(:order => :customer).where(:customers => {:id => order.customer_id},
         :work_orders => {:status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]], :current_day => Time.now.strftime("%Y%m%d").to_i})
-      p work_orders
       station_ids = work_orders.map(&:station_id).uniq
     end
-    p "------------------------------"
-    p station_ids
     if station_ids.present? && ((station_arr.map(&:id) & station_ids) == station_ids)
-      p 1111111111111111111111
       station_id = station_ids[0]
       temp_time = WkOrTime.find_by_station_id(station_id).try(:current_times) || time_now
     end
     if station_id==0
       #按照工位的忙闲获取预计时间
       stations_no_orders = station_arr.select{|station| station.wk_or_times.where(:current_day => Time.now.strftime("%Y%m%d")).blank?}
-      p stations_no_orders
       if stations_no_orders.present?
-        p 222222222222222222222222222
         temp_time = time_now
         station_id = stations_no_orders[0].id
       else
-        p 33333333333333333333333333
-        
         station_available = station_arr.map{|station| station.wk_or_times.where(:current_day => Time.now.strftime("%Y%m%d"))}.flatten.max{|a,b| a.current_times <=> b.current_times}
-        p (Time.zone.parse(time_now) <=> Time.zone.parse(station_available.current_times)) > 0
         temp_time = (Time.zone.parse(time_now) <=> Time.zone.parse(station_available.current_times)) > 0 ? time_now : station_available.current_times
         station_id = station_available.station_id
       end
     end
-    p station_id
-    p res_time
-    p Time.zone.parse(temp_time)
    
     time = (res_time && (Time.zone.parse(temp_time) < Time.zone.parse(res_time))) ? Time.zone.parse(res_time) : Time.zone.parse(temp_time)
     time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),

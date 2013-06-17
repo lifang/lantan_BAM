@@ -7,7 +7,8 @@
             <th>施工项目</th>
             <th>物品领用</th>
             <th>物品消耗</th>
-            <th>水电消耗</th>
+            <th>水消耗</th>
+            <th>气消耗</th>
             <% else %>
             <th>接单数量</th>
             <% end %>
@@ -28,6 +29,7 @@
             <td><%= work_record.materials_used_num_sum %></td>
             <td><%= work_record.materials_consume_num_sum %></td>
             <td><%= work_record.water_num_sum %></td>
+            <td><%= work_record.gas_num_sum %></td>
             <% else %>
             <td><%= work_record.construct_num_sum %></td>
             <% end %>

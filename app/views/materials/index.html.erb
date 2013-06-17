@@ -1,4 +1,4 @@
-<%= render :partial => "notice_panel" %>
+<div id="mo_notice"><%= render :partial => "notice_panel" %></div>
 <% unless  @low_materials.blank? %>
   <div class="message">
     有 <span class="red" id="low_materials_span"><%=  @low_materials.length %></span>个物料库存量过低

@@ -6,7 +6,7 @@ class MaterialsController < ApplicationController
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
-  before_filter :material_order_tips, :only =>[:index, :receive_order, :cancel_order, :tuihuo]
+  before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo]
   before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
   before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs]
   @@m = Mutex.new
@@ -450,20 +450,22 @@ class MaterialsController < ApplicationController
   
   #退货
   def tuihuo
-    order = MaterialOrder.find_by_id(params[:order_id].to_i)
-    if order
-      if order.m_status == 3 || order.m_status == 4
-        render :json => {:status => 0}
+    @order = MaterialOrder.find_by_id(params[:id].to_i)
+    if @order
+      if @order.m_status == 3 || @order.m_status == 4
+        @status = 0
+
       else
-        if order.update_attribute("m_status", MaterialOrder::M_STATUS[:returned])
-          render :json => {:status => 1}
+        if @order.update_attribute("m_status", MaterialOrder::M_STATUS[:returned])
+          @status = 1
         else
-          render :json => {:status => 0}
+          @status = 0
         end
       end
     else
-      render :json => {:status => 0}
+      @status = 0
     end
+    @content = @status==0 ? "操作失败" : "操作成功"
   end
   #取消订货订单
   def cancel_order
@@ -487,19 +489,19 @@ class MaterialsController < ApplicationController
 
   #确认收货
   def receive_order
-    if params[:order_id]
-      order = MaterialOrder.find_by_id params[:order_id]
-      content = ""
-      if order && order.m_status == MaterialOrder::M_STATUS[:send]
-        order.update_attribute(:m_status,MaterialOrder::M_STATUS[:received])
-        content = "收货成功"
-      elsif order.m_status == MaterialOrder::M_STATUS[:received]
-        content = "订单已收货"
+    if params[:id]
+      @order = MaterialOrder.find_by_id params[:id]
+      @content = ""
+      if @order && @order.m_status == MaterialOrder::M_STATUS[:send]
+        @order.update_attribute(:m_status,MaterialOrder::M_STATUS[:received])
+        @content = "收货成功"
+      elsif @order.m_status == MaterialOrder::M_STATUS[:received]
+        @content = "订单已收货"
       else
-        content = "收货失败"
+        @content = "收货失败"
       end
     end
-    render :json => {:status => 1,:content => content}.to_json
+    #render :json => {:status => 1,:content => content, :order => order}.to_json
   end
 
   #订单支付
