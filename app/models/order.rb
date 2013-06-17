@@ -192,15 +192,23 @@ class Order < ActiveRecord::Base
 
   def self.get_brands_products store_id
     arr = []
-    brands = CarBrand.all :order => "id"
+    capitals = Capital.all
+    brands = CarBrand.all.group_by { |cb| cb.capital_id }
+    capital_arr = []
     car_models = CarModel.all.group_by { |cm| cm.car_brand_id  }
-    brand_arr = []
-    (brands || []).each do |brand|
-      b = brand
-      b[:models] = car_models[brand.id] unless car_models.empty? and car_models[brand.id] #brand.car_models
-      brand_arr << b
-    end
-    arr << brand_arr
+    (capitals || []).each do |capital|
+      c = capital
+      brand_arr = []
+      c_brands = brands[capital.id] unless brands.empty? and brands[capital.id]
+      (c_brands || []).each do |brand|
+        b = brand
+        b[:models] = car_models[brand.id] unless car_models.empty? and car_models[brand.id] #brand.car_models
+        brand_arr << b
+      end
+      c[:brands] = brand_arr
+      capital_arr << c
+    end    
+    arr << capital_arr
     product_arr = []
     clean_arr = []
     prod_arr = []
@@ -566,10 +574,12 @@ class Order < ActiveRecord::Base
             order_p_r = OrderProdRelation.create(:order_id => order.id, :product_id => prod[1],
               :pro_num => prod[2], :price => product.sale_price, :t_price => product.t_price, :total_price => prod[3].to_f)
             order_prod_relations << order_p_r
-            x += 1 if product.is_service?
-            cost_time += product.cost_time.to_i * prod[2].to_i if product.is_service
-            prod_ids << product.id if product.is_service
-            is_has_service = true if product.is_service
+            if product.is_service
+              x += 1
+              cost_time += product.cost_time.to_i * prod[2].to_i
+              prod_ids << product.id
+              is_has_service = true
+            end
             product_prices[product.id] = product.sale_price
           end
         end
@@ -711,11 +721,11 @@ class Order < ActiveRecord::Base
           #创建工位订单
           #station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
           #unless station
-            arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
-            if arrange_time[2] > 0
-              new_station_id = arrange_time[2]
-              station = Station.find_by_id_and_status new_station_id, Station::STAT[:NORMAL]
-            end
+          arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
+          if arrange_time[2] > 0
+            new_station_id = arrange_time[2]
+            station = Station.find_by_id_and_status new_station_id, Station::STAT[:NORMAL]
+          end
           #end
           if station
             woTime = WkOrTime.find_by_station_id_and_current_day new_station_id, Time.now.strftime("%Y%m%d").to_i

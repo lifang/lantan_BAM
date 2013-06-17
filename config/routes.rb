@@ -134,7 +134,7 @@ LantanBAM::Application.routes.draw do
         get "search_list"
       end
       member do
-        get "order_prods", "revisits", "complaints"
+        get "order_prods", "revisits", "complaints", "sav_card_records", "pc_card_records"
       end
     end
     resources :revisits do
