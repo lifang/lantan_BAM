@@ -38,7 +38,7 @@ LantanBAM::Application.routes.draw do
           "sale_orders","sale_order_list","stored_card_record","daily_consumption_receipt",
           "stored_card_bill", "daily_consumption_receipt_blank", "stored_card_bill_blank","gross_profit"
         post "search_month","search_report","search_sale_order","search_gross_profit"
-        get "load_service","load_product","load_pcard"
+        get "load_service","load_product","load_pcard","load_goal","load_over"
       end
     end
     resources :complaints do

@@ -1,1 +1,2 @@
 $("#product_list").html("<%= escape_javascript(render :partial => "/market_manages/product_list") %>");
+$("#product_list .pageTurn a").attr("href",$("#product_list .pageTurn a").attr("href").replace("?","?created=<%=session[:r_created]%>&ended=<%=session[:r_ended]%>&time=<%=session[:time]%>"));

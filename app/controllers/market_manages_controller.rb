@@ -59,6 +59,7 @@ class MarketManagesController < ApplicationController
       @serv = serv.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     end
   end
+  
 
   def load_product
     @total_product,@total_prod,prods = {},0,[]
@@ -89,15 +90,22 @@ class MarketManagesController < ApplicationController
     @products = Product.where("id in (#{pays.map(&:product_id).join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
   end
 
+  #加载进行中的目标销售额
+  def load_goal
+    goals = []
+    GoalSale.total_type(params[:store_id],0).inject(Hash.new){|hash,sale|
+      hash[sale.id].nil? ? hash[sale.id]=[sale] : hash[sale.id]<<sale;hash
+    }.sort.each {|k,v| goals << v}
+    @goals = goals.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+  end
 
-  #目标销售额
-  def index
-    goals =GoalSale.where("store_id=#{params[:store_id]}").inject(Hash.new){|hash,sale|
-      hash[sale.ended_at.strftime("%Y-%m-%d")].nil? ? hash[sale.ended_at.strftime("%Y-%m-%d")]=[sale] : hash[sale.ended_at.strftime("%Y-%m-%d")] << [sale];hash }
-    @goal_hash =GoalSale.total_type(params[:store_id]).inject(Hash.new){|hash,goal|
-      hash[goal.goal_sale_id].nil? ? hash[goal.goal_sale_id]=[goal] : hash[goal.goal_sale_id] << goal;hash }
-    @new_goals =goals.select {|key,value| key >= Time.now.strftime("%Y-%m-%d")}.values.flatten
-    @old_goals =goals.select {|key,value| key < Time.now.strftime("%Y-%m-%d")}.values.flatten
+  #加载已结束的目标销售额
+  def load_over
+    goals = []
+    GoalSale.total_type(params[:store_id],1).inject(Hash.new){|hash,sale|
+      hash[sale.id].nil? ? hash[sale.id]=[sale] : hash[sale.id]<<sale;hash
+    }.sort.reverse.each {|k,v| goals << v}
+    @goals = goals.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
   end
 
   #创建目标销售额
@@ -157,39 +165,29 @@ class MarketManagesController < ApplicationController
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "o.created_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "o.created_at <= '#{@end_at} 23:59:59'"
 
-    order_details = Order.find_by_sql("select o.id,o.code,opt.price price,opt.created_at created_at,p.name product_name from orders o
-                                inner join order_pay_types opt on opt.order_id = o.id inner join order_prod_relations op on
-                                op.order_id = o.id inner join products p on op.product_id = p.id
+    orders = Order.find_by_sql("select o.id,o.code,o.price price,opt.created_at created_at,p.name product_name from orders o
+                                left join order_pay_types opt on opt.order_id = o.id left join order_prod_relations op on
+                                op.order_id = o.id left join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
                                 o.status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and
-                                #{started_at_sql} and #{ended_at_sql}")
+                                #{started_at_sql} and #{ended_at_sql} group by o.id")
 
-    pcar_relations = CPcardRelation.find_by_sql(["select cpr.order_id order_id, 1 pro_num, pc.price price, pc.name name
-        from c_pcard_relations cpr inner join package_cards pc
-        on pc.id = cpr.package_card_id where cpr.order_id in (?)", order_details])
-    
-    orders = {}
-    order_details.each do |order|
-      orders.keys.include?(order.id) ? orders[order.id][:product_name] += (","+order.product_name) : orders[order.id] = order
-    end
-    pcar_relations.each do |pr|
-      orders.keys.include?(pr.order_id) ? orders[pr.order_id][:product_name] += (","+pr.name) : orders[pr.order_id] = pr
-    end
-    @total_price = orders.values.sum(&:price)
-    @orders = orders.values.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
-    
+    @product_hash = OrderProdRelation.order_products(orders)
+    @total_price = orders.sum(&:price)
+    @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 
   def daily_consumption_receipt
     @search_time = params[:search_time] || Time.now.strftime("%Y-%m-%d")
     
-#    @current_day_total = Order.where("created_at <= '#{Time.now}'").
-#      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
-#      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
+    #    @current_day_total = Order.where("created_at <= '#{Time.now}'").
+    #      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
+    #      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
 
     orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
       where("created_at >= '#{@search_time} 00:00:00'").
       where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
+    @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
     @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
@@ -199,6 +197,7 @@ class MarketManagesController < ApplicationController
     @orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
       where("created_at >= '#{@search_time} 00:00:00'").
       where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
+    @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
   end
 

@@ -9,11 +9,6 @@
       <div><button id="use_search" class="search_btn">查询</button></div>
     </form>
     </div>
-    <!--div class="data_body_title">
-      <span class="data_body_p">储值卡总计：<span class="red"><%= @total_money.nil? ? " " : sprintf("%.2f",@total_money.to_f) %></span>元&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        已使用：<span class="red"><%= @total_money.nil? || @left_money.nil? ? " " : sprintf("%.2f",(@total_money.to_f - @left_money.to_f)) %></span>元&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        余额：<span class="red"><%= @left_money.nil? ? " " : sprintf("%.2f",@left_money.to_f) %></span>元</span>
-    </div-->
     <div class="clear"></div>
     <div class="data_body">
       <div>
@@ -44,15 +39,14 @@
 
                 </td>
                 <td>
-                  <% service_products = get_service_products(order) %>
-                  <% if service_products.length != 0 %>
+                  <% if @product_hash[order.id].length != 0 %>
                   <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                     <tr class="fws">
                       <td>服务名称</td>
                       <td>数量</td>
                       <td>单价</td>
                     </tr>
-                    <% service_products.each do |prod| %>
+                    <% @product_hash[order.id].each do |prod| %>
                     <tr>
                       <td><%= prod.name %></td>
                       <td><%= prod.pro_num %></td>
