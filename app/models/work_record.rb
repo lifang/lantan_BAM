@@ -44,7 +44,7 @@ class WorkRecord < ActiveRecord::Base
                               where("updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'").sum(:material_num)
 
           materials_consume_num = materials_used_num
-          work_orders = WorkOrder.find_by_sql("select wo.id id, wo.water_num water_num, wo.electricity_num electricity_num from work_orders wo
+          work_orders = WorkOrder.find_by_sql("select wo.id id, wo.water_num water_num, wo.gas_num gas_num from work_orders wo
                                              left join station_staff_relations ssr on ssr.station_id = wo.station_id
                                              where ssr.staff_id = #{work_record.staff_id} and 
                                              wo.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and
@@ -54,11 +54,11 @@ class WorkRecord < ActiveRecord::Base
           
           water_num = work_orders.uniq{|x| x.id}.sum(&:water_num)
 
-          elec_num = work_orders.uniq{|x| x.id}.sum(&:electricity_num)
+          gas_num = work_orders.uniq{|x| x.id}.sum(&:gas_num)
 
           work_record.update_attributes(:construct_num => construct_num, :materials_used_num => materials_used_num,
                                         :materials_consume_num => materials_consume_num, :water_num => water_num,
-                                        :electricity_num => elec_num, :complaint_num => complaint_num, :train_num => train_num,
+                                        :gas_num => gas_num, :complaint_num => complaint_num, :train_num => train_num,
                                         :violation_num => violation_num, :reward_num => reward_num)
         else
           if staff.type_of_w == Staff::S_COMPANY[:FRONT]  #前台
