@@ -177,7 +177,7 @@ class SvCardsController < ApplicationController
     @customers = Customer.find_by_sql("select csr.id csr_id, c.name name, cn.num num, c.mobilephone mobilephone, sc.name s_name, csr.left_price left_price from customers c
                                        inner join c_svc_relations csr on csr.customer_id = c.id left join sv_cards sc on sc.id = csr.sv_card_id
                                        left join customer_num_relations cnr on cnr.customer_id = c.id left join car_nums cn on cn.id = cnr.car_num_id
-                                       where c.status = #{Customer::STATUS[:NOMAL]} and #{base_sql}").
+                                       where c.status = #{Customer::STATUS[:NOMAL]} and #{base_sql} and sc.types = #{SvCard::FAVOR[:SAVE]}").
                                        paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 
