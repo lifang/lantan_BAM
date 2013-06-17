@@ -82,12 +82,12 @@
   <% end %>
   <% if permission?(:materials, :tuihuo) %>
       <% if @mo.m_status != MaterialOrder::M_STATUS[:save_in] && @mo.m_status != MaterialOrder::M_STATUS[:returned] %>
-      <span><button class="confirm_btn" onclick="tuihuo(<%= @mo.id %>, <%= @store_id %>)">退货</button></span>
+      <span><button class="confirm_btn" onclick="tuihuo(<%= @mo.id %>, <%= @mo.supplier_type %>, <%= @store_id %>)">退货</button></span>
       <% end %>
   <% end %>
   <% if permission?(:materials, :shouhuo) %>
     <% if @mo.m_status == MaterialOrder::M_STATUS[:send] %>
-      <span><button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,1,<%= @store_id %>)">确认收货</button></span>
+      <span><button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,<%= @mo.supplier_type %>,<%= @store_id %>)">确认收货</button></span>
     <% end %>
   <% end %>
   <% if permission?(:materials, :pay) %>
