@@ -736,6 +736,7 @@ class Order < ActiveRecord::Base
               end_at = start + cost_time.minutes
               woTime.update_attributes(:current_times => end_at.strftime("%Y%m%d%H%M").to_i, :wait_num => woTime.wait_num.to_i + 1)
             else
+              start = Time.zone.parse(start_at)
               end_at = Time.zone.parse(start_at) + cost_time.minutes
               WkOrTime.create(:current_times => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
                 :station_id => station.id, :worked_num => 1)
