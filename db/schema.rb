@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051471) do
+ActiveRecord::Schema.define(:version => 20130701051472) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -921,6 +921,7 @@ ActiveRecord::Schema.define(:version => 20130701051471) do
     t.string   "description"
     t.integer  "store_id"
     t.integer  "use_range"
+    t.integer  "status",      :default => 1
   end
 
   add_index "sv_cards", ["types"], :name => "index_sv_cards_on_types"
