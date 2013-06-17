@@ -905,30 +905,6 @@ function cuihuo(order_id,type,store_id){
     });
 }
 
-function tuihuo(order_id, mo_type, store_id){        //退货
-    $.ajax({
-        url: "/stores/"+store_id+"/materials/tuihuo",
-        dataType: "json",
-        type: "get",
-        data: {
-            order_id : order_id
-        },
-        success: function(data){
-            if(data.status == 0){
-                tishi_alert("操作失败!");
-            }else{
-                tishi_alert("操作成功!");
-                if(mo_type==1){
-                  $("#page_supplier_orders").find("#" + order_id).find("td:nth-child(6)").text("已退货")
-              }else{
-              $("#page_head_orders").find("#" + order_id).find("td:nth-child(6)").text("已退货")}
-              
-                hide_mask('#mat_order_detail_tab'); 
-            }
-        }
-    })
-}
-
 function cancel_order(order_id,type,store_id,mo_type){
   if(confirm("确认要取消订单吗？")){
       $.ajax({
@@ -950,26 +926,6 @@ function cancel_order(order_id,type,store_id,mo_type){
           }
       });
   }
-}
-
-function receive_order(order_id,mo_type,store_id){
-    $.ajax({
-        url:"/stores/"+store_id+"/materials/receive_order",
-        dataType:"json",
-        type:"GET",
-        data:"order_id="+order_id,
-        success:function(data,status){
-            tishi_alert(data["content"]);
-            if(mo_type==1){
-                  $("#page_supplier_orders").find("#" + order_id).find("td:nth-child(6)").text("已收货")
-              }else{
-              $("#page_head_orders").find("#" + order_id).find("td:nth-child(6)").text("已收货")}
-            hide_mask("#mat_order_detail_tab")
-        },
-        error:function(){
-//              alert("error");
-        }
-    });
 }
 
 function pay_order(mo_id,store_id){
