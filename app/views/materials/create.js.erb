@@ -1,0 +1,10 @@
+<% if @status == 2 %>
+tishi_alert("创建失败，当前门店已有相同条形码的物料存在!");
+<% elsif @status == 0 %>
+tishi_alert("创建失败!");
+<% else %>
+tishi_alert("创建成功!");
+$("#material_div").hide();
+$(".mask").css('display','none');
+window.location.reload();
+<% end %>

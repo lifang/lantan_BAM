@@ -34,7 +34,7 @@ module UserRoleHelper
   #是否有权限访问后台
   def has_authority?
     user = Staff.find cookies[:user_id] if cookies[:user_id]
-    roles = user.roles if user
+    roles = user.roles if user and Staff::VALID_STATUS.include?(user.status)
     return !roles.blank?
   end
 

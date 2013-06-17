@@ -29,7 +29,7 @@ class StationsController < ApplicationController
       staff=StationStaffRelation.find_by_sql("select staff_id from station_staff_relations where station_id=#{station.id} and current_day='#{Time.now.strftime("%Y%m%d")}' ")
       @t_infos[station.id]=Staff.where("id in (#{staff.map(&:staff_id).join(',')})").map(&:id)  unless staff.blank?
     end
-    @staffs =Staff.find_by_sql("select name,id from staffs where store_id=#{params[:store_id]} and type_of_w=#{Staff::S_COMPANY[:TECHNICIAN]}")
+    @staffs = Staff.find_by_sql("select name,id from staffs where store_id=#{params[:store_id]} and status = #{Staff::STATUS[:normal]} and type_of_w=#{Staff::S_COMPANY[:TECHNICIAN]}")
   end
 
   def create

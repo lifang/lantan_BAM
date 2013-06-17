@@ -51,7 +51,7 @@ class MonthScore < ActiveRecord::Base
     sql += "date_format(op.created_at,'%X-%V') day" if time.to_i==Sale::DISC_TIME[:WEEK]
     sql += "date_format(op.created_at,'%X-%m') day"  if time.to_i==Sale::DISC_TIME[:MONTH]
     sql +=" from order_pay_types op inner join orders o  on o.id=op.order_id inner join products p on p.id=op.product_id where product_id in (#{ids.uniq.join(",")}) and
-       op.pay_type in (#{OrderPayType::PAY_TYPES[:SV_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]},#{OrderPayType::PAY_TYPES[:IS_FREE]})
+       op.pay_type in (#{OrderPayType::PAY_TYPES[:DISCOUNT_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]},#{OrderPayType::PAY_TYPES[:IS_FREE]})
      and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and is_service=#{is_service}  "
     sql +=" group by date_format(op.created_at,'%Y-%m-%d'),product_id "  if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
     sql +=" group by product_id,date_format(op.created_at,'%X-%V')"  if time.to_i==Sale::DISC_TIME[:WEEK]
@@ -65,7 +65,7 @@ class MonthScore < ActiveRecord::Base
     sql += "date_format(op.created_at,'%X-%V') day" if time.to_i==Sale::DISC_TIME[:WEEK]
     sql += "date_format(op.created_at,'%X-%m') day"  if time.to_i==Sale::DISC_TIME[:MONTH]
     sql +=" from order_pay_types op inner  join orders o on o.id=op.order_id  where product_id is not null and o.store_id=#{store_id} and
-       pay_type in (#{OrderPayType::PAY_TYPES[:SV_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]},#{OrderPayType::PAY_TYPES[:IS_FREE]})
+       pay_type in (#{OrderPayType::PAY_TYPES[:DISCOUNT_CARD]},#{OrderPayType::PAY_TYPES[:PACJAGE_CARD]},#{OrderPayType::PAY_TYPES[:SALE]},#{OrderPayType::PAY_TYPES[:IS_FREE]})
     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
     sql += " and date_format(op.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(op.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0

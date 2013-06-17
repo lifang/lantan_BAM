@@ -18,6 +18,7 @@ class OrdersController < ApplicationController
   def order_staff
     ids = params[:id].split("_")
     @complaint_id = ids[0]
+    @comp_page = params[:comp_page].empty? ? 1 : params[:comp_page]
     @order = Order.one_order_info(ids[1].to_i)[0]
     respond_to do |format|
       format.js

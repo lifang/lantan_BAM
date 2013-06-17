@@ -17,6 +17,12 @@ class OrderProdRelation < ActiveRecord::Base
     pcar_relations.each { |p| 
       @product_hash[p.order_id].nil? ? @product_hash[p.order_id] = [p] : @product_hash[p.order_id] << p
     } if pcar_relations.any?
+    csvc_relations = CSvcRelation.find_by_sql(["select csr.order_id, 1 pro_num, sc.price, sc.name
+        from c_svc_relations csr inner join sv_cards sc
+        on sc.id = csr.sv_card_id where csr.order_id in (?)", orders])
+    csvc_relations.each { |p|
+      @product_hash[p.order_id].nil? ? @product_hash[p.order_id] = [p] : @product_hash[p.order_id] << p
+    } if csvc_relations.any?
     return @product_hash
   end
 

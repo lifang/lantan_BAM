@@ -33,7 +33,7 @@
                     <td><%= prod.sale_price %></td>
                     <td><%= Product::PRODUCT_TYPES[prod.types] %></td>
                     <td>
-                      <% if permission?(:sales, :edit_product) %><a href="javascript:void(0)"  onclick="prod_delete('<%=prod.id %>','<%=params[:store_id] %>')">删除</a><% end %>
+                      <% if permission?(:sales, :delete_product) %><a href="javascript:void(0)"  onclick="prod_delete('<%=prod.id %>','<%=params[:store_id] %>')">删除</a><% end %>
                       <% if permission?(:sales, :edit_product) %><a href="javascript:void(0)"  onclick="edit_prod('<%=prod.id %>','<%=params[:store_id] %>')">编辑</a><% end %>
                       <a href="javascript:void(0)" class="see_btn" onclick="show_prod('<%=prod.id %>','<%=params[:store_id] %>')">查看</a>
                       <a href="/stores/<%= params[:store_id] %>/products/<%=prod.id %>" target="_blank" class="see_btn"  >预览</a>

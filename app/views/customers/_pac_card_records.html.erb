@@ -17,19 +17,30 @@
         <tr>
           <td><%= cpr.name %></td>
           <td>
-            <% @already_used_count[cpr.id].values.each do |v| %>
-              <%= v[0] %>：<%= v[1] %>次&nbsp;&nbsp;
-            <% end unless @already_used_count.empty? %>
-          </td>
-          <td>
-            <% cpr.content.split(",").each do |c| %>
-              <% v = c.split("-") %>
-              <%= v[1] %>：<%= v[2] %>次&nbsp;&nbsp;
-            <% end %>
-          </td>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tbody>
+                    <% @already_used_count[cpr.id].values.each do |v| %>
+                      <tr><td style="text-align: center"><%= v[0] %>：<%= v[1] %>次&nbsp;&nbsp;</td></tr>
+                    <% end unless @already_used_count.empty? %>
+
+                  </tbody></table>
+              </td>
+              <td>
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tbody>
+                        <% cpr.content.split(",").each do |c| %>
+                          <% v = c.split("-") %>
+                          <tr><td style="text-align: center"><%= v[1] %>：<%= v[2] %>次&nbsp;&nbsp;</td></tr>
+                        <% end %>
+                      </tbody></table>
+                  </td>
           <td><%= cpr.ended_at.strftime('%Y-%m-%d') if cpr.ended_at %></td>
         </tr>
       <% end %>
     <% end %>
   </tbody>
 </table>
+<div class="pageTurn">
+  <%=  will_paginate_remote(@c_pcard_relations , "",
+  {:url => "/stores/#{@store.id}/customers/#{@customer.id}/pc_card_records"}) %>
+</div>

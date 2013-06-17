@@ -6,7 +6,15 @@ module MarketManagesHelper
     pcar_relations = CPcardRelation.find_by_sql("select pc.price price, pc.name name, 1 pro_num 
         from c_pcard_relations cpr inner join package_cards pc
         on pc.id = cpr.package_card_id where cpr.order_id = #{order.id}")
-    products + pcar_relations
+#    sv_cards = SvCard.find_by_sql("select sc.name name, sc.price price, 1 pro_num from sv_cards sc
+#                                    left join c_svc_relations csr on csr.sv_card_id = sc.id left join orders o on o.c_svc_relation_id = csr.id
+#                                    where o.id=#{order.id} and sc.status = #{SvCard::STATUS[:NORMAL]}#")
+
+    csvc_relations = CSvcRelation.find_by_sql("select csr.order_id, 1 pro_num, sc.price, sc.name name
+        from c_svc_relations csr inner join sv_cards sc
+        on sc.id = csr.sv_card_id where csr.order_id = #{order.id}")
+
+    products + pcar_relations + csvc_relations
     #p.is_service=#{Product::PROD_TYPES[:SERVICE]} 
   end
 
@@ -28,7 +36,7 @@ module MarketManagesHelper
     end
 
     # 使用打折卡优惠总价
-    opt_sav = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:SV_CARD]}.first  unless order_pay_types[order_id].blank?
+    opt_sav = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:DISCOUNT_CARD]}.first  unless order_pay_types[order_id].blank?
     unless opt_sav.blank?
       sav_price = opt_sav.price
     end
@@ -43,7 +51,7 @@ module MarketManagesHelper
   def order_cost_price(order)
     #购买套餐卡里面的商品与服务成本价
     unless order.c_pcard_relations.blank?
-      pp_price = order.c_pcard_relations.map{|cpr| cpr.package_card}.compact.map{|pc| pc.pcard_prod_relations.map{|ppr| ppr.product}.inject(0){|sum,opr| sum += opr.t_price.to_f}}.inject(0){|sum,pc| sum += pc}
+      pp_price = order.c_pcard_relations.map{|cpr| cpr.package_card}.compact.map{|pc| pc.pcard_prod_relations.map{|ppr| [ppr.product, ppr.product_num]}.inject(0){|sum,opr| sum += opr[0].t_price.to_f * opr[1]}}.inject(0){|sum,pc| sum += pc}
     end
     #跟order直接关联的商品与服务的价钱
     sum = order.order_prod_relations.inject(0){|sum,opr| sum+=(opr.t_price.to_f)*opr.pro_num}

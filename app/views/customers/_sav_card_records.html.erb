@@ -19,6 +19,6 @@
   </tbody>
 </table>
 <div class="pageTurn">
-  <%= will_paginate  @svcard_records, :class => "pagination", :previous_label => "<<",
-    :next_label=> ">>" %>
+  <%=  will_paginate_remote(@svcard_records , "",
+  {:url => "/stores/#{@store.id}/customers/#{@customer.id}/sav_card_records"}) %>
 </div>

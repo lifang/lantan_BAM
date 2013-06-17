@@ -150,15 +150,6 @@ textarea {
 	right: 0px;
 	padding-top:3px;
 }
-.module li a.message01 {
-	width: 31px; 
-	height:24px;
-	background: url(/assets/message01.png) no-repeat;
-	position:absolute; 
-	top: 0px;
-	right: 35px;
-	padding-top:3px;
-}
 /*内容页信息*/
 .box .message {
     padding: 5px 10px;
@@ -816,9 +807,9 @@ a.compile_btn { width: 100px;}
 
 .groupFunc_b { padding: 10px; overflow: hidden; clear: both;}
 .groupFunc_b li { display: inline; margin: 5px 10px; line-height: 24px;}
-.groupFunc_b dl { float: left; margin: 0 10px;}
+.groupFunc_b dl { margin: 0 10px 10px 0; overflow: hidden;}
 .groupFunc_b dt { font-size: 14px; font-weight: bold; line-height: 32px;}
-.groupFunc_b dd { margin-left: 15px; line-height: 24px;}
+.groupFunc_b dd {line-height: 24px; display: inline-block; width: 190px; float: left;}
 
 
 /*套餐卡*/

@@ -68,4 +68,14 @@ function search_first(){
     load_goal("/stores/"+ store_id+"/market_manages/"+arr[parseInt($(".tab_head .hover").attr("id"))]);
 }
 
+function load_sale(url){
+    $.ajax({
+        async : true,
+        url : url,
+        type:'get',
+        dataType : 'script'
+    });
+    return false;
+}
+
 

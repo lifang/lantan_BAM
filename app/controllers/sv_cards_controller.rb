@@ -5,7 +5,7 @@ class SvCardsController < ApplicationController
   before_filter :get_store
 
   def index
-    @sv_cards = SvCard.where(["store_id = ?", params[:store_id].to_i]).order("created_at desc")
+    @sv_cards = SvCard.where(["store_id = ? ", params[:store_id].to_i]).where(["status = ?", SvCard::STATUS[:NORMAL]]).order("created_at desc")
     .paginate(:page => params[:page] ||= 1, :per_page => SvCard::PER_PAGE)
   end
 
@@ -20,9 +20,9 @@ class SvCardsController < ApplicationController
     current_store = Store.find_by_id params[:sv_card][:store_id]
     img_obj = params[:sv_card][:img_url]
     params[:sv_card].delete_if{|key, value| key=="img_url"}
-    if params[:sv_card][:types].to_i == 0
-      sv_card = SvCard.new(params[:sv_card])
-      if sv_card.save  #打折卡
+    if params[:sv_card][:types].to_i == SvCard::FAVOR[:DISCOUNT] #打折卡
+      sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL]}))
+      if sv_card.save  
          begin
           url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, params[:sv_card][:store_id], Constant::SVCARD_PICSIZE)
           sv_card.update_attribute("img_url", url)          
@@ -31,7 +31,7 @@ class SvCardsController < ApplicationController
         end
       end
     else
-      sv_card = SvCard.new(params[:sv_card])
+      sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL], :price => params[:started_money]}))
       if sv_card.save
         SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
         begin
@@ -53,6 +53,20 @@ class SvCardsController < ApplicationController
     end
   end
 
+  def destroy
+    sc = SvCard.find_by_id(params[:id].to_i)
+    if sc.nil?
+      flash[:notice] = "删除失败!"
+    else
+      if sc.update_attribute("status", SvCard::STATUS[:DELETED])
+        flash[:notice] = "删除成功!"
+      else
+        flash[:notice] = "删除失败!"
+      end
+    end
+       redirect_to request.referer
+  end
+
   def update
     sv_card = SvCard.find_by_id(params[:id].to_i)
     current_store = Store.find_by_id(params[:store_id])
@@ -60,6 +74,7 @@ class SvCardsController < ApplicationController
     params[:sv_card].delete_if{|key, value| key=="img_url"}
     if sv_card.update_attributes(params[:sv_card])
       if sv_card.types == SvCard::FAVOR[:SAVE]
+        sv_card.update_attribute("price", params[:started_money])
         SvcardProdRelation.destroy_all("sv_card_id = #{sv_card.id}")
         SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
       end
@@ -72,8 +87,8 @@ class SvCardsController < ApplicationController
         end
       end
       flash[:notice] = "更新成功!"
-      redirect_to store_sv_cards_path(current_store)
     end
+    redirect_to request.referer
   end
 
   def sell_situation  #销售情况
@@ -81,7 +96,7 @@ class SvCardsController < ApplicationController
     @started_time = params[:started_time]
     @ended_time = params[:ended_time]
     @store_id = params[:store_id].to_i
-    sql = "select csr.*, c.name name, c.mobilephone phone, sc.price price, sc.types type
+    sql = "select csr.*, c.name name, c.mobilephone phone, sc.types type
            from c_svc_relations csr right join sv_cards sc on csr.sv_card_id = sc.id
            right join customers c on csr.customer_id = c.id where sc.store_id = #{@store_id}"
     unless @started_time.nil? || @started_time.strip == ""
@@ -163,7 +178,7 @@ class SvCardsController < ApplicationController
     @customers = Customer.find_by_sql("select csr.id csr_id, c.name name, cn.num num, c.mobilephone mobilephone, sc.name s_name, csr.left_price left_price from customers c
                                        inner join c_svc_relations csr on csr.customer_id = c.id left join sv_cards sc on sc.id = csr.sv_card_id
                                        left join customer_num_relations cnr on cnr.customer_id = c.id left join car_nums cn on cn.id = cnr.car_num_id
-                                       where c.status = #{Customer::STATUS[:NOMAL]} and #{base_sql}").
+                                       where c.status = #{Customer::STATUS[:NOMAL]} and #{base_sql} and sc.types = #{SvCard::FAVOR[:SAVE]}").
                                        paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 

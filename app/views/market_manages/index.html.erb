@@ -1,7 +1,8 @@
+<%= javascript_include_tag "complaints.js" %>
 <%=  render 'second_menu'%>
 <div class="data_menu">
   <% if permission?(:datas, :add_target) %>
-    <a href="javascript:void(0)" onclick="show_center('.goal_mark');">定制目标销售额</a>
+    <a href="javascript:void(0)" onclick="show_center('.goal_mark');">制定目标销售额</a>
   <% end %>
 </div>
 <div class="clear"></div>
@@ -12,91 +13,15 @@
   </ul>
 </div>
 <div class="data_body">
-  <div>
-    <% unless @new_goals.blank? %>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-        <thead>
-          <tr class="hbg">
-            <td>时间</td>
-            <td>详细</td>
-            <td>剩余时间（天）</td>
-          </tr>
-        </thead>
-        <tbody>
-          <%  @new_goals.sort.each do |sale|%>
-            <tr>
-              <td> <%="#{sale.started_at.strftime("%Y.%m.%d")}-#{sale.ended_at.strftime("%Y.%m.%d")}" %></td>
-              <td>
-                <table width="720" border="0" cellspacing="1" cellpadding="0" class="s_table">
-                  <tr class="fws">
-                    <td width="220px">分类</td>
-                    <td width="140px">目标销售额（元）</td>
-                    <td width="220px">目前完成销售额（元）</td>
-                    <td width="140px">目前完成百分比</td>
-                  </tr>
-                  <% @goal_hash[sale.id].each_with_index do |goal,index| %>
-                    <tr>
-                      <td><%= goal.type_name %></td>
-                      <td><%= format("%.2f",goal.goal_price) %></td>
-                      <td><%= format("%.2f",goal.current_price) %></td>
-                      <td><%= goal.goal_price==0 ? "0%" :"#{format("%.1f",(goal.current_price.nil?? 0 :goal.current_price)*100/goal.goal_price)}%" %></td>
-                    </tr>
-                  <% end unless @goal_hash[sale.id].blank? %>
-                </table>
-              </td>
-              <td>
-                <%= ((sale.ended_at-Time.now)/86400.00).to_i%>天</td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    <% else %>
-      当前暂无记录
-    <% end %>
-  </div>
-  <div style="display:none;">
-    <%unless @old_goals.blank?%>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-        <thead>
-          <tr class="hbg">
-            <td>时间</td>
-            <td>详细</td>
-            <td>剩余时间（天）</td>
-          </tr>
-        </thead>
-        <tbody>
-          <%  @old_goals.sort.each do |sale|%>
-            <tr>
-              <td> <%="#{sale.started_at.strftime("%Y.%m.%d")}-#{sale.ended_at.strftime("%Y.%m.%d")}" %></td>
-              <td>
-                <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-                  <tr class="fws">
-                    <td width="220px">分类</td>
-                    <td width="140px">目标销售额（元）</td>
-                    <td width="220px">目前完成销售额（元）</td>
-                    <td width="140px">目前完成百分比</td>
-                  </tr>
-                  <% @goal_hash[sale.id].each_with_index do |goal,index| %>
-                    <tr>
-                      <td><%= goal.type_name %></td>
-                      <td><%= format("%.2f",goal.goal_price) %></td>
-                      <td><%= format("%.2f",goal.current_price) %></td>
-                      <td><%= goal.goal_price==0 ? "0%" :"#{format("%.1f",(goal.current_price.nil?? 0 :goal.current_price)*100/goal.goal_price)}%" %></td>
-                    </tr>
-                  <% end unless @goal_hash[sale.id].blank? %>
-                </table>
-              </td>
-              <td>--</td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    <%else%>
-      暂无记录
-    <% end %>
-  </div>
+  <div id="on_time">数据加载中。。。</div>
+  <div style="display:none;" id="over_time">数据加载中。。。</div>
+  <script type="text/javascript">
+    load_sale("/stores/<%= params[:store_id] %>/market_manages/load_goal");
+    setTimeout(function(){
+      load_sale("/stores/<%= params[:store_id] %>/market_manages/load_over");
+    },2000)
+  </script>
 </div>
-
 <div class="mask"></div>
 <div class="tab_popup goal_mark" style="display: none;">
   <div class="popup_box">

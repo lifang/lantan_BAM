@@ -90,16 +90,22 @@ class MarketManagesController < ApplicationController
     @products = Product.where("id in (#{pays.map(&:product_id).join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
   end
 
+  #加载进行中的目标销售额
+  def load_goal
+    goals = []
+    GoalSale.total_type(params[:store_id],0).inject(Hash.new){|hash,sale|
+      hash[sale.id].nil? ? hash[sale.id]=[sale] : hash[sale.id]<<sale;hash
+    }.sort.each {|k,v| goals << v}
+    @goals = goals.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+  end
 
-
-  #目标销售额
-  def index
-    goals =GoalSale.where("store_id=#{params[:store_id]}").inject(Hash.new){|hash,sale|
-      hash[sale.ended_at.strftime("%Y-%m-%d")].nil? ? hash[sale.ended_at.strftime("%Y-%m-%d")]=[sale] : hash[sale.ended_at.strftime("%Y-%m-%d")] << [sale];hash }
-    @goal_hash =GoalSale.total_type(params[:store_id]).inject(Hash.new){|hash,goal|
-      hash[goal.goal_sale_id].nil? ? hash[goal.goal_sale_id]=[goal] : hash[goal.goal_sale_id] << goal;hash }
-    @new_goals =goals.select {|key,value| key >= Time.now.strftime("%Y-%m-%d")}.values.flatten
-    @old_goals =goals.select {|key,value| key < Time.now.strftime("%Y-%m-%d")}.values.flatten
+  #加载已结束的目标销售额
+  def load_over
+    goals = []
+    GoalSale.total_type(params[:store_id],1).inject(Hash.new){|hash,sale|
+      hash[sale.id].nil? ? hash[sale.id]=[sale] : hash[sale.id]<<sale;hash
+    }.sort.reverse.each {|k,v| goals << v}
+    @goals = goals.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
   end
 
   #创建目标销售额

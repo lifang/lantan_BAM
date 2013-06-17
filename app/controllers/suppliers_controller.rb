@@ -1,7 +1,7 @@
 class SuppliersController < ApplicationController
   layout "storage"
   before_filter :sign?
-  before_filter :find_record, :only => [:index]
+  before_filter :find_store
   before_filter :find_supplier, :only => [:edit, :update, :destroy]
 
   def index
@@ -14,12 +14,10 @@ class SuppliersController < ApplicationController
   end
 
   def new
-    @store = Store.find params[:store_id]
     @supplier = Supplier.new
   end
 
   def create
-    @store = Store.find params[:store_id]
     @supplier = Supplier.create(params[:supplier])
     if @supplier.save
       @store.suppliers << @supplier
@@ -47,7 +45,7 @@ class SuppliersController < ApplicationController
   
   private
 
-  def find_record
+  def find_store
     @store = Store.find_by_id(params[:store_id]) || not_found
   end
 

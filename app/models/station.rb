@@ -120,9 +120,9 @@ class Station < ActiveRecord::Base
     return video_hash
   end
 
-  def self.arrange_time store_id, prod_ids, res_time = nil
+  def self.arrange_time store_id, prod_ids, order = nil, res_time = nil
     #查询所有满足条件的工位
-    stations = Station.find_all_by_store_id_and_status store_id, Station::STAT[:NORMAL]
+    stations = Station.includes(:wk_or_times).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
     station_arr = []
     prod_ids = prod_ids.collect{|p| p.to_i }
     (stations || []).each do |station|
@@ -131,31 +131,33 @@ class Station < ActiveRecord::Base
         station_arr << station if (prods & prod_ids).sort == prod_ids.sort
       end
     end
-
-    #按照工位的忙闲获取预计时间
-    time = Time.now.strftime("%Y%m%d%H%M").to_i
+    time_now = Time.now.strftime("%Y%m%d%H%M")
     station_id = 0
-    (station_arr || []).each do |station|
-      w_o_time = WkOrTime.find_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d")
-      if w_o_time
-        t = w_o_time.current_times.to_s.to_datetime
-        s = time.to_s.to_datetime
-        if (t >= s)
-          time = w_o_time.current_times
-          station_id = station.id
-        else
-          station_id = station.id
-          time = Time.now.strftime("%Y%m%d%H%M")
-          break
-        end
+    
+    #如果用户连续多次下单并且购买的服务可以在原工位上施工，则排在原来工位上。
+    if order
+      work_orders = WorkOrder.joins(:order => :customer).where(:customers => {:id => order.customer_id},
+        :work_orders => {:status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]], :current_day => Time.now.strftime("%Y%m%d").to_i})
+      station_ids = work_orders.map(&:station_id).uniq
+    end
+    if station_ids.present? && ((station_arr.map(&:id) & station_ids) == station_ids)
+      station_id = station_ids[0]
+      temp_time = WkOrTime.find_by_station_id(station_id).try(:current_times) || time_now
+    end
+    if station_id==0
+      #按照工位的忙闲获取预计时间
+      stations_no_orders = station_arr.select{|station| station.wk_or_times.where(:current_day => Time.now.strftime("%Y%m%d")).blank?}
+      if stations_no_orders.present?
+        temp_time = time_now
+        station_id = stations_no_orders[0].id
       else
-        station_id = station.id
-        time = Time.now.strftime("%Y%m%d%H%M")
-        break
+        station_available = station_arr.map{|station| station.wk_or_times.where(:current_day => Time.now.strftime("%Y%m%d"))}.flatten.max{|a,b| a.current_times <=> b.current_times}
+        temp_time = (Time.zone.parse(time_now) <=> Time.zone.parse(station_available.current_times)) > 0 ? time_now : station_available.current_times
+        station_id = station_available.station_id
       end
     end
-    time = res_time && time.to_i < res_time.to_datetime.strftime("%Y%m%d%H%M").to_i ? res_time.to_datetime.strftime("%Y%m%d%H%M").to_i : time
-    time = time.to_s.to_datetime
+   
+    time = (res_time && (Time.zone.parse(temp_time) < Time.zone.parse(res_time))) ? Time.zone.parse(res_time) : Time.zone.parse(temp_time)
     time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),
       (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]
     #puts time_arr,"-----------------"

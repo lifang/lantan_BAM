@@ -68,7 +68,7 @@
   </table>
   <% end %>
    <div class="otherWay">
-    <div class="amount">总计：<%= @total_money %></div>
+    <div class="amount">总计：<%= '%.2f' % @total_money.to_f %></div>
     <% if @mo.svc_use_price %><div class="amount">储值卡抵用：<%= @mo.svc_use_price %></div><% end %>
     <% if @mo.sale_price %><div class="amount">活动优惠：<%= @mo.sale_price %></div><% end %>
     <% if @mo.pay_type_name %><div class="amount"><%= @mo.pay_type_name %>：<%= @mo.price %></div><% end %>
@@ -80,14 +80,15 @@
       <span><button class="confirm_btn" onclick="cuihuo(<%= @mo.id %>,1,<%= @store_id %>)">催货</button></span>
     <% end %>
   <% end %>
-  <% if permission?(:materials, :return) %>
+  <% if permission?(:materials, :tuihuo) %>
       <% if @mo.m_status != MaterialOrder::M_STATUS[:save_in] && @mo.m_status != MaterialOrder::M_STATUS[:returned] %>
-      <span><button class="confirm_btn" onclick="tuihuo(<%= @mo.id %>, <%= @store_id %>)">退货</button></span>
+      <span><%= link_to "退货", tuihuo_store_material_path(@store_id, @mo.id), :class=> "confirm_btn", :remote => true, 'data-type'=> 'script'  %></span>
       <% end %>
   <% end %>
-  <% if permission?(:materials, :receive) %>
+  <% if permission?(:materials, :shouhuo) %>
     <% if @mo.m_status == MaterialOrder::M_STATUS[:send] %>
-      <span><button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,1,<%= @store_id %>)">确认收货</button></span>
+      <span><%= link_to "确认收货", receive_order_store_material_path(@store_id, @mo.id), :class=> "confirm_btn", :remote => true, 'data-type'=> 'script'  %>
+        </span>
     <% end %>
   <% end %>
   <% if permission?(:materials, :pay) %>
@@ -97,7 +98,7 @@
   <% end %>
   <% if permission?(:materials, :cancel) %>
     <% if @mo.status == MaterialOrder::STATUS[:no_pay] && @mo.m_status == MaterialOrder::M_STATUS[:no_send] %>
-      <span><button class="confirm_btn" onclick="cancel_order(<%= @mo.id %>,1,<%= @store_id %>)">取消订单</button></span>
+      <span><button class="confirm_btn" onclick="cancel_order(<%= @mo.id %>,1,<%= @store_id %>, <%= @mo.supplier_type %>)">取消订单</button></span>
     <% end %>
   <% end %>
 </div>

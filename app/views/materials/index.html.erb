@@ -1,20 +1,22 @@
-<%= render :partial => "notice_panel" %>
+<div id="mo_notice"><%= render :partial => "notice_panel" %></div>
 <% unless  @low_materials.blank? %>
   <div class="message">
-    有 <span class="red" id="low_materials_span"><%=  @low_materials.length %></span>个物料库存量过低,
-    <a href="javascript:void(0);" onclick="toggle_low_materials(this)">点击查看</a>
+    有 <span class="red" id="low_materials_span"><%=  @low_materials.length %></span>个物料库存量过低
+    <a href="javascript:void(0)" onclick="toggle_low_materials(this)">点击查看</a>
     <%= render :partial => 'show_low_materials', :locals => {:low_materials => @low_materials} %>
   </div>
 <% end %>
-<div class="data_box">
+<div class="data_box" id="material_data_box">
   <div class="data_menu">
+    <% if permission?(:materials, :add) %>
     <%= link_to "添加物料", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
+    <% end %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store]), :class => "",:target => "_blank" %><% end %>
-    <% if permission?(:materials, :check) %><%= link_to_function "批量盘点", "checkMatNum()" %><% end %>
-    <%= link_to_function "设置库存预警", "setMaterialLow()", :class => "" %>
+    <% if permission?(:materials, :check_all) %><%= link_to_function "批量盘点", "checkMatNum()" %><% end %>
+    <% if permission?(:materials, :make_warning) %><%= link_to_function "设置库存预警", "setMaterialLow()", :class => "" %><% end %>
   </div>
   <div class="clear"></div>
   <div class="tab_head">
@@ -137,21 +139,22 @@
 <div class="tab_popup beizhu_tab" id="order_remark_div">
 
 </div>
-<div class="tab_popup" id="zhifu_tab">
+<!--<div class="tab_popup" id="zhifu_tab">
   <div class="popup_box">
     <h1>付款<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
         <div class="fukuan_btn">
-          <%= hidden_field_tag "pay_order_id","0" %>
-          <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('zhifu_tab', 1,<%= params[:store_id] %>)"></a></span>
-          <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order('zhifu_tab', 3,<%= params[:store_id] %>)}">现金</button></span>
+          <%#= hidden_field_tag "pay_order_id","0" %>
+          <%#= hidden_field_tag "pay_order_type" %>
+          <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('zhifu_tab', 1,<%#= params[:store_id] %>)"></a></span>
+          <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order('zhifu_tab', 3,<%#= params[:store_id] %>)}">现金</button></span>
         </div>
         <div class="clear"></div>
       </div>
     </div>
   </div>
-</div>
+</div>-->
 <div class="tab_popup" id="alipay_confirm">
   <div class="popup_box">
     <h1>支付宝付款<a href="javascript:void(0)" class="close">关闭</a></h1>
