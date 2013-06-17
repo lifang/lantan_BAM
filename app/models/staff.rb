@@ -121,7 +121,8 @@ class Staff < ActiveRecord::Base
       SUM(complaint_num) as complaint_num_sum,
       SUM(train_num) as train_num_sum,
       SUM(reward_num) as reward_num_sum,
-      SUM(violation_num) as violation_num_sum"
+      SUM(violation_num) as violation_num_sum,
+      SUM(gas_num) as gas_num_sum"
   end
 
 end

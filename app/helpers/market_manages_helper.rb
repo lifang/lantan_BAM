@@ -8,7 +8,7 @@ module MarketManagesHelper
         on pc.id = cpr.package_card_id where cpr.order_id = #{order.id}")
     sv_cards = SvCard.find_by_sql("select sc.name name, sc.price price, 1 pro_num from sv_cards sc 
                                     left join c_svc_relations csr on csr.sv_card_id = sc.id left join orders o on o.c_svc_relation_id = csr.id
-                                    where o.id=#{order.id}")
+                                    where o.id=#{order.id} and sc.status = #{SvCard::STATUS[:NORMAL]}")
 
     products + pcar_relations + sv_cards
     #p.is_service=#{Product::PROD_TYPES[:SERVICE]} 
