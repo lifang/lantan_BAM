@@ -20,9 +20,9 @@ class SvCardsController < ApplicationController
     current_store = Store.find_by_id params[:sv_card][:store_id]
     img_obj = params[:sv_card][:img_url]
     params[:sv_card].delete_if{|key, value| key=="img_url"}
-    if params[:sv_card][:types].to_i == 0
+    if params[:sv_card][:types].to_i == SvCard::FAVOR[:DISCOUNT] #打折卡
       sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL]}))
-      if sv_card.save  #打折卡
+      if sv_card.save  
          begin
           url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, params[:sv_card][:store_id], Constant::SVCARD_PICSIZE)
           sv_card.update_attribute("img_url", url)          
@@ -87,8 +87,8 @@ class SvCardsController < ApplicationController
         end
       end
       flash[:notice] = "更新成功!"
-      redirect_to store_sv_cards_path(current_store)
     end
+    redirect_to request.referer
   end
 
   def sell_situation  #销售情况

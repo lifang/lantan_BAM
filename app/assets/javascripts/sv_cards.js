@@ -58,17 +58,17 @@ function new_sv_card(store_id){
           tishi_alert("折扣必须在1~10之间的数字!");
           return false;
        }
-       if($.trim($("#sv_card_price").val()) == null || $.trim($("#sv_card_price").val()) == "" || isNaN($.trim($("#sv_card_price").val()))){
+       if($.trim($("#sv_card_price").val()) == null || $.trim($("#sv_card_price").val()) == "" || $.trim($("#sv_card_price").val()) <= 0 || isNaN($.trim($("#sv_card_price").val()))){
           tishi_alert("请输入有效的打折卡金额!");
           return false;
       }
      }else if(type==1){ //储值卡
-          if($.trim($("#started_money").val()) == null || $.trim($("#started_money").val()) == "" || isNaN($.trim($("#started_money").val()))){
-        tishi_alert("请输入充值金额!");
+          if($.trim($("#started_money").val()) == null || $.trim($("#started_money").val()) == "" || $.trim($("#started_money").val()) <= 0 || isNaN($.trim($("#started_money").val()))){
+        tishi_alert("请输入正确的充值金额!");
         return false;
       }
-       if($.trim($("#ended_money").val()) == null || $.trim($("#ended_money").val()) == "" || isNaN($.trim($("#ended_money").val()))){
-        tishi_alert("请输入赠送金额!");
+       if($.trim($("#ended_money").val()) == null || $.trim($("#ended_money").val()) == "" || $.trim($("#ended_money").val()) <= 0 || isNaN($.trim($("#ended_money").val()))){
+        tishi_alert("请输入正确的赠送金额!");
         return false;
       }
      }
@@ -109,17 +109,17 @@ function new_sv_card(store_id){
           tishi_alert("折扣必须在1~10之间的数字!");
           return false;
        }
-       if($.trim($("#edit_svcard_form #sv_card_price").val()) == null || $.trim($("#edit_svcard_form #sv_card_price").val()) == "" || isNaN($.trim($("#edit_svcard_form #sv_card_price").val()))){
+       if($.trim($("#edit_svcard_form #sv_card_price").val()) == null || $.trim($("#edit_svcard_form #sv_card_price").val()) == "" || $.trim($("#edit_svcard_form #sv_card_price").val()) <= 0 || isNaN($.trim($("#edit_svcard_form #sv_card_price").val()))){
           tishi_alert("请输入有效的打折卡金额!");
           return false;
       }
      }else if(type==1){ //储值卡
-          if($.trim($("#edit_svcard_form #started_money").val()) == null || $.trim($("#edit_svcard_form #started_money").val()) == "" || isNaN($.trim($("#edit_svcard_form #started_money").val()))){
-        tishi_alert("请输入充值金额!");
+          if($.trim($("#edit_svcard_form #started_money").val()) == null || $.trim($("#edit_svcard_form #started_money").val()) == "" || $.trim($("#edit_svcard_form #started_money").val()) <= 0 || isNaN($.trim($("#edit_svcard_form #started_money").val()))){
+        tishi_alert("请输入正确的充值金额!");
         return false;
       }
-       if($.trim($("#edit_svcard_form #ended_money").val()) == null || $.trim($("#edit_svcard_form #ended_money").val()) == "" || isNaN($.trim($("#edit_svcard_form #ended_money").val()))){
-        tishi_alert("请输入赠送金额!");
+       if($.trim($("#edit_svcard_form #ended_money").val()) == null || $.trim($("#edit_svcard_form #ended_money").val()) == "" || $.trim($("#edit_svcard_form #ended_money").val()) <= 0 || isNaN($.trim($("#edit_svcard_form #ended_money").val()))){
+        tishi_alert("请输入正确的赠送金额!");
         return false;
       }
      }
