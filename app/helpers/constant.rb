@@ -121,7 +121,8 @@ module Constant
       :svcard_sale_info => ["优惠卡销售情况",131072],
       :svcard_use_info => ["优惠卡使用情况明细",262144],
       :svcard_use_hz => ["优惠卡使用情况汇总",524288],
-      :svcard_leave => ["余额查询",1048576]
+      :svcard_leave => ["余额查询",1048576],
+      :make_billing => ["开具发票", 2097152]
     },
     :base_datas => {
       :name => "基础数据",
