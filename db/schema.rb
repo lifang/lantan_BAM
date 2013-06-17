@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130701051473) do
+ActiveRecord::Schema.define(:version => 20130701051472) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
