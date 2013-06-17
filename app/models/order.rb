@@ -574,10 +574,12 @@ class Order < ActiveRecord::Base
             order_p_r = OrderProdRelation.create(:order_id => order.id, :product_id => prod[1],
               :pro_num => prod[2], :price => product.sale_price, :t_price => product.t_price, :total_price => prod[3].to_f)
             order_prod_relations << order_p_r
-            x += 1 if product.is_service?
-            cost_time += product.cost_time.to_i * prod[2].to_i if product.is_service
-            prod_ids << product.id if product.is_service
-            is_has_service = true if product.is_service
+            if product.is_service
+              x += 1
+              cost_time += product.cost_time.to_i * prod[2].to_i
+              prod_ids << product.id
+              is_has_service = true
+            end
             product_prices[product.id] = product.sale_price
           end
         end
