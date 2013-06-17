@@ -31,7 +31,7 @@ class SvCardsController < ApplicationController
         end
       end
     else
-      sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL]}))
+      sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL], :price => params[:started_money]}))
       if sv_card.save
         SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
         begin
@@ -74,6 +74,7 @@ class SvCardsController < ApplicationController
     params[:sv_card].delete_if{|key, value| key=="img_url"}
     if sv_card.update_attributes(params[:sv_card])
       if sv_card.types == SvCard::FAVOR[:SAVE]
+        sv_card.update_attribute("price", params[:started_money])
         SvcardProdRelation.destroy_all("sv_card_id = #{sv_card.id}")
         SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
       end

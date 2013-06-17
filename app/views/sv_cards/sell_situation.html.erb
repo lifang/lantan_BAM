@@ -44,7 +44,13 @@
               <td><%= SvCard::S_FAVOR[sr.type] %></td>
              <td><%= sr.total_price %></td>
              <td id="is_billing<%= sr.id %>"><%= sr.is_billing ? "是" : "否" %></td>
-              <td><% if sr.is_billing %>----<% else %><a href="JavaScript:void(0)" onclick="make_billing(<%= sr.id %>,<%= @store_id %>,this)">开具发票</a><% end %></td>
+              <td>
+                  <% if !sr.is_billing && permission?(:sales, :make_billing) %>
+                      <a href="JavaScript:void(0)" onclick="make_billing(<%= sr.id %>,<%= @store_id %>,this)">开具发票</a>
+                 <% else %>
+                      ----
+                 <% end %>
+              </td>
             </tr>
             <% end %>
           </tbody>
