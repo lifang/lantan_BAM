@@ -54,7 +54,9 @@
     });
 
 </script>
+<% if permission?(:materials, :mat_search) %>
 <%= render :partial => 'search_materials', :locals => {:tab_name => "materials"} %>
+<% end %>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_tab_table">
   <thead>
     <tr class="hbg">
@@ -83,14 +85,16 @@
         <td><%= material.sale_price %></td>
         <td class="check_num_field"><%= text_field_tag "check_num_#{material.id}",material.check_num,{:style =>"width:50px;"} %></td>
         <td class="operation">
+          <% if permission?(:materials, :mat_mark) %>
           <%= link_to "备注", "/stores/#{params[:store_id]}/materials/#{material.id}/get_remark", :remote => true, 'data-type' => 'script' %>
+          <% end %>
           <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this)" %><% end %>
           <% if permission?(:materials, :mat_edit) %><%= link_to "编辑", edit_store_material_path(params[:store_id], material.id), :remote => true, 'data-type' => 'script' %><% end %>
           <% if permission?(:materials, :delete) %><%= link_to "删除", store_material_path(params[:store_id], material.id), :method => :delete, :confirm => "确定删除物料？" %><% end %>
           <% if material.is_ignore %>
-            <%= link_to_function "取消忽略","cancel_ignore(#{material.id},#{@current_store.id},this)"  %>
+            <%if permission?(:materials, :ignore_cancel)%><%= link_to_function "取消忽略","cancel_ignore(#{material.id},#{@current_store.id},this)"  %><% end %>
           <% else %>
-            <%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %>
+            <% if permission?(:materials, :ignore) %><%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %><% end %>
           <% end %>
         </td>
       </tr>

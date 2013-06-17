@@ -8,13 +8,15 @@
 <% end %>
 <div class="data_box" id="material_data_box">
   <div class="data_menu">
+    <% if permission?(:materials, :add) %>
     <%= link_to "添加物料", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
+    <% end %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store]), :class => "",:target => "_blank" %><% end %>
-    <% if permission?(:materials, :check) %><%= link_to_function "批量盘点", "checkMatNum()" %><% end %>
-    <%= link_to_function "设置库存预警", "setMaterialLow()", :class => "" %>
+    <% if permission?(:materials, :check_all) %><%= link_to_function "批量盘点", "checkMatNum()" %><% end %>
+    <% if permission?(:materials, :make_warning) %><%= link_to_function "设置库存预警", "setMaterialLow()", :class => "" %><% end %>
   </div>
   <div class="clear"></div>
   <div class="tab_head">

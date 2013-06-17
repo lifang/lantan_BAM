@@ -1,3 +1,4 @@
+<% if permission?(:materials, :sup_dh_serch) %>
 <div class="search">
   <div><label>物流状态：</label>
     <select id="select_s_order">
@@ -15,9 +16,10 @@
       <option value="1">已付款</option>
     </select>
   </div>
-  <div><label>时间：</label><input class="Wdate" readonly onclick="WdatePicker()" name="sup_start" type="text" id="date03"> 到 <input class="Wdate" readonly onclick="WdatePicker()" name="sup_end" type="text" id="date04"></div>
+  <div><label>时间：</label><input class="Wdate" readonly onclick="WdatePicker()" name="sup_start" type="text" id="date03"/> 到 <input class="Wdate" readonly onclick="WdatePicker()" name="sup_end" type="text" id="date04"/></div>
   <div><button onclick="search_supplier_order(<%= params[:store_id] %>)" class="search_btn">查询</button></div>
 </div>
+<% end %>
 <div id="page_supplier_orders">
   <%= render :partial => "materials/supplier_orders" %>
 </div>

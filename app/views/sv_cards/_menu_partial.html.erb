@@ -1,7 +1,15 @@
 <div class="second_menu">
   <a href="/stores/<%= @store.id %>/sv_cards" class="<%= action_name == "index" ? "hover" : "" %>">优惠卡</a>
-  <a href="/stores/<%= @store.id %>/sv_cards/sell_situation" class="<%= action_name == "sell_situation" ? "hover" : "" %>">销售情况</a>
-  <a href="/stores/<%= @store.id %>/sv_cards/use_detail" class="<%= action_name == "use_detail" ? "hover" : "" %>">使用情况明细</a>
-  <a href="/stores/<%= @store.id %>/sv_cards/use_collect" class="<%= action_name == "use_collect" ? "hover" : "" %>">使用情况汇总</a>
-  <a href="/stores/<%= @store.id %>/sv_cards/search_left_price" class="<%= action_name == "search_left_price" ? "hover" : "" %>">余额查询</a>
+  <% if permission?(:sales, :svcard_sale_info) %>
+    <a href="/stores/<%= @store.id %>/sv_cards/sell_situation" class="<%= action_name == "sell_situation" ? "hover" : "" %>">销售情况</a>
+  <% end %>
+  <% if permission?(:sales, :svcard_use_info) %>
+    <a href="/stores/<%= @store.id %>/sv_cards/use_detail" class="<%= action_name == "use_detail" ? "hover" : "" %>">使用情况明细</a>
+  <% end %>
+  <% if permission?(:sales, :svcard_use_hz) %>
+    <a href="/stores/<%= @store.id %>/sv_cards/use_collect" class="<%= action_name == "use_collect" ? "hover" : "" %>">使用情况汇总</a>
+  <% end %>
+  <% if permission?(:sales, :svcard_leave) %>
+    <a href="/stores/<%= @store.id %>/sv_cards/search_left_price" class="<%= action_name == "search_left_price" ? "hover" : "" %>">余额查询</a>
+  <% end %>
 </div>
