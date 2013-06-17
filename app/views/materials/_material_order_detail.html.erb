@@ -82,12 +82,13 @@
   <% end %>
   <% if permission?(:materials, :return) %>
       <% if @mo.m_status != MaterialOrder::M_STATUS[:save_in] && @mo.m_status != MaterialOrder::M_STATUS[:returned] %>
-      <span><button class="confirm_btn" onclick="tuihuo(<%= @mo.id %>, <%= @mo.supplier_type %>, <%= @store_id %>)">退货</button></span>
+      <span><%= link_to "退货", tuihuo_store_material_path(@store_id, @mo.id), :class=> "confirm_btn", :remote => true, 'data-type'=> 'script'  %></span>
       <% end %>
   <% end %>
   <% if permission?(:materials, :receive) %>
     <% if @mo.m_status == MaterialOrder::M_STATUS[:send] %>
-      <span><button class="confirm_btn" onclick="receive_order(<%= @mo.id %>,<%= @mo.supplier_type %>,<%= @store_id %>)">确认收货</button></span>
+      <span><%= link_to "确认收货", receive_order_store_material_path(@store_id, @mo.id), :class=> "confirm_btn", :remote => true, 'data-type'=> 'script'  %>
+        </span>
     <% end %>
   <% end %>
   <% if permission?(:materials, :pay) %>

@@ -1,0 +1,8 @@
+tishi_alert('<%= @content %>');
+<% if(@order.supplier_type==1) %>
+$("#page_supplier_orders").find("#<%= @order.id %>").find("td:nth-child(7)").text("已收货")
+<% else %>
+$("#page_head_orders").find("#<%= @order.id %>").find("td:nth-child(6)").text("已收货")
+<% end %>
+$("#mo_notice").html("<%= j (render :partial => 'notice_panel') %>")
+hide_mask("#mat_order_detail_tab");
