@@ -39,8 +39,8 @@
             <div class="setobj_name">项目：</div>
             <div class="setobj_box">
               <div class="seto_list">
-                <span>充<input id="started_money" name="started_money" type="text" class="input_s" value="<%= @spr.base_price %>"/>元</span>&nbsp;&nbsp;
-                <span>送<input id="ended_money" name="ended_money" type="text" class="input_s" value="<%= @spr.more_price %>"/>元</span>
+                <span>充<input id="started_money" name="started_money" type="text" class="input_s" value="<%= @spr.base_price if @spr %>"/>元</span>&nbsp;&nbsp;
+                <span>送<input id="ended_money" name="ended_money" type="text" class="input_s" value="<%= @spr.more_price if @spr %>"/>元</span>
               </div>
             </div>
           </div>

@@ -92,7 +92,8 @@ module Constant
       :duiz => ["储值卡对账单",4096],
       :kucun => ["库存订货统计", 8192],
       :jixiao => ["员工绩效统计", 16384],
-      :shuip => ["员工平均水平统计", 32768]
+      :shuip => ["员工平均水平统计", 32768],
+      :print => ["打印单据", 65536]
     },
     :stations => {
       :name => "现场",
@@ -197,4 +198,7 @@ module Constant
     "5000-10000"=>"o.price > 5000 and o.price <=10000","10000以上"=>"o.price > 10000"}
   PRE_DAY = 15
   ##    上面修改部分 在此处添加
+
+  #工作订单
+  WORK_ORDER_PATH = LOCAL_DIR + "work_order_data/"
 end
