@@ -136,24 +136,39 @@ class Station < ActiveRecord::Base
     
     #如果用户连续多次下单并且购买的服务可以在原工位上施工，则排在原来工位上。
     if order
-      work_orders = WorkOrder.joins(:order => :customer).where(:customers => {:id => order.customer_id},
-        :work_orders => {:status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]], :current_day => Time.now.strftime("%Y%m%d").to_i})
-      station_ids = work_orders.map(&:station_id).uniq
+#      p 33333333333333333333
+      work_order = WorkOrder.joins(:order => :car_num).where(:car_nums => {:id => order.car_num_id},
+        :work_orders => {:status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]], :current_day => Time.now.strftime("%Y%m%d").to_i}).order("ended_at desc").first
+#      p work_order
+      if work_order && station_arr.map(&:id).include?(work_order.station_id)
+        station_id = work_order.station_id
+        ended_at = work_order.ended_at
+        temp_time = (ended_at <=> Time.zone.parse(time_now)) > 0 ? ended_at.strftime("%Y%m%d%H%M") : time_now
+      end
     end
-    if station_ids.present? && ((station_arr.map(&:id) & station_ids) == station_ids)
-      station_id = station_ids[0]
-      temp_time = WkOrTime.find_by_station_id(station_id).try(:current_times) || time_now
-    end
-    if station_id==0
+    if station_id == 0
       #按照工位的忙闲获取预计时间
-      stations_no_orders = station_arr.select{|station| station.wk_or_times.where(:current_day => Time.now.strftime("%Y%m%d")).blank?}
-      if stations_no_orders.present?
+#      p "==========================="
+#      p station_arr
+      wkor_times = WkOrTime.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"))
+      if wkor_times.blank?
+#        p 66666666666666666
         temp_time = time_now
-        station_id = stations_no_orders[0].id
+        station_id = station_arr[0].id
       else
-        station_available = station_arr.map{|station| station.wk_or_times.where(:current_day => Time.now.strftime("%Y%m%d"))}.flatten.max{|a,b| a.current_times <=> b.current_times}
-        temp_time = (Time.zone.parse(time_now) <=> Time.zone.parse(station_available.current_times)) > 0 ? time_now : station_available.current_times
-        station_id = station_available.station_id
+        stations = Station.where(:id => wkor_times.map(&:station_id))
+        no_order_stations = station_arr - stations
+#        p 11111111111111111111111111
+#        p no_order_stations
+        if no_order_stations.present?
+          station_id = no_order_stations[0].id
+          temp_time = time_now
+        else
+          min_wkor_times = wkor_times.min{|a,b| a.current_times <=> b.current_times}
+          temp_time = (Time.zone.parse(time_now) <=> Time.zone.parse(min_wkor_times.current_times)) > 0 ? time_now : min_wkor_times.current_times
+          station_id = min_wkor_times.station_id
+        end
+#       p  station_id
       end
     end
    
