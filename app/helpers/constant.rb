@@ -157,6 +157,9 @@ module Constant
 
   PER_PAGE = 10
 
+  #工作订单
+  WORK_ORDER_PATH = LOCAL_DIR + "work_order_data/"
+
   #施工时间（分钟）
   STATION_MIN = 30
   W_MIN = 10 #休息时间
