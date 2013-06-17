@@ -222,10 +222,10 @@ textarea {
 /*main*/
 .main { padding: 10px 0 30px 0; overflow: hidden; min-height:500px;}
 
-.data_box { padding: 5px 0;}
-.data_body { padding: 5px 0; overflow: hidden;}
+.data_box { padding: 5px 0; overflow: hidden; height: 100%;}
+.data_body { padding: 5px 0; overflow: hidden; height: 100%;}
 .data_body:after {
-	clear: both;
+    clear: both;
     content: ".";
     display: block;
     height: 0;

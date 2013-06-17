@@ -32,9 +32,7 @@
       <% end %>
     </tbody>
   </table>
-  <div class="pageTurn">
-    <%= will_paginate_remote(@prods ,"" ,{:url =>"/stores/#{params[:store_id]}/market_manages/load_product"}) %>
-  </div>
+  <%= will_paginate_remote(@prods ,"" ,{:url =>"/stores/#{params[:store_id]}/market_manages/load_product"}) %>
   <div class="amount">总计：<%=format("%.1f",@total_prod) %></div>
 <% else %>
   暂无产品类报表

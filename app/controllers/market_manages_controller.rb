@@ -59,6 +59,7 @@ class MarketManagesController < ApplicationController
       @serv = serv.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     end
   end
+  
 
   def load_product
     @total_product,@total_prod,prods = {},0,[]
@@ -88,6 +89,7 @@ class MarketManagesController < ApplicationController
     @pcards = pcards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @products = Product.where("id in (#{pays.map(&:product_id).join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
   end
+
 
 
   #目标销售额
@@ -183,9 +185,9 @@ class MarketManagesController < ApplicationController
   def daily_consumption_receipt
     @search_time = params[:search_time] || Time.now.strftime("%Y-%m-%d")
     
-#    @current_day_total = Order.where("created_at <= '#{Time.now}'").
-#      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
-#      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
+    #    @current_day_total = Order.where("created_at <= '#{Time.now}'").
+    #      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
+    #      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
 
     orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
       where("created_at >= '#{@search_time} 00:00:00'").

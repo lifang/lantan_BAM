@@ -55,7 +55,7 @@ function load_goal(url){
         dataType : 'script',
         data : {
             created : $("#created").val(),
-            ended : $("#ended").val(),
+            ended : $("#entimeded").val(),
             time : $("input[name=time]:checked").val()
         }
     });
