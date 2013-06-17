@@ -163,10 +163,11 @@ class SvCardsController < ApplicationController
     base_sql = (@started_time.nil? || @started_time.blank?) ? "1=1" : "o.started_at >= '#{@started_time}'"
     base_sql << " and "
     base_sql << ((@ended_time.nil? || @ended_time.blank?) ? "1=1" : "o.ended_at <= '#{@ended_time}'")
-    @orders = Order.find_by_sql("select o.id id, o.code code,o.price price, c.name name, cn.num num from orders o left join customers c on c.id = o.customer_id
+    orders = Order.find_by_sql("select o.id id, o.code code,o.price price, c.name name, cn.num num from orders o left join customers c on c.id = o.customer_id
                                  left join car_nums cn on cn.id = o.car_num_id inner join order_pay_types opt on opt.order_id = o.id
-                                 where o.store_id = #{@store.id} and opt.pay_type = #{OrderPayType::PAY_TYPES[:SV_CARD]} and #{base_sql}").
-                                 paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+                                 where o.store_id = #{@store.id} and opt.pay_type = #{OrderPayType::PAY_TYPES[:SV_CARD]} and #{base_sql} group by o.id")
+    @product_hash = OrderProdRelation.order_products(orders)
+    @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 
   def search_left_price

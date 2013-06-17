@@ -157,27 +157,16 @@ class MarketManagesController < ApplicationController
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "o.created_at >= '#{@start_at}'"
     ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "o.created_at <= '#{@end_at} 23:59:59'"
 
-    order_details = Order.find_by_sql("select o.id,o.code,opt.price price,opt.created_at created_at,p.name product_name from orders o
-                                inner join order_pay_types opt on opt.order_id = o.id inner join order_prod_relations op on
-                                op.order_id = o.id inner join products p on op.product_id = p.id
+    orders = Order.find_by_sql("select o.id,o.code,o.price price,opt.created_at created_at,p.name product_name from orders o
+                                left join order_pay_types opt on opt.order_id = o.id left join order_prod_relations op on
+                                op.order_id = o.id left join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
                                 o.status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and
-                                #{started_at_sql} and #{ended_at_sql}")
+                                #{started_at_sql} and #{ended_at_sql} group by o.id")
 
-    pcar_relations = CPcardRelation.find_by_sql(["select cpr.order_id order_id, 1 pro_num, pc.price price, pc.name name
-        from c_pcard_relations cpr inner join package_cards pc
-        on pc.id = cpr.package_card_id where cpr.order_id in (?)", order_details])
-    
-    orders = {}
-    order_details.each do |order|
-      orders.keys.include?(order.id) ? orders[order.id][:product_name] += (","+order.product_name) : orders[order.id] = order
-    end
-    pcar_relations.each do |pr|
-      orders.keys.include?(pr.order_id) ? orders[pr.order_id][:product_name] += (","+pr.name) : orders[pr.order_id] = pr
-    end
-    @total_price = orders.values.sum(&:price)
-    @orders = orders.values.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
-    
+    @product_hash = OrderProdRelation.order_products(orders)
+    @total_price = orders.sum(&:price)
+    @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 
   def daily_consumption_receipt
@@ -190,6 +179,7 @@ class MarketManagesController < ApplicationController
     orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
       where("created_at >= '#{@search_time} 00:00:00'").
       where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
+    @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
     @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
@@ -199,6 +189,7 @@ class MarketManagesController < ApplicationController
     @orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
       where("created_at >= '#{@search_time} 00:00:00'").
       where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
+    @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
   end
 

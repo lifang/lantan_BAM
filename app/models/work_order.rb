@@ -38,7 +38,7 @@ class WorkOrder < ActiveRecord::Base
       file.close
       if equipment_info.nil?
         store = Store.all.first
-        EquipmentInfo.create(:current_day => current_day.to_i, :num => counter, :store_id => store.nil? ? nil : store.id)
+        EquipmentInfo.create(:current_day => current_day.to_i, :num => counter, :store_id => store.try(:id))
       else
         equipment_info.update_attribute(:num, counter)
       end
