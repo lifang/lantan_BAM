@@ -192,15 +192,23 @@ class Order < ActiveRecord::Base
 
   def self.get_brands_products store_id
     arr = []
-    brands = CarBrand.all :order => "id"
+    capitals = Capital.all
+    brands = CarBrand.all.group_by { |cb| cb.capital_id }
+    capital_arr = []
     car_models = CarModel.all.group_by { |cm| cm.car_brand_id  }
-    brand_arr = []
-    (brands || []).each do |brand|
-      b = brand
-      b[:models] = car_models[brand.id] unless car_models.empty? and car_models[brand.id] #brand.car_models
-      brand_arr << b
-    end
-    arr << brand_arr
+    (capitals || []).each do |capital|
+      c = capital
+      brand_arr = []
+      c_brands = brands[capital.id] unless brands.empty? and brands[capital.id]
+      (c_brands || []).each do |brand|
+        b = brand
+        b[:models] = car_models[brand.id] unless car_models.empty? and car_models[brand.id] #brand.car_models
+        brand_arr << b
+      end
+      c[:brands] = brand_arr
+      capital_arr << c
+    end    
+    arr << capital_arr
     product_arr = []
     clean_arr = []
     prod_arr = []
@@ -711,11 +719,11 @@ class Order < ActiveRecord::Base
           #创建工位订单
           #station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
           #unless station
-            arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
-            if arrange_time[2] > 0
-              new_station_id = arrange_time[2]
-              station = Station.find_by_id_and_status new_station_id, Station::STAT[:NORMAL]
-            end
+          arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
+          if arrange_time[2] > 0
+            new_station_id = arrange_time[2]
+            station = Station.find_by_id_and_status new_station_id, Station::STAT[:NORMAL]
+          end
           #end
           if station
             woTime = WkOrTime.find_by_station_id_and_current_day new_station_id, Time.now.strftime("%Y%m%d").to_i
