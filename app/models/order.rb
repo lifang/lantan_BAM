@@ -321,7 +321,7 @@ class Order < ActiveRecord::Base
           ids]) if ids.any?
       unless products.nil? or products.blank?
         service_ids = products.collect { |p| p.id  } #[311]
-        time_arr = Station.arrange_time store_id, service_ids,nil, res_time
+        time_arr = Station.arrange_time store_id, service_ids, nil, res_time
         info[:start] = time_arr[0]
         info[:end] = time_arr[1]
         info[:station_id] = time_arr[2]
@@ -724,6 +724,7 @@ class Order < ActiveRecord::Base
           arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
           if arrange_time[2] > 0
             new_station_id = arrange_time[2]
+            start_at = arrange_time[0]
             station = Station.find_by_id_and_status new_station_id, Station::STAT[:NORMAL]
           end
           #end
@@ -731,11 +732,11 @@ class Order < ActiveRecord::Base
             woTime = WkOrTime.find_by_station_id_and_current_day new_station_id, Time.now.strftime("%Y%m%d").to_i
             if woTime
               t =  Time.zone.parse(woTime.current_times) + Constant::W_MIN.minutes
-              start  = t > Time.zone.parse(start) ? t : Time.zone.parse(start)
+              start  = t > Time.zone.parse(start_at) ? t : Time.zone.parse(start_at)
               end_at = start + cost_time.minutes
               woTime.update_attributes(:current_times => end_at.strftime("%Y%m%d%H%M").to_i, :wait_num => woTime.wait_num.to_i + 1)
             else
-              end_at = Time.zone.parse(start) + cost_time.minutes
+              end_at = Time.zone.parse(start_at) + cost_time.minutes
               WkOrTime.create(:current_times => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
                 :station_id => station.id, :worked_num => 1)
             end
