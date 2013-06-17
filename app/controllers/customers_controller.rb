@@ -123,7 +123,8 @@ class CustomersController < ApplicationController
     @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, 1)
     comp_page = params[:comp_page] ? params[:comp_page] : 1
     @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, comp_page)
-    svc_pc_card_records(@customer.id)  #储值卡and套餐卡记录   【先不传】
+    svc_card_records_method(@customer.id)  #储值卡and套餐卡记录
+    pc_card_records_method(@customer.id)  #储值卡and套餐卡记录
   end
   
   def order_prods
@@ -135,6 +136,18 @@ class CustomersController < ApplicationController
     respond_to do |format|
       format.js
     end
+  end
+
+  def sav_card_records
+    @store = Store.find(params[:store_id].to_i)
+    @customer = Customer.find(params[:id].to_i)
+    svc_card_records_method(@customer.id)
+  end
+
+  def pc_card_records
+    @store = Store.find(params[:store_id].to_i)
+    @customer = Customer.find(params[:id].to_i)
+    pc_card_records_method(@customer.id)
   end
 
   def revisits
@@ -222,19 +235,23 @@ class CustomersController < ApplicationController
   end
 
   private
-#【先不传】
-  def svc_pc_card_records(customer_id)
+  
+  def svc_card_records_method(customer_id)
     #储值卡记录
     @svcard_records = SvcardUseRecord.paginate_by_sql(["select sur.* from svcard_use_records sur
       inner join c_svc_relations csr on csr.id = sur.c_svc_relation_id where csr.customer_id = ?
       order by sur.created_at desc", customer_id], :page => params[:page],
       :per_page => Constant::PER_PAGE)
-    #套餐卡记录
-    @c_pcard_relations = CPcardRelation.find_by_sql(["select p.id, p.name, cpr.content, cpr.ended_at
+  end
+
+  def pc_card_records_method(customer_id)
+     #套餐卡记录
+    @c_pcard_relations = CPcardRelation.paginate_by_sql(["select p.id, p.name, cpr.content, cpr.ended_at
         from lantan_db_all.c_pcard_relations cpr
         inner join lantan_db_all.package_cards p on p.id = cpr.package_card_id
         where cpr.status = ? and cpr.customer_id = ?",
-        CPcardRelation::STATUS[:NORMAL], customer_id])
+        CPcardRelation::STATUS[:NORMAL], customer_id], :page => params[:page],
+      :per_page => Constant::PER_PAGE)
     @already_used_count = {}
     unless @c_pcard_relations.blank?
       @c_pcard_relations.each do |r|

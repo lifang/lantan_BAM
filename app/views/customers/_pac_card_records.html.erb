@@ -40,3 +40,7 @@
     <% end %>
   </tbody>
 </table>
+<div class="pageTurn">
+  <%=  will_paginate_remote(@c_pcard_relations , "",
+  {:url => "/stores/#{@store.id}/customers/#{@customer.id}/pc_card_records"}) %>
+</div>
