@@ -78,4 +78,3 @@ function load_sale(url){
     return false;
 }
 
-
