@@ -754,8 +754,8 @@ function commit_in(obj){
         tishi_alert("请输入条形码");
     }else if($.trim($("#price").val())==""){
         tishi_alert("请输入单价");
-    }else if($.trim($("#num").val())==""){
-        tishi_alert("请输入数量");
+    }else if($("#num").val()==0 || $.trim($("#num").val())=="" || $("#num").val().match(reg1)==null){
+        tishi_alert("请输入有效数字");
     }else{
       var barcode = $.trim($("#barcode").val());
       var mo_code = $.trim($("#code").val());
