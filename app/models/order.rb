@@ -867,7 +867,7 @@ class Order < ActiveRecord::Base
   end
 
   #支付订单根据选择的支付方式
-  def self.pay order_id, store_id, please, pay_type, billing, code, is_free
+  def self.pay order_id, store_id, please, pay_type, billing, code, is_free, qfpos_id
     order = Order.find_by_id_and_store_id order_id,store_id
     status = 0
     if order
@@ -876,6 +876,7 @@ class Order < ActiveRecord::Base
           hash = Hash.new
           hash[:is_billing] = billing.to_i == 0 ? false : true
           hash[:is_pleased] = please.to_i
+          hash[:qfpos_id] = qfpos_id
           if is_free.to_i == 0
             hash[:status] = STATUS[:BEEN_PAYMENT]
             hash[:is_free] = false

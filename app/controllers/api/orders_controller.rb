@@ -74,7 +74,7 @@ class Api::OrdersController < ApplicationController
   #付款
   def pay
     order = Order.pay(params[:order_id], params[:store_id], params[:please],
-      params[:pay_type], params[:billing], params[:code], params[:is_free])
+      params[:pay_type], params[:billing], params[:code], params[:is_free], params[:appid])
     content = ""
     if order[0] == 0
       content = ""
