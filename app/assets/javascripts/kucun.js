@@ -284,6 +284,10 @@ function submit_out_order(form_id){
     $("#selected_materials").find("input").each(function(){
           var storage = parseInt($(this).parent().prev().text());
           var name = $(this).parent().parent().find("td:first").text();
+          if($(this).val().match(reg1)==null){
+            tishi_alert("请输入有效出库量");
+            a = false;
+          }
           if(parseFloat($(this).val()) > storage){
               tishi_alert("【"+name+"】出库量请输入小于库存量的值");
               a = false;

@@ -996,7 +996,7 @@ class Order < ActiveRecord::Base
   end
 
 
-  def return_order_materials
+  def return_order_materials # 取消订单后，退回产品或者服务相关物料数量
     order_products = self.order_prod_relations.group_by { |opr| opr.product_id }
     if order_products  #如果是产品,则减掉要加回来
       materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
@@ -1008,4 +1008,32 @@ class Order < ActiveRecord::Base
     end
   end
 
+  def return_order_pacard_num # 取消订单后，退回使用套餐卡数量
+    oprs = OPcardRelation.find_all_by_order_id(self.id)
+    oprs.each do |opr|
+      cpr = CPcardRelation.find_by_id(opr.c_pcard_relation_id)
+      pns = cpr.content.split(",").map{|pn| pn.split("-")} if cpr
+      pns.each do |pn|
+        pn[2] = pn[2].to_i + opr.product_num if pn[0].to_i == opr.product_id
+      end if pns
+      cpr.update_attribute(:content,pns.map{|pn| pn.join("-")}.join(",")) if cpr
+    end unless oprs.blank?
+  end
+
+  def return_work_orders  #如果存在work_order,取消订单后设置work_order以及wk_or_times里面的部分数值
+    work_order = self.work_orders[0]
+    unless work_order.blank?
+      work_order.update_attribute(:status, WorkOrder::STAT[:CANCELED])
+      wkor_time = WkOrTime.find_by_station_id_and_current_day(work_order.station_id, work_order.current_day)
+      max_time = [work_order.started_at,Time.now].max
+      difference = work_order.ended_at - max_time
+      work_orders_arrange = WorkOrder.where("station_id = ? and started_at > ? and current_day = ? and status != ?", work_order.station_id, work_order.started_at, work_order.current_day, WorkOrder::STAT[:CANCELED]).order("ended_at asc")
+      work_orders_arrange.each do |wo|
+        wo.update_attributes({:started_at => wo.started_at + difference, :ended_at => wo.ended_at + difference})
+      end
+      new_time = (Time.zone.parse(wkor_time.current_times) - difference).strftime("%Y%m%d%H%M")
+      wkor_time.update_attributes({:current_times => new_time, :wait_num => (wkor_time.wait_num.nil? ? nil : wkor_time.wait_num - 1)})
+    end
+  end
+  
 end
