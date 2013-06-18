@@ -21,7 +21,7 @@
                   <tbody>
                     <% @already_used_count[cpr.id].values.each do |v| %>
                       <tr><td style="text-align: center"><%= v[0] %>：<%= v[1] %>次&nbsp;&nbsp;</td></tr>
-                    <% end unless @already_used_count.empty? %>
+                    <% end if @already_used_count.present? and @already_used_count[cpr.id].present? %>
 
                   </tbody></table>
               </td>
