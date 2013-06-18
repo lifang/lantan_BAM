@@ -1029,7 +1029,7 @@ class Order < ActiveRecord::Base
       difference = work_order.ended_at - max_time
       work_orders_arrange = WorkOrder.where("station_id = ? and started_at > ? and current_day = ? and status != ?", work_order.station_id, work_order.started_at, work_order.current_day, WorkOrder::STAT[:CANCELED]).order("ended_at asc")
       work_orders_arrange.each do |wo|
-        wo.update_attributes({:started_at => wo.started_at + difference, :ended_at => wo.ended_at + difference})
+        wo.update_attributes({:started_at => wo.started_at - difference, :ended_at => wo.ended_at - difference})
       end
       new_time = (Time.zone.parse(wkor_time.current_times) - difference).strftime("%Y%m%d%H%M")
       wkor_time.update_attributes({:current_times => new_time, :wait_num => (wkor_time.wait_num.nil? ? nil : wkor_time.wait_num - 1)})
