@@ -247,8 +247,8 @@ class CustomersController < ApplicationController
   def pc_card_records_method(customer_id)
      #套餐卡记录
     @c_pcard_relations = CPcardRelation.paginate_by_sql(["select p.id, p.name, cpr.content, cpr.ended_at
-        from lantan_db_all.c_pcard_relations cpr
-        inner join lantan_db_all.package_cards p on p.id = cpr.package_card_id
+        from c_pcard_relations cpr
+        inner join package_cards p on p.id = cpr.package_card_id
         where cpr.status = ? and cpr.customer_id = ?",
         CPcardRelation::STATUS[:NORMAL], customer_id], :page => params[:page],
       :per_page => Constant::PER_PAGE)
