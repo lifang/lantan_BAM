@@ -12,9 +12,12 @@ class GoalSale < ActiveRecord::Base
   end
 
   #查询所有的分类
-  def self.total_type(store_id)
-    return GoalSaleType.find_by_sql("select * from goal_sale_types t inner join goal_sales g on t.goal_sale_id=g.id
-    where g.store_id=#{store_id} ")
+  def self.total_type(store_id,time)
+    sql = "select s.id,s.ended_at,s.started_at,t.type_name,t.goal_price,t.current_price from goal_sales s
+    inner join goal_sale_types t on t.goal_sale_id=s.id where s.store_id=#{store_id} and "
+    sql += "date_format(ended_at,'%Y-%m-%d')<date_format(now(),'%Y-%m-%d')" if time==1
+    sql += "date_format(ended_at,'%Y-%m-%d')>=date_format(now(),'%Y-%m-%d')" if time==0
+    return GoalSaleType.find_by_sql(sql)
   end
 
   #更新每天的销售报表

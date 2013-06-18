@@ -1,23 +1,4 @@
 module MarketManagesHelper
-  def get_service_products(order)
-    products = Product.find_by_sql("select p.name name, p.id, op.price price,op.pro_num pro_num from products p inner join
-                        order_prod_relations op on op.product_id = p.id inner join orders o on o.id=op.order_id
-                        where o.id=#{order.id}")
-    pcar_relations = CPcardRelation.find_by_sql("select pc.price price, pc.name name, 1 pro_num 
-        from c_pcard_relations cpr inner join package_cards pc
-        on pc.id = cpr.package_card_id where cpr.order_id = #{order.id}")
-#    sv_cards = SvCard.find_by_sql("select sc.name name, sc.price price, 1 pro_num from sv_cards sc
-#                                    left join c_svc_relations csr on csr.sv_card_id = sc.id left join orders o on o.c_svc_relation_id = csr.id
-#                                    where o.id=#{order.id} and sc.status = #{SvCard::STATUS[:NORMAL]}#")
-
-    csvc_relations = CSvcRelation.find_by_sql("select csr.order_id, 1 pro_num, sc.price, sc.name name
-        from c_svc_relations csr inner join sv_cards sc
-        on sc.id = csr.sv_card_id where csr.order_id = #{order.id}")
-
-    products + pcar_relations + csvc_relations
-    #p.is_service=#{Product::PROD_TYPES[:SERVICE]} 
-  end
-
   def prod_gross_price(order_id, oprr,order_pay_types)
     total_price = oprr.total_price.to_f  #每项商品总价
 

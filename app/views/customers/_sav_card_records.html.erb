@@ -11,7 +11,7 @@
     <% (@svcard_records || []).each do |record| %>
       <tr>
         <td><%= record.created_at.strftime('%Y-%m-%d') if record.created_at %></td>
-        <td><%= record.types==SvcardUseRecord::TYPES[:IN]? "+": "-" %><%= record.use_price %></td>
+        <td><% if record.use_price ==0 %> 0.0 <% else %><%= record.types==SvcardUseRecord::TYPES[:IN]? "+": "-" %><%= record.use_price %><% end %></td>
         <td><%= record.content %> </td>
         <td><%= record.left_price %></td>
       </tr>

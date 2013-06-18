@@ -158,9 +158,6 @@ module Constant
 
   PER_PAGE = 10
 
-  #工作订单
-  WORK_ORDER_PATH = LOCAL_DIR + "work_order_data/"
-
   #施工时间（分钟）
   STATION_MIN = 30
   W_MIN = 10 #休息时间
@@ -201,4 +198,7 @@ module Constant
     "5000-10000"=>"o.price > 5000 and o.price <=10000","10000以上"=>"o.price > 10000"}
   PRE_DAY = 15
   ##    上面修改部分 在此处添加
+
+  #工作订单
+  WORK_ORDER_PATH = LOCAL_DIR + "work_order_data/"
 end

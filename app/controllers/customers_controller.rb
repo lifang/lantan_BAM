@@ -245,13 +245,13 @@ class CustomersController < ApplicationController
   end
 
   def pc_card_records_method(customer_id)
-     #套餐卡记录
+    #套餐卡记录
     @c_pcard_relations = CPcardRelation.paginate_by_sql(["select p.id, p.name, cpr.content, cpr.ended_at
-        from lantan_db_all.c_pcard_relations cpr
-        inner join lantan_db_all.package_cards p on p.id = cpr.package_card_id
+        from c_pcard_relations cpr
+        inner join package_cards p on p.id = cpr.package_card_id
         where cpr.status = ? and cpr.customer_id = ?",
         CPcardRelation::STATUS[:NORMAL], customer_id], :page => params[:page],
-      :per_page => Constant::PER_PAGE)
+      :per_page => 3)
     @already_used_count = {}
     unless @c_pcard_relations.blank?
       @c_pcard_relations.each do |r|
@@ -265,8 +265,8 @@ class CustomersController < ApplicationController
       end
       @pcard_prod_relations = PcardProdRelation.find(:all, :conditions => ["package_card_id in (?)", @c_pcard_relations])
       @pcard_prod_relations.each do |ppr|
-        used_count = ppr.product_num - @already_used_count[ppr.package_card_id][ppr.product_id][1] if !@already_used_count.empty? and @already_used_count[ppr.package_card_id][ppr.product_id]
-        @already_used_count[ppr.package_card_id][ppr.product_id][1] = used_count ? used_count : 0 unless @already_used_count.empty? or @already_used_count[ppr.package_card_id][ppr.product_id].nil?
+        used_count = ppr.product_num - @already_used_count[ppr.package_card_id][ppr.product_id][1] if !@already_used_count.empty? and @already_used_count[ppr.package_card_id].present? and @already_used_count[ppr.package_card_id][ppr.product_id]
+        @already_used_count[ppr.package_card_id][ppr.product_id][1] = used_count ? used_count : 0 unless @already_used_count.empty? or @already_used_count[ppr.package_card_id].blank? or @already_used_count[ppr.package_card_id][ppr.product_id].nil?
       end
     end
   end

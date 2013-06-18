@@ -34,9 +34,7 @@
       <% end %>
     </tbody>
   </table>
-  <div class="pageTurn">
-    <%= will_paginate_remote(@pcards ,"" ,{:url =>"/stores/#{params[:store_id]}/market_manages/load_pcard"}) %>
-  </div>
+  <%= will_paginate_remote(@pcards ,"" ,{:url =>"/stores/#{params[:store_id]}/market_manages/load_pcard"}) %>
   <div class="amount">总计：<%= format("%.1f",@total_fee) %></div>
 <%else%>
   暂无增值服务类报表

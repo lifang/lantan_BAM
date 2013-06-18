@@ -17,18 +17,16 @@
                   :remote => "true", "data-type" => "script", :class => "other_a" %>
               </td>
               <td>
-                <% service_products = get_service_products(order) %>
-                <% if service_products.length != 0 %>
+                <% if @product_hash[order.id] != 0 %>
                   <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                     <tr class="fws">
                       <td>服务名称</td>
                       <td>数量</td>
                       <td>单价</td>
                     </tr>
-                    <% service_products.each do |prod| %>
+                    <% @product_hash[order.id].each do |prod| %>
                     <tr>
                       <td><%= prod.name %></td>
-                      <!--% order_prod_relation = get_order_prod_relation(order.id, prod.id) %-->
                       <td><%= prod.pro_num %></td>
                       <td><%= prod.price %></td>
                     </tr>

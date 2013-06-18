@@ -32,9 +32,7 @@
       <% end %>
     </tbody>
   </table>
-  <div class="pageTurn">
-    <%= will_paginate_remote(@serv ,"" ,{:url =>"/stores/#{params[:store_id]}/market_manages/load_service"}) %>
-  </div>
+  <%= will_paginate_remote(@serv ,"" ,{:url =>"/stores/#{params[:store_id]}/market_manages/load_service"}) %>
   <div class="amount">总计：<%= format("%.1f",@total_serv) %></div>
 <% else %>
   暂无服务类报表
