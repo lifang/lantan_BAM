@@ -12,13 +12,11 @@ class WorkOrder < ActiveRecord::Base
     if File.exist?(file_path)
       equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i}").first
       num = equipment_info.nil? ? 0 : equipment_info.num
-      counter = 0
       file = File.read(file_path)
       file_data_arr = file.split("\n")
-      
-      file_data_arr.each do |cur_line|
-        if counter >= num
-          data_arr = cur_line.split(",")
+      if num < file_data_arr.length
+        (num..(file_data_arr.length-1)).each do |index|
+          data_arr = file_data_arr[index].split(",")
           station = Station.find_by_id(data_arr[2].to_i)
           if station
             if data_arr[6] == "1" || data_arr[7] == "1"
@@ -34,13 +32,12 @@ class WorkOrder < ActiveRecord::Base
             end
           end
         end
-        counter += 1
-      end
-      if equipment_info.nil?
-        store = Store.all.first
-        EquipmentInfo.create(:current_day => current_day.to_i, :num => counter, :store_id => store.try(:id))
-      else
-        equipment_info.update_attribute(:num, counter)
+        if equipment_info.nil?
+          store = Store.all.first
+          EquipmentInfo.create(:current_day => current_day.to_i, :num => file_data_arr.length, :store_id => store.try(:id))
+        else
+          equipment_info.update_attribute(:num, file_data_arr.length)
+        end
       end
     end
   end
