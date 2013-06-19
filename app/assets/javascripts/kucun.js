@@ -284,11 +284,15 @@ function submit_out_order(form_id){
     $("#selected_materials").find("input").each(function(){
           var storage = parseInt($(this).parent().prev().text());
           var name = $(this).parent().parent().find("td:first").text();
+          if($(this).val().match(reg1)==null){
+            tishi_alert("请输入有效出库量");
+            a = false;
+          }
           if(parseFloat($(this).val()) > storage){
-              tishi_alert("【"+name+"】请输入小于库存量的值");
+              tishi_alert("【"+name+"】出库量请输入小于库存量的值");
               a = false;
           }else if(parseFloat($(this).val()) <= 0){
-              tishi_alert("【"+name+"】请输入大于0的值");
+              tishi_alert("【"+name+"】出库量请输入大于0的值");
               a = false;
           }
     })
@@ -750,8 +754,8 @@ function commit_in(obj){
         tishi_alert("请输入条形码");
     }else if($.trim($("#price").val())==""){
         tishi_alert("请输入单价");
-    }else if($.trim($("#num").val())==""){
-        tishi_alert("请输入数量");
+    }else if($("#num").val()==0 || $.trim($("#num").val())=="" || $("#num").val().match(reg1)==null){
+        tishi_alert("请输入有效数字");
     }else{
       var barcode = $.trim($("#barcode").val());
       var mo_code = $.trim($("#code").val());
@@ -768,8 +772,7 @@ function commit_in(obj){
                    if(confirm("商品入库数目大于订单中的商品数目，仍然要入库吗？")){
                       $("#ruku_tab_form").submit();
                    }else
-                      {$("#ruku_tab").hide();
-                         $(".mask").hide();
+                      {
                          $(obj).attr("disabled",false);
                          return false;
                       }

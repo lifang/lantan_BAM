@@ -74,7 +74,7 @@ class Api::OrdersController < ApplicationController
   #付款
   def pay
     order = Order.pay(params[:order_id], params[:store_id], params[:please],
-      params[:pay_type], params[:billing], params[:code], params[:is_free])
+      params[:pay_type], params[:billing], params[:code], params[:is_free], params[:appid])
     content = ""
     if order[0] == 0
       content = ""
@@ -168,17 +168,12 @@ class Api::OrdersController < ApplicationController
     status = 0
     if params[:opt_type].to_i == 1
       if order && (order.status == Order::STATUS[:NORMAL] or order.status == Order::STATUS[:SERVICING] or order.status == Order::STATUS[:WAIT_PAYMENT])
-        oprs = OPcardRelation.find_all_by_order_id(order.id)
-        oprs.each do |opr|
-          cpr = CPcardRelation.find_by_id(opr.c_pcard_relation_id)
-          pns = cpr.content.split(",").map{|pn| pn.split("-")} if cpr
-          pns.each do |pn|
-            pn[2] = pn[2].to_i + opr.product_num if pn[0].to_i == opr.product_id
-          end if pns
-          cpr.update_attribute(:content,pns.map{|pn| pn.join("-")}.join(",")) if cpr
-        end unless oprs.blank?
+        #退回使用的套餐卡次数
+        order.return_order_pacard_num
         #如果是产品,则减掉要加回来
         order.return_order_materials
+        #如果存在work_order,取消订单后设置work_order以及wk_or_times里面的部分数值
+        order.return_work_orders
         order.update_attribute(:status, Order::STATUS[:DELETED])
         status = 1
       else

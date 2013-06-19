@@ -251,7 +251,7 @@ class CustomersController < ApplicationController
         inner join package_cards p on p.id = cpr.package_card_id
         where cpr.status = ? and cpr.customer_id = ?",
         CPcardRelation::STATUS[:NORMAL], customer_id], :page => params[:page],
-      :per_page => 3)
+      :per_page => Constant::PER_PAGE)
     @already_used_count = {}
     unless @c_pcard_relations.blank?
       @c_pcard_relations.each do |r|
