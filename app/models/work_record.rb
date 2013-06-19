@@ -4,23 +4,23 @@ class WorkRecord < ActiveRecord::Base
 
   def self.update_record
     time = Time.now.strftime("%Y-%m-%d")
-    work_records = WorkRecord.where("current_day >= '#{time}' and current_day <= '#{time} 23:59:59'")
+    work_records = WorkRecord.where("current_day >= '#{time}' and date_format(current_day,'%Y-%m-%d') <= '#{time}'")
     work_records.each do |work_record|
       staff = Staff.find_by_id(work_record.staff_id)
       if staff
         complaint_num = Complaint.where("process_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}'").
-                            where("process_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'").
+                            where("date_format(process_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}'").
                             where("staff_id_1 = #{work_record.staff_id} or staff_id_2 = #{work_record.staff_id}").
                             where("status = #{Complaint::STATUS[:PROCESSED]}").count
 
         train_num = Train.includes(:train_staff_relations).
                 where("train_staff_relations.staff_id = #{work_record.staff_id}").
                 where("trains.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}'").
-                where("trains.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'").count
+                where("date_format(trains.updated_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}'").count
 
         violation_rewards = ViolationReward.where("staff_id = #{staff.id}").
                         where("process_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}'").
-                        where("process_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'").group_by{|v|v.staff_id}
+                        where("date_format(process_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}'").group_by{|v|v.staff_id}
         violation_num, reward_num = 0, 0
 
         violation_rewards.each do |key, vio_rew_array|
@@ -37,20 +37,20 @@ class WorkRecord < ActiveRecord::Base
           construct_num = Order.where("cons_staff_id_1 = #{work_record.staff_id} or cons_staff_id_2 = #{work_record.staff_id}").
                                 where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").
                                 where("updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}'").
-                                where("updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'").count
+                                where("date_format(updated_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}'").count
 
           materials_used_num = MatOutOrder.where("staff_id = #{work_record.staff_id}").
                               where("updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}'").
-                              where("updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'").sum(:material_num)
+                              where("date_format(updated_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}'").sum(:material_num)
 
           materials_consume_num = materials_used_num
           work_orders = WorkOrder.find_by_sql("select wo.id id, wo.water_num water_num, wo.gas_num gas_num from work_orders wo
                                              left join station_staff_relations ssr on ssr.station_id = wo.station_id
                                              where ssr.staff_id = #{work_record.staff_id} and 
                                              wo.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and
-                                             wo.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59' and
+                                             date_format(wo.updated_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}' and
                                              wo.status = #{WorkOrder::STAT[:COMPLETE]} and ssr.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and
-                                             ssr.updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'")
+                                             date_format(ssr.updated_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}'")
           
           water_num = work_orders.uniq{|x| x.id}.sum(&:water_num)
 
@@ -65,7 +65,7 @@ class WorkRecord < ActiveRecord::Base
             construct_num = Order.where("front_staff_id = #{work_record.staff_id}").
                                 where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").
                                 where("updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}'").
-                                where("updated_at <= '#{work_record.current_day.strftime("%Y-%m-%d")} 23:59:59'").count
+                                where("date_format(updated_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}'").count
             work_record.update_attributes(:construct_num => construct_num, :complaint_num => complaint_num,
                                           :train_num => train_num, :violation_num => violation_num, :reward_num => reward_num)
           else #店长

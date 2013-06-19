@@ -14,7 +14,7 @@
         <div class="nav">
           <ul>
             <li><a href="/stores/<%= params[:store_id] %>/sv_cards"
-                <% if  controller.controller_name=="sv_cards" %> class="hover" <%end%>>优惠卡</a></li>
+                   <% if  controller.controller_name=="sv_cards" %> class="hover" <%end%>>优惠卡</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/sales" 
                    <% if  controller.controller_name=="sales" %> class="hover" <%end%>>活动</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/products" 
@@ -29,6 +29,8 @@
       </div>
     </div>
     <%= yield %>
+    <div class="mask"></div>
+    <div class="maskOne"></div>
     <%= render :partial => "/shared/tishi_alert" %>
   </body>
 </html>
