@@ -9,10 +9,10 @@ class SalaryDetail < ActiveRecord::Base
     SalaryDetail.destroy_all("current_day = #{(Time.now - 1.days).strftime("%Y%m%d").to_i}") #删除已经生成的日工资，避免出现相同的日工资
     cal_day = (Time.now - 1.days).strftime("%Y-%m-%d")
     start_at_sql = "created_at >= '#{cal_day} 00:00:00'"
-    end_at_sql = "created_at <= '#{cal_day} 23:59:59'"
+    end_at_sql = "date_format(created_at,'%Y-%m-%d') <= '#{cal_day}'"
     order_search_sql = "front_staff_id = ? or cons_staff_id_1 = ? or cons_staff_id_2 = ?"
     complaint_search_sql = "staff_id_1 = ? or staff_id_2 = ?"
-    process_at_sql = "process_at >= '#{cal_day} 00:00:00' and process_at <= '#{cal_day} 23:59:59'"
+    process_at_sql = "process_at >= '#{cal_day}' and date_format(process_at,'%Y-%m-%d') <= '#{cal_day}'"
 
     violation_rewards = ViolationReward.where(process_at_sql).group_by{|v|v.staff_id}
 

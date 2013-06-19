@@ -163,7 +163,7 @@ class MarketManagesController < ApplicationController
   def stored_card_record
     @start_at, @end_at = params[:started_at], params[:ended_at]
     started_at_sql = (@start_at.nil? || @start_at.empty?) ? '1 = 1' : "o.created_at >= '#{@start_at}'"
-    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "o.created_at <= '#{@end_at} 23:59:59'"
+    ended_at_sql = (@end_at.nil? || @end_at.empty?) ? '1 = 1' : "date_format(o.created_at,'%Y-%m-%d') <= '#{@end_at}'"
 
     orders = Order.find_by_sql("select o.id,o.code,o.price price,opt.created_at created_at,p.name product_name from orders o
                                 left join order_pay_types opt on opt.order_id = o.id left join order_prod_relations op on
@@ -184,8 +184,8 @@ class MarketManagesController < ApplicationController
     #      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
     #      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
 
-    orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
-      where("created_at >= '#{@search_time} 00:00:00'").
+    orders = Order.where("date_format(created_at,'%Y-%m-%d') <= '#{@search_time}'").
+      where("created_at >= '#{@search_time}'").
       where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
     @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
@@ -194,8 +194,8 @@ class MarketManagesController < ApplicationController
 
   def daily_consumption_receipt_blank
     @search_time = params[:search_time]
-    @orders = Order.where("created_at <= '#{@search_time} 23:59:59'").
-      where("created_at >= '#{@search_time} 00:00:00'").
+    @orders = Order.where("date_format(created_at, '%Y-%m-%d') <= '#{@search_time}'").
+      where("created_at >= '#{@search_time}'").
       where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
     @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
@@ -254,7 +254,7 @@ class MarketManagesController < ApplicationController
 
   def shared_stored_card_bill(started_at, ended_at, store_id)
     started_at_sql = (started_at.nil? || started_at.empty?) ? '1 = 1' : "srr.created_at >= '#{started_at}'"
-    ended_at_sql = (ended_at.nil? || ended_at.empty?) ? '1 = 1' : "srr.created_at <= '#{ended_at} 23:59:59'"
+    ended_at_sql = (ended_at.nil? || ended_at.empty?) ? '1 = 1' : "date_format(srr.created_at, '%Y-%m-%d') <= '#{ended_at}'"
 
     relation_order_sql = "select srr.*,o.code code,o.id o_id from svc_return_records srr
                           left join orders o on o.id = srr.target_id where #{started_at_sql}
