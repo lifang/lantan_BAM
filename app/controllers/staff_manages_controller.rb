@@ -57,9 +57,9 @@ class StaffManagesController < ApplicationController
   def get_base_sql(year)
     if year == Time.now.strftime("%Y")
       month = Time.now.months_ago(1).strftime("%m")
-      base_sql = "current_day >= '#{year}-#{month}-01 00:00:00' and current_day <= '#{year}-#{month}-31 23:59:59'"
+      base_sql = "current_day >= '#{year}-#{month}-01 00:00:00' and date_format(current_day,'%Y-%m-%d') <= '#{year}-#{month}-31'"
     else
-      base_sql = "current_day >= '#{year}-12-01 00:00:00' and current_day <= '#{year}-12-31 23:59:59'"
+      base_sql = "current_day >= '#{year}-12-01 00:00:00' and date_format(current_day,'%Y-%m-%d') <= '#{year}-12-31'"
     end
     return base_sql
   end
