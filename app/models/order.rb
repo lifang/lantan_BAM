@@ -926,6 +926,12 @@ class Order < ActiveRecord::Base
             OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
             status = 1
           end
+          wo = WorkOrder.find_by_order_id(order.id)
+          if wo
+            wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE])
+            wot = WkOrTime.find_by_station_id_and_current_day(wo.station_id, wo.current_day)
+            wot.update_attribute(:wait_num, wot.wait_num - 1) if wot
+          end
         rescue
         end
       end
