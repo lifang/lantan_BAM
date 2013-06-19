@@ -100,10 +100,10 @@ class SvCardsController < ApplicationController
            from c_svc_relations csr right join sv_cards sc on csr.sv_card_id = sc.id
            right join customers c on csr.customer_id = c.id where sc.store_id = #{@store_id}"
     unless @started_time.nil? || @started_time.strip == ""
-      sql += " and csr.created_at >= '#{@started_time}'"
+      sql += " and date_format(csr.created_at,'%Y-%m-%d') >= '#{@started_time}'"
     end
     unless @ended_time.nil? || @ended_time.strip == ""
-      sql += " and csr.created_at <= '#{@ended_time}'"
+      sql += " and date_format(csr.created_at,'%Y-%m-%d') <= '#{@ended_time}'"
     end
     unless @card_type == 2
       sql += " and sc.types = #{@card_type}"
