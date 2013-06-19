@@ -240,7 +240,7 @@ class CustomersController < ApplicationController
     #储值卡记录
     @svcard_records = SvcardUseRecord.paginate_by_sql(["select sur.* from svcard_use_records sur
       inner join c_svc_relations csr on csr.id = sur.c_svc_relation_id where csr.customer_id = ?
-      order by sur.created_at desc", customer_id], :page => params[:page],
+       and csr.status = 1 order by sur.created_at desc", customer_id], :page => params[:page],
       :per_page => Constant::PER_PAGE)
   end
 

@@ -55,7 +55,7 @@ function load_goal(url){
         dataType : 'script',
         data : {
             created : $("#created").val(),
-            ended : $("#entimeded").val(),
+            ended : $("#ended").val(),
             time : $("input[name=time]:checked").val()
         }
     });
@@ -77,5 +77,4 @@ function load_sale(url){
     });
     return false;
 }
-
 

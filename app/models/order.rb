@@ -556,7 +556,7 @@ class Order < ActiveRecord::Base
                     total_price = sv_prod_relation.base_price.to_f+sv_prod_relation.more_price.to_f
                     c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, :status => false)
                     SvcardUseRecord.create(:c_svc_relation_id =>c_sv_relation.id,:types=>SvcardUseRecord::TYPES[:IN],:use_price=>total_price,
-                      :left_price=>total_price,:content=>"#{total_price}产品付费")
+                      :left_price=>total_price,:content=>"购买#{sv_card.name}")
                     
                   end
                 else   #打折卡
@@ -867,7 +867,7 @@ class Order < ActiveRecord::Base
   end
 
   #支付订单根据选择的支付方式
-  def self.pay order_id, store_id, please, pay_type, billing, code, is_free
+  def self.pay order_id, store_id, please, pay_type, billing, code, is_free, qfpos_id
     order = Order.find_by_id_and_store_id order_id,store_id
     status = 0
     if order
@@ -876,6 +876,7 @@ class Order < ActiveRecord::Base
           hash = Hash.new
           hash[:is_billing] = billing.to_i == 0 ? false : true
           hash[:is_pleased] = please.to_i
+          hash[:qfpos_id] = qfpos_id
           if is_free.to_i == 0
             hash[:status] = STATUS[:BEEN_PAYMENT]
             hash[:is_free] = false
@@ -1029,7 +1030,7 @@ class Order < ActiveRecord::Base
       difference = work_order.ended_at - max_time
       work_orders_arrange = WorkOrder.where("station_id = ? and started_at > ? and current_day = ? and status != ?", work_order.station_id, work_order.started_at, work_order.current_day, WorkOrder::STAT[:CANCELED]).order("ended_at asc")
       work_orders_arrange.each do |wo|
-        wo.update_attributes({:started_at => wo.started_at + difference, :ended_at => wo.ended_at + difference})
+        wo.update_attributes({:started_at => wo.started_at - difference, :ended_at => wo.ended_at - difference})
       end
       new_time = (Time.zone.parse(wkor_time.current_times) - difference).strftime("%Y%m%d%H%M")
       wkor_time.update_attributes({:current_times => new_time, :wait_num => (wkor_time.wait_num.nil? ? nil : wkor_time.wait_num - 1)})
