@@ -926,6 +926,8 @@ class Order < ActiveRecord::Base
             OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
             status = 1
           end
+          wo = WorkOrder.find_by_order_id(order.id)
+          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo
         rescue
         end
       end
