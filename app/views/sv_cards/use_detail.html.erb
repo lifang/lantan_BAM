@@ -11,7 +11,6 @@
     </div>
     <div class="clear"></div>
     <div class="data_body">
-      <div>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
           <thead>
             <tr class="hbg">
@@ -36,7 +35,6 @@
                 
                 <%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
                   :remote => "true", "data-type" => "script", :class => "other_a" %>
-
                 </td>
                 <td>
                   <% if @product_hash[order.id].length != 0 %>
@@ -65,7 +63,7 @@
           </tbody>
         </table>
         <%= will_paginate @orders, :class => "pageTurn", :previous_label => "上一页", :next_label => "下一页" %>
-      </div>
+
     </div>
   </div>
 </div>
