@@ -98,7 +98,8 @@ class SvCardsController < ApplicationController
     @store_id = params[:store_id].to_i
     sql = "select csr.*, c.name name, c.mobilephone phone, sc.types type
            from c_svc_relations csr right join sv_cards sc on csr.sv_card_id = sc.id
-           right join customers c on csr.customer_id = c.id where sc.store_id = #{@store_id}"
+           right join customers c on csr.customer_id = c.id where sc.store_id = #{@store_id}
+            and csr.status = #{CSvcRelation::STATUS[:valid]}"
     unless @started_time.nil? || @started_time.strip == ""
       sql += " and date_format(csr.created_at,'%Y-%m-%d') >= '#{@started_time}'"
     end
