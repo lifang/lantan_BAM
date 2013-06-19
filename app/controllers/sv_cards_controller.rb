@@ -109,6 +109,7 @@ class SvCardsController < ApplicationController
     unless @card_type == 2
       sql += " and sc.types = #{@card_type}"
     end
+    sql += " order by csr.created_at desc"
     sell_records = CSvcRelation.find_by_sql(sql)
     @sell_records = sell_records.paginate(:page => params[:page] ||= 1,:per_page => 10)
     @count = sell_records.length
