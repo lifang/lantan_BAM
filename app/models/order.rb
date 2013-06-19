@@ -927,11 +927,7 @@ class Order < ActiveRecord::Base
             status = 1
           end
           wo = WorkOrder.find_by_order_id(order.id)
-          if wo
-            wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE])
-            wot = WkOrTime.find_by_station_id_and_current_day(wo.station_id, wo.current_day)
-            wot.update_attribute(:wait_num, wot.wait_num - 1) if wot
-          end
+          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo
         rescue
         end
       end
