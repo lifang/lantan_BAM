@@ -556,7 +556,7 @@ class Order < ActiveRecord::Base
                     total_price = sv_prod_relation.base_price.to_f+sv_prod_relation.more_price.to_f
                     c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, :status => false)
                     SvcardUseRecord.create(:c_svc_relation_id =>c_sv_relation.id,:types=>SvcardUseRecord::TYPES[:IN],:use_price=>total_price,
-                      :left_price=>total_price,:content=>"#{total_price}产品付费")
+                      :left_price=>total_price,:content=>"购买#{sv_card.name}")
                     
                   end
                 else   #打折卡
