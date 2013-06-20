@@ -9,7 +9,7 @@
     <div class="scan-upload"><label>
         <input type="radio" name="scan" onclick="disbaleSib(this,'prev')"/>
         请上传扫描数据:</label>
-      <%= form_tag "/upload_code", :remote => true, :multipart => true, :id => 'upload_code' do |f| %>
+      <%= form_tag "/upload_code_matin", :remote => true, :multipart => true, :id => 'upload_code' do |f| %>
         <input type="file" name="code_file"/>
         <%= submit_tag "上传文件" %>
       <% end %>

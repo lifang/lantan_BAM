@@ -227,6 +227,10 @@ class MarketManagesController < ApplicationController
     types_sql = params[:prod_types] =="-1" ? nil : "products.types = #{params[:prod_types]}"
    
     @flag = "product"
+    if start_sql.nil? and end_sql.nil?
+        time_sql = "date_format(orders.created_at,'%Y-%m-%d') = curdate()"
+        sql << time_sql
+      end
     if types_sql.nil?
       sql<< start_sql << end_sql
       sql = sql.compact.join(" and ")
