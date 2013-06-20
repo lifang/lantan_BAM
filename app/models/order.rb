@@ -892,7 +892,7 @@ class Order < ActiveRecord::Base
           end unless c_pcard_relations.blank?
           #如果有买储值卡，则更新状态
           csvc_relations = CSvcRelation.where(:order_id => order.id)
-          csvc_relations.each{|csvc_relation| csvc_relation.update_attribute(:status, CSvcRelation::STATUS[:valid])}
+          csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing => hash[:is_billing]})}
           if c_pcard_relations.present? || csvc_relations.present?
             order.customer.update_attributes(:is_vip=>Customer::IS_VIP[:VIP])
           end
