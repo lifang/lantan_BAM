@@ -2,7 +2,7 @@
   <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="modify_value()">
     <% @materials.each do |material| %>
       <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{material.price}||#{material.sale_price}" %>" ><%= material.name%></option>
-    <% end %>
+    <% end unless @materials.blank?%>
   </select>
 </div>
 <div class="item">
@@ -71,8 +71,10 @@
     $("#t_price").val(html.attr("o_value").split("||")[2]);
     $("#base_price").val(html.attr("o_value").split("||")[3]);
   }
-  $("#item_txm").html($('#prod_material option:selected').attr("o_value").split("||")[0]);
-  $("#item_kc").html($('#prod_material option:selected').attr("o_value").split("||")[1]);
+<%unless @materials.blank?%>
+    $("#item_txm").html($('#prod_material option:selected').attr("o_value").split("||")[0]);
+    $("#item_kc").html($('#prod_material option:selected').attr("o_value").split("||")[1]);
+<% end %>
 </script>
 
 
