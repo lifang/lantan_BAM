@@ -86,10 +86,10 @@
       <% end %>
   <% end %>
   <% if permission?(:materials, :shouhuo) %>
-    <% if @mo.m_status == MaterialOrder::M_STATUS[:send] %>
+    
       <span><%= link_to "确认收货", receive_order_store_material_path(@store_id, @mo.id), :class=> "confirm_btn", :remote => true, 'data-type'=> 'script'  %>
         </span>
-    <% end %>
+    
   <% end %>
   <% if permission?(:materials, :pay) %>
     <% if @mo.status == MaterialOrder::STATUS[:no_pay] %>

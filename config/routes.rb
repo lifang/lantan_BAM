@@ -175,7 +175,8 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials/:mo_id/get_mo_remark' => 'materials#get_mo_remark'
   match 'stores/:store_id/materials/:mo_id/order_remark' => 'materials#order_remark'
   match 'stores/:store_id/uniq_mat_code' => 'materials#uniq_mat_code'
-  match '/upload_code' => 'materials_in_outs#upload_code'
+  match '/upload_code_matin' => 'materials_in_outs#upload_code_matin'
+  match '/upload_code_matout' => 'materials_in_outs#upload_code_matout'
   match '/upload_checknum' => 'materials#upload_checknum'
   resources :customers do
     collection do
