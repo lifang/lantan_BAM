@@ -63,7 +63,7 @@
             <div class="seeProDiv_rWidth width640">
               <div class="popup_body_result resultHeight">
                 <ul>
-                  <% @products = Product.is_service.is_normal %>
+                  <% @products = Product.is_service.is_normal.where(:store_id => @store.id) %>
                   <% @products.each do |product| %>
                     <li><%= check_box_tag 'product_ids[]', product.id, @station.new_record? ? false : @station.products.include?(product)  %><%= product.name %></li>
                   <% end %>
