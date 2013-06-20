@@ -67,6 +67,7 @@ class Salary < ActiveRecord::Base
       staff = Staff.find_by_id(staff_id)
       if !staff.nil?
         order_total_price = orders_array.sum(&:price)
+        order_total_price = order_total_price.nil? ? 0 : order_total_price
         difference_price = order_total_price - staff.deduct_at
         duduct_num = difference_price < 0 ? 0 : (order_total_price > staff.deduct_end ? staff.deduct_end : difference_price)
         deduct_amount = duduct_num * staff.deduct_percent * 0.01
