@@ -58,7 +58,7 @@ class Sync < ActiveRecord::Base
   def self.out_data(store_id)
     path = Constant::LOCAL_DIR
     Dir.mkdir Constant::LOG_DIR  unless File.directory?  Constant::LOG_DIR
-    flog = File.new(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+".log",File::CREAT|File::TRUNC|File::RDWR, 0644)
+    flog = File.open(Constant::LOG_DIR+Time.now.strftime("%Y-%m").to_s+".log","a+")
     sync_time = Time.now
     sync =Sync.where("store_id=#{store_id} and types=#{Sync::SYNC_TYPE[:BUILD]}").order("created_at desc")[0]
     file_time = sync.nil? ? sync_time : sync.sync_at
