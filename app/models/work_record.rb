@@ -52,9 +52,9 @@ class WorkRecord < ActiveRecord::Base
                                              wo.status = #{WorkOrder::STAT[:COMPLETE]} and ssr.updated_at >= '#{work_record.current_day.strftime("%Y-%m-%d")}' and
                                              date_format(ssr.updated_at,'%Y-%m-%d') <= '#{work_record.current_day.strftime("%Y-%m-%d")}'")
           
-          water_num = work_orders.uniq{|x| x.id}.sum(&:water_num)
+          water_num = work_orders.uniq{|x| x.id}.inject(0) {|sum, wo| sum + wo.water_num.to_f }
 
-          gas_num = work_orders.uniq{|x| x.id}.sum(&:gas_num)
+          gas_num = work_orders.uniq{|x| x.id}.inject(0) {|sum, wo| sum + wo.gas_num.to_f }
 
           work_record.update_attributes(:construct_num => construct_num, :materials_used_num => materials_used_num,
                                         :materials_consume_num => materials_consume_num, :water_num => water_num,
