@@ -757,7 +757,6 @@ class Order < ActiveRecord::Base
             hash[:cons_staff_id_2] = station_staffs[1].staff_id if station_staffs.size > 1
             hash[:started_at] = start
             hash[:ended_at] = end_at
-            hash[:status] = STATUS[:NORMAL]
             order.update_attributes hash
             status = 1
           else
