@@ -271,10 +271,10 @@ class Api::OrdersController < ApplicationController
                 SvcardUseRecord.create(:c_svc_relation_id => c_sv_relation.id, :types => SvcardUseRecord::TYPES[:IN],
                   :use_price => sv_price.base_price + sv_price.more_price,
                   :left_price=> sv_price.base_price + sv_price.more_price,:content=>"购买#{sv_card.name}")
-                carNum.customer_num_relation.customer.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
               else
                 c_sv_relation = CSvcRelation.create(c_svc_r_hash)
               end
+              carNum.customer_num_relation.customer.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
             end
           end
           (prod_arr[3] || []).each do |pcard|
