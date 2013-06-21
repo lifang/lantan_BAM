@@ -56,6 +56,9 @@ class WorkRecord < ActiveRecord::Base
 
           gas_num = work_orders.uniq{|x| x.id}.inject(0) {|sum, wo| sum + wo.gas_num.to_f }
 
+          water_num = water_num*10/2*0.1
+          gas_num = gas_num*10/2*0.1
+
           work_record.update_attributes(:construct_num => construct_num, :materials_used_num => materials_used_num,
                                         :materials_consume_num => materials_consume_num, :water_num => water_num,
                                         :gas_num => gas_num, :complaint_num => complaint_num, :train_num => train_num,
