@@ -741,7 +741,7 @@ class Order < ActiveRecord::Base
               WkOrTime.create(:current_times => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
                 :station_id => station.id, :worked_num => 1)
             end
-            WorkOrder.create({
+            work_order = WorkOrder.create({
                 :order_id => order.id,
                 :current_day => Time.now.strftime("%Y%m%d"),
                 :station_id => station.id,
@@ -750,6 +750,7 @@ class Order < ActiveRecord::Base
                 :started_at => start,
                 :ended_at => end_at
               })
+            hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? STATUS[:SERVICING] : STATUS[:NORMAL]
             hash[:station_id] = new_station_id
             station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d").to_i
             hash[:cons_staff_id_1] = station_staffs[0].staff_id if station_staffs.size > 0
