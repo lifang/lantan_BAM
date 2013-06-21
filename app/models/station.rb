@@ -106,15 +106,15 @@ class Station < ActiveRecord::Base
     path_dir = Constant::LOCAL_DIR
     dirs=["#{Constant::VIDEO_DIR}/","#{store_id}/"]
     dirs.each_with_index {|dir,index| Dir.mkdir path_dir+dirs[0..index].join   unless File.directory? path_dir+dirs[0..index].join }
-    video_path =dirs.join
+    video_path ="/public/"+dirs.join
     paths=get_dir_list("#{Rails.root}"+video_path)
     video_hash ={}
     paths.each do |path|
       mtime =File.stat("#{Rails.root}"+video_path+path).mtime.strftime("%Y-%m-%d")
       if video_hash[mtime]
-        video_hash[mtime] << video_path+path
+        video_hash[mtime] << "/#{dirs.join+path}"
       else
-        video_hash[mtime] = [video_path+path]
+        video_hash[mtime] = ["/#{dirs.join+path}"]
       end
     end unless paths.blank?
     return video_hash
