@@ -183,9 +183,15 @@ class MaterialsController < ApplicationController
 
   #物料查询
   def search
-    str_name = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%'" : "1=1 "
-    str_types = params[:types].strip.length > 0 ? "and types=#{params[:types]}": "and 1=1"
-    str = str_name + str_types
+    str = [""]
+    if params[:name].strip.length > 0
+      str[0] << "name like ? and"
+      str << "%#{params[:name]}%"
+    end
+    if params[:types].strip.length > 0
+      str[0] << " types = ? and"
+      str << "#{params[:types]}"
+    end
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
@@ -196,11 +202,12 @@ class MaterialsController < ApplicationController
                  end
         @search_materials = JSON.parse(result)
       elsif params[:from].to_i > 0
-        str += " and store_id=#{params[:store_id]} "
-        @search_materials = Material.normal.all(:conditions => str)
+        str[0] << " store_id = ?"
+        str << "#{params[:store_id]}"
+        @search_materials = Material.normal.where(str)
       end
     else
-      @search_materials = Material.normal.all(:conditions => str)
+      @search_materials = Material.normal.where(str)
     end
     
     @type = params[:type].to_i == 0 ? 0 : 1
