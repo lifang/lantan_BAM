@@ -183,13 +183,13 @@ class MaterialsController < ApplicationController
 
   #物料查询
   def search
-    str = [""]
+    str = ["status = ?", Material::STATUS[:NORMAL]]
     if params[:name].strip.length > 0
-      str[0] << "name like ? and"
+      str[0] += " and name like ?"
       str << "%#{params[:name]}%"
     end
     if params[:types].strip.length > 0
-      str[0] << " types = ? and"
+      str[0] += " and types = ?"
       str << "#{params[:types]}"
     end
     if params[:type].to_i == 1 && params[:from]
@@ -202,12 +202,12 @@ class MaterialsController < ApplicationController
                  end
         @search_materials = JSON.parse(result)
       elsif params[:from].to_i > 0
-        str[0] << " store_id = ?"
+        str[0] += " and store_id = ?"
         str << "#{params[:store_id]}"
-        @search_materials = Material.normal.where(str)
+        @search_materials = Material.where(str)
       end
     else
-      @search_materials = Material.normal.where(str)
+      @search_materials = Material.where(str)
     end
     
     @type = params[:type].to_i == 0 ? 0 : 1
