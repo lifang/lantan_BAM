@@ -39,9 +39,11 @@ class RolesController < ApplicationController
 
   #查询员工
   def staff
-    str = "store_id=#{params[:store_id]}"
+    str = ["store_id = ?", params[:store_id]]
+
     if params[:name]
-      str += " and name like '%#{params[:name]}%'"
+      str[0] += " and name like ?"
+      str << "%#{params[:name]}%"
     end
     @staffs = Staff.valid.includes(:staff_role_relations => :role).paginate(:conditions => str,
       :page => params[:page], :per_page => Constant::PER_PAGE)
