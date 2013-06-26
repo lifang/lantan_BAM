@@ -5,9 +5,9 @@ set :runner, nil # thanks to http://www.rubyrobot.org/article/deploying-rails-20
 
 set :application, "lantan_BAM"
 default_run_options[:pty] = true
-set :scm, :git
 set :ssh_options, { :forward_agent => true } 
 set :repository,  "git@github.com:lifang/lantan_BAM.git"
+set :scm, :git
 
 # set :scm, :git # You can set :scm explicitly or Capistrano will make an intelligent guess based on known version control directory names
 # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
