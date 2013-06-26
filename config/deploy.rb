@@ -9,6 +9,16 @@ set :ssh_options, { :forward_agent => true }
 set :repository,  "git@github.com:lifang/lantan_BAM.git"
 set :scm, :git
 
+$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
+require "rvm/capistrano"                  # Load RVM's capistrano plugin.
+require "bundler/capistrano"
+set :rvm_type, :user
+
+set :rvm_ruby_string, 'ruby-1.9.2-p320'
+
+require 'capistrano/ext/multistage'
+require 'capistrano_colors'
+
 # set :scm, :git # You can set :scm explicitly or Capistrano will make an intelligent guess based on known version control directory names
 # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
 
@@ -29,6 +39,6 @@ namespace :deploy do
   
   task :restart do
     run "touch #{current_path}/tmp/restart.txt"
-    run "cd #{deploy_to}/current;rake assets:precompile"
+    run "cd #{deploy_to}/current;RAILS_ENV=production rake assets:precompile"
   end
 end
