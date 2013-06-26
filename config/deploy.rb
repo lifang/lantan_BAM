@@ -14,7 +14,6 @@ set :user, "root"
 set :deploy_to, "/opt/projects/#{application}"
 set :current_path, "#{deploy_to}/current"
 set :shared_path, "#{deploy_to}/shared"
-set :deploy_via, :remote_cache
 
 
 
