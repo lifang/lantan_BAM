@@ -6,7 +6,7 @@ role :db,  "192.168.0.250", :primary => true # This is where Rails migrations wi
 
 set :scm, :git
 set :repository,  "git@github.com:lifang/lantan_BAM.git"
-
+set :git_shallow_clone, 1
 # set :scm, :git # You can set :scm explicitly or Capistrano will make an intelligent guess based on known version control directory names
 # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
 default_run_options[:pty] = true
@@ -33,9 +33,11 @@ set :shared_path, "#{deploy_to}/shared"
 # end
 
 namespace :deploy do
-  
 
-  desc "Tell Passenger to restart the app."
+  task :start, :roles => :app do
+    run "touch #{current_path}/tmp/restart.txt"
+  end
+  
   task :restart do
     run "touch #{current_path}/tmp/restart.txt"
     run "cd #{deploy_to}/current;rake assets:precompile"
