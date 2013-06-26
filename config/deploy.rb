@@ -1,4 +1,8 @@
 set :use_sudo, false
+set :group_writable, false
+set :keep_releases, 2 # Less releases, less space wasted
+set :runner, nil # thanks to http://www.rubyrobot.org/article/deploying-rails-20-to-mongrel-with-capistrano-21
+
 set :application, "lantan_BAM"
 default_run_options[:pty] = true
 set :scm, :git
