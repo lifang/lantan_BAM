@@ -18,7 +18,7 @@ set :rvm_type, :system
 
 set :default_stage, "production"
 set :stages, %w(staging production)
-set :rvm_ruby_string, 'ruby-1.9.2-p320'
+set :rvm_ruby_string, '1.9.2-p320@rails3.1.2'
 
 require 'capistrano/ext/multistage'
 require 'capistrano_colors'

@@ -1,5 +1,5 @@
 set :user, "root"
-set :deploy_to, "/var/www/lantan_BAM"
+set :deploy_to, "/opt/projects/lantan_BAM"
 set :current_path, "#{deploy_to}/current"
 set :shared_path, "#{deploy_to}/shared"
 role :web, "192.168.0.250"                          # Your HTTP server, Apache/etc
