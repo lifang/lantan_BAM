@@ -27,20 +27,24 @@ on :start do
   `ssh-add`
 end
 
-namespace :deploy do
-  task :start, :roles => :app do
-    run "touch #{current_path}/tmp/restart.txt"
-  end
-  
-  task :restart do
-    run "touch #{current_path}/tmp/restart.txt"
-    
-  end
-  after "deploy:restart" do
+after("deploy:symlink") do
+    # database.yml for localized database connection
+    run "rm #{current_path}/config/database.yml"
+    run "ln -s #{shared_path}/database.yml #{current_path}/config/database.yml"
+
     # log link
     run "rm #{current_path}/log"
     run "ln -s #{shared_path}/log/ #{current_path}/log"
-    
-    run "cd #{current_path};RAILS_ENV=production rake assets:precompile"
+end
+
+namespace :deploy do
+  task :start, :roles => :app do
+    run "/etc/init.d/nginx start"
+  end
+  
+  task :restart do
+    run "chmod -R 777 /opt/projects/lantan_BAM/"
+    run "/etc/init.d/nginx restart"
+    run "rm -rf #{current_path}/tmp/"
   end
 end
