@@ -14,7 +14,7 @@ button { font-family:"微软雅黑"; cursor: pointer; border: none;}
     width: 510px; 
 	height: 370px; 
 	margin: 100px auto; 
-/*	background: url(/assets/login_bg.png) no-repeat;*/
+	background: url(/assets/login_bg.png) no-repeat;
 	overflow: hidden;
 }
 .login_box { width: 250px; height: 160px; margin: 130px 0 0 130px;}
