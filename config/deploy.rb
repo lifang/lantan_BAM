@@ -16,7 +16,7 @@ require "rvm/capistrano"                  # Load RVM's capistrano plugin.
 require "bundler/capistrano"
 set :rvm_type, :system
 
-set :default_stage, "production"
+set :default_stage, "staging"
 set :stages, %w(staging production)
 set :rvm_ruby_string, '1.9.2-p320@rails3.1.2'
 
@@ -37,14 +37,11 @@ after("deploy:symlink") do
     run "ln -s #{shared_path}/log/ #{current_path}/log"
 end
 
-namespace :deploy do
-  task :start, :roles => :app do
-    run "/etc/init.d/nginx start"
-  end
-  
+namespace :deploy do  
   task :restart do
     run "chmod -R 777 /opt/projects/lantan_BAM/"
-    run "/etc/init.d/nginx restart"
-    run "rm -rf #{current_path}/tmp/"
+#    run "/etc/init.d/nginx restart"
+    run "touch #{current_path}/tmp/restart.txt"
+#    run "rm -rf #{current_path}/tmp/"
   end
 end
