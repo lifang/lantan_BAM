@@ -1,7 +1,7 @@
 <div class="popup_box">
   <h1>新建优惠卡<a href="JavaScript:void(0)" class="close">关闭</a></h1>
   <%= form_for(@card, :url => store_sv_cards_path(@store), :html => {:multipart => true, :id => "new_card_form"}) do |f| %>
-  <%= f.hidden_field :store_id %>
+
     <div class="popup_body">
       <div id="popup_body_area" class="popup_body_area">
         <div class="item">
