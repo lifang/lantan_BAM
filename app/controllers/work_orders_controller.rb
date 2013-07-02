@@ -23,7 +23,7 @@ class WorkOrdersController < ApplicationController
       work_orders w on s.id =  w.station_id inner join orders o on w.order_id = o.id inner join
       car_nums c on o.car_num_id = c.id where s.store_id = #{store.id} and w.current_day = #{now_date}
       order by w.started_at asc")
-      p stations
+
       if stations != nil
         stations.each do |station| #遍历所有工位
           if station.status == Station::STAT[:NORMAL]

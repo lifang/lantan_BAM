@@ -39,6 +39,18 @@ module ApplicationHelper
     types
   end
 
+  def staff_names
+    names = []
+    staffs = Staff.find_by_sql("select id,name from staffs where status = #{Staff::STATUS[:normal]}")
+    idx = 0
+    staffs.each do |staff|
+      names[idx] = []
+      names[idx] << "#{staff.name}" << staff.id
+      idx+=1
+    end
+    names
+  end
+
   def from_s store_id
     a = Item.new
     a.id = 0
