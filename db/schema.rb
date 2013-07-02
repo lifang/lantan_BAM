@@ -20,7 +20,7 @@ ActiveRecord::Schema.define(:version => 20130701051475) do
     t.boolean  "status"
     t.string   "content"
     t.datetime "created_at"
-    t.float    "price",           :default => 0.0
+    t.float    "price"
     t.datetime "updated_at"
     t.integer  "order_id"
   end
@@ -379,11 +379,6 @@ ActiveRecord::Schema.define(:version => 20130701051475) do
   add_index "message_records", ["status"], :name => "index_message_records_on_status"
   add_index "message_records", ["store_id"], :name => "index_message_records_on_store_id"
   add_index "message_records", ["updated_at"], :name => "index_message_records_on_updated_at"
-
-  create_table "models", :force => true do |t|
-    t.string  "name"
-    t.integer "num"
-  end
 
   create_table "month_scores", :force => true do |t|
     t.integer  "sys_score"
@@ -797,7 +792,7 @@ ActiveRecord::Schema.define(:version => 20130701051475) do
     t.string   "hometown"
     t.integer  "education"
     t.string   "nation"
-    t.integer  "political"
+    t.string   "political"
     t.string   "phone"
     t.string   "address"
     t.string   "photo"

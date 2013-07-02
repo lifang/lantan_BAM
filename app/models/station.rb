@@ -112,9 +112,9 @@ class Station < ActiveRecord::Base
     paths.each do |path|
       mtime =File.stat("#{Rails.root}"+video_path+path).mtime.strftime("%Y-%m-%d")
       if video_hash[mtime]
-        video_hash[mtime] << video_path+path
+        video_hash[mtime] << "/#{dirs.join+path}"
       else
-        video_hash[mtime] = [video_path+path]
+        video_hash[mtime] = ["/#{dirs.join+path}"]
       end
     end unless paths.blank?
     return video_hash

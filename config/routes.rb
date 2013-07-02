@@ -6,6 +6,12 @@ LantanBAM::Application.routes.draw do
       post "upload_image"
     end
   end
+  resources :materials_losses do
+    collection do
+      post 'add'
+      get 'delete','view'
+    end
+  end
   resources :work_orders do
     collection do
       get "work_orders_status"
@@ -88,7 +94,7 @@ LantanBAM::Application.routes.draw do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
-          "cancel_ignore","search_materials"
+          "cancel_ignore","search_materials","page_materials_losses"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"
       end
       member do
@@ -175,8 +181,12 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials/:mo_id/get_mo_remark' => 'materials#get_mo_remark'
   match 'stores/:store_id/materials/:mo_id/order_remark' => 'materials#order_remark'
   match 'stores/:store_id/uniq_mat_code' => 'materials#uniq_mat_code'
-  match '/upload_code' => 'materials_in_outs#upload_code'
+  match '/upload_code_matin' => 'materials_in_outs#upload_code_matin'
+  match '/upload_code_matout' => 'materials_in_outs#upload_code_matout'
   match '/upload_checknum' => 'materials#upload_checknum'
+  match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
+  match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
+  match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"

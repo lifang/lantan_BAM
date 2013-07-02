@@ -188,9 +188,10 @@ class ComplaintsController < ApplicationController
         } if pcar_relations.any?
         scard_relations = CSvcRelation.find_by_sql("select cpr.order_id,1 pro_num, pc.price order_price, pc.name p_name from c_svc_relations cpr
     inner join sv_cards pc on pc.id = cpr.sv_card_id where cpr.order_id in (#{@consumers.map(&:id).uniq.join(",")})")
-        pcar_relations.each { |p|
+        scard_relations.each { |p|
           @order_prods[p.order_id].nil? ? @order_prods[p.order_id] = [p] : @order_prods[p.order_id] << p
         } if scard_relations.any?
+
       end
       @total_price = complaints.inject(0){|num,prod|num +(prod.price.nil? ? 0 : prod.price)}
     else

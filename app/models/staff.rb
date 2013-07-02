@@ -12,6 +12,7 @@ class Staff < ActiveRecord::Base
   has_many :violation_rewards
   has_many :staff_gr_records
   has_many :month_scores
+  has_many :material_losses
   belongs_to :store
 
   validates :phone, :uniqueness => { :message => "联系方式已经存在!"}

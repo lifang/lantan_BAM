@@ -28,7 +28,7 @@ class MaterialsInOutsController < ApplicationController
         material_in[material] = material_orders
         render :partial => 'material_in', :locals =>{:material_in => material_in}
       else
-        render :partial => 'material_out', :locals =>{:material => material}
+        render :partial => 'material_out', :locals =>{:material_out => material}
       end
     end
   end
@@ -80,7 +80,7 @@ class MaterialsInOutsController < ApplicationController
     render :text => 'successful'
   end
 
-  def upload_code
+  def upload_code_matin
     code_file = params[:code_file]
     if code_file
       new_name = random_file_name(code_file.original_filename) + code_file.original_filename.split(".").reverse[0]
@@ -108,6 +108,30 @@ class MaterialsInOutsController < ApplicationController
             mm[material] = material_orders
             @material_ins << mm
         end
+      end
+    end
+  end
+
+  def upload_code_matout
+    code_file = params[:code_file]
+    if code_file
+      new_name = random_file_name(code_file.original_filename) + code_file.original_filename.split(".").reverse[0]
+      FileUtils.mkdir_p Material::MAT_OUT_PATH % @store_id
+      file_path = Material::MAT_OUT_PATH % @store_id + "/#{new_name}"
+      File.new(file_path, 'a+')
+      File.open(file_path, 'wb') do |file|
+        file.write(code_file.read)
+      end
+
+      if File.exists?(file_path)
+        @code_num = {}
+        File.open(file_path, "r").each_line do |line|
+          #6922233613731,10
+          data = line.strip.split(',')
+          @code_num[data[0]] = data[1]
+        end
+        @material_ins = []
+        @material_outs = Material.where(:code => @code_num.keys)
       end
     end
   end

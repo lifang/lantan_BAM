@@ -9,7 +9,7 @@ namespace :monthly do
         month_score =MonthScore.where("staff_id=#{staff.id} and current_month=#{Time.now.months_ago(1).strftime("%Y%m").to_i}")
         if month_score.blank?
           MonthScore.create(:current_month=>Time.now.months_ago(1).strftime("%Y%m").to_i,:sys_score=>score,:staff_id=>staff.id,
-            :is_syss_update=>MonthScore::IS_UPDATE[:NO])
+            :is_syss_update=>MonthScore::IS_UPDATE[:NO], :store_id => store.id)
         else
           month_score[0].update_attributes(:sys_score=>score)
         end

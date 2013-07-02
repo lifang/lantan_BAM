@@ -554,13 +554,13 @@ class Order < ActiveRecord::Base
                   sv_prod_relation = sv_card.svcard_prod_relations[0]
                   if sv_prod_relation
                     total_price = sv_prod_relation.base_price.to_f+sv_prod_relation.more_price.to_f
-                    c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, :status => false)
+                    c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, :status => CSvcRelation::STATUS[:invalid])
                     SvcardUseRecord.create(:c_svc_relation_id =>c_sv_relation.id,:types=>SvcardUseRecord::TYPES[:IN],:use_price=>total_price,
                       :left_price=>total_price,:content=>"购买#{sv_card.name}")
                     
                   end
                 else   #打折卡
-                  CSvcRelation.create!(:customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => sv_card.price, :status => false)
+                  CSvcRelation.create!(:customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => sv_card.price, :status => CSvcRelation::STATUS[:invalid])
                 end
               end
             end
@@ -741,7 +741,7 @@ class Order < ActiveRecord::Base
               WkOrTime.create(:current_times => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
                 :station_id => station.id, :worked_num => 1)
             end
-            WorkOrder.create({
+            work_order = WorkOrder.create({
                 :order_id => order.id,
                 :current_day => Time.now.strftime("%Y%m%d"),
                 :station_id => station.id,
@@ -750,13 +750,13 @@ class Order < ActiveRecord::Base
                 :started_at => start,
                 :ended_at => end_at
               })
+            hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? STATUS[:SERVICING] : STATUS[:NORMAL]
             hash[:station_id] = new_station_id
             station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d").to_i
             hash[:cons_staff_id_1] = station_staffs[0].staff_id if station_staffs.size > 0
             hash[:cons_staff_id_2] = station_staffs[1].staff_id if station_staffs.size > 1
             hash[:started_at] = start
             hash[:ended_at] = end_at
-            hash[:status] = STATUS[:NORMAL]
             order.update_attributes hash
             status = 1
           else
