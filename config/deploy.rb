@@ -37,7 +37,8 @@ after("deploy:symlink") do    #after， before 表示在特定操作之后或之
   # log link
   run "rm #{current_path}/log"        #移除当前路径下的log文件
   run "ln -s #{shared_path}/log/ #{current_path}/log"  #link日志文件到share下的日志文件
- 
+
+  run "ln -s /opt/projects/public/bam_public/* #{current_path}/public/"  #link public文件夹到/opt/projects/public/bam_public/
   run "cd #{current_path} && bundle install"
 end
 
