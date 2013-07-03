@@ -9,13 +9,13 @@ set :scm, :git   # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `pe
                  # set :deploy_via, :copy
                  # 如果SCM设为空， 也可通过直接copy本地repo部署
 set :repository,  "git@github.com:lifang/lantan_BAM.git" #项目在github上的地址
-set :ssh_options, { :forward_agent => true }  #deploy时获取github上项目使用你本地的ssh key
+#set :ssh_options, { :forward_agent => true }  #deploy时获取github上项目使用你本地的ssh key
 set :git_shallow_clone, 1  #Shallow cloning will do a clone each time, but will only get the top commit, not the entire repository history
 set :short_branch, "master"  #deploy的时候默认checkout master branch
 
 #$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
-require "rvm/capistrano"           # Load RVM's capistrano plugin.
-require "bundler/capistrano"       #添加之后部署时会调用bundle install， 如果不需要就可以注释掉 
+#require "rvm/capistrano"           # Load RVM's capistrano plugin.
+#require "bundler/capistrano"       #添加之后部署时会调用bundle install， 如果不需要就可以注释掉
 set :rvm_type, :user
 
 set :default_stage, "staging"     #一般不写成production，因为写成production的时候运行touch #{current_path}/tmp/restart.txt没效果
@@ -37,6 +37,8 @@ after("deploy:symlink") do    #after， before 表示在特定操作之后或之
   # log link
   run "rm #{current_path}/log"        #移除当前路径下的log文件
   run "ln -s #{shared_path}/log/ #{current_path}/log"  #link日志文件到share下的日志文件
+ 
+  run "cd #{current_path} && bundle install"
 end
 
 namespace :deploy do  
