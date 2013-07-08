@@ -2,6 +2,12 @@ function select_customers() {
     var checkboxes = $("#search_div input:checked");
     var send_html = "";
     var customer_ids = "";
+    if(checkboxes.length==0){
+        $(".select_all").attr("checked", false);
+    }
+    if(checkboxes.length == $("#search_div input").length){
+        $(".select_all").attr("checked", "checked");
+    }
     for (var i=0; i<checkboxes.length; i++) {
         send_html += "<div id='cus_"+ checkboxes[i].value +"'><em>"+ $("#label_" + checkboxes[i].value).html()
             + "</em><a href='javascript:void(0);' class='remove_a' onclick='delete_cus("+ checkboxes[i].value +")'>删除</a></div>";
@@ -25,6 +31,9 @@ function delete_cus(customer_id) {
        }
        $("#customer_ids").attr("value", new_ids.join(","));
    }
+   if($("#customer_ids").attr("value")==""){
+      $(".select_all").attr("checked", false);
+   }
 }
 
 function check_message() {
@@ -37,4 +46,15 @@ function check_message() {
         return false;
     }
     return true;
+}
+
+function selectAllCustomers(obj){
+    if($(obj).attr("checked")=='checked'){
+        $(obj).parent().next().find("input[type='checkbox']").attr("checked", "checked");
+        select_customers();
+    }else{
+        $(obj).parent().next().find("input[type='checkbox']").attr("checked", false);
+        $("#customer_ids").val("");
+        $("#send_div").html("");
+    }
 }

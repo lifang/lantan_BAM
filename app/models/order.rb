@@ -144,44 +144,50 @@ class Order < ActiveRecord::Base
     if customer && customer.size > 0
       customer = customer[0]
       customer.birth = customer.birth.strftime("%Y-%m-%d")  if customer.birth
-      orders = Order.find_by_sql("select * from orders o where o.car_num_id=#{customer.car_num_id}
+      orders = Order.includes(:order_pay_types).find_by_sql("select * from orders o where o.car_num_id=#{customer.car_num_id}
         and o.status!=#{STATUS[:DELETED]} and o.status != #{STATUS[:INNORMAL]} and o.store_id=#{store_id} order by o.created_at desc")
       #订单中购买的套餐卡
       package_cards = CPcardRelation.find_by_sql(["select cpr.order_id, pc.name, pc.price from c_pcard_relations cpr
             inner join package_cards pc
             on pc.id = cpr.package_card_id where cpr.order_id in (?)", orders]).group_by { |pc| pc.order_id }
+      csvc_relations = CSvcRelation.includes(:sv_card).where(:order_id => orders.map(&:id)).group_by { |pc| pc.order_id }
+      order_prod_relations = OrderProdRelation.includes(:product).where(:order_id => orders.map(&:id)).group_by { |pc| pc.order_id }
+      order_pay_types = OrderPayType.where(:order_id => orders.map(&:id)).group_by{|opt| opt.order_id}
+      staffs = Order.find_by_sql(["SELECT o.id, s.name FROM orders o inner join staffs s on o.front_staff_id = s.id where o.id in (?) and s.store_id = ?", orders, store_id]).group_by{|o| o.id}
       (orders || []).each do |order|
         order_hash = order
+        #每个订单中的产品
         order_hash[:products] = []
-        order.order_prod_relations.collect{|r|
-          product = r.product          
-          if product
-            p = Hash.new
-            p[:name] = product.name
-            p[:price] = r.price.to_f * r.pro_num.to_i
-            p
-            order_hash[:products] << p
-          end          
-        }
-        csvc_relations = CSvcRelation.includes(:sv_card).where(:order_id => order.id)
-        csvc_relations.each do |csvc_r|
-          sv_card = SvCard.find_by_id(csvc_r.sv_card_id)
+        order_prod_relations[order.id].each do |opr|
+          product = opr.product
+          order_hash[:products] << {:name => product.name, :price => opr.price.to_f * opr.pro_num.to_i} if product
+        end if order_prod_relations.present? && order_prod_relations[order.id].present?
+        
+        #每个订单中的储值卡、打折卡
+        csvc_relations[order.id].each do |csvc_r|
+          sv_card = csvc_r.sv_card
           sv_price =  sv_card.sale_price
-          order_hash[:products] << {:name => csvc_r.sv_card.try(:name), :price => sv_price}
-        end unless csvc_relations.blank?
+          order_hash[:products] << {:name => sv_card.try(:name), :price => sv_price}
+        end if csvc_relations.present? && csvc_relations[order.id].present?
+        
+        #每个订单中的套餐卡
         package_cards[order.id].each do |o_pc|
           order_hash[:products] << {:name => o_pc.name, :price => o_pc.price}
-        end if package_cards and package_cards[order.id]
-        order_hash[:pay_type] = order.order_pay_types.collect{|type|
+        end if package_cards.present? && package_cards[order.id].present?
+        
+        #订单对应的付款方式
+        order_hash[:pay_type] = order_pay_types[order.id].collect{|type|
           OrderPayType::PAY_TYPES_NAME[type.pay_type]
-        }.join(",")
-        front_staff = Staff.find_by_id_and_store_id order.front_staff_id,store_id
+        }.join(",") unless order_pay_types[order.id].nil?
+        
+        front_staff = staffs[order.id][0]
         order_hash[:staff] = front_staff.name if front_staff
+
         if order.status == STATUS[:BEEN_PAYMENT] or order.status == STATUS[:FINISHED]
-          old_orders << order_hash
+          old_orders << order_hash  #过往订单
         else
           if (car_id && car_id.to_i == order.id) || car_id.nil?
-            working_orders << order_hash
+            working_orders << order_hash  #进行中的订单
           end
         end
       end
@@ -213,18 +219,12 @@ class Order < ActiveRecord::Base
     clean_arr = []
     prod_arr = []
     maint_arr = []    
-    prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id from prod_mat_relations pmr
-      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
-      and m.storage > 0 and m.store_id = ? ", store_id])
-    p_ids = prod_mat_relations.collect { |i| i.p_id  } if prod_mat_relations.any?
-    products = Product.find_by_sql(["select * from products p where p.status = ? 
-      and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?", 
-        Product::IS_VALIDATE[:YES], p_ids, store_id])
-    services = Product.find_by_sql(["select * from products p where p.status = ?
-      and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
-        Product::IS_VALIDATE[:YES], store_id])
- 
-    ((products + services) || []).each do |p|
+#amanda modified 0708
+    products = Product.find_by_sql("select p.* from products p left join prod_mat_relations pmr on
+pmr.product_id = p.id left join materials m on m.id = pmr.material_id where p.status = 1
+and ((m.status = 0 and m.storage > 0 and p.is_service = 0) or (p.is_service = 1))
+and p.store_id = 2 and m.store_id = 2 group by p.id")
+    (products || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
@@ -239,7 +239,6 @@ class Order < ActiveRecord::Base
         maint_arr << h
       end
     end
-    count = clean_arr.length
     product_arr << clean_arr
     product_arr << maint_arr
     product_arr << prod_arr
@@ -250,7 +249,7 @@ class Order < ActiveRecord::Base
     pcard_prod_relations = PcardProdRelation.find_by_sql(["select p.name, ppr.product_num, ppr.package_card_id
       from pcard_prod_relations ppr
       inner join products p on p.id = ppr.product_id where ppr.package_card_id in (?)", cards]).group_by{ |pcr| pcr.package_card_id }
-    sv_cards = SvCard.find_by_sql("select * from sv_cards where store_id = #{store_id} and status = #{SvCard::STATUS[:NORMAL]}")
+    sv_cards = SvCard.normal_included(2)
 
     product_arr << (cards + sv_cards || []).collect{|c|
       price = c.is_a?(SvCard) ? c.sale_price : c.price
@@ -272,8 +271,7 @@ class Order < ActiveRecord::Base
       h
     }
     arr << product_arr
-    count = maint_arr.length if count < maint_arr.length
-    count = prod_arr.length if count < prod_arr.length
+    count = [maint_arr.length, prod_arr.length, clean_arr.length].max
     product_arr << count
     arr
   end

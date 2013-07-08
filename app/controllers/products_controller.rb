@@ -12,8 +12,8 @@ class ProductsController < ApplicationController
   #新建
   def add_prod
     @product=Product.new
-    @materials =Material.find_by_sql( "select id,name,code,storage,price,sale_price from materials  where  store_id=#{params[:store_id]} and
-              status=#{Material::STATUS[:NORMAL]} and types=#{Material::TYPES[:PRODUCT]}")
+    @materials =Material.find_by_sql( ["select id,name,code,storage,price,sale_price from materials  where  store_id=#{params[:store_id]} and
+              status=#{Material::STATUS[:NORMAL]} and types in (?)", Material::PRODUCT_TYPE])
   end
   
   def create
@@ -70,8 +70,8 @@ class ProductsController < ApplicationController
   def edit_prod
     @product =Product.find(params[:id])
     @img_urls=@product.image_urls
-    @materials =Material.find_by_sql( "select id,name,code,storage,price,sale_price from materials  where  store_id=#{params[:store_id]} and
-              status=#{Material::STATUS[:NORMAL]} and types=#{Material::TYPES[:PRODUCT]}")
+    @materials =Material.find_by_sql(["select id,name,code,storage,price,sale_price from materials  where  store_id=#{params[:store_id]} and
+              status=#{Material::STATUS[:NORMAL]} and types in (?)", Material::PRODUCT_TYPE])
     @material = @product.prod_mat_relations[0]
   end
 
