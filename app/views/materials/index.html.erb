@@ -16,7 +16,7 @@
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store]), :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :check_all) %><%= link_to_function "批量盘点", "checkMatNum()" %><% end %>
-    <%= link_to_function "新建库存报损", "MaterialsLoss()", :class => "" %>
+    <% if permission?(:materials, :material_loss_add) %><%= link_to_function "新建库存报损", "MaterialsLoss()", :class => "" %><% end %>
     <% if permission?(:materials, :make_warning) %><%= link_to_function "设置库存预警", "setMaterialLow()", :class => "" %><% end %>
   </div>
   <div class="clear"></div>
