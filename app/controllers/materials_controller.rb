@@ -13,6 +13,9 @@ class MaterialsController < ApplicationController
 
   #库存列表
   def index
+    @material_losses = MaterialLoss.find_by_sql("select m.id, m.name, m.code, m.types, m.loss_num, m.specifications,
+    m.price, m.sale_price,m.staff_id from material_losses m where m.store_id =#{@current_store.id}
+    order by m.created_at desc").paginate :page => params[:page], :per_page => Constant::PER_PAGE
     @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
@@ -37,6 +40,9 @@ class MaterialsController < ApplicationController
     if @tab_name == 'materials'
       @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).where(
         @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    elsif @tab_name == 'material_losses'
+      @material_losses = MaterialLoss.where(["store_id = ?",  @current_store.id]).where(@l_sql[0]).where(
+          @l_sql[1]).where(@l_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     elsif  @tab_name == 'in_records'
       @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
     elsif @tab_name == 'out_records'
@@ -99,6 +105,18 @@ class MaterialsController < ApplicationController
     respond_with(@supplier_order_records) do |f|
       f.html
       f.js
+    end
+  end
+
+  #库存报损分页
+  def page_materials_losses
+    @current_store = Store.find_by_id params[:store_id]
+    @material_losses =  MaterialLoss.find_by_sql("select m.id, m.name, m.code, m.types, m.loss_num, m.specifications,
+    m.price, m.sale_price, m.staff_id from material_losses m where m.store_id =#{@current_store.id}
+    order by m.created_at desc").paginate :page => params[:page], :per_page => Constant::PER_PAGE
+    respond_with(@material_losses) do |format|
+      #format.html
+      format.js
     end
   end
 
@@ -183,9 +201,15 @@ class MaterialsController < ApplicationController
 
   #物料查询
   def search
-    str_name = params[:name].strip.length > 0 ? "name like '%#{params[:name]}%'" : "1=1 "
-    str_types = params[:types].strip.length > 0 ? "and types=#{params[:types]}": "and 1=1"
-    str = str_name + str_types
+    str = ["status = ?", Material::STATUS[:NORMAL]]
+    if params[:name].strip.length > 0
+      str[0] += " and name like ?"
+      str << "%#{params[:name]}%"
+    end
+    if params[:types].strip.length > 0
+      str[0] += " and types = ?"
+      str << "#{params[:types]}"
+    end
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
@@ -196,11 +220,12 @@ class MaterialsController < ApplicationController
                  end
         @search_materials = JSON.parse(result)
       elsif params[:from].to_i > 0
-        str += " and store_id=#{params[:store_id]} "
-        @search_materials = Material.normal.all(:conditions => str)
+        str[0] += " and store_id = ?"
+        str << "#{params[:store_id]}"
+        @search_materials = Material.where(str)
       end
     else
-      @search_materials = Material.normal.all(:conditions => str)
+      @search_materials = Material.where(str)
     end
     
     @type = params[:type].to_i == 0 ? 0 : 1
@@ -727,8 +752,13 @@ class MaterialsController < ApplicationController
     mat_code_sql = params[:mat_code].nil? || params[:mat_code].empty? ? "1 = 1" : ["materials.code = ?", params[:mat_code]]
     mat_name_sql = params[:mat_name].nil? || params[:mat_name].empty? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name]}%"]
     mat_type_sql = params[:mat_type].nil? || params[:mat_type].to_i == 0 ? "1 = 1" : ["materials.types = ?", params[:mat_type].to_i]
+    mat_loss_code_sql = params[:mat_code].nil? || params[:mat_code].empty? ? "1 = 1" : ["material_losses.code = ?", params[:mat_code]]
+    mat_loss_name_sql = params[:mat_name].nil? || params[:mat_name].empty? ? "1 = 1" : ["material_losses.name like ?", "%#{params[:mat_name]}%"]
+    mat_loss_type_sql = params[:mat_type].nil? || params[:mat_type].to_i == 0 ? "1 = 1" : ["material_losses.types = ?", params[:mat_type].to_i]
     @s_sql = []
     @s_sql << mat_code_sql << mat_name_sql << mat_type_sql
+    @l_sql = []
+    @l_sql << mat_loss_code_sql << mat_loss_name_sql << mat_loss_type_sql
     @mat_code = params[:mat_code].nil? ? nil : params[:mat_code]
     @mat_name = params[:mat_name].nil? ? nil : params[:mat_name]
     @mat_type = params[:mat_type].nil? ? nil : params[:mat_type]

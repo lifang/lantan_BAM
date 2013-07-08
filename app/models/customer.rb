@@ -69,11 +69,12 @@ class Customer < ActiveRecord::Base
     stress_customer_ids = []
     Complaint.where("created_at >= '#{Time.now.years_ago(1)}'").each do |complaint|
       customer = complaint.customer
-      stress_customer_ids << customer.id and customer.update_attribute(:types, Customer::TYPES[:STRESS]) unless customer.status
+      stress_customer_ids << customer.id and customer.update_attribute(:types, Customer::TYPES[:STRESS]) if customer && !customer.status
     end
 
     orders = Order.includes(:car_num => {:customer_num_relation => :customer}).
       where("orders.created_at >= '#{Time.now.years_ago(1)}'").
+      where("orders.status = #{Order::STATUS[:BEEN_PAYMENT]} || orders.status = #{Order::STATUS[:FINISHED]}").
       where("customers.id not in (?)", stress_customer_ids).
       group_by{|s|s.car_num.customer_num_relation.customer.id}
 
@@ -82,7 +83,7 @@ class Customer < ActiveRecord::Base
       result[key] = value.length
     end
 
-    Customer.where("status = 0 and id not in (?)", stress_customer_ids).each do |customer|
+    Customer.where("status = #{STATUS[:NOMAL]} and id not in (?)", stress_customer_ids).each do |customer|
       if result.keys.include?(customer.id)
         types = result[customer.id] >= 12 ? Customer::TYPES[:GOOD] : Customer::TYPES[:NORMAL]
         customer.update_attribute(:types, types)

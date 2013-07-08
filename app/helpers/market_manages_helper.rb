@@ -6,7 +6,9 @@ module MarketManagesHelper
    opt_pcard = order_pay_types[order_id].select{|opt| opt.product_id == oprr.product_id and opt.pay_type == OrderPayType::PAY_TYPES[:PACJAGE_CARD]}.first unless order_pay_types[order_id].blank?
     unless opt_pcard.blank?
       deals_price = opt_pcard.price
-      prod_full_price_num = oprr.pro_num - opt_pcard.product_num #未使用套餐卡抵付的商品数目
+      p oprr.pro_num
+      p opt_pcard.product_num
+      prod_full_price_num = oprr.pro_num.to_i - opt_pcard.product_num.to_i #未使用套餐卡抵付的商品数目
       prod_cost_price = prod_full_price_num *(oprr.t_price.to_f) #未使用套餐卡抵付的商品成本价
     end
 

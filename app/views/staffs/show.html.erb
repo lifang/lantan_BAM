@@ -62,9 +62,7 @@
                                <% unless @current_month_score.nil? %>
                                  <span style="float:left" id="month_score_val"><%= @current_month_score.manage_score %></span>
                                <% end %>
-                                 <% if @staff.type_of_w != Staff::S_COMPANY[:CHIC] %>
                                  <button class="search_btn" id="manage_score_btn" style="float:left;margin-left:5px;">店长打分</button>
-                                 <% end %>
                                <% end %>
                              </div>
                         </div>

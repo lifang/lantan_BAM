@@ -1,0 +1,40 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <thead>
+    <tr class="hbg">
+      <td>条形码</td>
+      <td>物料名称</td>
+      <td>物料类别</td>
+      <td>报损数量</td>
+      <td>规格</td>
+      <td>成本价（元）</td>
+      <td>零售价（元）</td>
+      <td>报损人</td>
+      <td>操作</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% (@material_losses || []).each do |material_loss| %>
+      <tr class="<%= cycle('', 'tbg') %>">
+        <td><%= material_loss.code %></td>
+        <td><%= material_loss.name %></td>
+        <td><%= Material::TYPES_NAMES[material_loss.types.to_i] %></td>
+        <td><%= material_loss.loss_num %></td>
+        <td><%= material_loss.specifications %></td>
+        <td><%= material_loss.price %></td>
+        <td><%= material_loss.sale_price %></td>
+        <td>
+            <%= material_loss.staff.name %>
+        </td>
+        <td>
+          <% if permission?(:materials, :material_loss_modify) %>
+          <%= link_to_function "修改", "viewMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
+          <% end %>
+          <% if permission?(:materials, :material_loss_delete) %>
+          <%= link_to_function "删除", "deleteMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<%= will_paginate_remote(@material_losses,"",{:url => page_materials_losses_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @material_losses.size > 0 %>

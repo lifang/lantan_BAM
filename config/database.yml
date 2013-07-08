@@ -20,6 +20,7 @@ development:
   host: localhost
 
 
+
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
@@ -37,7 +38,7 @@ production:
   adapter: mysql2
   encoding: utf8
   reconnect: false
-  database: lantan_db_production
+  database: lantan_db
   pool: 5
   username: root
   password: comdo2012

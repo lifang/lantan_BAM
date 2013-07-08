@@ -17,34 +17,40 @@ class SvCardsController < ApplicationController
   end
 
   def create
-    current_store = Store.find_by_id params[:sv_card][:store_id]
-    img_obj = params[:sv_card][:img_url]
-    params[:sv_card].delete_if{|key, value| key=="img_url"}
-    if params[:sv_card][:types].to_i == SvCard::FAVOR[:DISCOUNT] #打折卡
-      sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL]}))
-      if sv_card.save  
-         begin
-          url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, params[:sv_card][:store_id], Constant::SVCARD_PICSIZE)
-          sv_card.update_attribute("img_url", url)          
-        rescue
-          flash[:notice] = "图片上传失败!"
+    if SvCard.where(["types = ? and name = ?", params[:sv_card][:types], params[:sv_card][:name]]).blank?
+      img_obj = params[:sv_card][:img_url]
+      params[:sv_card].delete_if{|key, value| key=="img_url"}
+      if params[:sv_card][:types].to_i == SvCard::FAVOR[:DISCOUNT] #打折卡
+        sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL], :store_id => @store.id}))
+        if sv_card.save
+          begin
+            url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, params[:sv_card][:store_id], Constant::SVCARD_PICSIZE)
+            sv_card.update_attribute("img_url", url)
+          rescue
+            flash[:notice] = "图片上传失败!"
+          end
+        end
+      else
+        sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL], :price => params[:started_money], :store_id => @store.id}))
+        if sv_card.save
+          SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
+          begin
+            url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, params[:sv_card][:store_id], Constant::SVCARD_PICSIZE)
+            sv_card.update_attribute("img_url", url)
+          rescue
+            flash[:notice] = "图片上传失败!"
+          end
         end
       end
+      flash[:notice] = "创建成功!"
+      redirect_to store_sv_cards_path(@store)
     else
-      sv_card = SvCard.new(params[:sv_card].merge({:status => SvCard::STATUS[:NORMAL], :price => params[:started_money]}))
-      if sv_card.save
-        SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
-        begin
-          url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, params[:sv_card][:store_id], Constant::SVCARD_PICSIZE)
-          sv_card.update_attribute("img_url", url)
-        rescue
-          flash[:notice] = "图片上传失败!"
-        end
-      end
+      flash[:notice] = "创建失败，已有同名的优惠卡存在!"
+      redirect_to request.referer
     end
-    flash[:notice] = "创建成功!"
-    redirect_to store_sv_cards_path(current_store)
+    
   end
+
   def show
     @sv_card = SvCard.find_by_id(params[:id])
     @spr = @sv_card.svcard_prod_relations[0]
@@ -69,24 +75,27 @@ class SvCardsController < ApplicationController
 
   def update
     sv_card = SvCard.find_by_id(params[:id].to_i)
-    current_store = Store.find_by_id(params[:store_id])
-    img_obj = params[:sv_card][:img_url]
-    params[:sv_card].delete_if{|key, value| key=="img_url"}
-    if sv_card.update_attributes(params[:sv_card])
-      if sv_card.types == SvCard::FAVOR[:SAVE]
-        sv_card.update_attribute("price", params[:started_money])
-        SvcardProdRelation.destroy_all("sv_card_id = #{sv_card.id}")
-        SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
-      end
-      if !img_obj.nil?
-        begin
-          url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, current_store.id, Constant::SVCARD_PICSIZE)
-          sv_card.update_attribute("img_url", url)
-        rescue
-          flash[:notice] = "图片上传失败!"
+    if SvCard.where(["id != ? and types= ? and name = ?", sv_card.id, sv_card.types, params[:sv_card][:name]]).blank?
+      img_obj = params[:sv_card][:img_url]
+      params[:sv_card].delete_if{|key, value| key=="img_url"}
+      if sv_card.update_attributes(params[:sv_card])
+        if sv_card.types == SvCard::FAVOR[:SAVE]
+          sv_card.update_attribute("price", params[:started_money])
+          SvcardProdRelation.destroy_all("sv_card_id = #{sv_card.id}")
+          SvcardProdRelation.create(:sv_card_id => sv_card.id, :base_price => params[:started_money].to_f, :more_price => params[:ended_money].to_f)
         end
+        if !img_obj.nil?
+          begin
+            url = SvCard.upload_img(img_obj, sv_card.id, Constant::SVCARD_PICS, @store.id, Constant::SVCARD_PICSIZE)
+            sv_card.update_attribute("img_url", url)
+          rescue
+            flash[:notice] = "图片上传失败!"
+          end
+        end
+        flash[:notice] = "更新成功!"
       end
-      flash[:notice] = "更新成功!"
+    else
+      flash[:notice] = "更新失败，已有同名的优惠卡存在!"
     end
     redirect_to request.referer
   end

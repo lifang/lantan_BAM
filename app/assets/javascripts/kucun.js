@@ -1086,3 +1086,136 @@ function checkMatNum(){
           }
       })
   }
+
+    function MaterialsLoss(){            //添加库存报损
+        $("#MaterialsLoss_form input").val("");
+        $("#material_loss_types").get(0).selectedIndex = 0;
+        $("#material_loss_staff_id").get(0).selectedIndex = 0;
+        popup("#MaterialsLoss");
+    }
+
+    function checkMaterialsLoss(store_id){
+        var reg2 = /^\d+\.{0,1}\d*$/;
+        var pattern = new RegExp("[=,-]")
+        var f = true;
+        if($.trim($("#material_loss_name").val())==""){
+            tishi_alert("请输入物料名称");
+            f = false;
+        }else if($("#material_loss_name").val().match(pattern)!=null){
+            tishi_alert("物料名称不能包含非法字符");
+            f = false;
+        }
+        else if($.trim($("#material_loss_code").val())==""){
+            tishi_alert("请输入条形码");
+            f = false;
+        }
+        else if($("#material_loss_types").val()==""){
+            tishi_alert("请选择类型");
+            f = false;
+        }
+        else if($("#material_loss_price").val().match(reg2)==null){
+            tishi_alert("请输入合法单价");
+            f = false;
+        }
+        else if($("#material_loss_sale_price").val().match(reg2)==null){
+            tishi_alert("请输入合法零售价");
+            f = false;
+        }
+        else if($("#material_loss_num").val().match(reg1)==null){
+            tishi_alert("请输入合法报损数量");
+            f = false;
+        }
+        else if($("#material_loss_specifications").val()==""){
+            tishi_alert("请输入物料规格");
+            f = false;
+        }
+        else if($("#material_loss_staff_id").val()==""){
+            tishi_alert("请选择报损人");
+            f = false;
+        }
+        else{
+            var name = $("#material_loss_name").val();
+            var code = $("#material_loss_code").val();
+            var types = $("#material_loss_types").val();
+            var price = $("#material_loss_price").val();
+            var sale_price = $("#material_loss_sale_price").val();
+            var num = $("#material_loss_num").val();
+            var specifications = $("#material_loss_specifications").val();
+            var select_staff_id = $("#material_loss_staff_id").val();
+            var id =  $("#material_loss_id").val();
+            $.ajax({
+                url: "/stores/" +store_id+ "/materials_losses/add",
+                dataType: "text",
+                type: "post",
+                data: {
+                    name : name,
+                    code : code,
+                    types : types,
+                    price : price,
+                    sale_price : sale_price,
+                    loss_num : num,
+                    specifications : specifications,
+                    report_person : select_staff_id,
+                    id : id
+
+                },
+                success:function(data,status){
+                    if(id == "")
+                        tishi_alert("报损成功!");
+                    else
+                        tishi_alert("修改成功!");
+                    $("#MaterialsLoss").hide();
+                    $(".mask").hide();
+                    location.reload();
+                },
+                error:function(){
+                    if(id == "")
+                        tishi_alert("报损失败!");
+                    else
+                        tishi_alert("修改失败!");
+                }
+            });
+        }
+    }
+
+    function deleteMaterails_loss(store_id,materials_loss_id)
+    {
+        if(confirm("确定删除吗？"))
+            $.ajax({
+                url: "/stores/" +store_id+ "/materials_losses/delete",
+                dataType:"text",
+                type:"get",
+                data:{materials_loss_id : materials_loss_id},
+                success:function(data,status){
+                    tishi_alert("删除成功!");
+                    location.reload();
+                },
+                error:function(){
+                    tishi_alert("删除失败!");
+                }
+            });
+    }
+
+    function viewMaterails_loss(store_id,materials_loss_id)
+    {
+        $.ajax({
+            url: "/stores/" +store_id+ "/materials_losses/view",
+            dataType:"text",
+            type:"get",
+            data:{materials_loss_id : materials_loss_id},
+            success:function(data,status)
+            {
+                var materail_loss = $.parseJSON(data);
+                $("#material_loss_name").val(materail_loss.name);
+                $("#material_loss_code").val(materail_loss.code);
+                $("#material_loss_types").val(materail_loss.types);
+                $("#material_loss_price").val(materail_loss.price);
+                $("#material_loss_sale_price").val(materail_loss.sale_price);
+                $("#material_loss_num").val(materail_loss.loss_num);
+                $("#material_loss_specifications").val(materail_loss.specifications);
+                $("#material_loss_staff_id").val(materail_loss.staff_id);
+                $("#material_loss_id").val(materail_loss.id);
+                popup("#MaterialsLoss");
+            }
+        });
+    }
