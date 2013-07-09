@@ -75,7 +75,9 @@
   <tbody>
     <% (@materials_storages || []).each do |material| %>
       <tr class="<%= cycle('', 'tbg') %>" id="showmaterial<%= material.id %>tr">
-        <td <% if !material.is_ignore && material.storage.to_i <= @current_store.material_low.to_i %>class="data_table_error"<% end %>><%= material.code %></td>
+        <td <% if !material.is_ignore && material.storage.to_i<=material.material_low.to_i %>class="data_table_error"<% end %>>
+          <%= material.code %>
+        </td>
         <td><%= material.name %></td>
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
         <td class="sstatus"><%= material.is_ignore || material.storage.to_i > @current_store.material_low.to_i ? "存货" : "缺货" %></td>
@@ -91,11 +93,13 @@
           <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this)" %><% end %>
           <% if permission?(:materials, :mat_edit) %><%= link_to "编辑", edit_store_material_path(params[:store_id], material.id), :remote => true, 'data-type' => 'script' %><% end %>
           <% if permission?(:materials, :delete) %><%= link_to "删除", store_material_path(params[:store_id], material.id), :method => :delete, :confirm => "确定删除物料？" %><% end %>
+          <% if permission?(:materials, :make_warning) %><%= link_to "设置库存预警", "materials/#{material.id}/set_material_low_count", :remote => true, 'data-type' => 'script' %><% end %>
           <% if material.is_ignore %>
             <%if permission?(:materials, :ignore_cancel)%><%= link_to_function "取消忽略","cancel_ignore(#{material.id},#{@current_store.id},this)"  %><% end %>
           <% else %>
             <% if permission?(:materials, :ignore) %><%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %><% end %>
           <% end %>
+          
         </td>
       </tr>
     <% end %>
