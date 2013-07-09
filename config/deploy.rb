@@ -6,8 +6,8 @@ set :application, "lantan_BAM"  #应用名称
 
 default_run_options[:pty] = true #pty: 伪登录设备  
 set :scm, :git   # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
-                 # set :deploy_via, :copy
-                 # 如果SCM设为空， 也可通过直接copy本地repo部署
+# set :deploy_via, :copy
+# 如果SCM设为空， 也可通过直接copy本地repo部署
 set :repository,  "git@github.com:lifang/lantan_BAM.git" #项目在github上的地址
 #set :ssh_options, { :forward_agent => true }  #deploy时获取github上项目使用你本地的ssh key
 set :git_shallow_clone, 1  #Shallow cloning will do a clone each time, but will only get the top commit, not the entire repository history
@@ -25,17 +25,11 @@ set :rvm_ruby_string, '1.9.2-p320@rails3.1.2'  #设置ruby具体版本号 去rvm
 require 'capistrano/ext/multistage' #多stage部署所需
 require 'capistrano_colors'
 
-on :start do   #自动将github加入到信任的hosts当中去
-  `ssh-add`
-end
 
 after("deploy:symlink") do    #after， before 表示在特定操作之后或之前执行其他任务  
-  # database.yml for localized database connection
-  run "rm #{current_path}/config/database.yml"  #移除当前路径下的数据库配置文件
-  run "ln -s #{shared_path}/database.yml #{current_path}/config/database.yml"  #link数据库文件到shared目录下的yml文件
-
+ 
   # log link
-  run "rm #{current_path}/log"        #移除当前路径下的log文件
+  run "rm -rf #{current_path}/log"        #移除当前路径下的log文件
   run "ln -s #{shared_path}/log/ #{current_path}/log"  #link日志文件到share下的日志文件
 
   run "ln -s /opt/projects/public/bam_public/* #{current_path}/public/"  #link public文件夹到/opt/projects/public/bam_public/
@@ -44,7 +38,11 @@ end
 
 namespace :deploy do  
   task :restart do
-#    run "chmod -R 777 /opt/projects/lantan_BAM/" #每次deploy完给目录下心产生的文件赋权限
+    #    run "chmod -R 777 /opt/projects/lantan_BAM/" # 每次deploy完给目录下新产生的文件赋权限
+
+    # database.yml for localized database connection
+    run "rm #{current_path}/config/database.yml"  #移除当前路径下的数据库配置文件
+    run "ln -s #{shared_path}/database.yml #{current_path}/config/database.yml"  #link数据库文件到shared目录下的yml文件
 
     #nginx -s reload 是重启Nginx
     #touch /tmp/restart.txt 是重启当前的Rails项目

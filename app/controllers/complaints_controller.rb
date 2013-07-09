@@ -32,15 +32,15 @@ class ComplaintsController < ApplicationController
 
   #投诉分类按时间和性别查询统计
   def search_time
-    session[:start_sex],session[:end_sex],session[:sex]=nil,nil,nil
-    session[:start_sex],session[:end_sex],session[:sex]=params[:start_sex],params[:end_sex],params[:sex]
+    session[:start_sex],session[:end_sex],session[:sex],session[:end_name]=nil,nil,nil,nil
+    session[:start_sex],session[:end_sex],session[:sex],session[:end_name]=params[:start_sex],params[:end_sex],params[:sex],params[:end_name]
     redirect_to "/stores/#{params[:store_id]}/complaints/date_list"
   end
   
   #投诉分类按时间和性别查询统计列表
   def date_list
     @complaint =Complaint.search_lis(params[:store_id],session[:created_at])
-    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex])
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex],params[:end_name])
     @size = ((@total_com.values.max.nil? ? 1 :@total_com.values.max)/10+1)*10#生成图表的y的坐标
     render 'index'
   end
@@ -94,15 +94,15 @@ class ComplaintsController < ApplicationController
 
   #满意度图标
   def degree_time
-    session[:start_degree],session[:end_degree],session[:sex_degree]=nil,nil,nil
-    session[:start_degree],session[:end_degree],session[:sex_degree]=params[:start_degree],params[:end_degree],params[:sex]
+    session[:start_degree],session[:end_degree],session[:sex_degree],session[:c_name]=nil,nil,nil,nil
+    session[:start_degree],session[:end_degree],session[:sex_degree],session[:c_name]=params[:start_degree],params[:end_degree],params[:sex],params[:c_name]
     redirect_to "/stores/#{params[:store_id]}/complaints/time_list"
   end
   
   #按照查询的日期生成满意度
   def time_list
     @degree =Complaint.degree_lis(params[:store_id],session[:degree])
-    @total_com = Complaint.degree_day(params[:store_id],session[:start_degree],session[:end_degree],session[:sex_degree])
+    @total_com = Complaint.degree_day(params[:store_id],session[:start_degree],session[:end_degree],session[:sex_degree],session[:c_name])
     render 'satisfy_degree'
   end
 

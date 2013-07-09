@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  depot_id: 1
+  material_id: 1
+  storage: 1
+  status: 1
+
+two:
+  depot_id: 1
+  material_id: 1
+  storage: 1
+  status: 1

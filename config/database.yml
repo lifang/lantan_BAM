@@ -16,10 +16,9 @@ development:
   pool: 5
   username: root
 #  username: comdo
-  password: root
-#  password: comdo2013
+  password: comdo2012
   host: localhost
-#  host: 192.168.0.148
+
 
 
 # Warning: The database defined as "test" will be erased and

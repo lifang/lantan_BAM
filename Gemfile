@@ -33,6 +33,7 @@ gem 'remotipart', '~> 1.0'
 
 # Deploy with Capistrano
  gem 'capistrano'
+ gem 'capistrano_colors'
 
 # To use debugger
 # gem 'ruby-debug19', :require => 'ruby-debug'

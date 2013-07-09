@@ -19,6 +19,7 @@ textarea {
 .box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
 .red { color: #F00;}
+.position_re{ position: relative;}
 
 /*强制换行*/
 .wordBreak {
@@ -39,8 +40,6 @@ textarea {
 .x { width: 10px; height: 10px; background: url(/assets/x.png) no-repeat 0 0; }
 .close { width: 13px; height: 13px; background: url(/assets/close.jpg) no-repeat ; }
 
-
-.red { color: #F00;}
 
 /*tab提示*/
 .tab_popup.tab_alert { width: 500px;}
@@ -85,26 +84,53 @@ textarea {
 
 
 .head { height: 100px; background: #930205;}
-.logo1 {
-    width: 480px;
-    height: 100px;
-    overflow: hidden;
-    float: left;
-    text-indent: -999px;
-    background: url(/assets/logo1.jpg) no-repeat;
+.logo1 { 
+    width: 164px; 
+	height: 100px; 
+	overflow: hidden; 
+	float: left;
+	background: url(/assets/logo1.jpg) no-repeat;
+	padding-left: 170px;
+	color: #FFF;
+	font-size: 18px;
 }
-.logo {
-    width: 270px;
-    height: 50px;
-    background: url(/assets/logo.jpg) no-repeat;
-    overflow: hidden;
-    float: left;
-    text-indent: -999px;
+.logo1 span { display: inline-block; padding-top: 60px;}
+.logo { 
+    width: 270px; 
+	height: 50px; 
+	background: url(/assets/logo.jpg) no-repeat;
+	overflow: hidden; 
+	float: left;
+	padding-left: 90px;
 }
+.logo span { display: inline-block; padding-top: 22px; color: #FFF; font-size: 18px;}
 
 .login { color: #FFF; font-size: 12px; float: right;}
 .login { padding-top: 10px;}
 .login a { margin-left: 5px; color: #FFF;}
+
+.name { 
+    font-size: 24px; 
+	color: #FFF; 
+	text-align: center; 
+	position: absolute; 
+	top: 0; 
+	left: 0; 
+	width:100%;
+	padding-top: 50px;
+	height: 30px;
+	line-height: 30px;
+}
+.name span { display: inline-block;}
+.name .nameInput { 
+    height: 24px; 
+	width: 80px; 
+	display: inline; 
+	background: none; 
+	border: none; 
+	border-bottom: 1px #FFFFFF solid; 
+	color: #FFF;
+}
 
 /*入口*/
 .module { width: 480px; margin: 50px auto 10px auto;}
@@ -459,6 +485,19 @@ a.compile_btn { width: 100px;}
     background: #CCC;
     color: #FFF;
     font-size: 35px;
+}
+.item_reItem {
+	width: 30px;
+	height: 27px;
+	display: block;
+	line-height: 22px;
+	text-align: center; 
+	background: #CCC;
+	color: #FFF;
+	font-size: 35px;
+	position: absolute;
+	right: 0px;
+	top: -1px;
 }
 
 /*suggest*/
