@@ -31,14 +31,6 @@ module ApplicationHelper
       and ((month(now())*30 + day(now()))-(month(birthday)*30 + day(birthday))) > -7")
   end
 
-  def material_types
-    types = []
-    Material::TYPES_NAMES.to_a.each_with_index{|item,idx|
-      types[idx] = [item[1],item[0]]
-    }
-    types
-  end
-
   def staff_names
     names = []
     staffs = Staff.find_by_sql("select id,name from staffs where status = #{Staff::STATUS[:normal]}")

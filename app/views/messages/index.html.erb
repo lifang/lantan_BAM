@@ -40,6 +40,10 @@
       <div>
         <fieldset class="popup_body_fieldset">
           <legend class="popup_body_title">查询结果</legend>
+            <div style="margin: 5px 0 5px 30px;">
+              <input class="select_all" type="checkbox" onclick="selectAllCustomers(this)"/>
+              <label>全选</label>
+            </div>
           <div class="popup_body_result" id="search_div">
             <ul>
               <% @customers.each do |customer| %>

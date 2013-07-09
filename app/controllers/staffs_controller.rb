@@ -31,6 +31,7 @@ class StaffsController < ApplicationController
   def create
     params[:staff][:username] = params[:staff][:name]
     params[:staff][:password] = params[:staff][:phone]
+    params[:staff][:status] = Staff::STATUS[:normal]
     @staff = @store.staffs.new(params[:staff])
     @staff.encrypt_password
     photo = params[:staff][:photo]
@@ -98,6 +99,30 @@ class StaffsController < ApplicationController
     @staff.update_attribute(:status,Staff::STATUS[:deleted] ) if @staff
     flash[:notice] = "成功删除员工"
     redirect_to store_staffs_path(@store)
+  end
+
+  def edit_info
+    @staff = Staff.find_by_id(cookies[:user_id])
+  end
+
+  def update_info
+    if params[:new_password] != params[:confirm_password]
+      flash[:notice] = "新密码和确认密码不一致！"
+      redirect_to "/stores/#{@store.id}/staffs/edit_info" and return
+    end
+    staff = Staff.find_by_id(cookies[:user_id])
+    if staff.has_password?(params[:old_password])
+        staff.password = params[:new_password]
+        staff.encrypt_password
+        if staff.save
+          flash[:notice] = "密码修改成功！"
+        else
+          flash[:notice] = "密码修改失败! #{staff.errors.messages.values.flatten.join("<br/>")}"
+        end
+    else
+      flash[:notice] = "请输入正确的旧密码！"
+    end
+    redirect_to "/stores/#{@store.id}/staffs/edit_info"
   end
 
   private

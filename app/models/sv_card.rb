@@ -10,6 +10,7 @@ class SvCard < ActiveRecord::Base
   USE_RANGE = [:ALL => 1, :CHAIN_STORE => 2, :LOCAL => 3]  #优惠卡使用范围 1全部，2仅连锁店， 3仅本店
   S_USE_RANGE = {1 => "全部", 2 => "仅连锁店", 3 => "仅本店"}
   PER_PAGE = 10
+  scope :normal_included, lambda{|store_id| where(:store_id => store_id, :status => STATUS[:NORMAL])}
 
   #上传图片并裁剪不同比例 目前为50,100,200和原图
   #img_url 上传文件的路径 sale_id所属对象的id

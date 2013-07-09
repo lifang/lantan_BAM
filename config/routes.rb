@@ -105,7 +105,8 @@ LantanBAM::Application.routes.draw do
 
     resources :staffs do
       collection do
-        post "search"
+        post "search", "update_info"
+        get "edit_info"
       end
     end
     resources :violation_rewards
