@@ -93,11 +93,11 @@ function check_goal(e){
 var tishi ="类别"
 var num_n ="金额"
 function add_div(){
-
     var num=$(".popup_body_area div[id *='item']");
-    var  str='<div class="item" id=item_'+ num.length+'>\n\
+    var  str='<div class="item position_re" id=item_'+ num.length+'>\n\
 <input type="text" name="val['+num.length +']" size="12" class="input_s" value="'+tishi +'" onfocus="remove_v(this)" onblur="back_v(this)"  /> \n\
-<input name="goal['+num.length +']" type="text" value="'+ num_n+'" onfocus="remove_v(this)" onblur="back_n(this)"  /></div>';
+<input name="goal['+num.length +']" type="text" value="'+ num_n+'" onfocus="remove_v(this)" onblur="back_n(this)"  />\n\
+<a href="javascript:void(0)" class="item_reItem" onclick="$(#item_'+ num.length+').remove();">-</a></div>';
     $(num[num.length-1]).after(str);
 }
 
