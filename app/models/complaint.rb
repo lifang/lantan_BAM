@@ -34,12 +34,13 @@ class Complaint < ActiveRecord::Base
       :per_page => per_page, :page => page)
   end
   
-  def self.show_types(store_id,created,ended,sex)
+  def self.show_types(store_id,created,ended,sex,name=nil)
     sql = "select count(c.id) total_num,c.types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id}
       and c.status=#{Complaint::STATUS[:PROCESSED]} "
     sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql += " and s.sex=#{sex}" unless sex.to_i==2
+     sql += " and s.name like '%#{name}%'" unless name.nil? || name =="" || name.length==0
     sql += " group by c.types"
     return  Complaint.find_by_sql(sql).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
     
@@ -122,12 +123,13 @@ class Complaint < ActiveRecord::Base
   end
 
 
-  def self.degree_day(store_id,created,ended,sex)
+  def self.degree_day(store_id,created,ended,sex,c_name=nil)
     sql="select count(*) num,is_pleased from orders o inner join customers c on c.id=o.customer_id where o.store_id=#{store_id}
      and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]})"
     sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql += " and c.sex=#{sex}" unless sex.to_i==2
+    sql += " and c.name like '%#{c_name}%'" unless c_name.nil? || c_name =="" || c_name.length==0
     sql += " group by is_pleased"
     orders =Order.find_by_sql(sql).inject(Hash.new){|hash,order| hash[order.is_pleased].nil? ? hash[order.is_pleased]=order.num : hash[order.is_pleased] +=order.num;hash}
     return orders=={} ? nil : orders.select{|k,v|  k != Order::IS_PLEASED[:BAD]}=={} ? 0 :

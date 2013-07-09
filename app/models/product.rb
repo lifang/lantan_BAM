@@ -11,7 +11,7 @@ class Product < ActiveRecord::Base
   has_many :image_urls
   has_many :stations, :through => :station_service_relations
   belongs_to :store
-  PRODUCT_TYPES = {0 => "汽车清洁用品", 1 => "汽车美容用品", 2 => "汽车装饰产品", 3 => "汽车配件产品", 4 => "汽车电子产品",5 =>"其他产品",
+  PRODUCT_TYPES = {0 => "清洁用品", 1 => "美容用品", 2 => "装饰产品", 3 => "配件产品", 4 => "电子产品",5 =>"其他产品",
     6 => "清洗服务", 7 => "维修服务", 8 => "钣喷服务", 9 => "美容服务", 10 => "安装服务", 11 => "其他服务"} #产品类别
   TYPES_NAME = {:OTHER_PROD => 5, :OTHER_SERV => 11}
   PRODUCT_END = 6
