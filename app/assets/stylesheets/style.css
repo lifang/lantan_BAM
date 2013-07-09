@@ -16,7 +16,7 @@ textarea {
 	border: 1px #CCCCCC solid;
 	resize: none;
 }
-.box { width: 1000px; margin: 0 auto; overflow: hidden; position: relative;}
+.box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
 .red { color: #F00;}
 .position_re{ position: relative;}
