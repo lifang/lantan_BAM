@@ -1,4 +1,4 @@
-<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+﻿<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
   <thead>
     <tr class="hbg">
       <td>条形码</td>
@@ -27,10 +27,10 @@
         </td>
         <td>
           <% if permission?(:materials, :material_loss_modify) %>
-            <%= link_to_function "修改", "viewMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
+          <%= link_to_function "修改", "viewMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
           <% end %>
           <% if permission?(:materials, :material_loss_delete) %>
-            <%= link_to_function "删除", "deleteMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
+          <%= link_to_function "删除", "deleteMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
           <% end %>
         </td>
       </tr>

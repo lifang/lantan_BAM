@@ -97,7 +97,7 @@ function add_div(){
     var  str='<div class="item position_re" id=item_'+ num.length+'>\n\
 <input type="text" name="val['+num.length +']" size="12" class="input_s" value="'+tishi +'" onfocus="remove_v(this)" onblur="back_v(this)"  /> \n\
 <input name="goal['+num.length +']" type="text" value="'+ num_n+'" onfocus="remove_v(this)" onblur="back_n(this)"  />\n\
-<a href="javascript:void(0)" class="item_reItem" onclick="$(#item_'+ num.length+').remove();">-</a></div>';
+<a href="javascript:void(0)" class="item_reItem" onclick="$(\'#item_'+ num.length+'\').remove();">-</a></div>';
     $(num[num.length-1]).after(str);
 }
 
@@ -107,14 +107,16 @@ function remove_v(e){
 
 function back_v(e){
     if( e.value==""|| e.length == 0){
-        e.value= tishi
+        e.value= tishi;
+        $(e).attr("onfocus","remove_v(this)")
     }else{
         $(e).attr("onfocus","")
     }
 }
 function back_n(e){
     if( e.value==""|| e.length == 0){
-        e.value= num_n
+        e.value= num_n;
+        $(e).attr("onfocus","remove_v(this)")
     }else{
         $(e).attr("onfocus","")
     }
