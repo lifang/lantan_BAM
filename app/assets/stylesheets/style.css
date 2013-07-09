@@ -19,6 +19,7 @@ textarea {
 .box { width: 1000px; margin: 0 auto; overflow: hidden; position: relative;}
 .clear { clear: both;}
 .red { color: #F00;}
+.position_re{ position: relative;}
 
 /*强制换行*/
 .wordBreak {
@@ -39,8 +40,6 @@ textarea {
 .x { width: 10px; height: 10px; background: url(/assets/x.png) no-repeat 0 0; }
 .close { width: 13px; height: 13px; background: url(/assets/close.jpg) no-repeat ; }
 
-
-.red { color: #F00;}
 
 /*tab提示*/
 .tab_popup.tab_alert { width: 500px;}
@@ -486,6 +485,19 @@ a.compile_btn { width: 100px;}
     background: #CCC;
     color: #FFF;
     font-size: 35px;
+}
+.item_reItem {
+	width: 30px;
+	height: 27px;
+	display: block;
+	line-height: 22px;
+	text-align: center; 
+	background: #CCC;
+	color: #FFF;
+	font-size: 35px;
+	position: absolute;
+	right: 0px;
+	top: -1px;
 }
 
 /*suggest*/
