@@ -423,12 +423,12 @@ a.compile_btn { width: 100px;}
 .pq_mb { margin-bottom: 16px;}
 
 /*编辑*/
-.item { margin: 10px; float: left; overflow: hidden; width: 295px; height: 30px; line-height: 24px;}
+.item { margin:5px 10px; float: left; overflow: hidden; width: 295px; height: 30px; line-height: 24px;}
 .item.item_width { width: 460px;}
 
 
-
-.item_title { font-size: 16px; line-height: 32px; padding-left: 55px;}
+.item_blockArea { background: #f3f3f3;overflow: hidden;}
+.item_title { font-size: 16px; line-height: 32px; padding-left: 55px; background: #fafafa;}
 .item_add { float: right; margin-right: 49px;}
 .item label, .item_textarea label {
     width: 115px;
