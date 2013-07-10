@@ -9,6 +9,24 @@
             <div><label>确认密码：</label><input type="password" name="confirm_password"/></div>
             <div><input type="submit" value="提交"/></div>
           </form>
+          <div class="bcTarget"></div>
+          <div class="bcTarget"></div>
+          <div class="bcTarget"></div>
+          <div class="bcTarget"></div>
+
+          <script type="text/javascript" src="/assets/jquery-barcode.min.js" ></script>
+          <style type="text/css">
+            .bcTarget{
+              float:left;
+              width:200px;
+              height:100px;
+            }
+          </style>
+          <script type="text/javascript">
+            $(document).ready(function(){
+              $(".bcTarget").barcode("1234567890128", "ean13",{barWidth:1, barHeight:30, moduleSize:200});
+            })
+          </script>
       </div>
   </div>
 </div>

@@ -64,7 +64,7 @@ function check_material_num(m_id, store_id, obj){                       //核实
                                                             缺货</td><td id='materialstorage"+m_id+"td'>"+data.material_storage+"</td><td>"+
                                                             data.material_price+"</td></tr></tbody></table></div></div>")
                         }else{
-                             if(l<=0){    //如果有缺货提示信息，但不在缺货信息提示里，则要加上......
+                             if(l<=0){    //如果有缺货提示信息栏，但该记录不在缺货信息提示里，则要加上......
                                 var low_materials_count = parseInt($("#low_materials_span").text());
                                 $("#low_materials_span").text(low_materials_count+1);
                                 var class_name = ($("#low_materials_tbody").find("tr:last").attr("class")=="tbg" ? "" : "tbg");
@@ -980,7 +980,7 @@ function checkMatNum(){
     popup("#setMaterialLow");
     $("#material_low_value").focus();
   }
-  function set_validate(){
+  function set_validate(){   //设置库存预警验证
     var num_flag = (new RegExp(/^\d+$/)).test($.trim($("#material_low_value").val()));
     if(num_flag == false ){
          tishi_alert("请输入正确的正整数!");
@@ -991,6 +991,24 @@ function checkMatNum(){
         })
     }
   }
+  function set_material_low_count_validate(store_id,material_id){ //设置单个物料的库存预警
+      //var a = $("#kucunliebiao .pageTurn").find("em").text();
+      var num_flag = (new RegExp(/^\d+$/)).test($.trim($("#material_low_count").val()));
+      var low_count = $("#material_low_count").val();
+      if(num_flag){
+         $("#remark_div").hide();
+         $(".mask").hide();
+         $.ajax({
+             url: "/stores/"+store_id+"/materials/set_material_low_count_commit",
+             dataType: "script",
+             type: "get",         
+             data: {low_count : low_count, mat_id : material_id}
+         })
+      }else{
+         tishi_alert("请输入合法的数量!");
+      }
+  }
+
   function set_ignore(m_id, store_id,obj){   //忽略库存预警
       var obj_td = $(obj).parent();
       $.ajax({
@@ -1011,8 +1029,8 @@ function checkMatNum(){
                 $(obj).remove();
                 if(data.material_storage <= data.material_low){         //如果设置忽略,且该物料小于库存预警，则要在缺货信息提示里把相应的物料删除掉
                     var l = $("#low_materials_tbody").find("#material"+m_id+"tr").length;  //判断该物料是否已经在缺货信息提示里
-                    if(l>0){
                     var low_materials_count = parseInt($("#low_materials_span").text());
+                    if(l>0){          
                     $("#low_materials_span").text(low_materials_count-1);
                     $("#material"+m_id+"tr").remove();
                     $("#low_materials_tbody").find("tr").removeAttr("class");       //重新加上样式
