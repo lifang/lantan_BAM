@@ -15,9 +15,13 @@
 
   <body>
     <div class="head">
-      <div class="box">
-        <div class="logo1">澜泰门店后台管理系统</div>
+      <div class="box position_re">
+        <div class="logo1"><span>V1.0</span></div>
         <div class="login">你好：<% if is_staff? %><a href="/stores/<%= params[:store_id] %>/staffs/edit_info"><%= cookies[:user_name] %></a><% else %><%= cookies[:user_name] %><% end %> | <a href="/logout">退出</a></div>
+        <div class="name">
+          <span style="display:none;"><input name="" type="text" class="nameInput"/></span>
+           <span style="cursor:pointer;"><%= cookies[:store_name] %></span><span>后台管理系统</span>
+        </div>
       </div>
     </div>
     <div class="main">
