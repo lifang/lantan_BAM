@@ -1,7 +1,7 @@
 <div class="item">
   <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="modify_value()">
     <% @materials.each do |material| %>
-      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{material.price}||#{material.sale_price}" %>" ><%= material.name%></option>
+      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{material.price}||#{material.types}||#{material.sale_price}" %>" ><%= material.name%></option>
     <% end unless @materials.blank?%>
   </select>
 </div>
@@ -28,7 +28,7 @@
 <div class="item">
   <label>类别：</label><select  id="prod_types" name="prod_types">
     <% Product::PRODUCT_TYPES.select {|k,v| k < Product::PRODUCT_END}.each do |key,value| %>
-      <option value="<%= key %>" <%if @product.types==key%> selected<%end%> ><%= value %></option>
+      <option value="<%= key %>" id="<%=key%>" <%if @product.types==key%> selected<%end%> ><%= value %></option>
     <% end %>
   </select>
 </div>
@@ -48,9 +48,26 @@
 <div class="item">
   <label>规格：</label><input name="standard" id="standard" type="text" value="<%= @product.standard %>" />
 </div>
+<div class="item">
+  <label>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @product.prod_point %>" />
+</div>
+<div class="clear"></div>
+<div class="item_title">
+  <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @product.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @product.is_auto_revist  %>"
+         onclick='$("#con_revist,#time_revist").attr("disabled",!$("#auto_revist")[0].checked);$("#auto_revist").val($("#auto_revist")[0].checked+0);'
+         <% if @product.is_auto_revist %>checked<%end%>/>自动回访</div>
+<div class="item_blockArea">
+  <div class="item"><label>回访时间：</label>
+    <input name="time_revist"id="time_revist" type="text" value="<%=@product.auto_time  %>"  <%unless @product.is_auto_revist%>disabled <%end%> /></div>
+  <div class="item_textarea">
+    <label>回访内容：</label><textarea name="con_revist" id="con_revist" cols="" rows="" class="width_textarea"
+         <%unless @product.is_auto_revist%>disabled <%end%>><%=  @product.revist_content  %></textarea>
+  </div>
+</div>
 <div class="item_textarea">
   <label>简介：</label><textarea name="intro" id="intro" cols="" rows="" class="width_textarea"><%=@product.description  %></textarea>
 </div>
+
 <div class="item_textarea">
   <label>描述：</label><textarea  id="add_intro" cols="" rows="" class="width_textarea" style="width:470px"><%=@product.introduction.nil? ? "" : @product.introduction  %></textarea>
   <input type="hidden" name="desc" id="desc" />
@@ -69,7 +86,9 @@
     $("#item_txm").html(html.attr("o_value").split("||")[0]);
     $("#item_kc").html(html.attr("o_value").split("||")[1]);
     $("#t_price").val(html.attr("o_value").split("||")[2]);
-    $("#base_price").val(html.attr("o_value").split("||")[3]);
+    $("#base_price").val(html.attr("o_value").split("||")[4]);
+    $("#prod_types option").attr("selected",'');
+    $("#prod_types option[id='"+html.attr("o_value").split("||")[3] +"']").attr("selected","selected")
   }
 <%unless @materials.blank?%>
     $("#item_txm").html($('#prod_material option:selected').attr("o_value").split("||")[0]);

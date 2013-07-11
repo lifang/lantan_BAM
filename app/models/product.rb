@@ -17,7 +17,7 @@ class Product < ActiveRecord::Base
   PRODUCT_END = 6
   PROD_TYPES = {:PRODUCT =>0, :SERVICE =>1}  #0 为产品 1 为服务
   IS_VALIDATE ={:NO=>0,:YES=>1} #0 无效 已删除状态 1 有效
-
+  IS_AUTO = {:YES=>1,:NO=>0}
   scope :is_service, where(:is_service => true)
   scope :is_normal, where(:status => true)
 end

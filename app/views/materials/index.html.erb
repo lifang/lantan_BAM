@@ -61,7 +61,7 @@
   <div class="popup_body">
     <%= form_tag "/stores/#{@current_store.id}/materials/set_material_low_commit" do %>
     <div class="popup_body_area">
-      <div class="item" >    
+      <div class="item" >
         <%= label_tag "库存预警值:" %>&nbsp;<%= text_field_tag "material_low_value", @current_store.material_low.to_i %>
       </div>
     </div>

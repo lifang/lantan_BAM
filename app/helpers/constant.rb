@@ -140,7 +140,11 @@ module Constant
       :edit_role => ["编辑角色",128],
       :del_role => ["删除角色",256],
       :role_role_set => ["角色设定",512],
-      :edit_store_datas => ["设置门店信息", 1024]
+      
+      :new_depot => ["新建仓库",1024],
+      :edit_depot => ["编辑仓库",2048],
+      :del_depot => ["删除仓库",4096],
+      :edit_store_datas => ["设置门店信息", 8192]
     }
   }
 

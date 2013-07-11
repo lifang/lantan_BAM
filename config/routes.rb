@@ -38,6 +38,7 @@ LantanBAM::Application.routes.draw do
   end
   match "logout" => "logins#logout"
   resources :stores do
+    resources :depots
     resources :market_manages do
       collection do
         get "makets_totals","makets_list","makets_reports","makets_views","makets_goal",
@@ -196,6 +197,7 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
+  match 'stores/:store_id/depots' => 'depots#index'
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"

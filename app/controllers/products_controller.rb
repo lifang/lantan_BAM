@@ -12,7 +12,7 @@ class ProductsController < ApplicationController
   #新建
   def add_prod
     @product=Product.new
-    @materials =Material.find_by_sql( ["select id,name,code,storage,price,sale_price from materials  where  store_id=#{params[:store_id]} and
+    @materials =Material.find_by_sql( ["select id,name,code,storage,price,sale_price,types from materials  where  store_id=#{params[:store_id]} and
               status=#{Material::STATUS[:NORMAL]} and types in (?)", Material::PRODUCT_TYPE])
   end
   
@@ -52,7 +52,10 @@ class ProductsController < ApplicationController
       end if params[:sale_prod]
     else
       ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
-      product.update_attributes({:standard=>params[:standard]})
+      c_parms ={:standard=>params[:standard],:is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],
+        :revist_content=>params[:con_revist]}
+      p c_parms
+      product.update_attributes(c_parms)
     end
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
@@ -70,7 +73,7 @@ class ProductsController < ApplicationController
   def edit_prod
     @product =Product.find(params[:id])
     @img_urls=@product.image_urls
-    @materials =Material.find_by_sql(["select id,name,code,storage,price,sale_price from materials  where  store_id=#{params[:store_id]} and
+    @materials =Material.find_by_sql(["select id,name,code,storage,price,sale_price,types from materials  where  store_id=#{params[:store_id]} and
               status=#{Material::STATUS[:NORMAL]} and types in (?)", Material::PRODUCT_TYPE])
     @material = @product.prod_mat_relations[0]
   end
@@ -82,8 +85,7 @@ class ProductsController < ApplicationController
 
   def update_product(types,product)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
-      :types=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price],
-    }
+      :types=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price]}
     if types == Constant::SERVICE
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],:deduct_percent=>params[:deduct_percent] })
       if params[:sale_prod]
@@ -98,7 +100,8 @@ class ProductsController < ApplicationController
       else
         ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
       end
-      parms.merge!({:standard=>params[:standard]})
+      parms.merge!({:standard=>params[:standard],:is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],:revist_content=>params[:con_revist]})
+      p parms
     end
     begin
       if params[:img_url] and !params[:img_url].keys.blank?

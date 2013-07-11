@@ -40,7 +40,7 @@
           <% if permissions_on_menus?(:sales)%><li><a href="/stores/<%= params[:store_id] %>/sales" class="m_five">营销管理</a></li><% end %>
           <% if permissions_on_menus?(:staffs)%><li><a href="/stores/<%= params[:store_id] %>/staffs" class="m_six">员工管理</a></li><% end %>
           <% if permissions_on_menus?(:base_datas) %>
-            <li><a href="/stores/<%= params[:store_id] %>/station_datas" class="m_seven">基础数据</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/depots" class="m_seven">基础数据</a></li>
           <% end %>
         </ul>
         <div class="clear"></div>
