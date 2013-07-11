@@ -84,31 +84,28 @@ textarea {
 
 
 .head { height: 100px; background: #930205;}
-.logo1 { 
-    width: 164px; 
-	height: 100px; 
-	overflow: hidden; 
-	float: left;
-	background: url(/assets/logo1.jpg) no-repeat;
-	padding-left: 170px;
-	color: #FFF;
-	font-size: 18px;
+.logo1 {
+    width: 480px;
+    height: 100px;
+    overflow: hidden;
+    float: left;
+    text-indent: -999px;
+    background: url(/assets/logo1.jpg) no-repeat;
 }
-.logo1 span { display: inline-block; padding-top: 60px;}
-.logo { 
-    width: 270px; 
-	height: 50px; 
-	background: url(/assets/logo.jpg) no-repeat;
-	overflow: hidden; 
-	float: left;
-	padding-left: 90px;
+.logo {
+    width: 270px;
+    height: 50px;
+    background: url(/assets/logo.jpg) no-repeat;
+    overflow: hidden;
+    float: left;
+    text-indent: -999px;
 }
-.logo span { display: inline-block; padding-top: 22px; color: #FFF; font-size: 18px;}
 
 .login { color: #FFF; font-size: 12px; float: right;}
 .login { padding-top: 10px;}
 .login a { margin-left: 5px; color: #FFF;}
 
+<<<<<<< HEAD
 .name { 
     font-size: 24px; 
 	color: #FFF; 
@@ -131,6 +128,8 @@ textarea {
 	color: #FFF;
 }
 
+=======
+>>>>>>> 032c82a9c1b67e0c0825ffab4d2649077a9abfa0
 /*入口*/
 .module { width: 480px; margin: 50px auto 10px auto;}
 .module ul { overflow: hidden;}
