@@ -465,6 +465,8 @@ a.compile_btn { width: 100px;}
 .item select {float: left;}
 .item select.staff { width: 70px; margin-right: 20px; _margin-right: 16px;}
 .item select.ymd { width: 50px; margin-right: 5px;}
+.item input.xyAxis { width: 40px; margin-right: 5px;}
+.mapIcon { float: right; margin-right:17px;}
 
 .item_textarea { margin: 10px 10px; float: left; overflow: hidden; width: 590px; position: relative;}
 .width_textarea { width: 460px;}

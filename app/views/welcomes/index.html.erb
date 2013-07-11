@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <title>澜泰门店后台管理系统</title>
     <%= stylesheet_link_tag    "application" %>
-    <%= javascript_include_tag "application","kucun" %>
+    <%= javascript_include_tag "application","kucun", "welcome" %>
     <!--[if IE 6]>
     <script src="/assets/DD_belatedPNG_0.0.8a-min.js"></script>
     <script>
@@ -19,8 +19,8 @@
         <div class="logo1"><span>V1.0</span></div>
         <div class="login">你好：<% if is_staff? %><a href="/stores/<%= params[:store_id] %>/staffs/edit_info"><%= cookies[:user_name] %></a><% else %><%= cookies[:user_name] %><% end %> | <a href="/logout">退出</a></div>
         <div class="name">
-          <span style="display:none;"><input name="" type="text" class="nameInput"/></span>
-           <span style="cursor:pointer;" title="点击此处编辑门店名"><%= cookies[:store_name] %></span><span>后台管理系统</span>
+          <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= cookies[:store_id] %>)"/></span>
+           <span style="cursor:pointer;" title="点击此处编辑门店名" onclick="set_store_name(this)"><%= cookies[:store_name] %></span><span>后台管理系统</span>
         </div>
       </div>
     </div>
