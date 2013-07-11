@@ -16,20 +16,22 @@
             </tr>
             </thead>
             <tbody>
-
+                <% @depots.each do |depot| if @depots.length != 0  %>
                 <tr>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td><%= depot.name %></td>
+                  <td><%= depot.status %></td>
+                  <td><%= depot.store_id %></td>
                   <td><% if permission?(:base_datas, :edit_depot) %><%= link_to "编辑", remote: :true, "data-type" => 'script' %><% end %>
                     <% if permission?(:base_datas, :del_depot) %><%= link_to "删除", "/stores/#{@store.id}/depots/#{}", :confirm => "确定需要删除工位吗？", :method => 'delete' %><% end %>
                   </td>
-
                 </tr>
+                <% end %>
+            <% end %>
 
             </tbody>
           </table>
-          <h3>分页</h3>
+          <%= will_paginate @depots, :class => "pageTurn", :previous_label => "上一页",
+                            :next_label => "下一页"  unless @depots.empty?%>
 
         </div>
       </div>
