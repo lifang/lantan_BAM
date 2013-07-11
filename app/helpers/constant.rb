@@ -139,7 +139,12 @@ module Constant
       :add_role => ["添加角色",64],
       :edit_role => ["编辑角色",128],
       :del_role => ["删除角色",256],
-      :role_role_set => ["角色设定",512]
+      :role_role_set => ["角色设定",512],
+      
+      :new_depot => ["新建仓库",1024],
+      :edit_depot => ["编辑仓库",2048],
+      :del_depot => ["删除仓库",4096],
+      :edit_store_datas => ["设置门店信息", 8192]
     }
   }
 
@@ -187,6 +192,7 @@ module Constant
   PCARD_PICS = "pcard_pics"
   SALE_PICS = "sale_pics"
   SVCARD_PICS = "svcardimg"
+  STORE_PICS = "storeimg"
   #产品和活动的类别  图片名称分别为 product_pics 和service_pics
   PRODUCT = "PRODUCT"
   SERVICE = "SERVICE"
