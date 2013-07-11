@@ -465,6 +465,8 @@ a.compile_btn { width: 100px;}
 .item select {float: left;}
 .item select.staff { width: 70px; margin-right: 20px; _margin-right: 16px;}
 .item select.ymd { width: 50px; margin-right: 5px;}
+.item input.xyAxis { width: 40px; margin-right: 5px;}
+.mapIcon { float: right; margin-right:17px;}
 
 .item_textarea { margin: 10px 10px; float: left; overflow: hidden; width: 590px; position: relative;}
 .width_textarea { width: 460px;}
@@ -886,6 +888,21 @@ a.compile_btn { width: 100px;}
     margin: 0 auto;
     padding: 0 auto;
 }
+
+/*修改账户密码*/
+.pressWord_box { width: 310px; margin: 10px auto 40px;}
+.pressWord_box h3 { text-align: center;}
+.pw_list { padding: 5px 0; margin-bottom: 10px;}
+.pw_list label { 
+    width: 100px; 
+	line-height: 24px; 
+	display: inline-block; 
+	text-align: right; 
+	color: #930205; 
+	font-weight:bold;
+}
+.pw_list input { height: 24px; line-height: 24px; border: 1px #CCCCCC solid; width: 200px;}
+
 /*#materials_tab_table th, #materials_tab_table td{width:12.5%; word-break:break-all}*/
 #role_staffs .data_table td{width:33.3%; word-break:break-all}
 .station-data .data_table td{width:25%; word-break:break-all}
@@ -899,3 +916,4 @@ a.compile_btn { width: 100px;}
     line-height: 24px;
     padding: 5px 0;
 }
+
