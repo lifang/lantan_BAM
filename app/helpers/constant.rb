@@ -188,6 +188,7 @@ module Constant
   PCARD_PICS = "pcard_pics"
   SALE_PICS = "sale_pics"
   SVCARD_PICS = "svcardimg"
+  STORE_PICS = "storeimg"
   #产品和活动的类别  图片名称分别为 product_pics 和service_pics
   PRODUCT = "PRODUCT"
   SERVICE = "SERVICE"
