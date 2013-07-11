@@ -105,8 +105,7 @@ textarea {
 .login { padding-top: 10px;}
 .login a { margin-left: 5px; color: #FFF;}
 
-<<<<<<< HEAD
-.name { 
+.name {
     font-size: 24px; 
 	color: #FFF; 
 	text-align: center; 
@@ -128,8 +127,6 @@ textarea {
 	color: #FFF;
 }
 
-=======
->>>>>>> 032c82a9c1b67e0c0825ffab4d2649077a9abfa0
 /*入口*/
 .module { width: 480px; margin: 50px auto 10px auto;}
 .module ul { overflow: hidden;}
