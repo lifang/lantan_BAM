@@ -2,7 +2,7 @@
   <div class="box">
     <div class="data_box">
       <div class="data_menu">
-        <% if permission?(:base_datas, :new_station_data) %><%= link_to "新建仓库", new_store_depot_path(@store), remote: :true, "data-type" => 'script', :class =>"add_btn" %><% end %></div>
+        <% if permission?(:base_datas, :new_depot) %><%= link_to "新建仓库", new_store_depot_path(@store), remote: :true, "data-type" => 'script', :class =>"add_btn" %><% end %></div>
       <div class="clear"></div>
       <div class="data_body">
         <div class="station-data">
