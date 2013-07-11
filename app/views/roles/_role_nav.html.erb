@@ -1,5 +1,6 @@
 <div class="nav">
-  <ul>        
+  <ul>
+    <li><%= link_to "仓库", store_depots_url(params[:store_id]), :class => cover_div("depots") %></li>
     <li><%= link_to "工位", store_station_datas_url(params[:store_id]), :class => cover_div("station_datas") %></li>
     <% if permission?(:base_datas,:roles) %><li><%= link_to "权限", store_roles_url(params[:store_id]), :class => cover_div("roles") %></li><% end %>
   </ul>
