@@ -134,7 +134,11 @@ LantanBAM::Application.routes.draw do
         get "page_suppliers"
       end
     end
-    resources :welcomes
+    resources :welcomes do
+      collection do
+        post "edit_store_name"
+      end
+    end
     resources :customers do
       collection do
         post "search", "customer_mark", "single_send_message"

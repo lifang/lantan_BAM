@@ -135,8 +135,8 @@ module ApplicationHelper
     @material_orders_received = MaterialOrder.where("m_status = ? and supplier_id = ? and store_id = ?", MaterialOrder::M_STATUS[:received], 0, params[:store_id])
     @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ? and store_id = ?", MaterialOrder::M_STATUS[:send], 0, params[:store_id])
     store = Store.find_by_id(params[:store_id].to_i)
-    @low_materials = Material.where(["status = ? and store_id = ? and storage <= ? and is_ignore = ?", Material::STATUS[:NORMAL],
-        store.id, store.material_low, Material::IS_IGNORE[:NO]])
+    @low_materials = Material.where(["status = ? and store_id = ? and storage <= material_low and is_ignore = ?", Material::STATUS[:NORMAL],
+        store.id, Material::IS_IGNORE[:NO]])
   end
 
   def random_file_name(file_name)
