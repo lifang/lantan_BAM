@@ -21,7 +21,7 @@
                   <td></td>
                   <td></td>
                   <td></td>
-                  <td><% if permission?(:base_datas, :edit_depot) %><%= link_to "编辑", edit_store_depot_path(@store, station), remote: :true, "data-type" => 'script' %><% end %>
+                  <td><% if permission?(:base_datas, :edit_depot) %><%= link_to "编辑", remote: :true, "data-type" => 'script' %><% end %>
                     <% if permission?(:base_datas, :del_depot) %><%= link_to "删除", "/stores/#{@store.id}/depots/#{}", :confirm => "确定需要删除工位吗？", :method => 'delete' %><% end %>
                   </td>
 
