@@ -103,6 +103,25 @@ class StaffsController < ApplicationController
 
   def edit_info
     @staff = Staff.find_by_id(cookies[:user_id])
+#    require 'barby'
+# require 'barby/barcode/code_128'
+# require 'barby/barcode/ean_8'
+# require 'barby/outputter/ascii_outputter'
+#
+# barcode = Barby::Code128B.new('BARBY')
+#
+#    require 'barby/outputter/rmagick_outputter'
+#
+#    require 'barby/outputter/png_outputter'
+#    @blob = Barby::PngOutputter.new(barcode).to_png
+#
+#    @outputter = Barby::RmagickOutputter.new(barcode)
+#    puts "*********"
+#    puts barcode.to_ascii
+#    puts "**********"
+#@a = Barby::RmagickOutputter.new(barcode1)
+#    require 'barby/outputter/html_outputter'
+#@outputter1 = Barby::HtmlOutputter.new(barcode)
   end
 
   def update_info

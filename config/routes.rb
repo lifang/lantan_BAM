@@ -110,6 +110,7 @@ LantanBAM::Application.routes.draw do
         get "edit_info"
       end
     end
+    resources :work_records
     resources :violation_rewards
     resources :trains
     resources :month_scores do
