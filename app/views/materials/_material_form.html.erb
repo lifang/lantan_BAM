@@ -12,20 +12,12 @@
             <%= f.select :types, Material::TYPES_NAMES.invert,{:prompt => "请选择"} %>
           </div>
           <div class="item">
-            <%= f.label :code,"条形码：" %>
-            <%= f.text_field :code %>
-          </div>
-          <div class="item">
             <%= f.label :price,"成本价：" %>
             <%= f.text_field :price %>
           </div>
           <div class="item">
             <%= f.label :sale_price,"零售价：" %>
             <%= f.text_field :sale_price %>
-          </div>
-          <div class="item">
-            <%= f.label :storage,"数量：" %>
-            <%= f.text_field :storage %>
           </div>
           <div class="item">
             <%= f.label :unit,"规格：" %>

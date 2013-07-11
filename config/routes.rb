@@ -198,6 +198,7 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
   match 'stores/:store_id/depots' => 'depots#index'
+  match 'stores/:store_id/check_mat_num' => 'materials#check_mat_num'
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"
