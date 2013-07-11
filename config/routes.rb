@@ -106,8 +106,7 @@ LantanBAM::Application.routes.draw do
 
     resources :staffs do
       collection do
-        post "search", "update_info"
-        get "edit_info"
+        post "search"
       end
     end
     resources :work_records
@@ -138,7 +137,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :welcomes do
       collection do
-        post "edit_store_name"
+        post "edit_store_name", "update_staff_password"
       end
     end
     resources :customers do
