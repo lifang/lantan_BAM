@@ -52,6 +52,8 @@ class LoginsController < ApplicationController
     cookies.delete(:user_name)
     cookies.delete(:user_roles)
     cookies.delete(:model_role)
+    cookies.delete(:store_name)
+    cookies.delete(:store_id)
     redirect_to root_path
   end
 end

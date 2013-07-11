@@ -94,11 +94,11 @@ LantanBAM::Application.routes.draw do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
-          "cancel_ignore","search_materials","page_materials_losses"
+          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"
       end
       member do
-        get "mat_order_detail","get_remark" ,"receive_order","tuihuo"
+        get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"
         post "remark"
       end
     end
@@ -134,7 +134,11 @@ LantanBAM::Application.routes.draw do
         get "page_suppliers"
       end
     end
-    resources :welcomes
+    resources :welcomes do
+      collection do
+        post "edit_store_name"
+      end
+    end
     resources :customers do
       collection do
         post "search", "customer_mark", "single_send_message"

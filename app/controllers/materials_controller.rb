@@ -27,8 +27,8 @@ class MaterialsController < ApplicationController
     @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id].to_i
     @material_order_urgent = MaterialOrder.where(:id => @material_pay_notices.map(&:target_id))
     @mat_in = params[:mat_in] if params[:mat_in]
-    @low_materials = Material.where(["status = ? and store_id = ? and storage <= ? and is_ignore = ?", Material::STATUS[:NORMAL],
-        @current_store.id, @current_store.material_low, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
+    @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
+                                    and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
     respond_to do |format|
       format.html
       format.js
@@ -189,9 +189,9 @@ class MaterialsController < ApplicationController
   def check
     #puts params[:num],"m_id:#{params[:id]}"
     material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
-    current_store = Store.find_by_id(params[:store_id].to_i)
+    #current_store = Store.find_by_id(params[:store_id].to_i)
     if material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
-      render :json => {:status => 1, :material_low => current_store.material_low, :material_storage => material.storage,
+      render :json => {:status => 1, :material_low => material.material_low, :material_storage => material.storage,
                           :material_code => material.code, :material_name => material.name,
                           :material_type => Material::TYPES_NAMES[material.types], :material_price => material.price}
     else
@@ -661,13 +661,35 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #设置单个库存预警
+  def set_material_low_count
+    @store_id = params[:store_id].to_i
+    @material = Material.find_by_id_and_store_id(params[:id].to_i, @store_id)
+  end
+  
+  #设置单个库存预警提交
+  def set_material_low_count_commit
+    material = Material.find_by_id_and_store_id(params[:mat_id].to_i,params[:store_id].to_i)
+    if material.nil?
+      @status = 0
+    else
+      if material.update_attribute("material_low", params[:low_count].to_i)
+        @status = 1
+        @material = material
+        @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
+                                    and is_ignore = ?", Material::STATUS[:NORMAL],params[:store_id].to_i, Material::IS_IGNORE[:NO]])
+      else
+        @status = 0
+      end
+    end
+  end
 
   def set_ignore   #设置物料忽略预警
-    current_store = Store.find_by_id(params[:store_id].to_i)
+    #current_store = Store.find_by_id(params[:store_id].to_i)
     material = Material.find_by_id_and_store_id(params[:m_id].to_i, params[:store_id])
     if material
       if material.update_attribute("is_ignore", Material::IS_IGNORE[:YES])
-        render :json => {:status => 1, :material_low => current_store.material_low, :material_storage => material.storage}
+        render :json => {:status => 1, :material_low => material.material_low, :material_storage => material.storage}
       else
         render :json => {:status => 0}
       end
@@ -678,10 +700,10 @@ class MaterialsController < ApplicationController
 
   def cancel_ignore   #取消设置物料预警
     material = Material.find_by_id_and_store_id(params[:m_id].to_i,params[:store_id].to_i)
-    current_store = Store.find_by_id(params[:store_id].to_i)
+    #current_store = Store.find_by_id(params[:store_id].to_i)
     if material
       if material.update_attribute("is_ignore", Material::IS_IGNORE[:NO])
-        render :json => {:status => 1, :material_low => current_store.material_low, :material_storage => material.storage,
+        render :json => {:status => 1, :material_low => material.material_low, :material_storage => material.storage,
                           :material_code => material.code, :material_name => material.name,
                           :material_type => Material::TYPES_NAMES[material.types], :material_price => material.price}
       else
