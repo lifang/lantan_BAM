@@ -2,6 +2,7 @@
   <ul>        
     <li><%= link_to "工位", store_station_datas_url(params[:store_id]), :class => cover_div("station_datas") %></li>
     <% if permission?(:base_datas,:roles) %><li><%= link_to "权限", store_roles_url(params[:store_id]), :class => cover_div("roles") %></li><% end %>
+    <% if permission?(:base_datas,:edit_store_datas) %><li><%= link_to "设置门店信息", "/stores/#{params[:store_id]}/set_stores/edit", :class =>cover_div("set_stores") %></li><% end %>
   </ul>
 </div>
 <div class="back"><a href="/stores/<%= params[:store_id] %>/welcomes" title="返回">Back</a>基础数据</div>

@@ -139,7 +139,8 @@ module Constant
       :add_role => ["添加角色",64],
       :edit_role => ["编辑角色",128],
       :del_role => ["删除角色",256],
-      :role_role_set => ["角色设定",512]
+      :role_role_set => ["角色设定",512],
+      :edit_store_datas => ["设置门店信息", 1024]
     }
   }
 
