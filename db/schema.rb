@@ -11,14 +11,14 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130711033518) do
+ActiveRecord::Schema.define(:version => 20130712021130) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
     t.integer  "package_card_id"
     t.datetime "ended_at"
     t.boolean  "status"
-    t.string   "content"
+    t.text     "content"
     t.datetime "created_at"
     t.float    "price",           :default => 0.0
     t.datetime "updated_at"
@@ -100,6 +100,7 @@ ActiveRecord::Schema.define(:version => 20130711033518) do
     t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "staff_id"
   end
 
   create_table "chart_images", :force => true do |t|
@@ -530,7 +531,7 @@ ActiveRecord::Schema.define(:version => 20130711033518) do
   create_table "orders", :force => true do |t|
     t.string   "code"
     t.integer  "car_num_id"
-    t.integer  "status"
+    t.integer  "status",              :limit => 2
     t.datetime "started_at"
     t.datetime "ended_at"
     t.float    "price"
@@ -632,7 +633,7 @@ ActiveRecord::Schema.define(:version => 20130711033518) do
     t.string   "name"
     t.float    "base_price"
     t.float    "sale_price"
-    t.string   "description"
+    t.text     "description"
     t.integer  "types"
     t.string   "service_code"
     t.boolean  "status"
@@ -1004,7 +1005,7 @@ ActiveRecord::Schema.define(:version => 20130711033518) do
     t.string   "name"
     t.string   "img_url"
     t.integer  "types"
-    t.float    "price"
+    t.float    "price",       :limit => 11
     t.float    "discount"
     t.datetime "created_at"
     t.datetime "updated_at"
