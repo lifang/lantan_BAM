@@ -5,7 +5,7 @@ class RolesController < ApplicationController
 
   #角色列表
   def index
-    @roles = Role.all
+    @roles = Role.find_all_by_store_id(params[:store_id].to_i)
     @role_id = params[:role_id] if params[:role_id]
     @menus = Menu.all
     @role_menu_relation_menu_ids = RoleMenuRelation.where(:role_id => @role_id).map(&:menu_id) if @role_id
@@ -27,7 +27,7 @@ class RolesController < ApplicationController
 
   #添加角色
   def create
-    role = Role.find_by_name params[:name]
+    role = Role.find_by_name_and_store_id(params[:name], params[:store_id].to_i)
     status = 0
     if role.nil?
       Role.create(:name => params[:name])
