@@ -54,14 +54,19 @@
 <div class="clear"></div>
 <div class="item_title">
   <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @product.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @product.is_auto_revist  %>"
-         onclick='$("#con_revist,#time_revist").attr("disabled",!$("#auto_revist")[0].checked);$("#auto_revist").val($("#auto_revist")[0].checked+0);'
-         <% if @product.is_auto_revist %>checked<%end%>/>自动回访</div>
+         onclick="check_revist()" <% if @product.is_auto_revist %>checked<%end%>/>自动回访</div>
 <div class="item_blockArea">
   <div class="item"><label>回访时间：</label>
-    <input name="time_revist"id="time_revist" type="text" value="<%=@product.auto_time  %>"  <%unless @product.is_auto_revist%>disabled <%end%> /></div>
+    <select  id="time_revist" name="time_revist" <%unless @product.is_auto_revist%>disabled <%end%>>
+      <option value="">--</option>
+      <% Product::REVIST_TIME.each do |key| %>
+        <option value="<%= key %>" id="<%=key%>" <%if @product.auto_time ==key%> selected<%end%> ><%= key %>小时</option>
+      <% end %>
+    </select>
+  </div>
   <div class="item_textarea">
     <label>回访内容：</label><textarea name="con_revist" id="con_revist" cols="" rows="" class="width_textarea"
-         <%unless @product.is_auto_revist%>disabled <%end%>><%=  @product.revist_content  %></textarea>
+                                  <%unless @product.is_auto_revist%>disabled <%end%>><%=  @product.is_auto_revist ? @product.revist_content : ""  %></textarea>
   </div>
 </div>
 <div class="item_textarea">

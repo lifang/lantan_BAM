@@ -79,6 +79,84 @@ class Station < ActiveRecord::Base
       }
     }
   end
+  
+  def self.set_station(store_id,h_staff,h_level)
+    p "start+++++++++StoreId-#{store_id} StaffId-#{h_staff} StaffLevel-#{h_level}"
+    s_levels ={}  #所需技师等级
+    o_staffs = {}  #已分配技师的工位
+    o_tech =[] #已分配工位的技师
+    t_staffs ={}
+    StationStaffRelation.joins(:staff).where("current_day=#{Time.now.strftime("%Y%m%d").to_i} and station_staff_relations.store_id=#{store_id}").select("staffs.level,station_staff_relations.*").each{
+      |staff|o_tech << staff.staff_id;o_staffs[staff.station_id].nil? ? o_staffs[staff.station_id] = staff.level : o_staffs.delete(staff.station_id);
+      t_staffs[staff.station_id].nil? ? t_staffs[staff.station_id] = [staff.level] : t_staffs[staff.station_id] << staff.level}
+    unless o_tech.include? h_staff  #如果该员工已分配工位则不再分配
+      stations=Station.where("store_id=#{store_id} and status != #{Station::STAT[:WRONG]} and status !=#{Station::STAT[:DELETED]}")
+      stations.each do |station|
+        if station.staff_level  #兼容老数据，当工位没有服务等级的时候自动修改工位的等级
+          if t_staffs[station.id].nil? #该工位未分配技师时
+            s_levels[station.staff_level].nil? ? s_levels[station.staff_level]=[station.id] : s_levels[station.staff_level] << station.id
+            s_levels[station.staff_level1].nil? ? s_levels[station.staff_level1]=[station.id] : s_levels[station.staff_level1] << station.id
+          elsif o_staffs[station.id] #如果已分配技师则判断是否只有一个，o_staffs存在的话就证明只分配了一个
+            levels = [station.staff_level] | [station.staff_level1]
+            if levels.length==1 && o_staffs[station.id] #当工位要求的技师等级相同且已经分配时
+              s_levels[station.staff_level].nil? ? s_levels[station.staff_level]=[station.id] : s_levels[station.staff_level] << station.id
+            elsif levels.length==2
+              if levels.include? o_staffs[station.id]  #如果已分配的技师和其中的一个等级一致
+                levels.delete(o_staffs[station.id])
+                s_levels[levels[0]].nil? ? s_levels[levels[0]]=[station.id] : s_levels[levels[0]] << station.id
+              else
+                if levels.min > o_staffs[station.id]  #所需最高级技师小于当前技师等级时则覆盖最高技师，将所需低级工位
+                  s_levels[levels.max].nil? ? s_levels[levels.max]=[station.id] : s_levels[levels.max] << station.id
+                else  #如果无法覆盖则意味着能够覆盖低级工位，将高级的去分配
+                  s_levels[levels.min].nil? ? s_levels[levels.min]=[station.id] : s_levels[levels.min] << station.id
+                end
+              end
+            end
+          end
+        else
+          prod=Product.find_by_sql("select staff_level level1,staff_level_1 level2 from products p inner join station_service_relations  s on
+      s.product_id=p.id where s.station_id=#{station.id}").inject(Array.new) {|sum,level| sum.push(level.level1,level.level2)}.compact.uniq.sort
+          unless prod.blank?
+            Station.find(station.id).update_attributes(:staff_level=>prod.min,:staff_level1=>prod[0..(prod.length/2.0)].max)
+          else
+            Station.find(station.id).update_attributes(:status=>Station::STAT[:NO_SERVICE])
+          end
+        end
+      end
+      s_levels.each_pair { |key,value| s_levels[key]=value.uniq.sort }
+      if s_levels[h_level].nil? || s_levels[h_level].blank? #没有合适的工位级别或者改级别工位已分配完毕
+        Staff::LEVELS.keys[(h_level+1)..Staff::LEVELS.keys.length].each do |level|
+          if s_levels[level] && !s_levels[level].blank?
+            h_level =  level
+            break
+          end
+        end
+      end
+      if s_levels[h_level] && !s_levels[h_level].blank?
+        if  o_staffs.keys.blank? #当工位都没有分配的时候
+          p "00#{store_id}"
+          StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
+        else #已分配的工位
+          is_half = true
+          s_levels[h_level].each{|station|
+            if o_staffs.keys.include? station
+              p "==#{store_id}"
+              StationStaffRelation.create(:station_id=>station,:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
+              Station.find(station).update_attributes(:status=>Station::STAT[:NORMAL])
+              is_half = false
+              break
+            end
+          }
+          if  is_half  #已分配工位中不包含当前级别的技师
+            p p "=--#{store_id}"
+            StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
+            Station.find(s_levels[h_level][0]).update_attributes(:status=>Station::STAT[:LACK])
+          end
+        end
+      end
+    end
+    p "end ============"
+  end
 
   def self.make_data(store_id)
     return  "select c.num,w.station_id,o.front_staff_id,s.name,w.status,w.order_id from work_orders w inner join orders o on w.order_id=o.id inner join car_nums c on c.id=o.car_num_id

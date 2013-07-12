@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130709073850) do
+ActiveRecord::Schema.define(:version => 20130712063338) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -170,6 +170,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.string   "encrypted_password"
     t.string   "username"
     t.string   "salt"
+    t.integer  "total_point"
   end
 
   add_index "customers", ["username"], :name => "index_customers_on_username"
@@ -344,11 +345,13 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "remark",     :limit => 1000
+    t.string   "remark",       :limit => 1000
     t.integer  "check_num"
     t.float    "sale_price"
     t.string   "unit"
-    t.boolean  "is_ignore",                  :default => false
+    t.boolean  "is_ignore",                    :default => false
+    t.integer  "material_low"
+    t.string   "code_img"
   end
 
   create_table "menus", :force => true do |t|
@@ -484,8 +487,12 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "price"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "date_types", :default => 0
+    t.integer  "date_types",     :default => 0
     t.integer  "date_month"
+    t.boolean  "is_auto_revist"
+    t.integer  "auto_time"
+    t.text     "revist_content"
+    t.integer  "prod_point"
   end
 
   add_index "package_cards", ["updated_at"], :name => "index_package_cards_on_updated_at"
@@ -500,6 +507,19 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
 
   add_index "pcard_prod_relations", ["created_at"], :name => "index_pcard_prod_relations_on_created_at"
   add_index "pcard_prod_relations", ["updated_at"], :name => "index_pcard_prod_relations_on_updated_at"
+
+  create_table "points", :force => true do |t|
+    t.integer  "customer_id"
+    t.integer  "target_id"
+    t.integer  "point_num"
+    t.string   "target_content"
+    t.integer  "types"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "points", ["customer_id"], :name => "index_points_on_customer_id"
+  add_index "points", ["target_id"], :name => "index_points_on_target_id"
 
   create_table "prod_mat_relations", :force => true do |t|
     t.integer  "product_id"
@@ -535,6 +555,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.boolean  "is_auto_revist"
     t.integer  "auto_time"
     t.text     "revist_content"
+    t.integer  "prod_point"
   end
 
   create_table "res_prod_relations", :force => true do |t|
@@ -584,6 +605,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "menu_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "role_menu_relations", ["created_at"], :name => "index_role_menu_relations_on_created_at"
@@ -595,6 +617,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.string   "model_name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "role_model_relations", ["created_at"], :name => "index_role_model_relations_on_created_at"
@@ -604,6 +627,8 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
+    t.integer  "role_type"
   end
 
   add_index "roles", ["created_at"], :name => "index_roles_on_created_at"
@@ -751,8 +776,10 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "current_day"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
+  add_index "station_staff_relations", ["store_id"], :name => "index_station_staff_relations_on_store_id"
   add_index "station_staff_relations", ["updated_at"], :name => "index_station_staff_relations_on_updated_at"
 
   create_table "stations", :force => true do |t|
@@ -773,6 +800,8 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.string   "month_hmi"
     t.string   "once_gas_use"
     t.string   "once_water_use"
+    t.integer  "staff_level"
+    t.integer  "staff_level1"
   end
 
   create_table "store_chains_relations", :force => true do |t|
