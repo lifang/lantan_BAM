@@ -34,10 +34,9 @@
           </thead>
           <tbody class="mat-out-list"></tbody>
         </table>
-        <%= hidden_field_tag "store_id", @store_id%>
         <div class="clear"></div>
         <div class="btn_box_s">
-          <button onclick="checkNums()" type="button" class="confirm_btn">入库</button>
+          <button onclick="checkNums(<%= @store_id %>)" type="button" class="confirm_btn">入库</button>
         </div>
       <% end %>
     </div>

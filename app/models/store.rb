@@ -21,6 +21,7 @@ class Store < ActiveRecord::Base
   has_many :depots
 
   belongs_to :city
+  has_many :roles
    STATUS = {
     :CLOSED => 0,       #0该门店已关闭，1正常营业，2装修中, 3已删除
     :OPENED => 1,

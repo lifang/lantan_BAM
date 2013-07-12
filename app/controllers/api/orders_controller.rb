@@ -362,4 +362,67 @@ class Api::OrdersController < ApplicationController
     end
     render :json => {:content => message, :status => status}
   end
+
+  #工位完成施工，技师会用手机触发，给工位进行排单
+  def work_order_finished
+      current_time = Time.now
+      work_order = WorkOrder.find_by_id(params[:work_order_id])
+      if work_order
+        #把完成的单的状态置为等待付款
+        runtime = sprintf('%.2f',(current_time - work_order.started_at)/60).to_f
+        work_order.update_attributes(:status => WorkOrder::STAT[:WAIT_PAY], :runtime => runtime)
+        order = work_order.order
+        if runtime > work_order.cost_time
+          staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+          staffs.each do |staff_id|
+            ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
+            :situation => "订单号#{order.code}超时#{runtime - work_order.cost_time}分钟",
+            :status => ViolationReward::STATUS[:NOMAL])
+          end
+        end
+        order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order
+
+        #排下一个单
+        next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
+                                    where("station_id = #{work_order.station_id}").
+                                    where("store_id = #{work_order.store_id}").
+                                    where("current_day = #{work_order.current_day}").first
+        if next_work_order
+          #同一个人的下单，直接紧接着排单
+          ended_at = current_time + next_work_order.cost_time*60
+          next_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
+            :started_at => current_time, :ended_at => ended_at )
+          next_order = next_work_order.order
+          next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order
+        else
+          #按照created_at时间来排单
+          another_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
+                              where("station_id is null").
+                              where("store_id = #{work_order.store_id}").
+                              where("current_day = #{work_order.current_day}").order("created_at asc").first
+          if another_work_order
+            another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
+              :started_at => current_time, :ended_at => ended_at, :station_id => work_order.station_id)
+            another_order = another_work_order.order
+            another_order.update_attribute(:status, Order::STATUS[:SERVICING]) if another_order
+          end
+        end
+      end
+      render :json => "sort_station_success"
+    end
+
+  #手机入库
+  def into_materials
+    store_id = params[:store_id]
+    code = params[:code]
+    check_num = params[:check_num]
+    material = Material.where("code = #{code} and store_id = #{store_id}").first
+    if material
+      material.update_attribute(:check_num, check_num)
+      render :json => "success"
+    else
+      render :json => "error"
+    end
+  end
+  
 end

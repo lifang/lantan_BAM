@@ -150,4 +150,17 @@ module ApplicationHelper
     1.upto(len) {code_array << chars[rand(chars.length)]}
     return code_array.join("")
   end
+
+#物料
+  def get_mo(material,material_orders)
+    mos = []
+    material_orders.each do |material_order|
+      mio_num = MatInOrder.where(:material_id => material.id, :material_order_id => material_order.id).sum(:material_num)
+      moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
+      if mio_num < moi_num
+        mos <<  material_order
+      end
+    end
+    mos
+  end
 end

@@ -2,6 +2,7 @@
 class RolesController < ApplicationController
   layout "role"
   before_filter :sign?
+  before_filter :find_store
 
   #角色列表
   def index
@@ -17,12 +18,14 @@ class RolesController < ApplicationController
 
   #修改角色名称
   def update
-    puts params[:name],params[:id]
-    role = Role.find_by_id params[:id]
+    role = Role.find_by_id_and_store_id params[:id], params[:store_id]
+    status = 0
     if role
       role.update_attribute(:name, params[:name])
+    else
+      status = 1
     end
-    render :json => {:status => 0}
+    render :json => {:status => status}
   end
 
   #添加角色
@@ -115,5 +118,11 @@ class RolesController < ApplicationController
       status = 1
     end
     render :json => {:status => status}
+  end
+
+  private
+
+  def find_store
+    @store = Store.find_by_id(params[:store_id]) || not_found
   end
 end

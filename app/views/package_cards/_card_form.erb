@@ -6,6 +6,9 @@
 <div class="item">
   <label>套餐价格：</label><input name="price" id="price" type="text" value="<%= @pcard.price %>" />
 </div>
+<div class="item">
+  <label>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @pcard.prod_point %>" />
+</div>
 <div class="item_textarea">
   <span class="item_radio"><input name="time_select" type="radio" checked value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>"
                                   onclick="$('#end_time').attr('disabled',true).val('');$('#started_at,#ended_at').attr('disabled',false)" /></span>
@@ -24,6 +27,24 @@
   <label>套餐卡配图：</label>
   <input type="file" name="img_url" id="sale_img"  class="file" size="50px" /><span class="show_pic" >
     <img src="<%=  @pcard.img_url.nil? ? "" : @pcard.img_url.gsub("img#{@pcard.id}","img#{@pcard.id}_#{Constant::C_PICSIZE[2]}") %>" /></span>
+</div>
+<div class="clear"></div>
+<div class="item_title">
+  <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @pcard.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @pcard.is_auto_revist  %>"
+         onclick="check_revist()" <% if @pcard.is_auto_revist %>checked<%end%>/>自动回访</div>
+<div class="item_blockArea">
+  <div class="item"><label>回访时间：</label>
+    <select  id="time_revist" name="time_revist" <%unless @pcard.is_auto_revist%>disabled <%end%>>
+      <option value="">--</option>
+      <% Product::REVIST_TIME.each do |key| %>
+        <option value="<%= key %>" id="<%=key%>" <%if @pcard.auto_time ==key%> selected<%end%> ><%= key %>小时</option>
+      <% end %>
+    </select>
+  </div>
+  <div class="item_textarea">
+    <label>回访内容：</label><textarea name="con_revist" id="con_revist" cols="" rows="" class="width_textarea"
+                                  <%unless @pcard.is_auto_revist%>disabled <%end%>><%=  @pcard.is_auto_revist ? @pcard.revist_content : ""  %></textarea>
+  </div>
 </div>
 <input type="hidden" value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>" id="date1" />
 <div class="clear"></div>

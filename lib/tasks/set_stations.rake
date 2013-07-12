@@ -4,7 +4,14 @@ namespace :daily do
   task(:set_stations => :environment) do
     Store.all.each {|store| Station.set_stations(store.id)}
   end
-
+  task(:set_station => :environment) do
+    Store.all.each {|store|
+      StationStaffRelation.where("current_day=#{Time.now.strftime("%Y%m%d")} and store_id=#{store.id}").each {|station| station.destroy}
+      Staff.where("store_id=#{store.id} and type_of_w=#{Staff::S_COMPANY[:TECHNICIAN]} and status=#{Staff::STATUS[:normal]}").each {|staff|
+        Station.set_station(store.id,staff.id,staff.level)
+      }
+    }
+  end
   task(:sync_local_data => :environment) do
     Store.all.each {|store| Sync.out_data(store.id)}
   end
