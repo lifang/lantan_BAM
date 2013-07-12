@@ -1,3 +1,4 @@
+<% mat_in_flag ||= 0 %>
 <div class="search">
   <div>
     <label>条形码：</label>
@@ -17,6 +18,6 @@
     </select>
   </div>
   <div>
-    <button class="search_btn" onclick="search_materials('<%= tab_name %>',<%= @current_store.id %>, this)">查询</button>
+    <button class="search_btn" onclick="search_materials('<%= tab_name %>',<%= @current_store.id %>, this, <%= mat_in_flag %>)">查询</button>
   </div>
 </div>

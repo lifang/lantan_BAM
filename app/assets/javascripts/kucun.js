@@ -790,6 +790,7 @@ function commit_in(obj){
 function ruku(){
   $("#ruku_tab").find('input[type="text"]').val("");
   $("#ruku_tab").find('select').get(0).selectedIndex = 0;
+  $("#ruku_tab .mat-out-list").html("");
   popup('#ruku_tab');
   return false;
 }
@@ -1076,7 +1077,7 @@ function close_notice(obj){
            }
       })
   }
-  function search_materials(tab_name, store_id, obj){
+  function search_materials(tab_name, store_id, obj, mat_in_flag){
       var mat_code = $.trim($(obj).parents(".search").find("#search_material_code").val());
       var mat_name = $.trim($(obj).parents(".search").find("#search_material_name").val());
       var mat_type = $.trim($(obj).parents(".search").find("#search_material_type").val());
@@ -1089,7 +1090,8 @@ function close_notice(obj){
               mat_code : mat_code,
               mat_name : mat_name,
               mat_type : mat_type,
-              store_id : store_id
+              store_id : store_id,
+              mat_in_flag : mat_in_flag
           }
       })
   }

@@ -41,8 +41,9 @@ class MaterialsController < ApplicationController
   def search_materials
     @tab_name = params[:tab_name]
     if @tab_name == 'materials'
-      @materials_storages = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
-        @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+      materials = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
+        @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
+      @materials_storages = materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     elsif @tab_name == 'material_losses'
       @material_losses = MaterialLoss.where(["store_id = ?",  @current_store.id]).where(@l_sql[0]).where(
           @l_sql[1]).where(@l_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
@@ -50,6 +51,16 @@ class MaterialsController < ApplicationController
       @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
     elsif @tab_name == 'out_records'
       @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
+    end
+    if params[:mat_in_flag]=="1"
+      @material_ins = []
+      materials.each do |material|
+        temp_material_orders = material.material_orders.not_all_in
+        material_orders = get_mo(material, temp_material_orders)
+        mm ={}
+        mm[material] = material_orders
+        @material_ins << mm
+      end if materials
     end
   end
 
@@ -775,6 +786,10 @@ class MaterialsController < ApplicationController
     @materials_need_check = Material.includes(:mat_depot_relations).find_by_sql(["select m.* from materials m left join mat_depot_relations mdr on m.id = mdr.material_id
        left join depots d on mdr.depot_id = d.id where m.status=? and m.store_id=? and d.store_id=?
        and mdr.check_num is not null group by m.id", Material::STATUS[:NORMAL], @current_store.id, @current_store.id])
+  end
+
+  def prin_matin_list
+    
   end
 
 

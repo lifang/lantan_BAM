@@ -1,9 +1,13 @@
-<% if @tab_name=="materials" %>
-  $("#kucunliebiao").html('<%= escape_javascript(render :partial => '/materials/page_materials') %>');
-<% elsif @tab_name=="material_losses"%>
-$("#page_materails_losses").html('<%= escape_javascript(render :partial => 'materials/materials_losses') %>');
-<% elsif @tab_name=="in_records" %>
-  $("#page_in_records").html('<%= escape_javascript(render :partial => '/materials/in_records') %>');
-<% elsif @tab_name=="out_records" %>
-  $("#page_out_records").html('<%= escape_javascript(render :partial => '/materials/out_records') %>');
+<% if @material_ins %>
+  $(".mat-out-list").append('<%= escape_javascript(render :partial => '/materials_in_outs/batch_mat_in') %>');
+<% else %>
+  <% if @tab_name=="materials" %>
+    $("#kucunliebiao").html('<%= escape_javascript(render :partial => '/materials/page_materials') %>');
+  <% elsif @tab_name=="material_losses"%>
+    $("#page_materails_losses").html('<%= escape_javascript(render :partial => 'materials/materials_losses') %>');
+  <% elsif @tab_name=="in_records" %>
+    $("#page_in_records").html('<%= escape_javascript(render :partial => '/materials/in_records') %>');
+  <% elsif @tab_name=="out_records" %>
+    $("#page_out_records").html('<%= escape_javascript(render :partial => '/materials/out_records') %>');
+  <% end %>
 <% end %>
