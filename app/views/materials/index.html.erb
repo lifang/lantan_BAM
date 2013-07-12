@@ -6,6 +6,13 @@
     <%= render :partial => 'show_low_materials', :locals => {:low_materials => @low_materials} %>
   </div>
 <% end %>
+<% unless  @unsalable_materials.blank? %>
+    <div class="message" id="unsalable_materials_notice">
+      最近30天有 <span class="red" id="unsalable_materials_span"><%=  @unsalable_materials.length %></span>种物料滞销
+      <a href="javascript:void(0)" onclick="toggle_low_materials(this)">点击查看</a>
+      <%= render :partial => 'show_unsalable_materials', :locals => {:unsalable_materials => @unsalable_materials} %>
+    </div>
+<% end %>
 <div class="data_box" id="material_data_box">
   <div class="data_menu">
     <% if permission?(:materials, :add) %>
