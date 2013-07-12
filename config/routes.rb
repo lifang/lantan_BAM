@@ -14,7 +14,7 @@ LantanBAM::Application.routes.draw do
   end
   resources :work_orders do
     collection do
-      get "work_orders_status"
+      get "work_orders_status", "work_order_finished"
     end
   end
   resources :package_cards do
