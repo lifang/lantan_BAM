@@ -29,7 +29,7 @@ class StaffsController < ApplicationController
   end
 
   def create
-    params[:staff][:username] = params[:staff][:name]
+    params[:staff][:username] = params[:staff][:phone]
     params[:staff][:password] = params[:staff][:phone]
     params[:staff][:status] = Staff::STATUS[:normal]
     @staff = @store.staffs.new(params[:staff])
