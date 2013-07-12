@@ -14,7 +14,7 @@ LantanBAM::Application.routes.draw do
   end
   resources :work_orders do
     collection do
-      get "work_orders_status"
+      get "work_orders_status", "work_order_finished"
     end
   end
   resources :package_cards do
@@ -38,6 +38,7 @@ LantanBAM::Application.routes.draw do
   end
   match "logout" => "logins#logout"
   resources :stores do
+    #resources :depots
     resources :market_manages do
       collection do
         get "makets_totals","makets_list","makets_reports","makets_views","makets_goal",
@@ -105,10 +106,10 @@ LantanBAM::Application.routes.draw do
 
     resources :staffs do
       collection do
-        post "search", "update_info"
-        get "edit_info"
+        post "search"
       end
     end
+    resources :work_records
     resources :violation_rewards
     resources :trains
     resources :month_scores do
@@ -136,7 +137,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :welcomes do
       collection do
-        post "edit_store_name"
+        post "edit_store_name", "update_staff_password"
       end
     end
     resources :customers do
@@ -168,7 +169,11 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-    
+    resources :set_stores do
+      collection do
+        get "edit"       
+      end
+    end
     resources :station_datas
     resources :sv_cards do
       collection do
@@ -192,6 +197,10 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
+  #match 'stores/:store_id/depots' => 'depots#index'
+  #match 'stores/:store_id/depots/create' => 'depots#create'
+  match 'stores/:store_id/depots' => 'depots#index'
+  match 'stores/:store_id/check_mat_num' => 'materials#check_mat_num'
   resources :customers do
     collection do
       post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"

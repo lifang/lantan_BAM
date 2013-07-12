@@ -1,9 +1,6 @@
 #encoding:utf-8
 class MaterialsLossesController < ApplicationController
    def add
-     #p cookies[:user_id]
-     # puts params[:store_id]
-     p params[:id]
     if params[:id].empty?
       material =  MaterialLoss.new({:name => params[:name].strip, :code => params[:code].strip,
       :types => params[:types].strip, :price => params[:price].strip.to_i,

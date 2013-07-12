@@ -67,8 +67,7 @@ function removeRow(obj){
     $(obj).parents("tr").remove();
 }
 
-function checkNums(){
-    var store_id = $("#store_id").val();
+function checkNums(store_id){
     var form_action_url = $("#create_mat_in_form").attr("action");
     var saved_mat_mos = "";
     var notice = "";
@@ -115,7 +114,9 @@ function checkNums(){
                                 if(data2=="1")
                                 {
                                     tishi_alert("入库成功！");
-                                    window.location.href = "/materials_in_outs";
+                                    window.location.href = "/stores/" + store_id + "/materials";
+                                }else{
+                                    tishi_alert("入库失败！");
                                 }
                             }
                         });

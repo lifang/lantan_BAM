@@ -61,10 +61,10 @@
   <thead>
     <tr class="hbg">
       <th width="150">条形码</th>
-      <th width="120"><span class="sort_u" onclick="sort_change(this)">物料名称</span></th>
+      <th width="100"><span class="sort_u" onclick="sort_change(this)">物料名称</span></th>
       <th width="100"><span class="sort_d" onclick="sort_change(this)">物料类别</span></th>
-      <th width="90">库存状态</th>
-      <th width="80">库存量</th>
+      <th width="80">库存状态</th>
+      <th width="50">库存量</th>
       <th width="120">规格</th>
       <th width="100">成本价（元）</th>
       <th width="100">零售价（元）</th>
@@ -99,7 +99,6 @@
           <% else %>
             <% if permission?(:materials, :ignore) %><%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %><% end %>
           <% end %>
-          
         </td>
       </tr>
     <% end %>

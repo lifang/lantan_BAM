@@ -130,6 +130,35 @@ class Customer < ActiveRecord::Base
     self.encrypted_password=encrypt(password)
   end
 
+  #客户使用套餐卡记录，门店后台跟api共用
+  def pc_card_records_method(page=nil)
+    #套餐卡记录
+    c_pcard_relations_no_paginate = CPcardRelation.find_by_sql(["select p.id, p.name, cpr.content, cpr.ended_at
+        from c_pcard_relations cpr
+        inner join package_cards p on p.id = cpr.package_card_id
+        where cpr.status = ? and cpr.customer_id = ?",
+        CPcardRelation::STATUS[:NORMAL], self.id])
+    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
+    already_used_count = {}
+    unless c_pcard_relations_no_paginate.blank?
+      c_pcard_relations_no_paginate.each do |r|
+        service_infos = r.content.split(",")
+        single_car_content = {}
+        service_infos.each do |s|
+          content_arr = s.split("-")
+          single_car_content[content_arr[0].to_i] = [content_arr[1], content_arr[2].to_i] if content_arr.length == 3
+        end
+        already_used_count[r.id] = single_car_content unless single_car_content.empty?
+      end
+      pcard_prod_relations = PcardProdRelation.find(:all, :conditions => ["package_card_id in (?)", c_pcard_relations_no_paginate])
+      pcard_prod_relations.each do |ppr|
+        used_count = ppr.product_num - already_used_count[ppr.package_card_id][ppr.product_id][1] if !already_used_count.empty? and already_used_count[ppr.package_card_id].present? and already_used_count[ppr.package_card_id][ppr.product_id]
+        already_used_count[ppr.package_card_id][ppr.product_id][1] = used_count ? used_count : 0 unless already_used_count.empty? or already_used_count[ppr.package_card_id].blank? or already_used_count[ppr.package_card_id][ppr.product_id].nil?
+      end
+      [c_pcard_relations, already_used_count, c_pcard_relations_no_paginate]
+    end
+  end
+
   private
   def encrypt(string)
     self.salt = make_salt if new_record?

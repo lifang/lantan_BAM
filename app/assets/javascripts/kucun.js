@@ -716,10 +716,7 @@ function checkMaterial(obj){              //编辑物料验证
         tishi_alert("物料名称不能包含非法字符");
         f = false;
     }
-    else if($.trim($("#material_code").val())==""){
-        tishi_alert("请输入条形码");
-        f = false;
-    }else if($("#material_div #material_types").val()==""){
+    else if($("#material_div #material_types").val()==""){
         tishi_alert("请输入类型");
         f = false;
     }else if($("#material_price").val().match(reg2)==null){
@@ -727,9 +724,6 @@ function checkMaterial(obj){              //编辑物料验证
         f = false;
     }else if($("#material_sale_price").val().match(reg2)==null){
         tishi_alert("请输入合法零售价");
-        f = false;
-    }else if($("#material_storage").val().match(reg1)==null){
-        tishi_alert("请输入合法数量");
         f = false;
     }else if($("#material_unit").val()==""){
         tishi_alert("请输入物料规格");
@@ -796,6 +790,7 @@ function commit_in(obj){
 function ruku(){
   $("#ruku_tab").find('input[type="text"]').val("");
   $("#ruku_tab").find('select').get(0).selectedIndex = 0;
+  $("#ruku_tab .mat-out-list").html("");
   popup('#ruku_tab');
   return false;
 }
@@ -971,11 +966,6 @@ function close_notice(obj){
         }
     });*/
 }
-function checkMatNum(){
-    $("#batch_check_tab").find('input[type="file"]').val("");
-    $("#batch_check_tab .file_data").html("");
-    popup('#batch_check_tab');
-}
   function setMaterialLow(){            //设置库存预警
     popup("#setMaterialLow");
     $("#material_low_value").focus();
@@ -1087,7 +1077,7 @@ function checkMatNum(){
            }
       })
   }
-  function search_materials(tab_name, store_id, obj){
+  function search_materials(tab_name, store_id, obj, mat_in_flag){
       var mat_code = $.trim($(obj).parents(".search").find("#search_material_code").val());
       var mat_name = $.trim($(obj).parents(".search").find("#search_material_name").val());
       var mat_type = $.trim($(obj).parents(".search").find("#search_material_type").val());
@@ -1100,7 +1090,8 @@ function checkMatNum(){
               mat_code : mat_code,
               mat_name : mat_name,
               mat_type : mat_type,
-              store_id : store_id
+              store_id : store_id,
+              mat_in_flag : mat_in_flag
           }
       })
   }

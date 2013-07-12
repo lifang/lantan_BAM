@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130712063338) do
+ActiveRecord::Schema.define(:version => 20130712103728) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -88,6 +88,7 @@ ActiveRecord::Schema.define(:version => 20130712063338) do
     t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "staff_id"
   end
 
   create_table "chart_images", :force => true do |t|
@@ -260,6 +261,7 @@ ActiveRecord::Schema.define(:version => 20130712063338) do
     t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "check_num"
   end
 
   add_index "mat_depot_relations", ["depot_id"], :name => "index_mat_depot_relations_on_depot_id"
@@ -298,6 +300,7 @@ ActiveRecord::Schema.define(:version => 20130712063338) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "types",             :limit => 1
+    t.integer  "store_id"
   end
 
   add_index "mat_out_orders", ["updated_at"], :name => "index_mat_out_orders_on_updated_at"
@@ -475,6 +478,7 @@ ActiveRecord::Schema.define(:version => 20130712063338) do
     t.datetime "updated_at"
     t.integer  "customer_id"
     t.string   "qfpos_id"
+    t.datetime "auto_time"
   end
 
   create_table "package_cards", :force => true do |t|
@@ -802,6 +806,7 @@ ActiveRecord::Schema.define(:version => 20130712063338) do
     t.string   "once_water_use"
     t.integer  "staff_level"
     t.integer  "staff_level1"
+    t.boolean  "is_has_controller"
   end
 
   create_table "store_chains_relations", :force => true do |t|
@@ -994,6 +999,7 @@ ActiveRecord::Schema.define(:version => 20130712063338) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.float    "gas_num"
+    t.integer  "cost_time"
   end
 
   add_index "work_orders", ["updated_at"], :name => "index_work_orders_on_updated_at"
