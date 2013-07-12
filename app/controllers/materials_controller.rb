@@ -30,8 +30,9 @@ class MaterialsController < ApplicationController
     @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
                                     and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
     date_now = Time.now.to_s[0..9]
-    @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT distinct moo.material_id as id FROM mat_out_orders as moo where created_at >= '2010-01-01 00:00:00' and created_at <= '#{date_now} 23:59:59'
-      and  types = 3) and store_id = #{@current_store.id};")
+    before_thirty_day =  (Time.now - 30.day).to_s[0..9]
+    @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT distinct moo.material_id as id FROM mat_out_orders as moo where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
+      and  types = 3 and store_id = #{@current_store.id}) and store_id = #{@current_store.id};")
     respond_to do |format|
       format.html
       format.js
