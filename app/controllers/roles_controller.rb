@@ -47,7 +47,7 @@ class RolesController < ApplicationController
     end
     @staffs = Staff.valid.includes(:staff_role_relations => :role).paginate(:conditions => str,
       :page => params[:page], :per_page => Constant::PER_PAGE)
-    @roles = Role.all
+    @roles = Role.find_all_by_store_id(params[:store_id].to_i)
     respond_to do |f|
       f.html
       f.js
@@ -67,7 +67,8 @@ class RolesController < ApplicationController
         params[:model_nums].each do |controller, num|
           role_model_relation = RoleModelRelation.where(:role_id => role_id, :model_name => controller)
           if role_model_relation.empty?
-            RoleModelRelation.create(:num => num.map(&:to_i).sum, :role_id => role_id, :model_name => controller)
+            RoleModelRelation.create(:num => num.map(&:to_i).sum, :role_id => role_id, 
+              :model_name => controller, :store_id => params[:store_id])
           else
             role_model_relation.first.update_attributes(:num => num.map(&:to_i).sum)
           end
