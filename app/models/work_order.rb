@@ -26,9 +26,17 @@ class WorkOrder < ActiveRecord::Base
               work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and current_day = #{current_day}").first
               started_at_sql = work_order.nil? ? "1=1" : "started_at >= '#{work_order.started_at}'"
               next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]} and station_id = #{station.id} and current_day = #{current_day}").where(started_at_sql).order("started_at asc").first
-              work_order.update_attributes(:status => WorkOrder::STAT[:COMPLETE],
-                :water_num => data_arr[3], :gas_num => data_arr[4]) if work_order
-              next_work_order.update_attribute(:status, WorkOrder::STAT[:SERVICING]) if next_work_order
+              if work_order
+                work_order.update_attributes(:status => WorkOrder::STAT[:WAIT_PAY],
+                  :water_num => data_arr[3], :gas_num => data_arr[4])
+                order = work_order.order
+                order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order
+              end
+              if next_work_order
+                next_work_order.update_attribute(:status, WorkOrder::STAT[:SERVICING])
+                next_order = next_work_order.order
+                next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order
+              end
             end
           end
         end
