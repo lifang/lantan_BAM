@@ -17,7 +17,9 @@ class Store < ActiveRecord::Base
   has_many :month_scores
   has_many :complaints
   has_many :sv_cards
+  has_many :store_chain_relations
   has_many :depots
+
   belongs_to :city
    STATUS = {
     :CLOSED => 0,       #0该门店已关闭，1正常营业，2装修中, 3已删除

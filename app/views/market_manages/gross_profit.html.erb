@@ -1,8 +1,8 @@
 <%=  render 'second_menu'%>
 <div class="search">
   <%= form_for :staff ,:url=>"/stores/#{params[:store_id]}/market_manages/search_gross_profit", :method => :post, :html => {:remote => true, 'data-type' => 'script'} do %>
-    <div><label>时间：</label><input class="Wdate" readonly id="o_gross_started" name="o_started" type="text" onclick="WdatePicker()" />&nbsp;到&nbsp;
-      <input class="Wdate" readonly id="o_gross_ended" name="o_ended" type="text" onclick="WdatePicker()"/></div>
+    <div><label>时间：</label><input class="Wdate" readonly id="o_gross_started" value="<%= Time.now().strftime("%Y-%m-%d") %>" name="o_started" type="text" onclick="WdatePicker()" />&nbsp;到&nbsp;
+      <input class="Wdate" readonly id="o_gross_ended" value="<%= Time.now().strftime("%Y-%m-%d") %>" name="o_ended" type="text" onclick="WdatePicker()"/></div>
     <div><label>产品/服务类型：</label>
       <select id="prod_types" name="prod_types">
         <option value="-1">全部</option>
@@ -15,7 +15,9 @@
     <div><button type="submit" class="search_btn">查询</button></div>
   <% end %>
 </div>
-
+<div class="data_body_title">
+  <h2 class="data_body_h">毛利金额总计：<span id="total_gross_price"><%= @toal_gross_price %></span>（元）</h2>
+</div>
 <div class="clear"></div>
 
 <div class="data_body" id="search_gross_profit">

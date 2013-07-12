@@ -192,12 +192,32 @@ class Order < ActiveRecord::Base
         end
       end
       working_orders = working_orders.first if working_orders.size > 0
+      customer_record = Customer.find_by_id(customer.customer_id)
+      c_pcard_relations =  customer_record.pc_card_records_method[2]  #套餐卡记录
+      already_used_count = customer_record.pc_card_records_method[1]
+
+      pcard_records = []
+      c_pcard_relations.each do |cpr|
+        pc_record_hash ={}
+        pc_record_hash[:ended_at] = cpr.ended_at.strftime('%Y-%m-%d') if cpr.ended_at
+        pc_record_hash[:name] = cpr.name
+        pc_record_hash[:products] = []
+        cpr.content.split(",").each do |p_num|    
+          prod_arr = p_num.split("-")
+          prod_num = {}
+          prod_num[:name] = prod_arr[1]
+          prod_num[:useNum] = already_used_count[cpr.id][prod_arr[0].to_i][1] if already_used_count && already_used_count[cpr.id] && already_used_count[cpr.id][prod_arr[0].to_i]
+          prod_num[:leftNum] = prod_arr[2]
+          pc_record_hash[:products] << prod_num
+        end
+        pcard_records << pc_record_hash
+      end
     end
-    [customer,working_orders,old_orders]
+    [customer, working_orders, old_orders, pcard_records]
   end
 
   def self.get_brands_products store_id
-    arr = []
+    arr = {}
     capitals = Capital.all
     brands = CarBrand.all.group_by { |cb| cb.capital_id }
     capital_arr = []
@@ -214,11 +234,9 @@ class Order < ActiveRecord::Base
       c[:brands] = brand_arr
       capital_arr << c
     end    
-    arr << capital_arr
-    product_arr = []
-    clean_arr = []
-    prod_arr = []
-    maint_arr = []    
+    arr[:car_info] = capital_arr
+    product_arr = {}
+    clean_servie_arr, maint_service_arr, clean_prod_arr, beauty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr = [], [], [], [], [], [], [], []
 #amanda modified 0708
     products = Product.find_by_sql("select p.* from products p left join prod_mat_relations pmr on
 pmr.product_id = p.id left join materials m on m.id = pmr.material_id where p.status = 1
@@ -231,17 +249,34 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
       h[:price] = p.sale_price
       h[:description] = p.description
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
-      if p.types.to_i <= Product::TYPES_NAME[:OTHER_PROD]
-        prod_arr << h
-      elsif p.types.to_i == Product::PRODUCT_END
-        clean_arr << h
-      elsif p.types.to_i > Product::PRODUCT_END
-        maint_arr << h
+      case p.types.to_i
+      when Product::TYPES_NAME[:CLEAN_PROD]
+        clean_prod_arr << h
+      when Product::TYPES_NAME[:BEAUTIFY_PROD]
+        beauty_prod_arr << h
+      when Product::TYPES_NAME[:DECORATE_PROD]
+        decorate_prod_arr << h
+      when Product::TYPES_NAME[:ASSISTANT_PROD]
+        assis_prod_arr << h
+      when Product::TYPES_NAME[:ELEC_PROD]
+        elec_prod_arr << h
+      when Product::TYPES_NAME[:OTHER_PROD]
+        other_prod_arr << h
+      when Product::PRODUCT_END
+        clean_servie_arr << h
+      end
+      if  p.types.to_i > Product::PRODUCT_END
+        maint_service_arr << h
       end
     end
-    product_arr << clean_arr
-    product_arr << maint_arr
-    product_arr << prod_arr
+    product_arr[:清洗服务] = clean_servie_arr
+    product_arr[:保养服务] = maint_service_arr
+    product_arr[:清洁用品] = clean_prod_arr
+    product_arr[:美容用品] = beauty_prod_arr
+    product_arr[:装饰产品] = decorate_prod_arr
+    product_arr[:配件产品] = assis_prod_arr
+    product_arr[:电子产品] = elec_prod_arr
+    product_arr[:其他产品] = other_prod_arr
     cards = PackageCard.find(:all,
       :conditions => ["status = ? and store_id = ? and
           ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?) or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})",
@@ -251,7 +286,7 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
       inner join products p on p.id = ppr.product_id where ppr.package_card_id in (?)", cards]).group_by{ |pcr| pcr.package_card_id }
     sv_cards = SvCard.normal_included(2)
 
-    product_arr << (cards + sv_cards || []).collect{|c|
+    product_arr[:会员卡] = (cards + sv_cards || []).collect{|c|
       price = c.is_a?(SvCard) ? c.sale_price : c.price
       description = ""
       if c.is_a?(SvCard)
@@ -270,9 +305,9 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
       h[:type] = c.is_a?(PackageCard) ? '0' : '1'
       h
     }
-    arr << product_arr
-    count = [maint_arr.length, prod_arr.length, clean_arr.length].max
-    product_arr << count
+    arr[:products] = product_arr
+    count = [clean_servie_arr, maint_service_arr, clean_prod_arr, beauty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr].map(&:length).max
+    arr[:count] = count
     arr
   end
 

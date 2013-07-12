@@ -5,4 +5,9 @@ class Role < ActiveRecord::Base
   has_many :role_model_relations
   has_many :role_menu_relations
   has_many :menus, :through => :role_menu_relations, :foreign_key => "menu_id"
+
+  ROLE_TYPE = {
+    :NORMAL => 1,   #门店员工,
+    :STORE_MANAGER => 0 #门店管理员
+  }
 end

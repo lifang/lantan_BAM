@@ -1,5 +1,6 @@
 #encoding: utf-8
 class MarketManagesController < ApplicationController
+  include MarketManagesHelper
   before_filter :sign?
   layout "complaint", :except => [:daily_consumption_receipt_blank, :stored_card_bill_blank]
   require 'will_paginate/array'
@@ -214,10 +215,14 @@ class MarketManagesController < ApplicationController
   end
 
   def gross_profit
-    @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
+    orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
     .where("date_format(created_at,'%Y-%m-%d') = curdate()")
     .select("distinct orders.*")
     .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+    
+    orders_arr = formatted_order_price(orders)[0]
+    @toal_gross_price = formatted_order_price(orders)[1]
+    @orders = orders_arr.paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
   end
 
   def search_gross_profit
@@ -227,27 +232,28 @@ class MarketManagesController < ApplicationController
     types_sql = params[:prod_types] =="-1" ? nil : "products.types = #{params[:prod_types]}"
    
     @flag = "product"
-    if start_sql.nil? and end_sql.nil?
-        time_sql = "date_format(orders.created_at,'%Y-%m-%d') = curdate()"
-        sql << time_sql
-      end
     if types_sql.nil?
       sql<< start_sql << end_sql
       sql = sql.compact.join(" and ")
-      @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
+      orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
       .where(sql)
       .select("distinct orders.*")
-      .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+
+      orders_arr = formatted_order_price(orders)[0]
+      @toal_gross_price = formatted_order_price(orders)[1]
+      @orders = orders_arr.paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
       @flag = "order"
     else
       sql<< start_sql << end_sql << types_sql
       sql = sql.compact.join(" and ")
-      @orders = Order.joins(:order_prod_relations => :product).where(:status => Order::VALID_STATUS)
+      orders = Order.joins(:order_prod_relations => :product).where(:status => Order::VALID_STATUS)
       .where(sql).select("orders.id, date_format(orders.created_at,'%Y-%m-%d') o_created_at, orders.code, products.types").uniq
-      .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
-      @order_pay_types = OrderPayType.where(:order_id => @orders.map(&:id) ).where("product_id is not null").group_by{|opt| opt.order_id}
-      #      @o_pcard_relations = OPcardRelation.where(:order_id => @orders.map(&:id)).group_by{|opt| opt.order_id}
-      @order_prod_relations = OrderProdRelation.joins(:product).where(:order_id => @orders.map(&:id)).where(types_sql).group_by{|opt| opt.order_id}
+      
+      order_pay_types = OrderPayType.where(:order_id => orders.map(&:id) ).where("product_id is not null").group_by{|opt| opt.order_id}
+      order_prod_relations = OrderProdRelation.joins(:product).where(:order_id => orders.map(&:id)).where(types_sql).group_by{|opt| opt.order_id}
+      orders_arr = format_product_price(orders, order_pay_types, order_prod_relations)[0]
+      @toal_gross_price = format_product_price(orders, order_pay_types, order_prod_relations)[1]
+      @orders = orders_arr.paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
     end
   end
 
@@ -275,5 +281,42 @@ class MarketManagesController < ApplicationController
     material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
 
     (order_svc_returns + material_order_svc_returns).sort{|a,b| a[:id] <=> b[:id]}
+  end
+
+  def formatted_order_price(orders)
+    orders_arr = []
+    toal_gross_price = 0
+    orders.each do |order|
+      order_hash = {}
+      order_hash[:created_at] = order.created_at
+      order_hash[:id] = order.id
+      order_hash[:code] = order.code
+      order_hash[:cost_price] = order_cost_price(order)
+      order_hash[:price] = order.price
+      order_hash[:gross_profit] = (order_hash[:price] - order_hash[:cost_price]) > 0 ? (order_hash[:price] - order_hash[:cost_price]) : 0
+      orders_arr << order_hash
+      toal_gross_price += order_hash[:gross_profit]
+    end
+    [orders_arr,toal_gross_price]
+  end
+
+  def format_product_price(orders, order_pay_types, order_prod_relations)
+    order_prod_arrs = []
+    toal_gross_price = 0
+    orders.each do |order|
+      order_prod_relations[order.id].each do |oprr|
+        prod_cost_price =  prod_gross_price(order.id, oprr, order_pay_types)
+        op_hash = {}
+        op_hash[:created_at] = order.o_created_at
+        op_hash[:id] = order.id
+        op_hash[:code] = order.code
+        op_hash[:cost_price] = prod_cost_price[0]
+        op_hash[:price] = prod_cost_price[1]
+        op_hash[:gross_profit] = prod_cost_price[2] > 0 ? prod_cost_price[2] : 0
+        toal_gross_price += op_hash[:gross_profit]
+        order_prod_arrs << op_hash
+      end unless order_prod_relations[order.id].nil?
+    end
+    [order_prod_arrs,toal_gross_price]
   end
 end

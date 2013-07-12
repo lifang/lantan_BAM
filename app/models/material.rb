@@ -10,6 +10,9 @@ class Material < ActiveRecord::Base
   has_many :mat_out_orders
   has_many  :mat_in_orders
   has_many :prod_mat_relations
+  has_many :mat_depot_relations
+  has_many :depots, :through => :mat_depot_relations
+  before_create :generate_barcode
 
   STATUS = {:NORMAL => 0, :DELETE => 1}
   TYPES_NAMES = {0 => "清洁用品", 1 => "美容用品", 2 => "装饰产品", 3 => "配件产品", 4 => "电子产品",
@@ -23,4 +26,10 @@ class Material < ActiveRecord::Base
   MAT_CHECKNUM_PATH = "#{File.expand_path(Rails.root)}/public/uploads/mat_check/%s"
   IS_IGNORE = {:YES => 1, :NO => 0} #是否忽略库存预警， 1是 0否
   scope :normal, where(:status => STATUS[:NORMAL])
+
+  private
+  
+  def generate_barcode
+    self.code = types.to_s + Time.now.strftime("%Y%m%d%H%M%S")
+  end
 end

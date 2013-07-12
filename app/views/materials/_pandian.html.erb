@@ -1,0 +1,48 @@
+<div class="popup_box">
+  <h1>盘点清单<a href="javascript:void(0)" class="close">关闭</a></h1>
+  <hr></hr>
+
+  <div class="popup_body">
+    <div class="popup_body_area">
+      <% if @materials_need_check.present? %>
+        <%= form_tag "/stores/#{@current_store.id}/materials/batch_check" do |f|%>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="print_sort_table">
+            <thead>
+              <tr class="hbg">
+                <th>物料名称</th>
+                <th>物料条形码</th>
+                <th>物料类别</th>
+                <th>物料规格</th>
+                <th>实际数量</th>
+                <th>盘点数量</th>
+                <th>盘点差额</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @materials_need_check.each do |material| %>
+                <tr>
+                  <td><%= material.name %></td>
+                  <td><%= material.code %></td>
+                  <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
+                  <td><%= material.unit %></td>
+                  <td><%= total_storage = material.mat_depot_relations.sum(:storage) if material.mat_depot_relations.present? %></td>
+                  <td><%= total_check_num = material.mat_depot_relations.sum(:check_num) if material.mat_depot_relations.present? %></td>
+                  <td><%= ((total_check_num - total_storage) > 0 ? "+" : "-") + (total_check_num - total_storage).to_s %></td>
+                  <td>
+                    <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this)" %><% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+
+        <% end %>
+        <div class="btn_box"><button onclick="return confirm('确定核实？')" type="submit" class="confirm_btn">确定</button></div>
+      <% else %>
+        没有需要盘点的物料
+      <% end %>
+      <div class="clear"></div>
+    </div>
+  </div>
+</div>
