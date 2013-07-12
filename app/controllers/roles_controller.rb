@@ -33,7 +33,7 @@ class RolesController < ApplicationController
     role = Role.find_by_name_and_store_id params[:name], params[:store_id]
     status = 0
     if role.nil?
-      Role.create(:name => params[:name], :store_id => params[:store_id])
+      Role.create(:name => params[:name], :store_id => params[:store_id].to_i, :role_type => Role::ROLE_TYPE[:NORMAL])
     else
       status = 1
     end
