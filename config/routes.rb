@@ -171,7 +171,7 @@ LantanBAM::Application.routes.draw do
 
     resources :set_stores do
       collection do
-        get "edit"
+        get "edit"       
       end
     end
     resources :station_datas

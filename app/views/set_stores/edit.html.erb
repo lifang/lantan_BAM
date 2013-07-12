@@ -3,7 +3,7 @@
   <div class="clear"></div>
   <div class="data_body">
     <div>
-      <form>
+      <%= form_for(@store, :url => store_set_store_path(@store, @store), :html => {:method => :put, :multipart => true}) do %>
       <div class="item">
         <label>选择省市：</label>
         <select id="store_province" name="store_province" class="staff">
@@ -50,14 +50,14 @@
       </div>
         <div class="item_textarea">
            <label>门店照片：</label>
-           <input type="file" class="file"/>
+           <input type="file" class="file" name="store_img"/>
            <span class="show_pic"><img src="<%= @store.img_url.nil? ? "" : @store.img_url.gsub("img#{@store.id}", "img#{@store.id}_#{Constant::STORE_PICSIZE[1]}") %>"/></span>
         </div>
         <div class="clear"></div>
         <div class="btn_box">
-          <button type="button" onclick="edit_store_validate()" class="confirm_btn">确定</button>
+          <button type="button" onclick="edit_store_validate(this)" class="confirm_btn">确定</button>
         </div>
-      </form>
+     <% end %>
     </div>
     <div class="clear"></div>
   </div>

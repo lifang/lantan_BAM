@@ -16,8 +16,8 @@ development:
   pool: 5
   username: root
 #  username: comdo
-#  password: comdo2012
-  password: root
+  password: comdo2012
+  #password: root
   host: localhost
 
 
