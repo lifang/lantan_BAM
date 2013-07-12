@@ -65,7 +65,7 @@
       <th width="100"><span class="sort_d" onclick="sort_change(this)">物料类别</span></th>
       <th width="80">库存状态</th>
       <th width="50">库存量</th>
-      <th width="50">仓库</th>
+      <!--th width="50">仓库</th-->
       <th width="120">规格</th>
       <th width="100">成本价（元）</th>
       <th width="100">零售价（元）</th>
@@ -83,7 +83,7 @@
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
         <td class="sstatus"><%= material.is_ignore || material.storage.to_i > @current_store.material_low.to_i ? "存货" : "缺货" %></td>
         <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= material.storage.to_i %></span></td>
-        <td><%= material.depot %></td>
+        <!--td><!--%= material.depot %></td-->
         <td><%= material.unit %></td>
         <td><%= material.price %></td>
         <td><%= material.sale_price %></td>
