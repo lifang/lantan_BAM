@@ -20,7 +20,7 @@ function new_role(store_id){
             url:"/stores/"+store_id+"/roles/",
             type:"POST",
             dataType:"json",
-            data:"name="+ $.trim($("#role_input").val()),
+            data:"name="+ $.trim($("#role_input").val())+"&store_id=" + store_id,
             success:function(data,status){
                 if(data["status"]==0){
                     $("#add_role").hide();
@@ -54,9 +54,13 @@ function blur_role(obj,store_id){
             url:"/stores/"+store_id+"/roles/"+role_id,
             type:"PUT",
             dataType:"json",
-            data:"name="+ $.trim($(obj).val()),
+            data:"name="+ $.trim($(obj).val())+"&store_id=" + store_id,
             success:function(data,status){
-                $("#a_role_"+role_id).html($.trim($(obj).val()));
+                if(data['status']=="0")
+                  {$("#a_role_"+role_id).html($.trim($(obj).val()));}
+                else{
+                   tishi_alert("当前角色不存在")
+                  }
             },
             error:function(data){
                 tishi_alert(data);
