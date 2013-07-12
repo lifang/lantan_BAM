@@ -2,7 +2,8 @@
   <div class="box">
     <div class="data_box">
       <div class="data_menu">
-        <% if permission?(:base_datas, :new_depot) %><%= link_to "新建仓库", new_store_depot_path(@store), remote: :true, "data-type" => 'script', :class =>"add_btn" %><% end %></div>
+        <% if permission?(:base_datas, :new_depot) %><a href="javascript:void(0);" onclick="add_depot('<%= params[:store_id] %>')" class="add_btn">添加仓库</a><% end %>
+      </div>
       <div class="clear"></div>
       <div class="data_body">
         <div class="station-data">
@@ -10,7 +11,6 @@
             <thead>
             <tr class="hbg">
               <td>仓库名称</td>
-              <td>状态</td>
               <td>所属门店</td>
               <td>操作</td>
             </tr>
@@ -19,20 +19,17 @@
                 <% @depots.each do |depot| if @depots.length != 0  %>
                 <tr>
                   <td><%= depot.name %></td>
-                  <td><%= depot.status %></td>
-                  <td><%= depot.store_id %></td>
+                  <td><%= depot.store.name %></td>
                   <td><% if permission?(:base_datas, :edit_depot) %><%= link_to "编辑", remote: :true, "data-type" => 'script' %><% end %>
                     <% if permission?(:base_datas, :del_depot) %><%= link_to "删除", "/stores/#{@store.id}/depots/#{}", :confirm => "确定需要删除工位吗？", :method => 'delete' %><% end %>
                   </td>
                 </tr>
+                    <% end %>
                 <% end %>
-            <% end %>
-
             </tbody>
           </table>
           <%= will_paginate @depots, :class => "pageTurn", :previous_label => "上一页",
                             :next_label => "下一页"  unless @depots.empty?%>
-
         </div>
       </div>
     </div>
