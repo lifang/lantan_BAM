@@ -123,8 +123,9 @@ class CustomersController < ApplicationController
     @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, 1)
     comp_page = params[:comp_page] ? params[:comp_page] : 1
     @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, comp_page)
-    svc_card_records_method(@customer.id)  #储值卡and套餐卡记录
-    pc_card_records_method(@customer.id)  #储值卡and套餐卡记录
+    svc_card_records_method(@customer.id)  #储值卡记录
+    @c_pcard_relations = @customer.pc_card_records_method(params[:page]||1)[0]  #套餐卡记录
+    @already_used_count = @customer.pc_card_records_method(params[:page]||1)[1]
   end
   
   def order_prods
@@ -147,7 +148,8 @@ class CustomersController < ApplicationController
   def pc_card_records
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    pc_card_records_method(@customer.id)
+    @c_pcard_relations = @customer.pc_card_records_method(params[:page]||1)[0]  #套餐卡记录
+    @already_used_count = @customer.pc_card_records_method(params[:page]||1)[1]
   end
 
   def revisits
@@ -244,30 +246,5 @@ class CustomersController < ApplicationController
       :per_page => Constant::PER_PAGE)
   end
 
-  def pc_card_records_method(customer_id)
-    #套餐卡记录
-    @c_pcard_relations = CPcardRelation.paginate_by_sql(["select p.id, p.name, cpr.content, cpr.ended_at
-        from c_pcard_relations cpr
-        inner join package_cards p on p.id = cpr.package_card_id
-        where cpr.status = ? and cpr.customer_id = ?",
-        CPcardRelation::STATUS[:NORMAL], customer_id], :page => params[:page],
-      :per_page => Constant::PER_PAGE)
-    @already_used_count = {}
-    unless @c_pcard_relations.blank?
-      @c_pcard_relations.each do |r|
-        service_infos = r.content.split(",")
-        single_car_content = {}
-        service_infos.each do |s|
-          content_arr = s.split("-")
-          single_car_content[content_arr[0].to_i] = [content_arr[1], content_arr[2].to_i] if content_arr.length == 3
-        end
-        @already_used_count[r.id] = single_car_content unless single_car_content.empty?
-      end
-      @pcard_prod_relations = PcardProdRelation.find(:all, :conditions => ["package_card_id in (?)", @c_pcard_relations])
-      @pcard_prod_relations.each do |ppr|
-        used_count = ppr.product_num - @already_used_count[ppr.package_card_id][ppr.product_id][1] if !@already_used_count.empty? and @already_used_count[ppr.package_card_id].present? and @already_used_count[ppr.package_card_id][ppr.product_id]
-        @already_used_count[ppr.package_card_id][ppr.product_id][1] = used_count ? used_count : 0 unless @already_used_count.empty? or @already_used_count[ppr.package_card_id].blank? or @already_used_count[ppr.package_card_id][ppr.product_id].nil?
-      end
-    end
-  end
+  
 end

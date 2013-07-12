@@ -8,7 +8,7 @@ class MaterialsController < ApplicationController
   before_filter :sign?,:except=>["alipay_complete"]
   before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo]
   before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
-  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs]
+  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num]
   @@m = Mutex.new
 
   #库存列表
@@ -16,7 +16,7 @@ class MaterialsController < ApplicationController
     @material_losses = MaterialLoss.find_by_sql("select m.id, m.name, m.code, m.types, m.loss_num, m.specifications,
     m.price, m.sale_price,m.staff_id from material_losses m where m.store_id =#{@current_store.id}
     order by m.created_at desc").paginate :page => params[:page], :per_page => Constant::PER_PAGE
-    @materials_storages = Material.where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    @materials_storages = Material.includes(:mat_depot_relations).where(["status = ?", Material::STATUS[:NORMAL]]).where(["store_id = ?",  @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
     @type = 0
@@ -725,7 +725,7 @@ class MaterialsController < ApplicationController
     material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id].to_i)
     if material.nil?
       params[:material][:name] = params[:material][:name].strip
-      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i}))
+      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i, :storage => 0}))
         @status = 1
       else
         @status = 0
@@ -765,6 +765,13 @@ class MaterialsController < ApplicationController
     material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
     material.update_attribute(:status, Material::STATUS[:DELETE])
     redirect_to "/stores/#{params[:store_id]}/materials"
+  end
+
+  #盘点物料清单
+  def check_mat_num
+    @materials_need_check = Material.includes(:mat_depot_relations).find_by_sql(["select m.* from materials m left join mat_depot_relations mdr on m.id = mdr.material_id
+       left join depots d on mdr.depot_id = d.id where m.status=? and m.store_id=? and d.store_id=?
+       and mdr.check_num is not null group by m.id", Material::STATUS[:NORMAL], @current_store.id, @current_store.id])
   end
 
 

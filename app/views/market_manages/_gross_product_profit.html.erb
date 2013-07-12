@@ -33,17 +33,15 @@
         </thead>
         <tbody>
             <% @orders.each do |order| %>
-              <% @order_prod_relations[order.id].each do |oprr| %>
-                <% prod_cost_price =  prod_gross_price(order.id, oprr, @order_pay_types)%>
+              
           <tr class="<%= cycle("","tbg")%>">
-                  <td><%= order.o_created_at %></td>
-                  <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
+                  <td><%= order[:created_at] %></td>
+                  <td><%= link_to "#{order[:code]}", "/orders/#{order[:id]}/order_info" ,
             :remote => "true", "data-type" => "script", :class => "other_a"  %></td>
-                  <td><%= format("%.2f",prod_cost_price[0]) %></td>
-                  <td><%= format("%.2f",prod_cost_price[1]) %></td>
-                  <td><%= format("%.2f",prod_cost_price[2] > 0 ? prod_cost_price[2] : 0) %></td>
+                  <td><%= format("%.2f",order[:cost_price]) %></td>
+                  <td><%= format("%.2f",order[:price]) %></td>
+                  <td><%= format("%.2f",order[:gross_profit]) %></td>
                 </tr>
-              <% end unless @order_prod_relations[order.id].nil?%>
             <% end %>
           </tbody>
       </table>

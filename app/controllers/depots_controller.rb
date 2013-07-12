@@ -5,6 +5,8 @@ class DepotsController < ApplicationController
   before_filter :find_store
 
   def index
+    store = find_store
+    @depots = store.depots.paginate(:page => params[:page] ||= 1, :per_page => Depot::PerPage)
   end
 
   def new
