@@ -167,17 +167,25 @@ function selectAll(obj){
         $(obj).parent().next().find("input[type='checkbox']").attr("checked", false)
     }
 }
-
+//这边是工位的开始
 function checkValid(obj){
     var flag = true;
-    $(".station_form").find("input[type='text']").each(function(){
-        var name = $(this).prev().text().split("：")[0]
-        if($(this).val()==""){
-            tishi_alert(name+"不能为空!")
+    if($(".station_form").find(".station_name input").val()=="")
+        {
+           tishi_alert("名称不能为空!")
             flag = false;
             return false;
         }
-    })
+    if($(".station_form #station_is_has_controller").attr("checked")=="checked")
+       { $(".station_form .controller_input").find("input[type='text']").each(function(){
+            var name = $(this).prev().text().split("：")[0]
+            if($(this).val()==""){
+                tishi_alert(name+"不能为空!")
+                flag = false;
+                return false;
+            }
+        })
+       }
     if($(".station_form").find("input[type='checkbox']:checked").length==0){
         tishi_alert("服务不能为空!")
         flag = false;
@@ -185,5 +193,15 @@ function checkValid(obj){
     if(flag)
     {
         $(obj).parents("form").submit();
+    }
+}
+function handleController(){
+    var input_div = $("#station_is_has_controller").parent().next();
+    if($("#station_is_has_controller").attr("checked")=="checked")
+    {
+        input_div.find("input").attr("disabled", false);
+    }
+    else{
+        input_div.find("input").attr("disabled","disabled");
     }
 }
