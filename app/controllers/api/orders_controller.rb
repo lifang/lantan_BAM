@@ -214,7 +214,7 @@ class Api::OrdersController < ApplicationController
             :birthday => customer["birth"], :sex => customer["sex"]) if old_customer
           carNum = CarNum.find_by_num(customer["carNum"])
           Customer.create_single_cus(old_customer, carNum, customer["phone"], customer["carNum"], customer["name"],
-            customer["email"], customer["birth"], customer["year"], customer["brand"].split("_")[1].to_i, customer["sex"], nil, nil)
+            customer["email"], customer["birth"], customer["year"], customer["brand"].split("_")[1].to_i, customer["sex"], nil, nil, customer["store_id"])
         end
 
         #同步订单信息

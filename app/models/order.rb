@@ -331,7 +331,7 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
         :other_way => email, :birthday => birth, :sex => sex) if customer
       carNum = CarNum.find_by_num car_num
       customer_infos = Customer.create_single_cus(customer, carNum, phone, car_num,
-        user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil,nil)
+        user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil, store_id)
       customer = customer_infos[0]
       carNum = customer_infos[1]
       info = Hash.new
@@ -980,7 +980,7 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
           customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
             :other_way => email, :birthday => birth, :sex => sex) if customer
           Customer.create_single_cus(customer, car_num_r, phone, car_num,
-            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil)
+            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil, store_id)
         end
         status = 1
       end

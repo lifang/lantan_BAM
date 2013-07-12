@@ -14,10 +14,10 @@ class CustomersController < ApplicationController
     session[:phone] = nil
     session[:is_vip] = nil
 
-    @store = @store = Store.find_by_id(params[:store_id]) || not_found
+    @store = Store.find_by_id(params[:store_id]) || not_found
     @customers = Customer.search_customer(params[:c_types], params[:car_num], params[:started_at], params[:ended_at],
-      params[:name], params[:phone], params[:is_vip], params[:page])
-    @car_nums = Customer.customer_car_num(@customers)
+      params[:name], params[:phone], params[:is_vip], params[:page], params[:store_id].to_i) if @store
+    @car_nums = Customer.customer_car_num(@customers) if @customers
   end
 
   def search
@@ -34,8 +34,8 @@ class CustomersController < ApplicationController
   def search_list
     @store = Store.find(params[:store_id].to_i)
     @customers = Customer.search_customer(session[:c_types], session[:car_num], session[:started_at], session[:ended_at],
-      session[:name], session[:phone], session[:is_vip], params[:page])
-    @car_nums = Customer.customer_car_num(@customers)
+      session[:name], session[:phone], session[:is_vip], params[:page], params[:store_id].to_i) if @store
+    @car_nums = Customer.customer_car_num(@customers) if @customers
     render "index"
   end
 
@@ -50,11 +50,27 @@ class CustomersController < ApplicationController
       customer = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], params[:mobilephone].strip)
       car_num = CarNum.find_by_num(params[:new_car_num].strip)
       if customer
-        flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
+        relation = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id].to_i, customer.id)
+        if relation
+          flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
+        else
+          if car_num
+            cnr = CustomerNumRelation.find_by_car_num_id_and_customer_id(car_num.id, customer.id)
+            unless cnr
+              CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
+              CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
+            end
+          else
+            car_num = CarNum.create(:num => params[:new_car_num].strip, :buy_year => params[:buy_year],
+              :car_model_id => params[:car_models])
+            CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
+          end
+          CustomerStoreRelation.create(:store_id => params[:store_id].to_i, :customer_id => customer.id)
+        end
       else
         Customer.create_single_cus(customer, car_num, params[:mobilephone].strip, params[:new_car_num].strip,
-          params[:new_name].strip, params[:other_way].strip,
-          params[:birthday], params[:buy_year], params[:car_models], params[:sex], params[:address], params[:is_vip])
+          params[:new_name].strip, params[:other_way].strip, params[:birthday], 
+          params[:buy_year], params[:car_models], params[:sex], params[:address], params[:is_vip], params[:store_id].to_i)
         flash[:notice] = "客户信息创建成功。"
       end
     end

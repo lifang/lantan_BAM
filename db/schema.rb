@@ -11,14 +11,14 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130712021130) do
+ActiveRecord::Schema.define(:version => 20130712075912) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
     t.integer  "package_card_id"
     t.datetime "ended_at"
     t.boolean  "status"
-    t.text     "content"
+    t.string   "content"
     t.datetime "created_at"
     t.float    "price",           :default => 0.0
     t.datetime "updated_at"
@@ -102,6 +102,8 @@ ActiveRecord::Schema.define(:version => 20130712021130) do
     t.datetime "updated_at"
     t.integer  "staff_id"
   end
+
+  add_index "chains", ["staff_id"], :name => "index_chains_on_staff_id"
 
   create_table "chart_images", :force => true do |t|
     t.integer  "store_id"
@@ -196,6 +198,7 @@ ActiveRecord::Schema.define(:version => 20130712021130) do
     t.string   "username"
     t.string   "salt"
     t.integer  "total_point"
+    t.integer  "store_id"
   end
 
   add_index "customers", ["birthday"], :name => "index_customers_on_birthday"
@@ -203,6 +206,7 @@ ActiveRecord::Schema.define(:version => 20130712021130) do
   add_index "customers", ["mobilephone"], :name => "index_customers_on_mobilephone"
   add_index "customers", ["name"], :name => "index_customers_on_name"
   add_index "customers", ["status"], :name => "index_customers_on_status"
+  add_index "customers", ["store_id"], :name => "index_customers_on_store_id"
   add_index "customers", ["types"], :name => "index_customers_on_types"
   add_index "customers", ["username"], :name => "index_customers_on_username"
 
@@ -531,7 +535,7 @@ ActiveRecord::Schema.define(:version => 20130712021130) do
   create_table "orders", :force => true do |t|
     t.string   "code"
     t.integer  "car_num_id"
-    t.integer  "status",              :limit => 2
+    t.integer  "status"
     t.datetime "started_at"
     t.datetime "ended_at"
     t.float    "price"
@@ -633,7 +637,7 @@ ActiveRecord::Schema.define(:version => 20130712021130) do
     t.string   "name"
     t.float    "base_price"
     t.float    "sale_price"
-    t.text     "description"
+    t.string   "description"
     t.integer  "types"
     t.string   "service_code"
     t.boolean  "status"
@@ -1005,7 +1009,7 @@ ActiveRecord::Schema.define(:version => 20130712021130) do
     t.string   "name"
     t.string   "img_url"
     t.integer  "types"
-    t.float    "price",       :limit => 11
+    t.float    "price"
     t.float    "discount"
     t.datetime "created_at"
     t.datetime "updated_at"

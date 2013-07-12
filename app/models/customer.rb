@@ -19,12 +19,13 @@ class Customer < ActiveRecord::Base
   C_TYPES = {0 => "优质客户", 1 => "一般客户", 2 => "重点客户"}
 
 
-  def self.search_customer(c_types, car_num, started_at, ended_at, name, phone, is_vip, page)
+  def self.search_customer(c_types, car_num, started_at, ended_at, name, phone, is_vip, page, store_id)
     base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.is_vip, cu.mark from customers cu
         left join customer_num_relations cnr on cnr.customer_id = cu.id
-        left join car_nums ca on ca.id = cnr.car_num_id "
-    condition_sql = "where cu.status = #{STATUS[:NOMAL]} "
-    params_arr = [""]
+        left join car_nums ca on ca.id = cnr.car_num_id 
+        left join customer_store_relations csr on csr.customer_id = cu.id "
+    condition_sql = "where cu.status = #{STATUS[:NOMAL]} and csr.store_id in(?) "
+    params_arr = ["", StoreChainsRelation.return_chain_stores(store_id)]
     unless c_types.nil? or c_types == "-1"
       condition_sql += " and cu.types = ? "
       params_arr << c_types.to_i
@@ -94,7 +95,7 @@ class Customer < ActiveRecord::Base
   end
 
   def Customer.create_single_cus(customer, carnum, phone, car_num, user_name, other_way,
-      birth, buy_year, car_model_id, sex, address, is_vip)
+      birth, buy_year, car_model_id, sex, address, is_vip, store_id)
     Customer.transaction do
       if customer.nil?
         customer = Customer.create(:name => user_name, :mobilephone => phone,
@@ -102,8 +103,10 @@ class Customer < ActiveRecord::Base
           :types => Customer::TYPES[:NORMAL], :is_vip => is_vip, :username => user_name,
           :password => phone, :sex => sex, :address => address)
         customer.encrypt_password
-        customer.save
+        customer.save        
       end
+      relation = CustomerStoreRelation.find_by_store_id_and_customer_id(store_id, customer.id)
+      CustomerStoreRelation.create(:store_id => store_id, :customer_id => customer.id) unless relation
       if carnum
         carnum.update_attributes(:buy_year => buy_year, :car_model_id => car_model_id)
       else
