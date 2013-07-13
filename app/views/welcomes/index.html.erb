@@ -16,7 +16,7 @@
   <body>
     <div class="head">
       <div class="box position_re">
-        <div class="logo1"><span>V1.0</span></div>
+        <div class="logo1"><span>V2.1</span></div>
         <div class="login">你好：<% if is_staff? %><a href="javascript:void(0)" id="edit_password"><%= cookies[:user_name] %></a><% else %><%= cookies[:user_name] %><% end %> | <a href="/logout">退出</a></div>
         <div class="name">
           <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= cookies[:store_id] %>)"/></span>
