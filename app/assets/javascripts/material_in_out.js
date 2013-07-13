@@ -108,7 +108,7 @@ function checkNums(store_id){
                             dataType:"json",
                             type:"POST",
                             data:{
-                                mat_in_items: saved_mat_mos
+                                mat_in_items: saved_mat_mos, mat_in_create: 1
                             },
                             success:function(data2){
                                 if(data2['status']=="1")

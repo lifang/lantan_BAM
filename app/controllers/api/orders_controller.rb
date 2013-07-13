@@ -96,7 +96,7 @@ class Api::OrdersController < ApplicationController
   #车品牌
   def brands_products
     items = Order.get_brands_products params[:store_id]
-    render :json => {:status => 1, :brands => items[0], :products => items[1], :count => items[1][4]}
+    render :json => {:status => 1, :all_infos => items}
   end
 
   #点击完成按钮，确定选择的产品和服务

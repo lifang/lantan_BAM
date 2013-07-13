@@ -91,7 +91,7 @@
           <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1}  %>
 
             <div class="data_body">
-      <%= form_tag  create_materials_in_path , :id => "create_mat_in_form" do |f|%>
+      <%= form_tag  create_materials_in_path , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
           <thead>
             <tr class="hbg">
@@ -104,10 +104,12 @@
           </thead>
           <tbody class="mat-out-list"></tbody>
         </table>
+              <input type="hidden" id="mat_in_hidden_value" name="mat_in_items"/>
+              <input type="hidden" id="mat_in_create" name="mat_in_create"/>
         <div class="clear"></div>
         <div class="btn_box_s">
           <button onclick="checkNums(<%= @current_store.id %>)" type="button" class="confirm_btn">入库</button>
-          <button onclick="fetchMatIn(<%= @current_store.id %>)" type="button" class="confirm_btn">打印入库清单</button>
+          <button onclick="fetchMatIn(this)" type="button" class="confirm_btn">打印入库清单</button>
           <button type="button" class="confirm_btn">打印条码</button>
         </div>
       <% end %>

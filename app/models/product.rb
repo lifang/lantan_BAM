@@ -16,6 +16,7 @@ class Product < ActiveRecord::Base
   TYPES_NAME = {:CLEAN_PROD => 0, :BEAUTIFY_PROD => 1, :DECORATE_PROD => 2, :ASSISTANT_PROD => 3,
     :ELEC_PROD => 4,:OTHER_PROD => 5, :OTHER_SERV => 11}
   PRODUCT_END = 6
+  BEAUTY_SERVICE = 9
   PROD_TYPES = {:PRODUCT =>0, :SERVICE =>1}  #0 为产品 1 为服务
   IS_VALIDATE ={:NO=>0,:YES=>1} #0 无效 已删除状态 1 有效
   REVIST_TIME = [24,48,72,96,120]

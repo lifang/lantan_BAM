@@ -58,9 +58,11 @@ class MaterialsController < ApplicationController
       materials.each do |material|
         temp_material_orders = material.material_orders.not_all_in
         material_orders = get_mo(material, temp_material_orders)
-        mm ={}
-        mm[material] = material_orders
+        material_orders.each do |mo|
+          mm ={:mo_code => mo.code, :mo_id => mo.id, :mat_code => material.code,
+            :mat_name => material.name, :mat_price => material.price}
         @material_ins << mm
+        end
       end if materials
     end
   end
@@ -651,10 +653,10 @@ class MaterialsController < ApplicationController
   #批量核实
   def batch_check
     failed_updates = []
-    flash[:notice] = "批量核实成功！"
+    flash[:notice] = "盘点清单成功！"
     params[:materials].each do |id,cn|
       material = Material.find_by_id(id)
-      unless material && material.update_attribute(:storage, cn[:num])
+      unless material && material.update_attributes({:storage => cn[:num], :check_num => nil})
         failed_updates << cn[:code]
       end
     end unless params[:materials].blank?
@@ -785,7 +787,7 @@ class MaterialsController < ApplicationController
   #盘点物料清单
   def check_mat_num
     @materials_need_check = Material.find_by_sql(["select m.* from materials m where
- m.status=? and m.store_id=? group by m.id", Material::STATUS[:NORMAL], @current_store.id])
+ m.status=? and m.store_id=? and m.check_num is not null group by m.id", Material::STATUS[:NORMAL], @current_store.id])
   end
 
 
