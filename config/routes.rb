@@ -33,7 +33,8 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins do
     collection do
-      get "logout"
+      get "logout", "send_validate_code"
+      post "forgot_password"
     end
   end
   match "logout" => "logins#logout"
