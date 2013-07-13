@@ -237,12 +237,17 @@ class Order < ActiveRecord::Base
     arr[:car_info] = capital_arr
     product_arr = {}
     clean_and_beauty_service_arr, maint_service_arr, clean_and_besuty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr = [], [], [], [], [], [], [], []
-#amanda modified 0708
-    products = Product.find_by_sql("select p.*, m.storage m_storage from products p left join prod_mat_relations pmr on
-pmr.product_id = p.id left join materials m on m.id = pmr.material_id where p.status = 1
-and ((m.status = 0 and m.storage > 0 and p.is_service = 0) or (p.is_service = 1))
-and p.store_id = #{store_id} and m.store_id = #{store_id} group by p.id")
-    (products || []).each do |p|
+prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id from prod_mat_relations pmr
+      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
+      and m.storage > 0 and m.store_id = ? ", store_id])
+    p_ids = prod_mat_relations.collect { |i| i.p_id  } if prod_mat_relations.any?
+    products = Product.find_by_sql(["select * from products p where p.status = ?
+      and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?",
+        Product::IS_VALIDATE[:YES], p_ids, store_id])
+    services = Product.find_by_sql(["select * from products p where p.status = ?
+      and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
+        Product::IS_VALIDATE[:YES], store_id])
+    ((products + services) || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
@@ -250,22 +255,21 @@ and p.store_id = #{store_id} and m.store_id = #{store_id} group by p.id")
       h[:description] = p.description
       h[:mat_num] =  p.m_storage if p.is_a?(Product)
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
-      case p.types.to_i
-      when [Product::TYPES_NAME[:CLEAN_PROD],Product::TYPES_NAME[:BEAUTIFY_PROD]]
+      
+      if [Product::TYPES_NAME[:CLEAN_PROD] || Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
         clean_and_besuty_prod_arr << h
       
-      when Product::TYPES_NAME[:DECORATE_PROD]
+      elsif p.types.to_i == Product::TYPES_NAME[:DECORATE_PROD]
         decorate_prod_arr << h
-      when Product::TYPES_NAME[:ASSISTANT_PROD]
+      elsif p.types.to_i ==  Product::TYPES_NAME[:ASSISTANT_PROD]
         assis_prod_arr << h
-      when Product::TYPES_NAME[:ELEC_PROD]
+      elsif p.types.to_i ==  Product::TYPES_NAME[:ELEC_PROD]
         elec_prod_arr << h
-      when Product::TYPES_NAME[:OTHER_PROD]
+      elsif p.types.to_i ==  Product::TYPES_NAME[:OTHER_PROD]
         other_prod_arr << h
-      when [Product::PRODUCT_END, Product::BEAUTY_SERVICE]
+      elsif [Product::PRODUCT_END, Product::BEAUTY_SERVICE].include?(p.types.to_i)
         clean_and_beauty_service_arr << h
-      end
-      if  p.types.to_i > Product::PRODUCT_END && p.types.to_i != Product::BEAUTY_SERVICE
+      elsif  p.types.to_i > Product::PRODUCT_END && p.types.to_i != Product::BEAUTY_SERVICE
         maint_service_arr << h
       end
     end
