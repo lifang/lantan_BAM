@@ -239,7 +239,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
           "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
-          "use_svcard","work_order_finished","into_materials"
+          "use_svcard","work_order_finished","into_materials","login_and_return_construction_order"
       end
     end
     resources :syncs_datas do
