@@ -33,7 +33,8 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins do
     collection do
-      get "logout"
+      get "logout", "send_validate_code"
+      post "forgot_password"
     end
   end
   match "logout" => "logins#logout"
@@ -119,7 +120,11 @@ LantanBAM::Application.routes.draw do
     end
     resources :salaries
     resources :current_month_salaries
-    resources :material_order_manages
+    resources :material_order_manages do
+      collection do
+        get "mat_in_or_out_query", "show_mat_in_or_out_query"
+      end
+    end
     resources :staff_manages do
       collection do
         get "get_year_staff_hart"
@@ -235,7 +240,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
           "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
-          "use_svcard","work_order_finished","into_materials"
+          "use_svcard","work_order_finished","into_materials","login_and_return_construction_order"
       end
     end
     resources :syncs_datas do
