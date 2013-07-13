@@ -784,17 +784,12 @@ class MaterialsController < ApplicationController
 
   #盘点物料清单
   def check_mat_num
-    @materials_need_check = Material.includes(:mat_depot_relations).find_by_sql(["select m.* from materials m left join mat_depot_relations mdr on m.id = mdr.material_id
-       left join depots d on mdr.depot_id = d.id where m.status=? and m.store_id=? and d.store_id=?
-       and mdr.check_num is not null group by m.id", Material::STATUS[:NORMAL], @current_store.id, @current_store.id])
-  end
-
-  def prin_matin_list
-    
+    @materials_need_check = Material.find_by_sql(["select m.* from materials m where
+ m.status=? and m.store_id=? group by m.id", Material::STATUS[:NORMAL], @current_store.id])
   end
 
 
-  private
+  protected
   
   def make_search_sql
     mat_code_sql = params[:mat_code].blank? ? "1 = 1" : ["materials.code = ?", params[:mat_code]]
@@ -807,9 +802,9 @@ class MaterialsController < ApplicationController
     @s_sql << mat_code_sql << mat_name_sql << mat_type_sql
     @l_sql = []
     @l_sql << mat_loss_code_sql << mat_loss_name_sql << mat_loss_type_sql
-    @mat_code = params[:mat_code].nil? ? nil : params[:mat_code]
-    @mat_name = params[:mat_name].nil? ? nil : params[:mat_name]
-    @mat_type = params[:mat_type].nil? ? nil : params[:mat_type]
+    @mat_code = params[:mat_code].blank? ? nil : params[:mat_code]
+    @mat_name = params[:mat_name].blank? ? nil : params[:mat_name]
+    @mat_type = params[:mat_type].blank? ? nil : params[:mat_type]
   end
 
   def get_store

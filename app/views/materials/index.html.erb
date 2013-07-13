@@ -107,7 +107,7 @@
         <div class="clear"></div>
         <div class="btn_box_s">
           <button onclick="checkNums(<%= @current_store.id %>)" type="button" class="confirm_btn">入库</button>
-          <button type="button" class="confirm_btn">打印入库清单</button>
+          <button onclick="fetchMatIn(<%= @current_store.id %>)" type="button" class="confirm_btn">打印入库清单</button>
           <button type="button" class="confirm_btn">打印条码</button>
         </div>
       <% end %>

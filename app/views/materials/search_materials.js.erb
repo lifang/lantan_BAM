@@ -1,5 +1,11 @@
 <% if @material_ins %>
-  $(".mat-out-list").append('<%= escape_javascript(render :partial => '/materials_in_outs/batch_mat_in') %>');
+  mat_in_list = $("#ruku_tab .mat-out-list");
+  <% if @mat_type %>
+    mat_in_list.html('<%= escape_javascript(render :partial => '/materials_in_outs/batch_mat_in') %>');
+  <% else %>
+    
+    mat_in_list.append('<%= escape_javascript(render :partial => '/materials_in_outs/batch_mat_in') %>');
+  <% end %>
 <% else %>
   <% if @tab_name=="materials" %>
     $("#kucunliebiao").html('<%= escape_javascript(render :partial => '/materials/page_materials') %>');

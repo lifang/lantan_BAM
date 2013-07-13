@@ -1210,7 +1210,6 @@ function close_notice(obj){
         $.ajax({
             url: "/stores/" +store_id+ "/materials_losses/view",
             dataType:"text",
-            type:"get",
             data:{materials_loss_id : materials_loss_id},
             success:function(data,status)
             {
@@ -1228,3 +1227,26 @@ function close_notice(obj){
             }
         });
     }
+  function fetchMatIn(store_id){
+    var saved_mat_mos = "";
+    $("#ruku_tab .mat-out-list").find("tr").each(function(index){
+        var mat_code = $(this).find(".mat_code").text();
+        var mo_code = $(this).find(".mo_code").text();
+        var num = $(this).find(".mat_item_num").text();
+        // var mat_name = $(this).find(".mat_name").text();
+        var each_item = "";
+        each_item += mat_code + "_";
+        each_item += mo_code + "_";
+        each_item += num;
+        saved_mat_mos += each_item + ",";
+    })
+    if(saved_mat_mos != "")
+    $.ajax({
+            url: "/stores/" +store_id+ "/prin_matin_list",
+            dataType:"text",
+            type:"get",
+            data:{mat_in_items : saved_mat_mos},
+            success:function(data,status)
+            {}
+    })
+  }

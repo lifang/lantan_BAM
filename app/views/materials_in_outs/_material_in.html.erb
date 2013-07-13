@@ -1,6 +1,6 @@
 <% material_in.each do |material, mos| %>
   <% mos.each do |mo|%>
-    <tr class="<% unless @code_num %>newTr_red<% end %>">
+    <tr id="<%= mo.id %>" class="<% unless @code_num %>newTr_red<% end %>">
       <td class="mo_code"><%= mo.code %></td>
       <td class="mat_code"><%= material.code %></td>
       <td class="mat_name"><%= material.name %></td>
