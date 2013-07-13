@@ -729,10 +729,11 @@ function checkMaterial(obj){              //编辑物料验证
         tishi_alert("请输入物料规格");
         f = false;
     }     
-         //$(obj).parent("form").submit();
-//      if(f){
-//           $(obj).attr("disabled", "disabled");
-//      }
+      if(f){
+           $(obj).attr("disabled", "disabled");
+      }else{
+          $(obj).attr("disabled", false);
+      }
          return f;
 }
 
