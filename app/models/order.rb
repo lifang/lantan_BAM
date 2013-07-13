@@ -253,7 +253,7 @@ prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id 
       h[:name] = p.name
       h[:price] = p.sale_price
       h[:description] = p.description
-      h[:mat_num] =  p.m_storage if p.is_a?(Product)
+#      h[:mat_num] =  p.m_storage if p.is_a?(Product)
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
       
       if [Product::TYPES_NAME[:CLEAN_PROD] || Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
