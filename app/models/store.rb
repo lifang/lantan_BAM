@@ -19,6 +19,8 @@ class Store < ActiveRecord::Base
   has_many :sv_cards
   has_many :store_chain_relations
   has_many :depots
+  has_many :customer_store_relations
+  has_many :customers, :through => :customer_store_relations
 
   belongs_to :city
   has_many :roles

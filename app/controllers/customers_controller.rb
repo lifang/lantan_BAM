@@ -3,6 +3,7 @@ class CustomersController < ApplicationController
   before_filter :sign?
   include RemotePaginateHelper
   layout "customer"
+  require 'will_paginate/array'
   before_filter :customer_tips
 
   def index
@@ -140,8 +141,8 @@ class CustomersController < ApplicationController
     comp_page = params[:comp_page] ? params[:comp_page] : 1
     @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, comp_page)
     svc_card_records_method(@customer.id)  #储值卡记录
-    @c_pcard_relations = @customer.pc_card_records_method(params[:page]||1)[0]  #套餐卡记录
-    @already_used_count = @customer.pc_card_records_method(params[:page]||1)[1]
+    @c_pcard_relations = @customer.pc_card_records_method[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if @customer.pc_card_records_method[1] #套餐卡记录
+    @already_used_count = @customer.pc_card_records_method[0]
   end
   
   def order_prods
@@ -164,8 +165,8 @@ class CustomersController < ApplicationController
   def pc_card_records
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @c_pcard_relations = @customer.pc_card_records_method(params[:page]||1)[0]  #套餐卡记录
-    @already_used_count = @customer.pc_card_records_method(params[:page]||1)[1]
+    @c_pcard_relations = @customer.pc_card_records_method[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if @customer.pc_card_records_method[1]  #套餐卡记录
+    @already_used_count = @customer.pc_card_records_method[0]
   end
 
   def revisits
