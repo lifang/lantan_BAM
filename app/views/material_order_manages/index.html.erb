@@ -1,6 +1,6 @@
 <div class="second_menu">
-  <% if permission?(:datas, :jixiao) %><%= link_to "成本统计", store_material_order_manages_path(@store), :class => "hover" %><% end %>
-  <% if permission?(:datas, :shuip) %><%= link_to "入/出库查询", mat_in_or_out_query_store_material_order_manages_path(@store), :class=> "" %><% end %>
+  <% if permission?(:datas, :chenbentongji) %><%= link_to "成本统计", store_material_order_manages_path(@store), :class => "hover" %><% end %>
+  <% if permission?(:datas, :ruchukuchaxun) %><%= link_to "入/出库查询", mat_in_or_out_query_store_material_order_manages_path(@store), :class=> "" %><% end %>
 </div>
 <form action="/stores/<%= @store.id %>/material_order_manages" method="get">
 <div class="search">

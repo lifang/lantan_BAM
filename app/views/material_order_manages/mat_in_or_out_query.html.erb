@@ -1,0 +1,44 @@
+<div class="second_menu">
+  <% if permission?(:datas, :chenbentongji) %><%= link_to "成本统计", store_material_order_manages_path(@store) %><% end %>
+  <% if permission?(:datas, :ruchukuchaxun) %><%= link_to "入/出库查询", mat_in_or_out_query_store_material_order_manages_path(@store), :class => "hover" %><% end %>
+</div>
+
+<%= form_tag search_mat_in_or_out_store_material_order_manages_url(params[:store_id]),:id => "search_mat_in_or_out" do |f|  %>
+  <div class="search">
+    <div>
+      <label>开始时间：</label>
+      <input id="start_date" type="text" value="<%= @start_date %>"  onclick="WdatePicker()" class="Wdate" readonly />
+    </div>
+    <div>
+      <label>结束时间：</label>
+      <input id="end_date"  type="text" value="<%=  @end_date  %>" onclick="WdatePicker()" class="Wdate" readonly />
+    </div>
+    <div>
+      <label>物料类型：</label>
+      <select style="width: 80px;" id="mat_types" value="<%= @mat_type%>">
+        <option value="" selected="selected">全部</option>
+        <% Material::TYPES_NAMES.each do |types| %>
+         <option value="<%= types[0] %>"><%= types[1] %></option>
+        <% end %>
+      </select>
+    </div>
+    <div>
+      <label>入/出库：</label>
+      <select style="width: 80px;" id="mat_in_or_out">
+        <option value="" selected="selected">请选择</option>
+        <option value="ruku">入库</option>
+        <option value="chuku">出库</option>
+      </select>
+    </div>
+    <div><button type="button" class="confirm_btn" onclick="search_mat_in_or_out('<%= params[:store_id] %>',this);">查询</button></div>
+  </div>
+<% end  %>
+
+<div id="mat_in_out_data_table" class="data_body">
+    <div id="mat_in_list" class="data_body" style="display: none;">
+        <%= render :partial => '/material_order_manages/mat_in_list' %>
+    </div>
+    <div id="mat_out_list" class="data_body" style="display: none;" >
+      <%= render :partial => '/material_order_manages/mat_out_list' %>
+    </div>
+</div>

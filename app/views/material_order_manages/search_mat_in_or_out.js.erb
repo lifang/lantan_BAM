@@ -1,0 +1,9 @@
+<% if @mat_in_or_out == "ruku" %>
+$("#mat_out_list").hide();
+$("#mat_in_list").html('<%= escape_javascript(render :partial => '/material_order_manages/mat_in_list') %>');
+$("#mat_in_list").show();
+<% elsif @mat_in_or_out == "chuku"%>
+$("#mat_in_list").hide();
+$("#mat_out_list").html('<%= escape_javascript(render :partial => '/material_order_manages/mat_out_list') %>');
+$("#mat_out_list").show();
+<%end%>
