@@ -10,8 +10,8 @@ set :scm, :git   # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `pe
 # 如果SCM设为空， 也可通过直接copy本地repo部署
 set :repository,  "git@github.com:lifang/lantan_BAM.git" #项目在github上的地址
 #set :ssh_options, { :forward_agent => true }  #deploy时获取github上项目使用你本地的ssh key
-set :git_shallow_clone, 1  #Shallow cloning will do a clone each time, but will only get the top commit, not the entire repository history
-set :short_branch, "master"  #deploy的时候默认checkout master branch
+#set :git_shallow_clone, 1  #Shallow cloning will do a clone each time, but will only get the top commit, not the entire repository history
+set :branch, "master"  #deploy的时候默认checkout master branch
 
 #$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
 #require "rvm/capistrano"           # Load RVM's capistrano plugin.

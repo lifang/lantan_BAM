@@ -14,7 +14,7 @@ LantanBAM::Application.routes.draw do
   end
   resources :work_orders do
     collection do
-      get "work_orders_status", "work_order_finished"
+      get "work_orders_status"
     end
   end
   resources :package_cards do
@@ -33,7 +33,8 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins do
     collection do
-      get "logout"
+      get "logout", "send_validate_code"
+      post "forgot_password"
     end
   end
   match "logout" => "logins#logout"
@@ -119,7 +120,11 @@ LantanBAM::Application.routes.draw do
     end
     resources :salaries
     resources :current_month_salaries
-    resources :material_order_manages
+    resources :material_order_manages do
+      collection do
+        get "mat_in_or_out_query", "search_mat_in_or_out","page_ins","page_outs"
+      end
+    end
     resources :staff_manages do
       collection do
         get "get_year_staff_hart"
@@ -197,6 +202,8 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
+  match 'stores/:id/prin_matin_list' => 'materials_in_outs#prin_matin_list'
+
   #match 'stores/:store_id/depots' => 'depots#index'
   #match 'stores/:store_id/depots/create' => 'depots#create'
   match 'stores/:store_id/depots' => 'depots#index'
@@ -232,7 +239,8 @@ LantanBAM::Application.routes.draw do
     resources :orders do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
-          "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard","use_svcard"
+          "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
+          "use_svcard","work_order_finished","into_materials","login_and_return_construction_order"
       end
     end
     resources :syncs_datas do

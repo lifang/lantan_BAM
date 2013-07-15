@@ -6,7 +6,7 @@ class RolesController < ApplicationController
 
   #角色列表
   def index
-    @roles = @store.roles
+    @roles = Role.find_all_by_store_id(params[:store_id].to_i)
     @role_id = params[:role_id] if params[:role_id]
     @menus = Menu.all
     @role_menu_relation_menu_ids = RoleMenuRelation.where(:role_id => @role_id).map(&:menu_id) if @role_id
@@ -30,7 +30,7 @@ class RolesController < ApplicationController
 
   #添加角色
   def create
-    role = Role.find_by_name_and_store_id params[:name], params[:store_id]
+    role = Role.find_by_name_and_store_id(params[:name], params[:store_id].to_i)
     status = 0
     if role.nil?
       Role.create(:name => params[:name], :store_id => params[:store_id].to_i, :role_type => Role::ROLE_TYPE[:NORMAL])
@@ -50,7 +50,7 @@ class RolesController < ApplicationController
     end
     @staffs = Staff.valid.includes(:staff_role_relations => :role).paginate(:conditions => str,
       :page => params[:page], :per_page => Constant::PER_PAGE)
-    @roles = Role.all
+    @roles = Role.find_all_by_store_id(params[:store_id].to_i)
     respond_to do |f|
       f.html
       f.js
@@ -70,7 +70,8 @@ class RolesController < ApplicationController
         params[:model_nums].each do |controller, num|
           role_model_relation = RoleModelRelation.where(:role_id => role_id, :model_name => controller)
           if role_model_relation.empty?
-            RoleModelRelation.create(:num => num.map(&:to_i).sum, :role_id => role_id, :model_name => controller)
+            RoleModelRelation.create(:num => num.map(&:to_i).sum, :role_id => role_id, 
+              :model_name => controller, :store_id => params[:store_id])
           else
             role_model_relation.first.update_attributes(:num => num.map(&:to_i).sum)
           end

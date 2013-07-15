@@ -193,8 +193,8 @@ class Order < ActiveRecord::Base
       end
       working_orders = working_orders.first if working_orders.size > 0
       customer_record = Customer.find_by_id(customer.customer_id)
-      c_pcard_relations =  customer_record.pc_card_records_method[2]  #套餐卡记录
-      already_used_count = customer_record.pc_card_records_method[1]
+      c_pcard_relations =  customer_record.pc_card_records_method[1]  #套餐卡记录
+      already_used_count = customer_record.pc_card_records_method[0]
 
       pcard_records = []
       c_pcard_relations.each do |cpr|
@@ -236,47 +236,51 @@ class Order < ActiveRecord::Base
     end    
     arr[:car_info] = capital_arr
     product_arr = {}
-    clean_servie_arr, maint_service_arr, clean_prod_arr, beauty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr = [], [], [], [], [], [], [], []
-    #amanda modified 0708
-    products = Product.find_by_sql("select p.* from products p left join prod_mat_relations pmr on
-pmr.product_id = p.id left join materials m on m.id = pmr.material_id where p.status = 1
-and ((m.status = 0 and m.storage > 0 and p.is_service = 0) or (p.is_service = 1))
-and p.store_id = 2 and m.store_id = 2 group by p.id")
-    (products || []).each do |p|
+    clean_and_beauty_service_arr, maint_service_arr, clean_and_besuty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr = [], [], [], [], [], [], [], []
+prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id, sum(m.storage) m_storage from prod_mat_relations pmr
+      inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
+      and m.storage > 0 and m.store_id = ? group by p_id", store_id])
+p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_storage.to_i; pmr_h} if prod_mat_relations.any?
+
+    products = Product.find_by_sql(["select * from products p where p.status = ?
+      and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?",
+        Product::IS_VALIDATE[:YES], p_ids.keys.flatten, store_id])
+    services = Product.find_by_sql(["select * from products p where p.status = ?
+      and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
+        Product::IS_VALIDATE[:YES], store_id])
+    ((products + services) || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
       h[:price] = p.sale_price
       h[:description] = p.description
+      h[:mat_num] =  p_ids[p.id] if p.is_a?(Product)
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
-      case p.types.to_i
-      when Product::TYPES_NAME[:CLEAN_PROD]
-        clean_prod_arr << h
-      when Product::TYPES_NAME[:BEAUTIFY_PROD]
-        beauty_prod_arr << h
-      when Product::TYPES_NAME[:DECORATE_PROD]
+      
+      if [Product::TYPES_NAME[:CLEAN_PROD] || Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
+        clean_and_besuty_prod_arr << h
+      
+      elsif p.types.to_i == Product::TYPES_NAME[:DECORATE_PROD]
         decorate_prod_arr << h
-      when Product::TYPES_NAME[:ASSISTANT_PROD]
+      elsif p.types.to_i ==  Product::TYPES_NAME[:ASSISTANT_PROD]
         assis_prod_arr << h
-      when Product::TYPES_NAME[:ELEC_PROD]
+      elsif p.types.to_i ==  Product::TYPES_NAME[:ELEC_PROD]
         elec_prod_arr << h
-      when Product::TYPES_NAME[:OTHER_PROD]
+      elsif p.types.to_i ==  Product::TYPES_NAME[:OTHER_PROD]
         other_prod_arr << h
-      when Product::PRODUCT_END
-        clean_servie_arr << h
-      end
-      if  p.types.to_i > Product::PRODUCT_END
+      elsif [Product::PRODUCT_END, Product::BEAUTY_SERVICE].include?(p.types.to_i)
+        clean_and_beauty_service_arr << h
+      elsif  p.types.to_i > Product::PRODUCT_END && p.types.to_i != Product::BEAUTY_SERVICE
         maint_service_arr << h
       end
     end
-    product_arr[:清洗服务] = clean_servie_arr
-    product_arr[:保养服务] = maint_service_arr
-    product_arr[:清洁用品] = clean_prod_arr
-    product_arr[:美容用品] = beauty_prod_arr
-    product_arr[:装饰产品] = decorate_prod_arr
-    product_arr[:配件产品] = assis_prod_arr
-    product_arr[:电子产品] = elec_prod_arr
-    product_arr[:其他产品] = other_prod_arr
+    product_arr[:清洗美容类] = clean_and_beauty_service_arr
+    product_arr[:维修保养类] = maint_service_arr
+    product_arr[:美容产品类] = clean_and_besuty_prod_arr
+    product_arr[:装饰产品类] = decorate_prod_arr
+    product_arr[:汽车配件类] = assis_prod_arr
+    product_arr[:电子产品类] = elec_prod_arr
+    product_arr[:汽车用品类] = other_prod_arr
     cards = PackageCard.find(:all,
       :conditions => ["status = ? and store_id = ? and
           ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?) or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})",
@@ -286,7 +290,7 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
       inner join products p on p.id = ppr.product_id where ppr.package_card_id in (?)", cards]).group_by{ |pcr| pcr.package_card_id }
     sv_cards = SvCard.normal_included(2)
 
-    product_arr[:会员卡] = (cards + sv_cards || []).collect{|c|
+    product_arr[:套餐卡类] = (cards + sv_cards || []).collect{|c|
       price = c.is_a?(SvCard) ? c.sale_price : c.price
       description = ""
       if c.is_a?(SvCard)
@@ -306,8 +310,9 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
       h
     }
     arr[:products] = product_arr
-    count = [clean_servie_arr, maint_service_arr, clean_prod_arr, beauty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr].map(&:length).max
-    arr[:count] = count
+    arr[:p_titles_order] = [:清洗美容类, :汽车用品类, :维修保养类, :美容产品类, :电子产品类, :装饰产品类, :汽车配件类, :套餐卡类]
+#    count = product_arr.values.map(&:length).max
+#    arr[:count] = count
     arr
   end
 
@@ -331,7 +336,7 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
         :other_way => email, :birthday => birth, :sex => sex) if customer
       carNum = CarNum.find_by_num car_num
       customer_infos = Customer.create_single_cus(customer, carNum, phone, car_num,
-        user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil,nil)
+        user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil, store_id)
       customer = customer_infos[0]
       carNum = customer_infos[1]
       info = Hash.new
@@ -375,7 +380,7 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
       sale_hash = {}
       svcard_arr = []
       prod_ids.split(",").each do |id| #["1_3_1","22_3_0","311_0","226_2"]
-        if id.split("_")[1].to_i == 3
+        if id.split("_")[1].to_i == 7
           #套餐卡
           if id.split("_")[2].to_i == 0
             has_p_card = 0
@@ -563,7 +568,8 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
           :front_staff_id => user_id,
           :customer_id => c_id,
           :store_id => store_id,
-          :is_visited => IS_VISITED[:NO]
+          :is_visited => IS_VISITED[:NO],
+          :auto_time=>Product.update_order_time(arr)
         })
       if order
         hash = Hash.new
@@ -989,7 +995,7 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
           customer.update_attributes(:name => user_name.strip, :mobilephone => phone,
             :other_way => email, :birthday => birth, :sex => sex) if customer
           Customer.create_single_cus(customer, car_num_r, phone, car_num,
-            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil)
+            user_name.strip, email, birth, car_year, brand.split("_")[1].to_i, sex, nil, nil, store_id)
         end
         status = 1
       end

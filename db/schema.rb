@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130712103728) do
+ActiveRecord::Schema.define(:version => 20130713092543) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -765,6 +765,7 @@ ActiveRecord::Schema.define(:version => 20130712103728) do
     t.float    "probation_salary"
     t.boolean  "is_deduct"
     t.integer  "probation_days"
+    t.string   "validate_code"
   end
 
   create_table "station_service_relations", :force => true do |t|

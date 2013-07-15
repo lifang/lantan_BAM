@@ -37,4 +37,4 @@
     <% end %>
   </tbody>
 </table>
-<%= will_paginate_remote(@material_losses,"",{:url => page_materials_losses_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @material_losses.size > 0 %>
+<%= will_paginate_remote(@material_losses,"mat_code=#{@mat_code}&mat_name=#{@mat_name}&mat_type=#{@mat_type}",{:url => page_materials_losses_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @material_losses.size > 0 %>

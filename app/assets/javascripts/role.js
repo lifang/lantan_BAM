@@ -82,7 +82,7 @@ function set_role(obj,role_id,store_id){
         url:this.href,
         dataType:"script",
         type:"GET",
-        data:"role_id="+role_id,
+        data:"role_id="+role_id+"&store_id="+store_id,
         success:function(){
             $("#model_div").show();
             $("#role_id").attr("value",role_id);

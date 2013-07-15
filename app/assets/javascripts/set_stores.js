@@ -26,5 +26,6 @@ function edit_store_validate(obj){
     };
     if(flag){
         $(obj).parents("form").submit();
+        $(obj).removeAttr("onclick");
     }
 }
