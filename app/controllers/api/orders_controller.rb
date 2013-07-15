@@ -418,10 +418,13 @@ class Api::OrdersController < ApplicationController
     check_num = params[:check_num]
     material = Material.where("code = #{code} and store_id = #{store_id}").first
     if material
-      material.update_attribute(:check_num, check_num)
-      render :json => {:status => "success"}
+      if material.update_attribute(:check_num, check_num)
+        render :json => {:status => "success"}
+      else
+        render :json => {:status => "error", :message => "更新材料数量失败"}
+      end
     else
-      render :json => {:status => "error"}
+      render :json => {:status => "error", :message => "没有材料"}
     end
   end
 
@@ -434,11 +437,11 @@ class Api::OrdersController < ApplicationController
     else
       #登录成功
       current_day = Time.now.strftime("%Y%m%d")
-      orders = Order.where("store_id = #{staff.store_id}").
-                     where("status = #{Order::STATUS[:SERVICING]}").
-                     where("current_day = #{current_day}")
+      orders = Order.includes(:work_orders).where("orders.store_id = #{staff.store_id}").
+                     where("orders.status = #{Order::STATUS[:SERVICING]}").
+                     where("work_orders.current_day = #{current_day}")
 
-      render :json => {:status => 1, :orders => orders}
+      render :json => {:status => 1, :orders => orders, :store_id => staff.store_id}
     end
   end
   

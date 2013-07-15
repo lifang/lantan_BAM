@@ -1,6 +1,24 @@
 #encoding: utf-8
 class LoginsController < ApplicationController
+  
   def index
+#    require 'barby'
+#    require 'barby/barcode/code_128'
+#    #require 'barby/barcode/ean_13'
+#    #require 'barby/barcode/ean_8'
+#    require 'barby/outputter/custom_rmagick_outputter'
+#    require 'barby/outputter/rmagick_outputter'
+#
+#
+#    barcode = Barby::Code128B.new('1234567895')
+    #barcode = Barby::EAN13.new('412345678901')
+    #barcode = Barby::EAN8.new('4128901')
+#    File.open(Rails.root.join('public', "uploads", "barcode_demo.png"), 'wb'){|f|
+#      f.write barcode.to_png
+#    }
+
+#    barcode.to_image_with_data.write(Rails.root.join('public', "uploads", "barcode_demo.png"))
+
     if cookies[:user_id]
       @staff = Staff.find_by_id(cookies[:user_id].to_i)
       if @staff.nil?
@@ -68,7 +86,7 @@ class LoginsController < ApplicationController
           :content => random_password, :phone => staff.phone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
         begin
-          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=#{random_password}&Exno=0"
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=新密码#{random_password}&Exno=0"
           create_get_http(Constant::MESSAGE_URL, message_route)
         rescue
           @notice = "短信通道忙碌，请稍后重试。"
@@ -77,6 +95,7 @@ class LoginsController < ApplicationController
         staff.validate_code = nil
         staff.encrypt_password
         staff.save
+        @flag = true
         @notice = "短信发送成功，新密码已经发送到手机中。"
       end
     else
@@ -95,7 +114,7 @@ class LoginsController < ApplicationController
           :content => random_num, :phone => staff.phone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
         begin
-          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=#{random_num}&Exno=0"
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=验证码#{random_num}&Exno=0"
           create_get_http(Constant::MESSAGE_URL, message_route)
         rescue
           render :text => "短信通道忙碌，请稍后重试。"
