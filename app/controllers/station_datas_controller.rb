@@ -14,12 +14,14 @@ class StationDatasController < ApplicationController
   end
 
   def create
-    @station = Station.create(params[:station].merge({:store_id => @store.id, :status => 2}))
+    if params[:product_ids]
+      products = Product.where(:id => params[:product_ids])
+      levels = (products.map(&:staff_level)|products.map(&:staff_level_1)).uniq.sort
+      @station = Station.create(params[:station].merge({:store_id => @store.id, :status => 2,:staff_level=>levels.min,
+            :staff_level1=>levels[0..(levels.length/2.0)].max   }))
+    end
     if @station.save
-      if params[:product_ids]
-        products = Product.where(:id => params[:product_ids])
-        @station.products = products
-      end
+      @station.products = products
       render :successful
     else
       render :replace_form
@@ -33,12 +35,15 @@ class StationDatasController < ApplicationController
   end
 
   def update
+    levels =[]
     @station = Station.find(params[:id])
-    if @station.update_attributes(params[:station])
-      if params[:product_ids]
-        products = Product.where(:id => params[:product_ids])
-        @station.products = products
-      end
+    if params[:product_ids]
+      products = Product.where(:id => params[:product_ids])
+      levels = (products.map(&:staff_level)|products.map(&:staff_level_1)).uniq.sort
+    end
+    if  @station.update_attributes(params[:station].merge({:staff_level=>levels.min,
+            :staff_level1=>levels[0..(levels.length/2.0)].max   }))
+      @station.products = products
       render :successful
     else
       render :replace_form

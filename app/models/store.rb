@@ -19,8 +19,11 @@ class Store < ActiveRecord::Base
   has_many :sv_cards
   has_many :store_chain_relations
   has_many :depots
+  has_many :customer_store_relations
+  has_many :customers, :through => :customer_store_relations
 
   belongs_to :city
+  has_many :roles
    STATUS = {
     :CLOSED => 0,       #0该门店已关闭，1正常营业，2装修中, 3已删除
     :OPENED => 1,

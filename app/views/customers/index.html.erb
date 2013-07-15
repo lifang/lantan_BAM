@@ -32,7 +32,7 @@
         上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints/satisfy_degree"><%= "#{satisfy}%" %></a>&nbsp;&nbsp;&nbsp;
         上月门店不满意度 ：<a href="/stores/<%= @store.id %>/complaints"><%= "#{100-satisfy}%" %></a>
       </h2>
-      <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries %></span>位</p>
+      <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries if @customers %></span>位</p>
     </div>
     <div class="data_menu">
       <% if permission?(controller.controller_name.to_sym, :create) %>
@@ -71,10 +71,10 @@
                   <div id="mark_<%= customer.id %>" style="display: none;"><%= customer.mark %></div>
                 </td>
               </tr>
-            <% end %>
+            <% end if @customers.any? %>
           </tbody>
         </table>
-        <%=  will_paginate @customers , :previous_label=>" 上一页", :next_label=>" 下一页", :class => "pageTurn" %>
+        <%=  will_paginate @customers , :previous_label=>" 上一页", :next_label=>" 下一页", :class => "pageTurn" if @customers.any? %>
       </div>
     </div>
   </div>

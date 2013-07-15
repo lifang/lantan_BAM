@@ -67,8 +67,7 @@ function removeRow(obj){
     $(obj).parents("tr").remove();
 }
 
-function checkNums(){
-    var store_id = $("#store_id").val();
+function checkNums(store_id){
     var form_action_url = $("#create_mat_in_form").attr("action");
     var saved_mat_mos = "";
     var notice = "";
@@ -80,7 +79,7 @@ function checkNums(){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
         var num = $(this).find(".mat_item_num").text();
-        var mat_name = $(this).find(".mat_name").text();
+       // var mat_name = $(this).find(".mat_name").text();
         var each_item = "";
         each_item += mat_code + "_";
         each_item += mo_code + "_";
@@ -106,16 +105,18 @@ function checkNums(){
                     {
                         $.ajax({
                             url: form_action_url,
-                            dataType:"text",
+                            dataType:"json",
                             type:"POST",
                             data:{
-                                mat_in_items: saved_mat_mos
+                                mat_in_items: saved_mat_mos, mat_in_create: 1
                             },
                             success:function(data2){
-                                if(data2=="1")
+                                if(data2['status']=="1")
                                 {
                                     tishi_alert("入库成功！");
-                                    window.location.href = "/materials_in_outs";
+                                    window.location.href = "/stores/" + store_id + "/materials";
+                                }else{
+                                    tishi_alert("入库失败！");
                                 }
                             }
                         });

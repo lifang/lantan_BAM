@@ -98,4 +98,5 @@ class WorkOrdersController < ApplicationController
       end
       render :json => current_info
     end# work_orders_status 方法结束标记
+
 end

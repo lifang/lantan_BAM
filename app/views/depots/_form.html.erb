@@ -1,79 +1,17 @@
-<div class="tab_popup" style="display: none;" id="station_form">
+<div class="tab_popup" style="display: none;" id="depot_form">
   <div class="popup_box">
-    <h1>工位<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <h1>仓库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
-      <% @station ||= Station.new %>
-      <%= form_for @station, :url => @action == 'new' ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => @action == 'new' ? :post : :put, :remote => true, :html => {"data-type" => 'script', :class=>"station_form"} do |f| %>
+      <% @depot ||= Depot.new %>
+      <%= form_tag :id => "Add_depot_form" do |f| %>
           <div class="popup_body_area">
-            <div class="item">
-              <%= f.label :name, '名称：'%>
-              <%= f.text_field :name%>
+            <div class="brand">
+              <%=label_tag 'name','仓库名称：'%>
+              <%= text_field_tag "depot_name"%>
             </div>
-            <div class="item">
-              <%= f.label :collector_code, '采集器编号：'%>
-              <%= f.text_field :collector_code%>
+            <div class="btn_box">
+              <button class="confirm_btn" onclick="new_depot('<%= params[:store_id] %>')">确定</button>
             </div>
-            <div class="item">
-              <%= f.label :elec_switch, '工位配电开关通道：'%>
-              <%= f.text_field :elec_switch%>
-            </div>
-            <div class="item">
-              <%= f.label :clean_m_fb, '清洗机反馈通道：'%>
-              <%= f.text_field :clean_m_fb %>
-            </div>
-            <div class="item">
-              <%= f.label :gas_t_switch, '气体流量开关通道：'%>
-              <%= f.text_field :gas_t_switch%>
-            </div>
-            <div class="item">
-              <%= f.label :gas_run_fb, '空气机运行反馈通道：'%>
-              <%= f.text_field :gas_run_fb%>
-            </div>
-            <div class="item">
-              <%= f.label :gas_error_fb, '空气机故障反馈通道：'%>
-              <%= f.text_field :gas_error_fb%>
-            </div>
-            <div class="item">
-              <%= f.label :system_error, '系统报警通道：'%>
-              <%= f.text_field :system_error%>
-            </div>
-            <div class="item">
-              <%= f.label :is_using, '工位有效占用通道：'%>
-              <%= f.text_field :is_using%>
-            </div>
-            <div class="item">
-              <%= f.label :day_hmi, '工位日hmi复位通道：'%>
-              <%= f.text_field :day_hmi%>
-            </div>
-            <div class="item">
-              <%= f.label :month_hmi, '工位月hmi复位通道：'%>
-              <%= f.text_field :month_hmi%>
-            </div>
-            <div class="item">
-              <%= f.label :once_gas_use, '工位一次使用的气体数量通道：'%>
-              <%= f.text_field :once_gas_use%>
-            </div>
-            <div class="item">
-              <%= f.label :once_water_use, '工位一次使用的水数量通道：'%>
-              <%= f.text_field :once_water_use%>
-            </div>
-
-            <div class="seeProDiv">
-              <div class="seeProDiv_l">服务：</div>
-              <div class="seeProDiv_rWidth width640">
-                <div class="popup_body_result resultHeight">
-                  <ul>
-                    <% @products = Product.is_service.is_normal.where(:store_id => @store.id) %>
-                    <% @products.each do |product| %>
-                        <li><%= check_box_tag 'product_ids[]', product.id, @station.new_record? ? false : @station.products.include?(product)  %><%= product.name %></li>
-                    <% end %>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="btn_box">
-            <input onclick="return checkValid(this)" type="button" value="确定" class="confirm_btn"/>
           </div>
       <% end %>
     </div>

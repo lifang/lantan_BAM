@@ -61,6 +61,27 @@
     <a href="javascript:void(0)" class="compile_btn" onclick="before_center('.add_img');">添加图片</a><span>*添加新图片会使已上传图片被删除，请为图片做好备份</span>
   </div>
 </div>
+<div class="item">
+  <label>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @service.prod_point %>" />
+</div>
+<div class="clear"></div>
+<div class="item_title">
+  <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @service.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @service.is_auto_revist  %>"
+         onclick="check_revist()" <% if @service.is_auto_revist %>checked<%end%>/>自动回访</div>
+<div class="item_blockArea">
+  <div class="item"><label>回访时间：</label>
+    <select  id="time_revist" name="time_revist" <%unless @service.is_auto_revist%>disabled <%end%>>
+      <option value="">--</option>
+      <% Product::REVIST_TIME.each do |key| %>
+        <option value="<%= key %>" id="<%=key%>" <%if @service.auto_time ==key%> selected<%end%> ><%= key %>小时</option>
+      <% end %>
+    </select>
+  </div>
+  <div class="item_textarea">
+    <label>回访内容：</label><textarea name="con_revist" id="con_revist" cols="" rows="" class="width_textarea"
+                                  <%unless @service.is_auto_revist%>disabled <%end%>><%=  @service.is_auto_revist ? @service.revist_content : ""  %></textarea>
+  </div>
+</div>
 <div class="item_textarea">
   <label>简介：</label><textarea name="intro" id="intro" cols="" rows="" class="width_textarea"><%=  @service.description %></textarea>
 </div>

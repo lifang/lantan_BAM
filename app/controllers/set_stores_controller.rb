@@ -1,3 +1,4 @@
+#encoding: utf-8
 class SetStoresController < ApplicationController
   layout "role"
   before_filter :sign?, :except => [:update]

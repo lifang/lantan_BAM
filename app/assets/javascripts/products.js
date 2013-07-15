@@ -36,6 +36,7 @@ function add_product(e){
     var t_price =$("#t_price").val();
     var sale=$("#sale_price").val();
     var standard =$("#standard").val();
+    var point =$("#prod_point").val();
     var pic_format =["png","gif","jpg","bmp"];
     if ($("#prod_material option").length==0){
         tishi_alert("请添加产品的物料");
@@ -61,8 +62,23 @@ function add_product(e){
         tishi_alert("请输入产品的规格");
         return false;
     }
+    if (point=="" || point.length==0 || isNaN(parseFloat(point))){
+        tishi_alert("请输入产品的积分，积分是数字");
+        return false;
+    }
+    if($("#auto_revist")[0].checked){
+        var time_revist =$("#time_revist option:selected").val();
+        var con_revist =$("#con_revist").val();
+        if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
+            tishi_alert("请选择回访的时长，时长是数字");
+            return false;
+        }
+        if (con_revist =="" || con_revist.length==0){
+            tishi_alert("请输入回访的内容");
+            return false;
+        }
+    }
     var img_f  = false
-   
     $(".add_img #img_div input[name$='img_url']").each(function (){
         if (this.value!="" || this.value.length!=0){
             var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
@@ -121,8 +137,10 @@ function edit_serv(e){
     var name=$("#name").val();
     var base=$("#base_price").val();
     var sale=$("#sale_price").val();
+    var origin =$("#t_price").val();
     var time=$("#cost_time").val();
     var deduct =$("#deduct_percent").val();
+    var point =$("#prod_point").val();
     var pic_format =["png","gif","jpg","bmp"];
     if (name=="" || name.length==0 || pattern.test(name)){
         tishi_alert("请输入服务的名称,不能包含非法字符");
@@ -146,6 +164,10 @@ function edit_serv(e){
         tishi_alert("请输入服务的促销价格,价格为数字");
         return false;
     }
+    if(origin == "" || origin.length==0 || isNaN(parseFloat(origin))){
+        tishi_alert("请输入服务的成本价,价格为数字");
+        return false;
+    }
     if(deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct))){
         tishi_alert("请输入技师提成百分点");
         return false;
@@ -155,7 +177,6 @@ function edit_serv(e){
         return false;
     }
     var img_f  = false
-    
     $(".add_img #img_div input[name$='img_url']").each(function (){
         if (this.value!="" || this.value.length!=0){
             var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
@@ -171,6 +192,22 @@ function edit_serv(e){
     if(img_f){
         tishi_alert("请选择"+pic_format+"格式的图片，且名称不能包含非法字符" );
         return false
+    }
+    if (point=="" || point.length==0 || isNaN(parseFloat(point))){
+        tishi_alert("请输入产品的积分，积分是数字");
+        return false;
+    }
+    if($("#auto_revist")[0].checked){
+        var time_revist =$("#time_revist option:selected").val();
+        var con_revist =$("#con_revist").val();
+        if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
+            tishi_alert("请选择回访的时长，时长是数字");
+            return false;
+        }
+        if (con_revist =="" || con_revist.length==0){
+            tishi_alert("请输入回访的内容");
+            return false;
+        }
     }
     $("#desc").val(serv_editor.html());
     $(e).removeAttr("onclick");
@@ -228,5 +265,13 @@ function serve_delete(id,store_id){
             dataType : 'script',
             url : "/stores/"+ store_id+"/products/"+ id+"/serve_delete"
         });
+    }
+}
+
+function check_revist(){
+    $("#con_revist,#time_revist").attr("disabled",!$("#auto_revist")[0].checked);
+    $("#auto_revist").val($("#auto_revist")[0].checked+0);
+    if (!$("#auto_revist")[0].checked){
+        $("#con_revist,#time_revist").val("");
     }
 }

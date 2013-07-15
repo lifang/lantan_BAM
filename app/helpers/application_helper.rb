@@ -25,10 +25,14 @@ module ApplicationHelper
       from complaints c inner join orders o on o.id = c.order_id
       inner join customers cu on cu.id = c.customer_id inner join car_nums ca on ca.id = o.car_num_id 
       where c.store_id = ? and c.status = ? ", params[:store_id].to_i, Complaint::STATUS[:UNTREATED]])
-    @notices = Customer.find_by_sql("select id, name from customers
-      where status = #{Customer::STATUS[:NOMAL]} and birthday is not null and
-      ((month(now())*30 + day(now()))-(month(birthday)*30 + day(birthday))) <= 0
-      and ((month(now())*30 + day(now()))-(month(birthday)*30 + day(birthday))) > -7")
+    
+    @notices = Customer.find_by_sql("select c.id, c.name from customers c
+      left join customer_store_relations csr on csr.customer_id = c.id
+      where c.status = #{Customer::STATUS[:NOMAL]} 
+      and csr.store_id in(#{StoreChainsRelation.return_chain_stores(params[:store_id].to_i).join(",")}) 
+      and c.birthday is not null and
+      ((month(now())*30 + day(now()))-(month(c.birthday)*30 + day(c.birthday))) <= 0
+      and ((month(now())*30 + day(now()))-(month(c.birthday)*30 + day(c.birthday))) > -7")
   end
 
   def staff_names
@@ -149,5 +153,18 @@ module ApplicationHelper
     code_array = []
     1.upto(len) {code_array << chars[rand(chars.length)]}
     return code_array.join("")
+  end
+
+#物料
+  def get_mo(material,material_orders)
+    mos = []
+    material_orders.each do |material_order|
+      mio_num = MatInOrder.where(:material_id => material.id, :material_order_id => material_order.id).sum(:material_num)
+      moi_num = MatOrderItem.find_by_material_id_and_material_order_id(material.id, material_order.id).try(:material_num)
+      if mio_num < moi_num
+        mos <<  material_order
+      end
+    end
+    mos
   end
 end

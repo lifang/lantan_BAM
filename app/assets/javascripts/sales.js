@@ -187,9 +187,18 @@ function check_add(e){
     var name=$("#name").val();
     var base=$("#price").val();
     var end_time = $("#end_time").val();
+    var point =$("#prod_point").val();
     var pattern = new RegExp("[`~@#$^&*()=:;,\\[\\].<>?~！@#￥……&*（）——|{}。，、？-]")
     if (name=="" || name.length==0 || pattern.test(name)){
         tishi_alert("请输入套餐卡的名称,不能包含非法字符");
+        return false;
+    }
+    if(base == "" || base.length==0 || isNaN(parseFloat(base))){
+        tishi_alert("请输入套餐卡的价格");
+        return false;
+    }
+    if (point=="" || point.length==0 || isNaN(parseFloat(point))){
+        tishi_alert("请输入产品的积分，积分是数字");
         return false;
     }
     if($("[name='time_select']:checked").val()==$("#date1").val()){
@@ -207,9 +216,18 @@ function check_add(e){
             return false;
         }
     }
-    if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        tishi_alert("请输入套餐卡的价格");
-        return false;
+
+    if($("#auto_revist")[0].checked){
+        var time_revist =$("#time_revist option:selected").val();
+        var con_revist =$("#con_revist").val();
+        if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
+            tishi_alert("请选择回访的时长，时长是数字");
+            return false;
+        }
+        if (con_revist =="" || con_revist.length==0){
+            tishi_alert("请输入回访的内容");
+            return false;
+        }
     }
     if($("#add_products").children().length == 0){
         tishi_alert("请选择产品或服务");
@@ -319,4 +337,12 @@ function show_pic(){
             "left":left+"px"
         })
     })
+}
+
+function check_revist(){
+    $("#con_revist,#time_revist").attr("disabled",!$("#auto_revist")[0].checked);
+    $("#auto_revist").val($("#auto_revist")[0].checked+0);
+    if (!$("#auto_revist")[0].checked){
+        $("#con_revist,#time_revist").val("");
+    }
 }

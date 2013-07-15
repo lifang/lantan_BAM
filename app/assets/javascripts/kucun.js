@@ -32,12 +32,17 @@ function save_material_remark(mat_id,store_id,obj){
     }
 }
 
-function check_material_num(m_id, store_id, obj){                       //核实库存
-    var check_num = $("#check_num_"+m_id).val();
+function check_material_num(m_id, store_id, obj, pandian_flag){                       //核实库存
+    var check_num;
+    if(pandian_flag=="")
+      {check_num = $("#materials_tab_table #check_num_"+m_id).val();}
+    else{
+       check_num = pandian_flag;
+    }
+    
     if(check_num.match(reg1)==null){
         tishi_alert("请输入有效数字");
     }else{
-        check_num = parseInt($("#check_num_"+m_id).val());
         if(confirm("确定核实的库存？")){
             $.ajax({
                 url:"/materials/"+m_id + "/check",
@@ -51,6 +56,7 @@ function check_material_num(m_id, store_id, obj){                       //核实
                         tishi_alert("操作成功")
                        $(obj).parent().siblings(".su").find(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
+                       $(obj).parent().siblings(".mat_diff").text(0);
                        var l = $("#low_materials_tbody").find("#material"+m_id+"tr").length;  //判断该物料是否已经在缺货信息提示里
                        var message_span = $("span[id='low_materials_span']").length;            //判断是否有缺货提示
                        if(check_num <= data.material_low){      //如果小于预警值，则加上样式,并且在缺货信息提示里加上对应的元素
@@ -728,12 +734,14 @@ function checkMaterial(obj){              //编辑物料验证
     }else if($("#material_unit").val()==""){
         tishi_alert("请输入物料规格");
         f = false;
-    }     
-         //$(obj).parent("form").submit();
-//      if(f){
-//           $(obj).attr("disabled", "disabled");
-//      }
-         return f;
+    }
+      if(f){
+       $(obj).parents("form").submit();
+       $(obj).attr('disabled','disabled'); 
+      }else{
+          $(obj).attr("disabled", false);
+      }
+         
 }
 
 function commit_in(obj){
@@ -790,6 +798,7 @@ function commit_in(obj){
 function ruku(){
   $("#ruku_tab").find('input[type="text"]').val("");
   $("#ruku_tab").find('select').get(0).selectedIndex = 0;
+  $("#ruku_tab .mat-out-list").html("");
   popup('#ruku_tab');
   return false;
 }
@@ -1076,7 +1085,7 @@ function close_notice(obj){
            }
       })
   }
-  function search_materials(tab_name, store_id, obj){
+  function search_materials(tab_name, store_id, obj, mat_in_flag){
       var mat_code = $.trim($(obj).parents(".search").find("#search_material_code").val());
       var mat_name = $.trim($(obj).parents(".search").find("#search_material_name").val());
       var mat_type = $.trim($(obj).parents(".search").find("#search_material_type").val());
@@ -1089,7 +1098,8 @@ function close_notice(obj){
               mat_code : mat_code,
               mat_name : mat_name,
               mat_type : mat_type,
-              store_id : store_id
+              store_id : store_id,
+              mat_in_flag : mat_in_flag
           }
       })
   }
@@ -1208,7 +1218,6 @@ function close_notice(obj){
         $.ajax({
             url: "/stores/" +store_id+ "/materials_losses/view",
             dataType:"text",
-            type:"get",
             data:{materials_loss_id : materials_loss_id},
             success:function(data,status)
             {
@@ -1226,3 +1235,24 @@ function close_notice(obj){
             }
         });
     }
+  function fetchMatIn(obj){
+    var saved_mat_mos = "";
+    $("#ruku_tab .mat-out-list").find("tr").each(function(index){
+        var mat_code = $(this).find(".mat_code").text();
+        var mo_code = $(this).find(".mo_code").text();
+        var num = $(this).find(".mat_item_num").text();
+        // var mat_name = $(this).find(".mat_name").text();
+        var each_item = "";
+        each_item += mat_code + "_";
+        each_item += mo_code + "_";
+        each_item += num;
+        saved_mat_mos += each_item + ",";
+    })
+    $("#ruku_tab #mat_in_hidden_value").val(saved_mat_mos);
+    $("#ruku_tab #mat_in_create").val(0);
+    if(saved_mat_mos != "")
+    {
+        $("#ruku_tab #mat_in_hidden_value").val(saved_mat_mos);
+        $(obj).parents("#create_mat_in_form").submit();
+    }
+  }

@@ -6,6 +6,7 @@ class StationsController < ApplicationController
 
   #施工现场
   def index
+   Product.revist_message()
     @stations =Station.where("store_id=#{params[:store_id]} and status !=#{Station::STAT[:DELETED]}")
     sql=Station.make_data(params[:store_id])
     work_orders=WorkOrder.find_by_sql(sql).inject(Hash.new) { |hash, a| hash[a.status].nil? ? hash[a.status]=[a] : hash[a.status] << a;hash}
@@ -16,7 +17,7 @@ class StationsController < ApplicationController
     nums=servs.inject(Hash.new) { |hash, a| hash.merge(a.station_id=>a.num)}
     @t_infos={}
     @stations.each do |station|
-      staff=StationStaffRelation.find_by_sql("select staff_id from station_staff_relations where station_id=#{station.id} and current_day='#{Time.now.strftime("%Y%m%d")}' ")
+      staff=StationStaffRelation.find_by_sql("select staff_id from station_staff_relations where station_id=#{station.id}  and current_day='#{Time.now.strftime("%Y%m%d")}' ")
       @t_infos[station.id]=[Staff.where("id in (#{staff.map(&:staff_id).join(',')})").map(&:name).join("、 "),nums[station.id]] unless staff.blank?
     end
     p @t_infos

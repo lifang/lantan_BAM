@@ -91,7 +91,12 @@ textarea { height: 100px; font-size: 14px; line-height: 24px; padding: 5px; font
 .login { padding-top: 10px;}
 .login a { margin-left: 5px; color: #FFF;}
 
+<<<<<<< HEAD
 .name { 
+=======
+.name {
+
+>>>>>>> b389655fa53afe44ac634f500f68ee0f98b87415
     font-size: 24px; 
 	color: #FFF; 
 	text-align: center; 

@@ -141,9 +141,9 @@ module Constant
       :del_role => ["删除角色",256],
       :role_role_set => ["角色设定",512],
       
-      :new_depot => ["新建仓库",1024],
-      :edit_depot => ["编辑仓库",2048],
-      :del_depot => ["删除仓库",4096],
+      #:new_depot => ["新建仓库",1024],
+      #:edit_depot => ["编辑仓库",2048],
+      #:del_depot => ["删除仓库",4096],
       :edit_store_datas => ["设置门店信息", 8192]
     }
   }
@@ -183,7 +183,7 @@ module Constant
   
   SERVER_PATH = "http://bam.gankao.co"
   #  SERVER_PATH = "http://192.168.1.100:3001"
-  HEAD_OFFICE_API_PATH = "http://headoffice.gankao.co/"
+  HEAD_OFFICE_API_PATH = "http://192.168.0.250:3002/"
   #  HEAD_OFFICE_API_PATH = "http://192.168.1.100:3002/"
 
   HEAD_OFFICE = HEAD_OFFICE_API_PATH + "syncs/upload_file"
