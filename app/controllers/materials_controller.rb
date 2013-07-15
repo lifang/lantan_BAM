@@ -7,18 +7,16 @@ class MaterialsController < ApplicationController
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
   before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo]
-  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
+  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs, :page_materials_losses]
   before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num]
   @@m = Mutex.new
 
   #库存列表
   def index
-    @material_losses = MaterialLoss.find_by_sql("select m.id, m.name, m.code, m.types, m.loss_num, m.specifications,
-    m.price, m.sale_price,m.staff_id from material_losses m where m.store_id =#{@current_store.id}
-    order by m.created_at desc").paginate :page => params[:page], :per_page => Constant::PER_PAGE
+    @material_losses = MaterialLoss.where("store_id = ?",@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @materials_storages = Material.includes(:mat_depot_relations).where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
-    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
-    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
+    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @type = 0
     @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
       :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=#{Staff::STATUS[:normal]}")
@@ -128,9 +126,9 @@ class MaterialsController < ApplicationController
   #库存报损分页
   def page_materials_losses
     @current_store = Store.find_by_id params[:store_id]
-    @material_losses =  MaterialLoss.find_by_sql("select m.id, m.name, m.code, m.types, m.loss_num, m.specifications,
-    m.price, m.sale_price, m.staff_id from material_losses m where m.store_id =#{@current_store.id}
-    order by m.created_at desc").paginate :page => params[:page], :per_page => Constant::PER_PAGE
+    @material_losses = MaterialLoss.where("store_id =?", @current_store.id).where(@l_sql[0]).where(@l_sql[1]).where(
+        @l_sql[2]).paginate(:page => params[:page], :per_page => Constant::PER_PAGE)
+
     respond_with(@material_losses) do |format|
       #format.html
       format.js
