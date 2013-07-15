@@ -237,13 +237,14 @@ class Order < ActiveRecord::Base
     arr[:car_info] = capital_arr
     product_arr = {}
     clean_and_beauty_service_arr, maint_service_arr, clean_and_besuty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr = [], [], [], [], [], [], [], []
-prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id from prod_mat_relations pmr
+prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id, sum(m.storage) m_storage from prod_mat_relations pmr
       inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
-      and m.storage > 0 and m.store_id = ? ", store_id])
-    p_ids = prod_mat_relations.collect { |i| i.p_id  } if prod_mat_relations.any?
+      and m.storage > 0 and m.store_id = ? group by p_id", store_id])
+p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_storage.to_i; pmr_h} if prod_mat_relations.any?
+
     products = Product.find_by_sql(["select * from products p where p.status = ?
       and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?",
-        Product::IS_VALIDATE[:YES], p_ids, store_id])
+        Product::IS_VALIDATE[:YES], p_ids.keys.flatten, store_id])
     services = Product.find_by_sql(["select * from products p where p.status = ?
       and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
         Product::IS_VALIDATE[:YES], store_id])
@@ -253,7 +254,7 @@ prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id 
       h[:name] = p.name
       h[:price] = p.sale_price
       h[:description] = p.description
-#      h[:mat_num] =  p.m_storage if p.is_a?(Product)
+      h[:mat_num] =  p_ids[p.id] if p.is_a?(Product)
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
       
       if [Product::TYPES_NAME[:CLEAN_PROD] || Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
@@ -379,7 +380,7 @@ prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id 
       sale_hash = {}
       svcard_arr = []
       prod_ids.split(",").each do |id| #["1_3_1","22_3_0","311_0","226_2"]
-        if id.split("_")[1].to_i == 3
+        if id.split("_")[1].to_i == 7
           #套餐卡
           if id.split("_")[2].to_i == 0
             has_p_card = 0
