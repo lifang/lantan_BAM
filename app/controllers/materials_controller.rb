@@ -532,7 +532,7 @@ class MaterialsController < ApplicationController
     if params[:id]
       @order = MaterialOrder.find_by_id params[:id]
       @content = ""
-      if @order && @order.m_status == MaterialOrder::M_STATUS[:send]
+      if @order #&& @order.m_status == MaterialOrder::M_STATUS[:send]
         @order.update_attribute(:m_status,MaterialOrder::M_STATUS[:received])
         @content = "收货成功"
       elsif @order.m_status == MaterialOrder::M_STATUS[:received]
