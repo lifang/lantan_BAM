@@ -373,7 +373,7 @@ function change_supplier(obj){
    }
 }
 
-function submit_material_order(form_id){
+function submit_material_order(form_id,obj){
         var data = "";
         if(parseInt($("#from").val())==0){
            data = "supplier="+$("#from").val()+"&selected_items="+$("#selected_items_dinghuo").val()+"&use_count="+$("#use_card").attr("value");
@@ -383,7 +383,7 @@ function submit_material_order(form_id){
         }else{
            data = "supplier="+$("#from").val()+"&selected_items="+$("#selected_items_dinghuo").val();
         }
-       
+       $(obj).attr('disabled', 'disabled');
         $.ajax({
             url:$("#"+form_id).attr("action"),
             dataType:"json",
@@ -413,7 +413,7 @@ function submit_material_order(form_id){
 
 }
 
-function pay_material_order(parent_id, pay_type,store_id){
+function pay_material_order(parent_id, pay_type,store_id, obj){
     var mo_id = $("#"+parent_id+" #pay_order_id").val();
     var mo_type = $("#"+parent_id+" #pay_order_type").val();
     var if_refresh = $('#final_fukuan_tab #if_refresh').val();
@@ -421,6 +421,7 @@ function pay_material_order(parent_id, pay_type,store_id){
     var sav_price = $("#sav_price").val();
     var sale_id = $("#sale_id").val();
     var sale_price = $("#sale_price").text();
+    $(obj).attr('disabled', 'disabled')
     $.ajax({
         url:"/stores/"+store_id + "/materials/pay_order",
         dataType:"json",

@@ -240,10 +240,7 @@ class MaterialsController < ApplicationController
         @search_materials = Material.where(str)
       end
     else
-      p 1111111111
-      p str
       @search_materials = Material.where(str)
-      p @search_materials
     end
     
     @type = params[:type].to_i
