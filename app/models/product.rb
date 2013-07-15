@@ -1,5 +1,9 @@
 #encoding: utf-8
 class Product < ActiveRecord::Base
+  include ApplicationHelper
+  require 'net/http'
+  require "uri"
+  require 'openssl'
   has_many :sale_prod_relations
   has_many :res_prod_relations
   has_many :station_service_relations
@@ -23,22 +27,72 @@ class Product < ActiveRecord::Base
   scope :is_service, where(:is_service => true)
   scope :is_normal, where(:status => true)
 
+  #根据回访要求发送客户短信，会查询所有的门店信息发送,设置的时间为每天的11:30和8点半左右，每天两次执行
   def self.revist_message()
-    p Product.update_order_time()
-    time =Time.now
-    condition = Time.now.strftime("%H").to_i<12 ? "date_format(date_add(orders.created_at, interval 'min(products.revist_time)' hour),'%Y-%m-%d %H') between '#{time.beginning_of_day.strftime('%Y-%m-%d %H')}' and '#{time.strftime('%Y-%m-%d')+" 11"}'" :
-      "date_format(date_add(orders.created_at, interval 'min(products.revist_time)' hour),'%Y-%m-%d %H') between '#{Time.now}' and '#{Time.now.end_of_day}'"
-    p  Order.joins(:order_prod_relations=>:product).where(condition)
-
+    customer_message ={}
+    condition = Time.now.strftime("%H").to_i<12 ? "date_format(orders.auto_time,'%Y-%m-%d %H') between '#{Time.now.beginning_of_day.strftime("%Y-%m-%d %H")}' and '#{Time.now.strftime('%Y-%m-%d')+" 11"}'" :
+      "date_format(orders.auto_time,'%Y-%m-%d %H') between '#{Time.now.strftime('%Y-%m-%d')+" 12"}' and '#{Time.now.end_of_day.strftime("%Y-%m-%d %H")}'"
+    Order.joins(:order_prod_relations=>:product).where(condition+" and products.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,products.revist_content,orders.store_id").each{|mess|
+      customer_message["#{mess.store_id}_#{mess.customer_id}"].nil? ? customer_message["#{mess.store_id}_#{mess.customer_id}"]= [mess] : customer_message["#{mess.store_id}_#{mess.customer_id}"] << mess}
+    Order.joins(:o_pcard_relations,:c_pcard_relations =>:package_card).where(condition+" and package_cards.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,package_cards.revist_content,orders.store_id").each{|mess|
+      customer_message["#{mess.store_id}_#{mess.customer_id}"].nil? ? customer_message["#{mess.store_id}_#{mess.customer_id}"]= [mess] : customer_message["#{mess.store_id}_#{mess.customer_id}"] << mess}
+    unless customer_message.keys.blank?
+      store_ids = []
+      customer_ids = []
+      message_arr = []
+      customer_message.keys.each {|mess|store_ids << mess.split("_")[0].to_i;customer_ids << mess.split("_")[1].to_i}
+      Store.find(store_ids).each do |store|
+        Customer.find(customer_ids).inject(Hash.new) { |hash,c|
+          strs = []
+          customer_message["#{store.id}_#{c.id}"].each_with_index {|str,index| strs << "#{index+1}.#{str.revist_content}" }
+          MessageRecord.transaction do
+            message_record = MessageRecord.create(:store_id =>store.id, :content =>strs.join(),
+              :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
+            content ="#{c.name}\t女士/男士,您好,#{store.name}的美容小贴士提醒您:\n" + strs.join("\r\n")
+            p content
+            SendMessage.create(:message_record_id => message_record.id, :customer_id => c.id,
+              :content => content, :phone => c.mobilephone,
+              :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
+            message_arr << {:content => content, :msid => "#{c.id}", :mobile => c.mobilephone}
+          end
+        }
+      end
+      msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
+      jsondata = JSON msg_hash
+      p jsondata
+      begin
+        message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
+        message_route
+        create_message_http(Constant::MESSAGE_URL, message_route)
+        p "success"
+      rescue
+        p "error"
+      end
+    end
   end
 
 
+  #付款完成生成订单的时候更新订单回访记录
   def self.update_order_time(arr)
     product,pcard =[],[]
     arr[0].each{|arr| product << arr[1]}
     arr[3].each{|arr| pcard << arr[1]}
     hour = (Product.find(product.uniq).map(&:auto_time)|PackageCard.find(pcard.uniq).map(&:auto_time)).compact.min
-    return Time.now+(hour.nil? ? 0 : hour.hours)
+    return hour.nil? ? nil : Time.now+hour.hours  #修改时间条件，如果不需要回访则订单的回访时间设置为null
   end
+
+  def self.create_message_http(url,route)
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    if uri.port==443
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    request= Net::HTTP::Get.new(route)
+    back_res = http.request(request)
+    return JSON back_res.body
+  end
+
+ 
 
 end

@@ -237,7 +237,7 @@ class Order < ActiveRecord::Base
     arr[:car_info] = capital_arr
     product_arr = {}
     clean_servie_arr, maint_service_arr, clean_prod_arr, beauty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr = [], [], [], [], [], [], [], []
-#amanda modified 0708
+    #amanda modified 0708
     products = Product.find_by_sql("select p.* from products p left join prod_mat_relations pmr on
 pmr.product_id = p.id left join materials m on m.id = pmr.material_id where p.status = 1
 and ((m.status = 0 and m.storage > 0 and p.is_service = 0) or (p.is_service = 1))
@@ -554,7 +554,6 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
       #2_id_card_type_（is_new）_price 储值卡格式
       #[[["0", "311", "9"], ["0", "310", "2"]], [], [[2,1,0,0,20],...], [["3", "10", "0", "310=2-311=7-"], ["3", "11", "0"], ["3", "10", "1", "311=2-"]]]
       sale_id = arr[1].size > 0 ? arr[1][0][1] : ""  #活动
-
       order = Order.create({
           :code => MaterialOrder.material_order_code(store_id.to_i),
           :car_num_id => car_num_id,
@@ -805,6 +804,7 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
           order.update_attributes hash
           status = 1
         end
+       
       end
       #rescue
       #status = 2
@@ -961,6 +961,15 @@ and p.store_id = 2 and m.store_id = 2 group by p.id")
           end
           wo = WorkOrder.find_by_order_id(order.id)
           wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo
+          #生成积分的记录
+          c_customer = order.customer
+          if c_customer && c_customer.is_vip
+           points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
+              where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
+              PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
+            Point.create(:customer_id=>c_customer.id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points);
+            c_customer.update_attributes(:total_point=>points+c_customer.total_point)
+          end
         rescue
         end
       end

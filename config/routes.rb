@@ -179,7 +179,7 @@ LantanBAM::Application.routes.draw do
       collection do
         get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
       end
-  end
+    end
   end
   resources :materials_in_outs
   match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
@@ -242,6 +242,9 @@ LantanBAM::Application.routes.draw do
       member do
         get :return_sync_all_to_db
       end
+    end
+    resources :logins do
+       post :check_staff
     end
   end
 
