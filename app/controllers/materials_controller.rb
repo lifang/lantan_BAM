@@ -58,7 +58,7 @@ class MaterialsController < ApplicationController
         material_orders = get_mo(material, temp_material_orders)
         material_orders.each do |mo|
           mm ={:mo_code => mo.code, :mo_id => mo.id, :mat_code => material.code,
-            :mat_name => material.name, :mat_price => material.price}
+            :mat_name => material.name,:mat_unit => material.unit, :mat_price => material.price}
         @material_ins << mm
         end
       end if materials
@@ -240,10 +240,13 @@ class MaterialsController < ApplicationController
         @search_materials = Material.where(str)
       end
     else
+      p 1111111111
+      p str
       @search_materials = Material.where(str)
+      p @search_materials
     end
     
-    @type = params[:type].to_i == 0 ? 0 : 1
+    @type = params[:type].to_i
     respond_with(@search_materials,@type) do |format|
       format.html
       format.js
@@ -532,13 +535,12 @@ class MaterialsController < ApplicationController
     if params[:id]
       @order = MaterialOrder.find_by_id params[:id]
       @content = ""
+
       if @order #&& @order.m_status == MaterialOrder::M_STATUS[:send]
         @order.update_attribute(:m_status,MaterialOrder::M_STATUS[:received])
         @content = "收货成功"
       elsif @order.m_status == MaterialOrder::M_STATUS[:received]
         @content = "订单已收货"
-      else
-        @content = "收货失败"
       end
     end
     #render :json => {:status => 1,:content => content, :order => order}.to_json
@@ -786,6 +788,10 @@ class MaterialsController < ApplicationController
   def check_mat_num
     @materials_need_check = Material.find_by_sql(["select m.* from materials m where
  m.status=? and m.store_id=? and m.check_num is not null group by m.id", Material::STATUS[:NORMAL], @current_store.id])
+  end
+
+  def print_code
+    @type=2
   end
 
 

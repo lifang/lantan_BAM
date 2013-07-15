@@ -21,4 +21,12 @@
       '#{Material::TYPES_NAMES[types.to_i]}',#{@type},'#{code}','#{price}')"} %><label><%= name %></label</li>
     <% end %>
   </ul>
+<% elsif @type==2 %>
+<ul>
+    <% (@search_materials || []).each do |m| %>
+
+      <li><%= check_box_tag "mat_#{m.id}",m.storage,false,{:onclick=>"select_print_material(this,'#{m.name}',
+      '#{Material::TYPES_NAMES[m.types.to_i]}')",:alt => m.code, 'data-unit' => m.unit || ""} %><%= m.name %></li>
+    <% end %>
+  </ul>
 <% end %>

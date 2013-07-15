@@ -2,6 +2,7 @@
   <td class="mo_code"><%= material_in[:mo_code] %></td>
   <td class="mat_code"><%= material_in[:mat_code] %></td>
   <td class="mat_name"><%= material_in[:mat_name] %></td>
+  <td><%= material_in[:mat_unit] %></td>
   <td class ="mat_item_num">1</td>
   <td class ="num_box" style="display:none"><%= text_field_tag "material_num", nil, :style => 'width:50px', :onblur=>"hideInput(this)" %></td>
   <td><a href="javascript:void(0)" onclick="changeNum(this)" class="bz_btn">编辑</a><a href="javascript:void(0)" onclick="removeRow(this)">删除</a></td>

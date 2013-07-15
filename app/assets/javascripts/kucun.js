@@ -160,7 +160,6 @@ function select_material(obj,name,type,panel_type){
         $("#selected_items").attr("value",select_str);
     }
     else{
-        
         var selected_str = "";
         $("#selected_items").val("");
         $("#li_"+$(obj).attr("id")).remove();
@@ -171,6 +170,20 @@ function select_material(obj,name,type,panel_type){
       
     }
 }
+
+//打印条形码 搜索
+function select_print_material(obj,name,type){
+    if($(obj).is(":checked")){
+        var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
+        tr += $(obj).attr("alt") + "</td><td>" +name + "</td><td>" + type + "</td><td>" + $(obj).attr('data-unit') +"</td><td>"+ "<input type='text' class='print_code' alt="+$(obj).attr("alt")+" name='print["+ $(obj).attr('id').split('_')[1] +"][print_code_num]' style='width:60px' />" + "</td><td>" +
+        "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,1); return false;'>移除</a></td>" +"<input type='hidden' name='print["+ $(obj).attr('id').split('_')[1] +"][print_code]' value="+ $(obj).attr('alt') + "></tr>";
+        $("#print_code_tab #selected_materials").append(tr);
+    }
+    else{
+        $("#li_"+$(obj).attr("id")).remove();
+    }
+}
+
 //select_order_material(this,'水枪',       '辅助工具',1,'234234566','2344.0')
 function select_order_material(obj,name,type,panel_type,code,price){
 //   alert($(obj).is(":checked"));
@@ -799,6 +812,7 @@ function ruku(){
   $("#ruku_tab").find('input[type="text"]').val("");
   $("#ruku_tab").find('select').get(0).selectedIndex = 0;
   $("#ruku_tab .mat-out-list").html("");
+  $("#ruku_tab .search_result_mat").html("");
   popup('#ruku_tab');
   return false;
 }
@@ -1255,4 +1269,16 @@ function close_notice(obj){
         $("#ruku_tab #mat_in_hidden_value").val(saved_mat_mos);
         $(obj).parents("#create_mat_in_form").submit();
     }
+  }
+
+  function checkPrintNum(){
+      var f = true;
+      $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
+         if($(this).val().match(reg1)==null){
+             var code = $(this).attr('alt');
+             alert("条形码为"+ code + "的物料数量不正确！");
+             f = false;
+         }
+      })
+      return f;
   }

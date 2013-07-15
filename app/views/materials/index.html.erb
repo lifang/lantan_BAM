@@ -22,6 +22,7 @@
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store_id]), :class => "",:target => "_blank" %><% end %>
+    <% if permission?(:materials, :print) %><%= link_to "打印条形码",print_code_store_materials_path(params[:store_id]),:remote => true, 'data-type' => 'script', :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :check_all) %><%= link_to "盘点清单", "/stores/#{params[:store_id]}/check_mat_num", :remote => true, 'data-type'=>'script' %><% end %>
     <% if permission?(:materials, :material_loss_add) %><%= link_to_function "新建库存报损", "MaterialsLoss()", :class => "" %><% end %>
   </div>
@@ -64,6 +65,9 @@
 <!--盘点-->
 <div class="tab_popup" id="batch_check_tab"></div>
 
+<!--打印条形码-->
+<div class="tab_popup print_code_tab" id="print_code_tab"></div>
+
 <div class="tab_popup" id="setMaterialLow">
 <div class="popup_box" >
   <h1>设置库存预警<a href="javascript:void(0)" class="close">关闭</a></h1>
@@ -89,8 +93,8 @@
     <div class="popup_body">
       <div class="popup_body_area">
           <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1}  %>
-
-            <div class="data_body">
+        <div class="search_result_mat"></div>
+        <div class="data_body">
       <%= form_tag  create_materials_in_path , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
           <thead>
@@ -98,6 +102,7 @@
               <td>订货编号</td>
               <td>条形码</td>
               <td>物料名称</td>
+              <td>规格</td>
               <td>数量</td>
               <td>操作</td>
             </tr>

@@ -30,7 +30,7 @@
                   <td class="mat_diff"><%= check_num - storage %></td>
                   <td class="operation">
                     <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this, '#{material.check_num}')" %><% end %>
-                    <%= link_to_function "移除", "removeRow(this)" %>
+                    <%= link_to_function "移除", "removeRow(this, 0)" %>
                   </td>
                   <%= hidden_field_tag "materials[#{material.id}][code]", material.code %>
                   <%= hidden_field_tag "materials[#{material.id}][num]", check_num %>
