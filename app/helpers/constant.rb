@@ -97,8 +97,8 @@ module Constant
       :jixiao => ["员工绩效统计", 16384],
       :shuip => ["员工平均水平统计", 32768],
       :print => ["打印单据", 65536],
-      :chenbentongji => ["成本统计",131072],
-      :ruchukuchaxun => ["入／出库统计",262144]
+      :chenben => ["成本统计",131072],
+      :ruchuku => ["入/出库统计",262144]
     },
     :stations => {
       :name => "现场",

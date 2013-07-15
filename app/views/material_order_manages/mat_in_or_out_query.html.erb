@@ -1,6 +1,7 @@
+<%= javascript_include_tag "material_order_manages"%>
 <div class="second_menu">
-  <% if permission?(:datas, :chenbentongji) %><%= link_to "成本统计", store_material_order_manages_path(@store) %><% end %>
-  <% if permission?(:datas, :ruchukuchaxun) %><%= link_to "入/出库查询", mat_in_or_out_query_store_material_order_manages_path(@store), :class => "hover" %><% end %>
+  <% if permission?(:datas, :chenben) %><%= link_to "成本统计", store_material_order_manages_path(@store) %><% end %>
+  <% if permission?(:datas, :ruchuku) %><%= link_to "入/出库查询", mat_in_or_out_query_store_material_order_manages_path(@store), :class => "hover" %><% end %>
 </div>
 
 <%= form_tag search_mat_in_or_out_store_material_order_manages_url(params[:store_id]),:id => "search_mat_in_or_out" do |f|  %>
