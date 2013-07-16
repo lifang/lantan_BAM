@@ -36,7 +36,7 @@ class LoginsController < ApplicationController
       cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => true}
       session_role(cookies[:user_id])
       #if has_authority?
-      #  redirect_to "/stores/#{@staff.store_id}/welcomes"
+      redirect_to "/stores/#{@staff.store_id}/welcomes"
       #else
       #  cookies.delete(:user_id)
       #  cookies.delete(:user_name)
