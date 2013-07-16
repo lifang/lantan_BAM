@@ -3,17 +3,17 @@ class LoginsController < ApplicationController
   
   def index
     if cookies[:user_id]
-      @staff = Staff.find_by_id(cookies[:user_id].to_i)
-      if @staff.nil?
-        render :index, :layout => false
-      else
-        session_role(cookies[:user_id])
+      #@staff = Staff.find_by_id(cookies[:user_id].to_i)
+      #if @staff.nil?
+        #render :index, :layout => false
+      #else
+        #session_role(cookies[:user_id])
         #if has_authority?
-        redirect_to "/stores/#{@staff.store_id}/welcomes"
+        #redirect_to "/stores/#{@staff.store_id}/welcomes"
         #else
         #render :index, :layout => false
         #end
-      end
+      #end
     else
       render :index, :layout => false
     end
@@ -32,8 +32,8 @@ class LoginsController < ApplicationController
       @user_name = params[:user_name]
       render 'index', :layout => false
     else
-      cookies[:user_id]={:value =>@staff.id, :path => "/", :secure  => true}
-      cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => true}
+      cookies[:user_id]={:value =>@staff.id, :path => "/", :secure  => false}
+      cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => false}
       session_role(cookies[:user_id])
       #if has_authority?
       redirect_to "/stores/#{@staff.store_id}/welcomes"

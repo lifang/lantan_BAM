@@ -7,7 +7,7 @@ class WelcomesController < ApplicationController
     store = Store.find_by_id(params[:store_id].to_i)
     @staff = Staff.find_by_id(cookies[:user_id])
     cookies[:store_name] = {:value => store.name, :path => "/", :secure => false} if store
-    cookies[:store_id] = {:value => store.id, :path => "/", :secure => false} if store
+    #cookies[:store_id] = {:value => store.id, :path => "/", :secure => false} if store
     render :index, :layout => false
   end
 

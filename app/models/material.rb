@@ -29,6 +29,12 @@ class Material < ActiveRecord::Base
   DEFAULT_MATERIAL_LOW = 0    #默认库存预警为0
   scope :normal, where(:status => STATUS[:NORMAL])
 
+  def self.unsalable_list page,per_page,store_id,sql=[nil,nil,nil,nil]
+    Material.find_by_sql("select * from materials m where m.id not in(select material_id as id from mat_out_orders where
+    #{sql[0]} and #{sql[1]} and store_id = '#{store_id}' group by material_id having #{sql[2]} order by material_id) and m.status !=#{Material::STATUS[:DELETE]} and m.store_id = '#{store_id}' and #{sql[3]};").
+        paginate(:page => page, :per_page => per_page)
+  end
+
   private
   
   def generate_barcode
