@@ -4,7 +4,7 @@ class Material < ActiveRecord::Base
   has_many :mat_order_items
   has_many :material_orders, :through => :mat_order_items do 
     def not_all_in
-       where("m_status not in (?) and supplier_type = ? and status != ?",[3,4], 0, MaterialOrder::STATUS[:cancel])
+       where("m_status not in (?) and status != ?",[3,4], MaterialOrder::STATUS[:cancel])
     end
   end
   has_many :mat_out_orders

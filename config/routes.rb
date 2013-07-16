@@ -96,7 +96,7 @@ LantanBAM::Application.routes.draw do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
-          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit"
+          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"
       end
       member do
@@ -184,7 +184,7 @@ LantanBAM::Application.routes.draw do
       collection do
         get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
       end
-  end
+    end
   end
   resources :materials_in_outs
   match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
@@ -250,6 +250,9 @@ LantanBAM::Application.routes.draw do
       member do
         get :return_sync_all_to_db
       end
+    end
+    resources :logins do
+       post :check_staff
     end
   end
 

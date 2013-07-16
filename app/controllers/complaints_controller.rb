@@ -40,7 +40,7 @@ class ComplaintsController < ApplicationController
   #投诉分类按时间和性别查询统计列表
   def date_list
     @complaint =Complaint.search_lis(params[:store_id],session[:created_at])
-    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex],params[:end_name])
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex],session[:end_name])
     @size = ((@total_com.values.max.nil? ? 1 :@total_com.values.max)/10+1)*10#生成图表的y的坐标
     render 'index'
   end

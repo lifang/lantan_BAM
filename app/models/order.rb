@@ -254,12 +254,11 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
       h[:name] = p.name
       h[:price] = p.sale_price
       h[:description] = p.description
-      h[:mat_num] =  p_ids[p.id] if p.is_a?(Product)
+      h[:mat_num] =  p_ids[p.id] if p.is_service == false
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
       
-      if [Product::TYPES_NAME[:CLEAN_PROD] || Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
+      if [Product::TYPES_NAME[:CLEAN_PROD], Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
         clean_and_besuty_prod_arr << h
-      
       elsif p.types.to_i == Product::TYPES_NAME[:DECORATE_PROD]
         decorate_prod_arr << h
       elsif p.types.to_i ==  Product::TYPES_NAME[:ASSISTANT_PROD]
@@ -274,6 +273,7 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
         maint_service_arr << h
       end
     end
+
     product_arr[:清洗美容类] = clean_and_beauty_service_arr
     product_arr[:维修保养类] = maint_service_arr
     product_arr[:美容产品类] = clean_and_besuty_prod_arr
@@ -559,7 +559,6 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
       #2_id_card_type_（is_new）_price 储值卡格式
       #[[["0", "311", "9"], ["0", "310", "2"]], [], [[2,1,0,0,20],...], [["3", "10", "0", "310=2-311=7-"], ["3", "11", "0"], ["3", "10", "1", "311=2-"]]]
       sale_id = arr[1].size > 0 ? arr[1][0][1] : ""  #活动
-
       order = Order.create({
           :code => MaterialOrder.material_order_code(store_id.to_i),
           :car_num_id => car_num_id,
@@ -811,6 +810,7 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
           order.update_attributes hash
           status = 1
         end
+       
       end
       #rescue
       #status = 2
@@ -967,6 +967,15 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
           end
           wo = WorkOrder.find_by_order_id(order.id)
           wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo
+          #生成积分的记录
+          c_customer = order.customer
+          if c_customer && c_customer.is_vip
+           points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
+              where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
+              PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
+            Point.create(:customer_id=>c_customer.id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points);
+            c_customer.update_attributes(:total_point=>points+c_customer.total_point)
+          end
         rescue
         end
       end

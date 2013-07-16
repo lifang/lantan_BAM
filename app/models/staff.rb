@@ -30,7 +30,7 @@ class Staff < ActiveRecord::Base
   scope :valid, where(:status => VALID_STATUS)
   scope :not_deleted, where("status != #{STATUS[:deleted]}")
 
-  S_HEAD = {:BOSS=>0,:MANAGER=>2,:NORMAL=>1} #0老板 2 店长 1员工
+  S_HEAD = {:BOSS=>0,:MANAGER =>2,:NORMAL=>1} #0老板 2 店长 1员工
   N_HEAD = {1=>"员工",0=>"老板", 2=>"店长"}
   WORKING_STATS = {:FORMAL => 1, :PROBATION => 0}   #在职状态 0试用 1正式
   S_WORKING_STATS = {1 => "正式", 0 => "实习"}

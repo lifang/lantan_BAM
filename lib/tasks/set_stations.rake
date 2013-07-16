@@ -12,6 +12,10 @@ namespace :daily do
       }
     }
   end
+  task(:revist_message => :environment) do
+    #客户在不同门店的消费回访会作为多次发送，同一个门店的则只做单次发送
+    Product.revist_message() #根据回访要求发送客户短信，会查询所有的门店信息发送,设置的时间为每天的11:30和8点半左右，每天两次执行
+  end
   task(:sync_local_data => :environment) do
     Store.all.each {|store| Sync.out_data(store.id)}
   end
