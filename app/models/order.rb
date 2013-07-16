@@ -349,7 +349,7 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
       ids = []
       #prod_ids = "10_3,311_0,226_2"
       prod_ids.split(",").each do |p_id|
-        ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 3
+        ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 7
       end
       #ids = [311, 226]
       prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
