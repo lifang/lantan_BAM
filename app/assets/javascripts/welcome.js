@@ -7,7 +7,7 @@ function set_store_name(obj){
 }
 
 function edit_store_name(obj,store_id){
-    var new_name = $(obj).val();
+    var new_name = $.trim($(obj).val());
     if(new_name == $(obj).parent().next().text()){
         $(obj).parent().hide();
         $(obj).parent().next().show();

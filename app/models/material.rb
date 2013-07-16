@@ -1,4 +1,8 @@
 #encoding: utf-8
+require 'barby'
+require 'barby/barcode/code_128'
+require 'barby/outputter/custom_rmagick_outputter'
+require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :mat_order_items
@@ -46,7 +50,7 @@ class Material < ActiveRecord::Base
     if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
       FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
     end
-    barcode.to_image_with_data.write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
+    barcode.to_image_with_data(:height => 100, :margin => 10, :xdim => 3).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
     #self.update_attribute(:code_img, "/barcode/#{self.id}/barcode.png")
 
     file_path = "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}/barcode.png"
