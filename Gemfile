@@ -47,4 +47,4 @@ end
 #  gem "better_errors"
 #end
 gem 'rmagick'
-gem 'barby', :git => 'git@github.com:toretore/barby.git'
+gem 'barby'

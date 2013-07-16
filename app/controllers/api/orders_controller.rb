@@ -413,18 +413,27 @@ class Api::OrdersController < ApplicationController
 
   #手机入库
   def into_materials
-    store_id = params[:store_id]
-    code = params[:code]
-    check_num = params[:check_num]
-    material = Material.where("code = #{code} and store_id = #{store_id}").first
-    if material
-      if material.update_attribute(:check_num, check_num)
+    data = JSON.parse(params[:data])
+    store_id = data["store_id"]
+    materials = data["materials"]
+    mat_arr = []
+    materials.each do |mat|
+      material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
+      if material
+        material.check_num = mat['check_num'].to_i
+        mat_arr << material
+      else
+        mat_arr << material
+      end
+    end
+    if mat_arr.include?(nil)
+      render :json => {:status => "error", :message => "没有材料"}
+    else
+      if Material.import mat_arr, :on_duplicate_key_update => [:check_num]
         render :json => {:status => "success"}
       else
         render :json => {:status => "error", :message => "更新材料数量失败"}
       end
-    else
-      render :json => {:status => "error", :message => "没有材料"}
     end
   end
 

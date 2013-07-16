@@ -7,15 +7,15 @@ class Api::LoginsController < ApplicationController
     data_type = 0
     if staff && staff.has_password?(params[:staff_password])
       if staff.position == Saff::S_HEAD[:MANAGER]
-       data_type = 1
-       message = "登录成功"
+        data_type = 1
+        message = "登录成功"
       else
-       message = "用户权限不足"
+        message = "用户权限不足"
       end
     else
-       
+      message = "用户不存在"
     end
-    render :json=>{:return_type=>0}
+    render :json=>{:msg=>message,:d_type=>data_type}
   end
 
   
