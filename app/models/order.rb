@@ -237,10 +237,10 @@ class Order < ActiveRecord::Base
     arr[:car_info] = capital_arr
     product_arr = {}
     clean_and_beauty_service_arr, maint_service_arr, clean_and_besuty_prod_arr, decorate_prod_arr, assis_prod_arr, elec_prod_arr, other_prod_arr = [], [], [], [], [], [], [], []
-prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id, sum(m.storage) m_storage from prod_mat_relations pmr
+    prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id) p_id, sum(m.storage) m_storage from prod_mat_relations pmr
       inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
       and m.storage > 0 and m.store_id = ? group by p_id", store_id])
-p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_storage.to_i; pmr_h} if prod_mat_relations.any?
+    p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_storage.to_i; pmr_h} if prod_mat_relations.any?
 
     products = Product.find_by_sql(["select * from products p where p.status = ?
       and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?",
@@ -311,8 +311,8 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
     }
     arr[:products] = product_arr
     arr[:p_titles_order] = [:清洗美容类, :汽车用品类, :维修保养类, :美容产品类, :电子产品类, :装饰产品类, :汽车配件类, :套餐卡类]
-#    count = product_arr.values.map(&:length).max
-#    arr[:count] = count
+    #    count = product_arr.values.map(&:length).max
+    #    arr[:count] = count
     arr
   end
 
@@ -349,7 +349,7 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
       ids = []
       #prod_ids = "10_3,311_0,226_2"
       prod_ids.split(",").each do |p_id|
-        ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 3
+        ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 7
       end
       #ids = [311, 226]
       prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
@@ -970,11 +970,11 @@ p_ids = prod_mat_relations.inject({}){|pmr_h, pmr| pmr_h[pmr.p_id] = pmr.m_stora
           #生成积分的记录
           c_customer = order.customer
           if c_customer && c_customer.is_vip
-           points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
+            points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
               where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
               PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
-            Point.create(:customer_id=>c_customer.id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points);
-            c_customer.update_attributes(:total_point=>points+c_customer.total_point)
+            Point.create(:customer_id=>c_customer.id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
+            c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
           end
         rescue
         end
