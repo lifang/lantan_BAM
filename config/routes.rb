@@ -252,8 +252,10 @@ LantanBAM::Application.routes.draw do
       end
     end
     resources :logins do
-       post :check_staff,:staff_login,:staff_checkin
-       get :download_staff_infos
+      collection do
+        post :check_staff,:staff_login,:staff_checkin
+        get :download_staff_infos
+      end
     end
   end
 
