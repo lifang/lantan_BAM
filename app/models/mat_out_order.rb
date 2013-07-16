@@ -4,6 +4,7 @@ class MatOutOrder < ActiveRecord::Base
   belongs_to :material_order
 
   TYPES = {0 => "消耗", 1 => "调拨", 2 => "赠送", 3 => "销售"}
+  TYPES_VALUE = {:cost => 0, :transfer => 1, :send => 2, :sale => 3}
 
   def self.out_list page,per_page, store_id,sql = [nil,nil,nil]
     MatOutOrder.where(sql[0]).where(sql[1]).where(sql[2]).where("materials.status=#{Material::STATUS[:NORMAL]} and materials.store_id=#{store_id}")
