@@ -138,6 +138,7 @@ class Order < ActiveRecord::Base
       from customer_num_relations cnr
       inner join car_nums cn on cn.id=cnr.car_num_id and cn.num='#{car_num}'
       inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}
+      inner join customer_store_relations csr on csr.customer_id = c.id and csr.store_id=#{store_id}
       left join car_models cm on cm.id=cn.car_model_id
       left join car_brands cb on cb.id=cm.car_brand_id "
     customer = CustomerNumRelation.find_by_sql sql
@@ -976,7 +977,16 @@ class Order < ActiveRecord::Base
             Point.create(:customer_id=>c_customer.id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points);
             c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
           end
+          #生成出库记录
+          order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id, m.price m_price FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
+p.id = opr.product_id inner join prod_mat_relations pmr on pmr.product_id = p.id inner join materials m
+on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and o.status in (?) and o.id = ?", [STATUS[:BEEN_PAYMENT], STATUS[:FINISHED]], order.id])
+        order_mat_infos.each do |omi|
+          MatOutOrder.create({:material_id => omi.m_id, :staff_id => omi.front_staff_id, :material_num => omi.material_num,
+                              :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => store_id})
+        end
         rescue
+          status = 2
         end
       end
     else

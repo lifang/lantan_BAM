@@ -811,6 +811,6 @@ class MaterialsController < ApplicationController
   end
 
   def get_store
-    @current_store = Store.find_by_id(params[:store_id].to_i)
+    @current_store = Store.find_by_id(params[:store_id].to_i) || not_found
   end
 end
