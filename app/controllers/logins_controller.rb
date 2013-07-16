@@ -2,23 +2,6 @@
 class LoginsController < ApplicationController
   
   def index
-#    require 'barby'
-#    require 'barby/barcode/code_128'
-#    #require 'barby/barcode/ean_13'
-#    #require 'barby/barcode/ean_8'
-#    require 'barby/outputter/custom_rmagick_outputter'
-#    require 'barby/outputter/rmagick_outputter'
-#
-#
-#    barcode = Barby::Code128B.new('1234567895')
-    #barcode = Barby::EAN13.new('412345678901')
-    #barcode = Barby::EAN8.new('4128901')
-#    File.open(Rails.root.join('public', "uploads", "barcode_demo.png"), 'wb'){|f|
-#      f.write barcode.to_png
-#    }
-
-#    barcode.to_image_with_data.write(Rails.root.join('public', "uploads", "barcode_demo.png"))
-
     if cookies[:user_id]
       @staff = Staff.find_by_id(cookies[:user_id].to_i)
       if @staff.nil?
