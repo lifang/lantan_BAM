@@ -3,8 +3,8 @@ class MaterialOrderManagesController < ApplicationController
   before_filter :sign?
   layout "complaint"
   respond_to :json, :xml, :html
-  before_filter :make_search_sql, :only => [:mat_in_or_out_query,:search_mat_in_or_out,:page_ins,:page_outs]
-  before_filter :get_store, :only => [:mat_in_or_out_query,:search_mat_in_or_out,:page_ins,:page_outs]
+  before_filter :make_search_sql, :only => [:mat_in_or_out_query,:search_mat_in_or_out,:page_ins,:page_outs,:search_unsalable_materials,:unsalable_materials,:page_unsalable_materials]
+  before_filter :get_store, :only => [:mat_in_or_out_query,:search_mat_in_or_out,:page_ins,:page_outs,:search_unsalable_materials,:unsalable_materials,:page_unsalable_materials]
   def index
     @store = Store.find_by_id(params[:store_id])
     @statistics_month = (params[:statistics_month] ||= Time.now.months_ago(1).strftime("%Y-%m"))
@@ -38,6 +38,24 @@ class MaterialOrderManagesController < ApplicationController
     end
   end
 
+  #滞销物料显示
+  def unsalable_materials
+    @unsalable_materials = Material.unsalable_list params[:page],Constant::PER_PAGE,params[:store_id],@u_sql
+  end
+
+  def search_unsalable_materials
+    @unsalable_materials = Material.unsalable_list params[:page],Constant::PER_PAGE,params[:store_id],@u_sql
+  end
+
+  def page_unsalable_materials
+    @unsalable_materials = Material.unsalable_list params[:page],Constant::PER_PAGE,params[:store_id],@u_sql
+
+    respond_with(@unsalable_materials) do |f|
+      f.html
+      f.js
+    end
+  end
+
   #入库列表分页
   def page_ins
     @mat_in_orders = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
@@ -66,9 +84,16 @@ class MaterialOrderManagesController < ApplicationController
     mat_types = params[:mat_types].blank? || params[:mat_types] == "-1" ? "1 = 1" : ["materials.types = ?", params[:mat_types].to_i]
     @sql = []
     @sql << start_date << end_date << mat_types
+    @u_sql = []
+    start = params[:start_date].blank? ? "1 = 1" : "created_at >='#{params[:start_date]} 00:00:00'"
+    ended = params[:end_date].blank? ? "1 = 1" : "created_at <='#{params[:end_date]} 23:59:59'"
+    num = params[:sale_num].blank? ? "1 = 1" : " sum(material_num) >= #{params[:sale_num]}"
+    type = params[:mat_types].blank? ? "1 = 1" : "m.types = #{params[:mat_types]}"
+    @u_sql << start << ended << num << type
     @start_date = params[:start_date].blank? ? nil : params[:start_date]
     @end_date = params[:end_date].blank? ? nil : params[:end_date]
     @mat_type = params[:mat_types].blank? ? nil : params[:mat_types]
+    @sale_num = params[:sale_num].blank? ? nil : params[:sale_num]
   end
 
   def get_store

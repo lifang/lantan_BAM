@@ -122,7 +122,9 @@ LantanBAM::Application.routes.draw do
     resources :current_month_salaries
     resources :material_order_manages do
       collection do
-        get "mat_in_or_out_query", "search_mat_in_or_out","page_ins","page_outs"
+        get "mat_in_or_out_query", "search_mat_in_or_out","page_ins","page_outs",
+            "unsalable_materials","search_unsalable_materials","page_unsalable_materials",
+            "page_unsalable_materials"
       end
     end
     resources :staff_manages do
