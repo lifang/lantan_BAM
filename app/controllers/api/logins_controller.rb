@@ -8,18 +8,20 @@ class Api::LoginsController < ApplicationController
     data_type = 1
     staffs =[]
     if staff && staff.has_password?(params[:staff_password])
-      if staff.position == Saff::S_HEAD[:MANAGER]
+      if staff.position == Staff::S_HEAD[:MANAGER]
         data_type = 0
         message = "登录成功"
-        Staff.where("store_id=#{staff.store_id} and status=#{Staff::STATUS[:normal]} and position=#{Staff::S_HEAD[:NORMAL]}").each{|staff|
+        Staff.where("store_id=#{staff.store_id} and status=#{Staff::STATUS[:normal]} and position in (#{Staff::S_HEAD[:NORMAL]},#{Staff::S_HEAD[:MANAGER]})").each{|staff|
           staffs << [staff.id,staff.name,staff.photo]}
       else
         message = "用户权限不足"
       end
+      render :json=>{:msg=>message,:d_type=>data_type,:store_id=>staff.store_id,:staffs=>staffs}
     else
       message = "用户不存在"
+      render :json=>{:msg=>message,:d_type=>data_type}
     end
-    render :json=>{:msg=>message,:d_type=>data_type,:staff=>staff,:staffs=>staffs}
+    
   end
 
 
@@ -44,7 +46,7 @@ class Api::LoginsController < ApplicationController
       WorkORecord.create(:current_day=>Time.now.strftime("%Y%m%d").to_i,:attenance_num=>1,:staff_id=>staff.id,:store_id=>staff.store_id)
       message = "签到成功"
     else
-      message = "签到不成功"
+      message = "签到不成功,用户不存在"
     end
     render :json=>{:msg=>message}
   end
