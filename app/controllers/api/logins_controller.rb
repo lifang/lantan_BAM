@@ -11,8 +11,8 @@ class Api::LoginsController < ApplicationController
       if staff.position == Staff::S_HEAD[:MANAGER]
         data_type = 0
         message = "登录成功"
-        Staff.where("store_id=#{staff.store_id} and status=#{Staff::STATUS[:normal]} and position in (#{Staff::S_HEAD[:NORMAL]},#{Staff::S_HEAD[:MANAGER]})").each{|staff|
-          staffs << staff}
+        Staff.where("store_id=#{staff.store_id} and status=#{Staff::STATUS[:normal]} and position in (#{Staff::S_HEAD[:NORMAL]},#{Staff::S_HEAD[:MANAGER]})").inject(Hash.new){|hash,staff|
+          hash["id"]=staff.id;hash["name"]=staff.name;hash["photo"]=staff.photo;staffs << hash}
       else
         message = "用户没有权限"
       end
