@@ -25,6 +25,7 @@ class Material < ActiveRecord::Base
   MAT_OUT_PATH = "#{File.expand_path(Rails.root)}/public/uploads/mat_out/%s"
   MAT_CHECKNUM_PATH = "#{File.expand_path(Rails.root)}/public/uploads/mat_check/%s"
   IS_IGNORE = {:YES => 1, :NO => 0} #是否忽略库存预警， 1是 0否
+  DEFAULT_MATERIAL_LOW = 0    #默认库存预警为0
   scope :normal, where(:status => STATUS[:NORMAL])
 
   private

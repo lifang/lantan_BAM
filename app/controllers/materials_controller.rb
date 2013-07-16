@@ -147,7 +147,8 @@ class MaterialsController < ApplicationController
           @material = Material.create({:code => params[:barcode].strip,:name => params[:name].strip,
               :price => params[:price].strip, :storage => params[:num].strip,
               :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
-              :types => params[:material][:types], :is_ignore => Material::IS_IGNORE[:NO]})
+              :types => params[:material][:types], :is_ignore => Material::IS_IGNORE[:NO],
+              :material_low => Material::DEFAULT_MATERIAL_LOW})
         end
         if @material_order
           MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
@@ -359,7 +360,7 @@ class MaterialsController < ApplicationController
     #puts params[:store_id]
     material = Material.find_by_code params[:code]
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
-        :price => params[:price].strip.to_i, :storage => 0,
+        :price => params[:price].strip.to_i, :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
         :types => params[:types], :check_num => nil, :is_ignore => Material::IS_IGNORE[:NO]}) if material.nil?
     x = {:status => 1, :material => material}.to_json
