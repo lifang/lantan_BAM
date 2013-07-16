@@ -33,7 +33,8 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins do
     collection do
-      get "logout"
+      get "logout", "send_validate_code"
+      post "forgot_password"
     end
   end
   match "logout" => "logins#logout"
@@ -95,7 +96,7 @@ LantanBAM::Application.routes.draw do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
-          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit"
+          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"
       end
       member do
@@ -119,7 +120,11 @@ LantanBAM::Application.routes.draw do
     end
     resources :salaries
     resources :current_month_salaries
-    resources :material_order_manages
+    resources :material_order_manages do
+      collection do
+        get "mat_in_or_out_query", "search_mat_in_or_out","page_ins","page_outs"
+      end
+    end
     resources :staff_manages do
       collection do
         get "get_year_staff_hart"
@@ -179,7 +184,7 @@ LantanBAM::Application.routes.draw do
       collection do
         get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
       end
-  end
+    end
   end
   resources :materials_in_outs
   match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
@@ -235,7 +240,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
           "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
-          "use_svcard","work_order_finished","into_materials"
+          "use_svcard","work_order_finished","into_materials","login_and_return_construction_order"
       end
     end
     resources :syncs_datas do
@@ -245,6 +250,10 @@ LantanBAM::Application.routes.draw do
       member do
         get :return_sync_all_to_db
       end
+    end
+    resources :logins do
+       post :check_staff,:staff_login,:staff_checkin
+       get :download_staff_infos
     end
   end
 

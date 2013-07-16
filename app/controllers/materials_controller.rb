@@ -7,18 +7,16 @@ class MaterialsController < ApplicationController
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
   before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo]
-  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
+  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs, :page_materials_losses]
   before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num]
   @@m = Mutex.new
 
   #库存列表
   def index
-    @material_losses = MaterialLoss.find_by_sql("select m.id, m.name, m.code, m.types, m.loss_num, m.specifications,
-    m.price, m.sale_price,m.staff_id from material_losses m where m.store_id =#{@current_store.id}
-    order by m.created_at desc").paginate :page => params[:page], :per_page => Constant::PER_PAGE
+    @material_losses = MaterialLoss.where("store_id = ?",@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @materials_storages = Material.includes(:mat_depot_relations).where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
-    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
-    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i 
+    @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @type = 0
     @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
       :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=#{Staff::STATUS[:normal]}")
@@ -58,9 +56,11 @@ class MaterialsController < ApplicationController
       materials.each do |material|
         temp_material_orders = material.material_orders.not_all_in
         material_orders = get_mo(material, temp_material_orders)
-        mm ={}
-        mm[material] = material_orders
+        material_orders.each do |mo|
+          mm ={:mo_code => mo.code, :mo_id => mo.id, :mat_code => material.code,
+            :mat_name => material.name,:mat_unit => material.unit, :mat_price => material.price}
         @material_ins << mm
+        end
       end if materials
     end
   end
@@ -126,9 +126,9 @@ class MaterialsController < ApplicationController
   #库存报损分页
   def page_materials_losses
     @current_store = Store.find_by_id params[:store_id]
-    @material_losses =  MaterialLoss.find_by_sql("select m.id, m.name, m.code, m.types, m.loss_num, m.specifications,
-    m.price, m.sale_price, m.staff_id from material_losses m where m.store_id =#{@current_store.id}
-    order by m.created_at desc").paginate :page => params[:page], :per_page => Constant::PER_PAGE
+    @material_losses = MaterialLoss.where("store_id =?", @current_store.id).where(@l_sql[0]).where(@l_sql[1]).where(
+        @l_sql[2]).paginate(:page => params[:page], :per_page => Constant::PER_PAGE)
+
     respond_with(@material_losses) do |format|
       #format.html
       format.js
@@ -243,7 +243,7 @@ class MaterialsController < ApplicationController
       @search_materials = Material.where(str)
     end
     
-    @type = params[:type].to_i == 0 ? 0 : 1
+    @type = params[:type].to_i
     respond_with(@search_materials,@type) do |format|
       format.html
       format.js
@@ -532,13 +532,12 @@ class MaterialsController < ApplicationController
     if params[:id]
       @order = MaterialOrder.find_by_id params[:id]
       @content = ""
-      if @order && @order.m_status == MaterialOrder::M_STATUS[:send]
+
+      if @order #&& @order.m_status == MaterialOrder::M_STATUS[:send]
         @order.update_attribute(:m_status,MaterialOrder::M_STATUS[:received])
         @content = "收货成功"
       elsif @order.m_status == MaterialOrder::M_STATUS[:received]
         @content = "订单已收货"
-      else
-        @content = "收货失败"
       end
     end
     #render :json => {:status => 1,:content => content, :order => order}.to_json
@@ -651,10 +650,10 @@ class MaterialsController < ApplicationController
   #批量核实
   def batch_check
     failed_updates = []
-    flash[:notice] = "批量核实成功！"
+    flash[:notice] = "盘点清单成功！"
     params[:materials].each do |id,cn|
       material = Material.find_by_id(id)
-      unless material && material.update_attribute(:storage, cn[:num])
+      unless material && material.update_attributes({:storage => cn[:num], :check_num => nil})
         failed_updates << cn[:code]
       end
     end unless params[:materials].blank?
@@ -785,7 +784,11 @@ class MaterialsController < ApplicationController
   #盘点物料清单
   def check_mat_num
     @materials_need_check = Material.find_by_sql(["select m.* from materials m where
- m.status=? and m.store_id=? group by m.id", Material::STATUS[:NORMAL], @current_store.id])
+ m.status=? and m.store_id=? and m.check_num is not null group by m.id", Material::STATUS[:NORMAL], @current_store.id])
+  end
+
+  def print_code
+    @type=2
   end
 
 

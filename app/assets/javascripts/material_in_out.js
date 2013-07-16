@@ -1,3 +1,4 @@
+var reg1 =  /^\d+$/;
 $(document).ready(function(){
     $("#mat_code").focus();
     $("#mat_code").live('keyup', function(event){
@@ -59,11 +60,15 @@ function changeNum(obj){
 
 function hideInput(obj){
     var ori_num = $(obj).val();
-    $(obj).parent("td").hide();
-    $(obj).parent("td").siblings(".mat_item_num").text(ori_num).show();
+     $(obj).parent("td").hide();
+     $(obj).parent("td").siblings(".mat_item_num").text(ori_num).show();
 }
 
-function removeRow(obj){
+function removeRow(obj, print_flag){
+    if(print_flag=="1"){ 
+        var id = $(obj).attr('class');
+        $("#print_code_tab #search_result").find("#" + id).attr("checked", false);
+    }
     $(obj).parents("tr").remove();
 }
 
@@ -75,11 +80,18 @@ function checkNums(store_id){
     if(mat_in_length==-1){
         alert('请录入商品！');
     }
+    var f = true;
     $(".mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
         var num = $(this).find(".mat_item_num").text();
-       // var mat_name = $(this).find(".mat_name").text();
+//        var input_num = $(this).find("#material_num").val();
+        if(num.match(reg1)==null){
+          tishi_alert("请输入正确的数字！")
+          f = false;
+        }
+
+       if(f){
         var each_item = "";
         each_item += mat_code + "_";
         each_item += mo_code + "_";
@@ -108,7 +120,7 @@ function checkNums(store_id){
                             dataType:"json",
                             type:"POST",
                             data:{
-                                mat_in_items: saved_mat_mos
+                                mat_in_items: saved_mat_mos, mat_in_create: 1
                             },
                             success:function(data2){
                                 if(data2['status']=="1")
@@ -125,6 +137,7 @@ function checkNums(store_id){
                
             }
         });
+       }
     });
 }
 

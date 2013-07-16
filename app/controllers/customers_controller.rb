@@ -3,7 +3,6 @@ class CustomersController < ApplicationController
   before_filter :sign?
   include RemotePaginateHelper
   layout "customer"
-  require 'will_paginate/array'
   before_filter :customer_tips
 
   def index

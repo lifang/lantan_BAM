@@ -22,9 +22,62 @@
           <div class="login_list"><input id="user_name" name="user_name" type="text" value="<%= @user_name.nil? ? "" : @user_name %>"/></div>
           <div class="login_list"><input id="user_password" name="user_password" type="password" /></div>
           <div class="login_btn"><button type="submit" id="login_exam">登录</button></div>
+          <div class="losePassWord"><a href="javascript:void(0)" id="forgot_password">忘记密码?</a></div>
         <% end %>
       </div>
     </div>
     <%= render :partial => "/shared/tishi_alert" %>
+    <div class="mask"></div>
+    <div class="tab_popup" style="display:none" id="forgot_password_area">
+        <div class="popup_box">
+            <h1><a href="javascript:void(0)" class="close">关闭</a></h1>
+            <form accept-charset="UTF-8" action="/logins/forgot_password" method="post" data-remote="true" data-type="script">
+             <div class="popup_body">
+                  <div class="popup_body_area">
+                       <div class="losePassWord_list"><label>手机号码：</label><input name="telphone" type="text" id="telphone"/><a href="javascript:void(0)" id="send_validate_code">点击获取验证吗</a></div>
+                       <div class="losePassWord_list"><label>验证码:</label><input type="text" name="validate_code" id="validate_code"/></div>
+                  </div>
+                  <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+             </div>
+            </form>
+        </div>
+   </div>
+    
+  <style type="text/css">
+    .mask {
+        background: url(/assets/black.png) repeat;
+        width: 100%;
+        height: 100%;
+        display: none;
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        left: 0;
+    }
+  </style>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $("#forgot_password").click(function(){
+          popup("#forgot_password_area");
+          return false;
+        });
+
+        $("#send_validate_code").click(function(){
+          var telphone = $("#telphone").val();
+          $.ajax({
+              type : 'get',
+              url : "/logins/send_validate_code",
+              data : {
+                  telphone : telphone   
+              },
+              success: function(data){
+                  tishi_alert(data);
+                  return false;
+              }
+          });
+          return false;
+        });
+      });
+    </script>
   </body>
 </html>

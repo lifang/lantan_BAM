@@ -6,7 +6,6 @@ class StationsController < ApplicationController
 
   #施工现场
   def index
-   Product.revist_message()
     @stations =Station.where("store_id=#{params[:store_id]} and status !=#{Station::STAT[:DELETED]}")
     sql=Station.make_data(params[:store_id])
     work_orders=WorkOrder.find_by_sql(sql).inject(Hash.new) { |hash, a| hash[a.status].nil? ? hash[a.status]=[a] : hash[a.status] << a;hash}

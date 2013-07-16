@@ -22,6 +22,7 @@
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store_id]), :class => "",:target => "_blank" %><% end %>
+    <% if permission?(:materials, :print) %><%= link_to "打印条形码",print_code_store_materials_path(params[:store_id]),:remote => true, 'data-type' => 'script', :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :check_all) %><%= link_to "盘点清单", "/stores/#{params[:store_id]}/check_mat_num", :remote => true, 'data-type'=>'script' %><% end %>
     <% if permission?(:materials, :material_loss_add) %><%= link_to_function "新建库存报损", "MaterialsLoss()", :class => "" %><% end %>
   </div>
@@ -64,6 +65,9 @@
 <!--盘点-->
 <div class="tab_popup" id="batch_check_tab"></div>
 
+<!--打印条形码-->
+<div class="tab_popup print_code_tab" id="print_code_tab"></div>
+
 <div class="tab_popup" id="setMaterialLow">
 <div class="popup_box" >
   <h1>设置库存预警<a href="javascript:void(0)" class="close">关闭</a></h1>
@@ -89,25 +93,28 @@
     <div class="popup_body">
       <div class="popup_body_area">
           <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1}  %>
-
-            <div class="data_body">
-      <%= form_tag  create_materials_in_path , :id => "create_mat_in_form" do |f|%>
+        <div class="search_result_mat"></div>
+        <div class="data_body">
+      <%= form_tag  create_materials_in_path , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
           <thead>
             <tr class="hbg">
               <td>订货编号</td>
               <td>条形码</td>
               <td>物料名称</td>
+              <td>规格</td>
               <td>数量</td>
               <td>操作</td>
             </tr>
           </thead>
           <tbody class="mat-out-list"></tbody>
         </table>
+              <input type="hidden" id="mat_in_hidden_value" name="mat_in_items"/>
+              <input type="hidden" id="mat_in_create" name="mat_in_create"/>
         <div class="clear"></div>
         <div class="btn_box_s">
           <button onclick="checkNums(<%= @current_store.id %>)" type="button" class="confirm_btn">入库</button>
-          <button onclick="fetchMatIn(<%= @current_store.id %>)" type="button" class="confirm_btn">打印入库清单</button>
+          <button onclick="fetchMatIn(this)" type="button" class="confirm_btn">打印入库清单</button>
           <button type="button" class="confirm_btn">打印条码</button>
         </div>
       <% end %>
@@ -153,22 +160,7 @@
 <div class="tab_popup beizhu_tab" id="order_remark_div">
 
 </div>
-<!--<div class="tab_popup" id="zhifu_tab">
-  <div class="popup_box">
-    <h1>付款<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <div class="popup_body">
-      <div class="popup_body_area">
-        <div class="fukuan_btn">
-          <%#= hidden_field_tag "pay_order_id","0" %>
-          <%#= hidden_field_tag "pay_order_type" %>
-          <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('zhifu_tab', 1,<%#= params[:store_id] %>)"></a></span>
-          <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order('zhifu_tab', 3,<%#= params[:store_id] %>)}">现金</button></span>
-        </div>
-        <div class="clear"></div>
-      </div>
-    </div>
-  </div>
-</div>-->
+
 <div class="tab_popup" id="alipay_confirm">
   <div class="popup_box">
     <h1>支付宝付款<a href="javascript:void(0)" class="close">关闭</a></h1>
@@ -177,7 +169,7 @@
         <div style="text-align:center">完成付款后请根据你的情况点击下面的按钮:</div>
         <div class="fukuan_btn">
           <%= hidden_field_tag "pay_order_id","0" %>
-          <span><a href="javascript:void(0)" class="confirm_btn" onclick="pay_material_order('alipay_confirm',1,<%= params[:store_id] %>)">重新付款</a></span>
+          <span><a href="javascript:void(0)" class="confirm_btn" onclick="pay_material_order('alipay_confirm',1,<%= params[:store_id] %>, this)">重新付款</a></span>
           <span><button class="confirm_btn" type="button" onclick="window.location.reload()">支付完成</button></span>
         </div>
         <div class="clear"></div>

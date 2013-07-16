@@ -11,6 +11,10 @@ function edit_store_name(obj,store_id){
     if(new_name == $(obj).parent().next().text()){
         $(obj).parent().hide();
         $(obj).parent().next().show();
+    }else if(new_name==""){
+        tishi_alert("编辑失败,门店名不能为空!");
+        $(obj).parent().hide();
+        $(obj).parent().next().show();
     }else{
         $.ajax({
             async:false,
