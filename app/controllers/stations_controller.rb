@@ -18,6 +18,7 @@ class StationsController < ApplicationController
     @stations.each do |station|
       staff=StationStaffRelation.find_by_sql("select staff_id from station_staff_relations where station_id=#{station.id}  and current_day='#{Time.now.strftime("%Y%m%d")}' ")
       @t_infos[station.id]=[Staff.where("id in (#{staff.map(&:staff_id).join(',')})").map(&:name).join("、 "),nums[station.id]] unless staff.blank?
+#    WorkOrder.where("store_id=#{}")
     end
     p @t_infos
   end

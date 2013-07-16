@@ -11,7 +11,7 @@ class Api::LoginsController < ApplicationController
       if staff.position == Staff::S_HEAD[:MANAGER]
         data_type = 0
         message = "登录成功"
-        Staff.where("store_id=#{staff.store_id} and status=#{Staff::STATUS[:normal]} and position=#{Staff::S_HEAD[:NORMAL]}").each{|staff|
+        Staff.where("store_id=#{staff.store_id} and status=#{Staff::STATUS[:normal]} and position in (#{Staff::S_HEAD[:NORMAL]},#{Staff::S_HEAD[:MANAGER]})").each{|staff|
           staffs << [staff.id,staff.name,staff.photo]}
       else
         message = "用户权限不足"
