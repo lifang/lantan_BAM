@@ -8,11 +8,11 @@ class LoginsController < ApplicationController
         render :index, :layout => false
       else
         session_role(cookies[:user_id])
-        if has_authority?
-          redirect_to "/stores/#{@staff.store_id}/welcomes"
-        else
-          render :index, :layout => false
-        end
+        #if has_authority?
+        redirect_to "/stores/#{@staff.store_id}/welcomes"
+        #else
+        #render :index, :layout => false
+        #end
       end
     else
       render :index, :layout => false
@@ -32,19 +32,19 @@ class LoginsController < ApplicationController
       @user_name = params[:user_name]
       render 'index', :layout => false
     else
-      cookies[:user_id]={:value =>@staff.id, :path => "/", :secure  => false}
-      cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => false}
+      cookies[:user_id]={:value =>@staff.id, :path => "/", :secure  => true}
+      cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => true}
       session_role(cookies[:user_id])
-      if has_authority?
-        redirect_to "/stores/#{@staff.store_id}/welcomes"
-      else
-        cookies.delete(:user_id)
-        cookies.delete(:user_name)
-        cookies.delete(:user_roles)
-        cookies.delete(:model_role)
-        flash[:notice] = "抱歉，您没有访问权限"
-        redirect_to "/"
-      end
+      #if has_authority?
+      #  redirect_to "/stores/#{@staff.store_id}/welcomes"
+      #else
+      #  cookies.delete(:user_id)
+      #  cookies.delete(:user_name)
+      #  cookies.delete(:user_roles)
+      #  cookies.delete(:model_role)
+      #  flash[:notice] = "抱歉，您没有访问权限"
+      #  redirect_to "/"
+      #end
     end
   end
 
