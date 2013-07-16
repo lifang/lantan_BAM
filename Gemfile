@@ -46,3 +46,5 @@ end
 #group :development do
 #  gem "better_errors"
 #end
+gem 'rmagick'
+gem 'barby'

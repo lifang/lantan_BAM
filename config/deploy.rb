@@ -28,17 +28,17 @@ require 'capistrano_colors'
 
 after("deploy:symlink") do    #after， before 表示在特定操作之后或之前执行其他任务  
  
-  # log link
-  run "rm -rf #{current_path}/log"        #移除当前路径下的log文件
-  run "ln -s #{shared_path}/log/ #{current_path}/log"  #link日志文件到share下的日志文件
-
-  run "ln -s /opt/projects/public/bam_public/* #{current_path}/public/"  #link public文件夹到/opt/projects/public/bam_public/
-  run "cd #{current_path} && bundle install"
+ 
 end
 
 namespace :deploy do  
   task :restart do
     #    run "chmod -R 777 /opt/projects/lantan_BAM/" # 每次deploy完给目录下新产生的文件赋权限
+ # log link
+  run "rm -rf #{current_path}/log"        #移除当前路径下的log文件
+  run "ln -s #{shared_path}/log/ #{current_path}/log"  #link日志文件到share下的日志文件
+
+  run "ln -s /opt/projects/public/bam_public/* #{current_path}/public/"  #link public文件夹到/opt/projects/public/bam_public/
 
     # database.yml for localized database connection
     run "rm #{current_path}/config/database.yml"  #移除当前路径下的数据库配置文件

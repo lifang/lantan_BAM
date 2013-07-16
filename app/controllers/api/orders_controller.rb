@@ -413,15 +413,27 @@ class Api::OrdersController < ApplicationController
 
   #手机入库
   def into_materials
-    store_id = params[:store_id]
-    code = params[:code]
-    check_num = params[:check_num]
-    material = Material.where("code = #{code} and store_id = #{store_id}").first
-    if material
-      material.update_attribute(:check_num, check_num)
-      render :json => {:status => "success"}
+    data = JSON.parse(params[:data])
+    store_id = data["store_id"]
+    materials = data["materials"]
+    mat_arr = []
+    materials.each do |mat|
+      material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
+      if material
+        material.check_num = mat['check_num'].to_i
+        mat_arr << material
+      else
+        mat_arr << material
+      end
+    end
+    if mat_arr.include?(nil)
+      render :json => {:status => "error", :message => "没有材料"}
     else
-      render :json => {:status => "error"}
+      if Material.import mat_arr, :on_duplicate_key_update => [:check_num]
+        render :json => {:status => "success"}
+      else
+        render :json => {:status => "error", :message => "更新材料数量失败"}
+      end
     end
   end
 
@@ -434,11 +446,11 @@ class Api::OrdersController < ApplicationController
     else
       #登录成功
       current_day = Time.now.strftime("%Y%m%d")
-      orders = Order.where("store_id = #{staff.store_id}").
-                     where("status = #{Order::STATUS[:SERVICING]}").
-                     where("current_day = #{current_day}")
+      orders = Order.includes(:work_orders).where("orders.store_id = #{staff.store_id}").
+                     where("orders.status = #{Order::STATUS[:SERVICING]}").
+                     where("work_orders.current_day = #{current_day}")
 
-      render :json => {:status => 1, :orders => orders}
+      render :json => {:status => 1, :orders => orders, :store_id => staff.store_id}
     end
   end
   

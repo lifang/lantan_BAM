@@ -254,12 +254,11 @@ class Order < ActiveRecord::Base
       h[:name] = p.name
       h[:price] = p.sale_price
       h[:description] = p.description
-      h[:mat_num] =  p_ids[p.id] if p.is_a?(Product)
+      h[:mat_num] =  p_ids[p.id] if p.is_service == false
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
       
-      if [Product::TYPES_NAME[:CLEAN_PROD] || Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
+      if [Product::TYPES_NAME[:CLEAN_PROD], Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
         clean_and_besuty_prod_arr << h
-      
       elsif p.types.to_i == Product::TYPES_NAME[:DECORATE_PROD]
         decorate_prod_arr << h
       elsif p.types.to_i ==  Product::TYPES_NAME[:ASSISTANT_PROD]
@@ -274,6 +273,7 @@ class Order < ActiveRecord::Base
         maint_service_arr << h
       end
     end
+
     product_arr[:清洗美容类] = clean_and_beauty_service_arr
     product_arr[:维修保养类] = maint_service_arr
     product_arr[:美容产品类] = clean_and_besuty_prod_arr
