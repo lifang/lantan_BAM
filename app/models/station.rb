@@ -79,7 +79,8 @@ class Station < ActiveRecord::Base
       }
     }
   end
-  
+
+  #工位安排技师 h_staff 员工id h_level 技师等级
   def self.set_station(store_id,h_staff,h_level)
     p "start+++++++++StoreId-#{store_id} StaffId-#{h_staff} StaffLevel-#{h_level}"
     s_levels ={}  #所需技师等级
