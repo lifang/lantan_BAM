@@ -450,7 +450,10 @@ class Api::OrdersController < ApplicationController
                      where("orders.status = #{Order::STATUS[:SERVICING]}").
                      where("work_orders.current_day = #{current_day}")
 
-      render :json => {:status => 1, :orders => orders, :store_id => staff.store_id}
+      #所有的code，材料名称
+      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name")
+
+      render :json => {:status => 1, :orders => orders, :store_id => staff.store_id, :materials => materials}
     end
   end
   
