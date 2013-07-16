@@ -140,7 +140,7 @@ module ApplicationHelper
     @material_orders_send = MaterialOrder.where("m_status = ? and supplier_id = ? and store_id = ?", MaterialOrder::M_STATUS[:send], 0, params[:store_id])
     store = Store.find_by_id(params[:store_id].to_i)
     @low_materials = Material.where(["status = ? and store_id = ? and storage <= material_low and is_ignore = ?", Material::STATUS[:NORMAL],
-        store.id, Material::IS_IGNORE[:NO]])
+        store.id, Material::IS_IGNORE[:NO]]) if store
   end
 
   def random_file_name(file_name)

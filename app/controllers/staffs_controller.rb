@@ -37,7 +37,7 @@ class StaffsController < ApplicationController
     photo = params[:staff][:photo]
     encrypt_name = random_file_name(photo.original_filename) if photo
     @staff.photo = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
-    @staff.staff_role_relations.new(:role_id => Constant::STAFF)
+    #@staff.staff_role_relations.new(:role_id => Constant::STAFF)
     if @staff.save   #save staff info and picture
       @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create") unless photo.nil?
       flash[:notice] = "创建员工成功!"

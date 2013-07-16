@@ -24,7 +24,7 @@
               </tr>
               <% (record.mat_order_items || []).each do |item| %>
                 <tr>
-                  <td><%= item.material.name %></td>
+                  <td><%= item.material.try(:name) %></td>
                   <td><%= item.price %></td>
                   <td><%= item.material_num.to_i %></td>
                 </tr>
