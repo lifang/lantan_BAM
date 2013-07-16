@@ -54,13 +54,12 @@ class Product < ActiveRecord::Base
             SendMessage.create(:message_record_id => message_record.id, :customer_id => c.id,
               :content => content, :phone => c.mobilephone,
               :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
-            message_arr << {:content => content, :msid => "#{c.id}", :mobile => c.mobilephone}
+            message_arr << {:content => content.gsub(/([   ])/,"/t"), :msid => "#{c.id}", :mobile => c.mobilephone}
           end
         }
       end
       msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
       jsondata = JSON msg_hash
-      p jsondata
       begin
         message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
         message_route

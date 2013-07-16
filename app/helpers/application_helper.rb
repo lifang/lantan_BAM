@@ -16,7 +16,11 @@ module ApplicationHelper
   end
 
   def signed_in?
-    return cookies[:user_id] != nil
+    return (cookies[:user_id] != nil and current_user.store_id == params[:store_id].to_i)
+  end
+
+  def current_user
+    return Staff.find_by_id(cookies[:user_id].to_i)
   end
 
   #客户管理提示信息

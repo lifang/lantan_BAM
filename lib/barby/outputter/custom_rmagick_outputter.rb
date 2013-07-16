@@ -5,11 +5,12 @@ require 'barby/outputter/rmagick_outputter'
 module Barby
   class CustomRmagickOutputter < RmagickOutputter
     register :to_image_with_data
-    def to_image_with_data
+    def to_image_with_data(*a)
       #Make canvas  bigger
       canvas = Magick::ImageList.new
-      canvas.new_image(full_width , full_height + 10)
-      canvas << to_image
+      canvas.new_image(748 , full_height + 10)
+      #canvas.new_image(full_width , full_height + 10)
+      canvas << to_image(*a)
       canvas = canvas.flatten_images
       #Make the text
       text = Magick::Draw.new
