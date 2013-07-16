@@ -12,13 +12,13 @@ class Api::LoginsController < ApplicationController
         data_type = 0
         message = "登录成功"
         Staff.where("store_id=#{staff.store_id} and status=#{Staff::STATUS[:normal]} and position in (#{Staff::S_HEAD[:NORMAL]},#{Staff::S_HEAD[:MANAGER]})").each{|staff|
-          staffs << [staff.id,staff.name,staff.photo]}
+          staffs << staff}
       else
-        message = "用户权限不足"
+        message = "用户没有权限"
       end
       render :json=>{:msg=>message,:d_type=>data_type,:store_id=>staff.store_id,:staffs=>staffs}
     else
-      message = "用户不存在"
+      message = "用户不存在或者密码不正确"
       render :json=>{:msg=>message,:d_type=>data_type}
     end
     
