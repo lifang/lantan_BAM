@@ -80,7 +80,7 @@
         </td>
         <td><%= material.name %></td>
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
-        <td class="sstatus"><%= material.is_ignore || material.storage.to_i > @current_store.material_low.to_i ? "存货" : "缺货" %></td>
+        <td class="sstatus"><%= material.is_ignore || material.storage.to_i > material.material_low.to_i ? "存货" : "缺货" %></td>
         <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= material.storage.to_i %></span></td>
         <td><%= material.unit %></td>
         <td><%= material.price %></td>
