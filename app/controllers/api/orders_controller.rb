@@ -25,15 +25,15 @@ class Api::OrdersController < ApplicationController
       cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
       cookies[:user_name]={:value =>staff.name, :path => "/", :secure  => false}
       session_role(cookies[:user_id])
-      if has_authority?
+      #if has_authority?
         info = ""
-      else
-        cookies.delete(:user_id)
-        cookies.delete(:user_name)
-        cookies.delete(:user_roles)
-        cookies.delete(:model_role)
-        info = "抱歉，您没有访问权限"
-      end
+      #else
+        #cookies.delete(:user_id)
+        #cookies.delete(:user_name)
+        #cookies.delete(:user_roles)
+        #cookies.delete(:model_role)
+        #info = "抱歉，您没有访问权限"
+      #end
     end
     render :json => {:staff => staff, :info => info}.to_json
   end
