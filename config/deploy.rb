@@ -38,6 +38,7 @@ namespace :deploy do
   run "rm -rf #{current_path}/log"        #移除当前路径下的log文件
   run "ln -s #{shared_path}/log/ #{current_path}/log"  #link日志文件到share下的日志文件
 
+#  run "ln -s /opt/projects/public/bam_public/storeimg /opt/projects/public/headoffice_public/storeimg"
   run "ln -s /opt/projects/public/bam_public/* #{current_path}/public/"  #link public文件夹到/opt/projects/public/bam_public/
 
     # database.yml for localized database connection

@@ -738,6 +738,7 @@ a.compile_btn { width: 100px;}
     text-align: center;
     background: url(/assets/site_bg.png) no-repeat 0 -98px;
     color: #FFF;
+    cursor: pointer;
 }
 .site_teacher { 
     width: 160px;
@@ -944,3 +945,4 @@ a.compile_btn { width: 100px;}
     line-height: 24px;
     padding: 5px 0;
 }
+.search select#material_order_code{width: 150px}
