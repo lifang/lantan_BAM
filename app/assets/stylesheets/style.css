@@ -758,6 +758,7 @@ a.compile_btn { width: 100px;}
 	top: 0;
 	left: 0;
 }
+.site_table_text { line-height:100px; text-align: center;}
 .site_tdThead { background: #930205; color: #FFF;}
 .site_tdTbody { border-bottom: 1px #930205 solid;}
 .site_tdThead, .site_tdTbody { height: 24px; line-height: 24px;}
