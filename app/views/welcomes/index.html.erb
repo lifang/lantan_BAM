@@ -17,7 +17,7 @@
     <div class="head">
       <div class="box position_re">
         <div class="logo1"><span>V2.1</span></div>
-        <div class="login">你好：<% if is_staff? %><a href="javascript:void(0)" id="edit_password"><%= cookies[:user_name] %></a><% else %><%= cookies[:user_name] %><% end %> | <a href="/logout">退出</a></div>
+        <div class="login">你好：<a href="javascript:void(0)" id="edit_password"><%= cookies[:user_name] %></a> | <a href="/logout">退出</a></div>
         <div class="name">
           <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= params[:store_id] %>)"/></span>
            <span style="cursor:pointer;" title="点击此处编辑门店名" onclick="set_store_name(this)"><%= cookies[:store_name] %></span><span>后台管理系统</span>
@@ -50,7 +50,7 @@
     <%= render :partial => "/shared/tishi_alert" %>
     <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
 
-    <% if is_staff? %>
+    
     <script type="text/javascript">
       $(document).ready(function(){
          $("#edit_password").click(function(){
@@ -68,7 +68,7 @@
                       <div class="popup_body_area">
                          <div class="pressWord_box">
                          <h3 class="red"></h3>
-                         <div class="pw_list"><label>用户名：</label><span><%= @staff.name %></span></div>
+                         <div class="pw_list"><label>用户名：</label><span><%= @staff.username %></span></div>
                                  <div class="pw_list"><label>旧密码：</label><input name="old_password" type="password" id="old_password"/></div>
                                  <div class="pw_list"><label>新密码：</label><input name="new_password" type="password" id="new_password"/></div>
                                  <div class="pw_list"><label>确认新密码：</label><input name="confirm_password" type="password" id="confirm_password"/></div>
@@ -79,6 +79,6 @@
                  </div>
             </div>
        </div>
-    <% end %>
+    
   </body>
 </html>

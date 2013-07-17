@@ -8,14 +8,15 @@ module Barby
     def to_image_with_data(*a)
       #Make canvas  bigger
       canvas = Magick::ImageList.new
-      canvas.new_image(748 , full_height + 10)
+      canvas.new_image(748 , 415)
       #canvas.new_image(full_width , full_height + 10)
       canvas << to_image(*a)
       canvas = canvas.flatten_images
       #Make the text
       text = Magick::Draw.new
       text.font_family = 'helvetica'
-      text.pointsize = 14
+      #text.pointsize = 14
+      text.pointsize = 18
       text.gravity = Magick::SouthGravity
       text.annotate(canvas , 0,0,0,0, barcode.data)
       canvas

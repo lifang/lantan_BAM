@@ -449,7 +449,7 @@ class Api::OrdersController < ApplicationController
         material.check_num = mat['check_num'].to_i
         mat_arr << material
       else
-        mat_arr << material
+        mat_arr << nil
       end
     end
     if mat_arr.include?(nil)
@@ -486,11 +486,21 @@ class Api::OrdersController < ApplicationController
     if mat_arr.include?(nil)
       render :json => {:status => "error", :message => "没有材料或者你的盘点数量超过库存数量"}
     else
-      if Material.import mat_arr, :on_duplicate_key_update => [:storage, :check_num]
-        render :json => {:status => "success"}
-      else
-        render :json => {:status => "error", :message => "出库失败"}
+      Material.transaction do
+        begin
+          mat_arr.each do |mat|
+            mat.save
+          end
+          render :json => {:status => "success"}
+        rescue
+          render :json => {:status => "error", :message => "出库失败"}
+        end
       end
+#      if Material.import mat_arr, :on_duplicate_key_update => [:storage, :check_num, :mat_out_orders]
+#        render :json => {:status => "success"}
+#      else
+#        render :json => {:status => "error", :message => "出库失败"}
+#      end
     end
   end
 
@@ -508,7 +518,7 @@ class Api::OrdersController < ApplicationController
                      where("work_orders.current_day = #{current_day}")
 
       #所有的code，材料名称
-      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name")
+      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
       mat_out_types = MatOutOrder::TYPES
       render :json => {:status => 1, :orders => orders, :store_id => staff.store_id,
         :materials => materials, :staff_id => staff.id, :mat_out_types => mat_out_types}
