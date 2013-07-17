@@ -739,7 +739,14 @@ a.compile_btn { width: 100px;}
     background: url(/assets/site_bg.png) no-repeat 0 -98px;
     color: #FFF;
 }
-.site_station p { text-align: center;}
+.site_teacher { 
+    width: 160px;
+	padding: 0 5px;
+    word-break:keep-all;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
 
 .site_station .siteCar.free_station { background: url(/assets/site_bg.png) no-repeat 0 -150px;}
 .site_station .siteCar.wrong_station { background: url(/assets/site_bg.png) no-repeat 0 -205px;}
@@ -761,7 +768,7 @@ a.compile_btn { width: 100px;}
 .site_table_text { line-height:100px; text-align: center;}
 .site_tdThead { background: #930205; color: #FFF;}
 .site_tdTbody { border-bottom: 1px #930205 solid;}
-.site_tdThead, .site_tdTbody { height: 24px; line-height: 24px;}
+.site_tdThead, .site_tdTbody { height: 33px; line-height: 33px;}
 .site_tdTbody_bt { background: #B72629; color: #FFF;}
 .site_tdThead span, .site_tdTbody span { width: 55px; display: inline-block; float: left; text-align: center;}
 
