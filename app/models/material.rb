@@ -1,10 +1,10 @@
 #encoding: utf-8
+#require 'barby'
+#require 'barby/barcode/code_128'
+#require 'barby/barcode/ean_13'
+#require 'barby/outputter/custom_rmagick_outputter'
+#require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
-require 'barby'
-require 'barby/barcode/code_128'
-require 'barby/barcode/ean_13'
-require 'barby/outputter/custom_rmagick_outputter'
-require 'barby/outputter/rmagick_outputter'
   has_many :prod_mat_relations
   has_many :mat_order_items
   has_many :material_orders, :through => :mat_order_items do 

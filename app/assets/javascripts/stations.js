@@ -15,14 +15,14 @@ function collect_info(store_id,station_id){
                     var month_num = data[types[i]];
                     for(var item in month_num){
                         $($("#water_"+item+" span")[i+1]).html(month_num[item][0]);
-                        $($("#electric_"+item+" span")[i+1]).html(month_num[item][1]);
-                        $($("#gas_"+item+" span")[i+1]).html(month_num[item][2]);
+                        $($("#gas_"+item+" span")[i+1]).html(month_num[item][1]);
                     }
                 }
-                $("#site_"+station_id).css("display","");
+                 $("#site_"+station_id).css("display","");
             }
         })
     }else{
+        //        $("#site_"+station_id).slideToggle("slow");
         $("#site_"+station_id).css("display","");
     }
 

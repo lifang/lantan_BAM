@@ -40,20 +40,17 @@
               <h3>工位: <%= station.name %><span class="countTime" id="time_<%=station.id  %>"></span></h3>
               <div class="site_m" id="site_<%= station.id %>" style="display:none">
                 <div class="close" onclick="$(this).parent().css('display','none')">关闭</div>
-                <div class="site_table" >
+                <div class="site_table" id="table_<%= station.id %>">
                   <%if station.is_has_controller%>
                     <div class="site_tdThead"><span>&nbsp;</span><span>日</span><span>月</span></div>
                     <div class="site_tdTbody"id="water_<%=station.id%>">
                       <span class="site_tdTbody_bt" >水(T)</span><span>0</span><span>0</span></div>
-                    <div class="site_tdTbody" id="electric_<%= station.id %>">
-                      <span class="site_tdTbody_bt" >电(℃)</span><span>0</span><span>0</span></div>
                     <div class="site_tdTbody" id="gas_<%= station.id %>">
                       <span class="site_tdTbody_bt" >气(L)</span><span>0</span><span>0</span></div>
                   <%else%>
-                    <div class="site_table_text">工位暂不支持数据</div>
+                    <div class="site_table_text">工位暂无工控机</div>
                   <%end%>
                 </div>
-
               </div>
               <% if  station.status== Station::STAT[:LACK]%>
                 <div class="siteCar wrong_station" onclick="collect_info(<%= params[:store_id] %>,<%=station.id%>)" title="查看水、电、气使用情况"><%=Station::STAT_NAME[station.status] %></div>
@@ -69,7 +66,7 @@
                 <p>技师：<%= @t_infos[station.id][0] %></p>
               <% else %>
                 <div class="siteCar" title="查看水、电、气使用情况" onclick="collect_info(<%= params[:store_id] %>,<%=station.id%>)"><%=@t_infos[station.id][1]  %></div>
-                <p>技师：<%= @t_infos[station.id][0] %></p>
+                <div class="site_teacher">技师：<%= @t_infos[station.id][0] %></div>
                 <%time = @times[station.id].nil? ? 0 : @times[station.id].to_i %>
                 <script type="text/javascript">
                   time<%=station.id  %> = <%=  time%>
