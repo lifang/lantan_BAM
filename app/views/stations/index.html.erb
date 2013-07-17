@@ -35,21 +35,30 @@
         <% unless  @stations.blank?%>
           <% @stations.each do |station| %>
             <div class="site_station">
-              <h3>工位: <%= station.name %></h3>
+              <h3>工位: <%= station.name %><span class="countTime" id="time_<%=station.id  %>">50:49</span></h3>
+              <div class="site_m" id="site_<%= station.id %>">
+                <div class="close">关闭</div>
+                <div class="site_table">
+                  <div class="site_tdThead"><span>&nbsp;</span><span>日</span><span>月</span></div>
+                  <div class="site_tdTbody"><span class="site_tdTbody_bt">水(T)</span><span>9999</span><span>9999</span></div>
+                  <div class="site_tdTbody"><span class="site_tdTbody_bt">电(℃)</span><span>9999</span><span>9999</span></div>
+                  <div class="site_tdTbody"><span class="site_tdTbody_bt">气(L)</span><span>9999</span><span>9999</span></div>
+                </div>
+              </div>
               <% if  station.status== Station::STAT[:LACK]%>
-                <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
+                <div class="siteCar wrong_station"><%=Station::STAT_NAME[station.status]%></div>
               <% elsif station.status== Station::STAT[:WRONG] %>
-                <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
+                <div class="siteCar wrong_station"><%=Station::STAT_NAME[station.status]%></div>
               <% elsif station.status== Station::STAT[:NO_SERVICE] %>
-                <div class="wrong_station"><%=Station::STAT_NAME[station.status]%></div>
+                <div class="siteCar wrong_station"><%=Station::STAT_NAME[station.status]%></div>
               <%elsif @t_infos[station.id].nil?%>
-                <div class="free_station">空闲</div>
+                <div class="siteCar free_station">空闲</div>
                 <p>技师：暂无技师，<a href="/stores/<%=params[:store_id]%>/stations/show_detail" target="_blank">请分配</a></p>
               <%elsif  @t_infos[station.id][1].nil? %>
-                <div class="free_station">空闲</div>
+                <div class="siteCar free_station">空闲</div>
                 <p>技师：<%= @t_infos[station.id][0] %></p>
               <% else %>
-                <div><%=@t_infos[station.id][1]  %></div>
+                <div class="siteCar"><%=@t_infos[station.id][1]  %></div>
                 <p>技师：<%= @t_infos[station.id][0] %></p>
               <% end %>
             </div>
@@ -62,3 +71,20 @@
   </div>
 </div>
 <div id="related_order_div"></div>
+
+
+
+<div class="site_station">
+  <h3>工位01<span class="countTime">50:49</span></h3>
+  <div class="site_m">
+    <div class="close">关闭</div>
+    <div class="site_table">
+      <div class="site_tdThead"><span>&nbsp;</span><span>日</span><span>月</span></div>
+      <div class="site_tdTbody"><span class="site_tdTbody_bt">水(T)</span><span>9999</span><span>9999</span></div>
+      <div class="site_tdTbody"><span class="site_tdTbody_bt">电(℃)</span><span>9999</span><span>9999</span></div>
+      <div class="site_tdTbody"><span class="site_tdTbody_bt">气(L)</span><span>9999</span><span>9999</span></div>
+    </div>
+  </div>
+  <div class="siteCar wrong_station">故障</div>
+  <p>技师：张三、李四 <a href="#">请分配</a></p>
+</div>

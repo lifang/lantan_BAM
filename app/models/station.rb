@@ -82,7 +82,7 @@ class Station < ActiveRecord::Base
 
   #工位安排技师 h_staff 员工id h_level 技师等级
   def self.set_station(store_id,h_staff,h_level)
-    p "start+++++++++StoreId-#{store_id} StaffId-#{h_staff} StaffLevel-#{h_level}"
+    p "start------StoreId-#{store_id} StaffId-#{h_staff} StaffLevel-#{h_level}"
     s_levels ={}  #所需技师等级
     o_staffs = {}  #已分配技师的工位
     o_tech =[] #已分配工位的技师
@@ -135,13 +135,11 @@ class Station < ActiveRecord::Base
       end
       if s_levels[h_level] && !s_levels[h_level].blank?
         if  o_staffs.keys.blank? #当工位都没有分配的时候
-          p "00#{store_id}"
           StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
         else #已分配的工位
           is_half = true
           s_levels[h_level].each{|station|
             if o_staffs.keys.include? station
-              p "==#{store_id}"
               StationStaffRelation.create(:station_id=>station,:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
               Station.find(station).update_attributes(:status=>Station::STAT[:NORMAL])
               is_half = false
@@ -149,14 +147,13 @@ class Station < ActiveRecord::Base
             end
           }
           if  is_half  #已分配工位中不包含当前级别的技师
-            p p "=--#{store_id}"
             StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
             Station.find(s_levels[h_level][0]).update_attributes(:status=>Station::STAT[:LACK])
           end
         end
       end
     end
-    p "end ============"
+    p "end--------"
   end
 
   def self.make_data(store_id)

@@ -81,4 +81,15 @@ class StationsController < ApplicationController
     end
     render :layout => false
   end
+
+  def collect_info
+    content = "sum(water_num) water,sum(electricity_num) electric,sum(gas_num) gas,station_id"
+    conditions = "status=#{WorkOrder::STAT[:COMPLETE]} and date_format(updated_at,'%Y-%m')=#{Time.now.strtime('%Y-%m')}
+    and store_id=#{params[:store_id]} group by station_id"
+    month_num = WorkOrder.select(content).where(conditions).inject(Hash.new){|hash,w_order| hash[w_order.station_id]=[w_order.water,w_order.electric,w_order.gas]}
+    d_conditions = "status=#{WorkOrder::STAT[:COMPLETE]} and current_day=#{Time.now.strtime('%Y%m%d').to_i} and store_id=#{params[:store_id]} group by station_id"
+    day_num = WorkOrder.select(content).where(d_conditions).inject(Hash.new){|hash,w_order| hash[w_order.station_id]=[w_order.water,w_order.electric,w_order.gas]}
+    render :json=>{:month_num=>month_num,:day_num=>day_num}
+  end
+
 end
