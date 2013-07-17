@@ -1,9 +1,10 @@
 #encoding: utf-8
-#require 'barby'
-#require 'barby/barcode/code_128'
-#require 'barby/outputter/custom_rmagick_outputter'
-#require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
+require 'barby'
+require 'barby/barcode/code_128'
+require 'barby/barcode/ean_13'
+require 'barby/outputter/custom_rmagick_outputter'
+require 'barby/outputter/rmagick_outputter'
   has_many :prod_mat_relations
   has_many :mat_order_items
   has_many :material_orders, :through => :mat_order_items do 
@@ -42,27 +43,29 @@ class Material < ActiveRecord::Base
   private
   
   def generate_barcode
-    self.code = types.to_s + Time.now.strftime("%Y%m%d%H%M%S")
+    #self.code = types.to_s + Time.now.strftime("%Y%m%d%H%M%S")
+    self.code = '123456789012'
   end
 
   def generate_barcode_img
-    barcode = Barby::Code128B.new(self.code)
+    #barcode = Barby::Code128B.new(self.code)
+    barcode = Barby::EAN13.new(self.code)
     if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
       FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
     end
-    barcode.to_image_with_data(:height => 100, :margin => 10, :xdim => 3).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
+    barcode.to_image_with_data(:height => 350, :margin => 10, :xdim => 7).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
     #self.update_attribute(:code_img, "/barcode/#{self.id}/barcode.png")
 
-    file_path = "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}/barcode.png"
-    img = MiniMagick::Image.open file_path,"rb"
-
-    [748].each do |size|
-      resize = size
-      new_file = file_path.split(".")[0]+"_#{resize}."+file_path.split(".").reverse[0]
-      resize_file_name = "barcode"+"_#{resize}."+"png"
-      self.update_attribute(:code_img, "/barcode/#{self.id}/#{resize_file_name}")
-      img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
-    end
+#    file_path = "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}/barcode.png"
+#    img = MiniMagick::Image.open file_path,"rb"
+#
+#    [748].each do |size|
+#      resize = size
+#      new_file = file_path.split(".")[0]+"_#{resize}."+file_path.split(".").reverse[0]
+#      resize_file_name = "barcode"+"_#{resize}."+"png"
+#      self.update_attribute(:code_img, "/barcode/#{self.id}/#{resize_file_name}")
+#      img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
+#    end
 
   end
 end

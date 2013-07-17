@@ -66,8 +66,8 @@ class Api::OrdersController < ApplicationController
       "数据出现异常"
     elsif order[0] == 1
       "success"
-    elsif order[0] == 3
-      "没可用的工位了"
+#    elsif order[0] == 3
+#      "没可用的工位了"
     end
     render :json => {:status => order[0], :content => str, :order => info}
   end
@@ -173,7 +173,7 @@ class Api::OrdersController < ApplicationController
         #如果是产品,则减掉要加回来
         order.return_order_materials
         #如果存在work_order,取消订单后设置work_order以及wk_or_times里面的部分数值
-        order.return_work_orders
+        order.rearrange_station
         order.update_attribute(:status, Order::STATUS[:DELETED])
         status = 1
       else
@@ -365,49 +365,9 @@ class Api::OrdersController < ApplicationController
 
   #工位完成施工，技师会用手机触发，给工位进行排单
   def work_order_finished
-    current_time = Time.now
     work_order = WorkOrder.find_by_id(params[:work_order_id])
-    if work_order
-      #把完成的单的状态置为等待付款
-      runtime = sprintf('%.2f',(current_time - work_order.started_at)/60).to_f
-      work_order.update_attributes(:status => WorkOrder::STAT[:WAIT_PAY], :runtime => runtime)
-      order = work_order.order
-      if runtime > work_order.cost_time
-        staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
-        staffs.each do |staff_id|
-          ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
-          :situation => "订单号#{order.code}超时#{runtime - work_order.cost_time}分钟",
-          :status => ViolationReward::STATUS[:NOMAL])
-        end
-      end
-      order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order
-
-      #排下一个单
-      next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
-                                  where("station_id = #{work_order.station_id}").
-                                  where("store_id = #{work_order.store_id}").
-                                  where("current_day = #{work_order.current_day}").first
-      if next_work_order
-        #同一个人的下单，直接紧接着排单
-        ended_at = current_time + next_work_order.cost_time*60
-        next_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
-          :started_at => current_time, :ended_at => ended_at )
-        next_order = next_work_order.order
-        next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order
-      else
-        #按照created_at时间来排单
-        another_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
-                            where("station_id is null").
-                            where("store_id = #{work_order.store_id}").
-                            where("current_day = #{work_order.current_day}").order("created_at asc").first
-        if another_work_order
-          another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
-            :started_at => current_time, :ended_at => ended_at, :station_id => work_order.station_id)
-          another_order = another_work_order.order
-          another_order.update_attribute(:status, Order::STATUS[:SERVICING]) if another_order
-        end
-      end
-    end
+    work_order.arrange_station if work_order
+    
     render :json => {:status => "sort_station_success"}
   end
 
@@ -449,7 +409,7 @@ class Api::OrdersController < ApplicationController
         material.check_num = mat['check_num'].to_i
         mat_arr << material
       else
-        mat_arr << material
+        mat_arr << nil
       end
     end
     if mat_arr.include?(nil)
@@ -486,11 +446,21 @@ class Api::OrdersController < ApplicationController
     if mat_arr.include?(nil)
       render :json => {:status => "error", :message => "没有材料或者你的盘点数量超过库存数量"}
     else
-      if Material.import mat_arr, :on_duplicate_key_update => [:storage, :check_num]
-        render :json => {:status => "success"}
-      else
-        render :json => {:status => "error", :message => "出库失败"}
+      Material.transaction do
+        begin
+          mat_arr.each do |mat|
+            mat.save
+          end
+          render :json => {:status => "success"}
+        rescue
+          render :json => {:status => "error", :message => "出库失败"}
+        end
       end
+#      if Material.import mat_arr, :on_duplicate_key_update => [:storage, :check_num, :mat_out_orders]
+#        render :json => {:status => "success"}
+#      else
+#        render :json => {:status => "error", :message => "出库失败"}
+#      end
     end
   end
 
@@ -508,7 +478,7 @@ class Api::OrdersController < ApplicationController
                      where("work_orders.current_day = #{current_day}")
 
       #所有的code，材料名称
-      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name")
+      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
       mat_out_types = MatOutOrder::TYPES
       render :json => {:status => 1, :orders => orders, :store_id => staff.store_id,
         :materials => materials, :staff_id => staff.id, :mat_out_types => mat_out_types}

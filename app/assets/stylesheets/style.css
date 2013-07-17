@@ -759,6 +759,7 @@ a.compile_btn { width: 100px;}
 	top: 0;
 	left: 0;
 }
+.site_table_text { line-height:100px; text-align: center;}
 .site_tdThead { background: #930205; color: #FFF;}
 .site_tdTbody { border-bottom: 1px #930205 solid;}
 .site_tdThead, .site_tdTbody { height: 24px; line-height: 24px;}
@@ -925,7 +926,7 @@ a.compile_btn { width: 100px;}
 
 /*#materials_tab_table th, #materials_tab_table td{width:12.5%; word-break:break-all}*/
 #role_staffs .data_table td{width:33.3%; word-break:break-all}
-.station-data .data_table td{width:25%; word-break:break-all}
+.station-data .data_table td{width:20%; word-break:break-all}
 #mat_order_detail_tab .data_tab_table td td{width:33.3%; word-break:break-all}
 #batch_check_tab .file_data{height: 300px;overflow-y: auto;}
 .mat_hint{

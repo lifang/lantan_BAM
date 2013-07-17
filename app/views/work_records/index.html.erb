@@ -1,7 +1,7 @@
 <div class="main">
     <div class="box">
          <div class="data_box">
-           <div class="data_body_p" style="padding: 0 10px 0px 10px;float:left">员工绩效统计月份：<%= DateTime.now.months_ago(1).strftime("%Y%m") %></div>
+           <div class="data_body_p" style="padding: 0 10px 0px 10px;float:left">员工出勤统计：<%= Time.now.strftime("%Y-%m-%d") %></div>
               
               <input type="hidden" value="<%= @store.id %>" id="store_id"/>
               <div class="clear"></div>
