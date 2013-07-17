@@ -50,5 +50,52 @@ class WorkOrder < ActiveRecord::Base
       end
     end
   end
+
+  def arrange_station
+    current_time = Time.now
+    #把完成的单的状态置为等待付款
+    unless self.status ==  WorkOrder::STAT[:CANCELED]
+      runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
+      self.update_attributes(:status => WorkOrder::STAT[:WAIT_PAY], :runtime => runtime)
+      order = self.order
+      if runtime > self.cost_time
+        staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+        staffs.each do |staff_id|
+          ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
+          :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
+          :status => ViolationReward::STATUS[:NOMAL])
+        end
+      end
+    end
+      order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order
+
+      #排下一个单
+      next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
+                                  where("station_id = #{self.station_id}").
+                                  where("store_id = #{self.store_id}").
+                                  where("current_day = #{self.current_day}").first
+      if next_work_order
+        #同一个人的下单，直接紧接着排单
+        ended_at = current_time + next_work_order.cost_time*60
+        next_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
+          :started_at => current_time, :ended_at => ended_at )
+        woTime = WkOrTime.find_by_station_id_and_current_day next_work_order.station_id, ended_at
+        woTime.update_attribute(:wait_num, woTime.wait_num - 1) if woTime and woTime.wait_num
+        next_order = next_work_order.order
+        next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order
+      else
+        #按照created_at时间来排单
+        another_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
+                            where("station_id is null").
+                            where("store_id = #{self.store_id}").
+                            where("current_day = #{self.current_day}").order("created_at asc").first
+        if another_work_order
+          another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
+            :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
+          another_order = another_work_order.order
+          another_order.update_attribute(:status, Order::STATUS[:SERVICING]) if another_order
+        end
+      end
+  end
   
 end
