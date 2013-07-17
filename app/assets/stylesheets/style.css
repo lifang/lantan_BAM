@@ -764,6 +764,7 @@ a.compile_btn { width: 100px;}
 	position: absolute; 
 	top: 0;
 	left: 0;
+	z-index:10;
 }
 .site_table_text { line-height:100px; text-align: center;}
 .site_tdThead { background: #930205; color: #FFF;}
