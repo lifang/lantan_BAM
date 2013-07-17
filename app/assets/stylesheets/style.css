@@ -738,6 +738,7 @@ a.compile_btn { width: 100px;}
     text-align: center;
     background: url(/assets/site_bg.png) no-repeat 0 -98px;
     color: #FFF;
+    cursor: pointer;
 }
 .site_station p { text-align: center;}
 
