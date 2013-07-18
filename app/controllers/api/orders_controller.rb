@@ -453,11 +453,16 @@ class Api::OrdersController < ApplicationController
     staff = Staff.find_by_id(params[:staff_id])
     if staff
       current_day = Time.now.strftime("%Y%m%d")
-      work_orders = WorkOrder.where("store_id = #{staff.store_id}").
-                     where("status = #{WorkOrder::STAT[:SERVICING]}").
-                     where("current_day = #{current_day}")
+      work_orders = WorkOrder.joins(:order => :car_num).where("work_orders.store_id = #{staff.store_id}").
+                     where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
+                     where("work_orders.current_day = #{current_day}").select("work_orders.*,car_nums.num as car_num")
+      result = []
+      work_orders.each do |work_order|
+        work_order["coutdown"] = Time.now - work_order.ended_at
+        result << work_order
+      end
 
-      render :json => {:status => 1, :work_orders => work_orders}
+      render :json => {:status => 1, :work_orders => result}
     else
       render :json => {:status => 0}
     end
