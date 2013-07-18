@@ -31,6 +31,9 @@ class MaterialsController < ApplicationController
     before_thirty_day =  (Time.now - 30.day).to_s[0..9]
     @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT distinct moo.material_id as id FROM mat_out_orders as moo where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
       and  types = 3 and store_id = #{@current_store.id}) and store_id = #{@current_store.id};")
+    #入库查询状态未完全入库的订货单号
+    @material_orders_not_all_in = MaterialOrder.joins(:materials).where("material_orders.m_status not in (?) and material_orders.status != ? and material_orders.store_id = ?",[3,4], MaterialOrder::STATUS[:cancel], params[:store_id]).order("material_orders.created_at desc").select("material_orders.id, material_orders.code")
+    @mat_loss_search_materials = []
     respond_to do |format|
       format.html
       format.js
@@ -39,10 +42,13 @@ class MaterialsController < ApplicationController
 
   def search_materials
     @tab_name = params[:tab_name]
-    if @tab_name == 'materials'
+    if @tab_name == 'materials' and params[:mat_in_flag]!="1"
       materials = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
         @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
       @materials_storages = materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    elsif @tab_name == "material_losses_materials"
+      @mat_loss_search_materials = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
+          @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
     elsif @tab_name == 'material_losses'
       @material_losses = MaterialLoss.where(["store_id = ?",  @current_store.id]).where(@l_sql[0]).where(
           @l_sql[1]).where(@l_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
@@ -52,12 +58,19 @@ class MaterialsController < ApplicationController
       @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
     end
     if params[:mat_in_flag]=="1"
+       materials = Material.joins(:material_orders).where(["materials.status = ? and materials.store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
+        @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).where(@s_sql[3])
       @material_ins = []
       materials.each do |material|
-        temp_material_orders = material.material_orders.not_all_in
+        if params[:mo_code].present?
+          temp_material_orders = MaterialOrder.where({:id => params[:mo_code]})
+        else
+          temp_material_orders = material.material_orders.not_all_in
+        end
+        
         material_orders = get_mo(material, temp_material_orders)
-        material_orders.each do |mo|
-          mm ={:mo_code => mo.code, :mo_id => mo.id, :mat_code => material.code,
+        material_orders.each do |mo, left_num|
+          mm ={:mo_code => mo.code, :mo_id => mo.id, :mat_code => material.code,:mat_num => left_num,
             :mat_name => material.name,:mat_unit => material.unit, :mat_price => material.price}
         @material_ins << mm
         end
@@ -261,7 +274,7 @@ class MaterialsController < ApplicationController
   def material_order
     status = MaterialOrder.make_order
     MaterialOrder.transaction do
-      begin
+      
         if params[:supplier]
           #向总部订货
           if params[:supplier].to_i == 0
@@ -286,13 +299,17 @@ class MaterialsController < ApplicationController
                   name = item.split("_")[4]
                   type_name = item.split("_")[5]
                   types = Material::TYPES_NAMES.key(type_name)
-                  m = Material.create(:name => name, :code => code, :price => s_price,
-                    :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
+                  begin
+                    m = Material.create(:name => name, :code => code, :price => s_price,
+                      :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
+                  rescue
+                    status = 3
+                  end
                 end
                 mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
                     :price => s_price})   if m
 
-                mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code}
+                mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code} if m
               end
                 
               #发送订货提醒给总店
@@ -300,7 +317,11 @@ class MaterialsController < ApplicationController
 
               material_order.update_attributes(:price => price)
               headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
-              result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
+            begin
+              result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json}) if mat_code_items.present?
+            rescue
+              status = 2
+            end
             end
             #material = Material.find_by_id_and_store_id
             #向供应商订货
@@ -325,9 +346,7 @@ class MaterialsController < ApplicationController
             end
           end
         end
-      rescue
-        status = 2
-      end
+      
       render :json => {:status => status, :mo_id => material_order.id}
     end
   end
@@ -764,7 +783,7 @@ class MaterialsController < ApplicationController
       if material.update_attributes(params[:material])
         @status = 1
         @material = material
-        @current_store = Store.find_by_id(params[:store_id].to_i)
+        #@current_store = Store.find_by_id(params[:store_id].to_i)
       else
         @status = 0
       end
@@ -790,8 +809,18 @@ class MaterialsController < ApplicationController
 
   def print_code
     @type=2
+    @store_id = params[:store_id]
   end
 
+  def output_barcode
+    prints = params[:print]
+    @data = []
+    prints.each do |key, value|
+      material = Material.find_by_id(key)
+      @data << {:num => value[:print_code_num], :code_img => material.code_img}
+    end
+    render :layout => false
+  end
 
   protected
   
@@ -802,8 +831,9 @@ class MaterialsController < ApplicationController
     mat_loss_code_sql = params[:mat_code].blank? ? "1 = 1" : ["material_losses.code = ?", params[:mat_code]]
     mat_loss_name_sql = params[:mat_name].blank? ? "1 = 1" : ["material_losses.name like ?", "%#{params[:mat_name]}%"]
     mat_loss_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["material_losses.types = ?", params[:mat_type].to_i]
+    mo_code_sql = params[:mo_code].blank? ? "1=1" : ["material_orders.id = ?", params[:mo_code]]
     @s_sql = []
-    @s_sql << mat_code_sql << mat_name_sql << mat_type_sql
+    @s_sql << mat_code_sql << mat_name_sql << mat_type_sql << mo_code_sql
     @l_sql = []
     @l_sql << mat_loss_code_sql << mat_loss_name_sql << mat_loss_type_sql
     @mat_code = params[:mat_code].blank? ? nil : params[:mat_code]

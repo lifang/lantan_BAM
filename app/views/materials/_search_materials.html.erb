@@ -1,21 +1,29 @@
-<% mat_in_flag ||= 0 %>
+<% mat_in_flag ||= 0 
+mo_search ||= false
+%>
 <div class="search">
+  <% if mo_search %>
   <div>
-    <label>条形码：</label>
-    <input type="text" id="search_material_code" value="<%= @mat_code %>"/>
+    <label>订货单号：</label>
+    <%= select("material_order", "code", @material_orders_not_all_in.collect {|mo| [ mo.code, mo.id ] }, { :prompt =>"请选择" }) %>
+  </div>
+  <% end %>
+  <div>
+    <label>物料类别：</label>
+    <select id="search_material_type">
+      <option value="-1">全部</option>
+      <% Material::TYPES_NAMES.each do |key,value| %>
+        <option value="<%= key %>" <% if @mat_type == key.to_s %>selected<% end %>><%= value %></option>
+      <% end %>
+    </select>
   </div>
   <div>
     <label>物料名称：</label>
     <input type="text" id="search_material_name" value="<%= @mat_name %>"/>
   </div>
   <div>
-    <label>物料类别：</label>
-    <select id="search_material_type">
-      <option value>全部</option>
-      <% Material::TYPES_NAMES.each do |key,value| %>
-        <option value="<%= key %>" <% if @mat_type == key.to_s %>selected<% end %>><%= value %></option>
-      <% end %>
-    </select>
+    <label>条形码：</label>
+    <input type="text" id="search_material_code" value="<%= @mat_code %>"/>
   </div>
   <div>
     <button class="search_btn" onclick="search_materials('<%= tab_name %>',<%= @current_store.id %>, this, <%= mat_in_flag %>)">查询</button>

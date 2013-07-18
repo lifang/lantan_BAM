@@ -3,8 +3,8 @@
   <td class="mat_code"><%= material_in[:mat_code] %></td>
   <td class="mat_name"><%= material_in[:mat_name] %></td>
   <td><%= material_in[:mat_unit] %></td>
-  <td class ="mat_item_num">1</td>
-  <td class ="num_box" style="display:none"><%= text_field_tag "material_num", nil, :style => 'width:50px', :onblur=>"hideInput(this)" %></td>
-  <td><a href="javascript:void(0)" onclick="changeNum(this)" class="bz_btn">编辑</a><a href="javascript:void(0)" onclick="removeRow(this)">删除</a></td>
+  <td><%= text_field_tag "materials[#{material_in[:mat_code]}][mat_num]", material_in[:mat_num], :class=> "mat_item_num", :style => 'width:50px' %></td>
+  <td><a href="javascript:void(0)" onclick="removeRow(this)">删除</a></td>
   <%= hidden_field_tag "material_price", material_in[:price], :class=>"material_price"%>
+  <%= hidden_field_tag "materials[#{material_in[:mat_code]}][mat_code]", material_in[:mat_code] %>
 </tr>

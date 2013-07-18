@@ -92,7 +92,7 @@
     <h1>入库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
-          <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1}  %>
+          <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1, :mo_search => true}  %>
         <div class="search_result_mat"></div>
         <div class="data_body">
       <%= form_tag  create_materials_in_path , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
@@ -210,42 +210,34 @@
 <div class="tab_popup" id="MaterialsLoss">
   <div class="popup_box" >
     <h1>库存报损<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <%= render :partial => 'search_materials', :locals => {:tab_name => "material_losses_materials"} %>
     <div class="popup_body">
-      <%= form_tag add_materials_losses_url(params[:store_id]), :id => "MaterialsLoss_form" do |f| %>
-          <div class="popup_body_area">
-            <div class="item">
-              <%= label_tag "name","物料名称：" %><%= text_field_tag "material_loss_name" %>
+      <div class="popup_body_area">
+        <div id="mat_loss_search_result" style="height: auto;">
+          <%= render :partial => '/materials/mat_loss_search_result' %>
+        </div>
+        <%= form_tag add_materials_losses_url(params[:store_id]), :id => "MaterialsLoss_form" ,:method => :post, :html => {:remote => true, 'data-type' => 'script'} do  %>
+            <table  width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+              <thead>
+              <tr class="hbg">
+                <td>物料名称</td>
+                <td>物料类别</td>
+                <td>条形码</td>
+                <td>库存量</td>
+                <td>报损数量</td>
+                <td>操作</td>
+              </tr>
+              </thead>
+              <tbody id="selected_materials"></tbody>
+            </table>
+            <div class="search"><%= hidden_field_tag "selected_items" %>
+              <div><%= label_tag "staff","报损人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
             </div>
-
-            <div class="item">
-              <%= label_tag "types","物料类型：" %><%= select(:material_loss,:types,Material::TYPES_NAMES.invert,{:prompt => "请选择"}) %>
             </div>
-            <div class="item">
-              <%= label_tag "code","条形码：" %><%= text_field_tag "material_loss_code" %>
-            </div>
-            <div class="item">
-              <%= label_tag "price","成本价：" %><%= text_field_tag "material_loss_price" %>
-            </div>
-            <div class="item">
-              <%= label_tag "sale_price","零售价：" %><%= text_field_tag "material_loss_sale_price" %>
-            </div>
-            <div class="item">
-              <%= label_tag "num","报损数量：" %><%= text_field_tag "material_loss_num" %>
-            </div>
-            <div class="item">
-              <%= label_tag "specifications","规格：" %><%= text_field_tag "material_loss_specifications" %>
-            </div>
-            <div class="item">
-              <%= label_tag "report_person","报损人：" %><%= select(:material_loss,:staff_id,staff_names,{:prompt => "请选择"}) %>
-            </div>
-            <div class="item">
-              <%= hidden_field_tag "material_loss_id" %>
-            </div>
-          </div>
-          <%= hidden_field_tag "hidden_store_id", params[:store_id] %>
-          <div class="btn_box"><button id="add_MaterialsLoss_btn" onclick="checkMaterialsLoss(<%= params[:store_id] %>)" type="button" class="confirm_btn">确定</button></div>
-          <div class="clear"></div>
-      <% end %>
+            <%= hidden_field_tag "hidden_store_id", cookies[:user_id] %>
+            <div class="btn_box"><button id="add_MaterialsLoss_btn" onclick="return checkMatLossNum(this)" class="confirm_btn">确定</button></div>
+            <div class="clear"></div>
+        <% end %>
     </div>
   </div>
 </div>
@@ -254,15 +246,15 @@
 </div>
 
 <script type="text/javascript">
-    $(document).ready(function(){
-        var obj = $("#add_MaterialsLoss_btn");
-        $(obj).attr('disabled',false);
-    })
-
-    $("#add_MaterialsLoss_btn").click(function(){
-        var obj = $("#add_MaterialsLoss_btn");
-        $(obj).attr('disabled',true);
-    })
+//    $(document).ready(function(){
+//        var obj = $("#add_MaterialsLoss_btn");
+//        $(obj).attr('disabled',false);
+//    })
+//
+//    $("#add_MaterialsLoss_btn").click(function(){
+//        var obj = $("#add_MaterialsLoss_btn");
+//        $(obj).attr('disabled',true);
+//    })
 
   $(function() {
 <% if @status %>

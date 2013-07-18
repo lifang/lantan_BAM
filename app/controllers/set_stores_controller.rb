@@ -4,7 +4,7 @@ class SetStoresController < ApplicationController
   before_filter :sign?, :except => [:update]
   def edit
     @store = Store.find_by_id(params[:store_id].to_i)
-    @store_city = City.find_by_id(@store.city_id)
+    @store_city = City.find_by_id(@store.city_id) if @store.city_id
     @cities = City.where(["parent_id = ?", @store_city.parent_id]) if @store_city
     @province = City.where(["parent_id = ?", City::IS_PROVINCE])
   end
@@ -28,5 +28,10 @@ class SetStoresController < ApplicationController
       flash[:notice] = "更新失败!"
     end
     redirect_to edit_store_set_store_path
+  end
+
+  def select_cities   #选择省份时加载下面的所有城市
+    p_id = params[:p_id]
+    @cities = City.where(["parent_id = ?", p_id])
   end
 end

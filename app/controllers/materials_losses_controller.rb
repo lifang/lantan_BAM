@@ -1,28 +1,21 @@
 #encoding:utf-8
 class MaterialsLossesController < ApplicationController
-   def add
-    if params[:id].empty?
-      material =  MaterialLoss.new({:name => params[:name].strip, :code => params[:code].strip,
-      :types => params[:types].strip, :price => params[:price].strip.to_i,
-      :sale_price => params[:sale_price].strip.to_i, :loss_num => params[:loss_num].strip.to_i,
-      :specifications => params[:specifications].strip, :staff_id => params[:report_person],
-      :store_id => params[:store_id]
-        }) if material.nil?
-
-      if material.save
-       redirect_to "/stores/#{params[:store_id]}/materials"
+  def add
+    mat_losses = params[:mat_losses]
+    unless mat_losses.nil?
+      mat_losses.each do |key,value|
+        material = Material.find(mat_losses[key][:mat_id])
+        if material
+          MaterialLoss.create({:loss_num =>  mat_losses[key][:mat_num].to_i,
+                               :material_id => material.id,
+                               :staff_id => params[:staff],
+                               :store_id => params[:hidden_store_id]
+                               })
+        end
       end
-    else
-      material = MaterialLoss.find(params[:id])
-     if material.update_attributes({:name => params[:name].strip, :code => params[:code].strip,
-                                      :types => params[:types].strip, :price => params[:price].strip.to_i,
-                                      :sale_price => params[:sale_price].strip.to_i, :loss_num => params[:loss_num].strip.to_i,
-                                      :specifications => params[:specifications].strip, :staff_id => params[:report_person],
-                                     })
-       redirect_to "/stores/#{params[:store_id]}/materials"
-     end
     end
-   end
+    redirect_to "/stores/#{params[:hidden_store_id]}/materials"
+  end
 
    def delete
      material =  MaterialLoss.find(params[:materials_loss_id].to_i)

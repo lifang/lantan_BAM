@@ -1,11 +1,11 @@
 #encoding: utf-8
 require 'barby'
-require 'barby/barcode/code_128'
 require 'barby/barcode/ean_13'
 require 'barby/outputter/custom_rmagick_outputter'
 require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
+  has_many :material_losses
   has_many :mat_order_items
   has_many :material_orders, :through => :mat_order_items do 
     def not_all_in
@@ -18,7 +18,7 @@ class Material < ActiveRecord::Base
   has_many :mat_depot_relations
   has_many :depots, :through => :mat_depot_relations
   before_create :generate_barcode
-  after_create :generate_barcode_img
+#  after_create :generate_barcode_img
 
   STATUS = {:NORMAL => 0, :DELETE => 1}
   TYPES_NAMES = {0 => "清洁用品", 1 => "美容用品", 2 => "装饰产品", 3 => "配件产品", 4 => "电子产品",
@@ -43,29 +43,19 @@ class Material < ActiveRecord::Base
   private
   
   def generate_barcode
-    #self.code = types.to_s + Time.now.strftime("%Y%m%d%H%M%S")
-    self.code = '123456789012'
+    code = Time.now.strftime("%Y%m%d%H%M%S")
+    code[0] = ''
+    code[0] = ''
+    self.code = code
   end
 
   def generate_barcode_img
-    #barcode = Barby::Code128B.new(self.code)
     barcode = Barby::EAN13.new(self.code)
     if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
       FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
     end
-    barcode.to_image_with_data(:height => 350, :margin => 10, :xdim => 7).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
-    #self.update_attribute(:code_img, "/barcode/#{self.id}/barcode.png")
-
-#    file_path = "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}/barcode.png"
-#    img = MiniMagick::Image.open file_path,"rb"
-#
-#    [748].each do |size|
-#      resize = size
-#      new_file = file_path.split(".")[0]+"_#{resize}."+file_path.split(".").reverse[0]
-#      resize_file_name = "barcode"+"_#{resize}."+"png"
-#      self.update_attribute(:code_img, "/barcode/#{self.id}/#{resize_file_name}")
-#      img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
-#    end
-
+    barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
+    self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{self.id}/barcode.png")
   end
+
 end

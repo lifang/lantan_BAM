@@ -19,10 +19,12 @@ class StationDatasController < ApplicationController
       levels = (products.map(&:staff_level)|products.map(&:staff_level_1)).uniq.sort
       @station = Station.create(params[:station].merge({:store_id => @store.id, :status => 2,:staff_level=>levels.min,
             :staff_level1=>levels[0..(levels.length/2.0)].max   }))
-    end
-    if @station.save
-      @station.products = products
-      render :successful
+      if @station.save
+        @station.products = products
+        render :successful
+      else
+        render :replace_form
+      end
     else
       render :replace_form
     end
