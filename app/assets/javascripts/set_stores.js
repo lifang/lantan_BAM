@@ -35,10 +35,14 @@ function edit_store_validate(obj){
 }
 
 function select_city(province_id,store_id){
-    $.ajax({
+    if(province_id==0){
+        $("#store_city").html("<option value='0'>------</option>")
+    }else{
+      $.ajax({
         type: "get",
         url: "/stores/"+store_id+"/set_stores/select_cities",
         dataType: "script",
         data: {p_id : province_id}
     })
+    }
 }
