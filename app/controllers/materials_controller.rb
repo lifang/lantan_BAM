@@ -799,6 +799,7 @@ class MaterialsController < ApplicationController
 
   def print_code
     @type=2
+    @store_id = params[:store_id]
   end
 
   def output_barcode
@@ -806,8 +807,6 @@ class MaterialsController < ApplicationController
     puts params.inspect
     puts "****************"
   end
-
-
 
   protected
   
