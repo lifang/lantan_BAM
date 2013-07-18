@@ -29,14 +29,17 @@ class Api::LoginsController < ApplicationController
   def staff_login
     staff = Staff.find_by_username_and_store_id(params[:login_name],params[:store_id])
     if staff && staff.has_password?(params[:login_password])
-      photo = params[:login_photo]
-      encrypt_name = random_file_name(photo.original_filename)
-      @staff.photo = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
-      staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create")
-      render :json=>{:data=>0,:login_staff=>staff.id,:msg=>"员工信息更新完成，请重新签到"}
+      render :json=>{:data=>0,:login_staff=>staff.id,:login_name=>staff.name}
     else
-      render :json=>{:data=>1,:msg=>"员工信息不存在，请录入！"}
+      render :json=>{:data=>1}
     end
+  end
+
+  def upload_img
+    photo = params[:login_photo]
+    encrypt_name = random_file_name(photo.original_filename)
+    @staff.photo = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
+    staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create")
   end
 
   def staff_checkin

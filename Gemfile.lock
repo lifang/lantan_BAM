@@ -34,7 +34,6 @@ GEM
       multi_json (~> 1.0)
     ansi (1.4.3)
     arel (2.2.3)
-    barby (0.5.1)
     builder (3.0.4)
     capistrano (2.15.4)
       highline
@@ -100,7 +99,6 @@ GEM
     rdoc (3.12.2)
       json (~> 1.4)
     remotipart (1.0.5)
-    rmagick (2.13.2)
     ruby-ole (1.2.11.6)
     rubyzip (0.9.9)
     spreadsheet (0.6.5.5)
@@ -129,7 +127,6 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import (~> 0.2.8)
-  barby
   capistrano (~> 2.15.4)
   capistrano_colors (~> 0.5.5)
   gchartrb (= 0.8)
@@ -139,7 +136,6 @@ DEPENDENCIES
   mysql2 (= 0.3.10)
   rails (= 3.1.2)
   remotipart (~> 1.0)
-  rmagick
   rubyzip (= 0.9.9)
   spreadsheet (= 0.6.5.5)
   turn (= 0.8.2)
