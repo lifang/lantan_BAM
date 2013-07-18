@@ -62,7 +62,7 @@ class MaterialsController < ApplicationController
         @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).where(@s_sql[3])
       @material_ins = []
       materials.each do |material|
-        if params[:mo_code]
+        if params[:mo_code].present?
           temp_material_orders = MaterialOrder.where({:id => params[:mo_code]})
         else
           temp_material_orders = material.material_orders.not_all_in
