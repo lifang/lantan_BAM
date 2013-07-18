@@ -1,7 +1,7 @@
 <div class="popup_box">
   <h1>打印条形码<a href="javascript:void(0)" class="close">关闭</a></h1>
   <div class="popup_body">
-    <form>
+    <form action="/stores/<%= @store_id %>/materials/output_barcode">
     <div class="popup_body_area">
       <%= render :partial => "/common/search_panel", :object => @type %>
       <div class="pq pq_mb"></div>

@@ -16,7 +16,7 @@ module Barby
       text = Magick::Draw.new
       text.font_family = 'helvetica'
       #text.pointsize = 14
-      text.pointsize = 28
+      text.pointsize = 56
       text.gravity = Magick::SouthGravity
       text.annotate(canvas , 0,0,0,0, barcode.data)
       canvas

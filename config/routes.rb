@@ -97,7 +97,7 @@ LantanBAM::Application.routes.draw do
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code"
-        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"
+        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode"
       end
       member do
         get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"
@@ -178,7 +178,8 @@ LantanBAM::Application.routes.draw do
 
     resources :set_stores do
       collection do
-        get "edit"       
+        get "edit"
+        get "select_cities"
       end
     end
     resources :station_datas
@@ -242,7 +243,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
           "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
-          "use_svcard","work_order_finished","into_materials","login_and_return_construction_order","check_num","out_materials"
+          "use_svcard","work_order_finished","login_and_return_construction_order","check_num","out_materials","get_construction_order"
       end
     end
     resources :syncs_datas do

@@ -65,13 +65,14 @@
   <label>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @service.prod_point %>" />
 </div>
 <div class="clear"></div>
-<div class="item_title">
-  <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @service.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @service.is_auto_revist  %>"
-         onclick="check_revist()" <% if @service.is_auto_revist %>checked<%end%>/>自动回访</div>
 <div class="item_blockArea">
+  <div class="item">
+    <label>自动回访：</label><input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @service.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @service.is_auto_revist  %>"
+                               onclick="check_revist()" <% if @service.is_auto_revist %>checked<%end%>/>
+  </div>
   <div class="item"><label>回访时间：</label>
     <select  id="time_revist" name="time_revist" <%unless @service.is_auto_revist%>disabled <%end%>>
-      <option value="">--</option>
+      <option value="">请选择</option>
       <% Product::REVIST_TIME.each do |key| %>
         <option value="<%= key %>" id="<%=key%>" <%if @service.auto_time ==key%> selected<%end%> ><%= key %>小时</option>
       <% end %>
