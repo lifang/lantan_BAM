@@ -23,9 +23,6 @@ LantanBAM::Application.routes.draw do
     end
   end
   resources :stations do
-    collection do
-      get "simple_station"
-    end
   end
 
   # The priority is based upon order of creation:
@@ -61,7 +58,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :stations do
       collection do
-        get "show_detail","show_video","see_video","search_video"
+        get "show_detail","show_video","see_video","search_video", "simple_station"
         post "search","collect_info"
       end
     end
@@ -188,10 +185,11 @@ LantanBAM::Application.routes.draw do
         get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
       end
     end
+    resources :materials_in_outs
   end
-  resources :materials_in_outs
-  match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
-  match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
+  
+  match 'stores/:store_id/materials_in' => 'materials_in_outs#materials_in'
+  match 'stores/:store_id/materials_out' => 'materials_in_outs#materials_out'
   match 'get_material' => 'materials_in_outs#get_material'
   match 'create_materials_in' => 'materials_in_outs#create_materials_in'
   match 'create_materials_out' => 'materials_in_outs#create_materials_out'
@@ -205,7 +203,7 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
-  match 'stores/:id/prin_matin_list' => 'materials_in_outs#prin_matin_list'
+  match 'stores/:store_id/prin_matin_list' => 'materials_in_outs#prin_matin_list'
 
   #match 'stores/:store_id/depots' => 'depots#index'
   #match 'stores/:store_id/depots/create' => 'depots#create'

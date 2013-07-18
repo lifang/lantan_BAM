@@ -32,7 +32,7 @@ class MaterialsController < ApplicationController
     @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT distinct moo.material_id as id FROM mat_out_orders as moo where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
       and  types = 3 and store_id = #{@current_store.id}) and store_id = #{@current_store.id};")
     #入库查询状态未完全入库的订货单号
-    @material_orders_not_all_in = MaterialOrder.where("m_status not in (?) and status != ? and store_id = ?",[3,4], MaterialOrder::STATUS[:cancel], params[:store_id]).order("created_at desc").select("id, code")
+    @material_orders_not_all_in = MaterialOrder.joins(:materials).where("material_orders.m_status not in (?) and material_orders.status != ? and material_orders.store_id = ?",[3,4], MaterialOrder::STATUS[:cancel], params[:store_id]).order("material_orders.created_at desc").select("material_orders.id, material_orders.code")
     @mat_loss_search_materials = []
     respond_to do |format|
       format.html
@@ -317,13 +317,11 @@ class MaterialsController < ApplicationController
 
               material_order.update_attributes(:price => price)
               headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
-              p "------------------------"
             begin
               result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json}) if mat_code_items.present?
             rescue
               status = 2
             end
-              p result
             end
             #material = Material.find_by_id_and_store_id
             #向供应商订货
