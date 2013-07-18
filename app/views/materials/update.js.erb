@@ -14,7 +14,7 @@ $("#showmaterial<%= @material.id %>tr").find("td:nth-child(7)").text("<%= @mater
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(8)").text("<%= @material.sale_price %>");
 $("#showmaterial<%= @material.id %>span").text(<%= @material.storage %>);
 
-<% if @material.storage <= @current_store.material_low.to_i %>       <!--如果小于预警值，则要加上信息提示-->
+<% if @material.storage <= @material.material_low.to_i %>       <!--如果小于预警值，则要加上信息提示-->
 
 $("#showmaterial<%= @material.id %>tr").find("td:first").removeAttr("class");
 $("#showmaterial<%= @material.id %>tr").find("td:first").attr("class", "data_table_error");
