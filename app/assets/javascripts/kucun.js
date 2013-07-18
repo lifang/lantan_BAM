@@ -1328,5 +1328,4 @@ function close_notice(obj){
           }
 
       })
-      return f;
-  }
+}
