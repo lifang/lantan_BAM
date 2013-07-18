@@ -19,9 +19,9 @@
 </div>
 <div class="item_textarea">
   <span class="item_radio"><input name="time_select" type="radio" onclick="$('#end_time').attr('disabled',false);$('#started_at,#ended_at').attr('disabled',true).val('')"
-   <% if @pcard.date_types==PackageCard::TIME_SELCTED[:END_TIME] %> checked <%end%> value="<%= PackageCard::TIME_SELCTED[:END_TIME] %>" /></span>
+                                  <% if @pcard.date_types==PackageCard::TIME_SELCTED[:END_TIME] %> checked <%end%> value="<%= PackageCard::TIME_SELCTED[:END_TIME] %>" /></span>
   <label>有效天数：</label><input name="end_time" type="text" class="item_areaInput_s" id="end_time"
-          <% if @pcard.date_types!=PackageCard::TIME_SELCTED[:END_TIME] %> disabled <%end%> value="<%=@pcard.date_month  %>" />&nbsp;&nbsp;天
+                             <% if @pcard.date_types!=PackageCard::TIME_SELCTED[:END_TIME] %> disabled <%end%> value="<%=@pcard.date_month  %>" />&nbsp;&nbsp;天
 </div>
 <div class="item_textarea">
   <label>套餐卡配图：</label>
@@ -29,13 +29,14 @@
     <img src="<%=  @pcard.img_url.nil? ? "" : @pcard.img_url.gsub("img#{@pcard.id}","img#{@pcard.id}_#{Constant::C_PICSIZE[2]}") %>" /></span>
 </div>
 <div class="clear"></div>
-<div class="item_title">
-  <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @pcard.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @pcard.is_auto_revist  %>"
-         onclick="check_revist()" <% if @pcard.is_auto_revist %>checked<%end%>/>自动回访</div>
 <div class="item_blockArea">
+  <div class="item">
+    <label>自动回访：</label> <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @pcard.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @pcard.is_auto_revist  %>"
+                                onclick="check_revist()" <% if @pcard.is_auto_revist %>checked<%end%>/>
+  </div>
   <div class="item"><label>回访时间：</label>
     <select  id="time_revist" name="time_revist" <%unless @pcard.is_auto_revist%>disabled <%end%>>
-      <option value="">--</option>
+      <option value="">请选择</option>
       <% Product::REVIST_TIME.each do |key| %>
         <option value="<%= key %>" id="<%=key%>" <%if @pcard.auto_time ==key%> selected<%end%> ><%= key %>小时</option>
       <% end %>
