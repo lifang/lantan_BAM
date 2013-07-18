@@ -16,7 +16,7 @@ module ApplicationHelper
   end
 
   def signed_in?
-    return (cookies[:user_id] != nil and current_user.store_id == params[:store_id].to_i)
+    return (cookies[:user_id] != nil and ((params[:store_id].nil? and @store.nil?) or current_user.store_id == params[:store_id].to_i or current_user.store_id == @store.id))
   end
 
   def current_user

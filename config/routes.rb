@@ -191,7 +191,7 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_in' => 'materials_in_outs#materials_in'
   match 'stores/:store_id/materials_out' => 'materials_in_outs#materials_out'
   match 'get_material' => 'materials_in_outs#get_material'
-  match 'create_materials_in' => 'materials_in_outs#create_materials_in'
+  match 'stores/:store_id/create_materials_in' => 'materials_in_outs#create_materials_in'
   match 'create_materials_out' => 'materials_in_outs#create_materials_out'
   match 'save_cookies' => 'materials_in_outs#save_cookies'
   match 'stores/:store_id/materials/:mo_id/get_mo_remark' => 'materials#get_mo_remark'
@@ -203,7 +203,6 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
-  match 'stores/:store_id/prin_matin_list' => 'materials_in_outs#prin_matin_list'
 
   #match 'stores/:store_id/depots' => 'depots#index'
   #match 'stores/:store_id/depots/create' => 'depots#create'

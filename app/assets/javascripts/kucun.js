@@ -1265,13 +1265,17 @@ function close_notice(obj){
             }
         });
     }
-  function fetchMatIn(obj){
+  function fetchMatIn(obj, store_id, print_flag){
     var saved_mat_mos = "";
+    var flag = true;
     $("#ruku_tab .mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
         var num = $(this).find(".mat_item_num").val();
-        // var mat_name = $(this).find(".mat_name").text();
+        if(num.match(reg1)==null){
+           flag = false;
+           tishi_alert("请输入有效数字！")
+        }
         var each_item = "";
         each_item += mat_code + "_";
         each_item += mo_code + "_";
@@ -1280,7 +1284,12 @@ function close_notice(obj){
     })
     $("#ruku_tab #mat_in_hidden_value").val(saved_mat_mos);
     $("#ruku_tab #mat_in_create").val(0);
-    if(saved_mat_mos != "")
+    if(print_flag==1){
+        $(obj).parents("#create_mat_in_form").attr("action", "/stores/"+ store_id +"/materials/output_barcode")
+    }else{
+        $(obj).parents("#create_mat_in_form").attr("action", "/stores/"+ store_id +"/create_materials_in")
+    }
+    if(saved_mat_mos != "" && flag)
     {
         $("#ruku_tab #mat_in_hidden_value").val(saved_mat_mos);
         $(obj).parents("#create_mat_in_form").submit();

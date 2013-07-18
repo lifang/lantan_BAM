@@ -42,7 +42,6 @@ class MaterialsInOutsController < ApplicationController
         render :json => {:status => status}
       }
     end
-    
   end
   
   def create_materials_out
@@ -126,10 +125,6 @@ class MaterialsInOutsController < ApplicationController
       end
     end
   end
-  
-  def prin_matin_list
-    @mat_in_list_hash = parse_mat_in_list(params['mat_in_items'], "0")
-  end
 
   protected
 
@@ -137,7 +132,7 @@ class MaterialsInOutsController < ApplicationController
     @store = Store.find_by_id(params[:store_id])
   end
 
-  def parse_mat_in_list(mat_in_items, mat_in_flag = nil)
+  def parse_mat_in_list(mat_in_items, mat_in_flag)
     mat_in_orders = []
     mat_in_items.split(",").each do |mat_in_item|
       mii = mat_in_item.split("_")
@@ -161,9 +156,9 @@ class MaterialsInOutsController < ApplicationController
           material.storage += mat_in_order.material_num
           material.save
         end
-      end unless mat_in_items.blank?
+      end 
     
-    end
+    end unless mat_in_items.blank?
     mat_in_orders
   end
 end

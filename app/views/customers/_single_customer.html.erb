@@ -13,14 +13,18 @@
       <span>车牌号码：<%= car.num %></span>&nbsp;&nbsp;
       <span>品牌：<%= car.b_name %>——<%= car.m_name %></span>&nbsp;&nbsp;
       <span>购买年份：<%= car.buy_year %></span>
+      <% if permission?(:customers, :edit_car_num) %>
       <span>
         <button type="button" class="compile_btn" 
                 onclick="javascript:edit_car_num_f('<%= car.c_id %>')">编辑</button>
       </span>
+      <% end %>
+      <% if permission?(:customers, :delete_car_num) %>
       <span>
         <button class="compile_btn" type="button"
                 onclick="javascript:if(confirm('您确定要删除当前车牌号码与当前客户的关系吗？')){window.location.href='/customers/<%= car.c_id %>_<%= car.customer_id %>/delete_car_num'}">删除</button>
       </span>
+      <% end %>
       <%= render :partial => "/customers/edit_car_num", :object => car %>
     </li>
     <% end %>
