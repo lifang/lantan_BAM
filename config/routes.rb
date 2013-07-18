@@ -178,7 +178,8 @@ LantanBAM::Application.routes.draw do
 
     resources :set_stores do
       collection do
-        get "edit"       
+        get "edit"
+        get "select_cities"
       end
     end
     resources :station_datas
