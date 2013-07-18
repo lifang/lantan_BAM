@@ -83,6 +83,8 @@ $(document).ready(function(){
    });
 
    $(".cancel_btn").click(function(){
+       $("#edit_password_area").hide();
+       $(".mask").hide();
        return false;
    });
 });
