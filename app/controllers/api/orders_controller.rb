@@ -472,16 +472,32 @@ class Api::OrdersController < ApplicationController
       render :json => {:status => 0}
     else
       #登录成功
+#      current_day = Time.now.strftime("%Y%m%d")
+#      orders = Order.includes(:work_orders).where("orders.store_id = #{staff.store_id}").
+#                     where("orders.status = #{Order::STATUS[:SERVICING]}").
+#                     where("work_orders.current_day = #{current_day}")
+#
+#      #所有的code，材料名称
+#      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+#      mat_out_types = MatOutOrder::TYPES
+      render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id}
+    end
+  end
+
+  def get_construction_order
+    staff = Staff.find_by_id(params[:staff_id])
+    if staff
       current_day = Time.now.strftime("%Y%m%d")
-      orders = Order.includes(:work_orders).where("orders.store_id = #{staff.store_id}").
-                     where("orders.status = #{Order::STATUS[:SERVICING]}").
-                     where("work_orders.current_day = #{current_day}")
+      work_orders = WorkOrder.where("store_id = #{staff.store_id}").
+                     where("status = #{WorkOrder::STAT[:SERVICING]}").
+                     where("current_day = #{current_day}")
 
       #所有的code，材料名称
       materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
       mat_out_types = MatOutOrder::TYPES
-      render :json => {:status => 1, :orders => orders, :store_id => staff.store_id,
-        :materials => materials, :staff_id => staff.id, :mat_out_types => mat_out_types}
+      render :json => {:status => 1, :work_orders => work_orders, :materials => materials, :mat_out_types => mat_out_types}
+    else
+      render :json => {:status => 0}
     end
   end
   

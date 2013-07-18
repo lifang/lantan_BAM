@@ -801,6 +801,13 @@ class MaterialsController < ApplicationController
     @type=2
   end
 
+  def output_barcode
+    puts "**************"
+    puts params.inspect
+    puts "****************"
+  end
+
+
 
   protected
   
