@@ -1268,6 +1268,9 @@ function close_notice(obj){
   function fetchMatIn(obj, store_id, print_flag){
     var saved_mat_mos = "";
     var flag = true;
+    if($("#ruku_tab .mat-out-list").find("tr").length==0){
+      tishi_alert("请选择物料！")
+    }else{
     $("#ruku_tab .mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
@@ -1293,6 +1296,7 @@ function close_notice(obj){
     {
         $("#ruku_tab #mat_in_hidden_value").val(saved_mat_mos);
         $(obj).parents("#create_mat_in_form").submit();
+    }
     }
   }
 

@@ -78,7 +78,7 @@ function checkNums(store_id){
     var notice = "";
     var mat_in_length = $(".mat-out-list").find("tr").length - 1;
     if(mat_in_length==-1){
-        alert('请录入商品！');
+        tishi_alert('请选择物料！');
     }
     var f = true;
     $(".mat-out-list").find("tr").each(function(index){
