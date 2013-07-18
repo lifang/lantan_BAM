@@ -361,7 +361,7 @@ function add_material(store_id){
   if(i>0){
     i = $("#dinghuo_selected_materials").find("tr").last().attr("id").split("_")[2];
   }
-  var li = "<tr id='add_li_"+i+"'><td><input type='text' id='add_barcode_"+i+"'/></td><td><input type='text' id='add_name_"+i+"' /></td><td>"+
+  var li = "<tr id='add_li_"+i+"'><td><input type='text' id='add_name_"+i+"' /></td><td>"+
       $("#select_types").html() +"</td><td><input type='text' id='add_price_"+i+"'/></td><td><input type='text' id='add_count_"+i+"' /></td><td>--</td><td>--</td><td>"+
       "<button onclick=\"return add_new_material(this,'"+i+"','"+store_id+"')\">确定</button></td></tr>" ;
 //    alert(li);
@@ -415,8 +415,10 @@ function submit_material_order(form_id,obj){
                     })
                    
                 }
-               else{
+               else if(data["status"]==2){
                     tishi_alert("出错了，订货失败！")
+                }else if(data["status"]==3){
+                    tishi_alert("物料保存失败！")
                 }
             },
             error:function(err){
@@ -1269,7 +1271,7 @@ function close_notice(obj){
     $("#ruku_tab .mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
-        var num = $(this).find(".mat_item_num").text();
+        var num = $(this).find(".mat_item_num").val();
         // var mat_name = $(this).find(".mat_name").text();
         var each_item = "";
         each_item += mat_code + "_";

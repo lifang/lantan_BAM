@@ -11,7 +11,7 @@ mo_search ||= false
   <div>
     <label>物料类别：</label>
     <select id="search_material_type">
-      <option value>全部</option>
+      <option value="-1">全部</option>
       <% Material::TYPES_NAMES.each do |key,value| %>
         <option value="<%= key %>" <% if @mat_type == key.to_s %>selected<% end %>><%= value %></option>
       <% end %>
