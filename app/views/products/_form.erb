@@ -51,14 +51,15 @@
 <div class="item">
   <label>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @product.prod_point %>" />
 </div>
-<div class="clear"></div>
-<div class="item_title">
-  <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @product.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @product.is_auto_revist  %>"
-         onclick="check_revist()" <% if @product.is_auto_revist %>checked<%end%>/>自动回访</div>
+ <div class="clear"></div>
 <div class="item_blockArea">
+   <div class="item">
+         <label>自动回访：</label><input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @product.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @product.is_auto_revist  %>"
+         onclick="check_revist()" <% if @product.is_auto_revist %>checked<%end%>/>
+       </div>
   <div class="item"><label>回访时间：</label>
     <select  id="time_revist" name="time_revist" <%unless @product.is_auto_revist%>disabled <%end%>>
-      <option value="">--</option>
+      <option value="">请选择</option>
       <% Product::REVIST_TIME.each do |key| %>
         <option value="<%= key %>" id="<%=key%>" <%if @product.auto_time ==key%> selected<%end%> ><%= key %>小时</option>
       <% end %>
@@ -100,7 +101,5 @@
     $("#item_kc").html($('#prod_material option:selected').attr("o_value").split("||")[1]);
 <% end %>
 </script>
-
-
 
 

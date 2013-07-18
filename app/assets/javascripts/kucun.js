@@ -1104,6 +1104,7 @@ function close_notice(obj){
       var mat_code = $.trim($(obj).parents(".search").find("#search_material_code").val());
       var mat_name = $.trim($(obj).parents(".search").find("#search_material_name").val());
       var mat_type = $.trim($(obj).parents(".search").find("#search_material_type").val());
+      var mo_code = $.trim($(obj).parents(".search").find("#material_order_code").val());
       $.ajax({
           url: "/stores/"+store_id+"/materials/search_materials",
           dataType: "script",
@@ -1114,7 +1115,8 @@ function close_notice(obj){
               mat_name : mat_name,
               mat_type : mat_type,
               store_id : store_id,
-              mat_in_flag : mat_in_flag
+              mat_in_flag : mat_in_flag,
+              mo_code : mo_code
           }
       })
   }

@@ -92,7 +92,7 @@
     <h1>入库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
-          <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1}  %>
+          <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1, :mo_search => true}  %>
         <div class="search_result_mat"></div>
         <div class="data_body">
       <%= form_tag  create_materials_in_path , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
