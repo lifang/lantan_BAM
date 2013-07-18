@@ -1,7 +1,7 @@
 #encoding: utf-8
 class StationsController < ApplicationController
   # 现场管理 -- 施工现场
-  before_filter :sign?, :except => [:simple_station]
+  before_filter :sign?
   layout 'station'
 
   #施工现场
@@ -73,8 +73,8 @@ class StationsController < ApplicationController
   end
 
   def simple_station
-    store_id = Store.first.try(:id)
-    @stations = Station.where("store_id=#{store_id} and status !=#{Station::STAT[:DELETED]}")
+    store = Store.find_by_id(params[:store_id]) || not_found
+    @stations = Station.where("store_id=#{store.id} and status !=#{Station::STAT[:DELETED]}")
     @staff_stations = {}
     @stations.each do |station|
       @staff_stations[station.id] = station.staffs.where("current_day=DATE_FORMAT(NOW(),'%Y%m%d')")
