@@ -2,18 +2,18 @@
 class MaterialsLossesController < ApplicationController
   def add
     mat_losses = params[:mat_losses]
-    mat_losses.each do |key,value|
-      material = Material.find(mat_losses[key][:mat_id])
-      unless material.nil?
-        MaterialLoss.create({:name => material.name, :code => material.code,
-                             :types => material.types, :price => material.price.to_i,
-                             :sale_price => material.sale_price.to_i, :loss_num =>  mat_losses[key][:mat_num].to_i,
-                             :specifications => material.unit, :staff_id => params[:staff],
-                             :store_id => params[:hidden_store_id]
-                             })
+    unless mat_losses.nil?
+      mat_losses.each do |key,value|
+        material = Material.find(mat_losses[key][:mat_id])
+        if material
+          MaterialLoss.create({:loss_num =>  mat_losses[key][:mat_num].to_i,
+                               :material_id => material.id,
+                               :staff_id => params[:staff],
+                               :store_id => params[:hidden_store_id]
+                               })
+        end
       end
     end
-    flash[:notice] = "报损成功"
     redirect_to "/stores/#{params[:hidden_store_id]}/materials"
   end
 

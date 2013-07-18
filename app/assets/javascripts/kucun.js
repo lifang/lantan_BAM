@@ -171,12 +171,25 @@ function select_material(obj,name,type,panel_type){
     }
 }
 
-//打印条形码 搜索
+//库存报损选择
+function select_mat_loss_material(obj,name,code,typesname,storage,types,id){
+    alert(name);
+    if($(obj).is(":checked")){
+        var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
+        tr += code + "</td><td>" +name + "</td><td>" + types + "</td><td>" + typesname +"</td><td>"+ "<input type='text'  alt="+code+" name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' />" + "</td><td>" +
+        "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,1); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
+        $("#MaterialsLoss #selected_materials").append(tr);
+    }
+    else{
+        $("#li_"+$(obj).attr("id")).remove();
+    }
+}
+
 function select_print_material(obj,name,type){
     if($(obj).is(":checked")){
         var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
         tr += $(obj).attr("alt") + "</td><td>" +name + "</td><td>" + type + "</td><td>" + $(obj).attr('data-unit') +"</td><td>"+ "<input type='text' class='print_code' alt="+$(obj).attr("alt")+" name='print["+ $(obj).attr('id').split('_')[1] +"][print_code_num]' style='width:60px' />" + "</td><td>" +
-        "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,1); return false;'>移除</a></td>" +"<input type='hidden' name='print["+ $(obj).attr('id').split('_')[1] +"][print_code]' value="+ $(obj).attr('alt') + "></tr>";
+            "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,1); return false;'>移除</a></td>" +"<input type='hidden' name='print["+ $(obj).attr('id').split('_')[1] +"][print_code]' value="+ $(obj).attr('alt') + "></tr>";
         $("#print_code_tab #selected_materials").append(tr);
     }
     else{
@@ -1287,7 +1300,13 @@ function close_notice(obj){
 
 
   function checkMatLossNum(){
+
       var f = true;
+      var mat_loss_length =$("#MaterialsLoss #selected_materials").find("tr").length - 1;
+      if(mat_loss_length==-1){
+          alert('请选择物料！');
+          f = false;
+      }
       $("#MaterialsLoss #selected_materials").find('input.mat_loss_num').each(function(){
          if($(this).val().match(reg1)==null){
             var code = $(this).attr('code');
