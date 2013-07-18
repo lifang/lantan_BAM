@@ -26,9 +26,6 @@
             <%= material_loss.staff.name %>
         </td>
         <td>
-          <% if permission?(:materials, :material_loss_modify) %>
-          <%= link_to_function "修改", "viewMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
-          <% end %>
           <% if permission?(:materials, :material_loss_delete) %>
           <%= link_to_function "删除", "deleteMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
           <% end %>
