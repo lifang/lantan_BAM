@@ -73,7 +73,7 @@ function removeRow(obj, print_flag){
 }
 
 function checkNums(store_id){
-    var form_action_url = $("#create_mat_in_form").attr("action");
+    var form_action_url = "/stores/"+ store_id +"/create_materials_in"
     var saved_mat_mos = "";
     var notice = "";
     var mat_in_length = $(".mat-out-list").find("tr").length - 1;

@@ -71,7 +71,7 @@ class MaterialsController < ApplicationController
         material_orders = get_mo(material, temp_material_orders)
         material_orders.each do |mo, left_num|
           mm ={:mo_code => mo.code, :mo_id => mo.id, :mat_code => material.code,:mat_num => left_num,
-            :mat_name => material.name,:mat_unit => material.unit, :mat_price => material.price}
+            :mat_name => material.name,:mat_unit => material.unit, :mat_price => material.price, :mat_id => material.id}
         @material_ins << mm
         end
       end if materials
