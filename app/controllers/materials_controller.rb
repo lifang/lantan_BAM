@@ -777,7 +777,7 @@ class MaterialsController < ApplicationController
       if material.update_attributes(params[:material])
         @status = 1
         @material = material
-        @current_store = Store.find_by_id(params[:store_id].to_i)
+        #@current_store = Store.find_by_id(params[:store_id].to_i)
       else
         @status = 0
       end
