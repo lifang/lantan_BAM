@@ -1,0 +1,1 @@
+$("#store_city").html("<% if @cities.blank? %><option value='0'>------</option><% else %><%= @cities.each do |c| %><option value='<%= c.id %>'><%= c.name %></option><% end %><% end %>")

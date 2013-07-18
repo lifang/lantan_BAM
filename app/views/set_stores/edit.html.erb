@@ -6,7 +6,7 @@
       <%= form_for(@store, :url => store_set_store_path(@store, @store), :html => {:method => :put, :multipart => true}) do %>
       <div class="item">
         <label>选择省市：</label>
-        <select id="store_province" name="store_province" class="staff">
+        <select id="store_province" name="store_province" onchange="select_city(this.value,<%= @store.id %>)" class="staff">
           <% @province.each do |p| %>
           <option value="<%= p.id %>"<% if @store_city.parent_id == p.id %>selected<% end %>><%= p.name %></option>
           <% end %>
