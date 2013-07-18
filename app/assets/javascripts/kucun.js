@@ -1318,7 +1318,7 @@ function close_notice(obj){
           }
 
           if(parseInt(num)<=0){
-            alert("条形码为'"+ code + "'的报损数量不能为0！");
+            alert("条形码为'"+ code + "'的报损数量不能小于1！");
             f = false;
           }
 
