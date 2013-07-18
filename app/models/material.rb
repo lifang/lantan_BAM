@@ -18,7 +18,7 @@ class Material < ActiveRecord::Base
   has_many :mat_depot_relations
   has_many :depots, :through => :mat_depot_relations
   before_create :generate_barcode
-#  after_create :generate_barcode_img
+  after_create :generate_barcode_img
 
   STATUS = {:NORMAL => 0, :DELETE => 1}
   TYPES_NAMES = {0 => "清洁用品", 1 => "美容用品", 2 => "装饰产品", 3 => "配件产品", 4 => "电子产品",
