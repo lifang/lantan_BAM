@@ -15,13 +15,13 @@
   <tbody>
     <% (@material_losses || []).each do |material_loss| %>
       <tr class="<%= cycle('', 'tbg') %>">
-        <td><%= material_loss.code %></td>
-        <td><%= material_loss.name %></td>
-        <td><%= Material::TYPES_NAMES[material_loss.types.to_i] %></td>
+        <td><%= material_loss.material.code %></td>
+        <td><%= material_loss.material.name %></td>
+        <td><%= Material::TYPES_NAMES[material_loss.material.types.to_i] %></td>
         <td><%= material_loss.loss_num %></td>
-        <td><%= material_loss.specifications %></td>
-        <td><%= material_loss.price %></td>
-        <td><%= material_loss.sale_price %></td>
+        <td><%= material_loss.material.unit %></td>
+        <td><%= material_loss.material.price %></td>
+        <td><%= material_loss.material.sale_price %></td>
         <td>
             <%= material_loss.staff.name %>
         </td>

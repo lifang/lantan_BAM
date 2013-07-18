@@ -5,6 +5,7 @@ require 'barby/outputter/custom_rmagick_outputter'
 require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
+  has_many :material_losses
   has_many :mat_order_items
   has_many :material_orders, :through => :mat_order_items do 
     def not_all_in
