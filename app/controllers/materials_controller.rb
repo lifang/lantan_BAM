@@ -815,9 +815,13 @@ class MaterialsController < ApplicationController
   end
 
   def output_barcode
-    puts "**************"
-    puts params.inspect
-    puts "****************"
+    prints = params[:print]
+    @data = []
+    prints.each do |key, value|
+      material = Material.find_by_id(key)
+      @data << {:num => value[:print_code_num], :code_img => material.code_img}
+    end
+    render :layout => false
   end
 
   protected
