@@ -1256,7 +1256,7 @@ function close_notice(obj){
     $("#ruku_tab .mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
-        var num = $(this).find(".mat_item_num").text();
+        var num = $(this).find(".mat_item_num").val();
         // var mat_name = $(this).find(".mat_name").text();
         var each_item = "";
         each_item += mat_code + "_";

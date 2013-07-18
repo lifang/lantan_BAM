@@ -155,7 +155,7 @@ class MaterialsInOutsController < ApplicationController
       material = Material.find_by_code_and_status_and_store_id mat_code,Material::STATUS[:NORMAL],@store_id
       material_order = MaterialOrder.find_by_code mo_code
 
-      mat_in_orders << {:mo_code => mo_code, :mat_code => mat_code, :num => num,
+      mat_in_orders << {:mo_code => mo_code, :mat_code => mat_code, :num => num, :mat_unit => material.unit,
         :mat_name => material.name}
       if mat_in_flag == "1"
         mat_in_order = MatInOrder.create({:material => material, :material_order => material_order,
