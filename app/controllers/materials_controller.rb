@@ -274,7 +274,7 @@ class MaterialsController < ApplicationController
   def material_order
     status = MaterialOrder.make_order
     MaterialOrder.transaction do
-      begin
+      
         if params[:supplier]
           #向总部订货
           if params[:supplier].to_i == 0
@@ -299,13 +299,17 @@ class MaterialsController < ApplicationController
                   name = item.split("_")[4]
                   type_name = item.split("_")[5]
                   types = Material::TYPES_NAMES.key(type_name)
-                  m = Material.create(:name => name, :code => code, :price => s_price,
-                    :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
+                  begin
+                    m = Material.create(:name => name, :code => code, :price => s_price,
+                      :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
+                  rescue
+                    status = 3
+                  end
                 end
                 mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
                     :price => s_price})   if m
 
-                mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code}
+                mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code} if m
               end
                 
               #发送订货提醒给总店
@@ -313,7 +317,13 @@ class MaterialsController < ApplicationController
 
               material_order.update_attributes(:price => price)
               headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/save_mat_info"
-              result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json})
+              p "------------------------"
+            begin
+              result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'material_order' => material_order.to_json, 'mat_items_code' => mat_code_items.to_json}) if mat_code_items.present?
+            rescue
+              status = 2
+            end
+              p result
             end
             #material = Material.find_by_id_and_store_id
             #向供应商订货
@@ -338,9 +348,7 @@ class MaterialsController < ApplicationController
             end
           end
         end
-      rescue
-        status = 2
-      end
+      
       render :json => {:status => status, :mo_id => material_order.id}
     end
   end
