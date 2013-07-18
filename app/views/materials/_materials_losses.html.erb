@@ -14,6 +14,7 @@
   </thead>
   <tbody>
     <% (@material_losses || []).each do |material_loss| %>
+    <% if material_loss.material %>
       <tr class="<%= cycle('', 'tbg') %>">
         <td><%= material_loss.material.code %></td>
         <td><%= material_loss.material.name %></td>
@@ -31,6 +32,7 @@
           <% end %>
         </td>
       </tr>
+      <% end %>
     <% end %>
   </tbody>
 </table>
