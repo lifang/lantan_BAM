@@ -172,11 +172,10 @@ function select_material(obj,name,type,panel_type){
 }
 
 //库存报损选择
-function select_mat_loss_material(obj,name,code,typesname,storage,types,id){
-    alert(name);
+function select_mat_loss_material(obj,name,code,typesname,storage,id){
     if($(obj).is(":checked")){
         var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
-        tr += code + "</td><td>" +name + "</td><td>" + types + "</td><td>" + typesname +"</td><td>"+ "<input type='text'  alt="+code+" name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' />" + "</td><td>" +
+        tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+code+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
         "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,1); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
         $("#MaterialsLoss #selected_materials").append(tr);
     }
@@ -1319,11 +1318,24 @@ function close_notice(obj){
           f = false;
       }
       $("#MaterialsLoss #selected_materials").find('input.mat_loss_num').each(function(){
-         if($(this).val().match(reg1)==null){
-            var code = $(this).attr('code');
+          var code = $(this).attr('alt');
+          var num = $(this).attr('value');
+          var storage = $(this).next().val();
+          if($(this).val().match(reg1)==null){
             alert("条形码为'"+ code + "'的物料数量不正确！");
             f = false;
-         }
+          }
+
+          if(parseInt(num)<=0){
+            alert("条形码为'"+ code + "'的报损数量不能小于1！");
+            f = false;
+          }
+
+          if(parseInt(num)>parseInt(storage)){
+            alert("条形码为'"+ code + "'的报损数量不能大于库存数量！");
+            f = false;
+          }
+
       })
       return f;
   }
