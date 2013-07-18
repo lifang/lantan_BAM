@@ -33,6 +33,7 @@ class MaterialsController < ApplicationController
       and  types = 3 and store_id = #{@current_store.id}) and store_id = #{@current_store.id};")
     #入库查询状态未完全入库的订货单号
     @material_orders_not_all_in = MaterialOrder.where("m_status not in (?) and status != ? and store_id = ?",[3,4], MaterialOrder::STATUS[:cancel], params[:store_id]).order("created_at desc").select("id, code")
+    @mat_loss_search_materials = []
     respond_to do |format|
       format.html
       format.js
@@ -45,6 +46,9 @@ class MaterialsController < ApplicationController
       materials = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
         @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
       @materials_storages = materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    elsif @tab_name == "material_losses_materials"
+      @mat_loss_search_materials = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
+          @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
     elsif @tab_name == 'material_losses'
       @material_losses = MaterialLoss.where(["store_id = ?",  @current_store.id]).where(@l_sql[0]).where(
           @l_sql[1]).where(@l_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
@@ -799,6 +803,7 @@ class MaterialsController < ApplicationController
 
   def print_code
     @type=2
+    @store_id = params[:store_id]
   end
 
   def output_barcode
@@ -806,8 +811,6 @@ class MaterialsController < ApplicationController
     puts params.inspect
     puts "****************"
   end
-
-
 
   protected
   

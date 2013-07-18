@@ -1122,9 +1122,8 @@ function close_notice(obj){
   }
 
     function MaterialsLoss(){            //添加库存报损
-        $("#MaterialsLoss_form input").val("");
-        $("#material_loss_types").get(0).selectedIndex = 0;
-        $("#material_loss_staff_id").get(0).selectedIndex = 0;
+        $("#mat_loss_search_result").empty();
+        $("#MaterialsLoss #selected_materials").empty();
         popup("#MaterialsLoss");
     }
 
@@ -1281,6 +1280,19 @@ function close_notice(obj){
              var code = $(this).attr('alt');
              alert("条形码为"+ code + "的物料数量不正确！");
              f = false;
+         }
+      })
+      return f;
+  }
+
+
+  function checkMatLossNum(){
+      var f = true;
+      $("#MaterialsLoss #selected_materials").find('input.mat_loss_num').each(function(){
+         if($(this).val().match(reg1)==null){
+            var code = $(this).attr('code');
+            alert("条形码为'"+ code + "'的物料数量不正确！");
+            f = false;
          }
       })
       return f;
