@@ -113,7 +113,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
 
 function submit_search_form(store_id,type,obj){
     var form = $(obj).parent().parent().find("#select_types");
-    var name = $(obj).parent().parent().find("#name").val();
+    var name = $.trim($(obj).parent().parent().find("#name").val());
     var types = $(form).find("#material_types").val();
     if(types==""&&name==""){
         tishi_alert("请选择类型或填写名称！");
