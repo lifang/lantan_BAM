@@ -46,5 +46,5 @@ end
 #group :development do
 #  gem "better_errors"
 #end
-#gem 'rmagick'
-#gem 'barby'
+gem 'rmagick', '~>2.13.1'
+gem 'barby', '~>0.5.1'
