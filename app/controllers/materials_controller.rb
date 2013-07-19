@@ -823,7 +823,7 @@ class MaterialsController < ApplicationController
   def mat_loss_add
     count = 0
     success = 0
-    @status = true
+    @status = false
     mat_losses = params[:mat_losses]
     unless mat_losses.nil?
       mat_losses.each do |key,value|
@@ -852,9 +852,14 @@ class MaterialsController < ApplicationController
 
   #删除库存报损
   def mat_loss_delete
+    @status = false
     material =  MaterialLoss.find(params[:materials_loss_id].to_i)
     if material.destroy
-      redirect_to "/stores/#{params[:store_id]}/materials"
+      @status = true
+      @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    end
+    respond_to do |f|
+      f.js
     end
   end
 

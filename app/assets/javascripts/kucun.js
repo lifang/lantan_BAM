@@ -1230,15 +1230,14 @@ function close_notice(obj){
         if(confirm("确定删除吗？"))
             $.ajax({
                 url: "/stores/" +store_id+ "/materials/mat_loss_delete",
-                dataType:"text",
+                dataType:"script",
                 type:"get",
                 data:{materials_loss_id : materials_loss_id},
                 success:function(data,status){
-                    tishi_alert("删除成功!");
-                    location.reload();
+//                    tishi_alert("删除成功!");
                 },
                 error:function(){
-                    tishi_alert("删除失败!");
+//                    tishi_alert("删除失败!");
                 }
             });
     }
