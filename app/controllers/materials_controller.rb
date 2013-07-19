@@ -13,7 +13,7 @@ class MaterialsController < ApplicationController
 
   #库存列表
   def index
-    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id]
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @materials_storages = Material.includes(:mat_depot_relations).where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
@@ -50,7 +50,7 @@ class MaterialsController < ApplicationController
       @mat_loss_search_materials = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
           @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
     elsif @tab_name == 'material_losses'
-      @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id],@l_sql
+      @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id], @l_sql
     elsif  @tab_name == 'in_records'
       @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
     elsif @tab_name == 'out_records'
@@ -138,11 +138,9 @@ class MaterialsController < ApplicationController
   #库存报损分页
   def page_materials_losses
     @current_store = Store.find_by_id params[:store_id]
-    @material_losses = MaterialLoss.where("store_id =?", @current_store.id).where(@l_sql[0]).where(@l_sql[1]).where(
-        @l_sql[2]).paginate(:page => params[:page], :per_page => Constant::PER_PAGE)
-
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id], @l_sql
     respond_with(@material_losses) do |format|
-      #format.html
+      format.html
       format.js
     end
   end
@@ -819,6 +817,50 @@ class MaterialsController < ApplicationController
       @data << {:num => value[:print_code_num], :code_img => material.code_img}
     end
     render :layout => false
+  end
+
+  #添加库存报损
+  def mat_loss_add
+    count = 0
+    success = 0
+    @status = false
+    mat_losses = params[:mat_losses]
+    unless mat_losses.nil?
+      mat_losses.each do |key,value|
+        count +=1
+        material = Material.find(mat_losses[key][:mat_id])
+        if material
+          if MaterialLoss.create({:loss_num =>  mat_losses[key][:mat_num].to_i,
+                               :material_id => material.id,
+                               :staff_id => params[:staff],
+                               :store_id => params[:hidden_store_id]
+                              })
+            success += 1
+          end
+        end
+      end
+    end
+    if count == success
+      @status = true
+    end
+
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    respond_to do |f|
+      f.js
+    end
+  end
+
+  #删除库存报损
+  def mat_loss_delete
+    @status = false
+    material =  MaterialLoss.find(params[:materials_loss_id].to_i)
+    if material.destroy
+      @status = true
+      @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    end
+    respond_to do |f|
+      f.js
+    end
   end
 
   protected

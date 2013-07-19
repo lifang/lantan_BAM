@@ -1229,16 +1229,15 @@ function close_notice(obj){
     {
         if(confirm("确定删除吗？"))
             $.ajax({
-                url: "/stores/" +store_id+ "/materials_losses/delete",
-                dataType:"text",
+                url: "/stores/" +store_id+ "/materials/mat_loss_delete",
+                dataType:"script",
                 type:"get",
                 data:{materials_loss_id : materials_loss_id},
                 success:function(data,status){
-                    tishi_alert("删除成功!");
-                    location.reload();
+//                    tishi_alert("删除成功!");
                 },
                 error:function(){
-                    tishi_alert("删除失败!");
+//                    tishi_alert("删除失败!");
                 }
             });
     }
@@ -1313,7 +1312,7 @@ function close_notice(obj){
   }
 
 
-  function checkMatLossNum(){
+  function checkMatLossNum(obj){
       var f = true;
       var mat_loss_length =$("#MaterialsLoss #selected_materials").find("tr").length - 1;
       if(mat_loss_length==-1){
@@ -1340,5 +1339,8 @@ function close_notice(obj){
           }
 
       })
+      if(f){
+          $(obj).attr('disabled',true)
+      }
       return f;
 }
