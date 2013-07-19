@@ -1229,7 +1229,7 @@ function close_notice(obj){
     {
         if(confirm("确定删除吗？"))
             $.ajax({
-                url: "/stores/" +store_id+ "/materials_losses/delete",
+                url: "/stores/" +store_id+ "/materials/mat_loss_delete",
                 dataType:"text",
                 type:"get",
                 data:{materials_loss_id : materials_loss_id},

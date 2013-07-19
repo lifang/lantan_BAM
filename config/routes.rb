@@ -6,12 +6,6 @@ LantanBAM::Application.routes.draw do
       post "upload_image"
     end
   end
-  resources :materials_losses do
-    collection do
-      post 'add'
-      get 'delete','view'
-    end
-  end
   resources :work_orders do
     collection do
       get "work_orders_status"
@@ -93,8 +87,10 @@ LantanBAM::Application.routes.draw do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
-          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code"
-        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode"
+          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
+          "mat_loss_delete"
+        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
+             "mat_loss_add"
       end
       member do
         get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"

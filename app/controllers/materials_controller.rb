@@ -819,6 +819,45 @@ class MaterialsController < ApplicationController
     render :layout => false
   end
 
+  #添加库存报损
+  def mat_loss_add
+    count = 0
+    success = 0
+    @status = true
+    mat_losses = params[:mat_losses]
+    unless mat_losses.nil?
+      mat_losses.each do |key,value|
+        count +=1
+        material = Material.find(mat_losses[key][:mat_id])
+        if material
+          if MaterialLoss.create({:loss_num =>  mat_losses[key][:mat_num].to_i,
+                               :material_id => material.id,
+                               :staff_id => params[:staff],
+                               :store_id => params[:hidden_store_id]
+                              })
+            success += 1
+          end
+        end
+      end
+    end
+    if count == success
+      @status = true
+    end
+
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    respond_to do |f|
+      f.js
+    end
+  end
+
+  #删除库存报损
+  def mat_loss_delete
+    material =  MaterialLoss.find(params[:materials_loss_id].to_i)
+    if material.destroy
+      redirect_to "/stores/#{params[:store_id]}/materials"
+    end
+  end
+
   protected
   
   def make_search_sql

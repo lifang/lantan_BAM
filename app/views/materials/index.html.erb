@@ -216,7 +216,7 @@
         <div id="mat_loss_search_result" style="height: auto;">
           <%= render :partial => '/materials/mat_loss_search_result' %>
         </div>
-        <%= form_tag add_materials_losses_url(params[:store_id]), :id => "MaterialsLoss_form" ,:method => :post, :html => {:remote => true, 'data-type' => 'script'} do  %>
+        <%= form_tag "/stores/#{@current_store.id}/materials/mat_loss_add", :id => "MaterialsLoss_form" ,:method => :post, "data-type" => "script", :remote => true do  %>
             <table  width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
               <thead>
               <tr class="hbg">
@@ -230,7 +230,7 @@
               </thead>
               <tbody id="selected_materials"></tbody>
             </table>
-            <div class="search"><%= hidden_field_tag "selected_items" %>
+            <div class="search">
               <div><%= label_tag "staff","报损人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
             </div>
             
