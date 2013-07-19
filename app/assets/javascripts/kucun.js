@@ -1273,7 +1273,7 @@ function close_notice(obj){
     $("#ruku_tab .mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
-        var num = $(this).find(".mat_item_num").val();
+        var num = $.trim($(this).find(".mat_item_num").val());
         if(num.match(reg1)==null){
            flag = false;
            tishi_alert("请输入有效数字！")
@@ -1299,14 +1299,14 @@ function close_notice(obj){
     }
   }
 
-  function checkPrintNum(){
+  function checkPrintNum(obj){
       var f = true;
       if($("#print_code_tab #selected_materials").find('tr').length==0){
           f = false;
           tishi_alert("请选择物料！")
       }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
-         if($(this).val().match(reg1)==null){
+         if($.trim($(this).val().match(reg1))==null){
              var code = $(this).attr('alt');
              alert("条形码为"+ code + "的物料数量不正确！");
              f = false;
