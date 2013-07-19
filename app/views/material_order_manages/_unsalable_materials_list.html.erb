@@ -1,6 +1,3 @@
-<div class="message">
-  <%= @start_date %>&nbsp;至&nbsp;<%= @end_date %>共有<span class="red" id="unsalable_materials_span"><%=  (@all_unsalable_materials || []).length %></span>种物料滞销
-</div>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_tab_table">
   <thead>
   <tr class="hbg">
@@ -14,17 +11,23 @@
   </tr>
   </thead>
   <tbody>
-  <% (@unsalable_materials || []).each do |material| %>
-      <tr class="<%= cycle('', 'tbg') %>" id="showmaterial<%= material.id %>tr">
-        <td <% if !material.is_ignore && material.storage.to_i<=material.material_low.to_i %>class="data_table_error"<% end %>>
-          <%= material.code %>
-        </td>
-        <td><%= material.name %></td>
-        <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
-        <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= material.storage.to_i %></span></td>
-        <td><%= material.unit %></td>
-        <td><%= material.price %></td>
-        <td><%= material.sale_price %></td>
+  <% if @all_unsalable_materials.length != 0 %>
+      <% (@unsalable_materials || []).each do |material| %>
+          <tr class="<%= cycle('', 'tbg') %>" id="showmaterial<%= material.id %>tr">
+            <td <% if !material.is_ignore && material.storage.to_i<=material.material_low.to_i %>class="data_table_error"<% end %>>
+              <%= material.code %>
+            </td>
+            <td><%= material.name %></td>
+            <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
+            <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= material.storage.to_i %></span></td>
+            <td><%= material.unit %></td>
+            <td><%= material.price %></td>
+            <td><%= material.sale_price %></td>
+          </tr>
+      <% end %>
+  <% else %>
+      <tr>
+        <td colspan="8" align="center">暂无查询结果</td>
       </tr>
   <% end %>
   </tbody>

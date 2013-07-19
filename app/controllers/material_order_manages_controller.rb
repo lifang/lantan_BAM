@@ -1,5 +1,6 @@
 #encoding:utf-8
 require 'date'
+require 'will_paginate/array'
 class MaterialOrderManagesController < ApplicationController
   before_filter :sign?
   layout "complaint"
@@ -31,18 +32,33 @@ class MaterialOrderManagesController < ApplicationController
   #入/出库查询
   def search_mat_in_or_out
     @mat_in_or_out = mat_in_or_out = params[:mat_in_or_out]
+    start_date = params[:start_date]
+    end_date = params[:end_date]
+    @status = 0
+    if(start_date.empty? || end_date.empty?)
+      @status = 1
+    else
+      if Date.parse(start_date)>Date.parse(end_date)
+        @status = 2
+      end
+    end
 
-    if mat_in_or_out == "ruku"
-      @mat_in_orders = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
-    elsif mat_in_or_out == "chuku"
-      @mat_out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
+    if @status == 0
+      if mat_in_or_out == "ruku"
+        @mat_in_orders = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
+      elsif mat_in_or_out == "chuku"
+        @mat_out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
+      end
+    else
+       @mat_in_orders = []
+       @mat_out_records = []
     end
   end
 
   #滞销物料显示
   def unsalable_materials
-    @end_date = date_now = Time.now.to_s[0..9]
-    @start_date = before_thirty_day =  (Time.now - 30.day).to_s[0..9]
+    @end_date = Time.now.to_s[0..9]
+    @start_date  =  (Time.now - 30.day).to_s[0..9]
     @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql
     #@all_unsalable_materials  = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
     #  and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]};")
@@ -54,7 +70,6 @@ class MaterialOrderManagesController < ApplicationController
       start_date = params[:start_date]
       end_date = params[:end_date]
       @status = false
-      p Date.parse(start_date)<=Date.parse(end_date)
       if Date.parse(start_date)<=Date.parse(end_date)
         @status = true
       end
