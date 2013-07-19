@@ -478,5 +478,11 @@ class Api::OrdersController < ApplicationController
       render :json => {:status => 0}
     end
   end
+
+  # 点击产品预览后，输入car num 查询api
+  def search_by_car_num2
+    customer_info = CarNum.get_customer_info_by_carnum(params[:store_id],params[:car_num])
+    render :json => {:customer => customer_info, :status => customer_info.nil? ? 0 : 1}
+  end
   
 end

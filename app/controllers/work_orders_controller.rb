@@ -1,7 +1,9 @@
 #encoding: utf-8
 class WorkOrdersController < ApplicationController
-    def work_orders_status
-      store = Store.first #查询所有门店记录
+  def work_orders_status
+    status, staff = login
+    if status == 0 && staff
+      store = Store.find_by_id(staff.store_id) #查询所有门店记录
       date = Time.now.to_s  #获取当前日期时间
       now_date = (date.slice(0,4) + date.slice(5,2) + date.slice(8,2)).to_i #截取当前年月日转换成int型的数据
 
@@ -32,7 +34,7 @@ class WorkOrdersController < ApplicationController
             station[:waiting_car_num] = []
 
             if cons_staffs == nil
-                station[:cons_staffs] = nil
+              station[:cons_staffs] = nil
             else
               cons_staffs.each do |cons_staff|
                 if cons_staff.station_id == station.id
@@ -42,45 +44,45 @@ class WorkOrdersController < ApplicationController
             end
             # 如果该工位下员工为空时，将station[:cons_staffs]设为空值
             if station[:cons_staffs].length == 0
-                station[:cons_staffs] = nil
+              station[:cons_staffs] = nil
             end
 
-              #加入订单信息
+            #加入订单信息
             if work_orders != nil
               work_orders.each do |work_order|
                 if work_order.station_id == station.id
-                 # STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成"}
-                 # STAT = {:WAIT=>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE=>3}
-                 #等待付款车牌号
-                 if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY]
-                   wait_pay_car_nums << work_order.car_num
-                 end
+                  # STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成"}
+                  # STAT = {:WAIT=>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE=>3}
+                  #等待付款车牌号
+                  if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY] || (work_order.work_order_status == WorkOrder::STAT[:COMPLETE] && (Time.now - work_order.updated_at)/60 <= 5)
+                    wait_pay_car_nums << work_order.car_num
+                  end
 
-                 #正在施工的车牌号及剩余时间
-                 if work_order.work_order_status == WorkOrder::STAT[:SERVICING]
-                   station[:dealing_car_num] = work_order.car_num
-                   station[:dealing_time_left] = work_order.time_left
-                   if station[:dealing_time_left].to_i  < 0
+                  #正在施工的车牌号及剩余时间
+                  if work_order.work_order_status == WorkOrder::STAT[:SERVICING]
+                    station[:dealing_car_num] = work_order.car_num
+                    station[:dealing_time_left] = work_order.time_left
+                    if station[:dealing_time_left].to_i  < 0
                       station[:dealing_time_left] = 0
-                   end
-                 end
+                    end
+                  end
 
-                 #等待施工的车牌号
-                 if work_order.work_order_status == WorkOrder::STAT[:WAIT]
-                   station[:waiting_car_num] << work_order.car_num
-                 end
-               end# if work_order.station_id == station.id 结束标记
-             end# work_orders.each do |work_order| 结束标记
-             #如果没有正在施工的车辆，则正在施工的车牌、剩余时间为空
-             station[:dealing_car_num] = nil unless station[:dealing_car_num]
-             station[:dealing_time_left] = nil unless station[:dealing_time_left]
-             station[:waiting_car_num] = nil if station[:waiting_car_num].length == 0
+                  #等待施工的车牌号
+                  if work_order.work_order_status == WorkOrder::STAT[:WAIT]
+                    station[:waiting_car_num] << work_order.car_num
+                  end
+                end# if work_order.station_id == station.id 结束标记
+              end# work_orders.each do |work_order| 结束标记
+              #如果没有正在施工的车辆，则正在施工的车牌、剩余时间为空
+              station[:dealing_car_num] = nil unless station[:dealing_car_num]
+              station[:dealing_time_left] = nil unless station[:dealing_time_left]
+              station[:waiting_car_num] = nil if station[:waiting_car_num].length == 0
 
-           else  #工位正常，但没有工单时：等待付款、正在施工的车牌、剩余时间、等待施工的车牌均为空
-               station[:dealing_time_left] = nil
-               station[:dealing_car_num] = nil
-               station[:waiting_car_num] = nil
-           end# if work_orders.length != 0 结束标记
+            else  #工位正常，但没有工单时：等待付款、正在施工的车牌、剩余时间、等待施工的车牌均为空
+              station[:dealing_time_left] = nil
+              station[:dealing_car_num] = nil
+              station[:waiting_car_num] = nil
+            end# if work_orders.length != 0 结束标记
           end # if station.status == Station::STAT[:NORMAL] 结束标记
         end # stations.each do |station| 结束标记
       end #if stations.length != 0 结束标记
@@ -96,7 +98,24 @@ class WorkOrdersController < ApplicationController
       else
         current_info[:station_infos] = nil
       end
+      current_info[:no_station_wos] = WorkOrder.where("current_day =? and store_id = ? and status != ? and station_id is null", now_date, store.id, WorkOrder::STAT[:CANCELED])
       render :json => current_info
-    end# work_orders_status 方法结束标记
+    end
+  end# work_orders_status 方法结束标记
+
+  protected
+
+  def login
+    status = 0
+    staff = Staff.find_by_username(params[:user_name])
+    if  staff.nil? or !staff.has_password?(params[:user_password])
+#      flash.now[:notice] = "用户名或密码错误"
+      status = 1
+    elsif !Staff::VALID_STATUS.include?(staff.status) or staff.store.status != Store::STATUS[:OPENED]
+#      flash.now[:notice] = "用户不存在"
+      status = 2
+    end
+    [status, staff]
+  end
 
 end
