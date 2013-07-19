@@ -368,9 +368,16 @@ class Api::OrdersController < ApplicationController
   #工位完成施工，技师会用手机触发，给工位进行排单
   def work_order_finished
     work_order = WorkOrder.find_by_id(params[:work_order_id])
-    work_order.arrange_station if work_order
-
-    render :json => {:status => "sort_station_success"}
+    if work_order
+      message = work_order.arrange_station
+      if message == "no_next_work_order"
+        render :json => {:status => 1, :message => "没有客户继续下单!"}
+      else
+        render :json => {:status => 1, :message => "排单成功!"}
+      end
+    else
+      render :json => {:status => 0, :message => "没有找到这个订单!"}
+    end
   end
 
   #盘点实数
@@ -455,8 +462,9 @@ class Api::OrdersController < ApplicationController
     staff = Staff.find_by_id(params[:staff_id])
     if staff
       current_day = Time.now.strftime("%Y%m%d")
-      work_orders = WorkOrder.joins(:order => :car_num).where("work_orders.store_id = #{staff.store_id}").
+      work_orders = WorkOrder.joins([:order => :car_num], :station).where("work_orders.store_id = #{staff.store_id}").
                      where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
+                     where("stations.status = #{Station::STAT[:NORMAL]}").
                      where("work_orders.current_day = #{current_day}").select("work_orders.*,car_nums.num as car_num")
       result = []
       work_orders.each do |work_order|
