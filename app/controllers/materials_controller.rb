@@ -13,7 +13,7 @@ class MaterialsController < ApplicationController
 
   #库存列表
   def index
-    @material_losses = MaterialLoss.where("store_id = ?",@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id]
     @materials_storages = Material.includes(:mat_depot_relations).where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
@@ -50,8 +50,7 @@ class MaterialsController < ApplicationController
       @mat_loss_search_materials = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
           @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
     elsif @tab_name == 'material_losses'
-      @material_losses = MaterialLoss.where(["store_id = ?",  @current_store.id]).where(@l_sql[0]).where(
-          @l_sql[1]).where(@l_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+      @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id],@l_sql
     elsif  @tab_name == 'in_records'
       @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
     elsif @tab_name == 'out_records'
@@ -828,14 +827,14 @@ class MaterialsController < ApplicationController
     mat_code_sql = params[:mat_code].blank? ? "1 = 1" : ["materials.code = ?", params[:mat_code]]
     mat_name_sql = params[:mat_name].blank? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name]}%"]
     mat_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["materials.types = ?", params[:mat_type].to_i]
-    mat_loss_code_sql = params[:mat_code].blank? ? "1 = 1" : ["material_losses.code = ?", params[:mat_code]]
-    mat_loss_name_sql = params[:mat_name].blank? ? "1 = 1" : ["material_losses.name like ?", "%#{params[:mat_name]}%"]
-    mat_loss_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["material_losses.types = ?", params[:mat_type].to_i]
+    mat_loss_code_sql = params[:mat_code].blank? ? "1 = 1" : ["code = ?", params[:mat_code]]
+    mat_loss_name_sql = params[:mat_name].blank? ? "1 = 1" : ["m.name like ?", "%#{params[:mat_name]}%"]
+    mat_loss_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["types = ?", params[:mat_type].to_i]
     mo_code_sql = params[:mo_code].blank? ? "1=1" : ["material_orders.id = ?", params[:mo_code]]
     @s_sql = []
     @s_sql << mat_code_sql << mat_name_sql << mat_type_sql << mo_code_sql
     @l_sql = []
-    @l_sql << mat_loss_code_sql << mat_loss_name_sql << mat_loss_type_sql
+    @l_sql << mat_loss_type_sql << mat_loss_name_sql << mat_loss_code_sql
     @mat_code = params[:mat_code].blank? ? nil : params[:mat_code]
     @mat_name = params[:mat_name].blank? ? nil : params[:mat_name]
     @mat_type = params[:mat_type].blank? ? nil : params[:mat_type]
