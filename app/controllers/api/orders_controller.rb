@@ -389,7 +389,8 @@ class Api::OrdersController < ApplicationController
     materials.each do |mat|
       material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
       if material
-        material.check_num = mat['check_num'].to_i
+        material.storage = mat['storage'].to_i
+        material.check_num = nil
         mat_arr << material
       else
         mat_arr << nil
@@ -398,7 +399,7 @@ class Api::OrdersController < ApplicationController
     if mat_arr.include?(nil)
       render :json => {:status => "error", :message => "没有材料"}
     else
-      if Material.import mat_arr, :on_duplicate_key_update => [:check_num]
+      if Material.import mat_arr, :on_duplicate_key_update => [:check_num, :storage]
         render :json => {:status => "success"}
       else
         render :json => {:status => "error", :message => "更新盘点实数失败"}
