@@ -360,7 +360,7 @@ function add_material(store_id){
   if(i>0){
     i = $("#dinghuo_selected_materials").find("tr").last().attr("id").split("_")[2];
   }
-  var li = "<tr id='add_li_"+i+"'><td><input type='text' id='add_name_"+i+"' /></td><td>"+
+  var li = "<tr id='add_li_"+i+"'><td></td><td><input type='text' id='add_name_"+i+"' /></td><td>"+
       $("#select_types").html() +"</td><td><input type='text' id='add_price_"+i+"'/></td><td><input type='text' id='add_count_"+i+"' /></td><td>--</td><td>--</td><td>"+
       "<button onclick=\"return add_new_material(this,'"+i+"','"+store_id+"')\">确定</button></td></tr>" ;
 //    alert(li);

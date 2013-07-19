@@ -364,10 +364,14 @@ class Order < ActiveRecord::Base
         info[:start] = ""
         info[:end] = ""
         info[:station_id] = time_arr[0] || ""
-        station_flag = time_arr[1]
-        if station_flag
+
+        case time_arr[1]
+        when 0
           status = 2
+        when 2
+          status = 3
         end
+
       else
         info[:start] = ""
         info[:end] = ""
@@ -564,7 +568,7 @@ class Order < ActiveRecord::Base
       order = Order.create({
           :code => MaterialOrder.material_order_code(store_id.to_i),
           :car_num_id => car_num_id,
-          :status => Order::STATUS[:INNORMAL],
+          :status => Order::STATUS[:NORMAL],
           :price => price,
           :is_billing => false,
           :front_staff_id => user_id,
