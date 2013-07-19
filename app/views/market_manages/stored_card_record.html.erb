@@ -27,7 +27,7 @@
                     <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
                         :remote => "true", "data-type" => "script", :class => "other_a" %></td>
                     <td>
-                      <% if @product_hash[order.id].length != 0 %>
+                      <% if !@product_hash[order.id].nil? && @product_hash[order.id].length != 0 %>
                         <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                           <tr class="fws">
                             <td>服务名称</td>
