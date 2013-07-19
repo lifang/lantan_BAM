@@ -1301,6 +1301,10 @@ function close_notice(obj){
 
   function checkPrintNum(){
       var f = true;
+      if($("#print_code_tab #selected_materials").find('tr').length==0){
+          f = false;
+          tishi_alert("请选择物料！")
+      }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
          if($(this).val().match(reg1)==null){
              var code = $(this).attr('alt');
