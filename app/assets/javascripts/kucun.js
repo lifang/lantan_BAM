@@ -1313,7 +1313,7 @@ function close_notice(obj){
   }
 
 
-  function checkMatLossNum(){
+  function checkMatLossNum(obj){
       var f = true;
       var mat_loss_length =$("#MaterialsLoss #selected_materials").find("tr").length - 1;
       if(mat_loss_length==-1){
@@ -1340,5 +1340,8 @@ function close_notice(obj){
           }
 
       })
+      if(f){
+          $(obj).attr('disabled',true)
+      }
       return f;
 }
