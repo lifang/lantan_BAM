@@ -1,5 +1,9 @@
 <div class="message">
+<% if @all_unsalable_materials.length != 0 %>
   <%= @start_date %>&nbsp;至&nbsp;<%= @end_date %>共有<span class="red" id="unsalable_materials_span"><%=  (@all_unsalable_materials || []).length %></span>种物料滞销
+<% else %>
+  查询结果为空！
+<% end %>
 </div>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_tab_table">
   <thead>
