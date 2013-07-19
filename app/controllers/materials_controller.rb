@@ -59,7 +59,7 @@ class MaterialsController < ApplicationController
     end
     if params[:mat_in_flag]=="1"
        materials = Material.joins(:material_orders).where(["materials.status = ? and materials.store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
-        @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).where(@s_sql[3])
+        @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).where(@s_sql[3]).uniq
       @material_ins = []
       materials.each do |material|
         if params[:mo_code].present?
