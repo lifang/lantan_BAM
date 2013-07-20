@@ -15,7 +15,7 @@ class CarNum < ActiveRecord::Base
       left join car_brands cb on cb.id=cm.car_brand_id "
     customer = CustomerNumRelation.find_by_sql sql
     customer = customer[0]
-    customer.birth = customer.birth.strftime("%Y-%m-%d")  if customer.birth
+    customer.birth = customer.birth.strftime("%Y-%m-%d")  if customer && customer.birth
     customer
   end
   
