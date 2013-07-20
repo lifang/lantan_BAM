@@ -29,17 +29,16 @@ function search_unsalable_materials(store_id,obj) {
     var end_date = $.trim($(obj).parents(".search").find("#end_date").val());
     var mat_types = $.trim($(obj).parents(".search").find("#mat_types").val());
     var sale_num = $.trim($(obj).parents(".search").find("#sale_num").val());
-
     $.ajax({
-        url: "/stores/"+store_id+"/material_order_manages/search_unsalable_materials",
-        dataType: "script",
-        type: "get",
-        data: {
-            start_date : start_date,
-            end_date : end_date,
-            mat_types : mat_types,
-            store_id : store_id,
-            sale_num : sale_num
-        }
+            url: "/stores/"+store_id+"/material_order_manages/search_unsalable_materials",
+            dataType: "script",
+            type: "get",
+            data: {
+                start_date : start_date,
+                end_date : end_date,
+                mat_types : mat_types,
+                store_id : store_id,
+                sale_num : sale_num
+            }
     });
 }

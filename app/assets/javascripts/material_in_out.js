@@ -84,7 +84,7 @@ function checkNums(store_id){
     $(".mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
-        var num = $(this).find(".mat_item_num").val();
+        var num = $.trim($(this).find(".mat_item_num").val());
 //        var input_num = $(this).find("#material_num").val();
         if(num.match(reg1)==null){
           tishi_alert("请输入正确的数字！")

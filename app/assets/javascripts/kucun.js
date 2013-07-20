@@ -113,7 +113,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
 
 function submit_search_form(store_id,type,obj){
     var form = $(obj).parent().parent().find("#select_types");
-    var name = $(obj).parent().parent().find("#name").val();
+    var name = $.trim($(obj).parent().parent().find("#name").val());
     var types = $(form).find("#material_types").val();
     if(types==""&&name==""){
         tishi_alert("请选择类型或填写名称！");
@@ -360,7 +360,7 @@ function add_material(store_id){
   if(i>0){
     i = $("#dinghuo_selected_materials").find("tr").last().attr("id").split("_")[2];
   }
-  var li = "<tr id='add_li_"+i+"'><td><input type='text' id='add_name_"+i+"' /></td><td>"+
+  var li = "<tr id='add_li_"+i+"'><td></td><td><input type='text' id='add_name_"+i+"' /></td><td>"+
       $("#select_types").html() +"</td><td><input type='text' id='add_price_"+i+"'/></td><td><input type='text' id='add_count_"+i+"' /></td><td>--</td><td>--</td><td>"+
       "<button onclick=\"return add_new_material(this,'"+i+"','"+store_id+"')\">确定</button></td></tr>" ;
 //    alert(li);
@@ -1229,16 +1229,15 @@ function close_notice(obj){
     {
         if(confirm("确定删除吗？"))
             $.ajax({
-                url: "/stores/" +store_id+ "/materials_losses/delete",
-                dataType:"text",
+                url: "/stores/" +store_id+ "/materials/mat_loss_delete",
+                dataType:"script",
                 type:"get",
                 data:{materials_loss_id : materials_loss_id},
                 success:function(data,status){
-                    tishi_alert("删除成功!");
-                    location.reload();
+//                    tishi_alert("删除成功!");
                 },
                 error:function(){
-                    tishi_alert("删除失败!");
+//                    tishi_alert("删除失败!");
                 }
             });
     }
@@ -1274,7 +1273,7 @@ function close_notice(obj){
     $("#ruku_tab .mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
-        var num = $(this).find(".mat_item_num").val();
+        var num = $.trim($(this).find(".mat_item_num").val());
         if(num.match(reg1)==null){
            flag = false;
            tishi_alert("请输入有效数字！")
@@ -1300,10 +1299,14 @@ function close_notice(obj){
     }
   }
 
-  function checkPrintNum(){
+  function checkPrintNum(obj){
       var f = true;
+      if($("#print_code_tab #selected_materials").find('tr').length==0){
+          f = false;
+          tishi_alert("请选择物料！")
+      }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
-         if($(this).val().match(reg1)==null){
+         if($.trim($(this).val().match(reg1))==null){
              var code = $(this).attr('alt');
              alert("条形码为"+ code + "的物料数量不正确！");
              f = false;
@@ -1313,7 +1316,7 @@ function close_notice(obj){
   }
 
 
-  function checkMatLossNum(){
+  function checkMatLossNum(obj){
       var f = true;
       var mat_loss_length =$("#MaterialsLoss #selected_materials").find("tr").length - 1;
       if(mat_loss_length==-1){
@@ -1340,5 +1343,8 @@ function close_notice(obj){
           }
 
       })
+      if(f){
+          $(obj).attr('disabled',true)
+      }
       return f;
 }

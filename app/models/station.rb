@@ -199,15 +199,27 @@ class Station < ActiveRecord::Base
 
   def self.arrange_time store_id, prod_ids, order = nil, res_time = nil
     #查询所有满足条件的工位
-    stations = Station.includes(:wk_or_times, :station_service_relations).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
+    stations = Station.includes(:station_service_relations).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
     station_arr = []
+    station_prod_ids = []
     prod_ids = prod_ids.collect{|p| p.to_i }
     (stations || []).each do |station|
       if station.station_service_relations
         prods = station.station_service_relations.collect{|r| r.product_id }
+        station_prod_ids << prods
         station_arr << station if (prods & prod_ids).sort == prod_ids.sort
       end
     end
+    if station_arr.present?
+      station_flag = 1 #有对应工位对应
+    else
+      if((station_prod_ids.flatten & prod_ids).sort == prod_ids.sort) && (!station_prod_ids.include?(prod_ids))
+        station_flag = 2 #一个订单要使用多个工位
+      else
+        station_flag = 0 #没工位
+      end
+    end
+
 #    times_arr = []
 #    time_now = Time.now.strftime("%Y%m%d%H%M")
 #    times_arr << time_now
@@ -252,6 +264,6 @@ class Station < ActiveRecord::Base
 #    time_arr = [(time + Constant::W_MIN.minutes).strftime("%Y-%m-%d %H:%M"),
 #      (time + (Constant::W_MIN + Constant::STATION_MIN).minutes).strftime("%Y-%m-%d %H:%M"),station_id]
     #puts time_arr,"-----------------"
-    [station_id, station_arr.empty?, has_start_end_time]
+    [station_id, station_flag, has_start_end_time]
   end
 end

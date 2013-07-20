@@ -121,7 +121,7 @@ class MaterialsInOutsController < ApplicationController
           @code_num[data[0]] = data[1]
         end
         @material_ins = []
-        @material_outs = Material.where(:code => @code_num.keys)
+        @material_outs = Material.where(:code => @code_num.keys, :store_id => @store_id)
       end
     end
   end

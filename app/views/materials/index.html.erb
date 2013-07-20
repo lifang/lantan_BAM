@@ -16,7 +16,7 @@
 <div class="data_box" id="material_data_box">
   <div class="data_menu">
     <% if permission?(:materials, :add) %>
-    <%= link_to "物料数据维护", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
+    <%= link_to "添加物料", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
     <% end %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
@@ -216,7 +216,7 @@
         <div id="mat_loss_search_result" style="height: auto;">
           <%= render :partial => '/materials/mat_loss_search_result' %>
         </div>
-        <%= form_tag add_materials_losses_url(params[:store_id]), :id => "MaterialsLoss_form" ,:method => :post, :html => {:remote => true, 'data-type' => 'script'} do  %>
+        <%= form_tag "/stores/#{@current_store.id}/materials/mat_loss_add", :id => "MaterialsLoss_form" ,:method => :post, "data-type" => "script", :remote => true do  %>
             <table  width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
               <thead>
               <tr class="hbg">
@@ -230,14 +230,15 @@
               </thead>
               <tbody id="selected_materials"></tbody>
             </table>
-            <div class="search"><%= hidden_field_tag "selected_items" %>
+            <div class="search">
               <div><%= label_tag "staff","报损人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
             </div>
-            </div>
+            
             <%= hidden_field_tag "hidden_store_id", cookies[:user_id] %>
             <div class="btn_box"><button id="add_MaterialsLoss_btn" onclick="return checkMatLossNum(this);" class="confirm_btn">确定</button></div>
             <div class="clear"></div>
         <% end %>
+            </div>
     </div>
   </div>
 </div>
@@ -246,15 +247,15 @@
 </div>
 
 <script type="text/javascript">
-    $(document).ready(function(){
-        var obj = $("#add_MaterialsLoss_btn");
-        $(obj).attr('disabled',false);
-    })
-
-    $("#add_MaterialsLoss_btn").click(function(){
-        var obj = $("#add_MaterialsLoss_btn");
-        $(obj).attr('disabled',true);
-    })
+//    $(document).ready(function(){
+//        var obj = $("#add_MaterialsLoss_btn");
+//        $(obj).attr('disabled',false);
+//    })
+//
+//    $("#add_MaterialsLoss_btn").click(function(){
+//        var obj = $("#add_MaterialsLoss_btn");
+//        $(obj).attr('disabled',true);
+//    })
 
   $(function() {
 <% if @status %>

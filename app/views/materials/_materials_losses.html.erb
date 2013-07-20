@@ -13,22 +13,22 @@
     </tr>
   </thead>
   <tbody>
-    <% (@material_losses || []).each do |material_loss| %>
-    <% if material_loss.material %>
+    <% (@material_losses || []).each do |mat_loss| %>
+    <% if mat_loss %>
       <tr class="<%= cycle('', 'tbg') %>">
-        <td><%= material_loss.material.code %></td>
-        <td><%= material_loss.material.name %></td>
-        <td><%= Material::TYPES_NAMES[material_loss.material.types.to_i] %></td>
-        <td><%= material_loss.loss_num %></td>
-        <td><%= material_loss.material.unit %></td>
-        <td><%= material_loss.material.price %></td>
-        <td><%= material_loss.material.sale_price %></td>
+        <td><%= mat_loss.code %></td>
+        <td><%= mat_loss.name %></td>
+        <td><%= Material::TYPES_NAMES[mat_loss.types.to_i] %></td>
+        <td><%= mat_loss.loss_num %></td>
+        <td><%= mat_loss.unit %></td>
+        <td><%= mat_loss.price %></td>
+        <td><%= mat_loss.sale_price %></td>
         <td>
-            <%= material_loss.staff.name %>
+            <%= mat_loss.staff_name %>
         </td>
         <td>
           <% if permission?(:materials, :material_loss_delete) %>
-          <%= link_to_function "删除", "deleteMaterails_loss(#{params[:store_id]},#{material_loss.id})" %>
+          <%= link_to_function "删除", "deleteMaterails_loss(#{params[:store_id]},#{mat_loss.id})" %>
           <% end %>
         </td>
       </tr>

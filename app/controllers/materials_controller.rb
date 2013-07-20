@@ -7,13 +7,13 @@ class MaterialsController < ApplicationController
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
   before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo]
-  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs, :page_materials_losses]
-  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num]
+  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
+  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num, :page_materials_losses]
   @@m = Mutex.new
 
   #库存列表
   def index
-    @material_losses = MaterialLoss.where("store_id = ?",@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @materials_storages = Material.includes(:mat_depot_relations).where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
@@ -29,10 +29,10 @@ class MaterialsController < ApplicationController
                                     and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
     date_now = Time.now.to_s[0..9]
     before_thirty_day =  (Time.now - 30.day).to_s[0..9]
-    @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT distinct moo.material_id as id FROM mat_out_orders as moo where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
-      and  types = 3 and store_id = #{@current_store.id}) and store_id = #{@current_store.id};")
+    @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
+      and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]};")
     #入库查询状态未完全入库的订货单号
-    @material_orders_not_all_in = MaterialOrder.joins(:materials).where("material_orders.m_status not in (?) and material_orders.status != ? and material_orders.store_id = ?",[3,4], MaterialOrder::STATUS[:cancel], params[:store_id]).order("material_orders.created_at desc").select("material_orders.id, material_orders.code")
+    @material_orders_not_all_in = MaterialOrder.joins(:materials).where("material_orders.m_status not in (?) and material_orders.status != ? and material_orders.store_id = ?",[3,4], MaterialOrder::STATUS[:cancel], params[:store_id]).order("material_orders.created_at desc").select("material_orders.id, material_orders.code").uniq
     @mat_loss_search_materials = []
     respond_to do |format|
       format.html
@@ -50,8 +50,9 @@ class MaterialsController < ApplicationController
       @mat_loss_search_materials = Material.where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
           @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
     elsif @tab_name == 'material_losses'
-      @material_losses = MaterialLoss.where(["store_id = ?",  @current_store.id]).where(@l_sql[0]).where(
-          @l_sql[1]).where(@l_sql[2]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+      @l_sql = []
+      @l_sql <<  params[:mat_code] << params[:mat_name] << params[:mat_type]
+      @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id],@l_sql
     elsif  @tab_name == 'in_records'
       @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
     elsif @tab_name == 'out_records'
@@ -59,7 +60,7 @@ class MaterialsController < ApplicationController
     end
     if params[:mat_in_flag]=="1"
        materials = Material.joins(:material_orders).where(["materials.status = ? and materials.store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).where(
-        @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).where(@s_sql[3])
+        @s_sql[0]).where(@s_sql[1]).where(@s_sql[2]).where(@s_sql[3]).uniq
       @material_ins = []
       materials.each do |material|
         if params[:mo_code].present?
@@ -138,12 +139,11 @@ class MaterialsController < ApplicationController
 
   #库存报损分页
   def page_materials_losses
-    @current_store = Store.find_by_id params[:store_id]
-    @material_losses = MaterialLoss.where("store_id =?", @current_store.id).where(@l_sql[0]).where(@l_sql[1]).where(
-        @l_sql[2]).paginate(:page => params[:page], :per_page => Constant::PER_PAGE)
-
+    @l_sql = []
+    @l_sql <<  @mat_code << @mat_name << @mat_type
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id], @l_sql
     respond_with(@material_losses) do |format|
-      #format.html
+      format.html
       format.js
     end
   end
@@ -239,6 +239,10 @@ class MaterialsController < ApplicationController
       str[0] += " and types = ?"
       str << "#{params[:types]}"
     end
+     if params[:store_id].present?
+      str[0] += " and store_id = ?"
+      str << "#{params[:store_id]}"
+    end
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
@@ -249,8 +253,6 @@ class MaterialsController < ApplicationController
                  end
         @search_materials = JSON.parse(result)
       elsif params[:from].to_i > 0
-        str[0] += " and store_id = ?"
-        str << "#{params[:store_id]}"
         @search_materials = Material.where(str)
       end
     else
@@ -294,16 +296,16 @@ class MaterialsController < ApplicationController
                 price += item.split("_")[2].to_f * item.split("_")[1].to_i
                 code = item.split("_")[3]
                 s_price = item.split("_")[2].to_f
-                m = Material.find_by_code code
+                m = Material.find_by_code_and_store_id code, params[:store_id]
                 if m.nil?
                   name = item.split("_")[4]
                   type_name = item.split("_")[5]
                   types = Material::TYPES_NAMES.key(type_name)
-                  begin
+                  Material.transaction do
                     m = Material.create(:name => name, :code => code, :price => s_price,
-                      :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
-                  rescue
-                    status = 3
+                      :types => types , :status => 0, :storage => 0, :store_id => params[:store_id],
+                    :material_low => Material::DEFAULT_MATERIAL_LOW)
+
                   end
                 end
                 mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
@@ -377,7 +379,7 @@ class MaterialsController < ApplicationController
   #添加物料（供应商订货）
   def add
     #puts params[:store_id]
-    material = Material.find_by_code params[:code]
+    material = Material.find_by_code_and_store_id params[:code], params[:store_id]
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
         :price => params[:price].strip.to_i, :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
@@ -662,7 +664,7 @@ class MaterialsController < ApplicationController
           data = line.strip.split(',')
           @check_nums[data[0]] = data[1]
         end
-        @materials = Material.where(:code => @check_nums.keys, :status => Material::STATUS[:NORMAL])
+        @materials = Material.where(:code => @check_nums.keys, :status => Material::STATUS[:NORMAL], :store_id => @store_id)
       end
     end
   end
@@ -759,7 +761,8 @@ class MaterialsController < ApplicationController
     material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id].to_i)
     if material.nil?
       params[:material][:name] = params[:material][:name].strip
-      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i, :storage => 0}))
+      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
+              :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
         @status = 1
       else
         @status = 0
@@ -822,20 +825,59 @@ class MaterialsController < ApplicationController
     render :layout => false
   end
 
+  #添加库存报损
+  def mat_loss_add
+    count = 0
+    success = 0
+    @status = false
+    mat_losses = params[:mat_losses]
+    unless mat_losses.nil?
+      mat_losses.each do |key,value|
+        count +=1
+        material = Material.find(mat_losses[key][:mat_id])
+        if material
+          if MaterialLoss.create({:loss_num =>  mat_losses[key][:mat_num].to_i,
+                               :material_id => material.id,
+                               :staff_id => params[:staff],
+                               :store_id => params[:hidden_store_id]
+                              })
+            success += 1
+          end
+        end
+      end
+    end
+    if count == success
+      @status = true
+    end
+
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    respond_to do |f|
+      f.js
+    end
+  end
+
+  #删除库存报损
+  def mat_loss_delete
+    @status = false
+    material =  MaterialLoss.find(params[:materials_loss_id].to_i)
+    if material.destroy
+      @status = true
+      @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    end
+    respond_to do |f|
+      f.js
+    end
+  end
+
   protected
   
   def make_search_sql
     mat_code_sql = params[:mat_code].blank? ? "1 = 1" : ["materials.code = ?", params[:mat_code]]
     mat_name_sql = params[:mat_name].blank? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name]}%"]
     mat_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["materials.types = ?", params[:mat_type].to_i]
-    mat_loss_code_sql = params[:mat_code].blank? ? "1 = 1" : ["material_losses.code = ?", params[:mat_code]]
-    mat_loss_name_sql = params[:mat_name].blank? ? "1 = 1" : ["material_losses.name like ?", "%#{params[:mat_name]}%"]
-    mat_loss_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["material_losses.types = ?", params[:mat_type].to_i]
     mo_code_sql = params[:mo_code].blank? ? "1=1" : ["material_orders.id = ?", params[:mo_code]]
     @s_sql = []
     @s_sql << mat_code_sql << mat_name_sql << mat_type_sql << mo_code_sql
-    @l_sql = []
-    @l_sql << mat_loss_code_sql << mat_loss_name_sql << mat_loss_type_sql
     @mat_code = params[:mat_code].blank? ? nil : params[:mat_code]
     @mat_name = params[:mat_name].blank? ? nil : params[:mat_name]
     @mat_type = params[:mat_type].blank? ? nil : params[:mat_type]

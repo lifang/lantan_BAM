@@ -6,9 +6,9 @@
     <%= csrf_meta_tags %>
     <style type="text/css">
       *{ padding: 0; margin: 0;}
-      .box {width: 2292px; height: 3320px; padding: 94px;}
-      .barcode { width: 590px; height: 524px; float: left; padding: 45px 79px;}
-      .margin24 { margin-left: 24px;}
+.box {width: 1025px; padding: 40px 23px;}
+.barcode { width: 250px; height: 140px; float: left; margin: 20px 0 20px 78px;}
+.margin24 { margin-left: 80px;}
     </style>
 </head>
 
@@ -17,7 +17,7 @@
        <% i = 1 %>
        <% @data.each do |material| %>
          <% (1..material[:num].to_i).each do |index| %>
-          <div class="barcode <%= (i % 3 == 1) ? "" : "margin24" %>"><%= image_tag material[:code_img] %></div>
+          <div class="barcode <%= (i % 3 == 1) ? "" : "margin24" %>"><%= image_tag material[:code_img], :width => '250', :height => '140' %></div>
           <% i += 1 %>
          <% end %>
        <% end %>              

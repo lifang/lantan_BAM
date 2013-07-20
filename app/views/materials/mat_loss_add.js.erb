@@ -1,0 +1,11 @@
+$("#mat_loss_search_result").empty();
+$("#MaterialsLoss #selected_materials").empty();
+$("#MaterialsLoss").hide();
+$(".mask").hide();
+<% if @status == true %>
+  tishi_alert('报损成功!');
+<% else %>
+  tishi_alert('报损失败!');
+<% end %>
+$("#add_MaterialsLoss_btn").removeAttr("disabled");
+$("#page_materails_losses").html('<%= escape_javascript(render :partial => '/materials/materials_losses') %>');
