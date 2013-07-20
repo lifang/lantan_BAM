@@ -1315,7 +1315,6 @@ function close_notice(obj){
       return f;
   }
 
-
   function checkMatLossNum(obj){
       var f = true;
       var mat_loss_length =$("#MaterialsLoss #selected_materials").find("tr").length - 1;
@@ -1327,6 +1326,7 @@ function close_notice(obj){
           var code = $(this).attr('alt');
           var num = $(this).attr('value');
           var storage = $(this).next().val();
+
           if($(this).val().match(reg1)==null){
             alert("条形码为'"+ code + "'的物料数量不正确！");
             f = false;
@@ -1342,9 +1342,10 @@ function close_notice(obj){
             f = false;
           }
 
-      })
-      if(f){
-          $(obj).attr('disabled',true)
+      });
+
+      if(f == true){
+          $("#add_MaterialsLoss_btn").attr('disabled',true);
+          $("#MaterialsLoss_form").submit();
       }
-      return f;
 }
