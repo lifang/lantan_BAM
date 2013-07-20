@@ -52,9 +52,6 @@ class MaterialsController < ApplicationController
     elsif @tab_name == 'material_losses'
       @l_sql = []
       @l_sql <<  params[:mat_code] << params[:mat_name] << params[:mat_type]
-      #@mat_code = params[:mat_code].blank? ? nil : params[:mat_code]
-      #@mat_name = params[:mat_name].blank? ? nil : params[:mat_name]
-      #@mat_type = params[:mat_type].blank? ? nil : params[:mat_type]
       @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id],@l_sql
     elsif  @tab_name == 'in_records'
       @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
