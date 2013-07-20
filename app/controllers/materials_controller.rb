@@ -7,8 +7,8 @@ class MaterialsController < ApplicationController
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
   before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo]
-  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs, :page_materials_losses]
-  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num]
+  before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
+  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num, :page_materials_losses]
   @@m = Mutex.new
 
   #库存列表
