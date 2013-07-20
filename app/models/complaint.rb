@@ -218,11 +218,11 @@ class Complaint < ActiveRecord::Base
       conditions << sex
     end
     unless car_model.nil? || car_model =="" || car_model.length==0
-      sql += " and m.id=?'"
+      sql += " and m.id=?"
       conditions << car_model
     end
     unless year.nil? || year =="" || year.length==0
-      sql += " and n.buy_year =?"
+      sql += " and n.buy_year = ?"
       conditions << year
     end
     unless name.nil? || name =="" || name.length==0
@@ -242,7 +242,7 @@ class Complaint < ActiveRecord::Base
     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
     conditions = ["",store_id]
     unless created.nil? || created =="" || created.length==0
-      sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'"
+      sql += " and date_format(o.created_at,'%Y-%m-%d')> ? "
       conditions << created
     end
     unless ended.nil? || ended =="" || ended.length==0

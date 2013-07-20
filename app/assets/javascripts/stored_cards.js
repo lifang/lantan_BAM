@@ -61,8 +61,9 @@ function check_goal(e){
     $(".popup_body_area div[id *='item']").each(function(){
         if ($(this).find("input").length==1){
             var label =$(this).find("label").html();
+            var p_value = $(this).find("input").val();
             types_name.push(label)
-            if ($(this).find("input").val()==0 || $(this).find("input").val().length==0 || isNaN(parseFloat($(this).find("input").val()))){
+            if (p_value==0 || p_value.length==0 || isNaN(parseFloat(p_value)) || parseFloat(p_value)<0){
                 tishi_alert("请输入"+label+"的金额,且为数值");
                 carry_out=false;
                 return false
@@ -71,7 +72,7 @@ function check_goal(e){
             var first=$(this).find("input").first().val();
             if (first!="" || first.length!=0 ){
                 var second=$(this).find("input").last().val();
-                if(second=="" || second.length==0 || isNaN(parseFloat(second)) ){
+                if(second=="" || second.length==0 || isNaN(parseFloat(second)) || parseFloat(second)<0 ){
                     tishi_alert("请输入"+first+"的金额,且为数值");
                     carry_out=false;
                     return false;

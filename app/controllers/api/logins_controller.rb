@@ -36,22 +36,26 @@ class Api::LoginsController < ApplicationController
   end
 
   def upload_img
-    photo = params[:login_photo]
-    encrypt_name = random_file_name(photo.original_filename)
-    @staff.photo = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
-    staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create")
+    staff = Staff.find(params[:staff_id])
+    begin
+      photo = params[:login_photo]
+      staff.photo = "/uploads/#{params[:store_id]}/#{staff.id}/#{staff.id}_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
+      staff.operate_picture(photo,"#{staff.id}.#{photo.original_filename.split(".").reverse[0]}", "update")
+      render :json=>{:data=>0}
+    rescue
+      render :json=>{:data=>1}
+    end
   end
 
   def staff_checkin
     staff = Staff.find(params[:staff_id])
-    if staff
+    if staff and staff.work_records.where("current_day=#{Time.now.strftime("%Y%m%d").to_i}").blank?
       Station.set_station(staff.store_id,staff.id,staff.level) if staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
-      WorkORecord.create(:current_day=>Time.now.strftime("%Y%m%d").to_i,:attenance_num=>1,:staff_id=>staff.id,:store_id=>staff.store_id)
-      message = "签到成功"
+      WorkRecord.create(:current_day=>Time.now.strftime("%Y%m%d").to_i,:attendance_num=>1,:staff_id=>staff.id,:store_id=>staff.store_id)
+      render :json=>{:data=>0}
     else
-      message = "签到不成功,用户不存在"
+      render :json=>{:data=>1}
     end
-    render :json=>{:msg=>message}
   end
 
   
