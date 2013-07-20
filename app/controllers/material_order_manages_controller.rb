@@ -124,7 +124,7 @@ class MaterialOrderManagesController < ApplicationController
     start = params[:start_date].blank? ? "'1 = 1'" : "created_at >='#{params[:start_date]} 00:00:00'"
     ended = params[:end_date].blank? ? "'1 = 1'" : "created_at <='#{params[:end_date]} 23:59:59'"
     num = params[:sale_num].blank? ? nil : "having count(material_id) >= #{params[:sale_num]}"
-    type = params[:mat_types].blank? ? "'1 = 1'" : ["m.types = ?",params[:mat_types].to_i]
+    type = params[:mat_types].blank? ? "'1 = 1'" : "m.types = #{params[:mat_types].to_i}"
     @u_sql << start << ended << num << type
     @start_date = params[:start_date].blank? ? nil : params[:start_date]
     @end_date = params[:end_date].blank? ? nil : params[:end_date]
