@@ -67,10 +67,10 @@ class MaterialOrderManagesController < ApplicationController
   end
 
   def search_unsalable_materials
-    @start_date = params[:start_date]
-    @end_date = params[:end_date]
-    @mat_type = params[:mat_types]
-    @sale_num = params[:sale_num]
+      @start_date = params[:start_date]
+      @end_date = params[:end_date]
+      @mat_type = params[:mat_types]
+      @sale_num = params[:sale_num]
       @u_sql = []
       @u_sql << @start_date << @end_date << @sale_num << @mat_type
 
@@ -93,6 +93,10 @@ class MaterialOrderManagesController < ApplicationController
   end
 
   def page_unsalable_materials
+    @start_date = params[:start_date]
+    @end_date = params[:end_date]
+    @mat_type = params[:mat_types]
+    @sale_num = params[:sale_num]
     @u_sql = []
     @u_sql << @start_date << @end_date << @sale_num << @mat_type
     @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql

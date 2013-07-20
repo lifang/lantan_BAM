@@ -14,6 +14,7 @@ class MaterialsController < ApplicationController
   #库存列表
   def index
     @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id].to_i
+    p     @material_losses
     @materials_storages = Material.includes(:mat_depot_relations).where(["status = ? and store_id = ?", Material::STATUS[:NORMAL], @current_store.id]).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
     @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
@@ -139,9 +140,12 @@ class MaterialsController < ApplicationController
 
   #库存报损分页
   def page_materials_losses
+    @mat_code = params[:mat_code]
+    @mat_name = params[:mat_name]
+    @mat_type = params[:mat_type]
     @l_sql = []
-    @l_sql <<  @mat_code << @mat_name << @mat_type
-    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id], @l_sql
+    @l_sql << @mat_code << @mat_name << @mat_type
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id],@l_sql
     respond_with(@material_losses) do |format|
       format.html
       format.js
