@@ -42,7 +42,7 @@ class Material < ActiveRecord::Base
   private
   
   def generate_barcode
-    code = Time.now.strftime("%Y%m%d%H%M%S")
+    code = Time.now.strftime("%Y%m%d%H%M%L")[1..-1]
     code[0] = ''
     code[0] = ''
     self.code = code
