@@ -213,7 +213,7 @@ class Station < ActiveRecord::Base
     if station_arr.present?
       station_flag = 1 #有对应工位对应
     else
-      if((station_prod_ids.flatten & prod_ids)==prod_ids) && (!station_prod_ids.include?(prod_ids))
+      if((station_prod_ids.flatten & prod_ids).sort == prod_ids.sort) && (!station_prod_ids.include?(prod_ids))
         station_flag = 2 #一个订单要使用多个工位
       else
         station_flag = 0 #没工位

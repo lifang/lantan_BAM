@@ -298,7 +298,8 @@ class MaterialsController < ApplicationController
                   types = Material::TYPES_NAMES.key(type_name)
                   begin
                     m = Material.create(:name => name, :code => code, :price => s_price,
-                      :types => types , :status => 0, :storage => 0, :store_id => params[:store_id] )
+                      :types => types , :status => 0, :storage => 0, :store_id => params[:store_id],
+                    :material_low => Material::DEFAULT_MATERIAL_LOW)
                   rescue
                     status = 3
                   end
@@ -756,7 +757,8 @@ class MaterialsController < ApplicationController
     material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id].to_i)
     if material.nil?
       params[:material][:name] = params[:material][:name].strip
-      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i, :storage => 0}))
+      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
+              :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
         @status = 1
       else
         @status = 0
