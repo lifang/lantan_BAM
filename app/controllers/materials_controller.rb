@@ -293,17 +293,16 @@ class MaterialsController < ApplicationController
                 price += item.split("_")[2].to_f * item.split("_")[1].to_i
                 code = item.split("_")[3]
                 s_price = item.split("_")[2].to_f
-                m = Material.find_by_code code
+                m = Material.find_by_code_and_store_id code, params[:store_id]
                 if m.nil?
                   name = item.split("_")[4]
                   type_name = item.split("_")[5]
                   types = Material::TYPES_NAMES.key(type_name)
-                  begin
+                  Material.transaction do
                     m = Material.create(:name => name, :code => code, :price => s_price,
                       :types => types , :status => 0, :storage => 0, :store_id => params[:store_id],
                     :material_low => Material::DEFAULT_MATERIAL_LOW)
-                  rescue
-                    status = 3
+
                   end
                 end
                 mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
@@ -377,7 +376,7 @@ class MaterialsController < ApplicationController
   #添加物料（供应商订货）
   def add
     #puts params[:store_id]
-    material = Material.find_by_code params[:code]
+    material = Material.find_by_code_and_store_id params[:code], params[:store_id]
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
         :price => params[:price].strip.to_i, :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
@@ -662,7 +661,7 @@ class MaterialsController < ApplicationController
           data = line.strip.split(',')
           @check_nums[data[0]] = data[1]
         end
-        @materials = Material.where(:code => @check_nums.keys, :status => Material::STATUS[:NORMAL])
+        @materials = Material.where(:code => @check_nums.keys, :status => Material::STATUS[:NORMAL], :store_id => @store_id)
       end
     end
   end
