@@ -242,6 +242,10 @@ class MaterialsController < ApplicationController
       str[0] += " and types = ?"
       str << "#{params[:types]}"
     end
+     if params[:store_id].present?
+      str[0] += " and store_id = ?"
+      str << "#{params[:store_id]}"
+    end
     if params[:type].to_i == 1 && params[:from]
       if params[:from].to_i == 0
         headoffice_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/search_material.json?name=#{params[:name]}&types=#{params[:types]}"
@@ -252,8 +256,6 @@ class MaterialsController < ApplicationController
                  end
         @search_materials = JSON.parse(result)
       elsif params[:from].to_i > 0
-        str[0] += " and store_id = ?"
-        str << "#{params[:store_id]}"
         @search_materials = Material.where(str)
       end
     else

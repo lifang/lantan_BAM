@@ -303,35 +303,35 @@ $(document).ready(function(){
            tishi_alert("提成率必须为数字!");
            return false;
        }
-       if($(this).attr("id") == "new_staff_btn"){
-           if($(this).parents('form').find("#staff_photo").val() == ''){
-               tishi_alert("照片不能为空!");
-               return false;
-           }else{
-               var input_s = document.getElementById('staff_photo');
-               var file_size = input_s.files[0].size;
-               if(file_size > 500*1024){
-                  tishi_alert("图片大小不能超过500k！");
-                  return false;
-               }
-               var img_val = $(this).parents('form').find("#staff_photo").val();
-               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
-               var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
-               var g_name_val = img_name_val.substring(1,img_name_val.length);
-               if(pattern_str.test(g_name_val.split(".")[0])){
-                  tishi_alert(g_name_val+"不能包含特殊字符!");
-                  return false;
-               }
-
-               var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
-               if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
-               }else{
-                  tishi_alert("图片格式不对!");
-                  return false;
-               }
-           }
-       }
-       if($(this).attr("id") == "edit_staff_btn"){
+//       if($(this).attr("id") == "new_staff_btn"){
+//           if($(this).parents('form').find("#staff_photo").val() == ''){
+//               tishi_alert("照片不能为空!");
+//               return false;
+//           }else{
+//               var input_s = document.getElementById('staff_photo');
+//               var file_size = input_s.files[0].size;
+//               if(file_size > 500*1024){
+//                  tishi_alert("图片大小不能超过500k！");
+//                  return false;
+//               }
+//               var img_val = $(this).parents('form').find("#staff_photo").val();
+//               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+//               var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
+//               var g_name_val = img_name_val.substring(1,img_name_val.length);
+//               if(pattern_str.test(g_name_val.split(".")[0])){
+//                  tishi_alert(g_name_val+"不能包含特殊字符!");
+//                  return false;
+//               }
+//
+//               var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
+//               if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
+//               }else{
+//                  tishi_alert("图片格式不对!");
+//                  return false;
+//               }
+//           }
+//       }
+       //if($(this).attr("id") == "edit_staff_btn"){
            if($(this).parents('form').find("#staff_photo").val() != ''){
                var input_e = document.getElementById('staff_photo');
                var file_size_e = input_e.files[0].size;
@@ -354,7 +354,7 @@ $(document).ready(function(){
                   return false;
                }
            }
-       }
+       //}
        $(this).parents('form').submit();
        $(this).attr("disabled", "disabled");
     });
