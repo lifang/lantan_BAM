@@ -1,8 +1,8 @@
 #encoding: utf-8
-require 'barby'
-require 'barby/barcode/ean_13'
-require 'barby/outputter/custom_rmagick_outputter'
-require 'barby/outputter/rmagick_outputter'
+#require 'barby'
+#require 'barby/barcode/ean_13'
+#require 'barby/outputter/custom_rmagick_outputter'
+#require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :material_losses

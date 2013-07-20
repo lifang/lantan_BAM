@@ -30,7 +30,7 @@ function publish_sale(e){
         tishi_alert("请选择优惠类型");
         return false;
     }
-    if (parseInt(disc)==1 && ($("#disc_"+disc).val().length==0 || isNaN(parseFloat($("#disc_"+disc).val())) )){
+    if (parseInt(disc)==1 && ($("#disc_"+disc).val().length==0 || isNaN(parseFloat($("#disc_"+disc).val())) || parseFloat($("#disc_"+disc).val())<0 )){
         tishi_alert("请填写优惠的金额，且为数字");
         return false;
     }
@@ -46,7 +46,8 @@ function publish_sale(e){
         tishi_alert("请输入活动开始和结束的时间,且开始日期小于结束日期");
         return false;
     }
-    if ($("#disc_car_nums").val() == " " || $("#disc_car_nums").val().length==0 ){
+    var car_nums = $("#disc_car_nums").val();
+    if ( car_nums == " " || car_nums.length==0 || isNaN(parseInt(car_nums))||parseInt(car_nums)<0){
         tishi_alert("请输入参加活动的总车辆数");
         return false;
     }
@@ -193,11 +194,11 @@ function check_add(e){
         tishi_alert("请输入套餐卡的名称,不能包含非法字符");
         return false;
     }
-    if(base == "" || base.length==0 || isNaN(parseFloat(base))){
+    if(base == "" || base.length==0 || isNaN(parseFloat(base)) || parseFloat(base)<0){
         tishi_alert("请输入套餐卡的价格");
         return false;
     }
-    if (point=="" || point.length==0 || isNaN(parseFloat(point))){
+    if (point=="" || point.length==0 || isNaN(parseFloat(point))||parseFloat(point)<0){
         tishi_alert("请输入产品的积分，积分是数字");
         return false;
     }
@@ -211,7 +212,7 @@ function check_add(e){
             return false;
         }
     }else{
-        if(end_time == "" || end_time.length==0 || isNaN(parseFloat(end_time))){
+        if(end_time == "" || end_time.length==0 || isNaN(parseFloat(end_time)||parseFloat(end_time)<0)){
             tishi_alert("请输入套餐卡的有效时长，且为整数");
             return false;
         }
@@ -220,7 +221,7 @@ function check_add(e){
     if($("#auto_revist")[0].checked){
         var time_revist =$("#time_revist option:selected").val();
         var con_revist =$("#con_revist").val();
-        if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
+        if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))||parseFloat(time_revist)<0){
             tishi_alert("请选择回访的时长，时长是数字");
             return false;
         }
