@@ -303,6 +303,11 @@ $(document).ready(function(){
            tishi_alert("提成率必须为数字!");
            return false;
        }
+       var staff_deduct_percent = $(this).parents('form').find("#staff_deduct_percent").val();
+       if(parseFloat(staff_deduct_percent) < 0.0 || parseFloat(staff_deduct_percent) > 100.0){
+           tishi_alert("提成率必须在0-100之间!");
+           return false;
+       }
 //       if($(this).attr("id") == "new_staff_btn"){
 //           if($(this).parents('form').find("#staff_photo").val() == ''){
 //               tishi_alert("照片不能为空!");
