@@ -14,7 +14,6 @@
                 <th>物料规格</th>
                 <th>实际数量</th>
                 <th>盘点数量</th>
-                <th>盘点差额</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -26,14 +25,12 @@
                   <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
                   <td><%= material.unit %></td>
                   <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= storage = material.storage %></span></td>
-                  <td class="check_num"><%= check_num = material.check_num %></td>
-                  <td class="mat_diff"><%= check_num - storage %></td>
+                  <td class="check_num"><%= text_field_tag "materials[#{material.id}][num]", material.check_num, :id => "check_num_#{material.id}", :style => 'width:50px' %></td>
                   <td class="operation">
-                    <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this, '#{material.check_num}')" %><% end %>
+                    <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this, '1')" %><% end %>
                     <%= link_to_function "移除", "removeRow(this, 0)" %>
                   </td>
                   <%= hidden_field_tag "materials[#{material.id}][code]", material.code %>
-                  <%= hidden_field_tag "materials[#{material.id}][num]", check_num %>
                 </tr>
               <% end %>
             </tbody>

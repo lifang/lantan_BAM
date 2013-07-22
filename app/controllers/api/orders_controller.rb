@@ -300,8 +300,8 @@ class Api::OrdersController < ApplicationController
   #发送短信code
   def get_user_svcard
     csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id where c.mobilephone = ? and sc.types = 1",
-        params[:mobilephone].strip])
+      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id where c.mobilephone = ? and sc.types = 1 and csr.status = ?",
+        params[:mobilephone].strip, CSvcRelation::STATUS[:valid]])
     sum_left_total = csvc_relaions.inject(0){|sum, csv| sum = sum+csv.left_price.to_f}
     record = csvc_relaions[0]
     status = 0
@@ -328,8 +328,8 @@ class Api::OrdersController < ApplicationController
   def use_svcard
     record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
       left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
-      where sc.types = 1 and c.mobilephone = ? and csr.verify_code = ?",
-        params[:mobilephone].strip, params[:verify_code].strip])[0]
+      where sc.types = 1 and c.mobilephone = ? and csr.verify_code = ? and csr.status = ?",
+        params[:mobilephone].strip, params[:verify_code].strip, CSvcRelation::STATUS[:valid]])[0]
     status = 0
     message = "支付失败。"
     price = params[:price].to_f
@@ -341,8 +341,8 @@ class Api::OrdersController < ApplicationController
         record.update_attribute(:left_price, left_price)
       else
         csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join customers c on c.id = csr.customer_id where c.mobilephone = ? and left_price != ?",
-            params[:mobilephone].strip, 0])
+      left join customers c on c.id = csr.customer_id where c.mobilephone = ? and left_price != ? and csr.status = ?",
+            params[:mobilephone].strip, 0, CSvcRelation::STATUS[:valid]])
         csvc_relaions.each do |csv|
           if price > 0
             if price - csv.left_price >= 0

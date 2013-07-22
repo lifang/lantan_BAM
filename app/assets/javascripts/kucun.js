@@ -38,7 +38,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
     if(pandian_flag=="")
       {check_num = $("#materials_tab_table #check_num_"+m_id).val();}
     else{
-       check_num = pandian_flag;
+       check_num = $("#print_sort_table #check_num_"+m_id).val();
     }
     
     if(check_num.match(reg1)==null){

@@ -5,5 +5,5 @@ class CSvcRelation < ActiveRecord::Base
  has_many :orders
  belongs_to :customer
 
-  STATUS = {:valid => 1, :invalid => 1}         #1有效的，0无效
+  STATUS = {:valid => 1, :invalid => 0}         #1有效的，0无效
 end
