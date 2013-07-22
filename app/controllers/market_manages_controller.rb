@@ -88,7 +88,7 @@ class MarketManagesController < ApplicationController
       @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
     }.sort.reverse.each {|k,v| pcards << [k,v]}
     @pcards = pcards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    @products = Product.where("id in (#{pays.map(&:product_id).join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
+    @products = Product.where("id in (#{pays.map(&:product_id).compact.uniq.join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
   end
 
   #加载进行中的目标销售额
