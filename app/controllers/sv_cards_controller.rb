@@ -17,7 +17,8 @@ class SvCardsController < ApplicationController
   end
 
   def create
-    if SvCard.where(["types = ? and name = ? and status = ?", params[:sv_card][:types], params[:sv_card][:name], SvCard::STATUS[:NORMAL]]).blank?
+    if SvCard.where(["types = ? and name = ? and status = ? and store_id = ?",
+                  params[:sv_card][:types], params[:sv_card][:name], SvCard::STATUS[:NORMAL], @store.id]).blank?
       img_obj = params[:sv_card][:img_url]
       params[:sv_card].delete_if{|key, value| key=="img_url"}
       if params[:sv_card][:types].to_i == SvCard::FAVOR[:DISCOUNT] #打折卡
@@ -75,7 +76,8 @@ class SvCardsController < ApplicationController
 
   def update
     sv_card = SvCard.find_by_id(params[:id].to_i)
-    if SvCard.where(["id != ? and types= ? and name = ?", sv_card.id, sv_card.types, params[:sv_card][:name]]).blank?
+    if SvCard.where(["id != ? and types= ? and name = ? and status = ? and store_id = ?", sv_card.id, sv_card.types,
+                    params[:sv_card][:name], SvCard::STATUS[:NORMAL], sv_card.store_id]).blank?
       img_obj = params[:sv_card][:img_url]
       params[:sv_card].delete_if{|key, value| key=="img_url"}
       if sv_card.update_attributes(params[:sv_card])
