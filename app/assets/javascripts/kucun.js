@@ -1319,7 +1319,7 @@ function close_notice(obj){
       var f = true;
       var mat_loss_length =$("#MaterialsLoss #selected_materials").find("tr").length - 1;
       if(mat_loss_length==-1){
-          alert('请选择物料！');
+          tishi_alert('请选择物料！');
           f = false;
       }
       $("#MaterialsLoss #selected_materials").find('input.mat_loss_num').each(function(){
@@ -1328,17 +1328,17 @@ function close_notice(obj){
           var storage = $(this).next().val();
 
           if($(this).val().match(reg1)==null){
-            alert("条形码为'"+ code + "'的物料数量不正确！");
+            tishi_alert("条形码为'"+ code + "'的物料数量不正确！");
             f = false;
           }
 
           if(parseInt(num)<=0){
-            alert("条形码为'"+ code + "'的报损数量不能小于1！");
+            tishi_alert("条形码为'"+ code + "'的报损数量不能小于1！");
             f = false;
           }
 
           if(parseInt(num)>parseInt(storage)){
-            alert("条形码为'"+ code + "'的报损数量不能大于库存数量！");
+            tishi_alert("条形码为'"+ code + "'的报损数量不能大于库存数量！");
             f = false;
           }
 
