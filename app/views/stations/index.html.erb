@@ -56,15 +56,17 @@
                 <div class="siteCar wrong_station" title="查看水、气、施工情况" onclick="collect_info(<%= params[:store_id] %>,<%=station.id%>)"><%=Station::STAT_NAME[station.status]%></div>
               <% elsif station.status== Station::STAT[:NO_SERVICE] %>
                 <div class="siteCar wrong_station" title="查看水、气、施工情况" onclick="collect_info(<%= params[:store_id] %>,<%=station.id%>)"><%=Station::STAT_NAME[station.status]%></div>
-              <%elsif @t_infos[station.id].nil?%>
+              <%elsif @staff_ids[station.id].nil?%>
                 <div class="siteCar free_station" title="查看水、气、施工情况" onclick="collect_info(<%= params[:store_id] %>,<%=station.id%>)">空闲</div>
                 <p>技师：暂无技师，<a href="/stores/<%=params[:store_id]%>/stations/show_detail" target="_blank">请分配</a></p>
-              <%elsif  @t_infos[station.id][1].nil? %>
+              <%elsif  @nums[station.id].nil? %>
                 <div class="siteCar free_station" title="查看水、气、施工情况" onclick="collect_info(<%= params[:store_id] %>,<%=station.id%>)">空闲</div>
-                <div class="site_teacher" title="<%= @t_infos[station.id][0] %>">技师：<%= @t_infos[station.id][0] %></div>
+                <% s_id = @staff_ids[station.id] %>
+                <div class="site_teacher" title="<%= "#{@staffs[s_id[0]]}、#{@staffs[s_id[1]]}" %>">技师：<%= "#{@staffs[s_id[0]]}、#{@staffs[s_id[1]]}" %></div>
               <% else %>
-                <div class="siteCar" title="查看水、气、施工情况" onclick="collect_info(<%= params[:store_id] %>,<%=station.id%>)"><%=@t_infos[station.id][1]  %></div>
-                <div class="site_teacher" title="<%= @t_infos[station.id][0] %>">技师：<%= @t_infos[station.id][0] %></div>
+                <% s_id = @staff_ids[station.id] %>
+                <div class="siteCar" title="查看水、气、施工情况" onclick="collect_info(<%= params[:store_id] %>,<%=station.id%>)"><%=  @nums[station.id]  %></div>
+                <div class="site_teacher" title="<%= "#{@staffs[s_id[0]]}、#{@staffs[s_id[1]]}" %>">技师：<%= "#{@staffs[s_id[0]]}、#{@staffs[s_id[1]]}" %></div>
                 <%time = @times[station.id].nil? ? 0 : @times[station.id].to_i %>
                 <script type="text/javascript">
                   time<%=station.id  %> = <%=  time%>
