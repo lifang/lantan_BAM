@@ -503,8 +503,12 @@ class Api::OrdersController < ApplicationController
         work_order["coutdown"] = work_order.ended_at - Time.now
         result << work_order
       end
-
-      render :json => {:status => 1, :work_orders => result}
+      station = Station.includes(:station_staff_relations => :staff).
+        where("staffs.id = #{staff.id}").
+        where("station_staff_relations.store_id = #{staff.store.id}").
+        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
+        where("stations.status = #{Station::STAT[:NORMAL]}").first
+      render :json => {:status => 1, :work_orders => result, :station => station}
     else
       render :json => {:status => 0}
     end
