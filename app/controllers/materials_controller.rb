@@ -139,9 +139,12 @@ class MaterialsController < ApplicationController
 
   #库存报损分页
   def page_materials_losses
+    @mat_code = params[:mat_code]
+    @mat_name = params[:mat_name]
+    @mat_type = params[:mat_type]
     @l_sql = []
-    @l_sql <<  @mat_code << @mat_name << @mat_type
-    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id], @l_sql
+    @l_sql << @mat_code << @mat_name << @mat_type
+    @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id],@l_sql
     respond_with(@material_losses) do |format|
       format.html
       format.js

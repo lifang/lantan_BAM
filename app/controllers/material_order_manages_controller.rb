@@ -36,11 +36,11 @@ class MaterialOrderManagesController < ApplicationController
     end_date = params[:end_date]
     @status = 0
     if(start_date.empty? || end_date.empty?)
-      @status = 1
+           @status = 0
     else
-      if Date.parse(start_date)>Date.parse(end_date)
-        @status = 2
-      end
+        if Date.parse(start_date)>Date.parse(end_date)
+           @status = 1
+        end
     end
 
     if @status == 0
@@ -59,31 +59,46 @@ class MaterialOrderManagesController < ApplicationController
   def unsalable_materials
     @end_date = Time.now.to_s[0..9]
     @start_date  =  (Time.now - 30.day).to_s[0..9]
-    @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql
-    #@all_unsalable_materials  = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
-    #  and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]};")
-    #@unsalable_materials =  @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    #@all_unsalable_materials = Material.unsalable_list params[:store_id].to_i
+    @all_unsalable_materials  = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{@start_date} 00:00:00' and created_at <= '#{@end_date} 23:59:59'
+      and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]};")
     @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    #@unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
   end
 
   def search_unsalable_materials
-      start_date = params[:start_date]
-      end_date = params[:end_date]
-      @status = false
-      if Date.parse(start_date)<=Date.parse(end_date)
-        @status = true
-      end
+      @start_date = params[:start_date]
+      @end_date = params[:end_date]
+      @mat_type = params[:mat_types]
+      @sale_num = params[:sale_num]
+      @u_sql = []
+      @u_sql << @start_date << @end_date << @sale_num << @mat_type
 
-      if @status == true
+      @status = false
+      if (@start_date.blank? || @end_date.blank?)
         @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql
         @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+        @status = true
       else
-        @all_unsalable_materials = []
-        @unsalable_materials = []
+        if Date.parse(@start_date)>Date.parse(@end_date)
+          @all_unsalable_materials = []
+          @unsalable_materials = []
+          @status = false
+        else
+          @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql
+          @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+          @status = true
+        end
       end
   end
 
   def page_unsalable_materials
+    @start_date = params[:start_date]
+    @end_date = params[:end_date]
+    @mat_type = params[:mat_types]
+    @sale_num = params[:sale_num]
+    @u_sql = []
+    @u_sql << @start_date << @end_date << @sale_num << @mat_type
     @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql
     @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     respond_with(@unsalable_materials) do |f|
@@ -120,16 +135,9 @@ class MaterialOrderManagesController < ApplicationController
     mat_types = params[:mat_types].blank? || params[:mat_types] == "-1" ? "1 = 1" : ["materials.types = ?", params[:mat_types].to_i]
     @sql = []
     @sql << start_date << end_date << mat_types
-    @u_sql = []
-    start = params[:start_date].blank? ? "'1 = 1'" : "created_at >='#{params[:start_date]} 00:00:00'"
-    ended = params[:end_date].blank? ? "'1 = 1'" : "created_at <='#{params[:end_date]} 23:59:59'"
-    num = params[:sale_num].blank? ? nil : "having count(material_id) >= #{params[:sale_num]}"
-    type = params[:mat_types].blank? ? "'1 = 1'" : "m.types = #{params[:mat_types].to_i}"
-    @u_sql << start << ended << num << type
     @start_date = params[:start_date].blank? ? nil : params[:start_date]
     @end_date = params[:end_date].blank? ? nil : params[:end_date]
     @mat_type = params[:mat_types].blank? ? nil : params[:mat_types]
-    @sale_num = params[:sale_num].blank? ? nil : params[:sale_num]
   end
 
   def get_store

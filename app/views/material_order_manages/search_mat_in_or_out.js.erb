@@ -1,8 +1,4 @@
-<% if @status == 0 %>
-  tishi_alert("查询成功！");
-<% elsif @status == 1%>
-  tishi_alert("开始日期和结束日期均不能为空！");
-<% elsif @status == 2%>
+<% if @status == 1 %>
   tishi_alert("开始日期不能大于结束日期！");
 <% end %>
 <% if @mat_in_or_out == "ruku" %>

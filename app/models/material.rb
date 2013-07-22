@@ -1,8 +1,8 @@
 #encoding: utf-8
-#require 'barby'
-#require 'barby/barcode/ean_13'
-#require 'barby/outputter/custom_rmagick_outputter'
-#require 'barby/outputter/rmagick_outputter'
+require 'barby'
+require 'barby/barcode/ean_13'
+require 'barby/outputter/custom_rmagick_outputter'
+require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :material_losses
@@ -35,6 +35,10 @@ class Material < ActiveRecord::Base
   scope :normal, where(:status => STATUS[:NORMAL])
 
   def self.unsalable_list store_id,sql=[nil,nil,nil,nil]
+    sql[0] = sql[0].blank? ? "'1 = 1'" : "created_at >='#{sql[0]} 00:00:00'"
+    sql[1] = sql[1].blank? ? "'1 = 1'" : "created_at <='#{sql[1]} 23:59:59'"
+    sql[2] = sql[2].blank? ? nil : "having count(material_id) >= #{sql[2]}"
+    sql[3] = sql[3].blank? ? "'1 = 1'" : "m.types = #{sql[3].to_i}"
     Material.find_by_sql("select * from materials m where m.id not in(select material_id as id from mat_out_orders where
     #{sql[0]} and #{sql[1]} and types = 3 and store_id = #{store_id} group by material_id  #{sql[2]}) and m.status !=#{Material::STATUS[:DELETE]} and m.store_id = #{store_id} and #{sql[3]};")
   end
