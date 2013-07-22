@@ -7,7 +7,7 @@ class PackageCardsController < ApplicationController
 
   def index
     session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at]=nil,nil,nil,nil,nil
-    @cards =PackageCard.paginate_by_sql("select name,img_url,started_at,ended_at,id,date_types,date_month from package_cards where
+    @cards =PackageCard.paginate_by_sql("select name,img_url,started_at,prod_point,ended_at,id,date_types,date_month from package_cards where
     store_id=#{params[:store_id]} and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => Constant::PER_PAGE)
     unless @cards.blank?
       prods =Product.find_by_sql("select s.name,p.product_num num,package_card_id from products s inner join
