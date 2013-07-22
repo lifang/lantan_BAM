@@ -19,6 +19,7 @@
                   <td>成本价</td>
                   <td>零售价格</td>
                   <td>促销价</td>
+                   <td>积分</td>
                   <td>类别</td>
                   <td>操作</td>
                 </tr>
@@ -31,6 +32,7 @@
                     <td><%= prod.t_price %></td>
                     <td><%= prod.base_price %></td>
                     <td><%= prod.sale_price %></td>
+                     <td><%= prod.prod_point %></td>
                     <td><%= Product::PRODUCT_TYPES[prod.types] %></td>
                     <td>
                       <% if permission?(:sales, :delete_product) %><a href="javascript:void(0)"  onclick="prod_delete('<%=prod.id %>','<%=params[:store_id] %>')">删除</a><% end %>

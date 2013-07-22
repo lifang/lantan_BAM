@@ -389,6 +389,32 @@ class Api::OrdersController < ApplicationController
     materials.each do |mat|
       material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
       if material
+        material.check_num = mat['check_num']
+        mat_arr << material
+      else
+        mat_arr << nil
+      end
+    end
+    if mat_arr.include?(nil)
+      render :json => {:status => "error", :message => "没有材料"}
+    else
+      if Material.import mat_arr, :on_duplicate_key_update => [:check_num]
+        render :json => {:status => "success"}
+      else
+        render :json => {:status => "error", :message => "更新盘点实数失败"}
+      end
+    end
+  end
+
+  #核实
+  def materials_verification
+    data = JSON.parse(params[:data])
+    store_id = data["store_id"]
+    materials = data["materials"]
+    mat_arr = []
+    materials.each do |mat|
+      material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
+      if material
         material.storage = mat['storage'].to_i
         material.check_num = nil
         mat_arr << material
@@ -458,7 +484,7 @@ class Api::OrdersController < ApplicationController
         mat_out_types = MatOutOrder::TYPES
         render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types}
       else
-        render :json => {:status => 2, :message => "不是技师，无法登录!"}
+        render :json => {:status => 2}
       end
     end
   end
@@ -477,8 +503,12 @@ class Api::OrdersController < ApplicationController
         work_order["coutdown"] = work_order.ended_at - Time.now
         result << work_order
       end
-
-      render :json => {:status => 1, :work_orders => result}
+      station = Station.includes(:station_staff_relations => :staff).
+        where("staffs.id = #{staff.id}").
+        where("station_staff_relations.store_id = #{staff.store.id}").
+        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
+        where("stations.status = #{Station::STAT[:NORMAL]}").first
+      render :json => {:status => 1, :work_orders => result, :station => station}
     else
       render :json => {:status => 0}
     end

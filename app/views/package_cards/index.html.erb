@@ -16,8 +16,9 @@
                   <td>&nbsp;</td>
                   <td>名称</td>
                   <td>有效时间</td>
+                  <td>积分</td>
                   <td>套餐内容</td>
-                  <td>操作</td>
+                                    <td>操作</td>
                 </tr>
               </thead>
               <tbody>
@@ -31,6 +32,7 @@
                         "#{card.started_at.nil?? "" : card.started_at.strftime("%Y.%m.%d")}-#{card.ended_at.nil??  "" : card.ended_at.strftime("%Y.%m.%d")}"
                       end
                     %></td>
+                    <td><%= card.prod_point %></td>
                     <td>
                       <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                         <%unless @prods[card.id].blank? %>
