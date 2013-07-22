@@ -307,7 +307,7 @@ class MaterialsController < ApplicationController
                   Material.transaction do
                     m = Material.create(:name => name, :code => code, :price => s_price,
                       :types => types , :status => 0, :storage => 0, :store_id => params[:store_id],
-                    :material_low => Material::DEFAULT_MATERIAL_LOW)
+                    :material_low => Material::DEFAULT_MATERIAL_LOW,:unit => params[:unit] || "件")
 
                   end
                 end
@@ -384,7 +384,8 @@ class MaterialsController < ApplicationController
     #puts params[:store_id]
     material = Material.find_by_code_and_store_id params[:code], params[:store_id]
     material =  Material.create({:code => params[:code].strip,:name => params[:name].strip,
-        :price => params[:price].strip.to_i, :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,
+        :price => params[:cost_price].strip.to_i,:sale_price => params[:sale_price].strip.to_i,
+        :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,:unit => params[:unit] || "件",
         :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
         :types => params[:types], :check_num => nil, :is_ignore => Material::IS_IGNORE[:NO]}) if material.nil?
     x = {:status => 1, :material => material}.to_json
