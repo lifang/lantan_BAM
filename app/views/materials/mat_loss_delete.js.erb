@@ -1,0 +1,6 @@
+<% if @status == true %>
+  tishi_alert('删除成功!');
+<% else %>
+  tishi_alert('删除失败!');
+<% end %>
+$("#page_materails_losses").html('<%= escape_javascript(render :partial => '/materials/materials_losses') %>');

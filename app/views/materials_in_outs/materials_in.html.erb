@@ -17,7 +17,7 @@
   </div>
   <div class="data_box">
     <div class="data_menu">
-      <%= link_to "物料数据维护", "/stores/#{@store_id}/materials?mat_in=1", :target => "_blank"%>
+      <%= link_to "添加物料", "/stores/#{@store.id}/materials?mat_in=1", :target => "_blank"%>
     </div>
     <div class="clear"></div>
     <div class="data_body">
@@ -36,7 +36,7 @@
         </table>
         <div class="clear"></div>
         <div class="btn_box_s">
-          <button onclick="checkNums(<%= @store_id %>)" type="button" class="confirm_btn">入库</button>
+          <button onclick="checkNums(<%= @store.id %>)" type="button" class="confirm_btn">入库</button>
         </div>
       <% end %>
     </div>

@@ -24,12 +24,14 @@
                       <td>数量</td>
                       <td>单价</td>
                     </tr>
-                    <% @product_hash[order.id].each do |prod| %>
-                    <tr>
-                      <td><%= prod.name %></td>
-                      <td><%= prod.pro_num %></td>
-                      <td><%= prod.price %></td>
-                    </tr>
+                    <% if !@product_hash[order.id].nil? %>
+                      <% @product_hash[order.id].each do |prod| %>
+                      <tr>
+                        <td><%= prod.name %></td>
+                        <td><%= prod.pro_num %></td>
+                        <td><%= prod.price %></td>
+                      </tr>
+                      <% end %>
                     <% end %>
                   </table>
                 <% else %>

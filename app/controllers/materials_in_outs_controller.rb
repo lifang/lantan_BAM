@@ -1,13 +1,11 @@
 #encoding: utf-8
 require 'fileutils'
 class MaterialsInOutsController < ApplicationController
+  before_filter :sign?
+  before_filter :find_store
   layout "mat_in_out", :except => [:create_materials_in]
 
-  before_filter :find_store, :except => [:index, :save_cookies]
-  
   def index
-    @store_id = Store.first.id unless Store.first.nil?
-    @staff = Staff.find(cookies[:user_id]) unless cookies[:user_id].nil?
   end
   
   def materials_in
@@ -17,7 +15,7 @@ class MaterialsInOutsController < ApplicationController
   end
 
   def get_material
-    material = Material.normal.find_by_code_and_store_id(params[:code], @store_id)
+    material = Material.normal.find_by_code_and_store_id(params[:code], @store.id)
     if material.nil?
       render :text => 'fail'
     else
@@ -38,23 +36,21 @@ class MaterialsInOutsController < ApplicationController
     @mat_in_list = parse_mat_in_list(params['mat_in_items'], params['mat_in_create'])
     respond_to do |format|
       format.html{
-        p @mat_in_list
         render :pandian
       }
       format.json{
         render :json => {:status => status}
       }
     end
-    
   end
   
   def create_materials_out
     if params['material_order'].nil?
       flash[:notice] = '请录入商品！'
-      redirect_to "/stores/#{@store_id}/materials_out" and return
+      redirect_to "/stores/#{@store.id}/materials_out" and return
     end
     params['material_order'].values.each do |mo|
-      mat_out_order = MatOutOrder.create(mo.merge(params[:mat_out]).merge({:store_id => @store_id}))
+      mat_out_order = MatOutOrder.create(mo.merge(params[:mat_out]).merge({:store_id => @store.id}))
       if mat_out_order.save
         material = Material.find(mat_out_order.material_id)
         material.storage -= mat_out_order.material_num
@@ -76,8 +72,8 @@ class MaterialsInOutsController < ApplicationController
     code_file = params[:code_file]
     if code_file
       new_name = random_file_name(code_file.original_filename) + code_file.original_filename.split(".").reverse[0]
-      FileUtils.mkdir_p Material::MAT_IN_PATH % @store_id
-      file_path = Material::MAT_IN_PATH % @store_id + "/#{new_name}"
+      FileUtils.mkdir_p Material::MAT_IN_PATH % @store.id
+      file_path = Material::MAT_IN_PATH % @store.id + "/#{new_name}"
       File.new(file_path, 'a+')
       File.open(file_path, 'wb') do |file|
         file.write(code_file.read)
@@ -91,7 +87,7 @@ class MaterialsInOutsController < ApplicationController
           @code_num[data[0]] = data[1]
         end
         @material_ins = []
-        materials = Material.where(:code => @code_num.keys, :store_id => @store_id)
+        materials = Material.where(:code => @code_num.keys, :store_id => @store.id)
         @no_material_codes = (@code_num.keys - materials.map(&:code)) || []
         materials.each do |material|
           temp_material_orders = material.material_orders.not_all_in
@@ -110,8 +106,8 @@ class MaterialsInOutsController < ApplicationController
     code_file = params[:code_file]
     if code_file
       new_name = random_file_name(code_file.original_filename) + code_file.original_filename.split(".").reverse[0]
-      FileUtils.mkdir_p Material::MAT_OUT_PATH % @store_id
-      file_path = Material::MAT_OUT_PATH % @store_id + "/#{new_name}"
+      FileUtils.mkdir_p Material::MAT_OUT_PATH % @store.id
+      file_path = Material::MAT_OUT_PATH % @store.id + "/#{new_name}"
       File.new(file_path, 'a+')
       File.open(file_path, 'wb') do |file|
         file.write(code_file.read)
@@ -125,41 +121,32 @@ class MaterialsInOutsController < ApplicationController
           @code_num[data[0]] = data[1]
         end
         @material_ins = []
-        @material_outs = Material.where(:code => @code_num.keys)
+        @material_outs = Material.where(:code => @code_num.keys, :store_id => @store_id)
       end
     end
-  end
-  
-  def prin_matin_list
-    @mat_in_list_hash = parse_mat_in_list(params['mat_in_items'], "0")
   end
 
   protected
 
   def find_store
-    if cookies[:user_id].nil?
-      flash[:notice] = "请先选择用户！"
-      redirect_to "/materials_in_outs" and return
-    end
-    @staff = Staff.find(cookies[:user_id])
-    @store_id = @staff.store_id
+    @store = Store.find_by_id(params[:store_id])
   end
 
-  def parse_mat_in_list(mat_in_items, mat_in_flag = nil)
+  def parse_mat_in_list(mat_in_items, mat_in_flag)
     mat_in_orders = []
     mat_in_items.split(",").each do |mat_in_item|
       mii = mat_in_item.split("_")
       mat_code = mii[0]
       mo_code = mii[1]
       num = mii[2]
-      material = Material.find_by_code_and_status_and_store_id mat_code,Material::STATUS[:NORMAL],@store_id
+      material = Material.find_by_code_and_status_and_store_id mat_code,Material::STATUS[:NORMAL],@store.id
       material_order = MaterialOrder.find_by_code mo_code
 
-      mat_in_orders << {:mo_code => mo_code, :mat_code => mat_code, :num => num,
+      mat_in_orders << {:mo_code => mo_code, :mat_code => mat_code, :num => num, :mat_unit => material.unit,
         :mat_name => material.name}
       if mat_in_flag == "1"
         mat_in_order = MatInOrder.create({:material => material, :material_order => material_order,
-            :material_num => num, :price => material.price, :staff_id => @staff.id
+            :material_num => num, :price => material.price, :staff_id => cookies[:user_id]
           })
         if mat_in_order.save
           if material_order.check_material_order_status
@@ -169,9 +156,9 @@ class MaterialsInOutsController < ApplicationController
           material.storage += mat_in_order.material_num
           material.save
         end
-      end unless mat_in_items.blank?
+      end 
     
-    end
+    end unless mat_in_items.blank?
     mat_in_orders
   end
 end

@@ -37,8 +37,10 @@
         <td><%= Order::IS_PLEASED_NAME[order.is_pleased] %></td>
         <td><%= order.is_billing ? "是" : "否" %></td>
         <td>
-          <a href="javascript:void(0)"
-             onclick="javascript:customer_revisit(<%= order.id %>, <%= @customer.id %>)">回访</a>
+          <% if permission?(:customers, :revisit) %>
+            <a href="javascript:void(0)"
+               onclick="javascript:customer_revisit(<%= order.id %>, <%= @customer.id %>)">回访</a>
+             <% end %>
         </td>
       </tr>
     <% end %>

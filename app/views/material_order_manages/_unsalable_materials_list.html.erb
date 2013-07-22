@@ -11,19 +11,25 @@
   </tr>
   </thead>
   <tbody>
-  <% (@unsalable_materials || []).each do |material| %>
-      <tr class="<%= cycle('', 'tbg') %>" id="showmaterial<%= material.id %>tr">
-        <td <% if !material.is_ignore && material.storage.to_i<=material.material_low.to_i %>class="data_table_error"<% end %>>
-          <%= material.code %>
-        </td>
-        <td><%= material.name %></td>
-        <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
-        <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= material.storage.to_i %></span></td>
-        <td><%= material.unit %></td>
-        <td><%= material.price %></td>
-        <td><%= material.sale_price %></td>
+  <% if @all_unsalable_materials.length != 0 %>
+      <% (@unsalable_materials || []).each do |material| %>
+          <tr class="<%= cycle('', 'tbg') %>" id="showmaterial<%= material.id %>tr">
+            <td <% if !material.is_ignore && material.storage.to_i<=material.material_low.to_i %>class="data_table_error"<% end %>>
+              <%= material.code %>
+            </td>
+            <td><%= material.name %></td>
+            <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
+            <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= material.storage.to_i %></span></td>
+            <td><%= material.unit %></td>
+            <td><%= material.price %></td>
+            <td><%= material.sale_price %></td>
+          </tr>
+      <% end %>
+  <% else %>
+      <tr>
+        <td colspan="8" align="center">暂无查询结果</td>
       </tr>
   <% end %>
   </tbody>
 </table>
-<%= will_paginate_remote(@unsalable_materials,"start_date=#{@start_date}&end_date = #{@end_date}&mat_types = #{@mat_type}&sale_num=#{@sale_num}",{:url=>page_unsalable_materials_store_material_order_manages_url(@store), :class => "pageTurn",:prev_label => "上一页",:next_label => "下一页", :renderer => "RemotePaginateHelper::LinkRenderer"}) if @unsalable_materials.size > 0 %>
+<%= will_paginate_remote(@unsalable_materials,"start_date=#{@start_date}&end_date=#{@end_date}&mat_types=#{@mat_type}&sale_num=#{@sale_num}",{:url=>page_unsalable_materials_store_material_order_manages_url(@store), :class => "pageTurn",:prev_label => "上一页",:next_label => "下一页", :renderer => "RemotePaginateHelper::LinkRenderer"}) if @unsalable_materials.size > 0 %>

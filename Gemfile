@@ -19,8 +19,8 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
-#gem 'execjs'
-#gem 'therubyracer'
+gem 'execjs'
+gem 'therubyracer'
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'
@@ -46,5 +46,5 @@ end
 #group :development do
 #  gem "better_errors"
 #end
-gem 'rmagick'
-gem 'barby'
+#gem 'rmagick', '2.13.1'
+#gem 'barby', '0.5.1'

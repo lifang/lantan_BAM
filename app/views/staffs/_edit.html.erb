@@ -100,7 +100,9 @@
                   </div>
                 <div class="item_textarea">
                      <label>上传照片：</label><%= f.file_field :photo, :class => "file" %>
+                     <% if !f.object.photo.nil? %>
                        <span class="show_pic"><%= image_tag "#{f.object.photo}" %>
+                     <% end %>
                      </span>
                 </div>
                 

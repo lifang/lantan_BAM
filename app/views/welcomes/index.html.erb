@@ -17,7 +17,7 @@
     <div class="head">
       <div class="box position_re">
         <div class="logo1"><span>V2.1</span></div>
-        <div class="login">你好：<a href="javascript:void(0)" id="edit_password"><%= cookies[:user_name] %></a> | <a href="/logout">退出</a></div>
+        <div class="login">你好：<a href="javascript:void(0)" id="edit_password"><%= cookies[:user_name] %>(忘记密码)</a> | <a href="/logout">退出</a></div>
         <div class="name">
           <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= params[:store_id] %>)"/></span>
            <span style="cursor:pointer;" title="点击此处编辑门店名" onclick="set_store_name(this)"><%= cookies[:store_name] %></span><span>后台管理系统</span>
@@ -50,19 +50,11 @@
     <%= render :partial => "/shared/tishi_alert" %>
     <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
 
-    
-    <script type="text/javascript">
-      $(document).ready(function(){
-         $("#edit_password").click(function(){
-           popup("#edit_password_area");
-         });
-      });
-    </script>
       <!--修改账户密码-->
       <div class="mask"></div>
       <div class="tab_popup" style="display:none;z-index:10;" id="edit_password_area">
             <div class="popup_box">
-                <h1><a href="javascript:void(0)" class="close">关闭</a></h1>
+                <h1>修改密码<a href="javascript:void(0)" class="close">关闭</a></h1>
                  <div class="popup_body">
                    <form accept-charset="UTF-8" action="/stores/<%= params[:store_id] %>/welcomes/update_staff_password" method="post" data-remote="true" data-type="script">
                       <div class="popup_body_area">
@@ -73,7 +65,7 @@
                                  <div class="pw_list"><label>新密码：</label><input name="new_password" type="password" id="new_password"/></div>
                                  <div class="pw_list"><label>确认新密码：</label><input name="confirm_password" type="password" id="confirm_password"/></div>
                          </div>
-                         <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
+                         <div class="btn_box"><button class="confirm_btn" id="edit_password_btn">确定</button><button class="cancel_btn">取消</button></div>
                       </div>
                    </form>
                  </div>

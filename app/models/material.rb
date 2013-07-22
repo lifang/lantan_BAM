@@ -1,11 +1,11 @@
 #encoding: utf-8
-#require 'barby'
-#require 'barby/barcode/code_128'
-#require 'barby/barcode/ean_13'
-#require 'barby/outputter/custom_rmagick_outputter'
-#require 'barby/outputter/rmagick_outputter'
+require 'barby'
+require 'barby/barcode/ean_13'
+require 'barby/outputter/custom_rmagick_outputter'
+require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
+  has_many :material_losses
   has_many :mat_order_items
   has_many :material_orders, :through => :mat_order_items do 
     def not_all_in
@@ -34,38 +34,31 @@ class Material < ActiveRecord::Base
   DEFAULT_MATERIAL_LOW = 0    #默认库存预警为0
   scope :normal, where(:status => STATUS[:NORMAL])
 
-  def self.unsalable_list page,per_page,store_id,sql=[nil,nil,nil,nil]
+  def self.unsalable_list store_id,sql=[nil,nil,nil,nil]
+    sql[0] = sql[0].blank? ? "'1 = 1'" : "created_at >='#{sql[0]} 00:00:00'"
+    sql[1] = sql[1].blank? ? "'1 = 1'" : "created_at <='#{sql[1]} 23:59:59'"
+    sql[2] = sql[2].blank? ? nil : "having count(material_id) >= #{sql[2]}"
+    sql[3] = sql[3].blank? ? "'1 = 1'" : "m.types = #{sql[3].to_i}"
     Material.find_by_sql("select * from materials m where m.id not in(select material_id as id from mat_out_orders where
-    #{sql[0]} and #{sql[1]} and store_id = '#{store_id}' group by material_id having #{sql[2]} order by material_id) and m.status !=#{Material::STATUS[:DELETE]} and m.store_id = '#{store_id}' and #{sql[3]};").
-        paginate(:page => page, :per_page => per_page)
+    #{sql[0]} and #{sql[1]} and types = 3 and store_id = #{store_id} group by material_id  #{sql[2]}) and m.status !=#{Material::STATUS[:DELETE]} and m.store_id = #{store_id} and #{sql[3]};")
   end
 
   private
   
   def generate_barcode
-    #self.code = types.to_s + Time.now.strftime("%Y%m%d%H%M%S")
-    self.code = '123456789012'
+    code = Time.now.strftime("%Y%m%d%H%M%L")[1..-1]
+    code[0] = ''
+    code[0] = ''
+    self.code = code
   end
 
   def generate_barcode_img
-    #barcode = Barby::Code128B.new(self.code)
     barcode = Barby::EAN13.new(self.code)
     if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
       FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
     end
-    barcode.to_image_with_data(:height => 350, :margin => 10, :xdim => 7).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
-    #self.update_attribute(:code_img, "/barcode/#{self.id}/barcode.png")
-
-#    file_path = "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}/barcode.png"
-#    img = MiniMagick::Image.open file_path,"rb"
-#
-#    [748].each do |size|
-#      resize = size
-#      new_file = file_path.split(".")[0]+"_#{resize}."+file_path.split(".").reverse[0]
-#      resize_file_name = "barcode"+"_#{resize}."+"png"
-#      self.update_attribute(:code_img, "/barcode/#{self.id}/#{resize_file_name}")
-#      img.run_command("convert #{file_path}  -resize #{resize}x#{resize} #{new_file}")
-#    end
-
+    barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
+    self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{self.id}/barcode.png")
   end
+
 end

@@ -16,7 +16,7 @@
 <div class="data_box" id="material_data_box">
   <div class="data_menu">
     <% if permission?(:materials, :add) %>
-    <%= link_to "物料数据维护", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
+    <%= link_to "添加物料", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
     <% end %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
@@ -95,7 +95,7 @@
           <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1, :mo_search => true}  %>
         <div class="search_result_mat"></div>
         <div class="data_body">
-      <%= form_tag  create_materials_in_path , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
+      <%= form_tag  "/stores/#{@current_store.id}/create_materials_in" , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
           <thead>
             <tr class="hbg">
@@ -114,8 +114,8 @@
         <div class="clear"></div>
         <div class="btn_box_s">
           <button onclick="checkNums(<%= @current_store.id %>)" type="button" class="confirm_btn">入库</button>
-          <button onclick="fetchMatIn(this)" type="button" class="confirm_btn">打印入库清单</button>
-          <button type="button" class="confirm_btn">打印条码</button>
+          <button onclick="fetchMatIn(this, <%= @current_store.id %>, 0)" type="button" class="confirm_btn">打印入库清单</button>
+          <button onclick="fetchMatIn(this, <%= @current_store.id %>, 1)" type="button" class="confirm_btn">打印条形码</button>
         </div>
       <% end %>
     </div>
@@ -216,7 +216,7 @@
         <div id="mat_loss_search_result" style="height: auto;">
           <%= render :partial => '/materials/mat_loss_search_result' %>
         </div>
-        <%= form_tag add_materials_losses_url(params[:store_id]), :id => "MaterialsLoss_form" ,:method => :post, :html => {:remote => true, 'data-type' => 'script'} do  %>
+        <%= form_tag "/stores/#{@current_store.id}/materials/mat_loss_add", :id => "MaterialsLoss_form" ,:method => :post, "data-type" => "script", :remote => true do  %>
             <table  width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
               <thead>
               <tr class="hbg">
@@ -230,14 +230,15 @@
               </thead>
               <tbody id="selected_materials"></tbody>
             </table>
-            <div class="search"><%= hidden_field_tag "selected_items" %>
+            <div class="search">
               <div><%= label_tag "staff","报损人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
             </div>
-            </div>
+            
             <%= hidden_field_tag "hidden_store_id", cookies[:user_id] %>
-            <div class="btn_box"><button id="add_MaterialsLoss_btn" onclick="return checkMatLossNum(this)" class="confirm_btn">确定</button></div>
+            <div class="btn_box"><button id="add_MaterialsLoss_btn" onclick="checkMatLossNum()" class="confirm_btn" type="button"  >确定</button></div>
             <div class="clear"></div>
         <% end %>
+            </div>
     </div>
   </div>
 </div>

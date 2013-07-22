@@ -87,19 +87,30 @@ class WorkOrder < ActiveRecord::Base
         wo_time.update_attribute(:wait_num, wo_time.wait_num - 1) if wo_time and wo_time.wait_num
         next_order = next_work_order.order
         next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT]
+        message = "has_next_work_order"
       else
         #按照created_at时间来排单
-        another_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
-                            where("station_id is null").
-                            where("store_id = #{self.store_id}").
-                            where("current_day = #{self.current_day}").order("created_at asc").first
+        products = Product.includes(:station_service_relations => :station).
+          where("stations.id=#{self.station_id} and products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
+        another_work_order = WorkOrder.joins(:order => {:order_prod_relations => :product}).
+                            where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
+                            where("work_orders.station_id is null").
+                            where("work_orders.store_id = #{self.store_id}").
+                            where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
+                            where("products.id in (?)",products.map(&:id)).
+                            where("work_orders.current_day = #{self.current_day}").readonly(false).order("work_orders.created_at asc").first
+
         if another_work_order
+          ended_at = current_time + another_work_order.cost_time*60
           another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
             :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
           another_order = another_work_order.order
           another_order.update_attribute(:status, Order::STATUS[:SERVICING]) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT]
+        else
+          message = "no_next_work_order"
         end
       end
+      message
   end
   
 end

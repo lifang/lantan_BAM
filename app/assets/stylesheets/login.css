@@ -95,3 +95,13 @@ button { font-family:"微软雅黑"; cursor: pointer; border: none;}
 .confirm_btn, .cancel_btn { padding: 5px 15px; margin: 0 10px; color: #FFF;cursor: pointer; display: inline-block;}
 .confirm_btn { background: #930205;}
 .cancel_btn { background: #999999;}
+.mask {
+    background: url(/assets/black.png) repeat;
+    width: 100%;
+    height: 100%;
+    display: none;
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    left: 0;
+}

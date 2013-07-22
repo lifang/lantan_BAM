@@ -46,15 +46,15 @@ function add_product(e){
         tishi_alert("请输入产品的名称,不能包含非法字符");
         return false;
     }
-    if(t_price == "" || t_price.length==0 || isNaN(parseFloat(t_price))){
+    if(t_price == "" || t_price.length==0 || isNaN(parseFloat(t_price)) || parseFloat(t_price)<0){
         tishi_alert("请输入产品的成本价,价格为数字");
         return false;
     }
-    if(base == "" || base.length==0 || isNaN(parseFloat(base))){
+    if(base == "" || base.length==0 || isNaN(parseFloat(base)) || parseFloat(base)<0){
         tishi_alert("请输入产品的零售价格,价格为数字");
         return false;
     }
-    if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
+    if(sale == "" || sale.length==0 || isNaN(parseFloat(sale)) || parseFloat(sale)<0){
         tishi_alert("请输入产品的促销价格,价格为数字");
         return false;
     }
@@ -62,7 +62,7 @@ function add_product(e){
         tishi_alert("请输入产品的规格");
         return false;
     }
-    if (point=="" || point.length==0 || isNaN(parseFloat(point))){
+    if (point=="" || point.length==0 || isNaN(parseFloat(point)) || parseFloat(point)<0){
         tishi_alert("请输入产品的积分，积分是数字");
         return false;
     }
@@ -156,23 +156,23 @@ function edit_serv(e){
         tishi_alert("产品或服务的数量必须大于1");
         return false;
     }
-    if(base == "" || base.length==0 || isNaN(parseFloat(base))){
+    if(base == "" || base.length==0 || isNaN(parseFloat(base)) || parseFloat(base)<0){
         tishi_alert("请输入服务的零售价格,价格为数字");
         return false;
     }
-    if(sale == "" || sale.length==0 || isNaN(parseFloat(sale))){
+    if(sale == "" || sale.length==0 || isNaN(parseFloat(sale)) || parseFloat(sale)<0){
         tishi_alert("请输入服务的促销价格,价格为数字");
         return false;
     }
-    if(origin == "" || origin.length==0 || isNaN(parseFloat(origin))){
+    if(origin == "" || origin.length==0 || isNaN(parseFloat(origin)) || parseFloat(origin)<0){
         tishi_alert("请输入服务的成本价,价格为数字");
         return false;
     }
-    if(deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct))){
+    if(deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct)) || parseFloat(deduct)<0){
         tishi_alert("请输入技师提成百分点");
         return false;
     }
-    if(time== "" || time.length==0 || isNaN(parseInt(time))){
+    if(time== "" || time.length==0 || isNaN(parseInt(time)) || parseInt(time)<0){
         tishi_alert("请输入服务的施工时间");
         return false;
     }
@@ -193,7 +193,7 @@ function edit_serv(e){
         tishi_alert("请选择"+pic_format+"格式的图片，且名称不能包含非法字符" );
         return false
     }
-    if (point=="" || point.length==0 || isNaN(parseFloat(point))){
+    if (point=="" || point.length==0 || isNaN(parseFloat(point)) || parseFloat(point)<0){
         tishi_alert("请输入产品的积分，积分是数字");
         return false;
     }

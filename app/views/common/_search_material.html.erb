@@ -14,11 +14,12 @@
       storage = m.is_a?(Hash) ? m["storage"].to_i : m.storage.to_i
       name = m.is_a?(Hash) ? m["name"] : m.name
       types = m.is_a?(Hash) ? m["types"] : m.types
-      code = m.is_a?(Hash) ? m["code"] : m.code
-      price = m.is_a?(Hash) ? m["price"] : m.price
+      #code = m.is_a?(Hash) ? m["code"] : m.code
+      #cost_price = m.is_a?(Hash) ? m["cost_price"] : m.price
+      #sale_price = m.is_a?(Hash) ? m["sale_price"] : m.sale_price
     %>
-      <li><%= check_box_tag "mat_#{id}",storage.to_i,false,{:onclick=>"select_order_material(this,'#{name}',
-      '#{Material::TYPES_NAMES[types.to_i]}',#{@type},'#{code}','#{price}')"} %><label><%= name %></label</li>
+      <li><%= check_box_tag "mat_#{id}",storage.to_i,false,{:onclick=>"select_order_material(this,
+      '#{Material::TYPES_NAMES[types.to_i]}',#{m.to_json})"} %><label><%= name %></label</li>
     <% end %>
   </ul>
 <% elsif @type==2 %>

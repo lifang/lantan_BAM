@@ -16,7 +16,7 @@
 <% else %>
   <% if @tab_name=="materials" %>
     $("#kucunliebiao").html('<%= escape_javascript(render :partial => '/materials/page_materials') %>');
-<% elsif @tab_name = "material_losses_materials" %>
+<% elsif @tab_name == "material_losses_materials" %>
 $("#mat_loss_search_result").html('<%= escape_javascript(render :partial => '/materials/mat_loss_search_result') %>');
   <% elsif @tab_name=="material_losses"%>
     $("#page_materails_losses").html('<%= escape_javascript(render :partial => 'materials/materials_losses') %>');

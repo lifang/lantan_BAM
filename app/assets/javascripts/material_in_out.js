@@ -73,18 +73,18 @@ function removeRow(obj, print_flag){
 }
 
 function checkNums(store_id){
-    var form_action_url = $("#create_mat_in_form").attr("action");
+    var form_action_url = "/stores/"+ store_id +"/create_materials_in"
     var saved_mat_mos = "";
     var notice = "";
     var mat_in_length = $(".mat-out-list").find("tr").length - 1;
     if(mat_in_length==-1){
-        alert('请录入商品！');
+        tishi_alert('请选择物料！');
     }
     var f = true;
     $(".mat-out-list").find("tr").each(function(index){
         var mat_code = $(this).find(".mat_code").text();
         var mo_code = $(this).find(".mo_code").text();
-        var num = $(this).find(".mat_item_num").val();
+        var num = $.trim($(this).find(".mat_item_num").val());
 //        var input_num = $(this).find("#material_num").val();
         if(num.match(reg1)==null){
           tishi_alert("请输入正确的数字！")

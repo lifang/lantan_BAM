@@ -6,12 +6,6 @@ LantanBAM::Application.routes.draw do
       post "upload_image"
     end
   end
-  resources :materials_losses do
-    collection do
-      post 'add'
-      get 'delete','view'
-    end
-  end
   resources :work_orders do
     collection do
       get "work_orders_status"
@@ -23,9 +17,6 @@ LantanBAM::Application.routes.draw do
     end
   end
   resources :stations do
-    collection do
-      get "simple_station"
-    end
   end
 
   # The priority is based upon order of creation:
@@ -61,7 +52,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :stations do
       collection do
-        get "show_detail","show_video","see_video","search_video"
+        get "show_detail","show_video","see_video","search_video", "simple_station"
         post "search","collect_info"
       end
     end
@@ -96,8 +87,10 @@ LantanBAM::Application.routes.draw do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
-          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code"
-        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode"
+          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
+          "mat_loss_delete"
+        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
+             "mat_loss_add"
       end
       member do
         get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"
@@ -188,12 +181,13 @@ LantanBAM::Application.routes.draw do
         get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
       end
     end
+    resources :materials_in_outs
   end
-  resources :materials_in_outs
-  match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
-  match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
+  
+  match 'stores/:store_id/materials_in' => 'materials_in_outs#materials_in'
+  match 'stores/:store_id/materials_out' => 'materials_in_outs#materials_out'
   match 'get_material' => 'materials_in_outs#get_material'
-  match 'create_materials_in' => 'materials_in_outs#create_materials_in'
+  match 'stores/:store_id/create_materials_in' => 'materials_in_outs#create_materials_in'
   match 'create_materials_out' => 'materials_in_outs#create_materials_out'
   match 'save_cookies' => 'materials_in_outs#save_cookies'
   match 'stores/:store_id/materials/:mo_id/get_mo_remark' => 'materials#get_mo_remark'
@@ -205,7 +199,6 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
-  match 'stores/:id/prin_matin_list' => 'materials_in_outs#prin_matin_list'
 
   #match 'stores/:store_id/depots' => 'depots#index'
   #match 'stores/:store_id/depots/create' => 'depots#create'
@@ -243,7 +236,8 @@ LantanBAM::Application.routes.draw do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
           "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
-          "use_svcard","work_order_finished","login_and_return_construction_order","check_num","out_materials","get_construction_order"
+          "use_svcard","work_order_finished","login_and_return_construction_order","check_num","out_materials",
+          "get_construction_order","search_by_car_num2"
       end
     end
     resources :syncs_datas do
@@ -256,7 +250,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :logins do
       collection do
-        post :check_staff,:staff_login,:staff_checkin
+        post :check_staff,:staff_login,:staff_checkin,:upload_img
         get :download_staff_infos
       end
     end

@@ -112,6 +112,8 @@ class Api::OrdersController < ApplicationController
       content = "success"
     elsif pre_arr[5] == 2
       content = "选择的产品和服务无法匹配工位"
+    elsif pre_arr[5] == 3
+      content = "所购买的服务需要多个工位，请分别下单！"
     end
     result = {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
       :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
@@ -366,9 +368,16 @@ class Api::OrdersController < ApplicationController
   #工位完成施工，技师会用手机触发，给工位进行排单
   def work_order_finished
     work_order = WorkOrder.find_by_id(params[:work_order_id])
-    work_order.arrange_station if work_order
-
-    render :json => {:status => "sort_station_success"}
+    if work_order
+      message = work_order.arrange_station
+      if message == "no_next_work_order"
+        render :json => {:status => 1, :message => "没有客户继续下单!"}
+      else
+        render :json => {:status => 1, :message => "排单成功!"}
+      end
+    else
+      render :json => {:status => 0, :message => "没有找到这个订单!"}
+    end
   end
 
   #盘点实数
@@ -380,7 +389,8 @@ class Api::OrdersController < ApplicationController
     materials.each do |mat|
       material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
       if material
-        material.check_num = mat['check_num'].to_i
+        material.storage = mat['storage'].to_i
+        material.check_num = nil
         mat_arr << material
       else
         mat_arr << nil
@@ -389,7 +399,7 @@ class Api::OrdersController < ApplicationController
     if mat_arr.include?(nil)
       render :json => {:status => "error", :message => "没有材料"}
     else
-      if Material.import mat_arr, :on_duplicate_key_update => [:check_num]
+      if Material.import mat_arr, :on_duplicate_key_update => [:check_num, :storage]
         render :json => {:status => "success"}
       else
         render :json => {:status => "error", :message => "更新盘点实数失败"}
@@ -453,14 +463,26 @@ class Api::OrdersController < ApplicationController
     staff = Staff.find_by_id(params[:staff_id])
     if staff
       current_day = Time.now.strftime("%Y%m%d")
-      work_orders = WorkOrder.where("store_id = #{staff.store_id}").
-                     where("status = #{WorkOrder::STAT[:SERVICING]}").
-                     where("current_day = #{current_day}")
+      work_orders = WorkOrder.joins([:order => :car_num], :station).where("work_orders.store_id = #{staff.store_id}").
+                     where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
+                     where("stations.status = #{Station::STAT[:NORMAL]}").
+                     where("work_orders.current_day = #{current_day}").select("work_orders.*,car_nums.num as car_num")
+      result = []
+      work_orders.each do |work_order|
+        work_order["coutdown"] = Time.now - work_order.ended_at
+        result << work_order
+      end
 
-      render :json => {:status => 1, :work_orders => work_orders}
+      render :json => {:status => 1, :work_orders => result}
     else
       render :json => {:status => 0}
     end
+  end
+
+  # 点击产品预览后，输入car num 查询api
+  def search_by_car_num2
+    customer_info = CarNum.get_customer_info_by_carnum(params[:store_id],params[:car_num])
+    render :json => {:customer => customer_info, :status => customer_info.nil? ? 0 : 1}
   end
   
 end
