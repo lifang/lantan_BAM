@@ -777,7 +777,7 @@ a.compile_btn { width: 100px;}
 .site_table_text { line-height:100px; text-align: center;}
 .site_tdThead { background: #930205; color: #FFF;}
 .site_tdTbody { border-bottom: 1px #930205 solid;}
-.site_tdThead, .site_tdTbody { height: 33px; line-height: 33px;}
+.site_tdThead, .site_tdTbody { height: 24px; line-height: 24px;}
 .site_tdTbody_bt { background: #B72629; color: #FFF;}
 .site_tdThead span, .site_tdTbody span { width: 55px; display: inline-block; float: left; text-align: center;}
 
