@@ -13,16 +13,14 @@ class StationsController < ApplicationController
     @f_waiting =waits.inject(Hash.new) { |hash, a| hash[a.front_staff_id].nil? ? hash[a.front_staff_id]=[a] : hash[a.front_staff_id] << a;hash}
     servs =work_orders[WorkOrder::STAT[:SERVICING]].nil? ? {} : work_orders[WorkOrder::STAT[:SERVICING]]
     @f_working =servs.inject(Hash.new) { |hash, a| hash[a.front_staff_id].nil? ? hash[a.front_staff_id]=[a] : hash[a.front_staff_id] << a;hash}
-    nums=servs.inject(Hash.new) { |hash, a| hash.merge(a.station_id=>a.num)}
-    @t_infos={}
-    @stations.each do |station|
-      staff=StationStaffRelation.find_by_sql("select staff_id from station_staff_relations where station_id=#{station.id}  and current_day='#{Time.now.strftime("%Y%m%d")}' ")
-      @t_infos[station.id]=[Staff.where("id in (#{staff.map(&:staff_id).join(',')})").map(&:name).join("、 "),nums[station.id]] unless staff.blank?
-    end
-    @times ={}
+    @nums = servs.inject(Hash.new) { |hash, a| hash.merge(a.station_id=>a.num)}
+    @staff_ids,@times,@staffs = {},{},{}
+    StationStaffRelation.find_by_sql("select staff_id t_id,station_id s_id from station_staff_relations where station_id in (#{@stations.map(&:id).join(',')})
+    and current_day='#{Time.now.strftime("%Y%m%d")}' ").each {|staff|@staff_ids[staff.s_id].nil? ? @staff_ids[staff.s_id]=[staff.t_id] : @staff_ids[staff.s_id]<<staff.t_id}
+    Staff.where("id in (#{@staff_ids.values.flatten.uniq.join(',')})").each{|staff|@staffs[staff.id]=staff.name} unless @staff_ids == {}
     WorkOrder.where("store_id=#{params[:store_id]} and status=#{WorkOrder::STAT[:SERVICING]} and current_day=#{Time.now.strftime('%Y%m%d').to_i}").each{|work_order|
       @times[work_order.station_id]=(work_order.ended_at.nil? ? 0 : work_order.ended_at) -Time.now}
-    p @t_infos
+    p @staffs
   end
 
   def show_detail
@@ -83,15 +81,17 @@ class StationsController < ApplicationController
   end
 
   def collect_info
-    content = "sum(water_num) water,sum(gas_num) gas,station_id"
+    content = "sum(water_num) water,sum(gas_num) gas,count(work_orders.id) num,station_id,is_has_controller"
     conditions = "work_orders.status=#{WorkOrder::STAT[:COMPLETE]} and date_format(work_orders.updated_at,'%Y-%m')='#{Time.now.strftime('%Y-%m')}'
-    and work_orders.store_id=#{params[:store_id]}  and stations.is_has_controller=#{Station::IS_CONTROLLER[:YES]}"
+    and work_orders.store_id=#{params[:store_id]}"
     month_num = WorkOrder.joins(:station).select(content).group("station_id").where(conditions).inject(Hash.new){|hash,w_order| 
-      hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(1),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(1)]; hash}
+      hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(1),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(1),
+        w_order.num]; hash}
     d_conditions = "work_orders.status=#{WorkOrder::STAT[:COMPLETE]} and current_day=#{Time.now.strftime('%Y%m%d').to_i} 
-    and work_orders.store_id=#{params[:store_id]}  and stations.is_has_controller=#{Station::IS_CONTROLLER[:YES]}"
+    and work_orders.store_id=#{params[:store_id]}"
     day_num = WorkOrder.joins(:station).select(content).group("station_id").where(d_conditions).inject(Hash.new){|hash,w_order| 
-      hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(1),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(1)];hash}
+      hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(1),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(1),
+        w_order.num];hash}
     p month_num
     render :json=>{:month_num=>month_num,:day_num=>day_num}
   end

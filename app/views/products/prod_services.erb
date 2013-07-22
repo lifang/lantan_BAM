@@ -20,6 +20,7 @@
                   <td>成本价</td>
                   <td>零售价格</td>
                   <td>促销价</td>
+                  <td>积分</td>
                   <td>施工时间（分钟）</td>
                   <td>类别</td>
                   <td>技师</td>
@@ -35,6 +36,7 @@
                     <td><%= service.t_price %></td>
                     <td><%= service.base_price %></td>
                     <td><%= service.sale_price %></td>
+                     <td><%= service.prod_point %></td>
                     <td><%= service.cost_time %></td>
                     <td><%= Product::PRODUCT_TYPES[service.types] %></td>
                     <td><%= "#{Staff::LEVELS[service.level1]} - #{Staff::LEVELS[service.level2]}" %></td>

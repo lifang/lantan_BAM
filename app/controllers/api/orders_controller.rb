@@ -300,8 +300,8 @@ class Api::OrdersController < ApplicationController
   #发送短信code
   def get_user_svcard
     csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id where c.mobilephone = ? and sc.types = 1",
-        params[:mobilephone].strip])
+      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id where c.mobilephone = ? and sc.types = 1 and csr.status = ?",
+        params[:mobilephone].strip, CSvcRelation::STATUS[:valid]])
     sum_left_total = csvc_relaions.inject(0){|sum, csv| sum = sum+csv.left_price.to_f}
     record = csvc_relaions[0]
     status = 0
@@ -328,8 +328,8 @@ class Api::OrdersController < ApplicationController
   def use_svcard
     record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
       left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
-      where sc.types = 1 and c.mobilephone = ? and csr.verify_code = ?",
-        params[:mobilephone].strip, params[:verify_code].strip])[0]
+      where sc.types = 1 and c.mobilephone = ? and csr.verify_code = ? and csr.status = ?",
+        params[:mobilephone].strip, params[:verify_code].strip, CSvcRelation::STATUS[:valid]])[0]
     status = 0
     message = "支付失败。"
     price = params[:price].to_f
@@ -341,8 +341,8 @@ class Api::OrdersController < ApplicationController
         record.update_attribute(:left_price, left_price)
       else
         csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join customers c on c.id = csr.customer_id where c.mobilephone = ? and left_price != ?",
-            params[:mobilephone].strip, 0])
+      left join customers c on c.id = csr.customer_id where c.mobilephone = ? and left_price != ? and csr.status = ?",
+            params[:mobilephone].strip, 0, CSvcRelation::STATUS[:valid]])
         csvc_relaions.each do |csv|
           if price > 0
             if price - csv.left_price >= 0
@@ -382,6 +382,32 @@ class Api::OrdersController < ApplicationController
 
   #盘点实数
   def check_num
+    data = JSON.parse(params[:data])
+    store_id = data["store_id"]
+    materials = data["materials"]
+    mat_arr = []
+    materials.each do |mat|
+      material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
+      if material
+        material.check_num = mat['check_num']
+        mat_arr << material
+      else
+        mat_arr << nil
+      end
+    end
+    if mat_arr.include?(nil)
+      render :json => {:status => "error", :message => "没有材料"}
+    else
+      if Material.import mat_arr, :on_duplicate_key_update => [:check_num]
+        render :json => {:status => "success"}
+      else
+        render :json => {:status => "error", :message => "更新盘点实数失败"}
+      end
+    end
+  end
+
+  #核实
+  def materials_verification
     data = JSON.parse(params[:data])
     store_id = data["store_id"]
     materials = data["materials"]
@@ -451,10 +477,15 @@ class Api::OrdersController < ApplicationController
       render :json => {:status => 0}
     else
       #登录成功
-      #所有的code，材料名称
-      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
-      mat_out_types = MatOutOrder::TYPES
-      render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types}
+      #是否是技师登录
+      if staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
+        #所有的code，材料名称
+        materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+        mat_out_types = MatOutOrder::TYPES
+        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types}
+      else
+        render :json => {:status => 2}
+      end
     end
   end
 
@@ -469,7 +500,7 @@ class Api::OrdersController < ApplicationController
                      where("work_orders.current_day = #{current_day}").select("work_orders.*,car_nums.num as car_num")
       result = []
       work_orders.each do |work_order|
-        work_order["coutdown"] = Time.now - work_order.ended_at
+        work_order["coutdown"] = work_order.ended_at - Time.now
         result << work_order
       end
 

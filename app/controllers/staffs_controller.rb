@@ -41,6 +41,7 @@ class StaffsController < ApplicationController
     if @staff.save   #save staff info and picture
       @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create") unless photo.nil?
       flash[:notice] = "创建员工成功!"
+      @staff.send_message
     else
       flash[:notice] = "创建员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
     end

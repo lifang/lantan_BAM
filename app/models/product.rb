@@ -42,8 +42,9 @@ class Product < ActiveRecord::Base
       customer_ids = []
       message_arr = []
       customer_message.keys.each {|mess|store_ids << mess.split("_")[0].to_i;customer_ids << mess.split("_")[1].to_i}
+      customers = Customer.find(customer_ids)
       Store.find(store_ids).each do |store|
-        Customer.find(customer_ids).inject(Hash.new) { |hash,c|
+        customers.inject(Hash.new) { |hash,c|
           strs = []
           customer_message["#{store.id}_#{c.id}"].each_with_index {|str,index| strs << "#{index+1}.#{str.revist_content}" }
           MessageRecord.transaction do
