@@ -83,13 +83,13 @@ class StationsController < ApplicationController
   end
 
   def collect_info
-    content = "sum(water_num) water,sum(gas_num) gas,station_id"
+    content = "sum(water_num) water,sum(gas_num) gas,count(work_orders.id) num,station_id,is_has_controller"
     conditions = "work_orders.status=#{WorkOrder::STAT[:COMPLETE]} and date_format(work_orders.updated_at,'%Y-%m')='#{Time.now.strftime('%Y-%m')}'
-    and work_orders.store_id=#{params[:store_id]}  and stations.is_has_controller=#{Station::IS_CONTROLLER[:YES]}"
+    and work_orders.store_id=#{params[:store_id]}"
     month_num = WorkOrder.joins(:station).select(content).group("station_id").where(conditions).inject(Hash.new){|hash,w_order| 
       hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(1),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(1)]; hash}
     d_conditions = "work_orders.status=#{WorkOrder::STAT[:COMPLETE]} and current_day=#{Time.now.strftime('%Y%m%d').to_i} 
-    and work_orders.store_id=#{params[:store_id]}  and stations.is_has_controller=#{Station::IS_CONTROLLER[:YES]}"
+    and work_orders.store_id=#{params[:store_id]}"
     day_num = WorkOrder.joins(:station).select(content).group("station_id").where(d_conditions).inject(Hash.new){|hash,w_order| 
       hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(1),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(1)];hash}
     p month_num
