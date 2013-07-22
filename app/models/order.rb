@@ -246,6 +246,7 @@ class Order < ActiveRecord::Base
       h[:price] = p.sale_price
       h[:description] = p.description
       h[:mat_num] =  p_ids[p.id] if p.is_service == false
+      h[:point] = p.prod_point
       h[:img] = (p.img_url.nil? or p.img_url.empty?) ? "" : p.img_url.gsub("img#{p.id}","img#{p.id}_#{Constant::P_PICSIZE[1]}")
       
       if [Product::TYPES_NAME[:CLEAN_PROD], Product::TYPES_NAME[:BEAUTIFY_PROD]].include?(p.types.to_i)
@@ -298,10 +299,11 @@ class Order < ActiveRecord::Base
       h[:description] = description
       h[:img] = c.img_url
       h[:type] = c.is_a?(PackageCard) ? '0' : '1'
+      h[:point] = c.is_a?(PackageCard) ? c.prod_point : nil
       h
     }
     arr[:products] = product_arr
-    arr[:p_titles_order] = [:清洗美容类, :汽车用品类, :维修保养类, :美容产品类, :电子产品类, :装饰产品类, :汽车配件类, :套餐卡类]
+    arr[:p_titles_order] = [:清洗美容类, :汽车用品类, :维修保养类, :美容产品类, :电子产品类, :装饰产品类, :汽车配件类, :优惠卡类]
     #    count = product_arr.values.map(&:length).max
     #    arr[:count] = count
     arr
@@ -462,7 +464,7 @@ class Order < ActiveRecord::Base
       end if prod_ids && carNum && customer
       #用户相关的打折卡
       discont_card = CSvcRelation.find(:all, :select => "c_svc_relations.*",
-        :conditions => ["c_svc_relations.customer_id = ? and c_svc_relations.status = ? and s.types= ?", customer.id, true, SvCard::FAVOR[:DISCOUNT]],
+        :conditions => ["c_svc_relations.customer_id = ? and c_svc_relations.status = ? and s.types= ?", customer.id, CSvcRelation::STATUS[:valid], SvCard::FAVOR[:DISCOUNT]],
         :joins => ["inner join sv_cards s on s.id = c_svc_relations.sv_card_id"])
       if discont_card.any?
         discont_card.each{|r|
