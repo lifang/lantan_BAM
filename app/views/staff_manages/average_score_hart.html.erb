@@ -15,7 +15,7 @@
 </form>
 <div class="clear"></div>
 <div class="data_body">
-     <div><% if @avg_technician.nil? || !File.exist?(@avg_technician) %>技师平均水平统计没有数据！<% else %><%= image_tag @avg_technician %><% end %></div>
-     <div><% if @avg_front.nil? || !File.exist?(@avg_front) %>接待平均水平统计没有数据！<% else %><%= image_tag @avg_front %><% end %></div>
+     <div><% if @avg_technician.nil? %>技师平均水平统计没有数据！<% else %><%= image_tag @avg_technician %><% end %></div>
+     <div><% if @avg_front.nil? %>接待平均水平统计没有数据！<% else %><%= image_tag @avg_front %><% end %></div>
 </div>
       
