@@ -469,7 +469,7 @@ class Api::OrdersController < ApplicationController
                      where("work_orders.current_day = #{current_day}").select("work_orders.*,car_nums.num as car_num")
       result = []
       work_orders.each do |work_order|
-        work_order["coutdown"] = Time.now - work_order.ended_at
+        work_order["coutdown"] = work_order.ended_at - Time.now
         result << work_order
       end
 

@@ -102,6 +102,7 @@ GEM
       json (~> 1.4)
     ref (1.0.5)
     remotipart (1.0.5)
+    rmagick (2.13.1)
     ruby-ole (1.2.11.6)
     rubyzip (0.9.9)
     spreadsheet (0.6.5.5)
@@ -144,6 +145,7 @@ DEPENDENCIES
   mysql2 (= 0.3.10)
   rails (= 3.1.2)
   remotipart (~> 1.0)
+  rmagick (= 2.13.1)
   rubyzip (= 0.9.9)
   spreadsheet (= 0.6.5.5)
   therubyracer
