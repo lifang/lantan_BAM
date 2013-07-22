@@ -451,10 +451,15 @@ class Api::OrdersController < ApplicationController
       render :json => {:status => 0}
     else
       #登录成功
-      #所有的code，材料名称
-      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
-      mat_out_types = MatOutOrder::TYPES
-      render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types}
+      #是否是技师登录
+      if staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
+        #所有的code，材料名称
+        materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+        mat_out_types = MatOutOrder::TYPES
+        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types}
+      else
+        render :json => {:status => 2, :message => "不是技师，无法登录!"}
+      end
     end
   end
 
@@ -469,7 +474,7 @@ class Api::OrdersController < ApplicationController
                      where("work_orders.current_day = #{current_day}").select("work_orders.*,car_nums.num as car_num")
       result = []
       work_orders.each do |work_order|
-        work_order["coutdown"] = Time.now - work_order.ended_at
+        work_order["coutdown"] = work_order.ended_at - Time.now
         result << work_order
       end
 
