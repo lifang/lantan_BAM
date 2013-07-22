@@ -281,7 +281,7 @@ class Order < ActiveRecord::Base
       inner join products p on p.id = ppr.product_id where ppr.package_card_id in (?)", cards]).group_by{ |pcr| pcr.package_card_id }
     sv_cards = SvCard.normal_included(2)
 
-    product_arr[:套餐卡类] = (cards + sv_cards || []).collect{|c|
+    product_arr[:优惠卡类] = (cards + sv_cards || []).collect{|c|
       price = c.is_a?(SvCard) ? c.sale_price : c.price
       description = ""
       if c.is_a?(SvCard)
