@@ -17,7 +17,7 @@ class SvCardsController < ApplicationController
   end
 
   def create
-    if SvCard.where(["types = ? and name = ?", params[:sv_card][:types], params[:sv_card][:name]]).blank?
+    if SvCard.where(["types = ? and name = ? and status = ?", params[:sv_card][:types], params[:sv_card][:name], SvCard::STATUS[:NORMAL]]).blank?
       img_obj = params[:sv_card][:img_url]
       params[:sv_card].delete_if{|key, value| key=="img_url"}
       if params[:sv_card][:types].to_i == SvCard::FAVOR[:DISCOUNT] #打折卡
