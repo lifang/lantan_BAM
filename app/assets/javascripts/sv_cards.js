@@ -5,7 +5,7 @@ $(document).ready(function(){
 function date_picker(){
     WdatePicker();
 }
-function new_sv_card(store_id){
+function new_sv_card(store_id){                 //新建优惠卡
     $.ajax({
         url: "/stores/"+store_id+"/sv_cards/new",
         type: "get",
@@ -33,7 +33,7 @@ function new_sv_card(store_id){
      if($.trim($("#sv_card_name").val()) == null || $.trim($("#sv_card_name").val()) == ""){
              tishi_alert("优惠卡名称不能为空");
              return false;
-         }
+         };
      if($("#sv_card_img_url").val() == ""){
         tishi_alert("请上传卡的图片!");
         return false;
@@ -44,30 +44,41 @@ function new_sv_card(store_id){
              tishi_alert("请上传格式正确的图片!");
              return false;
         }
-      }
-      if($.trim($("#sv_card_description").val()) == null || $.trim($("#sv_card_description").val()) == ""){
+      };
+      if($.trim($("#sv_card_description").val()) == ""){
         tishi_alert("请描述该卡!");
         return false;
-      }
+      };
      if(type==0){   //打折卡
-         if($.trim($("#sv_card_discount").val()) == null || $.trim($("#sv_card_discount").val()) == ""){
+         if($.trim($("#sv_card_discount").val()) == ""){
           tishi_alert("请输入折扣!");
           return false;
-        }
-        if(isNaN($("#sv_card_discount").val()) || parseFloat($("#sv_card_discount").val()) > 10 || parseFloat($("#sv_card_discount").val()) < 1){
+        }else if(isNaN($("#sv_card_discount").val()) || parseFloat($("#sv_card_discount").val()) > 10 || parseFloat($("#sv_card_discount").val()) < 1){
           tishi_alert("折扣必须在1~10之间的数字!");
           return false;
-       }
-       if($.trim($("#sv_card_price").val()) == null || $.trim($("#sv_card_price").val()) == "" || $.trim($("#sv_card_price").val()) <= 0 || isNaN($.trim($("#sv_card_price").val()))){
+       };
+       if($.trim($("#sv_card_price").val()) == ""){
+          tishi_alert("请输入打折卡金额!");
+          return false;
+      }else if(isNaN($.trim($("#sv_card_price").val()))){
           tishi_alert("请输入有效的打折卡金额!");
           return false;
-      }
+      }else if(parseFloat($.trim($("#sv_card_price").val()))<=0){
+          tishi_alert("金额至少大于零!");
+          return false;
+      };
      }else if(type==1){ //储值卡
-          if($.trim($("#started_money").val()) == null || $.trim($("#started_money").val()) == "" || $.trim($("#started_money").val()) <= 0 || isNaN($.trim($("#started_money").val()))){
+        if($.trim($("#started_money").val()) == ""){
+        tishi_alert("请输入充值金额!");
+        return false;
+      }else if(isNaN($.trim($("#started_money").val())) || parseFloat($.trim($("#started_money").val()))<=0){
         tishi_alert("请输入正确的充值金额!");
         return false;
-      }
-       if($.trim($("#ended_money").val()) == null || $.trim($("#ended_money").val()) == "" || $.trim($("#ended_money").val()) <= 0 || isNaN($.trim($("#ended_money").val()))){
+      };
+       if($.trim($("#ended_money").val()) == "" ){
+        tishi_alert("请输入赠送金额!");
+        return false;
+      }else if(isNaN($.trim($("#ended_money").val())) || parseFloat($.trim($("#ended_money").val()))<0){
         tishi_alert("请输入正确的赠送金额!");
         return false;
       }
@@ -101,24 +112,32 @@ function new_sv_card(store_id){
         }
       }
     if(type==0){   //打折卡
-         if($.trim($("#edit_svcard_form #sv_card_discount").val()) == null || $.trim($("#edit_svcard_form #sv_card_discount").val()) == ""){
+         if($.trim($("#edit_svcard_form #sv_card_discount").val()) == ""){
           tishi_alert("请输入折扣!");
           return false;
-        }
-        if(isNaN($("#edit_svcard_form #sv_card_discount").val()) || parseFloat($("#edit_svcard_form #sv_card_discount").val()) > 10 || parseFloat($("#edit_svcard_form #sv_card_discount").val()) < 1){
+        }else if(isNaN($("#edit_svcard_form #sv_card_discount").val()) || parseFloat($("#edit_svcard_form #sv_card_discount").val()) > 10 || parseFloat($("#edit_svcard_form #sv_card_discount").val()) < 1){
           tishi_alert("折扣必须在1~10之间的数字!");
           return false;
-       }
-       if($.trim($("#edit_svcard_form #sv_card_price").val()) == null || $.trim($("#edit_svcard_form #sv_card_price").val()) == "" || $.trim($("#edit_svcard_form #sv_card_price").val()) <= 0 || isNaN($.trim($("#edit_svcard_form #sv_card_price").val()))){
-          tishi_alert("请输入有效的打折卡金额!");
+       };
+       if($.trim($("#edit_svcard_form #sv_card_price").val()) == ""){
+          tishi_alert("请输入打折卡金额!");
           return false;
-      }
+      }else if(isNaN($.trim($("#edit_svcard_form #sv_card_price").val())) || parseFloat($.trim($("#edit_svcard_form #sv_card_price").val()))<=0){
+          tishi_alert("请输入正确的打折卡金额,金额至少大于零!");
+          return false;
+      };
      }else if(type==1){ //储值卡
-          if($.trim($("#edit_svcard_form #started_money").val()) == null || $.trim($("#edit_svcard_form #started_money").val()) == "" || $.trim($("#edit_svcard_form #started_money").val()) <= 0 || isNaN($.trim($("#edit_svcard_form #started_money").val()))){
-        tishi_alert("请输入正确的充值金额!");
+       if($.trim($("#edit_svcard_form #started_money").val()) == ""){
+        tishi_alert("请输入充值金额!");
         return false;
-      }
-       if($.trim($("#edit_svcard_form #ended_money").val()) == null || $.trim($("#edit_svcard_form #ended_money").val()) == "" || $.trim($("#edit_svcard_form #ended_money").val()) <= 0 || isNaN($.trim($("#edit_svcard_form #ended_money").val()))){
+      }else if(isNaN($.trim($("#edit_svcard_form #started_money").val())) || parseFloat($.trim($("#edit_svcard_form #started_money").val()))<=0){
+           tishi_alert("请输入正确的充值金额,金额至少大于零!");
+        return false;
+      };
+       if($.trim($("#edit_svcard_form #ended_money").val()) == ""){
+        tishi_alert("请输入赠送金额!");
+        return false;
+      }else if(isNaN($.trim($("#edit_svcard_form #ended_money").val())) || parseFloat($.trim($("#edit_svcard_form #ended_money").val()))<0){
         tishi_alert("请输入正确的赠送金额!");
         return false;
       }

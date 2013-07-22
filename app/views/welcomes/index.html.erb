@@ -17,7 +17,7 @@
     <div class="head">
       <div class="box position_re">
         <div class="logo1"><span>V2.1</span></div>
-        <div class="login">你好：<a href="javascript:void(0)" id="edit_password"><%= cookies[:user_name] %></a> | <a href="/logout">退出</a></div>
+        <div class="login">你好：<a href="javascript:void(0)" id="edit_password"><%= cookies[:user_name] %>(忘记密码)</a> | <a href="/logout">退出</a></div>
         <div class="name">
           <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= params[:store_id] %>)"/></span>
            <span style="cursor:pointer;" title="点击此处编辑门店名" onclick="set_store_name(this)"><%= cookies[:store_name] %></span><span>后台管理系统</span>

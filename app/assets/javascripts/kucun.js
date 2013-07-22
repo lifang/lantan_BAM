@@ -7,6 +7,7 @@
  */
 //保存material remark
     var reg1 =  /^\d+$/;
+    var reg2 = /^\d+\.{0,1}\d*$/;
 function save_material_remark(mat_id,store_id,obj){
     var content = $("#remark").val();
     if(mat_id!=null && content.length>0){
@@ -197,25 +198,25 @@ function select_print_material(obj,name,type){
 }
 
 //select_order_material(this,'水枪',       '辅助工具',1,'234234566','2344.0')
-function select_order_material(obj,name,type,panel_type,code,price){
+function select_order_material(obj,type,m){
 //   alert($(obj).is(":checked"));
     if($(obj).is(":checked")){
         var id = $(obj).attr("id").split("_")[1];
         var storage = $("#from").val()==0 ? $(obj).val() : "--";
         var li = "<tr id='li_"+$(obj).attr("id")+"' class='in_mat_selected'><td>";
-        li += code + "</td><td>" + name + "</td><td>" + type + "</td><td>" + price +
-            "</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+price+"','"+code+"','"+type+"')\" style='width:50px;'/></td><td>" +
-            "<span class='per_total' id='total_"+id+"'>" + price + "</span></td><td>" + storage +"</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
+        li += m.name + "</td><td>" + type + "</td><td>" + m.price +
+            "</td><td>" + m.sale_price +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+m.price+"','"+m.code+"','"+type+"')\" style='width:50px;'/></td><td>" +
+            "<span class='per_total' id='total_"+id+"'>" + m.price + "</span></td><td>" + storage +"</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
         if($("#dinghuo_selected_materials").find("tr.in_mat_selected").length > 0){
             $("#dinghuo_selected_materials").find("tr.in_mat_selected:last").after(li);
         }else{
             $("#dinghuo_selected_materials").prepend(li);
         }
         var select_str = $("#selected_items_dinghuo").val();
-        select_str += id + "_1_"+ price + "_"+ code +"_"+ name +"_"+ type +",";
+        select_str += id + "_1_"+ m.price + "_"+ m.code +"_"+ m.name +"_"+ type +",";
         $("#selected_items_dinghuo").attr("value",select_str);
         var old_total = parseFloat($("#total_count").text());
-        $("#total_count").text((old_total + parseFloat(price)).toFixed(2));
+        $("#total_count").text((old_total + parseFloat(m.price)).toFixed(2));
     }else{
         $("#dinghuo_selected_materials").find("#li_"+$(obj).attr("id")).remove();
         var select_items = $("#selected_items_dinghuo").val().split(",");
@@ -360,8 +361,8 @@ function add_material(store_id){
   if(i>0){
     i = $("#dinghuo_selected_materials").find("tr").last().attr("id").split("_")[2];
   }
-  var li = "<tr id='add_li_"+i+"'><td></td><td><input type='text' id='add_name_"+i+"' /></td><td>"+
-      $("#select_types").html() +"</td><td><input type='text' id='add_price_"+i+"'/></td><td><input type='text' id='add_count_"+i+"' /></td><td>--</td><td>--</td><td>"+
+  var li = "<tr id='add_li_"+i+"'><td><input type='text' id='add_name_"+i+"' /></td><td>"+
+      $("#select_types").html() +"</td><td><input type='text' id='cost_price_"+i+"'/></td><td><input type='text' id='sale_price_"+i+"'/></td><td><input type='text' id='add_count_"+i+"' /></td><td>--</td><td>--</td><td>"+
       "<button onclick=\"return add_new_material(this,'"+i+"','"+store_id+"')\">确定</button></td></tr>" ;
 //    alert(li);
   $("#dinghuo_selected_materials").append(li);
@@ -421,7 +422,7 @@ function submit_material_order(form_id,obj){
                 }
             },
             error:function(err){
-                tishi_alert("付款中...");
+                tishi_alert("订货中...");
             }
         });
 
@@ -617,25 +618,29 @@ function use_sale(obj, flag){
 }
 
 function add_new_material(obj,idx,store_id){
-   if($("#add_barcode_"+idx).val()==""){
-       tishi_alert("请输入条形码");
-   }else if($("#add_name_"+idx).val()==""){
+   if($("#add_name_"+idx).val()==""){
       tishi_alert("请输入名称");
-   }else if($("#add_price_"+idx).val()==""){
-      tishi_alert("请输入单价");
-   }else if($("#add_count_"+idx).val()==""){
+   }else if($("#add_li_"+idx + " #material_types").val()==""){
+      tishi_alert("请选择类型");
+   }
+   else if($.trim($("#cost_price_"+idx).val()).match(reg2)==null){
+      tishi_alert("请输入合法成本价");
+   }else if($.trim($("#sale_price_"+idx).val()).match(reg2)==null){
+      tishi_alert("请输入合法零售价");
+   }
+   else if($("#add_count_"+idx).val()==""){
      tishi_alert("请输入订货量");
    }else{
-       var item = $("#add_li_"+idx).find("select")[0];
-       var type = $(item).find("option:selected").index() + 1;
+       var type = $("#add_li_"+idx + " #material_types").val();
        var order_count = $("#add_count_"+idx).val();
        $(obj).attr('disabled','disabled');
        $.ajax({
            url:"/stores/" + store_id + "/materials/add",
            dataType:"json",
            type:"POST",
-           data:"code="+$("#add_barcode_"+idx).val()+"&name="+$("#add_name_"+idx).val()+"&price="+$("#add_price_"+idx).val() +
-           "&count="+$("#add_count_"+idx).val()+"&types="+type,
+           data:"code="+$("#add_barcode_"+idx).val()+"&name="+$("#add_name_"+idx).val()+
+               "&cost_price="+$("#cost_price_"+idx).val() + "&sale_price=" + $("#sale_price_"+idx).val() +
+               "&count="+$("#add_count_"+idx).val()+"&types="+type,
            success:function(data,status){
 //              alert(data.material.code);
                var m = data.material;
@@ -657,11 +662,12 @@ function add_material_to_selected(obj,order_count){
         nonchecked.attr("checked", 'checked');
     }
     if(selectedItems.length==0){
-    var li = "<tr id='li_mat_"+id+"' class='in_mat_selected'><td>";
-    li += obj.code + "</td><td>" + obj.name + "</td><td>" + type_name(obj.types) + "</td><td>" + parseFloat(obj.price) + "</td>"
-        + "<td><input type='text' id='out_num_mat_"+id+"' value='"+order_count+"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"','"+obj.code+"', '"+type_name(obj.types)+"')\" style='width:50px;'/></td><td>" +
-        "<span class='per_total' id='total_"+id+"'>" + parseFloat(obj.price * parseInt(order_count)) + "</span></td><td>--</td><td><a href='javascript:void(0);' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
-    $("#dinghuo_selected_materials").append(li);
+      var li = "<tr id='li_"+id+"' class='in_mat_selected'><td>";
+      li += obj.name + "</td><td>" + type_name(obj.types) + "</td><td>" + obj.price +
+            "</td><td>" + obj.sale_price +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='"+ order_count +"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"','"+obj.code+"','"+type_name(obj.types)+"')\" style='width:50px;'/></td><td>" +
+            "<span class='per_total' id='total_"+id+"'>" + parseFloat(obj.price * parseInt(order_count)) + "</span></td><td>--</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
+
+      $("#dinghuo_selected_materials").append(li);
     }else{
        var ori_num = selectedItems.find('#out_num_mat_'+id);
        var ori_price = selectedItems.find('#total_'+id);
@@ -712,16 +718,22 @@ function removeChecked(obj){
 
 function type_name(type){
     name = "";
-   if(type==1){
-       name = "施工耗材" ;
-   }else if(type == 2){
-      name = "辅助工具";
+   if(type==0){
+       name = "清洁用品" ;
+   }else if(type == 1){
+      name = "美容用品";
+   }else if(type==2){
+      name = "装饰产品";
    }else if(type==3){
-      name = "劳动保护";
+      name = "配件产品";
    }else if(type==4){
-      name = "一次性用品";
+      name = "电子产品";
    }else if(type==5){
-      name = "产品";
+      name = "其他产品"
+   }else if(type==6){
+      name = "辅助工具"
+   }else if(type==7){
+      name = "劳动保护"
    }
     return name;
 }
@@ -740,7 +752,6 @@ function commit_supplier_form(obj){
 }
 
 function checkMaterial(obj){              //编辑物料验证
-    var reg2 = /^\d+\.{0,1}\d*$/;
     var pattern = new RegExp("[=,-]")
     var f = true;
   if($.trim($("#material_name").val())==""){
@@ -754,7 +765,7 @@ function checkMaterial(obj){              //编辑物料验证
         tishi_alert("请输入类型");
         f = false;
     }else if($("#material_price").val().match(reg2)==null){
-        tishi_alert("请输入合法单价");
+        tishi_alert("请输入合法成本价");
         f = false;
     }else if($("#material_sale_price").val().match(reg2)==null){
         tishi_alert("请输入合法零售价");
@@ -1306,7 +1317,7 @@ function close_notice(obj){
           tishi_alert("请选择物料！")
       }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
-         if($.trim($(this).val().match(reg1))==null){
+         if($.trim($(this).val()).match(reg1)==null){
              var code = $(this).attr('alt');
              alert("条形码为"+ code + "的物料数量不正确！");
              f = false;
