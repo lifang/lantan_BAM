@@ -239,7 +239,7 @@ class Order < ActiveRecord::Base
     services = Product.find_by_sql(["select * from products p where p.status = ?
       and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
         Product::IS_VALIDATE[:YES], store_id])
-    ((products||[] + services) || []).each do |p|
+    (((products||[]) + services) || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
