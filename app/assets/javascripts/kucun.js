@@ -1309,17 +1309,21 @@ function close_notice(obj){
 
   function checkPrintNum(obj){
       var f = true;
+      var is_empty = false;
       if($("#print_code_tab #selected_materials").find('tr').length==0){
           f = false;
           tishi_alert("请选择物料！")
       }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
          if($.trim($(this).val()).match(reg1)==null){
-             var code = $(this).attr('alt');
-             alert("条形码为"+ code + "的物料数量不正确！");
+//             var code = $(this).attr('alt');
              f = false;
+             is_empty = true;
          }
       })
+      if(is_empty){
+          alert("物料数量不正确！");
+      }
       return f;
   }
 
