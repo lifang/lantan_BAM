@@ -96,17 +96,28 @@ class WorkOrder < ActiveRecord::Base
             where("work_orders.current_day = #{Time.now.strftime("%Y%m%d")}").
             where("work_orders.store_id = #{self.store_id}")
 
+      puts "1111111111111"
+      puts orders.inspect
+      puts "1111111111111"
+
         products = Product.includes(:station_service_relations => :station).
           where("stations.id=#{self.station_id} and products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
+        puts "222222222222"
+        puts products.inspect
+        puts "222222222222222222222"
         another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
                             where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
-                            where("work_orders.station_id is null").
+                            where("work_orders.station_id = null").
                             where("work_orders.store_id = #{self.store_id}").
                             where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
-                            where("products.id in (?)",products.map(&:id)).
+                            where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
                             where("work_orders.current_day = #{self.current_day}").
-                            where("orders.car_num_id not in (?)",orders.map(&:car_num_id)).
+                            where("orders.car_num_id not in (?)",orders.length == 0 ? [] : orders.map(&:car_num_id)).
                             readonly(false).order("work_orders.created_at asc")
+
+      puts "333333333333333"
+      puts another_work_orders.inspect
+      puts "33333333333333"
 
         if another_work_orders.length >= 1
           another_work_order = another_work_orders.first
