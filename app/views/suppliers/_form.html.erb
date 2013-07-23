@@ -1,14 +1,14 @@
 <%= form_for [@store,@supplier],:html => {:remote => true, 'data-type' => 'script'} do |f| %>
 <div class="popup_body_area">
     <div class="item">
-      <label>名称：</label>
+      <label><span class='red'>*</span>名称：</label>
       <%= f.text_field :name %></div>
     <div class="item">
-      <label>联系人：</label>
+      <label><span class='red'>*</span>联系人：</label>
       <%= f.text_field :contact %>
     </div>
     <div class="item">
-      <label>联系电话：</label>
+      <label><span class='red'>*</span>联系电话：</label>
       <%= f.text_field :phone %>
     </div>
     <div class="item">
