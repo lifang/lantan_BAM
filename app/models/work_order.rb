@@ -96,6 +96,8 @@ class WorkOrder < ActiveRecord::Base
             where("work_orders.current_day = #{Time.now.strftime("%Y%m%d")}").
             where("work_orders.store_id = #{self.store_id}")
 
+      car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
+
       puts "1111111111111"
       puts orders.inspect
       puts "1111111111111"
@@ -112,7 +114,7 @@ class WorkOrder < ActiveRecord::Base
                             where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
                             where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
                             where("work_orders.current_day = #{self.current_day}").
-                            where("orders.car_num_id not in (?)",orders.length == 0 ? [] : orders.map(&:car_num_id)).
+                            where(car_num_id_sql,orders.map(&:car_num_id)).
                             readonly(false).order("work_orders.created_at asc")
 
       puts "333333333333333"
