@@ -426,9 +426,10 @@ class Api::OrdersController < ApplicationController
       render :json => {:status => "error", :message => "没有材料"}
     else
       if Material.import mat_arr, :on_duplicate_key_update => [:check_num, :storage]
-        render :json => {:status => "success"}
+        materials = Material.where("store_id = #{store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+        render :json => {:status => "success", :meterials => materials}
       else
-        render :json => {:status => "error", :message => "更新盘点实数失败"}
+        render :json => {:status => "error", :message => "核实材料数量失败"}
       end
     end
   end
@@ -454,7 +455,7 @@ class Api::OrdersController < ApplicationController
       end
     end
     if mat_arr.include?(nil)
-      render :json => {:status => "error", :message => "没有材料或者你的盘点数量超过库存数量"}
+      render :json => {:status => "error", :message => "没有材料或者你的出库数量超过库存数量"}
     else
       Material.transaction do
         begin
@@ -475,6 +476,8 @@ class Api::OrdersController < ApplicationController
     if staff.nil? || !staff.has_password?(params[:user_password])
       #用户名或者密码错误
       render :json => {:status => 0}
+    elsif !Staff::VALID_STATUS.include?(staff.status) || staff.store.nil? || staff.store.status != Store::STATUS[:OPENED]
+      render :json => {:status => 3, :message => "该用户不存在"}
     else
       #登录成功
       #是否是技师登录
