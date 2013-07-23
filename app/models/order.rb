@@ -758,8 +758,6 @@ class Order < ActiveRecord::Base
           #station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
           #unless station
           arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
-          p 1111111111111
-          p arrange_time
           if arrange_time[0]
             new_station_id = arrange_time[0]
             start_at = Time.now if arrange_time[2]
@@ -789,7 +787,7 @@ class Order < ActiveRecord::Base
                 :ended_at => arrange_time[2] ? end_at : nil,
                 :cost_time => cost_time
               })
-#            hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? STATUS[:SERVICING] : STATUS[:NORMAL]
+            hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? STATUS[:SERVICING] : STATUS[:NORMAL]
             hash[:station_id] = new_station_id if new_station_id  #这个可能暂时没有值，一个完成后要更新
             station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d").to_i if station
             if station_staffs
