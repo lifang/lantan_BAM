@@ -19,7 +19,7 @@ class Api::OrdersController < ApplicationController
     info = ""
     if  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
-    elsif !Staff::VALID_STATUS.include?(staff.status) or staff.store.status != Store::STATUS[:OPENED]
+    elsif !Staff::VALID_STATUS.include?(staff.status) or @staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
       info = "用户不存在"
     else
       cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
