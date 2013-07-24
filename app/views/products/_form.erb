@@ -6,7 +6,7 @@
   </select>
 </div>
 <div class="item">
-  <label>名称：</label><input name="name" id="name" type="text" value="<%= @product.name.nil? ? @materials[0].nil? ? "" : @materials[0].name : @product.name  %>" />
+  <label><span class="red">*</span>名称：</label><input name="name" id="name" type="text" value="<%= @product.name.nil? ? @materials[0].nil? ? "" : @materials[0].name : @product.name  %>" />
 </div>
 <div class="item">
   <label>条形码：</label><label id="item_txm"><%=@materials[0].nil? ? "" : @materials[0].code  %></label>
@@ -16,13 +16,13 @@
 </div>
 
 <div class="item">
-  <label>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @product.t_price.nil? ? @materials[0].nil? ? "" : @materials[0].price : @product.t_price %>" />
+  <label><span class="red">*</span>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @product.t_price.nil? ? @materials[0].nil? ? "" : @materials[0].price : @product.t_price %>" />
 </div>
 <div class="item">
-  <label>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @product.base_price.nil? ? @materials[0].nil? ? "" : @materials[0].sale_price : @product.base_price %>" />
+  <label><span class="red">*</span>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @product.base_price.nil? ? @materials[0].nil? ? "" : @materials[0].sale_price : @product.base_price %>" />
 </div>
 <div class="item">
-  <label>全国促销价：</label><input name="sale_price" id="sale_price" type="text" value="<%= @product.sale_price %>" />
+  <label><span class="red">*</span>全国促销价：</label><input name="sale_price" id="sale_price" type="text" value="<%= @product.sale_price %>" />
 </div>
 
 <div class="item">
@@ -46,10 +46,10 @@
   </div>
 </div>
 <div class="item">
-  <label>规格：</label><input name="standard" id="standard" type="text" value="<%= @product.standard %>" />
+  <label><span class="red">*</span>规格：</label><input name="standard" id="standard" type="text" value="<%= @product.standard %>" />
 </div>
 <div class="item">
-  <label>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @product.prod_point %>" />
+  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @product.prod_point %>" />
 </div>
  <div class="clear"></div>
 <div class="item_blockArea">

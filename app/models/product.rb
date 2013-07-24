@@ -42,9 +42,14 @@ class Product < ActiveRecord::Base
       customer_ids = []
       message_arr = []
       customer_message.keys.each {|mess|store_ids << mess.split("_")[0].to_i;customer_ids << mess.split("_")[1].to_i}
-      customers = Customer.find(customer_ids)
+      customers = Customer.joins(:customer_store_relations).select("customers.name,customers.id,mobilephone,customer_store_relations.store_id").where("customers.id in (#{customer_ids.join(',')})").inject(Hash.new){|hash,c|
+        if hash[c.store_id].nil? 
+          hash[c.store_id]={};hash[c.store_id][c.id]=c
+        else
+          hash[c.store_id][c.id]=c
+        end;hash}
       Store.find(store_ids).each do |store|
-        customers.inject(Hash.new) { |hash,c|
+        customers[store.id].values.each { |c|
           strs = []
           customer_message["#{store.id}_#{c.id}"].each_with_index {|str,index| strs << "#{index+1}.#{str.revist_content}" }
           MessageRecord.transaction do
@@ -92,6 +97,35 @@ class Product < ActiveRecord::Base
     request= Net::HTTP::Get.new(route)
     back_res = http.request(request)
     return JSON back_res.body
+  end
+
+  def self.get_dir_list(path)
+    #获取目录列表
+    list = Dir.entries(path)
+    list.delete('.')
+    list.delete('..')
+    return list
+  end
+
+  def self.recgnite_pic
+    dir = "#{Rails.root}/public/recongte_pics"
+    files = get_dir_list(dir)
+    files.each do |file|
+      file_path = dir +"/"+file
+      ext_name = File.extname(file_path)
+      p ext_name
+      base_name = File.basename(file_path, ext_name)
+      p base_name
+      img = MiniMagick::Image.open file_path,"rb"
+      change_path = "#{Rails.root}/public/#{base_name}.tif"
+      p change_path.to_s
+      scale_path = "#{Rails.root}/public/#{base_name}_250.tif"
+      txt_path = "#{Rails.root}/public/result"
+      img.run_command("convert -compress none -depth 8 -alpha off -colorspace Gray  #{file_path} #{change_path} ")
+      img.run_command("convert #{change_path} -scale 250% #{scale_path} ")
+      img.run_command("tesseract #{change_path} #{txt_path}")
+      p File.read(txt_path+".txt")
+    end
   end
 
  
