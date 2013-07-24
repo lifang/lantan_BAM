@@ -54,13 +54,13 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
                 type:"GET",
                 success:function(data){
                     if(data.status=="1"){
-                        tishi_alert("操作成功")
+                        tishi_alert("操作成功");
                        $(obj).parent().siblings(".su").find(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
                        $(obj).parent().siblings(".mat_diff").text(0);
                        var l = $("#low_materials_tbody").find("#material"+m_id+"tr").length;  //判断该物料是否已经在缺货信息提示里
                        var message_span = $("span[id='low_materials_span']").length;            //判断是否有缺货提示
-                       if(check_num <= data.material_low){      //如果小于预警值，则加上样式,并且在缺货信息提示里加上对应的元素
+                       if(check_num <= data.material_low && !data.is_ignore){      //如果小于预警值，则加上样式,并且在缺货信息提示里加上对应的元素
                         if(message_span<=0){            //如果没有缺货提示，则要加上
                             $("#material_data_box").before("<div class='message'>有<span class='red' id='low_materials_span'>1</span>个物料库存量过低\n\
                                                             <a href='JavaScript:void(0)' onclick='toggle_low_materials(this)'>点击查看</a>\n\
