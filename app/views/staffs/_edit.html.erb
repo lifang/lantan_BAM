@@ -5,7 +5,7 @@
          <div class="popup_body">
               <div class="popup_body_area">
                 <div class="item">
-                    <label>*名称：</label>
+                    <label><span class="red">*</span>名称：</label>
                     <%= f.text_field :name %>
                   </div>
                   <div class="item">
@@ -43,7 +43,7 @@
                          :value => f.object.birthday.nil? ? "" : f.object.birthday.strftime("%Y-%m-%d") %>
                   </div>
                   <div class="item">
-                       <label>*联系方式：</label>
+                       <label><span class="red">*</span>联系方式：</label>
                        <%= f.text_field :phone %>
                   </div>
                   <div class="item">
@@ -51,7 +51,7 @@
                        <%= f.text_field :hometown %>
                   </div>
                   <div class="item">
-                       <label>*身份证：</label>
+                       <label><span class="red">*</span>身份证：</label>
                        <%= f.text_field :id_card %>
                   </div>
                   <div class="item">
@@ -63,7 +63,7 @@
                        <%= f.text_field :political %>
                   </div>
                   <div class="item">
-                       <label>*地址：</label>
+                       <label><span class="red">*</span>地址：</label>
                        <%= f.text_field :address %>
                   </div>
                 <div class="item">
@@ -71,7 +71,7 @@
             <%= f.text_field :probation_salary, :disabled => f.object.working_stats == 1 ? true : false %>
           </div>
                   <div class="item">
-                       <label>*正式薪资标准：</label>
+                       <label><span class="red">*</span>正式薪资标准：</label>
                        <%= f.text_field :base_salary %>
                   </div>
                 <div class="item">
@@ -79,15 +79,15 @@
             <%= f.check_box :is_deduct %>
           </div>
                   <div class="item">
-                       <label>*提成起始额：</label>
+                       <label><span class="red">*</span>提成起始额：</label>
                        <%= f.text_field :deduct_at, :disabled => f.object.is_deduct ? false :true %>
                   </div>
                   <div class="item">
-                       <label>*结束额度：</label>
+                       <label><span class="red">*</span>结束额度：</label>
                        <%= f.text_field :deduct_end, :disabled => f.object.is_deduct ? false :true %>
                   </div>
                   <div class="item">
-                       <label>*提成率：</label>
+                       <label><span class="red">*</span>提成率：</label>
                        <%= f.text_field :deduct_percent, :disabled => f.object.is_deduct ? false :true %>
                   </div>
                   <div class="item">
