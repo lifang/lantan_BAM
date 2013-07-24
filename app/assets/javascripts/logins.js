@@ -20,16 +20,22 @@ $(document).ready(function(){
            return false;
       }
       $.ajax({
-          type : 'get',
-          url : "/logins/send_validate_code",
-          data : {
-              telphone : telphone
-          },
-          success: function(data){
-              tishi_alert(data);
-              return false;
-          }
-      });
+            type : 'get',
+            url : "/logins/send_validate_code",
+            data : {
+                telphone : telphone
+            },
+            beforeSend:function(xhr){
+                $('#send_validate_code').attr("disabled",true)
+            },
+            complete:function(data,status){
+                if(status=="success"){
+                    $('#send_validate_code').removeClass("confirm_btn")
+                 setTimeout("removeDisable()",30000);
+                 tishi_alert(data.responseText + "若未收到短信，请30秒后再次请求");
+               }
+            }
+        });
       return false;
     });
 
@@ -47,3 +53,6 @@ $(document).ready(function(){
         return true;
     })
 });
+ function removeDisable(){
+        $("#send_validate_code").attr("disabled",false)
+    }
