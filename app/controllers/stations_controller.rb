@@ -7,19 +7,21 @@ class StationsController < ApplicationController
   #施工现场
   def index
     @stations =Station.where("store_id=#{params[:store_id]} and status !=#{Station::STAT[:DELETED]}")
-    sql=Station.make_data(params[:store_id])
-    work_orders=WorkOrder.find_by_sql(sql).inject(Hash.new) { |hash, a| hash[a.status].nil? ? hash[a.status]=[a] : hash[a.status] << a;hash}
-    waits =work_orders[WorkOrder::STAT[:WAIT_PAY]].nil? ? {} : work_orders[WorkOrder::STAT[:WAIT_PAY]]
-    @f_waiting =waits.inject(Hash.new) { |hash, a| hash[a.front_staff_id].nil? ? hash[a.front_staff_id]=[a] : hash[a.front_staff_id] << a;hash}
-    servs =work_orders[WorkOrder::STAT[:SERVICING]].nil? ? {} : work_orders[WorkOrder::STAT[:SERVICING]]
-    @f_working =servs.inject(Hash.new) { |hash, a| hash[a.front_staff_id].nil? ? hash[a.front_staff_id]=[a] : hash[a.front_staff_id] << a;hash}
-    @nums = servs.inject(Hash.new) { |hash, a| hash.merge(a.station_id=>a.num)}
-    @staff_ids,@times,@staffs = {},{},{}
-    StationStaffRelation.find_by_sql("select staff_id t_id,station_id s_id from station_staff_relations where station_id in (#{@stations.map(&:id).join(',')})
+    @staff_ids,@times,@staffs,@f_working,@f_waiting = {},{},{},{},{}
+    unless @stations.blank?
+      sql=Station.make_data(params[:store_id])
+      work_orders=WorkOrder.find_by_sql(sql).inject(Hash.new) { |hash, a| hash[a.status].nil? ? hash[a.status]=[a] : hash[a.status] << a;hash}
+      waits =work_orders[WorkOrder::STAT[:WAIT_PAY]].nil? ? {} : work_orders[WorkOrder::STAT[:WAIT_PAY]]
+      waits.each { |a| @f_waiting[a.front_staff_id].nil? ? @f_waiting[a.front_staff_id]=[a] : @f_waiting[a.front_staff_id] << a;}
+      servs =work_orders[WorkOrder::STAT[:SERVICING]].nil? ? {} : work_orders[WorkOrder::STAT[:SERVICING]]
+      servs.each { |hash, a| @f_working[a.front_staff_id].nil? ? @f_working[a.front_staff_id]=[a] : @f_working[a.front_staff_id] << a}
+      @nums = servs.inject(Hash.new) { |hash, a| hash.merge(a.station_id=>a.num)}
+      StationStaffRelation.find_by_sql("select staff_id t_id,station_id s_id from station_staff_relations where station_id in (#{@stations.map(&:id).join(',')})
     and current_day='#{Time.now.strftime("%Y%m%d")}' ").each {|staff|@staff_ids[staff.s_id].nil? ? @staff_ids[staff.s_id]=[staff.t_id] : @staff_ids[staff.s_id]<<staff.t_id}
-    Staff.where("id in (#{@staff_ids.values.flatten.uniq.join(',')})").each{|staff|@staffs[staff.id]=staff.name} unless @staff_ids == {}
-    WorkOrder.where("store_id=#{params[:store_id]} and status=#{WorkOrder::STAT[:SERVICING]} and current_day=#{Time.now.strftime('%Y%m%d').to_i}").each{|work_order|
-      @times[work_order.station_id]=(work_order.ended_at.nil? ? 0 : work_order.ended_at) -Time.now}
+      Staff.where("id in (#{@staff_ids.values.flatten.uniq.join(',')})").each{|staff|@staffs[staff.id]=staff.name} unless @staff_ids == {}
+      WorkOrder.where("store_id=#{params[:store_id]} and status=#{WorkOrder::STAT[:SERVICING]} and current_day=#{Time.now.strftime('%Y%m%d').to_i}").each{|work_order|
+        @times[work_order.station_id]=(work_order.ended_at.nil? ? 0 : work_order.ended_at) -Time.now}
+    end
     p @staffs
   end
 
@@ -38,9 +40,9 @@ class StationsController < ApplicationController
     stations.each {|station|
       if params[:"stat#{station.id}"].to_i==Station::STAT[:NORMAL]
         station.update_attributes(:status=>params[:"stat#{station.id}"].to_i)
-        station.station_staff_relations.where("current_day=#{Time.now.strftime("%Y%m%d")}").inject(Array.new) {|arr,mat| mat.destroy if mat.current_day==Time.now.strftime("%Y%m%d").to_i}
+        station.station_staff_relations.where("current_day=#{Time.now.strftime("%Y%m%d")}").inject(Array.new) {|arr,mat| mat.destroy}
         params[:"select#{station.id}"].each {|staff_id|
-          StationStaffRelation.create(:station_id=>station.id,:staff_id=>staff_id,:current_day=>Time.now.strftime("%Y%m%d")) }
+          StationStaffRelation.create(:station_id=>station.id,:staff_id=>staff_id,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>params[:store_id]) }
       else
         station.update_attributes(:status=>params[:"stat#{station.id}"].to_i)
       end
