@@ -74,8 +74,8 @@ module Constant
       :manager_score => ["店长打分",4096],
       :del_salary => ["删除工资",8192],
       :deal_violation => ["处理奖励违规",16384],
-      :search_staff => ["搜索员工", 32768]
-
+      :search_staff => ["搜索员工", 32768],
+      :phone_inventory => ["手机出库盘点", 65536]
     },
     :datas => {
       :name => "统计",
