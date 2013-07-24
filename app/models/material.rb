@@ -1,15 +1,15 @@
 #encoding: utf-8
-#require 'barby'
-#require 'barby/barcode/ean_13'
-#require 'barby/outputter/custom_rmagick_outputter'
-#require 'barby/outputter/rmagick_outputter'
+require 'barby'
+require 'barby/barcode/ean_13'
+require 'barby/outputter/custom_rmagick_outputter'
+require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :material_losses
   has_many :mat_order_items
   has_many :material_orders, :through => :mat_order_items do 
     def not_all_in
-       where("m_status not in (?) and status != ?",[3,4], MaterialOrder::STATUS[:cancel])
+      where("m_status not in (?) and status != ?",[3,4], MaterialOrder::STATUS[:cancel])
     end
   end
   has_many :mat_out_orders

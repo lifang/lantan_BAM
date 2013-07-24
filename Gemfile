@@ -32,8 +32,8 @@ gem 'remotipart', '~> 1.0'
 # gem 'unicorn'
 
 # Deploy with Capistrano
- gem 'capistrano','~> 2.15.4'
- gem 'capistrano_colors', '~>0.5.5'
+gem 'capistrano','~> 2.15.4'
+gem 'capistrano_colors', '~>0.5.5'
 
 # To use debugger
 # gem 'ruby-debug19', :require => 'ruby-debug'
@@ -46,5 +46,5 @@ end
 #group :development do
 #  gem "better_errors"
 #end
-#gem 'rmagick', '2.13.1'
-#gem 'barby', '0.5.1'
+gem 'rmagick', '2.13.1'
+gem 'barby', '0.5.1'
