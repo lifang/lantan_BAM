@@ -250,7 +250,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :logins do
       collection do
-        post :check_staff,:staff_login,:staff_checkin,:upload_img
+        post :check_staff,:staff_login,:staff_checkin,:upload_img,:recgnite_pic
         get :download_staff_infos
       end
     end
