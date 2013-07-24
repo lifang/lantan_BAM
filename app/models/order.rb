@@ -235,11 +235,11 @@ class Order < ActiveRecord::Base
 
     products = Product.find_by_sql(["select * from products p where p.status = ?
       and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?",
-        Product::IS_VALIDATE[:YES], p_ids.keys.flatten, store_id])
+        Product::IS_VALIDATE[:YES], p_ids.keys.flatten, store_id]) if p_ids
     services = Product.find_by_sql(["select * from products p where p.status = ?
       and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
         Product::IS_VALIDATE[:YES], store_id])
-    ((products + services) || []).each do |p|
+    (((products||[]) + services) || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
@@ -280,7 +280,7 @@ class Order < ActiveRecord::Base
     pcard_prod_relations = PcardProdRelation.find_by_sql(["select p.name, ppr.product_num, ppr.package_card_id
       from pcard_prod_relations ppr
       inner join products p on p.id = ppr.product_id where ppr.package_card_id in (?)", cards]).group_by{ |pcr| pcr.package_card_id }
-    sv_cards = SvCard.normal_included(2)
+    sv_cards = SvCard.normal_included(store_id)
 
     product_arr[:优惠卡类] = (cards + sv_cards || []).collect{|c|
       price = c.is_a?(SvCard) ? c.sale_price : c.price
@@ -758,8 +758,6 @@ class Order < ActiveRecord::Base
           #station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
           #unless station
           arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
-          p 1111111111111
-          p arrange_time
           if arrange_time[0]
             new_station_id = arrange_time[0]
             start_at = Time.now if arrange_time[2]
@@ -789,7 +787,7 @@ class Order < ActiveRecord::Base
                 :ended_at => arrange_time[2] ? end_at : nil,
                 :cost_time => cost_time
               })
-#            hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? STATUS[:SERVICING] : STATUS[:NORMAL]
+            hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? STATUS[:SERVICING] : STATUS[:NORMAL]
             hash[:station_id] = new_station_id if new_station_id  #这个可能暂时没有值，一个完成后要更新
             station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d").to_i if station
             if station_staffs

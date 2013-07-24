@@ -51,6 +51,7 @@ class Staff < ActiveRecord::Base
   attr_accessor :password
   #validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
 
+  after_create :send_message
   after_update :insert_staff_gr_record
 
   def insert_staff_gr_record
@@ -95,6 +96,26 @@ class Staff < ActiveRecord::Base
       diff_day = (Time.now - staff.created_at).to_i / (24 * 60 * 60)
       if diff_day >= staff.probation_days
         staff.update_attribute(:working_stats, 1)
+      end
+    end
+  end
+
+  def send_message
+    if self.store
+      content = "#{self.name}，您已经被添加为（#{self.store.name}）的员工，您登录门店后台管理系统的的账号为：#{self.username}，密码为：#{self.username}，修改密码请登录 #{Constant::SERVER_PATH}"
+      MessageRecord.transaction do
+        message_record = MessageRecord.create(:store_id => self.store_id, :content => content,
+          :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
+        SendMessage.create(:message_record_id => message_record.id, :customer_id => self.id,
+          :content => content, :phone => self.phone,
+          :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
+        begin
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{self.phone}&Content=#{content}&Exno=0"
+          create_get_http(Constant::MESSAGE_URL, message_route)
+        rescue
+          notice = "短信通道忙碌，请稍后重试。"
+        end
+        notice = "短信发送成功，账户信息已经发送到手机中。"
       end
     end
   end

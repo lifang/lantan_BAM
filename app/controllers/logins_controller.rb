@@ -27,7 +27,7 @@ class LoginsController < ApplicationController
       #redirect_to "/"
       @user_name = params[:user_name]
       render 'index', :layout => false
-    elsif !Staff::VALID_STATUS.include?(@staff.status) or @staff.store.status != Store::STATUS[:OPENED]
+    elsif !Staff::VALID_STATUS.include?(@staff.status) || @staff.store.nil? || @staff.store.status != Store::STATUS[:OPENED]
       flash.now[:notice] = "用户不存在"
       @user_name = params[:user_name]
       render 'index', :layout => false

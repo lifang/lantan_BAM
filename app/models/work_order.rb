@@ -91,15 +91,35 @@ class WorkOrder < ActiveRecord::Base
         message = "has_next_work_order"
       else
         #按照created_at时间来排单
+        #正在施工中的订单
+        orders = Order.includes(:work_orders).where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
+            where("work_orders.current_day = #{Time.now.strftime("%Y%m%d")}").
+            where("work_orders.store_id = #{self.store_id}")
+
+      car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
+
+      puts "1111111111111"
+      puts orders.inspect
+      puts "1111111111111"
+
         products = Product.includes(:station_service_relations => :station).
           where("stations.id=#{self.station_id} and products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
+        puts "222222222222"
+        puts products.inspect
+        puts "222222222222222222222"
         another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
                             where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
-                            where("work_orders.station_id is null").
+                            where("work_orders.station_id = null").
                             where("work_orders.store_id = #{self.store_id}").
                             where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
-                            where("products.id in (?)",products.map(&:id)).
-                            where("work_orders.current_day = #{self.current_day}").readonly(false).order("work_orders.created_at asc")
+                            where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
+                            where("work_orders.current_day = #{self.current_day}").
+                            where(car_num_id_sql,orders.map(&:car_num_id)).
+                            readonly(false).order("work_orders.created_at asc")
+
+      puts "333333333333333"
+      puts another_work_orders.inspect
+      puts "33333333333333"
 
         if another_work_orders.length >= 1
           another_work_order = another_work_orders.first
