@@ -455,14 +455,16 @@ class Api::OrdersController < ApplicationController
       end
     end
     if mat_arr.include?(nil)
-      render :json => {:status => "error", :message => "没有材料或者你的出库数量超过库存数量"}
+      no_enough_storeage = materials - mat_arr
+      render :json => {:status => "error", :message => "没有材料或者你的出库数量超过库存数量", :materials => no_enough_storeage}
     else
       Material.transaction do
         begin
           mat_arr.each do |mat|
             mat.save
           end
-          render :json => {:status => "success"}
+          materials = Material.where("store_id = #{store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+          render :json => {:status => "success", :materials => materials}
         rescue
           render :json => {:status => "error", :message => "出库失败"}
         end
@@ -480,15 +482,16 @@ class Api::OrdersController < ApplicationController
       render :json => {:status => 3, :message => "该用户不存在"}
     else
       #登录成功
+      phone_inventory = permission?(:staffs,:phone_inventory) ? 1 : 0
       #是否是技师登录
       if staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
         #所有的code，材料名称
         materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
         mat_out_types = MatOutOrder::TYPES
-        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types}
+        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types, :phone_inventory => phone_inventory}
       else
-        render :json => {:status => 2}
-      end
+        render :json => {:status => 2, :phone_inventory => phone_inventory, :staff_id => staff.id, :store_id => staff.store_id}
+      end  
     end
   end
 

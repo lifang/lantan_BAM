@@ -55,7 +55,7 @@
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item">
-            <label>*名称：</label>
+            <label><span class="red">*</span>名称：</label>
             <%= f.text_field :name %>
           </div>
           <div class="item">
@@ -92,7 +92,7 @@
             <%= f.text_field :birthday, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();" %>
           </div>
           <div class="item">
-            <label>*联系方式：</label>
+            <label><span class="red">*</span>联系方式：</label>
             <%= f.text_field :phone %>
           </div>
           <div class="item">
@@ -100,7 +100,7 @@
             <%= f.text_field :hometown %>
           </div>
           <div class="item">
-            <label>*身份证：</label>
+            <label><span class="red">*</span>身份证：</label>
             <%= f.text_field :id_card %>
           </div>
           <div class="item">
@@ -112,7 +112,7 @@
             <%= f.text_field :political %>
           </div>
           <div class="item">
-            <label>*地址：</label>
+            <label><span class="red">*</span>地址：</label>
             <%= f.text_field :address %>
           </div>
           <div class="item">
@@ -120,7 +120,7 @@
             <%= f.text_field :probation_salary, :disabled => true %>
           </div>
           <div class="item">
-            <label>*正式薪资标准：</label>
+            <label><span class="red">*</span>正式薪资标准：</label>
             <%= f.text_field :base_salary %>
           </div>
           <div class="item">
@@ -128,15 +128,15 @@
             <%= f.check_box :is_deduct, :value => 1, :checked => true %>
           </div>
           <div class="item">
-            <label>*提成起始额：</label>
+            <label><span class="red">*</span>提成起始额：</label>
             <%= f.text_field :deduct_at %>
           </div>
           <div class="item">
-            <label>*结束额度：</label>
+            <label><span class="red">*</span>结束额度：</label>
             <%= f.text_field :deduct_end %>
           </div>
           <div class="item">
-            <label>*提成率：</label>
+            <label><span class="red">*</span>提成率：</label>
             <%= f.text_field :deduct_percent %>
           </div>
           <div class="item">
@@ -165,7 +165,7 @@
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item_textarea">
-            <label>*奖励人员：</label>
+            <label><span class="red">*</span>奖励人员：</label>
             <div class="width_div">
               <% @staffs_names.each do |staff| %>
                 <span><input type="checkbox" value="<%= staff.id %>" name="staff[id][]"/>&nbsp;<%= staff.name %></span>
@@ -173,7 +173,7 @@
             </div>
           </div>
           <div class="item_textarea">
-            <label>*奖励原因：</label>
+            <label><span class="red">*</span>奖励原因：</label>
             <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
           </div>
           <div class="item_textarea">
@@ -186,7 +186,7 @@
             </ul>
           </div>
           <div class="item_textarea">
-            <label>*补充说明：</label>
+            <label><span class="red">*</span>补充说明：</label>
             <%= f.text_area(:mark, :cols => "", :rows => "", :class => "width_textarea") %>
           </div>
           <%= f.hidden_field :types, :value => 1 %>
@@ -204,7 +204,7 @@
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item_textarea">
-            <label>*违规人员：</label>
+            <label><span class="red">*</span>违规人员：</label>
             <div class="width_div">
               <% @staffs_names.each do |staff| %>
                 <span><input type="checkbox" value="<%= staff.id %>" name="staff[id][]"/>&nbsp;<%= staff.name %></span>
@@ -212,7 +212,7 @@
             </div>
           </div>
           <div class="item_textarea">
-            <label>*违规原因：</label>
+            <label><span class="red">*</span>违规原因：</label>
             <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
           </div>
 
@@ -226,7 +226,7 @@
             </ul>
           </div>
           <div class="item_textarea">
-            <label>*补充说明：</label>
+            <label><span class="red">*</span>补充说明：</label>
             <%= f.text_area(:mark, :cols => "", :rows => "", :class => "width_textarea") %>
           </div>
           <%= f.hidden_field :types, :value => 0 %>
@@ -244,13 +244,13 @@
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="search paddin_left" style="padding-left:53px !important;">
-            <div><label>*培训时间：</label>
+            <div><label><span class="red">*</span>培训时间：</label>
               <%= f.text_field :start_at, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();" %>
               到 <%= f.text_field :end_at, :class => "Wdate", :readonly => true, :onClick => "WdatePicker();" %>
             </div>
           </div>
           <div class="item_textarea">
-            <label>*培训人员：</label>
+            <label><span class="red">*</span>培训人员：</label>
             <div class="width_div">
               <% @staffs_names.each do |staff| %>
                 <span><input type="checkbox" value="<%= staff.id %>" name="staff[id][]"/>&nbsp;<%= staff.name %></span>
@@ -268,7 +268,7 @@
             </div>
           </div>
           <div class="item_textarea">
-            <label>*培训原因：</label>
+            <label><span class="red">*</span>培训原因：</label>
             <%= f.text_area(:content, :cols => "", :rows => "", :class => "width_textarea") %>
           </div>
         </div>
