@@ -5,6 +5,7 @@
     <span>其他联系方式：<%= @customer.other_way %></span>
     <span>生日：<%= @customer.birthday.strftime("%Y-%m-%d") if @customer.birthday %></span>
     <span>地址：<%= @customer.address %></span>
+    <% if @customer.is_vip %><br/><span>积分：<%= @customer.total_point || 0 %></span><% end %>
     <% if permission?(:customers, :edit) %><span><button type="button" class="compile_btn" onclick="javascript:edit_customer()">编辑</button></span><% end %>
   </div>
   <ul class="data_body_ul">
