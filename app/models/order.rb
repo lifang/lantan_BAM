@@ -184,8 +184,8 @@ class Order < ActiveRecord::Base
       end
       working_orders = working_orders.first if working_orders.size > 0
       customer_record = Customer.find_by_id(customer.customer_id)
-      c_pcard_relations =  customer_record.pc_card_records_method[1]  #套餐卡记录
-      already_used_count = customer_record.pc_card_records_method[0]
+      c_pcard_relations =  customer_record.pc_card_records_method(store_id)[1]  #套餐卡记录
+      already_used_count = customer_record.pc_card_records_method(store_id)[0]
 
       pcard_records = []
       c_pcard_relations.each do |cpr|
