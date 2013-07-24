@@ -1,7 +1,7 @@
 <div class="tab_popup" style="display:none;" id="edit_staff_area">
     <div class="popup_box">
          <h1>编辑员工<a href="javascript:void(0)" class="close">关闭</a></h1>
-         <%= form_for(@staff, :url => store_staff_path(@store, @staff), :html => {:method => :put, :multipart => true}) do |f| %>
+         <%= form_for(@staff, :url => store_staff_path(@store, @staff), :html => {:method => :put, :multipart => true, "data-type" => 'script'}, :remote => true) do |f| %>
          <div class="popup_body">
               <div class="popup_body_area">
                 <div class="item">

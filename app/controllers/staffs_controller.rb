@@ -41,10 +41,11 @@ class StaffsController < ApplicationController
     if @staff.save   #save staff info and picture
       @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create") unless photo.nil?
       flash[:notice] = "创建员工成功!"
+      @flash_notice = "success"
     else
-      flash[:notice] = "创建员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "创建员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
     end
-    redirect_to store_staffs_path(@store)
+    #redirect_to store_staffs_path(@store)
   end
 
   def show       
@@ -86,12 +87,13 @@ class StaffsController < ApplicationController
     params[:staff][:photo] = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
     if  @staff && @staff.update_attributes(params[:staff])
       flash[:notice] = "更新员工成功"
+      @flash_notice = "success"
     else
-      flash[:notice] = "更新员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "更新员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
     end
     #update picture
     @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "update") if !photo.nil? && @staff
-    redirect_to store_staff_path(@store, @staff)
+    #redirect_to store_staff_path(@store, @staff)
   end
 
   def destroy
