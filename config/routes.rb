@@ -227,6 +227,13 @@ LantanBAM::Application.routes.draw do
     end
   end
   
+  resources :work_orders do
+    collection do
+      get "work_orders_status"
+      post "login"
+    end
+  end
+
   namespace :api do
     resources :orders do
       collection do
@@ -251,12 +258,6 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-  resources :work_orders do
-    collection do
-      get "work_orders_status"
-      post "login"
-    end
-  end
   end
 
 end
