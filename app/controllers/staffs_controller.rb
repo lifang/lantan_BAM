@@ -101,6 +101,15 @@ class StaffsController < ApplicationController
     redirect_to store_staffs_path(@store)
   end
 
+#  def validate_phone
+#    staff = Staff.find_by_phone(params[:phone])
+#    if staff && staff.status != Staff::STATUS[:deleted]
+#      render :text => "error"
+#    else
+#      render :text => "success"
+#    end
+#  end
+
   private
 
   def get_store

@@ -376,6 +376,25 @@ $(document).ready(function(){
        $(this).attr("disabled", "disabled");
     });
 
+//    $("#staff_phone").live("blur", function(){
+//       var store_id = $("#store_id").val();
+//       var phone = $(this).val();
+//       $.ajax({
+//            type : 'get',
+//            url : "/stores/"+ store_id+"/staffs/validate_phone",
+//            data : {
+//                phone : phone
+//            },
+//            success: function(data){
+//                if(data == "error"){
+//                   tishi_alert("联系方式已经存在!");
+//                   return false;
+//                }
+//            }
+//        });
+//       return false;
+//    });
+
     //新建奖励信息验证
     $("#new_reward_btn").click(function(){
         if($("#new_reward_area input[type='checkbox']:checked").length == 0){

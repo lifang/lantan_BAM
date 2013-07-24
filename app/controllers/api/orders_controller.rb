@@ -455,7 +455,8 @@ class Api::OrdersController < ApplicationController
       end
     end
     if mat_arr.include?(nil)
-      render :json => {:status => "error", :message => "没有材料或者你的出库数量超过库存数量"}
+      no_enough_storeage = materials - mat_arr
+      render :json => {:status => "error", :message => "没有材料或者你的出库数量超过库存数量", :materials => no_enough_storeage}
     else
       Material.transaction do
         begin

@@ -98,7 +98,6 @@ class WorkOrder < ActiveRecord::Base
 
         car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
 
-
         products = Product.includes(:station_service_relations => :station).
           where("stations.id=#{self.station_id} and products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
 
