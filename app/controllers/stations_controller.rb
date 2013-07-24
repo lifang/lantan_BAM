@@ -10,17 +10,17 @@ class StationsController < ApplicationController
     @staff_ids,@times,@staffs,@f_working,@f_waiting = {},{},{},{},{}
     unless @stations.blank?
       sql=Station.make_data(params[:store_id])
-      work_orders=WorkOrder.find_by_sql(sql).inject(Hash.new) { |hash, a| hash[a.status].nil? ? hash[a.status]=[a] : hash[a.status] << a;hash}
+      work_orders = WorkOrder.find_by_sql(sql).inject(Hash.new) { |hash, a| hash[a.status].nil? ? hash[a.status]=[a] : hash[a.status] << a;hash}
       waits =work_orders[WorkOrder::STAT[:WAIT_PAY]].nil? ? {} : work_orders[WorkOrder::STAT[:WAIT_PAY]]
       waits.each { |a| @f_waiting[a.front_staff_id].nil? ? @f_waiting[a.front_staff_id]=[a] : @f_waiting[a.front_staff_id] << a;}
-      servs =work_orders[WorkOrder::STAT[:SERVICING]].nil? ? {} : work_orders[WorkOrder::STAT[:SERVICING]]
-      servs.each { |hash, a| @f_working[a.front_staff_id].nil? ? @f_working[a.front_staff_id]=[a] : @f_working[a.front_staff_id] << a}
+      servs = work_orders[WorkOrder::STAT[:SERVICING]].nil? ? {} : work_orders[WorkOrder::STAT[:SERVICING]]
+      servs.each { | a| @f_working[a.front_staff_id].nil? ? @f_working[a.front_staff_id]=[a] : @f_working[a.front_staff_id] << a}
       @nums = servs.inject(Hash.new) { |hash, a| hash.merge(a.station_id=>a.num)}
       StationStaffRelation.find_by_sql("select staff_id t_id,station_id s_id from station_staff_relations where station_id in (#{@stations.map(&:id).join(',')})
     and current_day='#{Time.now.strftime("%Y%m%d")}' ").each {|staff|@staff_ids[staff.s_id].nil? ? @staff_ids[staff.s_id]=[staff.t_id] : @staff_ids[staff.s_id]<<staff.t_id}
       Staff.where("id in (#{@staff_ids.values.flatten.uniq.join(',')})").each{|staff|@staffs[staff.id]=staff.name} unless @staff_ids == {}
       WorkOrder.where("store_id=#{params[:store_id]} and status=#{WorkOrder::STAT[:SERVICING]} and current_day=#{Time.now.strftime('%Y%m%d').to_i}").each{|work_order|
-        @times[work_order.station_id]=(work_order.ended_at.nil? ? 0 : work_order.ended_at) -Time.now}
+        @times[work_order.station_id]=work_order.ended_at.nil? ? 0 : (work_order.ended_at- Time.now) }
     end
     p @staffs
   end
