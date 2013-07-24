@@ -357,7 +357,7 @@ textarea {
     font-weight: bold;
     color: #930205;
 }
-.search input[type="text"], .search select {
+.search input[type="text"], .search input[type="password"], .search select {
     width: 100px;
     height: 23px;
     line-height: 24px;

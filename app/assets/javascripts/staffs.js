@@ -366,7 +366,7 @@ $(document).ready(function(){
 
     //新建奖励信息验证
     $("#new_reward_btn").click(function(){
-        if($("#new_reward_area input:checked").length == 0){
+        if($("#new_reward_area input[type='checkbox']:checked").length == 0){
             tishi_alert("至少选择一个奖励人员!");
             return false;
         }
@@ -384,7 +384,7 @@ $(document).ready(function(){
 
     //新建违规信息验证
     $("#new_violation_btn").click(function(){
-        if($("#new_violation_area input:checked").length == 0){
+        if($("#new_violation_area input[type='checkbox']:checked").length == 0){
             tishi_alert("至少选择一个违规人员!");
             return false;
         }
@@ -414,7 +414,7 @@ $(document).ready(function(){
             tishi_alert("培训开始时间必须在培训结束时间之后!");
             return false;
         }
-        if($("#new_train_area input:checked").length == 0){
+        if($("#new_train_area input[type='checkbox']:checked").length == 0){
             tishi_alert("至少选择一个培训人员!");
             return false;
         }

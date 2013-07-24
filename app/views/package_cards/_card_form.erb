@@ -1,13 +1,13 @@
 <%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
 <%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
 <div class="item">
-  <label>套餐卡名称：</label><input name="name" id="name" type="text" value="<%= @pcard.name %>" />
+  <label><span class="red">*</span>套餐卡名称：</label><input name="name" id="name" type="text" value="<%= @pcard.name %>" />
 </div>
 <div class="item">
-  <label>套餐价格：</label><input name="price" id="price" type="text" value="<%= @pcard.price %>" />
+  <label><span class="red">*</span>套餐价格：</label><input name="price" id="price" type="text" value="<%= @pcard.price %>" />
 </div>
 <div class="item">
-  <label>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @pcard.prod_point %>" />
+  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @pcard.prod_point %>" />
 </div>
 <div class="item_textarea">
   <span class="item_radio"><input name="time_select" type="radio" checked value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>"

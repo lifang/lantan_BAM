@@ -235,11 +235,11 @@ class Order < ActiveRecord::Base
 
     products = Product.find_by_sql(["select * from products p where p.status = ?
       and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?",
-        Product::IS_VALIDATE[:YES], p_ids.keys.flatten, store_id])
+        Product::IS_VALIDATE[:YES], p_ids.keys.flatten, store_id]) if p_ids
     services = Product.find_by_sql(["select * from products p where p.status = ?
       and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
         Product::IS_VALIDATE[:YES], store_id])
-    ((products + services) || []).each do |p|
+    (((products||[]) + services) || []).each do |p|
       h = Hash.new
       h[:id] = p.id
       h[:name] = p.name
@@ -280,7 +280,7 @@ class Order < ActiveRecord::Base
     pcard_prod_relations = PcardProdRelation.find_by_sql(["select p.name, ppr.product_num, ppr.package_card_id
       from pcard_prod_relations ppr
       inner join products p on p.id = ppr.product_id where ppr.package_card_id in (?)", cards]).group_by{ |pcr| pcr.package_card_id }
-    sv_cards = SvCard.normal_included(2)
+    sv_cards = SvCard.normal_included(store_id)
 
     product_arr[:优惠卡类] = (cards + sv_cards || []).collect{|c|
       price = c.is_a?(SvCard) ? c.sale_price : c.price

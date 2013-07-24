@@ -224,7 +224,7 @@ class Station < ActiveRecord::Base
     has_start_end_time = false
     #如果用户连续多次下单并且购买的服务可以在原工位上施工，则排在原来工位上。
     if order
-      work_order = WorkOrder.joins(:order).where(:order => {:car_num_id => order.car_num_id},
+      work_order = WorkOrder.joins(:order).where(:orders => {:car_num_id => order.car_num_id},
         :work_orders => {:status => WorkOrder::STAT[:SERVICING],
         :current_day => Time.now.strftime("%Y%m%d").to_i}).order("ended_at desc").first
       if work_order #5
@@ -239,7 +239,6 @@ class Station < ActiveRecord::Base
       if wkor_times.blank?
         if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
           station_id = nil
-          has_start_end_time = false
         else
           #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
           station_id = station_arr[0].try(:id) || 0
@@ -252,7 +251,6 @@ class Station < ActiveRecord::Base
         if no_order_stations.present?
           if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
             station_id = nil
-            has_start_end_time = false
           else
             #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
             station_id = no_order_stations[0].id
