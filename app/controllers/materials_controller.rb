@@ -225,7 +225,9 @@ class MaterialsController < ApplicationController
     if material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
       render :json => {:status => 1, :material_low => material.material_low, :material_storage => material.storage,
                           :material_code => material.code, :material_name => material.name,
-                          :material_type => Material::TYPES_NAMES[material.types], :material_price => material.price}
+                          :material_type => Material::TYPES_NAMES[material.types], :material_price => material.price,
+                          :is_ignore => material.is_ignore
+                          }
     else
       render :json => {:status => 0}
     end
