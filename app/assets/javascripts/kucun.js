@@ -55,6 +55,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
                 success:function(data){
                     if(data.status=="1"){
                         tishi_alert("操作成功")
+                        if(pandian_flag){$(obj).parents('tr').removeClass('tbg') }
                        $(obj).parent().siblings(".su").find(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
                        $(obj).parent().siblings(".mat_diff").text(0);
@@ -1322,7 +1323,7 @@ function close_notice(obj){
          }
       })
       if(is_empty){
-          alert("物料数量不正确！");
+          tishi_alert("物料数量不正确！");
       }
       return f;
   }
