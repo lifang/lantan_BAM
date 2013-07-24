@@ -15,11 +15,11 @@ class Api::OrdersController < ApplicationController
   end
 
   def login
-    staff = Staff.find_by_username(params[:user_name])
+    staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:user_name], Staff::VALID_STATUS])
     info = ""
     if  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
-    elsif !Staff::VALID_STATUS.include?(staff.status) or staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
+    elsif staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
       info = "用户不存在"
     else
       cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
