@@ -275,6 +275,10 @@ $(document).ready(function(){
            tishi_alert("正式薪资标准必须为数字!");
            return false;
        }
+       if(parseFloat($(this).parents('form').find("#staff_base_salary").val())<0.0){
+           tishi_alert("正式薪资标准必须大于0!");
+           return false;
+       }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
            tishi_alert("提成起始额不能为空!");
            return false;
@@ -283,12 +287,20 @@ $(document).ready(function(){
            tishi_alert("提成起始额必须为数字!");
            return false;
        }
+       if(parseFloat($(this).parents('form').find("#staff_deduct_at").val())<0.0){
+           tishi_alert("提成起始额必须大于0!");
+           return false;
+       }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
            tishi_alert("结束额度不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_end").val())){
            tishi_alert("结束额度必须为数字!");
+           return false;
+       }
+       if(parseFloat($(this).parents('form').find("#staff_deduct_end").val())<0.0){
+           tishi_alert("结束额度必须大于0!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && (parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val()))){

@@ -462,7 +462,8 @@ class Api::OrdersController < ApplicationController
           mat_arr.each do |mat|
             mat.save
           end
-          render :json => {:status => "success"}
+          materials = Material.where("store_id = #{store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+          render :json => {:status => "success", :materials => materials}
         rescue
           render :json => {:status => "error", :message => "出库失败"}
         end
