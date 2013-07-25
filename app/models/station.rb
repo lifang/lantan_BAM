@@ -243,7 +243,7 @@ class Station < ActiveRecord::Base
     #如果用户连续多次下单并且购买的服务可以在原工位上施工，则排在原来工位上。
     if order
       work_order = WorkOrder.joins(:order).where(:orders => {:car_num_id => order.car_num_id},
-        :work_orders => {:status => WorkOrder::STAT[:SERVICING],
+        :work_orders => {:status => WorkOrder::STAT[:SERVICING], :store_id => store_id,
         :current_day => Time.now.strftime("%Y%m%d").to_i}).order("ended_at desc").first
       if work_order #5
         if station_arr.map(&:id).include?(work_order.station_id) #[1,3] 5  # 看看同一辆车之前在的工位能不能施工现在下单的服务
