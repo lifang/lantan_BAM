@@ -21,7 +21,8 @@ class WorkOrdersController < ApplicationController
       work_orders = Station.find_by_sql("select s.id as station_id, TIMESTAMPDIFF(minute,now(),w.ended_at)
       as time_left, c.num as car_num, w.status as work_order_status, w.updated_at as wo_updated_at from stations s inner join
       work_orders w on s.id =  w.station_id inner join orders o on w.order_id = o.id inner join
-      car_nums c on o.car_num_id = c.id where s.store_id = #{params[:store_id]} and w.current_day = #{now_date}
+      car_nums c on o.car_num_id = c.id where s.store_id = #{params[:store_id]} and w.current_day = #{now_date} and
+      o.status != #{Order::STATUS[:DELETED]}
       order by w.started_at asc")
 
       if stations != nil
@@ -101,12 +102,12 @@ class WorkOrdersController < ApplicationController
   end# work_orders_status 方法结束标记
 
 def login
-   staff = Staff.find_by_username(params[:user_name])
+   staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:user_name], Staff::VALID_STATUS])
     info = ""
     if  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
       status = 2
-    elsif !Staff::VALID_STATUS.include?(staff.status) or staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
+    elsif staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
       info = "用户不存在"
       status = 1
     else

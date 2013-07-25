@@ -967,8 +967,8 @@ class Order < ActiveRecord::Base
             OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
             status = 1
           end
-#          wo = WorkOrder.find_by_order_id(order.id)
-#          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo
+          wo = WorkOrder.find_by_order_id(order.id)
+          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
           #生成积分的记录
           c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id,order.customer_id)
           customer =  Customer.find(order.customer_id)
