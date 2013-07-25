@@ -8,7 +8,7 @@ function check_login() {
 }
 
 $(document).ready(function(){
-    $(".cancel_btn, .close").click(function(){
+    $("#forgot_password_area .cancel_btn, #forgot_password_area .close").click(function(){
        $("#telphone").val('');
        $("#validate_code").val('');
        $('.mask').hide();
