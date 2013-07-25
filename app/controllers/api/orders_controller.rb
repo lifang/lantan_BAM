@@ -368,7 +368,7 @@ class Api::OrdersController < ApplicationController
   #工位完成施工，技师会用手机触发，给工位进行排单
   def work_order_finished
     work_order = WorkOrder.find_by_id(params[:work_order_id])
-    if work_order
+    if !work_order.nil?
       message = work_order.arrange_station
       if message == "no_next_work_order"
         render :json => {:status => 1, :message => "没有客户继续下单!"}
