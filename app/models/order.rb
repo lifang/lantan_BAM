@@ -70,7 +70,7 @@ class Order < ActiveRecord::Base
     customer_condition_sql = condition_sql
     customer_params_arr = params_arr.collect { |p| p }
     unless is_vip.nil? or is_vip == "-1"
-      customer_condition_sql += " and cu.is_vip = ? "
+      customer_condition_sql += " and csr.is_vip = ? "
       customer_params_arr << is_vip.to_i
     end
     unless is_birthday.nil?
@@ -90,7 +90,9 @@ class Order < ActiveRecord::Base
       price, is_vip, is_birthday, page)
     customer_sql = "select cu.id cu_id, cu.name, cu.mobilephone, cn.num, o.code, o.id o_id from customers cu
       inner join orders o on o.customer_id = cu.id left join car_nums cn on cn.id = o.car_num_id
-      where cu.status = #{Customer::STATUS[:NOMAL]} and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
+      inner join customer_store_relations csr on csr.customer_id = cu.id 
+      where cu.status = #{Customer::STATUS[:NOMAL]} and o.store_id = #{store_id.to_i} and csr.store_id = #{store_id.to_i}
+      and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
     customer_condition_sql = self.generate_customer_sql(condition_sql, params_arr, store_id, started_at,
@@ -104,7 +106,8 @@ class Order < ActiveRecord::Base
   def self.get_message_customers(store_id, started_at, ended_at, is_visited, is_time, time, is_price,
       price, is_vip, is_birthday)
     customer_sql = "select DISTINCT(cu.id) cu_id, cu.name from customers cu
-      inner join orders o on o.customer_id = cu.id  where cu.status = #{Customer::STATUS[:NOMAL]}
+      inner join orders o on o.customer_id = cu.id inner join customer_store_relations csr on csr.customer_id = cu.id 
+      where cu.status = #{Customer::STATUS[:NOMAL]} and csr.store_id = #{store_id.to_i} 
       and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
@@ -935,7 +938,8 @@ class Order < ActiveRecord::Base
           csvc_relations = CSvcRelation.where(:order_id => order.id)
           csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing => hash[:is_billing]})}
           if c_pcard_relations.present? || csvc_relations.present?
-            order.customer.update_attributes(:is_vip=>Customer::IS_VIP[:VIP])
+            c_s_r = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id, order.customer_id)
+            c_s_r.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
           end
           #如果是选择储值卡支付
           if pay_type.to_i == OrderPayType::PAY_TYPES[:SV_CARD] && code
