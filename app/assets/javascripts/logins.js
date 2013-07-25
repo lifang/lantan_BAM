@@ -50,9 +50,11 @@ $(document).ready(function(){
            tishi_alert("验证码不能为空!");
            return false;
         }
-        return true;
+        $(this).parents('form').submit();
+        $(this).attr('disabled', 'disabled');
     })
 });
  function removeDisable(){
-        $("#send_validate_code").attr("disabled",false)
+        $("#send_validate_code").attr("disabled",false);
+        $("#send_validate_code").attr("class", "confirm_btn");
     }

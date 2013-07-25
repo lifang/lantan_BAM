@@ -16,14 +16,18 @@ function new_sv_card(store_id){                 //新建优惠卡
      var type = $("#sv_card_types").val();
      if(type == 0){
          $("#sv_card_discount").removeAttr("disabled");
+         $("#sv_card_discount").prev().prepend("<span class='red'>*</span>");
          $("#sv_card_price").removeAttr("disabled");
+         $("#sv_card_price").prev().prepend("<span class='red'>*</span>");
          $("#setObj").remove();
      }else{
          $("#sv_card_discount").attr("disabled", "disabled");
+         $("#sv_card_discount").prev().html("折扣：");
          $("#sv_card_price").attr("disabled", "disabled");
+         $("#sv_card_price").prev().html("打折卡金额：");
          $("#sv_card_discount").val("");
-          $("#sv_card_price").val("");
-         $("#popup_body_area").append("<div id='setObj' class='setObj'><div class='setobj_name'>项目:</div><div class='setobj_box'>\n\
+         $("#sv_card_price").val("");
+         $("#popup_body_area").append("<div id='setObj' class='setObj'><div class='setobj_name'><span class='red'>*</span>项目:</div><div class='setobj_box'>\n\
              <div class='seto_list'><span>充<input id='started_money' name='started_money' type='text' class='input_s'/>元</span>&nbsp;&nbsp;\n\
               <span>送<input id='ended_money' name='ended_money' type='text' class='input_s'/>元</span></div></div></div>")
      } 
