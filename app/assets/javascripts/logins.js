@@ -8,6 +8,15 @@ function check_login() {
 }
 
 $(document).ready(function(){
+    $(".cancel_btn, .close").click(function(){
+       $("#telphone").val('');
+       $("#validate_code").val('');
+       $('.mask').hide();
+       $("#forgot_password_area").hide();
+       removeDisable();
+       return false;
+    });
+
     $("#forgot_password").click(function(){
       popup("#forgot_password_area");
       return false;
@@ -30,7 +39,8 @@ $(document).ready(function(){
             },
             complete:function(data,status){
                 if(status=="success"){
-                    $('#send_validate_code').removeClass("confirm_btn")
+                    //$('#send_validate_code').removeClass("confirm_btn");
+                 $("#send_validate_code").attr("class", "cancel_btn");
                  setTimeout("removeDisable()",30000);
                  tishi_alert(data.responseText + "若未收到短信，请30秒后再次请求");
                }
