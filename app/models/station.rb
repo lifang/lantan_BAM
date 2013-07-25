@@ -254,8 +254,8 @@ class Station < ActiveRecord::Base
     if station_id == 0
       #按照工位的忙闲获取预计时间
      # wkor_times = WkOrTime.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"))
-      busy_stations = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),
-      :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
+      busy_stations = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),      
+      :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
       
       availbale_stations = station_arr.map(&:id) - busy_stations
       if availbale_stations.present?

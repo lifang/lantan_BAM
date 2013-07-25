@@ -146,7 +146,7 @@ class WorkOrder < ActiveRecord::Base
         infos = Station.return_station_arr(product_ids, same_work_orders[0].store_id)
         station_arr = infos[0]
         wkor_times = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),
-                     :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
+                     :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
         if station_arr.any? and (wkor_times.blank? or wkor_times.length < station_arr.length)
           leave_station = (station_arr - wkor_times)[0]
           s_ended_at = Time.now + same_work_orders[0].cost_time*60
