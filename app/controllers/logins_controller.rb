@@ -2,7 +2,7 @@
 class LoginsController < ApplicationController
   
   def index
-    if cookies[:user_id]
+    #if cookies[:user_id]
       #@staff = Staff.find_by_id(cookies[:user_id].to_i)
       #if @staff.nil?
         #render :index, :layout => false
@@ -14,9 +14,9 @@ class LoginsController < ApplicationController
         #render :index, :layout => false
         #end
       #end
-    else
+    #else
       render :index, :layout => false
-    end
+    #end
     
   end
 
