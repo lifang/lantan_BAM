@@ -138,8 +138,8 @@ class WorkOrder < ActiveRecord::Base
         message = "no_next_work_order"
       end
       #同一个car_num_id，当符合条件的工位为空时，排单
-      same_work_orders = WorkOrder.join(:orders).include(:order => :order_prod_relations).
-        where("work_orders.station_id is null and work_orders.status = #{WorkOrder::STAT[:WAIT]}
+      same_work_orders = WorkOrder.joins(:order).includes(:order => :order_prod_relations).
+        where("work_orders.station_id = null and work_orders.status = #{WorkOrder::STAT[:WAIT]}
           and orders.car_num_id = #{order.car_num_id}").orders("work_orders.created_at asc")
       if same_work_orders.any?
         product_ids = same_work_orders[0].order.order_prod_relations.map(&:product_id)
