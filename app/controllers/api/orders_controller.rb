@@ -511,7 +511,7 @@ class Api::OrdersController < ApplicationController
                      where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
                      where("stations.status = #{Station::STAT[:NORMAL]}").
                      where("work_orders.current_day = #{current_day}").
-                     where("station_id = #{station.id}").select("work_orders.*,car_nums.num as car_num").first
+                     where("work_orders.station_id = #{station.id}").select("work_orders.*,car_nums.num as car_num").first
         work_order["coutdown"] = work_order.ended_at - Time.now if work_order
       else
         work_order = nil
