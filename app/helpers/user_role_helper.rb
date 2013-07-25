@@ -62,6 +62,26 @@ module UserRoleHelper
     cookies[:user_roles] = {:value => user_roles.join(","), :secure  => true}
   end
 
+  def staff_role(user_id)
+    user = Staff.includes(:roles => :role_model_relations).find user_id
+    roles = user.roles
+    user_roles = []
+    model_role = {}
+    roles.each do |role|
+      user_roles << role.id
+      model_roles = role.role_model_relations
+      model_roles.each do |m|
+        model_name = m.model_name
+        if model_role[model_name.to_sym]
+          model_role[model_name.to_sym] = model_role[model_name.to_sym].to_i|m.num.to_i
+        else
+          model_role[model_name.to_sym] = m.num.to_i
+        end
+      end if model_roles
+    end if roles
+    {:value => model_role.to_a.join(","), :secure  => true}
+  end
+
   #判断功能按钮的权限
   def permission?(*role)
     model = role[0]
@@ -84,6 +104,27 @@ module UserRoleHelper
     end
     role_flag.to_i&i[1] == i[1]
     #    session[:model_role][model]&i[1]==i[1]
+  end
+
+  def staff_phone_inventory_permission?(role, staff_id)
+    model = role[0]
+    function = role[1]
+    i = Constant::ROLES[model][function]
+    return false unless i
+    role_flag = nil
+    if staff_id
+      model_roles = staff_role(staff_id)
+      if model_roles
+        model_roles = model_roles.split(",")
+        for j in (0..model_roles.length)
+          if model_roles[j].to_s == model.to_s
+            role_flag = model_roles[j+1]
+            break
+          end
+        end
+      end
+    end
+    role_flag.to_i&i[1] == i[1]
   end
 
   #判断菜单的权限

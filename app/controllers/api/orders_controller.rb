@@ -482,7 +482,7 @@ class Api::OrdersController < ApplicationController
       render :json => {:status => 3, :message => "该用户不存在"}
     else
       #登录成功
-      phone_inventory = permission?(:staffs,:phone_inventory) ? 1 : 0
+      phone_inventory = staff_phone_inventory_permission?([:staffs, :phone_inventory], staff.id) ? 1 : 0
       #是否是技师登录
       materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
       mat_out_types = MatOutOrder::TYPES
