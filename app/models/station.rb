@@ -142,14 +142,12 @@ class Station < ActiveRecord::Base
           s_levels[h_level].each{|station|
             if o_staffs.keys.include? station
               StationStaffRelation.create(:station_id=>station,:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
-              Station.find(station).update_attributes(:status=>Station::STAT[:NORMAL])
               is_half = false
               break
             end
           }
           if  is_half  #已分配工位中不包含当前级别的技师
             StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
-            Station.find(s_levels[h_level][0]).update_attributes(:status=>Station::STAT[:LACK])
           end
         end
       end

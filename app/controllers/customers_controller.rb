@@ -88,7 +88,7 @@ class CustomersController < ApplicationController
         customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
           :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
           :address => params[:address])
-        c_store = CustomerStoreRelation.find_by_store_id_and_customer_id(customer.store_id,customer.id)
+        c_store = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id],customer.id)
         c_store.update_attributes( :is_vip => params[:is_vip]) if c_store
         flash[:notice] = "客户信息更新成功。"
       end

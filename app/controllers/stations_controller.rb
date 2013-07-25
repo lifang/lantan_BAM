@@ -28,11 +28,9 @@ class StationsController < ApplicationController
 
   def show_detail
     @stations =Station.where("store_id=#{params[:store_id]} and status !=#{Station::STAT[:DELETED]}")
-    @t_infos={}
-    @stations.each do |station|
-      staff=StationStaffRelation.find_by_sql("select staff_id from station_staff_relations where station_id=#{station.id} and current_day='#{Time.now.strftime("%Y%m%d")}' ")
-      @t_infos[station.id]=Staff.where("id in (#{staff.map(&:staff_id).join(',')})").map(&:id)  unless staff.blank?
-    end
+    @t_infos,@t_names = {},{}
+    StationStaffRelation.find_by_sql("select staff_id s_id,station_id t_id from station_staff_relations where current_day='#{Time.now.strftime("%Y%m%d")}' and
+     station_id in (#{@stations.map(&:id).join(',')}) ").each {|s| @t_infos[s.t_id].nil? ? @t_infos[s.t_id]=[s.s_id] : @t_infos[s.t_id] << s.s_id}
     @staffs = Staff.find_by_sql("select name,id from staffs where store_id=#{params[:store_id]} and status = #{Staff::STATUS[:normal]} and type_of_w=#{Staff::S_COMPANY[:TECHNICIAN]}")
   end
 
