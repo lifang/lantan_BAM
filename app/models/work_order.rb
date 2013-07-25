@@ -62,15 +62,23 @@ class WorkOrder < ActiveRecord::Base
       order = self.order
       status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
       self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
+
+      puts "**************"
+      puts runtime.inspect
+      puts self.cost_time.inspect
+      puts "******************"
       
-      if runtime > self.cost_time
-        staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
-        staffs.each do |staff_id|
-          ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
-            :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
-            :status => ViolationReward::STATUS[:NOMAL])
+      if !self.cost_time.nil?
+        if runtime > self.cost_time.to_f
+          staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+          staffs.each do |staff_id|
+            ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
+              :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
+              :status => ViolationReward::STATUS[:NOMAL])
+          end
         end
       end
+
     end
     order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
 
