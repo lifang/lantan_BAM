@@ -62,12 +62,7 @@ class WorkOrder < ActiveRecord::Base
       order = self.order
       status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
       self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
-
-      puts "**************"
-      puts runtime.inspect
-      puts self.cost_time.inspect
-      puts "******************"
-      
+    
       if !self.cost_time.nil?
         if runtime > self.cost_time.to_f
           staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
@@ -111,7 +106,7 @@ class WorkOrder < ActiveRecord::Base
 
       another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
-        where("work_orders.station_id = null").
+        where("work_orders.station_id is null").
         where("work_orders.store_id = #{self.store_id}").
         where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
         where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
