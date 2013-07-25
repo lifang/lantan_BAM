@@ -370,7 +370,7 @@ class Api::OrdersController < ApplicationController
   #工位完成施工，技师会用手机触发，给工位进行排单
   def work_order_finished
     work_order = WorkOrder.find_by_id(params[:work_order_id])
-    if work_order
+    if !work_order.nil?
       message = work_order.arrange_station
       if message == "no_next_work_order"
         render :json => {:status => 1, :message => "没有客户继续下单!"}
@@ -511,12 +511,24 @@ class Api::OrdersController < ApplicationController
         work_order["coutdown"] = work_order.ended_at - Time.now
         result << work_order
       end
+
       station = Station.includes(:station_staff_relations => :staff).
         where("staffs.id = #{staff.id}").
         where("station_staff_relations.store_id = #{staff.store.id}").
         where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
         where("stations.status = #{Station::STAT[:NORMAL]}").first
-      render :json => {:status => 1, :work_orders => result, :station => station}
+
+      if station
+        work_order = WorkOrder.joins([:order => :car_num], :station).where("work_orders.store_id = #{staff.store_id}").
+                     where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
+                     where("stations.status = #{Station::STAT[:NORMAL]}").
+                     where("work_orders.current_day = #{current_day}").
+                     where("work_orders.station_id = #{station.id}").select("work_orders.*,car_nums.num as car_num").first
+        work_order["coutdown"] = work_order.ended_at - Time.now if work_order
+      else
+        work_order = nil
+      end    
+      render :json => {:status => 1, :work_order => work_order, :station => station}
     else
       render :json => {:status => 0}
     end
