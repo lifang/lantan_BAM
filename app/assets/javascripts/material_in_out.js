@@ -65,9 +65,13 @@ function hideInput(obj){
 }
 
 function removeRow(obj, print_flag){
-    if(print_flag=="1"){ 
+    if(print_flag=="1"){
         var id = $(obj).attr('class');
         $("#print_code_tab #search_result").find("#" + id).attr("checked", false);
+    }
+    if(print_flag=="2"){
+        var id = $(obj).attr('class');
+        $("#MaterialsLoss #mat_loss_search_result").find("#" + id).attr("checked", false);
     }
     $(obj).parents("tr").remove();
 }
