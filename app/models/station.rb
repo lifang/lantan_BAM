@@ -253,32 +253,47 @@ class Station < ActiveRecord::Base
     end
     if station_id == 0
       #按照工位的忙闲获取预计时间
-      wkor_times = WkOrTime.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"))
-      if wkor_times.blank?
+     # wkor_times = WkOrTime.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"))
+      busy_stations = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),      
+      :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
+      
+      availbale_stations = station_arr.map(&:id) - busy_stations
+      if availbale_stations.present?
         if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
           station_id = nil
         else
           #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
-          station_id = station_arr[0].try(:id) || 0
+          station_id = availbale_stations[0] || 0
           has_start_end_time = true
         end
-        
       else
-        stations = Station.where(:id => wkor_times.map(&:station_id))
-        no_order_stations = station_arr - stations #获得工位上没订单的工位
-        if no_order_stations.present?
-          if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
-            station_id = nil
-          else
-            #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
-            station_id = no_order_stations[0].id
-            has_start_end_time = true
-          end
-        else
-          #如果没有空闲工位的话， 则不置station_id和开始结束时间
-          station_id = nil
-        end
+        station_id = nil
       end
+      # if busy_stations.blank?
+        # if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
+          # station_id = nil
+        # else
+          # #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
+          # station_id = station_arr[0].try(:id) || 0
+          # has_start_end_time = true
+        # end
+#         
+      # else
+        # stations = Station.where(:id => busy_stations.map(&:station_id))
+        # no_order_stations = station_arr - stations #获得工位上没订单的工位
+        # if no_order_stations.present?
+          # if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
+            # station_id = nil
+          # else
+            # #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
+            # station_id = no_order_stations[0].id
+            # has_start_end_time = true
+          # end
+        # else
+          # #如果没有空闲工位的话， 则不置station_id和开始结束时间
+          # station_id = nil
+        # end
+      # end
     end
     [station_id, station_flag, has_start_end_time]
   end
