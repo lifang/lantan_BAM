@@ -19,7 +19,7 @@ class WorkOrdersController < ApplicationController
 
       #查询所有工单对应的车牌号等信息
       work_orders = Station.find_by_sql("select s.id as station_id, TIMESTAMPDIFF(minute,now(),w.ended_at)
-      as time_left, c.num as car_num, w.status as work_order_status from stations s inner join
+      as time_left, c.num as car_num, w.status as work_order_status, w.updated_at as wo_updated_at from stations s inner join
       work_orders w on s.id =  w.station_id inner join orders o on w.order_id = o.id inner join
       car_nums c on o.car_num_id = c.id where s.store_id = #{params[:store_id]} and w.current_day = #{now_date}
       order by w.started_at asc")
@@ -52,7 +52,13 @@ class WorkOrdersController < ApplicationController
                   # STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成"}
                   # STAT = {:WAIT=>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE=>3}
                   #等待付款车牌号
-                  if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY] || (work_order.work_order_status == WorkOrder::STAT[:COMPLETE] && (Time.now - work_order.updated_at)/60 <= 5)
+                  p 11111111111111
+                  p work_order.station_id
+                  p work_order.work_order_status
+                  p WorkOrder::STAT[:COMPLETE]
+                  p Time.now
+                  p work_order.updated_at
+                  if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY] || (work_order.work_order_status == WorkOrder::STAT[:COMPLETE] && (Time.now - work_order.wo_updated_at)/60 <= 5)
                     wait_pay_car_nums << work_order.car_num
                   end
 
