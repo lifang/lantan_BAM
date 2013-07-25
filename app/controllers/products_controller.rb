@@ -5,7 +5,6 @@ class ProductsController < ApplicationController
   layout 'sale'
 
   def index
-    Product.revist_message()
     @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,t_price,base_price,id,store_id,prod_point from products where  store_id in (#{params[:store_id]},1)
     and is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]} order by created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
   end  #产品列表页

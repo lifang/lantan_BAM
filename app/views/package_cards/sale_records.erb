@@ -60,7 +60,26 @@
                     <td><%= card.mobilephone %></td>
                     <td><%= card.price %></td>
                     <%  stat = card.content.nil? ? [] : card.content.split(",")%>
-                    <td><%= stat.collect{|prod| prod.split("-")[1]+" 剩余#{prod.split("-")[2]}次" }.join(" ") %></td>
+                    <td>
+                      <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                        <%unless  card.content.nil? %>
+                          <tr class="fws">
+                            <td width="75%">项目</td>
+                            <td width="25%">剩余次数</td>
+                          </tr>
+                          <%card.content.split(",").each do |prod|%>
+                            <tr>
+                              <td><%= prod.split("-")[1] %></td>
+                              <td><%=prod.split("-")[2] %></td>
+                            </tr>
+                          <%end%>
+                        <%else%>
+                          <tr class="fws">
+                            <td>暂无</td>
+                          </tr>
+                        <% end %>
+                      </table>
+                    </td>
                     <td><%= CPcardRelation::STATUS_NAME[card.status] %></td>
                   </tr>
                 <% end %>

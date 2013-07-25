@@ -15,11 +15,11 @@ class Api::OrdersController < ApplicationController
   end
 
   def login
-    staff = Staff.find_by_username(params[:user_name])
+    staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:user_name], Staff::VALID_STATUS])
     info = ""
     if  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
-    elsif !Staff::VALID_STATUS.include?(staff.status) or staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
+    elsif staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
       info = "用户不存在"
     else
       cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
@@ -455,14 +455,16 @@ class Api::OrdersController < ApplicationController
       end
     end
     if mat_arr.include?(nil)
-      render :json => {:status => "error", :message => "没有材料或者你的出库数量超过库存数量"}
+      no_enough_storeage = materials - mat_arr
+      render :json => {:status => "error", :message => "没有材料或者你的出库数量超过库存数量", :materials => no_enough_storeage}
     else
       Material.transaction do
         begin
           mat_arr.each do |mat|
             mat.save
           end
-          render :json => {:status => "success"}
+          materials = Material.where("store_id = #{store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+          render :json => {:status => "success", :materials => materials}
         rescue
           render :json => {:status => "error", :message => "出库失败"}
         end
@@ -480,15 +482,16 @@ class Api::OrdersController < ApplicationController
       render :json => {:status => 3, :message => "该用户不存在"}
     else
       #登录成功
+      phone_inventory = staff_phone_inventory_permission?([:staffs, :phone_inventory], staff.id) ? 1 : 0
       #是否是技师登录
+      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+      mat_out_types = MatOutOrder::TYPES
       if staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
         #所有的code，材料名称
-        materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
-        mat_out_types = MatOutOrder::TYPES
-        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types}
+        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types, :phone_inventory => phone_inventory}
       else
-        render :json => {:status => 2}
-      end
+        render :json => {:status => 2, :phone_inventory => phone_inventory, :staff_id => staff.id, :store_id => staff.store_id, :materials => materials, :mat_out_types => mat_out_types}
+      end  
     end
   end
 

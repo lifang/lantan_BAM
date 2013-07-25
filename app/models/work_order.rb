@@ -25,22 +25,22 @@ class WorkOrder < ActiveRecord::Base
             else
               station.update_attribute(:status, Station::STAT[:LACK]) if station.status == Station::STAT[:WRONG]
               work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").first
-#              started_at_sql = work_order.nil? ? "1=1" : "started_at >= '#{work_order.started_at}'"
-#              next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").where(started_at_sql).order("started_at asc").first
-#              if work_order
-#                runtime = sprintf('%.2f',(current_time - work_order.started_at)/60).to_f
-#                order = work_order.order
-#                status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
-#                work_order.update_attributes(:status => status,
-#                  :water_num => data_arr[3], :gas_num => data_arr[4], :runtime => runtime)
-#                order = work_order.order
-#                order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
-#              end
-#              if next_work_order
-#                next_work_order.update_attribute(:status, WorkOrder::STAT[:SERVICING])
-#                next_order = next_work_order.order
-#                next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT]
-#              end
+              #              started_at_sql = work_order.nil? ? "1=1" : "started_at >= '#{work_order.started_at}'"
+              #              next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").where(started_at_sql).order("started_at asc").first
+              #              if work_order
+              #                runtime = sprintf('%.2f',(current_time - work_order.started_at)/60).to_f
+              #                order = work_order.order
+              #                status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
+              #                work_order.update_attributes(:status => status,
+              #                  :water_num => data_arr[3], :gas_num => data_arr[4], :runtime => runtime)
+              #                order = work_order.order
+              #                order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
+              #              end
+              #              if next_work_order
+              #                next_work_order.update_attribute(:status, WorkOrder::STAT[:SERVICING])
+              #                next_order = next_work_order.order
+              #                next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT]
+              #              end
               work_order.arrange_station(data_arr[4],data_arr[3]) if work_order
             end
           end
@@ -67,80 +67,89 @@ class WorkOrder < ActiveRecord::Base
         staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
         staffs.each do |staff_id|
           ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
-          :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
-          :status => ViolationReward::STATUS[:NOMAL])
+            :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
+            :status => ViolationReward::STATUS[:NOMAL])
         end
       end
     end
-      order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
+    order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
 
-      #排下一个单
-      next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
-                                  where("station_id = #{self.station_id}").
-                                  where("store_id = #{self.store_id}").
-                                  where("current_day = #{self.current_day}").first
-      if next_work_order
-        #同一个人的下单，直接紧接着排单
-        ended_at = current_time + next_work_order.cost_time*60
-        next_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
-          :started_at => current_time, :ended_at => ended_at )
-        wo_time = WkOrTime.find_by_station_id_and_current_day next_work_order.station_id, ended_at
-        wo_time.update_attribute(:wait_num, wo_time.wait_num - 1) if wo_time and wo_time.wait_num
-        next_order = next_work_order.order
-        next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT]
-        message = "has_next_work_order"
-      else
-        #按照created_at时间来排单
-        #正在施工中的订单
-        orders = Order.includes(:work_orders).where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
-            where("work_orders.current_day = #{Time.now.strftime("%Y%m%d")}").
-            where("work_orders.store_id = #{self.store_id}")
+    #排下一个单
+    next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
+      where("station_id = #{self.station_id}").
+      where("store_id = #{self.store_id}").
+      where("current_day = #{self.current_day}").first
+    if next_work_order
+      #同一个人的下单，直接紧接着排单
+      ended_at = current_time + next_work_order.cost_time*60
+      next_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
+        :started_at => current_time, :ended_at => ended_at )
+      wo_time = WkOrTime.find_by_station_id_and_current_day next_work_order.station_id, ended_at
+      wo_time.update_attribute(:wait_num, wo_time.wait_num - 1) if wo_time and wo_time.wait_num
+      next_order = next_work_order.order
+      next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT]
+      message = "has_next_work_order"
+    else
+      #按照created_at时间来排单
+      #正在施工中的订单
+      orders = Order.includes(:work_orders).where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
+        where("work_orders.current_day = #{Time.now.strftime("%Y%m%d")}").
+        where("work_orders.store_id = #{self.store_id}")
 
       car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
 
-      puts "1111111111111"
-      puts orders.inspect
-      puts "1111111111111"
+      products = Product.includes(:station_service_relations => :station).
+        where("stations.id=#{self.station_id} and products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
 
-        products = Product.includes(:station_service_relations => :station).
-          where("stations.id=#{self.station_id} and products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
-        puts "222222222222"
-        puts products.inspect
-        puts "222222222222222222222"
-        another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
-                            where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
-                            where("work_orders.station_id = null").
-                            where("work_orders.store_id = #{self.store_id}").
-                            where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
-                            where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
-                            where("work_orders.current_day = #{self.current_day}").
-                            where(car_num_id_sql,orders.map(&:car_num_id)).
-                            readonly(false).order("work_orders.created_at asc")
+      another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
+        where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
+        where("work_orders.station_id = null").
+        where("work_orders.store_id = #{self.store_id}").
+        where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
+        where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
+        where("work_orders.current_day = #{self.current_day}").
+        where(car_num_id_sql,orders.map(&:car_num_id)).
+        readonly(false).order("work_orders.created_at asc")
 
-      puts "333333333333333"
-      puts another_work_orders.inspect
-      puts "33333333333333"
-
-        if another_work_orders.length >= 1
-          another_work_order = another_work_orders.first
-          ended_at = current_time + another_work_order.cost_time*60
-          another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
-            :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
-          another_order = another_work_order.order
-          another_order.update_attribute(:status, Order::STATUS[:SERVICING]) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT]
-          if another_work_orders.length >= 2
-            another_work_orders.shift
-            another_work_orders.each do |w_k|
-              if w_k.order && w_k.order.car_num_id == another_order.car_num_id
-                w_k.update_attributes(:station_id => self.station_id)
-              end
+      if another_work_orders.length >= 1
+        another_work_order = another_work_orders.first
+        ended_at = current_time + another_work_order.cost_time*60
+        another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
+          :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
+        another_order = another_work_order.order
+        another_order.update_attribute(:status, Order::STATUS[:SERVICING]) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT]
+        if another_work_orders.length >= 2
+          another_work_orders.shift
+          another_work_orders.each do |w_k|
+            if w_k.order && w_k.order.car_num_id == another_order.car_num_id
+              w_k.update_attributes(:station_id => self.station_id)
             end
           end
-        else
-          message = "no_next_work_order"
+        end
+      else
+        message = "no_next_work_order"
+      end
+      #同一个car_num_id，当符合条件的工位为空时，排单
+      same_work_orders = WorkOrder.join(:orders).include(:order => :order_prod_relations).
+        where("work_orders.station_id is null and work_orders.status = #{WorkOrder::STAT[:WAIT]}
+          and orders.car_num_id = #{order.car_num_id}").orders("work_orders.created_at asc")
+      if same_work_orders.any?
+        product_ids = same_work_orders[0].order.order_prod_relations.map(&:product_id)
+        infos = Station.return_station_arr(product_ids, same_work_orders[0].store_id)
+        station_arr = infos[0]
+        wkor_times = WkOrTime.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d")).map(&:station_id)
+        if station_arr.any? and (wkor_times.blank? or wkor_times.length < station_arr.length)
+          leave_station = (station_arr - wkor_times)[0]
+          s_ended_at = Time.now + same_work_orders[0].cost_time*60
+          same_work_orders[0].update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station,
+            :started_at => Time.now, :ended_at => s_ended_at)
+          same_work_orders[0].order.update_attribute(:status, Order::STATUS[:SERVICING]) if same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT]
+          WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id => leave_station,
+            :current_times => s_ended_at.strftime("%Y%m%d%H%M"))
         end
       end
-      message
+    end
+    message
   end
   
 end

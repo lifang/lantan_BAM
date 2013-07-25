@@ -15,8 +15,9 @@ class Staff < ActiveRecord::Base
   has_many :material_losses
   belongs_to :store
 
-  validates :phone, :uniqueness => { :message => "联系方式已经存在!"}
-  validates :username, :uniqueness => { :message => "用户名已经存在!"}
+  
+  validates :phone, :uniqueness => { :message => "联系方式已经存在!", :scope => :status}, :if => :staff_not_deleted?
+  validates :username, :uniqueness => { :message => "用户名已经存在!", :scope => :status}, :if => :staff_not_deleted?
   #门店员工职务
   S_COMPANY = {:BOSS=>0,:CHIC=>2,:FRONT=>3,:TECHNICIAN=>1,:OTHER=>4} #0 老板 2 店长 3接待 1 技师 4其他
   N_COMPANY = {1=>"技师",3=>"接待",0=>"老板",2=>"店长",4=>"其他"}
@@ -46,7 +47,10 @@ class Staff < ActiveRecord::Base
 
   #分页页数
   PerPage = 10
-  
+
+  def staff_not_deleted?
+    status != STATUS[:deleted]
+  end
 
   attr_accessor :password
   #validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true

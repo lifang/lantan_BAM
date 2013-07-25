@@ -197,12 +197,12 @@ class Station < ActiveRecord::Base
     return video_hash
   end
 
-  def self.arrange_time store_id, prod_ids, order = nil, res_time = nil
-    #查询所有满足条件的工位
-    stations = Station.includes(:station_service_relations).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
+  #返回满足条件的工位
+  def self.return_station_arr(prod_ids, store_id)
     station_arr = []
     station_prod_ids = []
     prod_ids = prod_ids.collect{|p| p.to_i }
+    stations = Station.includes(:station_service_relations).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
     (stations || []).each do |station|
       if station.station_service_relations
         prods = station.station_service_relations.collect{|r| r.product_id }
@@ -210,6 +210,24 @@ class Station < ActiveRecord::Base
         station_arr << station if (prods & prod_ids).sort == prod_ids.sort
       end
     end
+    return [station_arr, station_prod_ids]
+  end
+
+
+  def self.arrange_time store_id, prod_ids, order = nil, res_time = nil
+    #查询所有满足条件的工位
+    infos = self.return_station_arr(prod_ids, store_id)
+    station_arr = infos[0]
+    station_prod_ids = infos[1]
+#    prod_ids = prod_ids.collect{|p| p.to_i }
+#    stations = Station.includes(:station_service_relations).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
+#    (stations || []).each do |station|
+#      if station.station_service_relations
+#        prods = station.station_service_relations.collect{|r| r.product_id }
+#        station_prod_ids << prods
+#        station_arr << station if (prods & prod_ids).sort == prod_ids.sort
+#      end
+#    end
     if station_arr.present?
       station_flag = 1 #有对应工位对应
     else

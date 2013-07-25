@@ -47,12 +47,12 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
         if(confirm("确定核实的库存？")){
             $.ajax({
                 url:"/materials/"+m_id + "/check",
-                dataType:"json",
+                dataType:"script",
                 data:{
-                    num : check_num, store_id : store_id
+                    num : check_num, store_id : store_id, pandian_flag:pandian_flag
                 },
-                type:"GET",
                 success:function(data){
+                    /*
                     if(data.status=="1"){
                         tishi_alert("操作成功")
                         if(pandian_flag){$(obj).parents('tr').removeClass('tbg') }
@@ -104,6 +104,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
                     }else{
                         tishi_alert("核实失败")
                     }
+                    */
                 },
                 error:function(){
                     tishi_alert("核实失败");

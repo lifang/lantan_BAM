@@ -21,13 +21,13 @@ class LoginsController < ApplicationController
   end
 
   def create
-    @staff = Staff.find_by_username(params[:user_name])
+    @staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:user_name], Staff::VALID_STATUS])
     if  @staff.nil? or !@staff.has_password?(params[:user_password]) 
       flash.now[:notice] = "用户名或密码错误"
       #redirect_to "/"
       @user_name = params[:user_name]
       render 'index', :layout => false
-    elsif !Staff::VALID_STATUS.include?(@staff.status) || @staff.store.nil? || @staff.store.status != Store::STATUS[:OPENED]
+    elsif @staff.store.nil? || @staff.store.status != Store::STATUS[:OPENED]
       flash.now[:notice] = "用户不存在"
       @user_name = params[:user_name]
       render 'index', :layout => false

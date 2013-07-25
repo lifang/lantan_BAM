@@ -1,9 +1,7 @@
 #encoding: utf-8
 class WorkOrdersController < ApplicationController
   def work_orders_status
-    status, staff = login
-    if status == 0 && staff
-      store = Store.find_by_id(staff.store_id) #查询所有门店记录
+      store = Store.find_by_id(params[:store_id]) #查询所有门店记录
       date = Time.now.to_s  #获取当前日期时间
       now_date = (date.slice(0,4) + date.slice(5,2) + date.slice(8,2)).to_i #截取当前年月日转换成int型的数据
 
@@ -11,19 +9,19 @@ class WorkOrdersController < ApplicationController
       wait_pay_car_nums = [] #定义数组存放所有待付款车牌
       #查询所有未删除的工位信息
       stations = Station.find_by_sql("select s.id, s.status, s.name
-      from stations s where s.status !=#{Station::STAT[:DELETED]} and s.store_id = #{store.id} order by s.id")
+      from stations s where s.status !=#{Station::STAT[:DELETED]} and s.store_id = #{params[:store_id]} order by s.id")
 
       #查询所有当天的技师信息
       cons_staffs = Station.find_by_sql("select s.id as station_id, staffs.name as staff_name
       from stations s inner join station_staff_relations ssr on s.id = ssr.station_id
-      inner join staffs on ssr.staff_id = staffs.id where s.store_id = #{store.id} and
+      inner join staffs on ssr.staff_id = staffs.id where s.store_id = #{params[:store_id]} and
       ssr.current_day = #{now_date}")
 
       #查询所有工单对应的车牌号等信息
       work_orders = Station.find_by_sql("select s.id as station_id, TIMESTAMPDIFF(minute,now(),w.ended_at)
       as time_left, c.num as car_num, w.status as work_order_status from stations s inner join
       work_orders w on s.id =  w.station_id inner join orders o on w.order_id = o.id inner join
-      car_nums c on o.car_num_id = c.id where s.store_id = #{store.id} and w.current_day = #{now_date}
+      car_nums c on o.car_num_id = c.id where s.store_id = #{params[:store_id]} and w.current_day = #{now_date}
       order by w.started_at asc")
 
       if stations != nil
@@ -98,24 +96,23 @@ class WorkOrdersController < ApplicationController
       else
         current_info[:station_infos] = nil
       end
-      current_info[:no_station_wos] = WorkOrder.where("current_day =? and store_id = ? and status != ? and station_id is null", now_date, store.id, WorkOrder::STAT[:CANCELED])
+      current_info[:no_station_wos] = Order.joins(:work_orders).where("work_orders.current_day =? and work_orders.store_id = ? and work_orders.status != ? and work_orders.station_id is null", now_date, params[:store_id], WorkOrder::STAT[:CANCELED]).map(&:car_num).map(&:num)
       render :json => current_info
-    end
   end# work_orders_status 方法结束标记
 
-  protected
-
-  def login
-    status = 0
-    staff = Staff.find_by_username(params[:user_name])
+def login
+   staff = Staff.find_by_username(params[:user_name])
+    info = ""
     if  staff.nil? or !staff.has_password?(params[:user_password])
-#      flash.now[:notice] = "用户名或密码错误"
-      status = 1
-    elsif !Staff::VALID_STATUS.include?(staff.status) or staff.store.status != Store::STATUS[:OPENED]
-#      flash.now[:notice] = "用户不存在"
+      info = "用户名或密码错误"
       status = 2
+    elsif !Staff::VALID_STATUS.include?(staff.status) or staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
+      info = "用户不存在"
+      status = 1
+    else
+      status = 0
     end
-    [status, staff]
-  end
+    render :json => {:store_id => staff.present? ? staff.store_id : 0, :status => status}
+end
 
 end
