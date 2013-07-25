@@ -23,6 +23,8 @@ class SetStoresController < ApplicationController
             flash[:nitice] = "图片上传失败!"
           end
       end
+      cookies.delete(:store_name) if cookies[:store_name]
+      cookies[:store_name] = {:value => store.name, :path => "/", :secure => false}
       flash[:notice] = "设置成功!"
     else
       flash[:notice] = "更新失败!"
