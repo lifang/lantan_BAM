@@ -8,6 +8,15 @@ function check_login() {
 }
 
 $(document).ready(function(){
+    $("#forgot_password_area .cancel_btn, #forgot_password_area .close").click(function(){
+       $("#telphone").val('');
+       $("#validate_code").val('');
+       $('.mask').hide();
+       $("#forgot_password_area").hide();
+       removeDisable();
+       return false;
+    });
+
     $("#forgot_password").click(function(){
       popup("#forgot_password_area");
       return false;
@@ -20,16 +29,23 @@ $(document).ready(function(){
            return false;
       }
       $.ajax({
-          type : 'get',
-          url : "/logins/send_validate_code",
-          data : {
-              telphone : telphone
-          },
-          success: function(data){
-              tishi_alert(data);
-              return false;
-          }
-      });
+            type : 'get',
+            url : "/logins/send_validate_code",
+            data : {
+                telphone : telphone
+            },
+            beforeSend:function(xhr){
+                $('#send_validate_code').attr("disabled",true)
+            },
+            complete:function(data,status){
+                if(status=="success"){
+                    //$('#send_validate_code').removeClass("confirm_btn");
+                 $("#send_validate_code").attr("class", "cancel_btn");
+                 setTimeout("removeDisable()",30000);
+                 tishi_alert(data.responseText + "若未收到短信，请30秒后再次请求");
+               }
+            }
+        });
       return false;
     });
 
@@ -44,6 +60,11 @@ $(document).ready(function(){
            tishi_alert("验证码不能为空!");
            return false;
         }
-        return true;
+        $(this).parents('form').submit();
+        $(this).attr('disabled', 'disabled');
     })
 });
+ function removeDisable(){
+        $("#send_validate_code").attr("disabled",false);
+        $("#send_validate_code").attr("class", "confirm_btn");
+    }

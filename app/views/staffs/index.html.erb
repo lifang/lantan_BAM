@@ -51,7 +51,7 @@
 <div class="tab_popup" style="display:none;" id="new_staff_area">
   <div class="popup_box">
     <h1>新建员工<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <%= form_for(@staff, :url => store_staffs_path(@store), :html => {:multipart => true, :id => "adv"}) do |f| %>
+    <%= form_for(@staff, :url => store_staffs_path(@store), :html => {:multipart => true, "data-type" => 'script'}, :remote => true) do |f| %>
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item">
@@ -150,7 +150,7 @@
         </div>
         <%= f.hidden_field :status, :value => 0 %>
         <div class="btn_box">
-          <button class="confirm_btn" id="new_staff_btn">确定</button>
+          <button class="confirm_btn" id="new_staff_btn" type="button">确定</button>
           <button class="cancel_btn">取消</button></div>
         <div class="clear"></div>
       </div>

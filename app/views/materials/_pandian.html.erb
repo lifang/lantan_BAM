@@ -20,7 +20,8 @@
             <tbody class="pandian_list">
               <% @materials_need_check.each do |material| %>
               <tr id="<%= material.id %>" class="<%= material.storage!= material.check_num ? 'tbg' : '' %>">
-                  <td><%= material.name %></td>
+                  <td <% if !material.is_ignore && material.storage.to_i<=material.material_low.to_i %>class="data_table_error"<% end %>>
+<%= material.name %></td>
                   <td><%= material.code %></td>
                   <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
                   <td><%= material.unit %></td>

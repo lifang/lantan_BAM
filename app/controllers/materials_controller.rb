@@ -6,9 +6,9 @@ class MaterialsController < ApplicationController
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
-  before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo]
+  before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo, :check]
   before_filter :make_search_sql, :only => [:search_materials, :page_materials, :page_ins, :page_outs]
-  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num, :page_materials_losses]
+  before_filter :get_store, :only => [:index, :search_materials, :page_materials, :page_ins, :page_outs, :check_mat_num, :page_materials_losses, :check]
   @@m = Mutex.new
 
   #库存列表
@@ -220,16 +220,13 @@ class MaterialsController < ApplicationController
   #核实
   def check
     #puts params[:num],"m_id:#{params[:id]}"
-    material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
+    @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     #current_store = Store.find_by_id(params[:store_id].to_i)
-    if material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
-      render :json => {:status => 1, :material_low => material.material_low, :material_storage => material.storage,
-                          :material_code => material.code, :material_name => material.name,
-                          :material_type => Material::TYPES_NAMES[material.types], :material_price => material.price,
-                          :is_ignore => material.is_ignore
-                          }
+    @pandian_flag = params[:pandian_flag].to_i
+    if @material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
+      @status = 0
     else
-      render :json => {:status => 0}
+      @status = 1
     end
   end
 

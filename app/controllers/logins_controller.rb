@@ -21,13 +21,13 @@ class LoginsController < ApplicationController
   end
 
   def create
-    @staff = Staff.find_by_username(params[:user_name])
+    @staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:user_name], Staff::VALID_STATUS])
     if  @staff.nil? or !@staff.has_password?(params[:user_password]) 
       flash.now[:notice] = "用户名或密码错误"
       #redirect_to "/"
       @user_name = params[:user_name]
       render 'index', :layout => false
-    elsif !Staff::VALID_STATUS.include?(@staff.status) || @staff.store.nil? || @staff.store.status != Store::STATUS[:OPENED]
+    elsif @staff.store.nil? || @staff.store.status != Store::STATUS[:OPENED]
       flash.now[:notice] = "用户不存在"
       @user_name = params[:user_name]
       render 'index', :layout => false
@@ -59,7 +59,8 @@ class LoginsController < ApplicationController
   end
 
   def forgot_password
-    staff = Staff.where("phone = '#{params[:telphone]}' and validate_code = '#{params[:validate_code]}'").first
+    staff = Staff.where("phone = '#{params[:telphone]}' and validate_code = '#{params[:validate_code]}'").
+                  where("status in (?)", Staff::VALID_STATUS).first
     if staff && !params[:validate_code].nil? && !params[:validate_code].blank?
       random_password = [*100000..999999].sample
       MessageRecord.transaction do
@@ -87,7 +88,8 @@ class LoginsController < ApplicationController
   end
 
   def send_validate_code
-    staff = Staff.find_by_phone(params[:telphone])
+    #staff = Staff.find_by_phone(params[:telphone])
+    staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:telphone], Staff::VALID_STATUS])
     if staff
       random_num = [*100000..999999].sample
       MessageRecord.transaction do
