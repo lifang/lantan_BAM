@@ -4,6 +4,7 @@
   {$('#<%= @material.id %>').removeClass('tbg') }
   $('#<%= @material.id %>, #showmaterial<%= @material.id %>tr').find(".su").find(".storage").text(<%= @material.storage %>);
   $('#showmaterial<%= @material.id %>tr').find(".check_num_field").find('input').val("");
+  $("#showmaterial<%= @material.id %>tr").find("td:nth-child(4)").text("<%=!@material.is_ignore && @material.storage.to_i<=@material.material_low.to_i ? '缺货' : '存货' %>");
   <% if @material.storage.to_i <= @material.material_low.to_i and !@material.is_ignore %>
     $('#<%= @material.id %>, #showmaterial<%= @material.id %>tr').find('td:first').addClass("data_table_error");
   <% else %>

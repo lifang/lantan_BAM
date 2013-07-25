@@ -85,7 +85,7 @@
         <td><%= material.unit %></td>
         <td><%= material.price %></td>
         <td><%= material.sale_price %></td>
-        <td class="check_num_field"><%= text_field_tag "check_num_#{material.id}",material.check_num,{:style =>"width:50px;"} %></td>
+        <td class="check_num_field"><%= text_field_tag "materials[#{material.id}][num]",material.check_num, :id =>"check_num_#{material.id}", :style =>"width:50px;" %></td>
         <td class="operation">
           <% if permission?(:materials, :mat_mark) %>
           <%= link_to "备注", "/stores/#{params[:store_id]}/materials/#{material.id}/get_remark", :remote => true, 'data-type' => 'script' %>
