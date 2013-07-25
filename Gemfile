@@ -19,8 +19,8 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 gem 'json', '1.7.6'
-gem 'execjs'
-gem 'therubyracer'
+gem 'execjs', '1.4.0'
+gem 'therubyracer', '0.11.4'
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'
