@@ -176,11 +176,33 @@ function select_material(obj,name,type,panel_type){
 
 //库存报损选择
 function select_mat_loss_material(obj,name,code,typesname,storage,id){
+    var count = 0;
+    var m_id = 0;
+    $("#MaterialsLoss #selected_materials").find("tr").each(function(){
+        m_id = $(this).attr("id").split("_")[2];
+        if(id == m_id)
+         count++;
+    });
+
     if($(obj).is(":checked")){
-        var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
-        tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+code+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
-        "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,1); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
-        $("#MaterialsLoss #selected_materials").append(tr);
+        if(count == 0){
+            var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
+            tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+code+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
+            "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,2); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
+            $("#MaterialsLoss #selected_materials").append(tr);
+        }
+        else
+        {
+            $("#MaterialsLoss #selected_materials").find("tr").each(function(){
+                m_id = $(this).attr("id").split("_")[2];
+                if(id == m_id)
+                    $(this).remove();
+            });
+            var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
+            tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+code+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
+                "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,2); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
+            $("#MaterialsLoss #selected_materials").append(tr);
+        }
     }
     else{
         $("#li_"+$(obj).attr("id")).remove();
