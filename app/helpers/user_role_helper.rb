@@ -79,7 +79,7 @@ module UserRoleHelper
         end
       end if model_roles
     end if roles
-    {:value => model_role.to_a.join(","), :secure  => true}
+    model_role.to_a.join(",")
   end
 
   #判断功能按钮的权限
