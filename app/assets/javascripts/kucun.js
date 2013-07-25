@@ -135,15 +135,31 @@ function submit_search_form(store_id,type,obj){
                 $("#search_result").show();
                 $("#dinghuo_search_result").show();
                 var mat_ids = [];
+                if(type==1){
                 $("#dinghuo_selected_materials").find("tr").each(function(){
                     mat_ids.push($(this).attr('id').split('_')[2])
                 })
+                
                 $("#dinghuo_search_material").find('input').each(function(){
                     var mat_id = $(this).attr('id').split('_')[1];
+                    
                     if(mat_ids.indexOf(mat_id)>=0){
                         $(this).attr("checked", 'checked');
                     }
                 })
+                }else if(type==2){
+                	$("#selected_materials").find("tr").each(function(){
+                    mat_ids.push($(this).attr('id').split('_')[2])
+                })
+               // alert(mat_ids)
+                	   $("#search_result").find('input.print_mat').each(function(){
+                    var mat_id = $(this).attr('id').split('_')[1];
+                    //alert(mat_id)
+                    if(mat_ids.indexOf(mat_id)>=0){
+                        $(this).attr("checked", 'checked');
+                    }
+                })
+                }
             },
             error:function(){
                 tishi_alert("error");

@@ -974,8 +974,9 @@ class Order < ActiveRecord::Base
 #          wo = WorkOrder.find_by_order_id(order.id)
 #          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo
           #生成积分的记录
-          c_customer = order.customer
-          if c_customer && c_customer.is_vip
+          c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id,order.customer_id)
+          customer =  Customer.find(order.customer_id)
+          if c_customer && customer.is_vip
             points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
               where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
               PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}

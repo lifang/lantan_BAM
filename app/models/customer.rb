@@ -108,13 +108,13 @@ class Customer < ActiveRecord::Base
       if customer.nil?
         customer = Customer.create(:name => user_name, :mobilephone => phone,
           :other_way => other_way, :birthday => birth, :status => Customer::STATUS[:NOMAL],
-          :types => Customer::TYPES[:NORMAL], :is_vip => is_vip, :username => user_name,
+          :types => Customer::TYPES[:NORMAL], :username => user_name,
           :password => phone, :sex => sex, :address => address)
         customer.encrypt_password
         customer.save        
       end
       relation = CustomerStoreRelation.find_by_store_id_and_customer_id(store_id, customer.id)
-      CustomerStoreRelation.create(:store_id => store_id, :customer_id => customer.id) unless relation
+      CustomerStoreRelation.create(:store_id => store_id, :customer_id => customer.id, :is_vip => is_vip) unless relation
       if carnum
         carnum.update_attributes(:buy_year => buy_year, :car_model_id => car_model_id)
       else
