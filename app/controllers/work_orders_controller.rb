@@ -53,7 +53,9 @@ class WorkOrdersController < ApplicationController
                   # STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成"}
                   # STAT = {:WAIT=>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE=>3}
                   #等待付款车牌号
-                  if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY] || (work_order.work_order_status == WorkOrder::STAT[:COMPLETE] && (Time.now - work_order.wo_updated_at)/60 <= 5)
+                  if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY] || 
+                      (work_order.work_order_status == WorkOrder::STAT[:COMPLETE] &&
+                        ((Time.now - work_order.wo_updated_at)/60).to_i <= 5)
                     wait_pay_car_nums << work_order.car_num
                   end
 
