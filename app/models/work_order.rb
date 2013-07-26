@@ -19,11 +19,11 @@ class WorkOrder < ActiveRecord::Base
         (num..(file_data_arr.length-1)).each do |index|
           data_arr = file_data_arr[index].split(",")
           station = Station.find_by_id(data_arr[2].to_i)
-          if station && station.is_has_controller == Station::IS_CONTROLLER[:YES]
+          if station && station.is_has_controller
             if data_arr[6] == "1" || data_arr[7] == "1"
               station.update_attribute(:status, Station::STAT[:WRONG])
             else
-              station.update_attribute(:status, Station::STAT[:LACK]) if station.status == Station::STAT[:WRONG]
+              station.update_attribute(:status, Station::STAT[:NORMAL]) if station.status == Station::STAT[:WRONG]
               work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").first
               #              started_at_sql = work_order.nil? ? "1=1" : "started_at >= '#{work_order.started_at}'"
               #              next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").where(started_at_sql).order("started_at asc").first
@@ -141,22 +141,25 @@ class WorkOrder < ActiveRecord::Base
         where("work_orders.store_id = #{self.store_id}").
         where("work_orders.current_day = #{self.current_day}").readonly(false).order("work_orders.created_at asc")
       if same_work_orders.any?
+
         product_ids = same_work_orders[0].order.order_prod_relations.map(&:product_id)
         infos = Station.return_station_arr(product_ids, same_work_orders[0].store_id)
 
         station_arr = infos[0]
         wkor_times = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),
                      :store_id =>self.store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
-        #查找，同一辆车有没有正在进行中的订单
-        # current_working_order = WorkOrder.joins(:order).where(:orders => {:car_num_id => order.car_num_id},
-        # :work_orders => {:status => WorkOrder::STAT[:SERVICING], :store_id => self.store_id,
-        # :current_day => Time.now.strftime("%Y%m%d").to_i}).order("ended_at desc").first
         
-        if station_arr.any? and (wkor_times.blank? or wkor_times.length < station_arr.length) #and !current_working_order
+        if station_arr.any? and (wkor_times.blank? or wkor_times.length < station_arr.length)
           leave_station = (station_arr - wkor_times)[0]
           s_ended_at = Time.now + same_work_orders[0].cost_time*60
+
+          same_work_orders.each_with_index do |same_work_order, index|
+            same_work_order.update_attribute(:station_id, leave_station.id) if index != 0
+          end
+
           same_work_orders[0].update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station.id,
             :started_at => Time.now, :ended_at => s_ended_at)
+          
           same_work_orders[0].order.update_attribute(:status, Order::STATUS[:SERVICING]) if same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT]
           WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id => leave_station.id,
             :current_times => s_ended_at.strftime("%Y%m%d%H%M"))

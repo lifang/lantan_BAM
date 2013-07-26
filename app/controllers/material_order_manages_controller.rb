@@ -59,11 +59,9 @@ class MaterialOrderManagesController < ApplicationController
   def unsalable_materials
     @end_date = Time.now.to_s[0..9]
     @start_date  =  (Time.now - 30.day).to_s[0..9]
-    #@all_unsalable_materials = Material.unsalable_list params[:store_id].to_i
     @all_unsalable_materials  = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{@start_date} 00:00:00' and created_at <= '#{@end_date} 23:59:59'
-      and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]};")
+      and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]} and created_at < '#{@start_date} 00:00:00';")
     @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
-    #@unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
   end
 
   def search_unsalable_materials
