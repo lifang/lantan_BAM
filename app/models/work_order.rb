@@ -79,7 +79,7 @@ class WorkOrder < ActiveRecord::Base
 
     #排下一个单
     next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
-      where("station_id = #{self.station_id}").
+      where(:station_id => self.station_id).
       where("store_id = #{self.store_id}").
       where("current_day = #{self.current_day}").first
     if next_work_order
@@ -102,7 +102,8 @@ class WorkOrder < ActiveRecord::Base
       car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
 
       products = Product.includes(:station_service_relations => :station).
-        where("stations.id=#{self.station_id} and products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
+        where(:stations=>{:id => self.station_id}).
+        where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
 
       another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
