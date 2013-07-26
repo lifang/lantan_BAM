@@ -75,7 +75,7 @@ class Station < ActiveRecord::Base
       end
       staffs.each {|staff|
         if staff
-          StationStaffRelation.create(:station_id=>station_id,:staff_id=>staff[0],:current_day=>Time.now.strftime("%Y%m%d"))
+          StationStaffRelation.create(:station_id=>station_id,:staff_id=>staff[0],:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
         end
       }
     }
