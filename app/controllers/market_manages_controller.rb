@@ -171,7 +171,7 @@ class MarketManagesController < ApplicationController
                                 op.order_id = o.id left join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
                                 o.status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and
-                                #{started_at_sql} and #{ended_at_sql} group by o.id")
+                                #{started_at_sql} and #{ended_at_sql} and o.store_id = #{params[:store_id]} group by o.id")
 
     @product_hash = OrderProdRelation.order_products(orders)
     @total_price = orders.sum(&:price)
@@ -187,7 +187,8 @@ class MarketManagesController < ApplicationController
 
     orders = Order.where("date_format(created_at,'%Y-%m-%d') <= '#{@search_time}'").
       where("created_at >= '#{@search_time}'").
-      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
+      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").
+      where("store_id = #{params[:store_id]}")
     @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
     @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
@@ -197,7 +198,8 @@ class MarketManagesController < ApplicationController
     @search_time = params[:search_time]
     @orders = Order.where("date_format(created_at, '%Y-%m-%d') <= '#{@search_time}'").
       where("created_at >= '#{@search_time}'").
-      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
+      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").
+      where("store_id = #{params[:store_id]}")
     @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
   end
