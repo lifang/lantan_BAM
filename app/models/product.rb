@@ -35,7 +35,7 @@ class Product < ActiveRecord::Base
       "date_format(orders.auto_time,'%Y-%m-%d %H') between '#{Time.now.strftime('%Y-%m-%d')+" 12"}' and '#{Time.now.end_of_day.strftime("%Y-%m-%d %H")}'"
     Order.joins(:order_prod_relations=>:product).where(condition+" and products.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,products.revist_content,orders.store_id").each{|mess|
       customer_message["#{mess.store_id}_#{mess.customer_id}"].nil? ? customer_message["#{mess.store_id}_#{mess.customer_id}"]= [mess] : customer_message["#{mess.store_id}_#{mess.customer_id}"] << mess}
-    Order.joins(:o_pcard_relations,:c_pcard_relations =>:package_card).where(condition+" and package_cards.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,package_cards.revist_content,orders.store_id").each{|mess|
+    Order.joins(:c_pcard_relations =>:package_card).where(condition+" and package_cards.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,package_cards.revist_content,orders.store_id").each{|mess|
       customer_message["#{mess.store_id}_#{mess.customer_id}"].nil? ? customer_message["#{mess.store_id}_#{mess.customer_id}"]= [mess] : customer_message["#{mess.store_id}_#{mess.customer_id}"] << mess}
     unless customer_message.keys.blank?
       store_ids = []

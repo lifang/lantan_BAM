@@ -21,7 +21,8 @@ class WorkOrdersController < ApplicationController
       work_orders = Station.find_by_sql("select s.id as station_id, TIMESTAMPDIFF(minute,now(),w.ended_at)
       as time_left, c.num as car_num, w.status as work_order_status, w.updated_at as wo_updated_at from stations s inner join
       work_orders w on s.id =  w.station_id inner join orders o on w.order_id = o.id inner join
-      car_nums c on o.car_num_id = c.id where s.store_id = #{params[:store_id]} and w.current_day = #{now_date}
+      car_nums c on o.car_num_id = c.id where s.store_id = #{params[:store_id]} and w.current_day = #{now_date} and
+      o.status != #{Order::STATUS[:DELETED]}
       order by w.started_at asc")
 
       if stations != nil
@@ -52,7 +53,9 @@ class WorkOrdersController < ApplicationController
                   # STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成"}
                   # STAT = {:WAIT=>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE=>3}
                   #等待付款车牌号
-                  if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY] || (work_order.work_order_status == WorkOrder::STAT[:COMPLETE] && (Time.now - work_order.wo_updated_at)/60 <= 5)
+                  if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY] || 
+                      (work_order.work_order_status == WorkOrder::STAT[:COMPLETE] &&
+                        ((Time.now - work_order.wo_updated_at)/60).to_i <= 5)
                     wait_pay_car_nums << work_order.car_num
                   end
 
@@ -101,12 +104,12 @@ class WorkOrdersController < ApplicationController
   end# work_orders_status 方法结束标记
 
 def login
-   staff = Staff.find_by_username(params[:user_name])
+   staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:user_name], Staff::VALID_STATUS])
     info = ""
     if  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
       status = 2
-    elsif !Staff::VALID_STATUS.include?(staff.status) or staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
+    elsif staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
       info = "用户不存在"
       status = 1
     else

@@ -66,7 +66,7 @@ class CustomersController < ApplicationController
               :car_model_id => params[:car_models])
             CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
           end
-          CustomerStoreRelation.create(:store_id => params[:store_id].to_i, :customer_id => customer.id)
+          CustomerStoreRelation.create(:store_id => params[:store_id].to_i, :customer_id => customer.id, :is_vip => params[:is_vip])
         end
       else
         Customer.create_single_cus(customer, car_num, params[:mobilephone].strip, params[:new_car_num].strip,
@@ -87,7 +87,9 @@ class CustomersController < ApplicationController
       else
         customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
           :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
-          :address => params[:address], :is_vip => params[:is_vip])
+          :address => params[:address])
+        c_store = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id],customer.id)
+        c_store.update_attributes( :is_vip => params[:is_vip]) if c_store
         flash[:notice] = "客户信息更新成功。"
       end
     end

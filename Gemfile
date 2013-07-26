@@ -4,6 +4,7 @@ gem 'rails', '3.1.2'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
+gem 'rake', '10.1.0'
 gem 'mysql2', '0.3.10'
 gem "will_paginate", '3.0.3'
 gem 'mini_magick', '3.5.0'
@@ -19,8 +20,8 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 gem 'json', '1.7.6'
-gem 'execjs'
-gem 'therubyracer'
+gem 'execjs', '1.4.0'
+gem 'therubyracer', '0.11.4'
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'

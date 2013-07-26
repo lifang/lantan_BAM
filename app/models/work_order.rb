@@ -62,12 +62,7 @@ class WorkOrder < ActiveRecord::Base
       order = self.order
       status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
       self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
-
-      puts "**************"
-      puts runtime.inspect
-      puts self.cost_time.inspect
-      puts "******************"
-      
+    
       if !self.cost_time.nil?
         if runtime > self.cost_time.to_f
           staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
@@ -111,7 +106,7 @@ class WorkOrder < ActiveRecord::Base
 
       another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
-        where("work_orders.station_id = null").
+        where("work_orders.station_id is null").
         where("work_orders.store_id = #{self.store_id}").
         where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
         where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
@@ -138,9 +133,12 @@ class WorkOrder < ActiveRecord::Base
         message = "no_next_work_order"
       end
       #同一个car_num_id，当符合条件的工位为空时，排单
-      same_work_orders = WorkOrder.join(:orders).include(:order => :order_prod_relations).
-        where("work_orders.station_id is null and work_orders.status = #{WorkOrder::STAT[:WAIT]}
-          and orders.car_num_id = #{order.car_num_id}").orders("work_orders.created_at asc")
+      same_work_orders = WorkOrder.joins(:order).
+        where("work_orders.station_id is null").
+        where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
+        where("orders.car_num_id = #{order.car_num_id}").
+        where("work_orders.store_id = #{self.store_id}").
+        where("work_orders.current_day = #{self.current_day}").readyonly(false).order("work_orders.created_at asc")
       if same_work_orders.any?
         product_ids = same_work_orders[0].order.order_prod_relations.map(&:product_id)
         infos = Station.return_station_arr(product_ids, same_work_orders[0].store_id)
