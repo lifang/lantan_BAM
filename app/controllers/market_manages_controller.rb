@@ -215,10 +215,12 @@ class MarketManagesController < ApplicationController
   end
 
   def gross_profit
-    orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
-    .where("date_format(created_at,'%Y-%m-%d') = curdate()")
-    .select("distinct orders.*")
-    .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+    orders = Order.includes(:order_prod_relations,:c_pcard_relations =>
+        {:package_card => {:pcard_prod_relations => :product}}).
+      where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
+    where("date_format(created_at,'%Y-%m-%d') = curdate()").
+    select("distinct orders.*").
+    paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
     
     orders_arr = formatted_order_price(orders)[0]
     @toal_gross_price = formatted_order_price(orders)[1]
@@ -235,9 +237,11 @@ class MarketManagesController < ApplicationController
     if types_sql.nil?
       sql<< start_sql << end_sql
       sql = sql.compact.join(" and ")
-      orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
-      .where(sql)
-      .select("distinct orders.*")
+      orders = Order.includes(:order_prod_relations,:c_pcard_relations =>
+          {:package_card => {:pcard_prod_relations => :product}}).
+        where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
+      where(sql).
+      select("distinct orders.*")
 
       orders_arr = formatted_order_price(orders)[0]
       @toal_gross_price = formatted_order_price(orders)[1]
@@ -246,8 +250,9 @@ class MarketManagesController < ApplicationController
     else
       sql<< start_sql << end_sql << types_sql
       sql = sql.compact.join(" and ")
-      orders = Order.joins(:order_prod_relations => :product).where(:status => Order::VALID_STATUS)
-      .where(sql).select("orders.id, date_format(orders.created_at,'%Y-%m-%d') o_created_at, orders.code, products.types").uniq
+      orders = Order.joins(:order_prod_relations => :product).
+        where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
+        where(sql).select("orders.id, date_format(orders.created_at,'%Y-%m-%d') o_created_at, orders.code, products.types").uniq
       
       order_pay_types = OrderPayType.where(:order_id => orders.map(&:id) ).where("product_id is not null").group_by{|opt| opt.order_id}
       order_prod_relations = OrderProdRelation.joins(:product).where(:order_id => orders.map(&:id)).where(types_sql).group_by{|opt| opt.order_id}
@@ -297,7 +302,7 @@ class MarketManagesController < ApplicationController
       orders_arr << order_hash
       toal_gross_price += order_hash[:gross_profit]
     end
-    [orders_arr,toal_gross_price]
+    [orders_arr,'%.2f' % toal_gross_price]
   end
 
   def format_product_price(orders, order_pay_types, order_prod_relations)

@@ -18,7 +18,7 @@
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store_id]), :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印条形码",print_code_store_materials_path(params[:store_id]),:remote => true, 'data-type' => 'script', :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :check_all) %><%= link_to "盘点清单", "/stores/#{params[:store_id]}/check_mat_num", :remote => true, 'data-type'=>'script' %><% end %>
-    <% if permission?(:materials, :material_loss_add) %><%= link_to_function "新建库存报损", "MaterialsLoss()", :class => "" %><% end %>
+    <% if permission?(:materials, :material_loss_add) %><%= link_to "新建库存报损", mat_loss_store_materials_path(params[:store_id]), :class => "", :remote => true, 'data-type'=>'script', :target => "_blank" %><% end %>
   </div>
   <div class="clear"></div>
   <div class="tab_head">
@@ -202,55 +202,12 @@
 </div>
 
 <div class="tab_popup" id="MaterialsLoss">
-  <div class="popup_box" >
-    <h1>库存报损<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <%= render :partial => 'search_materials', :locals => {:tab_name => "material_losses_materials"} %>
-    <div class="popup_body">
-      <div class="popup_body_area">
-        <div id="mat_loss_search_result" style="height: auto;">
-          <%= render :partial => '/materials/mat_loss_search_result' %>
-        </div>
-        <%= form_tag "/stores/#{@current_store.id}/materials/mat_loss_add", :id => "MaterialsLoss_form" ,:method => :post, "data-type" => "script", :remote => true do  %>
-            <table  width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
-              <thead>
-              <tr class="hbg">
-                <td>物料名称</td>
-                <td>物料类别</td>
-                <td>条形码</td>
-                <td>库存量</td>
-                <td>报损数量</td>
-                <td>操作</td>
-              </tr>
-              </thead>
-              <tbody id="selected_materials"></tbody>
-            </table>
-            <div class="search">
-              <div><%= label_tag "staff","报损人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
-            </div>
-            
-            <%= hidden_field_tag "hidden_store_id", cookies[:user_id] %>
-            <div class="btn_box"><button id="add_MaterialsLoss_btn" onclick="checkMatLossNum()" class="confirm_btn" type="button"  >确定</button></div>
-            <div class="clear"></div>
-        <% end %>
-            </div>
-    </div>
-  </div>
 </div>
 
 <div class="tab_popup" id="material_div">
 </div>
 
 <script type="text/javascript">
-//    $(document).ready(function(){
-//        var obj = $("#add_MaterialsLoss_btn");
-//        $(obj).attr('disabled',false);
-//    })
-//
-//    $("#add_MaterialsLoss_btn").click(function(){
-//        var obj = $("#add_MaterialsLoss_btn");
-//        $(obj).attr('disabled',true);
-//    })
-
   $(function() {
 <% if @status %>
       $('div.tab_head li').eq(3).addClass('hover').siblings().removeClass('hover');

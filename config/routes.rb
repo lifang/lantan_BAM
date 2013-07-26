@@ -84,7 +84,7 @@ LantanBAM::Application.routes.draw do
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
-          "mat_loss_delete"
+          "mat_loss_delete","mat_loss"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
              "mat_loss_add"
       end

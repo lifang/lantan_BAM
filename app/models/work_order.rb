@@ -62,12 +62,7 @@ class WorkOrder < ActiveRecord::Base
       order = self.order
       status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
       self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
-
-      puts "**************"
-      puts runtime.inspect
-      puts self.cost_time.inspect
-      puts "******************"
-      
+    
       if !self.cost_time.nil?
         if runtime > self.cost_time.to_f
           staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
@@ -84,7 +79,7 @@ class WorkOrder < ActiveRecord::Base
 
     #排下一个单
     next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
-      where("station_id = #{self.station_id}").
+      where(:station_id => self.station_id).
       where("store_id = #{self.store_id}").
       where("current_day = #{self.current_day}").first
     if next_work_order
@@ -107,11 +102,12 @@ class WorkOrder < ActiveRecord::Base
       car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
 
       products = Product.includes(:station_service_relations => :station).
-        where("stations.id=#{self.station_id} and products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
+        where(:stations=>{:id => self.station_id}).
+        where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
 
       another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
-        where("work_orders.station_id = null").
+        where("work_orders.station_id is null").
         where("work_orders.store_id = #{self.store_id}").
         where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
         where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
@@ -138,22 +134,27 @@ class WorkOrder < ActiveRecord::Base
         message = "no_next_work_order"
       end
       #同一个car_num_id，当符合条件的工位为空时，排单
-      same_work_orders = WorkOrder.joins(:order).includes(:order => :order_prod_relations).
-        where("work_orders.station_id = null and work_orders.status = #{WorkOrder::STAT[:WAIT]}
-          and orders.car_num_id = #{order.car_num_id}").orders("work_orders.created_at asc")
+      same_work_orders = WorkOrder.joins(:order).
+        where("work_orders.station_id is null").
+        where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
+        where("orders.car_num_id = #{order.car_num_id}").
+        where("work_orders.store_id = #{self.store_id}").
+        where("work_orders.current_day = #{self.current_day}").readonly(false).order("work_orders.created_at asc")
       if same_work_orders.any?
         product_ids = same_work_orders[0].order.order_prod_relations.map(&:product_id)
         infos = Station.return_station_arr(product_ids, same_work_orders[0].store_id)
+
         station_arr = infos[0]
         wkor_times = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),
                      :store_id =>self.store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
+
         if station_arr.any? and (wkor_times.blank? or wkor_times.length < station_arr.length)
           leave_station = (station_arr - wkor_times)[0]
           s_ended_at = Time.now + same_work_orders[0].cost_time*60
-          same_work_orders[0].update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station,
+          same_work_orders[0].update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station.id,
             :started_at => Time.now, :ended_at => s_ended_at)
           same_work_orders[0].order.update_attribute(:status, Order::STATUS[:SERVICING]) if same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT]
-          WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id => leave_station,
+          WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id => leave_station.id,
             :current_times => s_ended_at.strftime("%Y%m%d%H%M"))
         end
       end

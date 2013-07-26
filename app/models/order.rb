@@ -971,16 +971,15 @@ class Order < ActiveRecord::Base
             OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
             status = 1
           end
-#          wo = WorkOrder.find_by_order_id(order.id)
-#          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo
+          wo = WorkOrder.find_by_order_id(order.id)
+          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
           #生成积分的记录
           c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id,order.customer_id)
-          customer =  Customer.find(order.customer_id)
-          if c_customer && customer.is_vip
+          if c_customer && c_customer.is_vip
             points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
               where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
               PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
-            Point.create(:customer_id=>c_customer.id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
+            Point.create(:customer_id=>c_customer.customer_id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
             c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
           end
           #生成出库记录
