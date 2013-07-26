@@ -1183,12 +1183,6 @@ function close_notice(obj){
       })
   }
 
-    function MaterialsLoss(){            //添加库存报损
-        $("#mat_loss_search_result").empty();
-        $("#MaterialsLoss #selected_materials").empty();
-        popup("#MaterialsLoss");
-    }
-
     function checkMaterialsLoss(store_id){
         var reg2 = /^\d+\.{0,1}\d*$/;
         var pattern = new RegExp("[=,-]")
