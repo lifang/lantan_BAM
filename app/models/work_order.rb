@@ -141,7 +141,12 @@ class WorkOrder < ActiveRecord::Base
         station_arr = infos[0]
         wkor_times = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),
                      :store_id =>self.store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
-        if station_arr.any? and (wkor_times.blank? or wkor_times.length < station_arr.length)
+        
+        work_order = WorkOrder.joins(:order).where(:orders => {:car_num_id => order.car_num_id},
+        :work_orders => {:status => WorkOrder::STAT[:SERVICING], :store_id => self.store_id,
+        :current_day => Time.now.strftime("%Y%m%d").to_i}).order("ended_at desc").first
+        
+        if station_arr.any? and (wkor_times.blank? or wkor_times.length < station_arr.length) and !work_order
           leave_station = (station_arr - wkor_times)[0]
           s_ended_at = Time.now + same_work_orders[0].cost_time*60
           same_work_orders[0].update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station,
