@@ -134,7 +134,11 @@ class WorkOrder < ActiveRecord::Base
       end
       #同一个car_num_id，当符合条件的工位为空时，排单
       same_work_orders = WorkOrder.joins(:order).
-        where("work_orders.station_id is null and work_orders.status = #{WorkOrder::STAT[:WAIT]} and orders.car_num_id = #{order.car_num_id}").order("work_orders.created_at asc")
+        where("work_orders.station_id is null").
+        where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
+        where("orders.car_num_id = #{order.car_num_id}").
+        where("work_orders.store_id = #{self.store_id}").
+        where("work_orders.current_day = #{self.current_day}").order("work_orders.created_at asc")
       if same_work_orders.any?
         product_ids = same_work_orders[0].order.order_prod_relations.map(&:product_id)
         infos = Station.return_station_arr(product_ids, same_work_orders[0].store_id)
