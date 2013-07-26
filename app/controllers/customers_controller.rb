@@ -135,6 +135,7 @@ class CustomersController < ApplicationController
         inner join customer_num_relations cr on cr.car_num_id = c.id
         where cr.customer_id = ?", @customer.id])
     order_page = params[:rev_page] ? params[:rev_page] : 1
+    @s_customer = CustomerStoreRelation.find_by_customer_id_and_store_id(@customer.id,params[:store_id])
     @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 10, order_page)
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)

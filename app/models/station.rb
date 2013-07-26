@@ -137,6 +137,7 @@ class Station < ActiveRecord::Base
       if s_levels[h_level] && !s_levels[h_level].blank?
         if  o_staffs.keys.blank? #当工位都没有分配的时候
           StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
+          Station.find(s_levels[h_level][0]).update_attributes(:status=>Station::STAT[:NORMAL])
         else #已分配的工位
           is_half = true
           s_levels[h_level].each{|station|
@@ -148,6 +149,7 @@ class Station < ActiveRecord::Base
           }
           if  is_half  #已分配工位中不包含当前级别的技师
             StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
+            Station.find(s_levels[h_level][0]).update_attributes(:status=>Station::STAT[:NORMAL])
           end
         end
       end

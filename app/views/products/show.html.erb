@@ -5,7 +5,7 @@
   <div class="box">
     <div class="rightAera">
       <div class="rightTitle">
-        <h1><a href="#"><%=@prod.is_service ? "服务"  :  "产品" %></a> &gt; <%= Product::PRODUCT_TYPES[@prod.types] %></h1>
+        <h1><a href="/stores/<%=params[:store_id]%>/products/<%="prod_services" if @prod.is_service %>"><%=@prod.is_service ? "服务"  :  "产品" %></a> &gt; <%= Product::PRODUCT_TYPES[@prod.types] %></h1>
         <div class="pro_show">
           <div class="bigImg jqzoom">
             <%if @img_urls[0]%>
