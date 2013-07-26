@@ -26,8 +26,8 @@
           </div>
           <div class="item">
             <label>是否会员:</label>&nbsp;
-            <input type="radio" name="is_vip" value="<%= Customer::IS_VIP[:VIP] %>" <% if @customer.is_vip %>checked<% end %> />&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="radio" name="is_vip" value="<%= Customer::IS_VIP[:NORMAL] %>" <% unless @customer.is_vip %>checked<% end %>/>&nbsp;否
+            <input type="radio" name="is_vip" value="<%= Customer::IS_VIP[:VIP] %>" <% if @s_customer.is_vip %>checked<% end %> />&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="is_vip" value="<%= Customer::IS_VIP[:NORMAL] %>" <% unless @s_customer.is_vip %>checked<% end %>/>&nbsp;否
           </div>
           <div class="item_textarea">
             <label>地址：</label><textarea name="address" id="address" cols="" rows="" class="width_textarea"><%= @customer.address %></textarea>
