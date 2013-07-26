@@ -35,14 +35,19 @@ $(document).ready(function(){
                 telphone : telphone
             },
             beforeSend:function(xhr){
-                $('#send_validate_code').attr("disabled",true)
+                //$('#send_validate_code').attr("disabled",true)
             },
             complete:function(data,status){
                 if(status=="success"){
                     //$('#send_validate_code').removeClass("confirm_btn");
-                 $("#send_validate_code").attr("class", "cancel_btn");
-                 setTimeout("removeDisable()",30000);
-                 tishi_alert(data.responseText + "若未收到短信，请30秒后再次请求");
+                 if(data.responseText == "success"){
+                     $("#send_validate_code").attr("class", "cancel_btn");
+                     $('#send_validate_code').attr("disabled",true);
+                     setTimeout("removeDisable()",30000);
+                     tishi_alert("短信发送成功，注意查收验证码。若未收到短信，请30秒后再次请求");
+                 }else{
+                    tishi_alert(data.responseText + "若未收到短信，请30秒后再次请求");
+                 }
                }
             }
         });
