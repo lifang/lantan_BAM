@@ -138,7 +138,7 @@ class WorkOrder < ActiveRecord::Base
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
         where("orders.car_num_id = #{order.car_num_id}").
         where("work_orders.store_id = #{self.store_id}").
-        where("work_orders.current_day = #{self.current_day}").order("work_orders.created_at asc")
+        where("work_orders.current_day = #{self.current_day}").readyonly(false).order("work_orders.created_at asc")
       if same_work_orders.any?
         product_ids = same_work_orders[0].order.order_prod_relations.map(&:product_id)
         infos = Station.return_station_arr(product_ids, same_work_orders[0].store_id)
