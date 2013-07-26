@@ -19,7 +19,7 @@ class WorkOrder < ActiveRecord::Base
         (num..(file_data_arr.length-1)).each do |index|
           data_arr = file_data_arr[index].split(",")
           station = Station.find_by_id(data_arr[2].to_i)
-          if station && station.is_has_controller == Station::IS_CONTROLLER[:YES]
+          if station && station.is_has_controller
             if data_arr[6] == "1" || data_arr[7] == "1"
               station.update_attribute(:status, Station::STAT[:WRONG])
             else
