@@ -62,7 +62,9 @@
                   </td>
                   <td width="25%" class="wordBreak"><%= customer.name %></td>
                   <td width="20%" class="wordBreak"><%= customer.mobilephone %></td>
-                  <td width="10%" class="wordBreak"><%= customer.is_vip ? "是" : "否"  %></td>
+                  <td width="10%" class="wordBreak">
+                    <%= (@is_vips and @is_vips[customer.id] and @is_vips[customer.id][0].is_vip) ? "是" : "否" %>
+                  </td>
                   <td width="20%" class="wordBreak">
                     <% if permission?(controller.controller_name.to_sym, :detail) %><a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a><% end %>
                     <% if permission?(controller.controller_name.to_sym, :remark) %><a href="javascript:void(0)" onclick="customer_mark(<%= customer.id %>)">备注</a><% end %>
@@ -74,7 +76,7 @@
                 </tr>
               <% end %>
             <% else %>
-                <tr><td colspan="5">暂无客户信息</td></tr>
+              <tr><td colspan="5">暂无客户信息</td></tr>
             <% end %>
           </tbody>
         </table>

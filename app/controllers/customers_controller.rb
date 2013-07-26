@@ -19,6 +19,9 @@ class CustomersController < ApplicationController
     @customers = Customer.search_customer(params[:c_types], params[:car_num], params[:started_at], params[:ended_at],
       params[:name], params[:phone], params[:is_vip], params[:page], params[:store_id].to_i) if @store
     @car_nums = Customer.customer_car_num(@customers) if @customers
+    @is_vips = CustomerStoreRelation.where(["store_id = ? and customer_id in (?)", @store, @customers]).group_by{|i| i.customer_id }
+    puts "------------------------"
+    puts @is_vips.to_json
   end
 
   def search
