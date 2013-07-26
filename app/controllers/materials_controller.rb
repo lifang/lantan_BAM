@@ -33,7 +33,7 @@ class MaterialsController < ApplicationController
       and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]};")
     #入库查询状态未完全入库的订货单号
     @material_orders_not_all_in = MaterialOrder.joins(:materials).where("material_orders.m_status not in (?) and material_orders.status != ? and material_orders.store_id = ?",[3,4], MaterialOrder::STATUS[:cancel], params[:store_id]).order("material_orders.created_at desc").select("material_orders.id, material_orders.code").uniq
-    @mat_loss_search_materials = []
+
     respond_to do |format|
       format.html
       format.js
@@ -826,6 +826,13 @@ class MaterialsController < ApplicationController
       @data << {:num => value[:print_code_num], :code_img => material.code_img}
     end
     render :layout => false
+  end
+
+  #库存报损
+  def mat_loss
+    @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
+                        :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=#{Staff::STATUS[:normal]}")
+    @current_store = get_store
   end
 
   #添加库存报损
