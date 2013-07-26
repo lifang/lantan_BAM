@@ -22,7 +22,7 @@ class Customer < ActiveRecord::Base
 
 
   def self.search_customer(c_types, car_num, started_at, ended_at, name, phone, is_vip, page, store_id)
-    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, csr.is_vip, cu.mark from customers cu
+    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.mark from customers cu
         left join customer_num_relations cnr on cnr.customer_id = cu.id
         left join car_nums ca on ca.id = cnr.car_num_id "
     condition_sql = "where cu.status = #{STATUS[:NOMAL]} "
