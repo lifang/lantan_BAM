@@ -761,17 +761,21 @@ class MaterialsController < ApplicationController
   end
 
   def create
-    material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id].to_i)
-    if material.nil?
-      params[:material][:name] = params[:material][:name].strip
-      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
-              :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
+    params[:material][:name] = params[:material][:name].strip
+    Material.transaction  do
+      material = Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
+            :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
+      
+      if material && material.errors.blank?
+        @status = 0
+        @flash_notice = "创建员工成功!"
+      elsif material && material.errors.any?
+        @flash_notice = "创建员工成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
         @status = 1
       else
-        @status = 0
+        @flash_notice = "创建员工失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+        @status = 2
       end
-    else
-      @status = 2
     end
   end
 
@@ -784,21 +788,12 @@ class MaterialsController < ApplicationController
   def update
     material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     params[:material][:name] = params[:material][:name].strip
-    uniq_mat = Material.where("code = ? and store_id = ? and id != ?", params[:material][:code], params[:store_id].to_i, params[:id].to_i)
-    if uniq_mat.blank?   #如果code唯一
-      if material.update_attributes(params[:material])
-        @status = 1
-        @material = material
-        #@current_store = Store.find_by_id(params[:store_id].to_i)
-      else
-        @status = 0
-      end
+    if material.update_attributes(params[:material])
+      @status = 1
+      @material = material
     else
-        @status = 2
+      @status = 0
     end
-#    respond_to do |format|
-#      format.js
-#    end
   end
 
   def destroy

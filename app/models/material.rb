@@ -53,12 +53,16 @@ class Material < ActiveRecord::Base
   end
 
   def generate_barcode_img
-    barcode = Barby::EAN13.new(self.code)
-    if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
-      FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
+    begin
+      barcode = Barby::EAN13.new(self.code)
+      if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
+        FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
+      end
+      barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
+      self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{self.id}/barcode.png")
+    rescue
+      self.errors[:barby] << "条形码图片生成失败！"
     end
-    barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
-    self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{self.id}/barcode.png")
   end
 
 end

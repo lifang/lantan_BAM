@@ -1245,7 +1245,7 @@ function close_notice(obj){
           tishi_alert("请选择物料！")
       }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
-         if($.trim($(this).val()).match(reg1)==null){
+         if($.trim($(this).val()).match(reg1)==null || $(this).val()==0){
 //             var code = $(this).attr('alt');
              f = false;
              is_empty = true;
