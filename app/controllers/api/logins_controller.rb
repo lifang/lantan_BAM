@@ -37,14 +37,14 @@ class Api::LoginsController < ApplicationController
 
   def upload_img
     staff = Staff.find(params[:staff_id])
-#    begin
+    begin
       photo = params[:login_photo]
       staff.photo = "/uploads/#{params[:store_id]}/#{staff.id}/#{staff.id}_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
       staff.operate_picture(photo,"#{staff.id}.#{photo.original_filename.split(".").reverse[0]}", "update")
       render :json=>{:data=>0}
-#    rescue
-#      render :json=>{:data=>1}
-#    end
+    rescue
+      render :json=>{:data=>1}
+    end
   end
 
   def staff_checkin

@@ -12,7 +12,7 @@ class Station < ActiveRecord::Base
   end
   belongs_to :store
   STAT = {:WRONG =>0,:NORMAL =>2,:LACK =>1,:NO_SERVICE =>3, :DELETED => 4} #0 故障 1 缺少技师 2 正常 3 无服务
-  STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常", 4 => "删除"}
+  STAT_NAME = {0=>"故障",1=>"缺少技师",2=>"正常",3=>"缺少服务项目"}
   IS_CONTROLLER = {:YES=>1,:NO=>0} #定义是否拥有工控机
   PerPage = 10
   validates :name, :presence => true
