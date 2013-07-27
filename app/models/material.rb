@@ -35,12 +35,13 @@ class Material < ActiveRecord::Base
   scope :normal, where(:status => STATUS[:NORMAL])
 
   def self.unsalable_list store_id,sql=[nil,nil,nil,nil]
+    start_date = sql[0]
     sql[0] = sql[0].blank? ? "'1 = 1'" : "created_at >='#{sql[0]} 00:00:00'"
     sql[1] = sql[1].blank? ? "'1 = 1'" : "created_at <='#{sql[1]} 23:59:59'"
     sql[2] = sql[2].blank? ? nil : "having count(material_id) >= #{sql[2]}"
     sql[3] = sql[3].blank? ? "'1 = 1'" : "m.types = #{sql[3].to_i}"
     Material.find_by_sql("select * from materials m where m.id not in(select material_id as id from mat_out_orders where
-    #{sql[0]} and #{sql[1]} and types = 3 and store_id = #{store_id} group by material_id  #{sql[2]}) and m.status !=#{Material::STATUS[:DELETE]} and m.store_id = #{store_id} and #{sql[3]};")
+    #{sql[0]} and #{sql[1]} and types = 3 and store_id = #{store_id} group by material_id  #{sql[2]}) and m.status !=#{Material::STATUS[:DELETE]} and m.store_id = #{store_id} and #{sql[3]} and created_at < '#{start_date} 00:00:00';")
   end
 
   private
@@ -53,12 +54,16 @@ class Material < ActiveRecord::Base
   end
 
   def generate_barcode_img
-    barcode = Barby::EAN13.new(self.code)
-    if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
-      FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
+    begin
+      barcode = Barby::EAN13.new(self.code)
+      if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
+        FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
+      end
+      barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
+      self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{self.id}/barcode.png")
+    rescue
+      self.errors[:barby] << "条形码图片生成失败！"
     end
-    barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
-    self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{self.id}/barcode.png")
   end
 
 end

@@ -85,8 +85,11 @@ class StaffsController < ApplicationController
     photo = params[:staff][:photo]
     encrypt_name = random_file_name(photo.original_filename) if photo
     params[:staff][:photo] = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
-    if  @staff && @staff.update_attributes(params[:staff])
-      flash[:notice] = "更新员工成功"
+    @staff.attributes = params[:staff]
+    notice = @staff.status_changed? ? "员工在职状态已经改变，请注意检查员工的工作状态" : ""
+    if @staff && @staff.save
+    #if  @staff && @staff.update_attributes(params[:staff])
+      flash[:notice] = "更新员工成功！"+notice
       @flash_notice = "success"
     else
       @flash_notice = "更新员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"

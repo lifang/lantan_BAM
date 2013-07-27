@@ -30,7 +30,7 @@ class MaterialsController < ApplicationController
     date_now = Time.now.to_s[0..9]
     before_thirty_day =  (Time.now - 30.day).to_s[0..9]
     @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
-      and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]};")
+      and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]} and created_at < '#{before_thirty_day} 00:00:00';")
     #入库查询状态未完全入库的订货单号
     @material_orders_not_all_in = MaterialOrder.joins(:materials).where("material_orders.m_status not in (?) and material_orders.status != ? and material_orders.store_id = ?",[3,4], MaterialOrder::STATUS[:cancel], params[:store_id]).order("material_orders.created_at desc").select("material_orders.id, material_orders.code").uniq
 
@@ -761,17 +761,21 @@ class MaterialsController < ApplicationController
   end
 
   def create
-    material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id].to_i)
-    if material.nil?
-      params[:material][:name] = params[:material][:name].strip
-      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
-              :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
+    params[:material][:name] = params[:material][:name].strip
+    Material.transaction  do
+      material = Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
+            :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
+      
+      if material && material.errors.blank?
+        @status = 0
+        @flash_notice = "创建员工成功!"
+      elsif material && material.errors.any?
+        @flash_notice = "创建员工成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
         @status = 1
       else
-        @status = 0
+        @flash_notice = "创建员工失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+        @status = 2
       end
-    else
-      @status = 2
     end
   end
 
@@ -784,21 +788,12 @@ class MaterialsController < ApplicationController
   def update
     material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     params[:material][:name] = params[:material][:name].strip
-    uniq_mat = Material.where("code = ? and store_id = ? and id != ?", params[:material][:code], params[:store_id].to_i, params[:id].to_i)
-    if uniq_mat.blank?   #如果code唯一
-      if material.update_attributes(params[:material])
-        @status = 1
-        @material = material
-        #@current_store = Store.find_by_id(params[:store_id].to_i)
-      else
-        @status = 0
-      end
+    if material.update_attributes(params[:material])
+      @status = 1
+      @material = material
     else
-        @status = 2
+      @status = 0
     end
-#    respond_to do |format|
-#      format.js
-#    end
   end
 
   def destroy

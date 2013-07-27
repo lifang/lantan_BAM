@@ -105,7 +105,7 @@ class LoginsController < ApplicationController
           render :text => "短信通道忙碌，请稍后重试。"
         end
         staff.update_attribute(:validate_code, random_num)
-        render :text => "短信发送成功，注意查收验证码。"
+        render :text => "success"
       end
     else
       render :text => "手机号码不存在!"
