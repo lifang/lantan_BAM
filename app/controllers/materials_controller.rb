@@ -768,12 +768,12 @@ class MaterialsController < ApplicationController
       
       if material && material.errors.blank?
         @status = 0
-        @flash_notice = "创建员工成功!"
+        @flash_notice = "创建物料成功!"
       elsif material && material.errors.any?
-        @flash_notice = "创建员工成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+        @flash_notice = "创建物料成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
         @status = 1
       else
-        @flash_notice = "创建员工失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+        @flash_notice = "创建物料失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
         @status = 2
       end
     end
