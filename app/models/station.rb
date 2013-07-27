@@ -117,7 +117,7 @@ class Station < ActiveRecord::Base
           end
         else
           prod=Product.find_by_sql("select staff_level level1,staff_level_1 level2 from products p inner join station_service_relations  s on
-      s.product_id=p.id where s.station_id=#{station.id}").inject(Array.new) {|sum,level| sum.push(level.level1,level.level2)}.compact.uniq.sort
+      s.product_id=p.id where s.station_id=#{station.id} and p.status=#{Product::IS_VALIDATE[:YES]}").inject(Array.new) {|sum,level| sum.push(level.level1,level.level2)}.compact.uniq.sort
           unless prod.blank?
             Station.find(station.id).update_attributes(:staff_level=>prod.min,:staff_level1=>prod[0..(prod.length/2.0)].max)
           else
