@@ -43,11 +43,12 @@
   <tr class="hbg">
     <th width="160">条形码</th>
     <th width="160"><span class="sort_u">物料名称</span></th>
-    <th width="150"><span class="sort_d">物料类别</span></th>
-    <th width="150">库存状态</th>
+    <th width="120"><span class="sort_d">物料类别</span></th>
+    <th width="130">库存状态</th>
     <th width="80">库存量</th>
-    <th width="120">规格</th>
+    <th width="100">规格</th>
     <th width="100">成本价（元）</th>
+    <th width="100">零售价（元）</th>
   </tr>
   </thead>
   <tbody>
@@ -60,6 +61,7 @@
         <td><span><%= material.storage.to_i %></span></td>
         <td><%= material.unit %></td>
         <td><%= material.price %></td>
+        <td><%= material.sale_price %></td>
       </tr>
   <% end %>
   </tbody>

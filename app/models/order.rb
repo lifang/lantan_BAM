@@ -363,9 +363,11 @@ class Order < ActiveRecord::Base
 
         case time_arr[1]
         when 0
-          status = 2
+          status = 2 #没工位
+        when 1
+          status = 1  #有符合工位
         when 2
-          status = 3
+          status = 3 #多个工位
         end
 
       else
