@@ -12,7 +12,7 @@ class Station < ActiveRecord::Base
   end
   belongs_to :store
   STAT = {:WRONG =>0,:NORMAL =>2,:LACK =>1,:NO_SERVICE =>3, :DELETED => 4} #0 故障 1 缺少技师 2 正常 3 无服务
-  STAT_NAME = {0=>"故障",1=>"缺少技师",3=>"缺少服务项目",2=>"正常", 4 => "删除"}
+  STAT_NAME = {0=>"故障",1=>"缺少技师",2=>"正常",3=>"缺少服务项目"}
   IS_CONTROLLER = {:YES=>1,:NO=>0} #定义是否拥有工控机
   PerPage = 10
   validates :name, :presence => true
@@ -117,7 +117,7 @@ class Station < ActiveRecord::Base
           end
         else
           prod=Product.find_by_sql("select staff_level level1,staff_level_1 level2 from products p inner join station_service_relations  s on
-      s.product_id=p.id where s.station_id=#{station.id}").inject(Array.new) {|sum,level| sum.push(level.level1,level.level2)}.compact.uniq.sort
+      s.product_id=p.id where s.station_id=#{station.id} and p.status=#{Product::IS_VALIDATE[:YES]}").inject(Array.new) {|sum,level| sum.push(level.level1,level.level2)}.compact.uniq.sort
           unless prod.blank?
             Station.find(station.id).update_attributes(:staff_level=>prod.min,:staff_level1=>prod[0..(prod.length/2.0)].max)
           else
