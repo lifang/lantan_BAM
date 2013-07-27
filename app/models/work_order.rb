@@ -57,9 +57,9 @@ class WorkOrder < ActiveRecord::Base
   def arrange_station(gas_num=nil,water_num=nil)
     current_time = Time.now
     #把完成的单的状态置为等待付款
+    order = self.order
     unless self.status ==  WorkOrder::STAT[:CANCELED]
       runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
-      order = self.order
       status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
       self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
     
