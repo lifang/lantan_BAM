@@ -7,7 +7,7 @@ class SvCard < ActiveRecord::Base
   S_FAVOR = {1 => "储值卡", 0 => "打折卡"}
   STATUS = {:NORMAL => 1, :DELETED => 0} #状态 1正常 0删除
   
-  USE_RANGE = [:ALL => 1, :CHAIN_STORE => 2, :LOCAL => 3]  #优惠卡使用范围 1全部，2仅连锁店， 3仅本店
+  USE_RANGE = {:ALL => 1, :CHAIN_STORE => 2, :LOCAL => 3}  #优惠卡使用范围 1全部，2仅连锁店， 3仅本店
   S_USE_RANGE = {1 => "全部", 2 => "仅连锁店", 3 => "仅本店"}
   PER_PAGE = 10
   scope :normal_included, lambda{|store_id| where(:store_id => store_id, :status => STATUS[:NORMAL])}
