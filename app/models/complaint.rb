@@ -242,7 +242,7 @@ class Complaint < ActiveRecord::Base
     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
     conditions = ["",store_id]
     unless created.nil? || created =="" || created.length==0
-      sql += " and date_format(o.created_at,'%Y-%m-%d')> ? "
+      sql += " and date_format(o.created_at,'%Y-%m-%d')>= ? "
       conditions << created
     end
     unless ended.nil? || ended =="" || ended.length==0
