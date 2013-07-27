@@ -465,7 +465,7 @@ $(document).ready(function(){
     });
 
     //编辑系统打分
-    $("#staff_info .bz_btn").click(function(){
+    $("#staff_info .bz_btn").live("click", function(){
         $(this).prev().show();
         $(this).hide();
         $(this).parents('tr').find(".sys_score_text").hide();
@@ -474,7 +474,7 @@ $(document).ready(function(){
     });
 
     //编辑提交系统打分
-    $(".edit_btn").click(function(){
+    $(".edit_btn").live("click", function(){
         var this_obj = $(this);
         var store_id = $("#store_id").val();
         var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
