@@ -475,8 +475,9 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
     var sale_id = $("#sale_id").val();
     var sale_price = $("#sale_price").text();
     $(obj).attr('disabled', 'disabled');
-    if(parseFloat($("#rest_count span").text()) <= parseFloat(total_price)){
+    if(pay_type==4 && parseFloat($("#rest_count span").text()) <= parseFloat(total_price)){
         tishi_alert("门店余额不足");
+        $(obj).attr('disabled', false);
         flag = false;
     }
     if(flag){
