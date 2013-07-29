@@ -173,9 +173,9 @@ class SvCardsController < ApplicationController
   def use_detail
     @started_time = params[:started_time]
     @ended_time = params[:ended_time]
-    base_sql = (@started_time.nil? || @started_time.blank?) ? "1=1" : "o.started_at >= '#{@started_time}'"
+    base_sql = (@started_time.nil? || @started_time.blank?) ? "1=1" : "o.created_at >= '#{@started_time}'"
     base_sql << " and "
-    base_sql << ((@ended_time.nil? || @ended_time.blank?) ? "1=1" : "date_format(o.ended_at,'%Y-%m-%d') <= '#{@ended_time}'")
+    base_sql << ((@ended_time.nil? || @ended_time.blank?) ? "1=1" : "date_format(o.created_at,'%Y-%m-%d') <= '#{@ended_time}'")
     orders = Order.find_by_sql("select o.id id, o.code code,o.price price, c.name name, cn.num num from orders o left join customers c on c.id = o.customer_id
                                  left join car_nums cn on cn.id = o.car_num_id inner join order_pay_types opt on opt.order_id = o.id
                                  where o.store_id = #{@store.id} and (opt.pay_type = #{OrderPayType::PAY_TYPES[:SV_CARD]} || opt.pay_type = #{OrderPayType::PAY_TYPES[:DISCOUNT_CARD]}) and #{base_sql} group by o.id")

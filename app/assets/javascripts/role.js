@@ -148,7 +148,8 @@ function reset_role(store_id){
             type:"POST",
             data:"staff_id="+$("#staff_id_h").val()+"&roles="+roles,
             success:function(){
-                window.location.reload();
+                window.location.replace(window.location.href)
+                
             },
             error:function(){
 

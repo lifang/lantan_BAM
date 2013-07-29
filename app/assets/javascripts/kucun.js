@@ -466,6 +466,7 @@ function submit_material_order(form_id,obj){
 }
 
 function pay_material_order(parent_id, pay_type,store_id, obj){
+    var flag = true;
     var mo_id = $("#"+parent_id+" #pay_order_id").val();
     var mo_type = $("#"+parent_id+" #pay_order_type").val();
     var if_refresh = $('#final_fukuan_tab #if_refresh').val();
@@ -473,7 +474,13 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
     var sav_price = $("#sav_price").val();
     var sale_id = $("#sale_id").val();
     var sale_price = $("#sale_price").text();
-    $(obj).attr('disabled', 'disabled')
+    $(obj).attr('disabled', 'disabled');
+    if(pay_type==4 && parseFloat($("#rest_count span").text()) <= parseFloat(total_price)){
+        tishi_alert("门店余额不足");
+        $(obj).attr('disabled', false);
+        flag = false;
+    }
+    if(flag){
     $.ajax({
         url:"/stores/"+store_id + "/materials/pay_order",
         dataType:"json",
@@ -510,6 +517,7 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
             tishi_alert("支付失败");
         }
     });
+  }
 }
 
 function confirm_pay(){
@@ -1245,7 +1253,7 @@ function close_notice(obj){
           tishi_alert("请选择物料！")
       }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
-         if($.trim($(this).val()).match(reg1)==null){
+         if($.trim($(this).val()).match(reg1)==null || $(this).val()==0){
 //             var code = $(this).attr('alt');
              f = false;
              is_empty = true;

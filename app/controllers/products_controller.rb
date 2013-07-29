@@ -85,8 +85,10 @@ class ProductsController < ApplicationController
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
       :types=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price], :is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]}
+    service = false
     if types == Constant::SERVICE
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],:deduct_percent=>params[:deduct_percent] })
+      service = true if [product.staff_level,product.staff_level_1].sort != [params[:level1].to_i,params[:level2].to_i].sort
       if params[:sale_prod]
         product.prod_mat_relations.inject(Array.new) {|arr,mat| mat.destroy}
         params[:sale_prod].each do |key,value|
@@ -115,6 +117,7 @@ class ProductsController < ApplicationController
       flash[:notice] ="图片上传失败，请重新添加！"
     end
     product.update_attributes(parms)
+    product.alter_level if service
   end
 
   def update_prod
@@ -167,8 +170,10 @@ class ProductsController < ApplicationController
   end
 
   def delete_p(types,id,store_id)
-    Product.find(id).update_attribute(:status, Product::IS_VALIDATE[:NO])
+    product = Product.find(id)
+    product.update_attribute(:status, Product::IS_VALIDATE[:NO])
     if types == Constant::SERVICE
+      product.alter_level
       redit = "/stores/#{store_id}/products/prod_services"
     else
       redit =  "/stores/#{store_id}/products"

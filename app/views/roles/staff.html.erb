@@ -26,7 +26,7 @@
           <ul>
             <% (@roles || []).each do |role| %>
                 <li>
-                  <%= check_box_tag "check_role_#{role.id}",role.id,false,{:onclick => "select_role(this,'#{params[:store_id]}')"} %><%= role.name %>
+                  <%= check_box_tag "check_role_#{role.id}",role.id,false %><%= role.name %>
                 </li>
             <% end %>
           </ul>

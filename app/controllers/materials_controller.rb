@@ -761,17 +761,21 @@ class MaterialsController < ApplicationController
   end
 
   def create
-    material = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id].to_i)
-    if material.nil?
-      params[:material][:name] = params[:material][:name].strip
-      if Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
-              :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
+    params[:material][:name] = params[:material][:name].strip
+    Material.transaction  do
+      material = Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
+            :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
+      
+      if material && material.errors.blank?
+        @status = 0
+        @flash_notice = "创建物料成功!"
+      elsif material && material.errors.any?
+        @flash_notice = "创建物料成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
         @status = 1
       else
-        @status = 0
+        @flash_notice = "创建物料失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+        @status = 2
       end
-    else
-      @status = 2
     end
   end
 
@@ -784,21 +788,12 @@ class MaterialsController < ApplicationController
   def update
     material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     params[:material][:name] = params[:material][:name].strip
-    uniq_mat = Material.where("code = ? and store_id = ? and id != ?", params[:material][:code], params[:store_id].to_i, params[:id].to_i)
-    if uniq_mat.blank?   #如果code唯一
-      if material.update_attributes(params[:material])
-        @status = 1
-        @material = material
-        #@current_store = Store.find_by_id(params[:store_id].to_i)
-      else
-        @status = 0
-      end
+    if material.update_attributes(params[:material])
+      @status = 1
+      @material = material
     else
-        @status = 2
+      @status = 0
     end
-#    respond_to do |format|
-#      format.js
-#    end
   end
 
   def destroy
@@ -819,13 +814,21 @@ class MaterialsController < ApplicationController
   end
 
   def output_barcode
-    prints = params[:print]
     @data = []
-    prints.each do |key, value|
-      material = Material.find_by_id(key)
-      @data << {:num => value[:print_code_num], :code_img => material.code_img}
+    if params[:mat_in_items].blank?
+      prints = params[:print]
+      prints.each do |key, value|
+        material = Material.find_by_id(key)
+        @data << {:num => value[:print_code_num], :code_img => material.code_img}
+      end
+    else
+      mats = params[:mat_in_items].split(",").map{|mat| mat.split("_")}
+      mats.each do |mat|
+        material = Material.find_by_code(mat[0])
+        @data << {:num => mat[2], :code_img => material.code_img}
+      end
     end
-    render :layout => false
+      render :layout => false
   end
 
   #库存报损
