@@ -41,7 +41,7 @@
               <td><%=Complaint::TYPES_NAMES[comp.types]%></td>
               <td width="200px"><%= comp.reason %></td>
               <td><%= comp.types ==Complaint::TYPES[:INVALID]? "否" : "是" %></td>
-              <td><%=Complaint::STATUS_NAME[comp.status]  %></td>
+              <td><%= comp.status ?  Complaint::STATUS_NAME[1] : Complaint::STATUS_NAME[0]  %></td>
               <td><%=comp.process_at.nil? ? "" : comp.process_at.strftime("%Y.%m.%d--%H:%S")  %></td>
               <td width="200px"><%= comp.remark %></td>
               <td><%= Complaint::VIOLATE_N[comp.is_violation] %></td>

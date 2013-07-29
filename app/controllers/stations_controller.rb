@@ -3,6 +3,7 @@ class StationsController < ApplicationController
   # 现场管理 -- 施工现场
   before_filter :sign?
   layout 'station'
+  require 'fileutils'
 
   #施工现场
   def index

@@ -19,7 +19,7 @@ class Complaint < ActiveRecord::Base
 
   #投诉状态
   STATUS = {:UNTREATED => 0, :PROCESSED => 1} #0 未处理  1 已处理
-  STATUS_NAME ={0=>"未处理",1=>"已处理"}
+  STATUS_NAME ={0 =>"未处理",1 =>"已处理"}
   VIOLATE = {:NORMAL=>1,:INVALID=>0} #0  不纳入  1 纳入
   VIOLATE_N = {true=>"是",false=>"否"}
   SEX = {:MALE =>1,:FEMALE =>0,:NONE=>2} # 0 未选择 1 男 2 女

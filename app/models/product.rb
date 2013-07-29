@@ -4,6 +4,8 @@ class Product < ActiveRecord::Base
   require 'net/http'
   require "uri"
   require 'openssl'
+  require 'zip/zip'
+  require 'zip/zipfilesystem'
   has_many :sale_prod_relations
   has_many :res_prod_relations
   has_many :station_service_relations
@@ -107,25 +109,29 @@ class Product < ActiveRecord::Base
     return list
   end
 
-  def self.recgnite_pic
-    dir = "#{Rails.root}/public/recongte_pics"
-    files = get_dir_list(dir)
-    files.each do |file|
-      file_path = dir +"/"+file
-      ext_name = File.extname(file_path)
-      p ext_name
-      base_name = File.basename(file_path, ext_name)
-      p base_name
-      img = MiniMagick::Image.open file_path,"rb"
-      change_path = "#{Rails.root}/public/#{base_name}.tif"
-      p change_path.to_s
-      scale_path = "#{Rails.root}/public/#{base_name}_250.tif"
-      txt_path = "#{Rails.root}/public/result"
-      img.run_command("convert -compress none -depth 8 -alpha off -colorspace Gray  #{file_path} #{change_path} ")
-      img.run_command("convert #{change_path} -scale 250% #{scale_path} ")
-      img.run_command("tesseract #{change_path} #{txt_path}")
-      p File.read(txt_path+".txt")
+  def self.recgnite_pic(dir,file)
+    file_path = dir+file.name
+    ext_name = File.extname(file_path)
+    base_name = File.basename(file_path, ext_name)
+    img = MiniMagick::Image.open file_path,"rb"
+    change_path = "D:/ss/#{base_name}.tif"
+    txt_path = "#{Rails.root}/public/result"
+    img.run_command("convert -compress none -depth 8 -alpha off -colorspace Gray  #{file_path} #{change_path} ")
+    if base_name.to_i ==1
+      img.run_command("tesseract #{change_path} #{txt_path} -psm 6 -l chi_sim")  #识别汉字
+      v_file = File.read(txt_path+".txt")
+    else
+      img.run_command("tesseract #{change_path} #{txt_path} -psm 5")
+      v_file = File.read(txt_path+".txt")
+      if v_file.length >= 2
+        p v_file
+        img.run_command("tesseract #{change_path} #{txt_path} -psm 6")
+        v_file = File.read(txt_path+".txt")
+      else
+        v_file = (v_file | File.read(txt_path+".txt"))[0]
+      end
     end
+    p v_file
   end
 
   def alter_level
