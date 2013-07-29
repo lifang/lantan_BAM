@@ -245,7 +245,7 @@ function select_order_material(obj,type,m){
         var storage = $("#from").val()==0 ? $(obj).val() : "--";
         var li = "<tr id='li_"+$(obj).attr("id")+"' class='in_mat_selected'><td>";
         li += m.name + "</td><td>" + type + "</td><td>" + m.price +
-            "</td><td>" + (typeof(m.sale_price)==("undefined" || "null") ? "无" : m.sale_price) +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+m.price+"','"+m.code+"','"+type+"')\" style='width:50px;'/></td><td>" +
+            "</td><td>" + ((typeof(m.sale_price)=="undefined" || m.sale_price == null) ? "无" : m.sale_price) +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+m.price+"','"+m.code+"','"+type+"')\" style='width:50px;'/></td><td>" +
             "<span class='per_total' id='total_"+id+"'>" + m.price + "</span></td><td>" + storage +"</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
         if($("#dinghuo_selected_materials").find("tr.in_mat_selected").length > 0){
             $("#dinghuo_selected_materials").find("tr.in_mat_selected:last").after(li);
