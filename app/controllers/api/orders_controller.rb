@@ -302,8 +302,10 @@ class Api::OrdersController < ApplicationController
   #发送短信code
   def get_user_svcard
     csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id where c.mobilephone = ? and sc.types = 1 and csr.status = ?",
-        params[:mobilephone].strip, CSvcRelation::STATUS[:valid]])
+      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
+      where c.mobilephone = ? and sc.types = 1 and csr.status = ? and ((sc.use_range = #{SvCard::USE_RANGE[:LOCAL]} and sc.store_id = #{params[:store_id]})
+        or (sc.use_range = #{SvCard::USE_RANGE[:CHAIN_STORE]} and sc.store_id in (?)) or (sc.use_range = #{SvCard::USE_RANGE[:ALL]}))",
+        params[:mobilephone].strip, CSvcRelation::STATUS[:valid], StoreChainsRelation.return_chain_stores(params[:store_id])])
     sum_left_total = csvc_relaions.inject(0){|sum, csv| sum = sum+csv.left_price.to_f}
     record = csvc_relaions[0]
     status = 0
@@ -343,8 +345,11 @@ class Api::OrdersController < ApplicationController
         record.update_attribute(:left_price, left_price)
       else
         csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join customers c on c.id = csr.customer_id where c.mobilephone = ? and left_price != ? and csr.status = ?",
-            params[:mobilephone].strip, 0, CSvcRelation::STATUS[:valid]])
+      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
+ where sc.types = 1 and c.mobilephone = ? and left_price != ? and csr.status = ?
+            and ((sc.use_range = #{SvCard::USE_RANGE[:LOCAL]} and sc.store_id = #{params[:store_id]})
+        or (sc.use_range = #{SvCard::USE_RANGE[:CHAIN_STORE]} and sc.store_id in (?)) or (sc.use_range = #{SvCard::USE_RANGE[:ALL]}))",
+            params[:mobilephone].strip, 0, CSvcRelation::STATUS[:valid], StoreChainsRelation.return_chain_stores(params[:store_id])])
         csvc_relaions.each do |csv|
           if price > 0
             if price - csv.left_price >= 0
@@ -486,14 +491,25 @@ class Api::OrdersController < ApplicationController
       #登录成功
       phone_inventory = staff_phone_inventory_permission?([:staffs, :phone_inventory], staff.id) ? 1 : 0
       #是否是技师登录
-      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+      
       mat_out_types = MatOutOrder::TYPES
       if staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
         #所有的code，材料名称
-        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types, :phone_inventory => phone_inventory}
+        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :mat_out_types => mat_out_types, :phone_inventory => phone_inventory}
       else
         render :json => {:status => 2, :phone_inventory => phone_inventory, :staff_id => staff.id, :store_id => staff.store_id, :materials => materials, :mat_out_types => mat_out_types}
       end  
+    end
+  end
+
+  #得到最新的材料
+  def get_lastest_materails
+    staff = Staff.find_by_id(params[:staff_id])
+    if staff
+      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+      render :json => {:status => 1, :materials => materials}
+    else
+      render :json => {:status => 0}
     end
   end
 
