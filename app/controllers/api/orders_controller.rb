@@ -490,14 +490,25 @@ class Api::OrdersController < ApplicationController
       #登录成功
       phone_inventory = staff_phone_inventory_permission?([:staffs, :phone_inventory], staff.id) ? 1 : 0
       #是否是技师登录
-      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+      
       mat_out_types = MatOutOrder::TYPES
       if staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
         #所有的code，材料名称
-        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :materials => materials, :mat_out_types => mat_out_types, :phone_inventory => phone_inventory}
+        render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :mat_out_types => mat_out_types, :phone_inventory => phone_inventory}
       else
         render :json => {:status => 2, :phone_inventory => phone_inventory, :staff_id => staff.id, :store_id => staff.store_id, :materials => materials, :mat_out_types => mat_out_types}
       end  
+    end
+  end
+
+  #得到最新的材料
+  def get_lastest_materails
+    staff = Staff.find_by_id(params[:staff_id])
+    if staff
+      materials = Material.where("store_id = #{staff.store_id} and status = #{Material::STATUS[:NORMAL]}").select("code, name, storage")
+      render :json => {:status => 1, :materials => materials}
+    else
+      render :json => {:status => 0}
     end
   end
 
