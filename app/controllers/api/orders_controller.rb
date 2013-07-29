@@ -345,7 +345,8 @@ class Api::OrdersController < ApplicationController
         record.update_attribute(:left_price, left_price)
       else
         csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join customers c on c.id = csr.customer_id where c.mobilephone = ? and left_price != ? and csr.status = ?
+      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
+ where sc.types = 1 and c.mobilephone = ? and left_price != ? and csr.status = ?
             and ((sc.use_range = #{SvCard::USE_RANGE[:LOCAL]} and sc.store_id = #{params[:store_id]})
         or (sc.use_range = #{SvCard::USE_RANGE[:CHAIN_STORE]} and sc.store_id in (?)) or (sc.use_range = #{SvCard::USE_RANGE[:ALL]}))",
             params[:mobilephone].strip, 0, CSvcRelation::STATUS[:valid], StoreChainsRelation.return_chain_stores(params[:store_id])])
