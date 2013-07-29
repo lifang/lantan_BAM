@@ -814,13 +814,21 @@ class MaterialsController < ApplicationController
   end
 
   def output_barcode
-    prints = params[:print]
     @data = []
-    prints.each do |key, value|
-      material = Material.find_by_id(key)
-      @data << {:num => value[:print_code_num], :code_img => material.code_img}
+    if params[:mat_in_items].blank?
+      prints = params[:print]
+      prints.each do |key, value|
+        material = Material.find_by_id(key)
+        @data << {:num => value[:print_code_num], :code_img => material.code_img}
+      end
+    else
+      mats = params[:mat_in_items].split(",").map{|mat| mat.split("_")}
+      mats.each do |mat|
+        material = Material.find_by_code(mat[0])
+        @data << {:num => mat[2], :code_img => material.code_img}
+      end
     end
-    render :layout => false
+      render :layout => false
   end
 
   #库存报损
