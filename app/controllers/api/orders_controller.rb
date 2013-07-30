@@ -497,7 +497,7 @@ class Api::OrdersController < ApplicationController
         #所有的code，材料名称
         render :json => {:status => 1, :store_id => staff.store_id, :staff_id => staff.id, :mat_out_types => mat_out_types, :phone_inventory => phone_inventory}
       else
-        render :json => {:status => 2, :phone_inventory => phone_inventory, :staff_id => staff.id, :store_id => staff.store_id, :materials => materials, :mat_out_types => mat_out_types}
+        render :json => {:status => 2, :phone_inventory => phone_inventory, :staff_id => staff.id, :store_id => staff.store_id, :mat_out_types => mat_out_types}
       end  
     end
   end
