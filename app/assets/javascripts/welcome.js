@@ -83,8 +83,20 @@ $(document).ready(function(){
    });
 
    $(".cancel_btn").click(function(){
-       $("#edit_password_area").hide();
-       $(".mask").hide();
+       hide_form();
        return false;
    });
+
+   $("#edit_password_area .close").click(function(){
+      hide_form();
+      return false;
+   });
+
+   function hide_form(){
+       $("#edit_password_area").hide();
+       $(".mask").hide();
+       $("#old_password").val('');
+       $("#new_password").val('');
+       $("#confirm_password").val('');
+   }
 });
