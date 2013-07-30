@@ -844,7 +844,6 @@ class MaterialsController < ApplicationController
     success = 0
     @status = false
     mat_losses = params[:mat_losses]
-    p  params[:mat_losses]
     unless mat_losses.nil?
       mat_losses.each do |key,value|
         count +=1
