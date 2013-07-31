@@ -6,7 +6,7 @@
       <%= form_for @station, :url => @action == 'new' ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => @action == 'new' ? :post : :put, :remote => true, :html => {"data-type" => 'script', :class=>"station_form"} do |f| %>
         <div class="popup_body_area">
           <div class="item station_name">
-            <%= f.label :name, '名称：'%>
+            <%= f.label :name, ("<span class='red'>*</span>名称：").html_safe%>
             <%= f.text_field :name%>
           </div>
           <div class="item">
@@ -65,7 +65,7 @@
             </div>
           </div>
           <div class="seeProDiv">
-            <div class="seeProDiv_l">服务：</div>
+            <div class="seeProDiv_l"><span class='red'>*</span>服务：</div>
             <div class="seeProDiv_rWidth width640">
               <div class="popup_body_result resultHeight">
                 <ul>
