@@ -1,4 +1,5 @@
 #encoding: utf-8
+require 'will_paginate/array'
 class CurrentMonthSalariesController < ApplicationController
   before_filter :sign?
   layout "staff"
@@ -14,7 +15,9 @@ class CurrentMonthSalariesController < ApplicationController
                   :type => "text/excel;charset=utf-8; header=present",
                   :filename => "Current_Month_Salary_#{@statistics_date}.xls")
       }
-      format.html
+      format.html{
+        @staffs = @staffs.paginate(:per_page => Constant::PER_PAGE, :page => params[:page] ||= 1)
+      }
     end
   end
 

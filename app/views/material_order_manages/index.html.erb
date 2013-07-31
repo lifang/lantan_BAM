@@ -38,6 +38,8 @@
                 <% end %>
               </tbody>
         </table>
+       <%= will_paginate @material_orders, :class => "pageTurn", :previous_label => "上一页",
+    :next_label => "下一页" %>
         <div class="amount">总计：<%= sprintf('%.2f', @total_price) %>（元）</div>
      </div>
 </div>
