@@ -707,7 +707,7 @@ function add_material_to_selected(obj,order_count){
         nonchecked.attr("checked", 'checked');
     }
     if(selectedItems.length==0){
-      var li = "<tr id='li_"+id+"' class='in_mat_selected'><td>";
+      var li = "<tr id='li_mat_"+id+"' class='in_mat_selected'><td>";
       li += obj.name + "</td><td>" + type_name(obj.types) + "</td><td>" + obj.price +
             "</td><td>" + obj.sale_price +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='"+ order_count +"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"','"+obj.code+"','"+type_name(obj.types)+"')\" style='width:50px;'/></td><td>" +
             "<span class='per_total' id='total_"+id+"'>" + parseFloat(obj.price * parseInt(order_count)) + "</span></td><td>--</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
