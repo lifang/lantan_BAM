@@ -134,7 +134,9 @@ module ApplicationHelper
         params[:store_id].to_i, Time.mktime(Time.now.year, Time.now.mon-1, 1), Time.mktime(Time.now.year, Time.now.mon, 1)])
     un_pleased_size = 0
     orders.collect { |o| un_pleased_size += 1 if o.is_pleased == Order::IS_PLEASED[:BAD] }
-    return orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size
+    pleased = orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size
+    unpleased = orders.size == 0 ? 0 : 100 - pleased
+    return [pleased, unpleased]
   end
 
   def material_order_tips
