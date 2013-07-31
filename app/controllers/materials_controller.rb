@@ -852,7 +852,7 @@ class MaterialsController < ApplicationController
           if MaterialLoss.create({:loss_num =>  mat_losses[key][:mat_num].to_i,
                                :material_id => material.id,
                                :staff_id => params[:staff],
-                               :store_id => params[:hidden_store_id]
+                               :store_id => params[:store_id]
                               })
             success += 1
           end

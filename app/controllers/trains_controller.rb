@@ -5,10 +5,11 @@ class TrainsController < ApplicationController
 
   def create
     @store = Store.find_by_id(params[:store_id])
+    certificate = params[:train][:certificate]
     Train.transaction do
       begin
         params[:staff][:id].each do |staff_id|
-          params[:train][:certificate] = params[:train][:certificate].nil? ? 1 : 0
+          params[:train][:certificate] = certificate.eql?("0") ? 1 : 0
           train = Train.new(params[:train])
           train.train_staff_relations.new({:staff_id => staff_id, :status => 1}) #是否通过考核默认为没有，status=1
           train.save
