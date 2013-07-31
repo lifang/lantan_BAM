@@ -114,23 +114,30 @@ class Product < ActiveRecord::Base
     ext_name = File.extname(file_path)
     base_name = File.basename(file_path, ext_name)
     img = MiniMagick::Image.open file_path,"rb"
-    change_path = "D:/ss/#{base_name}.tif"
+    change_path = "#{dir}#{base_name}.tif"
     txt_path = "#{Rails.root}/public/result"
+    scale_path = "#{dir}#{base_name}_250.tif"
     img.run_command("convert -compress none -depth 8 -alpha off -colorspace Gray  #{file_path} #{change_path} ")
+    img.run_command("convert #{change_path} -scale 50% #{scale_path} ")
+
     if base_name.to_i ==1
-      img.run_command("tesseract #{change_path} #{txt_path} -psm 6 -l chi_sim")  #识别汉字
+      img.run_command("tesseract #{scale_path} #{txt_path} -psm 6 -l chi_sim")  #识别汉字
       v_file = File.read(txt_path+".txt")
     else
-      img.run_command("tesseract #{change_path} #{txt_path} -psm 5")
+      
+      img.run_command("tesseract #{scale_path} #{txt_path} -psm 5")
       v_file = File.read(txt_path+".txt")
       if v_file.length >= 2
         p v_file
-        img.run_command("tesseract #{change_path} #{txt_path} -psm 6")
+        img.run_command("tesseract #{scale_path} #{txt_path} -psm 6")
         v_file = File.read(txt_path+".txt")
       else
         v_file = (v_file | File.read(txt_path+".txt"))[0]
       end
     end
+    file = File.open("D:/ss/result.txt","a+")
+    file.write(base_name+"--"+6.to_s+"--"+v_file)
+    file.close
     p v_file
   end
 
