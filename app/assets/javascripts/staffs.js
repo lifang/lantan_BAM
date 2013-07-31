@@ -445,7 +445,7 @@ $(document).ready(function(){
             tishi_alert("培训开始时间必须在培训结束时间之后!");
             return false;
         }
-        if($("#new_train_area input[type='checkbox']:checked").length == 0){
+        if($("#new_train_area .width_div input[type='checkbox']:checked").length == 0){
             tishi_alert("至少选择一个培训人员!");
             return false;
         }
