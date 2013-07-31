@@ -153,9 +153,8 @@ class Api::OrdersController < ApplicationController
     end
     items = Order.get_brands_products params[:store_id]
     reservations = Reservation.store_reservations params[:store_id]
-
     render :json => {:status => 1, :reservation => reservations, :customer => customer, :product_ids => product_ids,
-      :brands => items[0], :products => items[1], :count => items[1][4]}
+      :all_infos => items}
   end
 
   #刷新返回预约信息
