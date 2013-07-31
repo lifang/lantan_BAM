@@ -114,6 +114,8 @@ class Api::OrdersController < ApplicationController
       content = "选择的产品和服务无法匹配工位"
     elsif pre_arr[5] == 3
       content = "所购买的服务需要多个工位，请分别下单！"
+    elsif pre_arr[5] == 4
+      content = "工位上暂无技师"
     end
     result = {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
       :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
