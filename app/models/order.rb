@@ -368,6 +368,8 @@ class Order < ActiveRecord::Base
           status = 1  #有符合工位
         when 2
           status = 3 #多个工位
+        when 3
+          status = 4 #工位上暂无技师
         end
 
       else
