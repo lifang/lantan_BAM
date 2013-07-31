@@ -23,8 +23,6 @@
           <div class="search">
             <div><%= label_tag "staff","报损人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
           </div>
-
-          <%= hidden_field_tag "hidden_store_id", cookies[:user_id] %>
           <div class="btn_box"><button id="add_MaterialsLoss_btn" onclick="checkMatLossNum()" class="confirm_btn" type="button"  >确定</button></div>
           <div class="clear"></div>
       <% end %>

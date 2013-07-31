@@ -203,7 +203,7 @@ function select_mat_loss_material(obj,name,code,typesname,storage,id){
     if($(obj).is(":checked")){
         if(count == 0){
             var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
-            tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+code+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
+            tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+name+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
             "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,2); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
             $("#MaterialsLoss #selected_materials").append(tr);
         }
@@ -215,7 +215,7 @@ function select_mat_loss_material(obj,name,code,typesname,storage,id){
                     $(this).remove();
             });
             var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
-            tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+code+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
+            tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+name+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
                 "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,2); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
             $("#MaterialsLoss #selected_materials").append(tr);
         }
@@ -245,7 +245,7 @@ function select_order_material(obj,type,m){
         var storage = $("#from").val()==0 ? $(obj).val() : "--";
         var li = "<tr id='li_"+$(obj).attr("id")+"' class='in_mat_selected'><td>";
         li += m.name + "</td><td>" + type + "</td><td>" + m.price +
-            "</td><td>" + (typeof(m.sale_price)=="undefined" || "null" ? "无" : m.sale_price) +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+m.price+"','"+m.code+"','"+type+"')\" style='width:50px;'/></td><td>" +
+            "</td><td>" + ((typeof(m.sale_price)=="undefined" || m.sale_price == null) ? "无" : m.sale_price) +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+m.price+"','"+m.code+"','"+type+"')\" style='width:50px;'/></td><td>" +
             "<span class='per_total' id='total_"+id+"'>" + m.price + "</span></td><td>" + storage +"</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
         if($("#dinghuo_selected_materials").find("tr.in_mat_selected").length > 0){
             $("#dinghuo_selected_materials").find("tr.in_mat_selected:last").after(li);
@@ -466,6 +466,7 @@ function submit_material_order(form_id,obj){
 }
 
 function pay_material_order(parent_id, pay_type,store_id, obj){
+    var flag = true;
     var mo_id = $("#"+parent_id+" #pay_order_id").val();
     var mo_type = $("#"+parent_id+" #pay_order_type").val();
     var if_refresh = $('#final_fukuan_tab #if_refresh').val();
@@ -473,7 +474,13 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
     var sav_price = $("#sav_price").val();
     var sale_id = $("#sale_id").val();
     var sale_price = $("#sale_price").text();
-    $(obj).attr('disabled', 'disabled')
+    $(obj).attr('disabled', 'disabled');
+    if(pay_type==4 && parseFloat($("#rest_count span").text()) <= parseFloat(total_price)){
+        tishi_alert("门店余额不足");
+        $(obj).attr('disabled', false);
+        flag = false;
+    }
+    if(flag){
     $.ajax({
         url:"/stores/"+store_id + "/materials/pay_order",
         dataType:"json",
@@ -510,6 +517,7 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
             tishi_alert("支付失败");
         }
     });
+  }
 }
 
 function confirm_pay(){
@@ -699,7 +707,7 @@ function add_material_to_selected(obj,order_count){
         nonchecked.attr("checked", 'checked');
     }
     if(selectedItems.length==0){
-      var li = "<tr id='li_"+id+"' class='in_mat_selected'><td>";
+      var li = "<tr id='li_mat_"+id+"' class='in_mat_selected'><td>";
       li += obj.name + "</td><td>" + type_name(obj.types) + "</td><td>" + obj.price +
             "</td><td>" + obj.sale_price +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='"+ order_count +"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"','"+obj.code+"','"+type_name(obj.types)+"')\" style='width:50px;'/></td><td>" +
             "<span class='per_total' id='total_"+id+"'>" + parseFloat(obj.price * parseInt(order_count)) + "</span></td><td>--</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
@@ -1245,7 +1253,7 @@ function close_notice(obj){
           tishi_alert("请选择物料！")
       }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
-         if($.trim($(this).val()).match(reg1)==null){
+         if($.trim($(this).val()).match(reg1)==null || $(this).val()==0){
 //             var code = $(this).attr('alt');
              f = false;
              is_empty = true;
@@ -1266,12 +1274,12 @@ function close_notice(obj){
           f = false;
       }
       $("#MaterialsLoss #selected_materials").find('input.mat_loss_num').each(function(){
-          var code = $(this).attr('alt');
+          var name = $(this).attr('alt');
           var num = $(this).attr('value');
-          var storage = $(this).next().val();
+//          var storage = $(this).next().val();
 
           if($(this).val().match(reg1)==null){
-            var msg1 = "条形码为'"+ code + "'的物料数量不正确！";
+            var msg1 = "物料名称为'"+ name + "'的报损数量不正确！";
             if(msg == "")
                 msg = msg1;
             else
@@ -1280,16 +1288,16 @@ function close_notice(obj){
           }
 
           if(parseInt(num)<=0){
-            var msg2 = "条形码为'"+ code + "'的报损数量不能小于1！";
+            var msg2 = "物料名称为'"+ name + "'的报损数量不能小于1！";
             msg = msg + "<br/>" + msg2;
             f = false;
           }
 
-          if(parseInt(num)>parseInt(storage)){
-            var msg3 = "条形码为'"+ code + "'的报损数量不能大于库存数量！";
-            msg = msg + "<br/>" + msg3;
-            f = false;
-          }
+//          if(parseInt(num)>parseInt(storage)){
+//            var msg3 = "物料名称为'"+ name + "'的报损数量不能大于库存数量！";
+//            msg = msg + "<br/>" + msg3;
+//            f = false;
+//          }
 
       });
 

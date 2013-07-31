@@ -19,7 +19,7 @@ class Complaint < ActiveRecord::Base
 
   #投诉状态
   STATUS = {:UNTREATED => 0, :PROCESSED => 1} #0 未处理  1 已处理
-  STATUS_NAME ={0=>"未处理",1=>"已处理"}
+  STATUS_NAME ={0 =>"未处理",1 =>"已处理"}
   VIOLATE = {:NORMAL=>1,:INVALID=>0} #0  不纳入  1 纳入
   VIOLATE_N = {true=>"是",false=>"否"}
   SEX = {:MALE =>1,:FEMALE =>0,:NONE=>2} # 0 未选择 1 男 2 女
@@ -165,7 +165,7 @@ class Complaint < ActiveRecord::Base
   end
   
   def self.search_detail(store_id,created,ended)
-    sql ="select c.*,o.code,o.id o_id,timestampdiff(hour,c.created_at,c.process_at) diff_time,c.process_at from complaints c inner join orders o on o.id=c.order_id  where c.store_id=#{store_id} "
+    sql ="select c.*,o.code,o.id o_id,timestampdiff(minute,c.created_at,c.process_at) diff_time,c.process_at from complaints c inner join orders o on o.id=c.order_id  where c.store_id=#{store_id} "
     sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql += " order by c.created_at desc"
@@ -242,7 +242,7 @@ class Complaint < ActiveRecord::Base
     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
     conditions = ["",store_id]
     unless created.nil? || created =="" || created.length==0
-      sql += " and date_format(o.created_at,'%Y-%m-%d')> ? "
+      sql += " and date_format(o.created_at,'%Y-%m-%d')>= ? "
       conditions << created
     end
     unless ended.nil? || ended =="" || ended.length==0

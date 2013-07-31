@@ -81,14 +81,16 @@ class MarketManagesController < ApplicationController
   end
 
   def load_pcard
-    @total_product,@total_fee,pcards = {},0,[]
+    @total_product,@total_fee,pcards,@pcards = {},0,[],[]
     session[:r_created],session[:r_ended],session[:time]=params[:created],params[:ended],params[:time].to_i
     pays = MonthScore.sort_pay_types(params[:store_id],session[:time],session[:r_created],session[:r_ended])
-    pays.inject(Hash.new){ |hash,prod|
-      @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-    }.sort.reverse.each {|k,v| pcards << [k,v]}
-    @pcards = pcards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    @products = Product.where("id in (#{pays.map(&:product_id).compact.uniq.join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
+    unless pays.blank?
+      pays.inject(Hash.new){ |hash,prod|
+        @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      }.sort.reverse.each {|k,v| pcards << [k,v]}
+      @pcards = pcards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+      @products = Product.where("id in (#{pays.map(&:product_id).compact.uniq.join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
+    end
   end
 
   #加载进行中的目标销售额
@@ -220,9 +222,9 @@ class MarketManagesController < ApplicationController
     orders = Order.includes(:order_prod_relations,:c_pcard_relations =>
         {:package_card => {:pcard_prod_relations => :product}}).
       where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
-    where("date_format(created_at,'%Y-%m-%d') = curdate()").
-    select("distinct orders.*").
-    paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+      where("date_format(created_at,'%Y-%m-%d') = curdate()").
+      select("distinct orders.*").
+      paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
     
     orders_arr = formatted_order_price(orders)[0]
     @toal_gross_price = formatted_order_price(orders)[1]
@@ -242,8 +244,8 @@ class MarketManagesController < ApplicationController
       orders = Order.includes(:order_prod_relations,:c_pcard_relations =>
           {:package_card => {:pcard_prod_relations => :product}}).
         where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
-      where(sql).
-      select("distinct orders.*")
+        where(sql).
+        select("distinct orders.*")
 
       orders_arr = formatted_order_price(orders)[0]
       @toal_gross_price = formatted_order_price(orders)[1]
