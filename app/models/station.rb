@@ -239,7 +239,7 @@ class Station < ActiveRecord::Base
       end
     end
     station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i) if station_arr
-    if station_staffs.present?
+    if station_staffs.blank?
       station_flag = 3
     end
 
