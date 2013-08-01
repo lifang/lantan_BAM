@@ -259,5 +259,10 @@ LantanBAM::Application.routes.draw do
     end
 
   end
+  resources :return_backs do
+    collection do
+      get :return_info
+    end
+  end
 
 end
