@@ -14,11 +14,11 @@ development:
   reconnect: false
   database: lantan_db
   pool: 5
-  username: comdo
+  username: root
 #  password: comdo2012
   password: comdo2012
 #  host: localhost
-  host: 116.255.135.175
+  host: 192.168.0.250
 
 
 
