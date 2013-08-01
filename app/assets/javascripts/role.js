@@ -181,19 +181,19 @@ function checkValid(obj){
             flag = false;
             return false;
         }
-    if($(".station_form #station_is_has_controller").attr("checked")=="checked")
+    else if($(".station_form #station_is_has_controller").attr("checked")=="checked")
        {
            $(".station_form .controller_input").find("input[type='text']").each(function(){
             var name = $(this).prev().text().split("：")[0]
             if($(this).val()==""){
-                tishi_alert(name+"不能为空!")
+                tishi_alert(name.split("*")[1]+"不能为空!")
                 flag = false;
                 return false;
             }
         })
        }
-    if($(".station_form .popup_body_result").find("input[type='checkbox']:checked").length==0){
-        tishi_alert("服务不能为空!新建或者勾选服务项目")
+    else if($(".station_form .popup_body_result").find("input[type='checkbox']:checked").length==0){
+        tishi_alert("服务不能为空!")
         flag = false;
     }
     if(flag)
@@ -205,9 +205,11 @@ function handleController(){
     var input_div = $("#station_is_has_controller").parent().next();
     if($("#station_is_has_controller").attr("checked")=="checked")
     {
+        $(".station_form .controller_input").find('label').prepend("<span class='red'>*</span>");
         input_div.find("input").attr("disabled", false);
     }
     else{
         input_div.find("input").attr("disabled","disabled");
+        $(".station_form .controller_input").find('label span').remove();
     }
 }

@@ -6,7 +6,8 @@ class StaffManagesController < ApplicationController
   before_filter :get_store
 
   def index
-    @staffs = Staff.where("store_id = #{params[:store_id]}")
+    @staffs = Staff.where("store_id = #{params[:store_id]}").
+      paginate(:per_page => Constant::PER_PAGE, :page => params[:page] ||= 1)
   end
 
 
