@@ -227,7 +227,7 @@ class Api::OrdersController < ApplicationController
         if code_info["status"].to_i == Order::STATUS[:DELETED]
           order.return_order_materials
           order.update_attribute(:status, Order::STATUS[:DELETED])
-        elsif code_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT]
+        elsif code_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT] || Order::STATUS[:FINISHED]
           OrderPayType.create(:pay_type => code_info["pay_type"], :price => code_info["price"],
             :created_at => code_info["time"], :order_id => order.id)
           Complaint.create(:reason => code_info["complaint"]["reason"], :suggestion => code_info["complaint"]["request"],
@@ -235,7 +235,7 @@ class Api::OrdersController < ApplicationController
           order.c_pcard_relations.each {|cpr| cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL])} if order.c_pcard_relations
           CSvcRelation.find_all_by_order_id(order.id).each { |csr| csr.update_attributes(:status => CSvcRelation::STATUS[:valid]) }
           is_free = (code_info["pay_type"].to_i == OrderPayType::PAY_TYPES[:IS_FREE]) ? true : false
-          order.update_attributes(:status => Order::STATUS[:BEEN_PAYMENT], :is_pleased => code_info["is_please"],
+          order.update_attributes(:status => code_info["status"].to_i, :is_pleased => code_info["is_please"],
             :is_billing => code_info["billing"].to_i, :is_free => is_free)
         end
       end if codes_info
