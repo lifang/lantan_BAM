@@ -276,7 +276,7 @@ $(document).ready(function(){
            return false;
        }
        if(parseFloat($(this).parents('form').find("#staff_base_salary").val())<0.0){
-           tishi_alert("正式薪资标准必须大于0!");
+           tishi_alert("正式薪资标准必须大于等于0!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
@@ -288,7 +288,7 @@ $(document).ready(function(){
            return false;
        }
        if(parseFloat($(this).parents('form').find("#staff_deduct_at").val())<0.0){
-           tishi_alert("提成起始额必须大于0!");
+           tishi_alert("提成起始额必须大于等于0!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
@@ -300,7 +300,7 @@ $(document).ready(function(){
            return false;
        }
        if(parseFloat($(this).parents('form').find("#staff_deduct_end").val())<0.0){
-           tishi_alert("结束额度必须大于0!");
+           tishi_alert("结束额度必须大于等于0!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && (parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val()))){
