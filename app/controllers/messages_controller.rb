@@ -51,7 +51,7 @@ class MessagesController < ApplicationController
         customers = Customer.find_all_by_id(params[:customer_ids].split(","))
         message_arr = []
         customers.each do |customer|
-          content = params[:content].strip.gsub("%name%", customer.name)
+          content = params[:content].strip.gsub("%name%", customer.name).gsub(" ", "")
           SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id, 
             :content => content, :phone => customer.mobilephone,
             :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])

@@ -115,7 +115,7 @@ class CustomersController < ApplicationController
         message_record = MessageRecord.create(:store_id => params[:store_id].to_i, :content => params[:content].strip,
           :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
         customer = Customer.find(params[:m_customer_id].to_i)
-        content = params[:content].strip.gsub("%name%", customer.name)
+        content = params[:content].strip.gsub("%name%", customer.name).gsub(" ", "")
         SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id,
           :content => content, :phone => customer.mobilephone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
