@@ -1,4 +1,5 @@
 #encoding: utf-8
+require "uri"
 class LoginsController < ApplicationController
   
   def index
@@ -62,15 +63,17 @@ class LoginsController < ApplicationController
     staff = Staff.where("phone = '#{params[:telphone]}' and validate_code = '#{params[:validate_code]}'").
                   where("status in (?)", Staff::VALID_STATUS).first
     if staff && !params[:validate_code].nil? && !params[:validate_code].blank?
+      
       random_password = [*100000..999999].sample
+      content = "新密码#{random_password}"
       MessageRecord.transaction do
-        message_record = MessageRecord.create(:store_id => staff.store_id, :content => random_password,
+        message_record = MessageRecord.create(:store_id => staff.store_id, :content => content,
           :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
         SendMessage.create(:message_record_id => message_record.id, :customer_id => staff.id,
-          :content => random_password, :phone => staff.phone,
+          :content => content, :phone => staff.phone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
         begin
-          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=新密码#{random_password}&Exno=0"
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=#{URI.escape(content)}&Exno=0"
           create_get_http(Constant::MESSAGE_URL, message_route)
         rescue
           @notice = "短信通道忙碌，请稍后重试。"
@@ -92,14 +95,15 @@ class LoginsController < ApplicationController
     staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:telphone], Staff::VALID_STATUS])
     if staff
       random_num = [*100000..999999].sample
+      content = "验证码#{random_num}"
       MessageRecord.transaction do
-        message_record = MessageRecord.create(:store_id => staff.store_id, :content => random_num,
+        message_record = MessageRecord.create(:store_id => staff.store_id, :content => content,
           :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
         SendMessage.create(:message_record_id => message_record.id, :customer_id => staff.id,
-          :content => random_num, :phone => staff.phone,
+          :content => content, :phone => staff.phone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
         begin
-          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=验证码#{random_num}&Exno=0"
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=#{URI.escape(content)}&Exno=0"
           create_get_http(Constant::MESSAGE_URL, message_route)
         rescue
           render :text => "短信通道忙碌，请稍后重试。"

@@ -1,5 +1,6 @@
 #encoding: utf-8
 require 'json'
+require "uri"
 class Api::OrdersController < ApplicationController
   #首页,登录后的页面
   def index_list
@@ -323,7 +324,7 @@ class Api::OrdersController < ApplicationController
         send_message = "余额不足，您的储值卡余额为#{sum_left_total}元。"
         message = "余额不足。"
       end
-      message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{params[:mobilephone].strip}&Content=#{send_message}&Exno=0"
+      message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{params[:mobilephone].strip}&Content=#{URI.escape(send_message)}&Exno=0"
       create_get_http(Constant::MESSAGE_URL, message_route)
     end
     render :json => {:content => message, :status => status}
