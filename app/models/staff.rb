@@ -1,6 +1,7 @@
 #encoding: utf-8
 require 'fileutils'
 class Staff < ActiveRecord::Base
+  include ApplicationHelper
   has_many :staff_role_relations, :dependent=>:destroy
   has_many :roles, :through => :staff_role_relations, :foreign_key => "role_id"
   has_many :salary_details
