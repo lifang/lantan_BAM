@@ -42,7 +42,7 @@ class Salary < ActiveRecord::Base
           :staff_id => staff.id, :satisfied_perc => percent)
       elsif staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN] #技师
         technician_amount = staff.is_deduct ? (technician_deduct_amount[staff.id].nil? ? 0 : technician_deduct_amount[staff.id]) : 0
-        total = base_salary + reward_amount - deduct_amount + technician_amount*staff.deduct_percent*0.01
+        total = base_salary + reward_amount - deduct_amount + technician_amount*(staff.deduct_percent||=0)*0.01
         Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,
           :total => total, :current_month => start_time.strftime("%Y%m"),
           :staff_id => staff.id, :satisfied_perc => percent)
@@ -70,7 +70,7 @@ class Salary < ActiveRecord::Base
         order_total_price = order_total_price.nil? ? 0 : order_total_price
         difference_price = order_total_price - staff.deduct_at
         duduct_num = difference_price < 0 ? 0 : (order_total_price > staff.deduct_end ? staff.deduct_end : difference_price)
-        deduct_amount = duduct_num * staff.deduct_percent * 0.01
+        deduct_amount = duduct_num * (staff.deduct_percent||=0) * 0.01
         front_deduct_amount[staff_id] = deduct_amount
       end
     end

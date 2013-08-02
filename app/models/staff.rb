@@ -1,6 +1,7 @@
 #encoding: utf-8
 require 'fileutils'
 class Staff < ActiveRecord::Base
+  include ApplicationHelper
   has_many :staff_role_relations, :dependent=>:destroy
   has_many :roles, :through => :staff_role_relations, :foreign_key => "role_id"
   has_many :salary_details
@@ -98,7 +99,7 @@ class Staff < ActiveRecord::Base
   def self.update_staff_working_stats
     Staff.where("working_stats = 0").each do |staff|
       diff_day = (Time.now - staff.created_at).to_i / (24 * 60 * 60)
-      if diff_day >= staff.probation_days
+      if diff_day >= (staff.probation_days||=0)
         staff.update_attribute(:working_stats, 1)
       end
     end
