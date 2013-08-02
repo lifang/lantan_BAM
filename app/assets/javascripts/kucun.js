@@ -1276,7 +1276,7 @@ function close_notice(obj){
       $("#MaterialsLoss #selected_materials").find('input.mat_loss_num').each(function(){
           var name = $(this).attr('alt');
           var num = $(this).attr('value');
-          var storage = $(this).next().val();
+//          var storage = $(this).next().val();
 
           if($(this).val().match(reg1)==null){
             var msg1 = "物料名称为'"+ name + "'的报损数量不正确！";
@@ -1293,11 +1293,11 @@ function close_notice(obj){
             f = false;
           }
 
-          if(parseInt(num)>parseInt(storage)){
-            var msg3 = "物料名称为'"+ name + "'的报损数量不能大于库存数量！";
-            msg = msg + "<br/>" + msg3;
-            f = false;
-          }
+//          if(parseInt(num)>parseInt(storage)){
+//            var msg3 = "物料名称为'"+ name + "'的报损数量不能大于库存数量！";
+//            msg = msg + "<br/>" + msg3;
+//            f = false;
+//          }
 
       });
 

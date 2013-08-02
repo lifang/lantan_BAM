@@ -13,6 +13,7 @@ class MaterialOrderManagesController < ApplicationController
     arrival_at_sql = "arrival_at>='#{@statistics_month}-01' and date_format(arrival_at,'%Y-%m-%d')<='#{@statistics_month}-31'"
     @material_orders = MaterialOrder.where("store_id = #{params[:store_id]}").where(arrival_at_sql)
     @total_price = @material_orders.sum(:price)
+    @material_orders = @material_orders.paginate(:per_page => Constant::PER_PAGE, :page => params[:page] ||= 1)
   end
 
   def show

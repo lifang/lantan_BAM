@@ -132,15 +132,21 @@ class MarketManagesController < ApplicationController
 
   #活动订单显示
   def sale_orders
-    session[:o_created],session[:o_ended],session[:order_name]=nil,nil,nil
-    orders = Sale.count_sale_orders(params[:store_id])
+    session[:o_created],session[:o_ended],session[:order_name]=Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d"),nil
+    orders = Sale.count_sale_orders_search(params[:store_id],session[:o_created],session[:o_ended])
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
-      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{@sale_orders.map(&:o_id).join(',')}) ").inject(Hash.new) {
-        |hash,order_pay| hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=[order_pay] : hash[order_pay.order_id] << order_pay;hash }
+      s_orders = Order.where("sale_id in (#{@sale_orders.map(&:id).join(',')})")
+      o_sales ={}
+      s_orders.each {|order|o_sales[order.sale_id].nil? ? o_sales[order.sale_id]=[order.id] : o_sales[order.sale_id] << order.id}
+      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{s_orders.map(&:id).join(',')}) ").inject(Hash.new) {
+        |hash,order_pay| 
+        o_sales.each do |key,value|
+          hash[key].nil? ? hash[key]=[order_pay] : hash[key] << order_pay if value.include? order_pay.order_id
+        end;hash }
       @hash_favor = {}
       pays.each {|key,value| @hash_favor[key]=value.inject(Hash.new){|hash,pay| hash[pay.pay_type].nil? ? hash[pay.pay_type]=pay.price : hash[pay.pay_type] += pay.price;hash }}
-      @sale_names =orders.map(&:name)
+      @sale_names = Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     end
   end
 
@@ -154,12 +160,18 @@ class MarketManagesController < ApplicationController
     orders = Sale.count_sale_orders_search(params[:store_id],session[:o_created],session[:o_ended],session[:order_name])
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
-      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{@sale_orders.map(&:o_id).join(',')}) ").inject(Hash.new) {
-        |hash,order_pay| hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=[order_pay] : hash[order_pay.order_id] << order_pay;hash }
+      s_orders = Order.where("sale_id in (#{@sale_orders.map(&:id).join(',')})")
+      o_sales ={}
+      s_orders.each {|order|o_sales[order.sale_id].nil? ? o_sales[order.sale_id]=[order.id] : o_sales[order.sale_id] << order.id}
+      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{s_orders.map(&:id).join(',')}) ").inject(Hash.new) {
+        |hash,order_pay|
+        o_sales.each do |key,value|
+          hash[key].nil? ? hash[key]=[order_pay] : hash[key] << order_pay if value.include? order_pay.order_id
+        end;hash }
       @hash_favor = {}
       pays.each {|key,value| @hash_favor[key]=value.inject(Hash.new){|hash,pay| hash[pay.pay_type].nil? ? hash[pay.pay_type]=pay.price : hash[pay.pay_type] += pay.price;hash }}
+      @sale_names = Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     end
-    @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     render 'sale_orders'
   end
 

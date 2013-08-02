@@ -238,6 +238,11 @@ class Station < ActiveRecord::Base
         station_flag = 0 #没工位
       end
     end
+    station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i) if station_arr
+    if station_staffs.blank?
+      station_flag = 3
+    end
+
 
     station_id = 0
     has_start_end_time = false

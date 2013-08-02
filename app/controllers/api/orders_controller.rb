@@ -114,6 +114,8 @@ class Api::OrdersController < ApplicationController
       content = "选择的产品和服务无法匹配工位"
     elsif pre_arr[5] == 3
       content = "所购买的服务需要多个工位，请分别下单！"
+    elsif pre_arr[5] == 4
+      content = "工位上暂无技师"
     end
     result = {:status => pre_arr[5], :info => pre_arr[0], :products => pre_arr[1], :sales => pre_arr[2],
       :svcards => pre_arr[3], :pcards => pre_arr[4], :total => pre_arr[6], :content  => content}
@@ -153,9 +155,8 @@ class Api::OrdersController < ApplicationController
     end
     items = Order.get_brands_products params[:store_id]
     reservations = Reservation.store_reservations params[:store_id]
-
     render :json => {:status => 1, :reservation => reservations, :customer => customer, :product_ids => product_ids,
-      :brands => items[0], :products => items[1], :count => items[1][4]}
+      :all_infos => items}
   end
 
   #刷新返回预约信息
@@ -226,7 +227,7 @@ class Api::OrdersController < ApplicationController
         if code_info["status"].to_i == Order::STATUS[:DELETED]
           order.return_order_materials
           order.update_attribute(:status, Order::STATUS[:DELETED])
-        elsif code_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT]
+        elsif code_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT] || Order::STATUS[:FINISHED]
           OrderPayType.create(:pay_type => code_info["pay_type"], :price => code_info["price"],
             :created_at => code_info["time"], :order_id => order.id)
           Complaint.create(:reason => code_info["complaint"]["reason"], :suggestion => code_info["complaint"]["request"],
@@ -234,7 +235,7 @@ class Api::OrdersController < ApplicationController
           order.c_pcard_relations.each {|cpr| cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL])} if order.c_pcard_relations
           CSvcRelation.find_all_by_order_id(order.id).each { |csr| csr.update_attributes(:status => CSvcRelation::STATUS[:valid]) }
           is_free = (code_info["pay_type"].to_i == OrderPayType::PAY_TYPES[:IS_FREE]) ? true : false
-          order.update_attributes(:status => Order::STATUS[:BEEN_PAYMENT], :is_pleased => code_info["is_please"],
+          order.update_attributes(:status => code_info["status"].to_i, :is_pleased => code_info["is_please"],
             :is_billing => code_info["billing"].to_i, :is_free => is_free)
         end
       end if codes_info

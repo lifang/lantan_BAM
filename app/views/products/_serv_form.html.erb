@@ -37,7 +37,7 @@
   <label><span class="red">*</span>提成(百分点)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" />
 </div>
 <div class="item_textarea">
-  <label><span class="red">*</span>相关物料：</label><input type="button" value="选择物料" class="other_btn" onclick="before_center('.mat_tab');" />
+  <label>相关物料：</label><input type="button" value="选择物料" class="other_btn" onclick="before_center('.mat_tab');" />
   <div class="seeProDiv_rWidth">
     <ul class="srw_ul">
       <%if @sale_prods && !@sale_prods.blank? %>

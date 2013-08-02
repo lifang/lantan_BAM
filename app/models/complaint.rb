@@ -165,7 +165,7 @@ class Complaint < ActiveRecord::Base
   end
   
   def self.search_detail(store_id,created,ended)
-    sql ="select c.*,o.code,o.id o_id,timestampdiff(hour,c.created_at,c.process_at) diff_time,c.process_at from complaints c inner join orders o on o.id=c.order_id  where c.store_id=#{store_id} "
+    sql ="select c.*,o.code,o.id o_id,timestampdiff(minute,c.created_at,c.process_at) diff_time,c.process_at from complaints c inner join orders o on o.id=c.order_id  where c.store_id=#{store_id} "
     sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql += " order by c.created_at desc"
