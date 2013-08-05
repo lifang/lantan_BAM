@@ -5,7 +5,7 @@
     <div>
       <%= form_for(@store, :url => store_set_store_path(@store, @store), :html => {:method => :put, :multipart => true}) do %>
       <div class="item">
-        <label>选择省市：</label>
+        <label><span class="red">*</span>选择省市：</label>
         <select id="store_province" name="store_province" onchange="select_city(this.value,<%= @store.id %>)" class="staff">
           <option value="0">请选择</option>
           <% @province.each do |p| %>
@@ -20,19 +20,19 @@
         </select>
       </div>
       <div class="item">
-        <label>门店名称：</label><input id="store_name" name="store_name" type="text" value="<%= @store.name %>"/>
+        <label><span class="red">*</span>门店名称：</label><input id="store_name" name="store_name" type="text" value="<%= @store.name %>"/>
       </div>
       <div class="item">
-        <label>负责人：</label><input id="store_contact" name="store_contact" type="text" value="<%= @store.contact %>"/>
+        <label><span class="red">*</span>负责人：</label><input id="store_contact" name="store_contact" type="text" value="<%= @store.contact %>"/>
       </div>
       <div class="item">
-        <label>联系电话：</label><input id="store_phone" name="store_phone" type="text" value="<%= @store.phone %>"/>
+        <label><span class="red">*</span>联系电话：</label><input id="store_phone" name="store_phone" type="text" value="<%= @store.phone %>"/>
       </div>
       <div class="item">
-        <label>地址：</label><input id="store_address" name="store_address" type="text" value="<%= @store.address %>"/>
+        <label><span class="red">*</span>地址：</label><input id="store_address" name="store_address" type="text" value="<%= @store.address %>"/>
       </div>
       <div class="item">
-        <label>开店时间：</label><input type="text" id="store_opened_at" name="store_opened_at" class="Wdate" 
+        <label><span class="red">*</span>开店时间：</label><input type="text" id="store_opened_at" name="store_opened_at" class="Wdate"
                                   value="<%= @store.opened_at.nil? ? "" : @store.opened_at.strftime("%Y-%m-%d") %>"
                                   onclick="WdatePicker();" readonly/>
       </div>
@@ -45,13 +45,13 @@
         </select>
       </div>
       <div class="item">
-        <label>门店坐标：</label>
+        <label><span class="red">*</span>门店坐标：</label>
         <span>X:</span><input id="store_position_x" name="store_position_x" type="text" class="xyAxis" value="<%= @store.position.split(',')[0] if @store.position %>"/>
         <span>Y:</span><input id="store_position_y" name="store_position_y" type="text" class="xyAxis" value="<%= @store.position.split(',')[1] if @store.position %>"/>
         <a href="http://api.map.baidu.com/lbsapi/getpoint/index.html" target="_blank" class="mapIcon"><img src="/assets/mapIcon.png"  alt="点击获取地图坐标" title="点击获取地图坐标"/></a>
       </div>
         <div class="item_textarea">
-           <label>门店照片：</label>
+           <label><span class="red">*</span>门店照片：</label>
            <input type="file" class="file" name="store_img"/>
            <span class="show_pic"><img src="<%= @store.img_url.nil? ? "" : @store.img_url.gsub("img#{@store.id}", "img#{@store.id}_#{Constant::STORE_PICSIZE[1]}") %>"/></span>
         </div>
