@@ -1,4 +1,5 @@
 #encoding: utf-8
+require "uri"
 class StaffsController < ApplicationController
   before_filter :sign?
   layout "staff"
@@ -41,6 +42,7 @@ class StaffsController < ApplicationController
     if @staff.save   #save staff info and picture
       @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create") unless photo.nil?
       flash[:notice] = "创建员工成功!"
+      send_message(@staff)
       @flash_notice = "success"
     else
       @flash_notice = "创建员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
@@ -144,6 +146,26 @@ class StaffsController < ApplicationController
       end
     end
 
+  end
+
+  def send_message(staff)
+    if staff.store
+      content = "#{staff.name}, 您已经被添加为(#{staff.store.name})的员工, 您登录门店后台管理系统的的账号为#{staff.username}, 密码为#{staff.username}, 修改密码请登录#{Constant::SERVER_PATH}"
+      MessageRecord.transaction do
+        message_record = MessageRecord.create(:store_id => staff.store_id, :content => content,
+          :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
+        SendMessage.create(:message_record_id => message_record.id, :customer_id => staff.id,
+          :content => content, :phone => staff.phone,
+          :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
+        begin
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=#{URI.escape(content)}&Exno=0"
+          create_get_http(Constant::MESSAGE_URL, message_route)
+        rescue
+          notice = "短信通道忙碌，请稍后重试。"
+        end
+        notice = "短信发送成功，账户信息已经发送到手机中。"
+      end
+    end
   end
   
 end

@@ -30,7 +30,7 @@ class WorkOrdersController < ApplicationController
           if station.status == Station::STAT[:NORMAL]
             #为该工位加入技师信息
             station[:cons_staffs] = []
-            station[:waiting_car_num] = []
+            #station[:waiting_car_num] = []
 
             if cons_staffs == nil
               station[:cons_staffs] = nil
@@ -68,21 +68,21 @@ class WorkOrdersController < ApplicationController
                     end
                   end
 
-                  #等待施工的车牌号
-                  if work_order.work_order_status == WorkOrder::STAT[:WAIT]
-                    station[:waiting_car_num] << work_order.car_num
-                  end
+                  ##等待施工的车牌号
+                  #if work_order.work_order_status == WorkOrder::STAT[:WAIT]
+                  #  station[:waiting_car_num] << work_order.car_num
+                  #end
                 end# if work_order.station_id == station.id 结束标记
               end# work_orders.each do |work_order| 结束标记
               #如果没有正在施工的车辆，则正在施工的车牌、剩余时间为空
               station[:dealing_car_num] = nil unless station[:dealing_car_num]
               station[:dealing_time_left] = nil unless station[:dealing_time_left]
-              station[:waiting_car_num] = nil if station[:waiting_car_num].length == 0
+              #station[:waiting_car_num] = nil if station[:waiting_car_num].length == 0
 
             else  #工位正常，但没有工单时：等待付款、正在施工的车牌、剩余时间、等待施工的车牌均为空
               station[:dealing_time_left] = nil
               station[:dealing_car_num] = nil
-              station[:waiting_car_num] = nil
+              #station[:waiting_car_num] = nil
             end# if work_orders.length != 0 结束标记
           end # if station.status == Station::STAT[:NORMAL] 结束标记
         end # stations.each do |station| 结束标记

@@ -20,7 +20,7 @@
               <% @stations.each do |station| %>
                 <tr>
                   <td><%= station.name %></td>
-                  <td><%= station.products.valid.map(&:name).join("、") %></td>
+                  <td><%= Product.includes(:station_service_relations).where(:station_service_relations => {:station_id => station.id}, :store_id => @store.id, :status => Product::IS_VALIDATE[:YES],:is_service =>Product::PROD_TYPES[:SERVICE]).map(&:name).join("、") %></td>
                   <td><%= Station::STAT_NAME[station.status] %></td>
                   <td><%= station.is_has_controller ? "有" : "无" %></td>
                   <td><% if permission?(:base_datas, :edit_station_data) %><%= link_to "编辑", edit_store_station_data_path(@store, station), remote: :true, "data-type" => 'script' %><% end %>

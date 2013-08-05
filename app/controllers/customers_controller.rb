@@ -1,4 +1,5 @@
 #encoding: utf-8
+require "uri"
 class CustomersController < ApplicationController
   before_filter :sign?
   include RemotePaginateHelper
@@ -115,12 +116,12 @@ class CustomersController < ApplicationController
         message_record = MessageRecord.create(:store_id => params[:store_id].to_i, :content => params[:content].strip,
           :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
         customer = Customer.find(params[:m_customer_id].to_i)
-        content = params[:content].strip.gsub("%name%", customer.name)
+        content = params[:content].strip.gsub("%name%", customer.name).gsub(" ", "")
         SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id,
           :content => content, :phone => customer.mobilephone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
         begin
-          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{content}&Exno=0"
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{URI.escape(content)}&Exno=0"
           create_get_http(Constant::MESSAGE_URL, message_route)
         rescue
           flash[:notice] = "短信通道忙碌，请稍后重试。"
