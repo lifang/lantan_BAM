@@ -45,7 +45,7 @@ class Order < ActiveRecord::Base
 
   #获取需要回访的订单
   def self.get_revisit_orders(store_id, started_at, ended_at, is_visited, is_time, time, is_price, price)
-    base_sql = "select o.customer_id from orders o
+    base_sql = "select distinct(o.customer_id) from orders o
       where o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
@@ -70,7 +70,7 @@ class Order < ActiveRecord::Base
     customer_condition_sql = condition_sql
     customer_params_arr = params_arr.collect { |p| p }
     unless is_vip.nil? or is_vip == "-1"
-      customer_condition_sql += " and cu.is_vip = ? "
+      customer_condition_sql += " and csr.is_vip = ? "
       customer_params_arr << is_vip.to_i
     end
     unless is_birthday.nil?
@@ -90,7 +90,9 @@ class Order < ActiveRecord::Base
       price, is_vip, is_birthday, page)
     customer_sql = "select cu.id cu_id, cu.name, cu.mobilephone, cn.num, o.code, o.id o_id from customers cu
       inner join orders o on o.customer_id = cu.id left join car_nums cn on cn.id = o.car_num_id
-      where cu.status = #{Customer::STATUS[:NOMAL]} and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
+      inner join customer_store_relations csr on csr.customer_id = cu.id 
+      where cu.status = #{Customer::STATUS[:NOMAL]} and o.store_id = #{store_id.to_i} and csr.store_id = #{store_id.to_i}
+      and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
     customer_condition_sql = self.generate_customer_sql(condition_sql, params_arr, store_id, started_at,
@@ -104,7 +106,8 @@ class Order < ActiveRecord::Base
   def self.get_message_customers(store_id, started_at, ended_at, is_visited, is_time, time, is_price,
       price, is_vip, is_birthday)
     customer_sql = "select DISTINCT(cu.id) cu_id, cu.name from customers cu
-      inner join orders o on o.customer_id = cu.id  where cu.status = #{Customer::STATUS[:NOMAL]}
+      inner join orders o on o.customer_id = cu.id inner join customer_store_relations csr on csr.customer_id = cu.id 
+      where cu.status = #{Customer::STATUS[:NOMAL]} and csr.store_id = #{store_id.to_i} 
       and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
@@ -125,8 +128,9 @@ class Order < ActiveRecord::Base
   #施工中的订单
   def self.working_orders store_id
     return Order.find_by_sql(["select o.id, c.num, o.status from orders o inner join car_nums c on c.id=o.car_num_id
+      inner join customers cu on cu.id=o.customer_id
       where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]})
-      and o.store_id = ? order by o.created_at", store_id])
+      and cu.status=? and o.store_id = ? order by o.created_at", Customer::STATUS[:NOMAL], store_id])
   end
 
   def self.search_by_car_num store_id,car_num, car_id
@@ -184,8 +188,8 @@ class Order < ActiveRecord::Base
       end
       working_orders = working_orders.first if working_orders.size > 0
       customer_record = Customer.find_by_id(customer.customer_id)
-      c_pcard_relations =  customer_record.pc_card_records_method[1]  #套餐卡记录
-      already_used_count = customer_record.pc_card_records_method[0]
+      c_pcard_relations =  customer_record.pc_card_records_method(store_id)[1]  #套餐卡记录
+      already_used_count = customer_record.pc_card_records_method(store_id)[0]
 
       pcard_records = []
       c_pcard_relations.each do |cpr|
@@ -359,9 +363,13 @@ class Order < ActiveRecord::Base
 
         case time_arr[1]
         when 0
-          status = 2
+          status = 2 #没工位
+        when 1
+          status = 1  #有符合工位
         when 2
-          status = 3
+          status = 3 #多个工位
+        when 3
+          status = 4 #工位上暂无技师
         end
 
       else
@@ -934,7 +942,8 @@ class Order < ActiveRecord::Base
           csvc_relations = CSvcRelation.where(:order_id => order.id)
           csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing => hash[:is_billing]})}
           if c_pcard_relations.present? || csvc_relations.present?
-            order.customer.update_attributes(:is_vip=>Customer::IS_VIP[:VIP])
+            c_s_r = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id, order.customer_id)
+            c_s_r.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
           end
           #如果是选择储值卡支付
           if pay_type.to_i == OrderPayType::PAY_TYPES[:SV_CARD] && code
@@ -966,15 +975,15 @@ class Order < ActiveRecord::Base
             OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
             status = 1
           end
-#          wo = WorkOrder.find_by_order_id(order.id)
-#          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo
+          wo = WorkOrder.find_by_order_id(order.id)
+          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
           #生成积分的记录
-          c_customer = order.customer
+          c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id,order.customer_id)
           if c_customer && c_customer.is_vip
             points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
               where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
               PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
-            Point.create(:customer_id=>c_customer.id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
+            Point.create(:customer_id=>c_customer.customer_id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
             c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
           end
           #生成出库记录

@@ -50,7 +50,9 @@ class ComplaintsController < ApplicationController
     session[:start_detail],session[:end_detail] =Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d")
     total = Complaint.search_detail(params[:store_id],session[:start_detail],session[:end_detail])
     @complaint = total.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    non_time =total.inject(0){|num,complaint|num +=1 if complaint.diff_time && complaint.diff_time <= Complaint::TIMELY_DAY;num }
+    time = Complaint::TIMELY_DAY
+    non_time =total.inject(0){|num,complaint| 
+      num +=1 if complaint.diff_time && (complaint.diff_time/60 < time ||(complaint.diff_time/60 == time && complaint.diff_time%60==0) );num }
     un_done = total.inject(0){|num,complaint| num +=1 if complaint.process_at;num}
     @staff_name ={}
     @complaint.each do |comp|
@@ -70,7 +72,8 @@ class ComplaintsController < ApplicationController
   #投诉详细查询列表
   def detail_list
     total = Complaint.search_detail(params[:store_id],session[:start_detail],session[:end_detail])
-    non_time =total.inject(0){|num,complaint|num +=1 if complaint.diff_time && complaint.diff_time <= Complaint::TIMELY_DAY;num }
+    time = Complaint::TIMELY_DAY
+    non_time =total.inject(0){|num,complaint|num +=1 if complaint.diff_time && (complaint.diff_time/60 < time ||(complaint.diff_time/60 == time && complaint.diff_time%60==0));num }
     un_done = total.inject(0){|num,complaint| num +=1 if complaint.process_at;num}
     @complaint = total.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @staff_name ={}

@@ -31,13 +31,15 @@
               <tbody>
                 <% @material_orders.each do |material_order| %>
                   <tr>
-                    <td><%= material_order.arrival_at.strftime("%Y-%m") %></td>
+                    <td><%= material_order.arrival_at.strftime("%Y-%m-%d") %></td>
                     <td><%= link_to material_order.code, store_material_order_manage_path(@store, material_order), :class => "other_a", :remote => true, "data-type" => "script" %></td>
                     <td><%= material_order.price %></td>
                   </tr>
                 <% end %>
               </tbody>
         </table>
+       <%= will_paginate @material_orders, :class => "pageTurn", :previous_label => "上一页",
+    :next_label => "下一页" %>
         <div class="amount">总计：<%= sprintf('%.2f', @total_price) %>（元）</div>
      </div>
 </div>

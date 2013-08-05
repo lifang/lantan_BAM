@@ -1,5 +1,7 @@
 #encoding: utf-8
 class Api::LoginsController < ApplicationController
+  require 'zip/zip'
+  require 'zip/zipfilesystem'
 
   #店长登录
   def check_staff
@@ -58,5 +60,22 @@ class Api::LoginsController < ApplicationController
     end
   end
 
+
+  def recgnite_pic
+    img_url = params[:image]
+    path = "#{Rails.root}/public/recongte_pics/"
+    t_value = []
+    Product.get_dir_list(path).sort.each {|f| FileUtils.remove_file path+f  }
+    File.open(path+ img_url.original_filename, "wb")  {|f|  f.write(img_url.read) }
+    Zip::ZipFile.open(path+"#{img_url.original_filename}"){ |zipFile|
+      zipFile.each do |file|
+        zipFile.extract(file, path+file.name)
+        t_value << Product.recgnite_pic(path,file)
+      end
+    }
+    p t_value
+    render :json=>{:msg=>t_value.join("")}
+  end
+ 
   
 end

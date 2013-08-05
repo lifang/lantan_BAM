@@ -275,6 +275,10 @@ $(document).ready(function(){
            tishi_alert("正式薪资标准必须为数字!");
            return false;
        }
+       if(parseFloat($(this).parents('form').find("#staff_base_salary").val())<0.0){
+           tishi_alert("正式薪资标准必须大于等于0!");
+           return false;
+       }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
            tishi_alert("提成起始额不能为空!");
            return false;
@@ -283,12 +287,20 @@ $(document).ready(function(){
            tishi_alert("提成起始额必须为数字!");
            return false;
        }
+       if(parseFloat($(this).parents('form').find("#staff_deduct_at").val())<0.0){
+           tishi_alert("提成起始额必须大于等于0!");
+           return false;
+       }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
            tishi_alert("结束额度不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_end").val())){
            tishi_alert("结束额度必须为数字!");
+           return false;
+       }
+       if(parseFloat($(this).parents('form').find("#staff_deduct_end").val())<0.0){
+           tishi_alert("结束额度必须大于等于0!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && (parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val()))){
@@ -364,6 +376,25 @@ $(document).ready(function(){
        $(this).attr("disabled", "disabled");
     });
 
+//    $("#staff_phone").live("blur", function(){
+//       var store_id = $("#store_id").val();
+//       var phone = $(this).val();
+//       $.ajax({
+//            type : 'get',
+//            url : "/stores/"+ store_id+"/staffs/validate_phone",
+//            data : {
+//                phone : phone
+//            },
+//            success: function(data){
+//                if(data == "error"){
+//                   tishi_alert("联系方式已经存在!");
+//                   return false;
+//                }
+//            }
+//        });
+//       return false;
+//    });
+
     //新建奖励信息验证
     $("#new_reward_btn").click(function(){
         if($("#new_reward_area input[type='checkbox']:checked").length == 0){
@@ -414,7 +445,7 @@ $(document).ready(function(){
             tishi_alert("培训开始时间必须在培训结束时间之后!");
             return false;
         }
-        if($("#new_train_area input[type='checkbox']:checked").length == 0){
+        if($("#new_train_area .width_div input[type='checkbox']:checked").length == 0){
             tishi_alert("至少选择一个培训人员!");
             return false;
         }
@@ -434,7 +465,7 @@ $(document).ready(function(){
     });
 
     //编辑系统打分
-    $("#staff_info .bz_btn").click(function(){
+    $("#staff_info .bz_btn").live("click", function(){
         $(this).prev().show();
         $(this).hide();
         $(this).parents('tr').find(".sys_score_text").hide();
@@ -443,7 +474,7 @@ $(document).ready(function(){
     });
 
     //编辑提交系统打分
-    $(".edit_btn").click(function(){
+    $(".edit_btn").live("click", function(){
         var this_obj = $(this);
         var store_id = $("#store_id").val();
         var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");

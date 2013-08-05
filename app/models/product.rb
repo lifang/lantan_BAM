@@ -4,6 +4,8 @@ class Product < ActiveRecord::Base
   require 'net/http'
   require "uri"
   require 'openssl'
+  require 'zip/zip'
+  require 'zip/zipfilesystem'
   has_many :sale_prod_relations
   has_many :res_prod_relations
   has_many :station_service_relations
@@ -35,16 +37,21 @@ class Product < ActiveRecord::Base
       "date_format(orders.auto_time,'%Y-%m-%d %H') between '#{Time.now.strftime('%Y-%m-%d')+" 12"}' and '#{Time.now.end_of_day.strftime("%Y-%m-%d %H")}'"
     Order.joins(:order_prod_relations=>:product).where(condition+" and products.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,products.revist_content,orders.store_id").each{|mess|
       customer_message["#{mess.store_id}_#{mess.customer_id}"].nil? ? customer_message["#{mess.store_id}_#{mess.customer_id}"]= [mess] : customer_message["#{mess.store_id}_#{mess.customer_id}"] << mess}
-    Order.joins(:o_pcard_relations,:c_pcard_relations =>:package_card).where(condition+" and package_cards.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,package_cards.revist_content,orders.store_id").each{|mess|
+    Order.joins(:c_pcard_relations =>:package_card).where(condition+" and package_cards.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,package_cards.revist_content,orders.store_id").each{|mess|
       customer_message["#{mess.store_id}_#{mess.customer_id}"].nil? ? customer_message["#{mess.store_id}_#{mess.customer_id}"]= [mess] : customer_message["#{mess.store_id}_#{mess.customer_id}"] << mess}
     unless customer_message.keys.blank?
       store_ids = []
       customer_ids = []
       message_arr = []
       customer_message.keys.each {|mess|store_ids << mess.split("_")[0].to_i;customer_ids << mess.split("_")[1].to_i}
-      customers = Customer.find(customer_ids)
+      customers = Customer.joins(:customer_store_relations).select("customers.name,customers.id,mobilephone,customer_store_relations.store_id").where("customers.id in (#{customer_ids.join(',')})").inject(Hash.new){|hash,c|
+        if hash[c.store_id].nil? 
+          hash[c.store_id]={};hash[c.store_id][c.id]=c
+        else
+          hash[c.store_id][c.id]=c
+        end;hash}
       Store.find(store_ids).each do |store|
-        customers.inject(Hash.new) { |hash,c|
+        customers[store.id].values.each { |c|
           strs = []
           customer_message["#{store.id}_#{c.id}"].each_with_index {|str,index| strs << "#{index+1}.#{str.revist_content}" }
           MessageRecord.transaction do
@@ -92,6 +99,54 @@ class Product < ActiveRecord::Base
     request= Net::HTTP::Get.new(route)
     back_res = http.request(request)
     return JSON back_res.body
+  end
+
+  def self.get_dir_list(path)
+    #获取目录列表
+    list = Dir.entries(path)
+    list.delete('.')
+    list.delete('..')
+    return list
+  end
+
+  def self.recgnite_pic(dir,file)
+    file_path = dir+file.name
+    ext_name = File.extname(file_path)
+    base_name = File.basename(file_path, ext_name)
+    img = MiniMagick::Image.open file_path,"rb"
+    change_path = "#{dir}#{base_name}.tif"
+    txt_path = "#{Rails.root}/public/result"
+    scale_path = "#{dir}#{base_name}_250.tif"
+    img.run_command("convert -compress none -depth 8 -alpha off -colorspace Gray  #{file_path} #{change_path} ")
+    img.run_command("convert #{change_path} -scale 50% #{scale_path} ")
+
+    if base_name.to_i ==1
+      img.run_command("tesseract #{scale_path} #{txt_path} -psm 6 -l chi_sim")  #识别汉字
+      v_file = File.read(txt_path+".txt")
+    else
+      
+      img.run_command("tesseract #{scale_path} #{txt_path} -psm 5")
+      v_file = File.read(txt_path+".txt")
+      if v_file.length >= 2
+        p v_file
+        img.run_command("tesseract #{scale_path} #{txt_path} -psm 6")
+        v_file = File.read(txt_path+".txt")
+      else
+        v_file = (v_file | File.read(txt_path+".txt"))[0]
+      end
+    end
+    file = File.open("D:/ss/result.txt","a+")
+    file.write(base_name+"--"+6.to_s+"--"+v_file)
+    file.close
+    p v_file
+  end
+
+  def alter_level
+    Station.find(self.station_service_relations.map(&:station_id)).each {|station|
+      products = Product.find(station.station_service_relations.joins(:product).where("status = #{Product::IS_VALIDATE[:YES]}").map(&:product_id).compact.uniq)
+      levels = (products.map(&:staff_level) | products.map(&:staff_level_1)).uniq.sort
+      station.update_attributes({:staff_level=>levels.min,:staff_level1=>levels[0..(levels.length/2.0)].max   })
+    }
   end
 
  

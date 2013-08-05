@@ -1,3 +1,37 @@
+<script>
+    $(document).ready(function(){
+        $("#materials_in_tab").tablesorter({
+            headers:
+            {
+                0: {
+                    sorter: false
+                },
+                1: {
+                    sorter: false
+                },
+                4: {
+                    sorter: false
+                },
+                5: {
+                    sorter: false
+                },
+                6: {
+                    sorter: false
+                }
+            }
+        });
+
+        $("#materials_in_tab").bind("sortEnd",function() {
+            $("#materials_in_tab tbody").find('tr').each(function(i){
+                if(i%2==0){
+                    $(this).removeClass('tbg');
+                }else{
+                    $(this).addClass('tbg');
+                }
+            })
+        });
+    });
+</script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_in_tab">
   <thead>
   <tr class="hbg">

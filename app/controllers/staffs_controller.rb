@@ -1,4 +1,5 @@
 #encoding: utf-8
+require "uri"
 class StaffsController < ApplicationController
   before_filter :sign?
   layout "staff"
@@ -41,10 +42,12 @@ class StaffsController < ApplicationController
     if @staff.save   #save staff info and picture
       @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "create") unless photo.nil?
       flash[:notice] = "创建员工成功!"
+      send_message(@staff)
+      @flash_notice = "success"
     else
-      flash[:notice] = "创建员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "创建员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
     end
-    redirect_to store_staffs_path(@store)
+    #redirect_to store_staffs_path(@store)
   end
 
   def show       
@@ -84,14 +87,18 @@ class StaffsController < ApplicationController
     photo = params[:staff][:photo]
     encrypt_name = random_file_name(photo.original_filename) if photo
     params[:staff][:photo] = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
-    if  @staff && @staff.update_attributes(params[:staff])
-      flash[:notice] = "更新员工成功"
+    @staff.attributes = params[:staff]
+    notice = @staff.status_changed? ? "员工在职状态已经改变，请注意检查员工的工作状态" : ""
+    if @staff && @staff.save
+    #if  @staff && @staff.update_attributes(params[:staff])
+      flash[:notice] = "更新员工成功！"+notice
+      @flash_notice = "success"
     else
-      flash[:notice] = "更新员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "更新员工失败! #{@staff.errors.messages.values.flatten.join("<br/>")}"
     end
     #update picture
     @staff.operate_picture(photo,encrypt_name +"."+photo.original_filename.split(".").reverse[0], "update") if !photo.nil? && @staff
-    redirect_to store_staff_path(@store, @staff)
+    #redirect_to store_staff_path(@store, @staff)
   end
 
   def destroy
@@ -100,6 +107,15 @@ class StaffsController < ApplicationController
     flash[:notice] = "成功删除员工"
     redirect_to store_staffs_path(@store)
   end
+
+#  def validate_phone
+#    staff = Staff.find_by_phone(params[:phone])
+#    if staff && staff.status != Staff::STATUS[:deleted]
+#      render :text => "error"
+#    else
+#      render :text => "success"
+#    end
+#  end
 
   private
 
@@ -130,6 +146,26 @@ class StaffsController < ApplicationController
       end
     end
 
+  end
+
+  def send_message(staff)
+    if staff.store
+      content = "#{staff.name}, 您已经被添加为(#{staff.store.name})的员工, 您登录门店后台管理系统的的账号为#{staff.username}, 密码为#{staff.username}, 修改密码请登录#{Constant::SERVER_PATH}"
+      MessageRecord.transaction do
+        message_record = MessageRecord.create(:store_id => staff.store_id, :content => content,
+          :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
+        SendMessage.create(:message_record_id => message_record.id, :customer_id => staff.id,
+          :content => content, :phone => staff.phone,
+          :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
+        begin
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{staff.phone}&Content=#{URI.escape(content)}&Exno=0"
+          create_get_http(Constant::MESSAGE_URL, message_route)
+        rescue
+          notice = "短信通道忙碌，请稍后重试。"
+        end
+        notice = "短信发送成功，账户信息已经发送到手机中。"
+      end
+    end
   end
   
 end

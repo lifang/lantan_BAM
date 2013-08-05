@@ -4,27 +4,27 @@
       <%= form_for [@current_store, @material], :id => "material_tab_form", :remote => true, :html => {"data-type" => "script"} do |f| %>
         <div class="popup_body_area">
           <div class="item">
-            <%= f.label :name,"物料名称：" %>
+            <%= f.label :name,("<span class='red'>*</span>物料名称：").html_safe %>
             <%= f.text_field :name %>
           </div>
           <div class="item">
-            <%= f.label :types,"物料类型：" %>
+            <%= f.label :types,("<span class='red'>*</span>物料类型：").html_safe %>
             <%= f.select :types, Material::TYPES_NAMES.invert,{:prompt => "请选择"} %>
           </div>
           <div class="item">
-            <%= f.label :price,"成本价：" %>
+            <%= f.label :price,("<span class='red'>*</span>成本价：").html_safe %>
             <%= f.text_field :price %>
           </div>
           <div class="item">
-            <%= f.label :sale_price,"零售价：" %>
+            <%= f.label :sale_price,("<span class='red'>*</span>零售价：").html_safe %>
             <%= f.text_field :sale_price %>
           </div>
           <div class="item">
-            <%= f.label :unit,"规格：" %>
+            <%= f.label :unit,("<span class='red'>*</span>规格：").html_safe %>
             <%= f.text_field :unit, :placeholder => "件" %>
           </div>
         </div>
-        <div class="btn_box"><button type="button" onclick="checkMaterial(this)" class="confirm_btn">确定</button></div>
+        <div class="btn_box"><button type="button" onclick="checkMaterial(this)" id="material_ce_bn" class="confirm_btn">确定</button></div>
         <div class="clear"></div>
       <% end %>
     </div>

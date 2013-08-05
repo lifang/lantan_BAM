@@ -30,7 +30,7 @@ module ApplicationHelper
       inner join customers cu on cu.id = c.customer_id inner join car_nums ca on ca.id = o.car_num_id 
       where c.store_id = ? and c.status = ? ", params[:store_id].to_i, Complaint::STATUS[:UNTREATED]])
     
-    @notices = Customer.find_by_sql("select c.id, c.name from customers c
+    @notices = Customer.find_by_sql("select DISTINCT(c.id), c.name from customers c
       left join customer_store_relations csr on csr.customer_id = c.id
       where c.status = #{Customer::STATUS[:NOMAL]} 
       and csr.store_id in(#{StoreChainsRelation.return_chain_stores(params[:store_id].to_i).join(",")}) 
@@ -134,7 +134,9 @@ module ApplicationHelper
         params[:store_id].to_i, Time.mktime(Time.now.year, Time.now.mon-1, 1), Time.mktime(Time.now.year, Time.now.mon, 1)])
     un_pleased_size = 0
     orders.collect { |o| un_pleased_size += 1 if o.is_pleased == Order::IS_PLEASED[:BAD] }
-    return orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size
+    pleased = orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size
+    unpleased = orders.size == 0 ? 0 : 100 - pleased
+    return [pleased, unpleased]
   end
 
   def material_order_tips

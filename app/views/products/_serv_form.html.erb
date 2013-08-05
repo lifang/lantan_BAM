@@ -1,17 +1,17 @@
 <div class="item">
-  <label>名称：</label><input name="name" id="name" type="text" value="<%= @service.name %>" />
+  <label><span class="red">*</span>名称：</label><input name="name" id="name" type="text" value="<%= @service.name %>" />
 </div>
 <div class="item">
-  <label>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @service.t_price %>" />
+  <label><span class="red">*</span>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @service.t_price %>" />
 </div>
 <div class="item">
-  <label>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @service.base_price %>" />
+  <label><span class="red">*</span>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @service.base_price %>" />
 </div>
 <div class="item">
-  <label>全国促销价：</label><input name="sale_price" id="sale_price" type="text" value="<%= @service.sale_price %>" />
+  <label><span class="red">*</span>全国促销价：</label><input name="sale_price" id="sale_price" type="text" value="<%= @service.sale_price %>" />
 </div>
 <div class="item">
-  <label>施工时间(分)：</label><input name="cost_time" id="cost_time" type="text" value="<%= @service.cost_time %>" />
+  <label><span class="red">*</span>施工时间(分)：</label><input name="cost_time" id="cost_time" type="text" value="<%= @service.cost_time %>" />
 </div>
 <div class="item">
   <label>技师：</label>
@@ -34,7 +34,7 @@
   </select>
 </div>
 <div class="item">
-  <label>提成(百分点)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" />
+  <label><span class="red">*</span>提成(百分点)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" />
 </div>
 <div class="item_textarea">
   <label>相关物料：</label><input type="button" value="选择物料" class="other_btn" onclick="before_center('.mat_tab');" />
@@ -62,7 +62,7 @@
   </div>
 </div>
 <div class="item">
-  <label>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @service.prod_point %>" />
+  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @service.prod_point %>" />
 </div>
 <div class="clear"></div>
 <div class="item_blockArea">

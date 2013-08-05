@@ -2,7 +2,7 @@
 <html>
   <head>
     <%= stylesheet_link_tag    "application" %>
-    <%= javascript_include_tag "application","material_order_manages"%>
+    <%= javascript_include_tag "application","material_order_manages","jquery.tablesorter.min" %>
     <script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
     <script type="text/javascript" src="/assets/stored_cards.js" ></script>
     <title><%= @title.nil? ? "统计管理" : @title %></title>
@@ -45,7 +45,7 @@
         </div>
       </div>
     </div>
-    <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+    <div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
     <div class="mask"></div>
     <div class="maskOne"></div>
     <%= render :partial => "/shared/tishi_alert" %>

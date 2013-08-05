@@ -6,11 +6,7 @@ LantanBAM::Application.routes.draw do
       post "upload_image"
     end
   end
-  resources :work_orders do
-    collection do
-      get "work_orders_status"
-    end
-  end
+
   resources :package_cards do
     member do
       post :delete_pcard
@@ -88,7 +84,7 @@ LantanBAM::Application.routes.draw do
           "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
-          "mat_loss_delete"
+          "mat_loss_delete","mat_loss"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
              "mat_loss_add"
       end
@@ -231,13 +227,20 @@ LantanBAM::Application.routes.draw do
     end
   end
   
+  resources :work_orders do
+    collection do
+      get "work_orders_status"
+      post "login"
+    end
+  end
+
   namespace :api do
     resources :orders do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
           "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
           "use_svcard","work_order_finished","login_and_return_construction_order","check_num","out_materials",
-          "get_construction_order","search_by_car_num2","materials_verification"
+          "get_construction_order","search_by_car_num2","materials_verification","get_lastest_materails"
       end
     end
     resources :syncs_datas do
@@ -250,9 +253,15 @@ LantanBAM::Application.routes.draw do
     end
     resources :logins do
       collection do
-        post :check_staff,:staff_login,:staff_checkin,:upload_img
+        post :check_staff,:staff_login,:staff_checkin,:upload_img,:recgnite_pic
         get :download_staff_infos
       end
+    end
+
+  end
+  resources :return_backs do
+    collection do
+      get :return_info
     end
   end
 

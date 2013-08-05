@@ -47,20 +47,21 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
         if(confirm("确定核实的库存？")){
             $.ajax({
                 url:"/materials/"+m_id + "/check",
-                dataType:"json",
+                dataType:"script",
                 data:{
-                    num : check_num, store_id : store_id
+                    num : check_num, store_id : store_id, pandian_flag:pandian_flag
                 },
-                type:"GET",
                 success:function(data){
+                    /*
                     if(data.status=="1"){
                         tishi_alert("操作成功")
+                        if(pandian_flag){$(obj).parents('tr').removeClass('tbg') }
                        $(obj).parent().siblings(".su").find(".storage").text(check_num);
                        $(obj).parent().siblings(".check_num_field").find('input').val("");
                        $(obj).parent().siblings(".mat_diff").text(0);
                        var l = $("#low_materials_tbody").find("#material"+m_id+"tr").length;  //判断该物料是否已经在缺货信息提示里
                        var message_span = $("span[id='low_materials_span']").length;            //判断是否有缺货提示
-                       if(check_num <= data.material_low){      //如果小于预警值，则加上样式,并且在缺货信息提示里加上对应的元素
+                       if(check_num <= data.material_low && !data.is_ignore){      //如果小于预警值，则加上样式,并且在缺货信息提示里加上对应的元素
                         if(message_span<=0){            //如果没有缺货提示，则要加上
                             $("#material_data_box").before("<div class='message'>有<span class='red' id='low_materials_span'>1</span>个物料库存量过低\n\
                                                             <a href='JavaScript:void(0)' onclick='toggle_low_materials(this)'>点击查看</a>\n\
@@ -103,6 +104,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
                     }else{
                         tishi_alert("核实失败")
                     }
+                    */
                 },
                 error:function(){
                     tishi_alert("核实失败");
@@ -133,15 +135,31 @@ function submit_search_form(store_id,type,obj){
                 $("#search_result").show();
                 $("#dinghuo_search_result").show();
                 var mat_ids = [];
+                if(type==1){
                 $("#dinghuo_selected_materials").find("tr").each(function(){
                     mat_ids.push($(this).attr('id').split('_')[2])
                 })
+                
                 $("#dinghuo_search_material").find('input').each(function(){
                     var mat_id = $(this).attr('id').split('_')[1];
+                    
                     if(mat_ids.indexOf(mat_id)>=0){
                         $(this).attr("checked", 'checked');
                     }
                 })
+                }else if(type==2){
+                	$("#selected_materials").find("tr").each(function(){
+                    mat_ids.push($(this).attr('id').split('_')[2])
+                })
+               // alert(mat_ids)
+                	   $("#search_result").find('input.print_mat').each(function(){
+                    var mat_id = $(this).attr('id').split('_')[1];
+                    //alert(mat_id)
+                    if(mat_ids.indexOf(mat_id)>=0){
+                        $(this).attr("checked", 'checked');
+                    }
+                })
+                }
             },
             error:function(){
                 tishi_alert("error");
@@ -174,11 +192,33 @@ function select_material(obj,name,type,panel_type){
 
 //库存报损选择
 function select_mat_loss_material(obj,name,code,typesname,storage,id){
+    var count = 0;
+    var m_id = 0;
+    $("#MaterialsLoss #selected_materials").find("tr").each(function(){
+        m_id = $(this).attr("id").split("_")[2];
+        if(id == m_id)
+         count++;
+    });
+
     if($(obj).is(":checked")){
-        var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
-        tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+code+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
-        "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,1); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
-        $("#MaterialsLoss #selected_materials").append(tr);
+        if(count == 0){
+            var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
+            tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+name+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
+            "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,2); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
+            $("#MaterialsLoss #selected_materials").append(tr);
+        }
+        else
+        {
+            $("#MaterialsLoss #selected_materials").find("tr").each(function(){
+                m_id = $(this).attr("id").split("_")[2];
+                if(id == m_id)
+                    $(this).remove();
+            });
+            var tr = "<tr id='li_"+$(obj).attr("id")+"'><td>";
+            tr += name + "</td><td>"+ typesname + "</td><td>" + code + "</td><td>" + storage +"</td><td>"+ "<input type='text' value='1'  alt="+name+" class='mat_loss_num'  name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_num]' style='width:60px' /><input type='hidden' style='width:10px' value='"+storage +"'/>" + "</td><td>" +
+                "<a href='javascript:void(0)' class='"+ $(obj).attr("id") +"' onclick='removeRow(this,2); return false;'>移除</a></td>" +"<input type='hidden' name='mat_losses["+ $(obj).attr('id').split('_')[1] +"][mat_id]' value="+ id + "></tr>";
+            $("#MaterialsLoss #selected_materials").append(tr);
+        }
     }
     else{
         $("#li_"+$(obj).attr("id")).remove();
@@ -205,7 +245,7 @@ function select_order_material(obj,type,m){
         var storage = $("#from").val()==0 ? $(obj).val() : "--";
         var li = "<tr id='li_"+$(obj).attr("id")+"' class='in_mat_selected'><td>";
         li += m.name + "</td><td>" + type + "</td><td>" + m.price +
-            "</td><td>" + (typeof(m.sale_price)=="undefined" || "null" ? "无" : m.sale_price) +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+m.price+"','"+m.code+"','"+type+"')\" style='width:50px;'/></td><td>" +
+            "</td><td>" + ((typeof(m.sale_price)=="undefined" || m.sale_price == null) ? "无" : m.sale_price) +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='1' onkeyup=\"set_order_num(this,'"+$(obj).val()+"','"+id+"','"+m.price+"','"+m.code+"','"+type+"')\" style='width:50px;'/></td><td>" +
             "<span class='per_total' id='total_"+id+"'>" + m.price + "</span></td><td>" + storage +"</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
         if($("#dinghuo_selected_materials").find("tr.in_mat_selected").length > 0){
             $("#dinghuo_selected_materials").find("tr.in_mat_selected:last").after(li);
@@ -426,6 +466,7 @@ function submit_material_order(form_id,obj){
 }
 
 function pay_material_order(parent_id, pay_type,store_id, obj){
+    var flag = true;
     var mo_id = $("#"+parent_id+" #pay_order_id").val();
     var mo_type = $("#"+parent_id+" #pay_order_type").val();
     var if_refresh = $('#final_fukuan_tab #if_refresh').val();
@@ -433,7 +474,13 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
     var sav_price = $("#sav_price").val();
     var sale_id = $("#sale_id").val();
     var sale_price = $("#sale_price").text();
-    $(obj).attr('disabled', 'disabled')
+    $(obj).attr('disabled', 'disabled');
+    if(pay_type==4 && parseFloat($("#rest_count span").text()) <= parseFloat(total_price)){
+        tishi_alert("门店余额不足");
+        $(obj).attr('disabled', false);
+        flag = false;
+    }
+    if(flag){
     $.ajax({
         url:"/stores/"+store_id + "/materials/pay_order",
         dataType:"json",
@@ -470,6 +517,7 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
             tishi_alert("支付失败");
         }
     });
+  }
 }
 
 function confirm_pay(){
@@ -659,7 +707,7 @@ function add_material_to_selected(obj,order_count){
         nonchecked.attr("checked", 'checked');
     }
     if(selectedItems.length==0){
-      var li = "<tr id='li_"+id+"' class='in_mat_selected'><td>";
+      var li = "<tr id='li_mat_"+id+"' class='in_mat_selected'><td>";
       li += obj.name + "</td><td>" + type_name(obj.types) + "</td><td>" + obj.price +
             "</td><td>" + obj.sale_price +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='"+ order_count +"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"','"+obj.code+"','"+type_name(obj.types)+"')\" style='width:50px;'/></td><td>" +
             "<span class='per_total' id='total_"+id+"'>" + parseFloat(obj.price * parseInt(order_count)) + "</span></td><td>--</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
@@ -1143,95 +1191,6 @@ function close_notice(obj){
       })
   }
 
-    function MaterialsLoss(){            //添加库存报损
-        $("#mat_loss_search_result").empty();
-        $("#MaterialsLoss #selected_materials").empty();
-        popup("#MaterialsLoss");
-    }
-
-    function checkMaterialsLoss(store_id){
-        var reg2 = /^\d+\.{0,1}\d*$/;
-        var pattern = new RegExp("[=,-]")
-        var f = true;
-        if($.trim($("#material_loss_name").val())==""){
-            tishi_alert("请输入物料名称");
-            f = false;
-        }else if($("#material_loss_name").val().match(pattern)!=null){
-            tishi_alert("物料名称不能包含非法字符");
-            f = false;
-        }
-        else if($.trim($("#material_loss_code").val())==""){
-            tishi_alert("请输入条形码");
-            f = false;
-        }
-        else if($("#material_loss_types").val()==""){
-            tishi_alert("请选择类型");
-            f = false;
-        }
-        else if($("#material_loss_price").val().match(reg2)==null){
-            tishi_alert("请输入合法单价");
-            f = false;
-        }
-        else if($("#material_loss_sale_price").val().match(reg2)==null){
-            tishi_alert("请输入合法零售价");
-            f = false;
-        }
-        else if($("#material_loss_num").val().match(reg1)==null){
-            tishi_alert("请输入合法报损数量");
-            f = false;
-        }
-        else if($("#material_loss_specifications").val()==""){
-            tishi_alert("请输入物料规格");
-            f = false;
-        }
-        else if($("#material_loss_staff_id").val()==""){
-            tishi_alert("请选择报损人");
-            f = false;
-        }
-        else{
-            var name = $("#material_loss_name").val();
-            var code = $("#material_loss_code").val();
-            var types = $("#material_loss_types").val();
-            var price = $("#material_loss_price").val();
-            var sale_price = $("#material_loss_sale_price").val();
-            var num = $("#material_loss_num").val();
-            var specifications = $("#material_loss_specifications").val();
-            var select_staff_id = $("#material_loss_staff_id").val();
-            var id =  $("#material_loss_id").val();
-            $.ajax({
-                url: "/stores/" +store_id+ "/materials_losses/add",
-                dataType: "text",
-                type: "post",
-                data: {
-                    name : name,
-                    code : code,
-                    types : types,
-                    price : price,
-                    sale_price : sale_price,
-                    loss_num : num,
-                    specifications : specifications,
-                    report_person : select_staff_id,
-                    id : id
-
-                },
-                success:function(data,status){
-                    if(id == "")
-                        tishi_alert("报损成功!");
-                    else
-                        tishi_alert("修改成功!");
-                    $("#MaterialsLoss").hide();
-                    $(".mask").hide();
-                    location.reload();
-                },
-                error:function(){
-                    if(id == "")
-                        tishi_alert("报损失败!");
-                    else
-                        tishi_alert("修改失败!");
-                }
-            });
-        }
-    }
 
     function deleteMaterails_loss(store_id,materials_loss_id)
     {
@@ -1250,28 +1209,7 @@ function close_notice(obj){
             });
     }
 
-    function viewMaterails_loss(store_id,materials_loss_id)
-    {
-        $.ajax({
-            url: "/stores/" +store_id+ "/materials_losses/view",
-            dataType:"text",
-            data:{materials_loss_id : materials_loss_id},
-            success:function(data,status)
-            {
-                var materail_loss = $.parseJSON(data);
-                $("#material_loss_name").val(materail_loss.name);
-                $("#material_loss_code").val(materail_loss.code);
-                $("#material_loss_types").val(materail_loss.types);
-                $("#material_loss_price").val(materail_loss.price);
-                $("#material_loss_sale_price").val(materail_loss.sale_price);
-                $("#material_loss_num").val(materail_loss.loss_num);
-                $("#material_loss_specifications").val(materail_loss.specifications);
-                $("#material_loss_staff_id").val(materail_loss.staff_id);
-                $("#material_loss_id").val(materail_loss.id);
-                popup("#MaterialsLoss");
-            }
-        });
-    }
+
   function fetchMatIn(obj, store_id, print_flag){
     var saved_mat_mos = "";
     var flag = true;
@@ -1309,21 +1247,26 @@ function close_notice(obj){
 
   function checkPrintNum(obj){
       var f = true;
+      var is_empty = false;
       if($("#print_code_tab #selected_materials").find('tr').length==0){
           f = false;
           tishi_alert("请选择物料！")
       }
       $("#print_code_tab #selected_materials").find('input.print_code').each(function(){
-         if($.trim($(this).val()).match(reg1)==null){
-             var code = $(this).attr('alt');
-             alert("条形码为"+ code + "的物料数量不正确！");
+         if($.trim($(this).val()).match(reg1)==null || $(this).val()==0){
+//             var code = $(this).attr('alt');
              f = false;
+             is_empty = true;
          }
       })
+      if(is_empty){
+          tishi_alert("物料数量不正确！");
+      }
       return f;
   }
 
   function checkMatLossNum(obj){
+      var msg = "";
       var f = true;
       var mat_loss_length =$("#MaterialsLoss #selected_materials").find("tr").length - 1;
       if(mat_loss_length==-1){
@@ -1331,26 +1274,36 @@ function close_notice(obj){
           f = false;
       }
       $("#MaterialsLoss #selected_materials").find('input.mat_loss_num').each(function(){
-          var code = $(this).attr('alt');
+          var name = $(this).attr('alt');
           var num = $(this).attr('value');
-          var storage = $(this).next().val();
+//          var storage = $(this).next().val();
 
           if($(this).val().match(reg1)==null){
-            tishi_alert("条形码为'"+ code + "'的物料数量不正确！");
+            var msg1 = "物料名称为'"+ name + "'的报损数量不正确！";
+            if(msg == "")
+                msg = msg1;
+            else
+                msg = msg + "<br/>" +msg1;
             f = false;
           }
 
           if(parseInt(num)<=0){
-            tishi_alert("条形码为'"+ code + "'的报损数量不能小于1！");
+            var msg2 = "物料名称为'"+ name + "'的报损数量不能小于1！";
+            msg = msg + "<br/>" + msg2;
             f = false;
           }
 
-          if(parseInt(num)>parseInt(storage)){
-            tishi_alert("条形码为'"+ code + "'的报损数量不能大于库存数量！");
-            f = false;
-          }
+//          if(parseInt(num)>parseInt(storage)){
+//            var msg3 = "物料名称为'"+ name + "'的报损数量不能大于库存数量！";
+//            msg = msg + "<br/>" + msg3;
+//            f = false;
+//          }
 
       });
+
+      if(msg != ""){
+        tishi_alert(msg);
+      }
 
       if(f == true){
           $("#add_MaterialsLoss_btn").attr('disabled',true);

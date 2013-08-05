@@ -9,7 +9,7 @@ class MonthScore < ActiveRecord::Base
   def self.sort_order_date(store_id,created,ended)
     sql ="select date_format(o.created_at,'%Y-%m-%d') day,sum(op.price) price,op.pay_type  from orders o inner join order_pay_types op on
    o.id=op.order_id where store_id=#{store_id} and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]})
-   and is_free !=#{Order::IS_FREE[:YES]} and o.sale_id is null "
+   and is_free !=#{Order::IS_FREE[:YES]} and o.sale_id is null and op.pay_type in (#{OrderPayType::PAY_TYPES.values[0..3].join(',')})"
     sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" && created.length==0
     sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'"   unless ended.nil? || ended =="" || ended.length==0
     sql += "group by date_format(o.created_at,'%Y-%m-%d'),op.pay_type order by o.created_at desc"
