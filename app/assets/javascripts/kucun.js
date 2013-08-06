@@ -818,8 +818,8 @@ function checkMaterial(obj){              //编辑物料验证
     }else if($("#material_unit").val()==""){
         tishi_alert("请输入物料规格");
         f = false;
-    }else if($(".new_material .old_code").attr("checked")=="checked" && $.trim($(".new_material #use_existed_code").val())==""){
-        tishi_alert("请输入条形码");
+    }else if($(".new_material .old_code").attr("checked")=="checked" && ($.trim($(".new_material #use_existed_code").val()).match(reg1)==null || $.trim($(".new_material #use_existed_code").val()).length<13)){
+        tishi_alert("请输入条形码, 条形码为数字，长度为13");
         f = false;
     }
       if(f){

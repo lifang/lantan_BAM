@@ -767,7 +767,7 @@ class MaterialsController < ApplicationController
     params[:material][:name] = params[:material][:name].strip
     Material.transaction  do
       if params[:material][:ifuse_code]=="1"
-        material_tmp = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id])
+        material_tmp = Material.find_by_code_and_store_id(params[:material][:code_value], params[:store_id])
         if material_tmp
           @status = 2
           @flash_notice = "具有相同条码的物料已存在！"
@@ -779,7 +779,7 @@ class MaterialsController < ApplicationController
 
         if material && material.errors.blank?
           smaterial = SharedMaterial.find_by_code(material.code)
-          sm_params = params[:material].except(:price, :sale_price,:ifuse_code).merge({:code => material.code})
+          sm_params = params[:material].except(:price, :sale_price,:ifuse_code,:code_value).merge({:code => material.code})
           SharedMaterial.create(sm_params) unless smaterial
           @status = 0
           @flash_notice = "物料创建成功!"
