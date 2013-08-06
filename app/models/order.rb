@@ -1114,8 +1114,13 @@ on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} 
     work_order = self.work_orders[0]
     
     unless work_order.blank?
-      work_order.update_attribute(:status, WorkOrder::STAT[:CANCELED])
-      work_order.arrange_station
+      if work_order.status == WorkOrder::STAT[:SERVICING]
+        work_order.update_attribute(:status, WorkOrder::STAT[:CANCELED])
+        work_order.arrange_station
+      else
+        work_order.update_attribute(:status, WorkOrder::STAT[:CANCELED])
+      end
+      
       #      wkor_time = WkOrTime.find_by_station_id_and_current_day(work_order.station_id, work_order.current_day)
       #      max_time = [work_order.started_at,Time.now].max
       #      difference = work_order.ended_at - max_time
