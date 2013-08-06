@@ -1329,7 +1329,7 @@ function submit_code(obj,store_id){
     var new_code = $(obj).val().trim();
     var old_code = $(obj).parent().next().text();
     var mat_id = $(obj).attr("id").split("_")[1];
-
+    var reg = /^\b\d{12}\b$/;
     if(new_code=="")
     {
         $(obj).parent().css("display","none");
@@ -1342,40 +1342,55 @@ function submit_code(obj,store_id){
         $(obj).parent().css("display","none");
         $(obj).parent().next().css("display","");
     }
-    else
+    else if(!reg.test(new_code))
     {
-        $.ajax({
-            async:false,
-            url: "materials/modify_code",
-            type: "post",
-            dataType: "json",
-            data: {
-                store_id : store_id,
-                new_code : new_code,
-                mat_id : mat_id
-            },
-            success: function(data){
-                if(data.status==0){
-                    tishi_alert("修改失败!");
-                    $(obj).parent().hide();
-                    $(obj).parent().next().show();
-//                    var old_name = $(obj).parent().next().text();
-                    $(obj).val(old_code);
-                };
-                if(data.status==2){
-                    tishi_alert("编辑失败,该条形码已存在!");
-                    $(obj).parent().hide();
-                    $(obj).parent().next().show();
-//                    var old_name = $(obj).parent().next().text();
-                    $(obj).val(old_code);
-                };
-                if(data.status==1){
-                    tishi_alert("编辑成功!");
-                    $(obj).parent().hide();
-                    $(obj).parent().next().text(data.new_code);
-                    $(obj).parent().next().show();
+        $(obj).parent().css("display","none");
+        $(obj).parent().next().css("display","");
+        $(obj).val(old_code);
+        tishi_alert("条形码必须为12位数字!");
+    }
+    else if(reg.test(new_code))
+    {
+        if(new_code == old_code.substr(0,12))
+        {
+            $(obj).parent().css("display","none");
+            $(obj).parent().next().css("display","");
+            $(obj).val(old_code);
+            tishi_alert("修改成功！");
+        }
+        else
+        {
+            $.ajax({
+                async:false,
+                url: "materials/modify_code",
+                type: "post",
+                dataType: "json",
+                data: {
+                    store_id : store_id,
+                    new_code : new_code,
+                    mat_id : mat_id
+                },
+                success: function(data){
+                    if(data.status==0){
+                        tishi_alert("修改失败!");
+                        $(obj).parent().hide();
+                        $(obj).parent().next().show();
+                        $(obj).val(old_code);
+                    };
+                    if(data.status==2){
+                        tishi_alert("修改失败,该条形码已存在!");
+                        $(obj).parent().hide();
+                        $(obj).parent().next().show();
+                        $(obj).val(old_code);
+                    };
+                    if(data.status==1){
+                        tishi_alert("修改成功!");
+                        $(obj).parent().hide();
+                        $(obj).parent().next().text(data.new_code);
+                        $(obj).parent().next().show();
+                    }
                 }
-            }
-        })
+            })
+        }
     }
 }

@@ -56,6 +56,7 @@ module Constant
       :edit_supplier => ["编辑供应商",134217728],
       :material_loss_add => ["添加库存报损",268435456],
       :material_loss_delete => ["删除库存报损",536870912],
+      :modify_mat_code => ["修改条形码",1073741824]
     },
     :staffs => {
       :name => "员工",

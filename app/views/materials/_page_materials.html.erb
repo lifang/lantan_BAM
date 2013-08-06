@@ -76,8 +76,10 @@
     <% (@materials_storages || []).each do |material| %>
       <tr class="<%= cycle('', 'tbg') %>" id="showmaterial<%= material.id %>tr">
         <td id="td_<%= material.id %>" <% if !material.is_ignore && material.storage.to_i<=material.material_low.to_i %>class="data_table_error"<% end %>>
-          <span class="code_span" style="display: none;"><input id="mat_<%= material.id %>" type="text" onblur="submit_code(this,<%= params[:store_id] %>)" ></span>
-          <span title="双击修改条形码" style="cursor: pointer;" ondblclick="change_code(this)"><%= material.code %></span>
+          <% if permission?(:materials, :modify_mat_code) %>
+              <span class="code_span" style="display: none;"><input id="mat_<%= material.id %>" type="text" onblur="submit_code(this,<%= params[:store_id] %>)" ></span>
+          <% end %>
+          <span <% if permission?(:materials, :modify_mat_code) %>title="双击修改条形码" style="cursor: pointer;" ondblclick="change_code(this)"<% end %> ><%= material.code %></span>
         </td>
         <td><%= material.name %></td>
         <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
