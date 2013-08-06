@@ -23,7 +23,7 @@ class ProductsController < ApplicationController
 
 
   def prod_services
-    @services = Product.paginate_by_sql("select id, service_code code,prod_point,store_id,name,types,base_price,cost_time,t_price,sale_price,staff_level level1,staff_level_1
+    @services = Product.paginate_by_sql("select id, service_code code,prod_point,store_id,name,types,base_price,show_on_ipad,cost_time,t_price,sale_price,staff_level level1,staff_level_1
     level2 from products where store_id in (#{params[:store_id]},1) and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}
     order by created_at asc", :page => params[:page], :per_page => Constant::PER_PAGE)
     @materials={}
@@ -55,6 +55,7 @@ class ProductsController < ApplicationController
       product =Product.create(parms)
       ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
     end
+    flash[:notice] = "添加成功"
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
         params[:img_url].each_with_index {|img,index|
@@ -104,6 +105,7 @@ class ProductsController < ApplicationController
       parms.merge!({:standard=>params[:standard],:is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],
           :revist_content=>params[:con_revist],:prod_point=>params[:prod_point]})
     end
+    flash[:notice] = "更新成功"
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
         product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}
@@ -114,7 +116,7 @@ class ProductsController < ApplicationController
         }
       end
     rescue
-      flash[:notice] ="图片上传失败，请重新添加！"
+      flash[:notice] ="图片上传失败，请重新添加图片！"
     end
     product.update_attributes(parms)
     product.alter_level if service
@@ -122,7 +124,7 @@ class ProductsController < ApplicationController
 
   def update_prod
     update_product(Constant::PRODUCT,Product.find(params[:id]))
-    redirect_to "/stores/#{params[:store_id]}/products"
+    redirect_to request.referer
   end
 
   def show_serv
@@ -145,7 +147,7 @@ class ProductsController < ApplicationController
 
   def serv_update
     update_product(Constant::SERVICE,Product.find(params[:id]))
-    redirect_to "/stores/#{params[:store_id]}/products/prod_services"
+    redirect_to request.referer
   end
 
   #加载物料信息
@@ -172,6 +174,7 @@ class ProductsController < ApplicationController
   def delete_p(types,id,store_id)
     product = Product.find(id)
     product.update_attribute(:status, Product::IS_VALIDATE[:NO])
+    flash[:notice] = "删除成功"
     if types == Constant::SERVICE
       product.alter_level
       redit = "/stores/#{store_id}/products/prod_services"
@@ -179,5 +182,12 @@ class ProductsController < ApplicationController
       redit =  "/stores/#{store_id}/products"
     end
     return redit
+  end
+
+  def update_status
+    vals = params[:vals].split(",")
+    Product.find(params[:ids].split(",")).each_with_index {|prod,index|  prod.update_attributes(:show_on_ipad =>vals[index]) }
+    flash[:notice] = "更新成功"
+    redirect_to request.referer
   end
 end

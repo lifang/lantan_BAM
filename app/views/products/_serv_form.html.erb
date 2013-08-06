@@ -34,7 +34,7 @@
   </select>
 </div>
 <div class="item">
-  <label><span class="red">*</span>提成(百分点)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" />
+  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @service.prod_point %>" />
 </div>
 <div class="item_textarea">
   <label>相关物料：</label><input type="button" value="选择物料" class="other_btn" onclick="before_center('.mat_tab');" />
@@ -61,8 +61,12 @@
     <a href="javascript:void(0)" class="compile_btn" onclick="before_center('.add_img');">添加图片</a><span>*添加新图片会使已上传图片被删除，请为图片做好备份</span>
   </div>
 </div>
-<div class="item">
-  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @service.prod_point %>" />
+
+<div class="item_textarea"><span class="item_radio"><input name="deduct_type" type="radio" value="<%=  %>" /></span>
+   <label>提成(点)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" class="item_areaInput_s"/>百分点
+</div>
+<div class="item_textarea"><span class="item_radio"><input name="deduct_type" type="radio" value="<%=  %>" /></span>
+  <label>提成(元)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" class="item_areaInput_s" />金额(元)
 </div>
 <div class="clear"></div>
 <div class="item_blockArea">

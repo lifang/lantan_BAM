@@ -9,7 +9,7 @@ class Api::LoginsController < ApplicationController
     message = "用户不存在或者密码有误"
     data_type = 1
     staffs =[]
-    if staff && staff.has_password?(params[:staff_password])
+    if staff && staff.has_password?(params[:staff_password]) && Staff::VALID_STATUS.include?(staff.status)
       if staff.position == Staff::S_HEAD[:MANAGER]
         data_type = 0
         message = "登录成功"
@@ -30,7 +30,7 @@ class Api::LoginsController < ApplicationController
   #签到时无法识别的人脸要做登录处理
   def staff_login
     staff = Staff.find_by_username_and_store_id(params[:login_name],params[:store_id])
-    if staff && staff.has_password?(params[:login_password])
+    if staff && staff.has_password?(params[:login_password]) && staff.status == Staff::STATUS[:normal]
       render :json=>{:data=>0,:login_staff=>staff.id,:login_name=>staff.name}
     else
       render :json=>{:data=>1}

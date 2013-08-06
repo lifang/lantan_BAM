@@ -71,7 +71,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :products do
       collection do
-        post "edit_prod","add_prod","add_serv","serv_create","load_material"
+        post "edit_prod","add_prod","add_serv","serv_create","load_material","update_status"
         get "prod_services"
       end
       member do

@@ -275,3 +275,23 @@ function check_revist(){
         $("#con_revist,#time_revist").val("");
     }
 }
+
+function update_status(){
+    var checks = $("input:checkbox");
+    var check_ids = [];
+    var check_val = [];
+    for(var i = 0;i<checks.length;i++){
+        check_ids.push(checks[i].value);
+        check_val.push(Number(checks[i].checked));
+    }
+    if ($("input:checkbox:checked").length !=0){
+        if (confirm("确定这些服务不在前端显示吗")){
+            $("#ids").val(check_ids.join(","));
+            $("#vals").val(check_val.join(","));
+            $("#update_ids").submit();
+        }
+    }else{
+        tishi_alert("请选择服务")
+    }
+   
+}
