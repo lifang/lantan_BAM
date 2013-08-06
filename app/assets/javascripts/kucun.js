@@ -818,8 +818,8 @@ function checkMaterial(obj){              //编辑物料验证
     }else if($("#material_unit").val()==""){
         tishi_alert("请输入物料规格");
         f = false;
-    }else if($(".new_material .old_code").attr("checked")=="checked" && $.trim($(".new_material #use_existed_code").val())==""){
-        tishi_alert("请输入条形码");
+    }else if($(".new_material .old_code").attr("checked")=="checked" && ($.trim($(".new_material #use_existed_code").val()).match(reg1)==null || $.trim($(".new_material #use_existed_code").val()).length<13)){
+        tishi_alert("请输入条形码, 条形码为数字，长度为13");
         f = false;
     }
       if(f){
@@ -1393,4 +1393,22 @@ function submit_code(obj,store_id){
             })
         }
     }
+}
+
+function enableNextInput(obj, flag){
+    if(flag){
+        $(obj).parent().next().attr('disabled', false);
+    }else{
+        $(obj).parents(".item").next().find("#use_existed_code").attr('disabled', true);
+    }
+}
+
+function search_material_barcode(obj){
+    var code = $(obj).parents('.search').find(".search-barcode").val();
+    $.ajax({
+        url: "/materials/search_by_code",
+        dataType:"script",
+        data:{code : code},
+        success:function(data,status){}
+    });
 }
