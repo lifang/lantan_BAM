@@ -1329,7 +1329,7 @@ function submit_code(obj,store_id){
     var new_code = $(obj).val().trim();
     var old_code = $(obj).parent().next().text();
     var mat_id = $(obj).attr("id").split("_")[1];
-    var reg = /^\b\d{12}\b$/;
+    var reg = /^\b\d{13}\b$/;
     if(new_code=="")
     {
         $(obj).parent().css("display","none");
@@ -1347,10 +1347,11 @@ function submit_code(obj,store_id){
         $(obj).parent().css("display","none");
         $(obj).parent().next().css("display","");
         $(obj).val(old_code);
-        tishi_alert("条形码必须为12位数字!");
+        tishi_alert("条形码必须为13位数字!");
     }
     else
     {
+        new_code = new_code.substr(0,12);
             $.ajax({
                 async:false,
                 url: "materials/modify_code",
