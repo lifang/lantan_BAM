@@ -33,7 +33,7 @@
               <tbody>
                 <% @services.each do |service| %>
                   <tr>
-                    <td><input type="checkbox" value="<%=service.id  %>"<% if service.show_on_ipad %>checked<%end%> /></td>
+                    <td><input type="checkbox" value="<%=service.id  %>"<% unless service.show_on_ipad %>checked<%end%> /></td>
                     <td><%= service.code %></td>
                     <td><%= service.name %></td>
                     <td><%= service.t_price %></td>

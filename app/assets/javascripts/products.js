@@ -284,7 +284,7 @@ function update_status(){
     var check_val = [];
     for(var i = 0;i<checks.length;i++){
         check_ids.push(checks[i].value);
-        check_val.push(Number(checks[i].checked));
+        check_val.push(Number(!checks[i].checked));
     }
     if (confirm("确定这些服务不在前端显示吗")){
         $("#ids").val(check_ids.join(","));
