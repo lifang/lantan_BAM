@@ -543,6 +543,11 @@ class Api::OrdersController < ApplicationController
                      where("work_orders.current_day = #{current_day}").
                      where("work_orders.station_id = #{station.id}").select("work_orders.*,car_nums.num as car_num").first
         work_order["coutdown"] = work_order.ended_at - Time.now if work_order
+        if work_order
+          products = Product.where("orders.id = #{work_order.order_id}").joins(:order_prod_relations => :order).select("name")
+          product_names = products.map(&:name).join(",")
+          work_order["product_names"] = product_names
+        end
       else
         work_order = nil
       end    
@@ -556,6 +561,22 @@ class Api::OrdersController < ApplicationController
   def search_by_car_num2
     customer_info = CarNum.get_customer_info_by_carnum(params[:store_id],params[:car_num])
     render :json => {:customer => customer_info, :status => customer_info.nil? ? 0 : 1}
+  end
+
+  #终止施工
+  def stop_construction
+    work_order = WorkOrder.find_by_id(params[:work_order_id])
+    work_order.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if work_order
+    order = work_order.order
+    order.update_attribute(:status, Order::STATUS[:FINISHED]) if order
+    render :json => {:status => 1}
+  end
+
+  #根据物料条形码查询物料
+  def search_material
+    material = Material.where(:code => params[:code]).
+      select("name, code, storage, types, status, store_id, created_at, updated_at, remark, check_num, sale_price, unit, is_ignore, material_low, code_img").first
+    render :json => {:material => material}
   end
   
 end

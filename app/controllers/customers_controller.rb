@@ -46,6 +46,7 @@ class CustomersController < ApplicationController
   def destroy
     @customer = Customer.find(params[:id].to_i)
     @customer.update_attributes(:status => Customer::STATUS[:DELETED])
+    flash[:notice] = "删除成功。"
     redirect_to request.referer
   end
 

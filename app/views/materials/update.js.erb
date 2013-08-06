@@ -1,8 +1,8 @@
-<%if @status == 0 %>
-tishi_alert("编辑失败!");
-$("#new_material #material_ce_bn").attr('disabled', false);
-<% else %>
-tishi_alert("编辑成功!");
+<%if @status == 2 %>
+tishi_alert("<%= @flash_notice.html_safe() %>");
+$(".edit_material #material_ce_bn").attr('disabled', false);
+<% elsif @status == 0 || @status == 1%>
+tishi_alert("<%= @flash_notice.html_safe() %>");
 
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(1)").text("<%= @material.code %>");
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(2)").text("<%= @material.name %>");

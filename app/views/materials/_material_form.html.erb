@@ -1,31 +1,27 @@
-  <div class="popup_box">
-    <h1><%= @material.new_record? ? "添加" : "编辑"%>物料<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <div class="popup_body">
-      <%= form_for [@current_store, @material], :id => "material_tab_form", :remote => true, :html => {"data-type" => "script"} do |f| %>
-        <div class="popup_body_area">
-          <div class="item">
-            <%= f.label :name,("<span class='red'>*</span>物料名称：").html_safe %>
-            <%= f.text_field :name %>
+<div class="popup_box">
+  <h1>添加物料<a href="javascript:void(0)" class="close">关闭</a></h1>
+  <div class="popup_body">
+            <% if @material.new_record? %>
+          <div class="search" style="margin:5px 52px">
+            <div>
+              <label>条形码：</label>
+              <input type="text" name="search-barcode" class="search-barcode"/>
+            </div>
+            <div>
+              <button class="search_btn" onclick="search_material_barcode(this)">查询</button>
+            </div>
           </div>
-          <div class="item">
-            <%= f.label :types,("<span class='red'>*</span>物料类型：").html_safe %>
-            <%= f.select :types, Material::TYPES_NAMES.invert,{:prompt => "请选择"} %>
-          </div>
-          <div class="item">
-            <%= f.label :price,("<span class='red'>*</span>成本价：").html_safe %>
-            <%= f.text_field :price %>
-          </div>
-          <div class="item">
-            <%= f.label :sale_price,("<span class='red'>*</span>零售价：").html_safe %>
-            <%= f.text_field :sale_price %>
-          </div>
-          <div class="item">
-            <%= f.label :unit,("<span class='red'>*</span>规格：").html_safe %>
-            <%= f.text_field :unit, :placeholder => "件" %>
-          </div>
+        <% end %>
+    <%= form_for [@current_store, @material], :id => "material_tab_form", :remote => true, :html => {"data-type" => "script"} do |f| %>
+      <div class="popup_body_area">
+        <div class="no_material_notice"></div>
+        <div class="mat_search_result">
+          <%= render :partial => 'mat_form', :locals => {:material => f.object} %>
         </div>
-        <div class="btn_box"><button type="button" onclick="checkMaterial(this)" id="material_ce_bn" class="confirm_btn">确定</button></div>
-        <div class="clear"></div>
-      <% end %>
-    </div>
+        
+      </div>
+      <div class="btn_box"><button type="button" onclick="checkMaterial(this)" id="material_ce_bn" class="confirm_btn">确定</button></div>
+      <div class="clear"></div>
+    <% end %>
   </div>
+</div>
