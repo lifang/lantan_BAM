@@ -86,7 +86,7 @@ LantanBAM::Application.routes.draw do
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
           "mat_loss_delete","mat_loss"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
-             "mat_loss_add"
+             "mat_loss_add","modify_code"
       end
       member do
         get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"

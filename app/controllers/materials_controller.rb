@@ -882,6 +882,29 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #修改条形码
+  def modify_code
+    store_id = params[:store_id].to_i
+    mat_id = params[:mat_id].strip
+    new_code = params[:new_code]
+    if Material.where(["store_id = ? and code = ? and id != ?", store_id, new_code, mat_id]).blank?
+      material = Material.find_by_id_and_store_id(mat_id,store_id)
+      p material = Material.find_by_id_and_store_id(mat_id,store_id)
+      if material.nil?
+        p material.nil?
+        render :json => {:status => 0}
+      else
+        if material.update_attribute("code", new_code)
+          render :json => {:status => 1, :new_code => material.code}
+        else
+          render :json => {:status => 0}
+        end
+      end
+    else
+      render :json => {:status => 2}
+    end
+  end
+
   protected
   
   def make_search_sql
