@@ -140,6 +140,7 @@ function edit_serv(e){
     var origin =$("#t_price").val();
     var time=$("#cost_time").val();
     var deduct =$("#deduct_percent").val();
+    var price =$("#deduct_price").val();
     var point =$("#prod_point").val();
     var pic_format =["png","gif","jpg","bmp"];
     if (name=="" || name.length==0 || pattern.test(name)){
@@ -168,8 +169,9 @@ function edit_serv(e){
         tishi_alert("请输入服务的成本价,价格为数字");
         return false;
     }
-    if(deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct)) || parseFloat(deduct)<0){
-        tishi_alert("请输入技师提成百分点");
+    if((deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct)) || parseFloat(deduct)<0) &&
+        price == "" || price.length==0 || isNaN(parseFloat(price)) || parseFloat(price)<0){
+        tishi_alert("请输入技师提成");
         return false;
     }
     if(time== "" || time.length==0 || isNaN(parseInt(time)) || parseInt(time)<0){

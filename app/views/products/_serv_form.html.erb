@@ -62,11 +62,16 @@
   </div>
 </div>
 
-<div class="item_textarea"><span class="item_radio"><input name="deduct_type" type="radio" value="<%=  %>" /></span>
-   <label>提成(点)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" class="item_areaInput_s"/>百分点
+<div class="item_textarea"><span class="item_radio">
+    <input name="deduct_type" type="radio" checked onclick="$('#deduct_price').attr('disabled',true).val('');$('#deduct_percent').attr('disabled',false)" /></span>
+  <label>提成(点)：</label>
+  <input name="deduct_percent" id="deduct_percent" type="text" <% unless @service.deduct_percent %> disabled <%end%> value="<%= @service.deduct_percent %>" class="item_areaInput_s"/>百分点
 </div>
-<div class="item_textarea"><span class="item_radio"><input name="deduct_type" type="radio" value="<%=  %>" /></span>
-  <label>提成(元)：</label><input name="deduct_percent" id="deduct_percent" type="text" value="<%= @service.deduct_percent %>" class="item_areaInput_s" />金额(元)
+<div class="item_textarea"><span class="item_radio">
+    <input name="deduct_type" type="radio" <% if @service.deduct_price %>checked<%end%>
+           onclick="$('#deduct_percent').attr('disabled',true).val('');$('#deduct_price').attr('disabled',false)" /></span>
+  <label>提成(元)：</label>
+  <input name="deduct_price" id="deduct_price" type="text" <% unless @service.deduct_price %> disabled <%end%> value="<%= @service.deduct_price %>" class="item_areaInput_s" />金额(元)
 </div>
 <div class="clear"></div>
 <div class="item_blockArea">
@@ -101,4 +106,7 @@
       allowFileManager : true
     });
   });
+<% if @service.deduct_percent.nil? && @service.deduct_price.nil?  %>
+  $("#deduct_percent").attr("disabled",false);
+<%end%>
 </script>

@@ -45,7 +45,7 @@ class ProductsController < ApplicationController
       :is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]}
     if types == Constant::SERVICE
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
-          :deduct_percent=>params[:deduct_percent] })
+          :deduct_percent=>params[:deduct_percent],:deduct_price=>params[:deduct_price] })
       product =Product.create(parms)
       params[:sale_prod].each do |key,value|
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
@@ -88,7 +88,8 @@ class ProductsController < ApplicationController
       :auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]}
     service = false
     if types == Constant::SERVICE
-      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],:deduct_percent=>params[:deduct_percent] })
+      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
+          :deduct_percent=>params[:deduct_percent],:deduct_price=>params[:deduct_price] })
       service = true if [product.staff_level,product.staff_level_1].sort != [params[:level1].to_i,params[:level2].to_i].sort
       if params[:sale_prod]
         product.prod_mat_relations.inject(Array.new) {|arr,mat| mat.destroy}

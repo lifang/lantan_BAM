@@ -559,6 +559,7 @@ ActiveRecord::Schema.define(:version => 20130805092635) do
     t.text     "revist_content"
     t.integer  "prod_point"
     t.boolean  "show_on_ipad",   :default => false
+    t.float    "deduct_price"
   end
 
   create_table "res_prod_relations", :force => true do |t|
