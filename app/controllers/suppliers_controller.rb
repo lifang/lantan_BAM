@@ -1,3 +1,4 @@
+#encoding:utf-8
 class SuppliersController < ApplicationController
   layout "storage"
   before_filter :sign?
@@ -40,6 +41,7 @@ class SuppliersController < ApplicationController
 
   def destroy
     @supplier.update_attribute(:status,Supplier::STATUS[:delete]) if @supplier && @supplier.status != Supplier::STATUS[:delete]
+    flash[:notice] = "供应商删除成功"
     redirect_to store_suppliers_path @store
   end
   

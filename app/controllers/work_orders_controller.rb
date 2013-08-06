@@ -1,7 +1,7 @@
 #encoding: utf-8
 class WorkOrdersController < ApplicationController
   def work_orders_status
-      store = Store.find_by_id(params[:store_id]) #查询所有门店记录
+      #store = Store.find_by_id(params[:store_id])
       date = Time.now.to_s  #获取当前日期时间
       now_date = (date.slice(0,4) + date.slice(5,2) + date.slice(8,2)).to_i #截取当前年月日转换成int型的数据
 

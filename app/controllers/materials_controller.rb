@@ -778,12 +778,12 @@ class MaterialsController < ApplicationController
           sm_params = params[:material].except(:price, :sale_price,:ifuse_code).merge({:code => material.code})
           SharedMaterial.create(sm_params) unless smaterial
           @status = 0
-          @flash_notice = "创建物料成功!"
+          @flash_notice = "物料创建成功!"
         elsif material && material.errors.any?
-          @flash_notice = "创建物料成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+          @flash_notice = "物料创建成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
           @status = 1
         else
-          @flash_notice = "创建物料失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+          @flash_notice = "物料创建失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
           @status = 2
         end
       end
@@ -801,12 +801,12 @@ class MaterialsController < ApplicationController
     params[:material][:name] = params[:material][:name].strip
     if @material.update_attributes(params[:material])&& @material.errors.blank?
       @status = 0
-      @flash_notice = "编辑物料成功!"
+      @flash_notice = "物料编辑成功!"
     elsif @material.update_attributes(params[:material]) && @material.errors.any?
-      @flash_notice = "编辑物料成功!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "物料编辑成功!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
       @status = 1
     else
-      @flash_notice = "编辑物料失败!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "物料编辑失败!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
       @status = 2
     end
   end
@@ -814,6 +814,7 @@ class MaterialsController < ApplicationController
   def destroy
     material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
     material.update_attribute(:status, Material::STATUS[:DELETE])
+    flash[:notice] = "物料删除成功"
     redirect_to "/stores/#{params[:store_id]}/materials"
   end
 
