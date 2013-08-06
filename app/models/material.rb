@@ -1,8 +1,8 @@
 #encoding: utf-8
 require 'barby'
 require 'barby/barcode/ean_13'
-#require 'barby/outputter/custom_rmagick_outputter'
-#require 'barby/outputter/rmagick_outputter'
+require 'barby/outputter/custom_rmagick_outputter'
+require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :material_losses
@@ -17,6 +17,8 @@ class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :mat_depot_relations
   has_many :depots, :through => :mat_depot_relations
+  attr_accessor :ifuse_code
+
   before_create :generate_barcode
   after_create :generate_barcode_img
 
@@ -47,10 +49,12 @@ class Material < ActiveRecord::Base
   private
   
   def generate_barcode
-    code = Time.now.strftime("%Y%m%d%H%M%L")[1..-1]
-    code[0] = ''
-    code[0] = ''
-    self.code = code
+    if self.ifuse_code=="0"
+      code = Time.now.strftime("%Y%m%d%H%M%L")[1..-1]
+      code[0] = ''
+      code[0] = ''
+      self.code = code
+    end
   end
 
   def generate_barcode_img

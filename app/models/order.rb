@@ -196,11 +196,22 @@ class Order < ActiveRecord::Base
         pc_record_hash ={}
         pc_record_hash[:ended_at] = cpr.ended_at.strftime('%Y-%m-%d') if cpr.ended_at
         pc_record_hash[:name] = cpr.name
+        pc_record_hash[:id] = cpr.id
+        pc_record_hash[:has_p_card] = 1
         pc_record_hash[:products] = []
         cpr.content.split(",").each do |p_num|    
           prod_arr = p_num.split("-")
+          prod_mat_relation = ProdMatRelation.find_by_sql(["select distinct(pmr.product_id)
+     p_id, p.sale_price p_price,p.is_service, m.storage m_storage from prod_mat_relations pmr
+      inner join materials m on m.id = pmr.material_id inner join products p on p.id = pmr.product_id 
+      where m.status = #{Material::STATUS[:NORMAL]} 
+      and p.id = ? and m.storage > 0 and m.store_id = ? group by p_id", prod_arr[0], store_id])
           prod_num = {}
           prod_num[:name] = prod_arr[1]
+          prod_num[:id] = prod_arr[0]
+          prod_num[:selected] = 1
+          prod_num[:price] = prod_mat_relation[0].p_price if prod_mat_relation[0]
+          prod_num[:mat_num] = prod_mat_relation[0].m_storage if prod_mat_relation[0] && prod_mat_relation[0].is_service == Product::PROD_TYPES[:PRODUCT]
           prod_num[:useNum] = already_used_count[cpr.id][prod_arr[0].to_i][1] if already_used_count && already_used_count[cpr.id] && already_used_count[cpr.id][prod_arr[0].to_i]
           prod_num[:leftNum] = prod_arr[2]
           pc_record_hash[:products] << prod_num
@@ -241,8 +252,8 @@ class Order < ActiveRecord::Base
       and p.id in (?) and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and p.store_id = ?",
         Product::IS_VALIDATE[:YES], p_ids.keys.flatten, store_id]) if p_ids
     services = Product.find_by_sql(["select * from products p where p.status = ?
-      and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.store_id = ?",
-        Product::IS_VALIDATE[:YES], store_id])
+      and p.is_service = #{Product::PROD_TYPES[:SERVICE]} and p.show_on_ipad = ? and p.store_id = ?",
+        Product::IS_VALIDATE[:YES], Product::SHOW_ON_IPAD[:YES], store_id])
     (((products||[]) + services) || []).each do |p|
       h = Hash.new
       h[:id] = p.id
@@ -484,7 +495,7 @@ class Order < ActiveRecord::Base
           s[:selected] = 1
           s[:show_price] = 0.0#"-" + s[:price].to_s
           s[:card_type] = 0
-          s[:is_new] = 0
+          s[:is_new] = 0 #表示旧的储值卡
           svcard_arr << s
           #total -= s[:price]
         }
