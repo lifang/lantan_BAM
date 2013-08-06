@@ -24,6 +24,7 @@ function new_role(store_id){
             success:function(data,status){
                 if(data["status"]==0){
                     $("#add_role").hide();
+                    tishi_alert("角色添加成功");
                     window.location.reload();
                 }else if(data["status"]==1){
                     tishi_alert("你输入的角色已经存在");
@@ -57,7 +58,9 @@ function blur_role(obj,store_id){
             data:"name="+ $.trim($(obj).val())+"&store_id=" + store_id,
             success:function(data,status){
                 if(data['status']=="0")
-                  {$("#a_role_"+role_id).html($.trim($(obj).val()));}
+                  {   
+                      tishi_alert("角色编辑成功")
+                      $("#a_role_"+role_id).html($.trim($(obj).val()));}
                 else{
                    tishi_alert("当前角色不存在")
                   }
@@ -127,6 +130,7 @@ function del_role(role_id,store_id){
             dataType:"json",
             type:"delete",
             success:function(){
+                tishi_alert("角色删除成功")
                 window.location.reload();
             }
         });

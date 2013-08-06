@@ -79,11 +79,12 @@ class Salary < ActiveRecord::Base
   end
 
   def self.get_technician_deduct_amount(start_time, end_time)
-    orders = Order.find_by_sql("select s2.id id_2,s.id id_1,sum(op.price*p.deduct_percent*0.01) price from orders o left join staffs s on o.cons_staff_id_1 =  s.id
+    orders = Order.find_by_sql("select s2.id id_2,s.id id_1,sum(op.pro_num*op.price*ifnull(p.deduct_percent,0)*0.01+ifnull(p.deduct_price,0)*op.pro_num) price from orders o left join staffs s on o.cons_staff_id_1 =  s.id
        left join staffs s2 on o.cons_staff_id_2 = s2.id inner join order_prod_relations op on
         op.order_id = o.id inner join products p on op.product_id = p.id
         where p.is_service = #{Product::PROD_TYPES[:SERVICE]} and o.created_at >= '#{start_time}' and o.created_at <='#{end_time}'
         and (o.status = #{Order::STATUS[:BEEN_PAYMENT]} or o.status = #{Order::STATUS[:FINISHED]}) group by s.id,s2.id")
+
     technician_deduct_amount = {}
     orders.each do |order|
       if technician_deduct_amount.keys.include?(order.id_1)
@@ -103,6 +104,7 @@ class Salary < ActiveRecord::Base
   def self.get_avg_percent(start_time, end_time)
     orders = Order.find_by_sql("select o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2, count(*) total_count from orders o left join staffs s on o.cons_staff_id_1 =  s.id
        left join staffs s2 on o.cons_staff_id_2 = s2.id left join staffs s3 on o.front_staff_id = s3.id where o.created_at >= '#{start_time}' and o.created_at <='#{end_time}'
+       and (o.status = #{Order::STATUS[:BEEN_PAYMENT]} or o.status = #{Order::STATUS[:FINISHED]})
        group by o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2")
 
     orders_info = {}

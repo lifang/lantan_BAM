@@ -3,6 +3,10 @@ class MaterialsController < ApplicationController
   require 'uri'
   require 'net/http'
   require 'will_paginate/array'
+  require 'barby'
+  require 'barby/barcode/ean_13'
+  require 'barby/outputter/custom_rmagick_outputter'
+  require 'barby/outputter/rmagick_outputter'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
@@ -778,12 +782,12 @@ class MaterialsController < ApplicationController
           sm_params = params[:material].except(:price, :sale_price,:ifuse_code).merge({:code => material.code})
           SharedMaterial.create(sm_params) unless smaterial
           @status = 0
-          @flash_notice = "创建物料成功!"
+          @flash_notice = "物料创建成功!"
         elsif material && material.errors.any?
-          @flash_notice = "创建物料成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+          @flash_notice = "物料创建成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
           @status = 1
         else
-          @flash_notice = "创建物料失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+          @flash_notice = "物料创建失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
           @status = 2
         end
       end
@@ -801,12 +805,12 @@ class MaterialsController < ApplicationController
     params[:material][:name] = params[:material][:name].strip
     if @material.update_attributes(params[:material])&& @material.errors.blank?
       @status = 0
-      @flash_notice = "编辑物料成功!"
+      @flash_notice = "物料编辑成功!"
     elsif @material.update_attributes(params[:material]) && @material.errors.any?
-      @flash_notice = "编辑物料成功!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "物料编辑成功!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
       @status = 1
     else
-      @flash_notice = "编辑物料失败!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "物料编辑失败!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
       @status = 2
     end
   end
@@ -814,6 +818,7 @@ class MaterialsController < ApplicationController
   def destroy
     material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
     material.update_attribute(:status, Material::STATUS[:DELETE])
+    flash[:notice] = "物料删除成功"
     redirect_to "/stores/#{params[:store_id]}/materials"
   end
 
@@ -907,25 +912,26 @@ class MaterialsController < ApplicationController
     store_id = params[:store_id].to_i
     mat_id = params[:mat_id].strip
     new_code = params[:new_code]
-    barcode = Barby::EAN13.new(new_code)
-    if Material.where(["store_id = ? and code = ? and id != ?", store_id, new_code+barcode.checksum.to_s, mat_id]).blank?
-      material = Material.find_by_id_and_store_id(mat_id,store_id)
-      if material.nil?
-        render :json => {:status => 0}
-      else
-        barcode = Barby::EAN13.new(new_code)
-        if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}")
-          FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}"
-        end
-        barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{mat_id}", "barcode.png"))
-        if material.update_attributes(:code => new_code+barcode.checksum.to_s, :code_img => "/barcode/#{mat_id}/barcode.png")
-          render :json => {:status => 1, :new_code => material.code}
-        else
+    Material.transaction do
+      barcode = Barby::EAN13.new(new_code)
+      if Material.where(["store_id = ? and code = ? and id != ?", store_id, new_code+barcode.checksum.to_s, mat_id]).blank?
+        material = Material.find_by_id_and_store_id(mat_id,store_id)
+        if material.nil?
           render :json => {:status => 0}
+        else
+          if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}")
+            FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}"
+          end
+          barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{mat_id}", "barcode.png"))
+          if material.update_attributes(:code => new_code+barcode.checksum.to_s, :code_img => "/barcode/#{mat_id}/barcode.png")
+            render :json => {:status => 1, :new_code => material.code}
+          else
+            render :json => {:status => 0}
+          end
         end
+      else
+        render :json => {:status => 2}
       end
-    else
-      render :json => {:status => 2}
     end
   end
 
