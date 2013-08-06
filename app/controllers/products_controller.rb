@@ -187,7 +187,7 @@ class ProductsController < ApplicationController
 
   def update_status
     vals = params[:vals].split(",")
-    Product.find(params[:ids].split(",")).each_with_index {|prod,index|  prod.update_attributes(:show_on_ipad =>vals[index]) }
+    Product.find(params[:ids].split(",")).each_with_index {|prod,index|  prod.update_attributes(:show_on_ipad =>vals[index])  }
     flash[:notice] = "更新成功"
     redirect_to request.referer
   end

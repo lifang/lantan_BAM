@@ -1339,8 +1339,8 @@ function submit_code(obj,store_id){
     }
     else if(new_code == old_code)
     {
-        $(obj).parent().css("display","none");
-        $(obj).parent().next().css("display","");
+          $(obj).parent().css("display","none");
+          $(obj).parent().next().css("display","");
     }
     else if(!reg.test(new_code))
     {
@@ -1349,17 +1349,8 @@ function submit_code(obj,store_id){
         $(obj).val(old_code);
         tishi_alert("条形码必须为12位数字!");
     }
-    else if(reg.test(new_code))
+    else
     {
-        if(new_code == old_code.substr(0,12))
-        {
-            $(obj).parent().css("display","none");
-            $(obj).parent().next().css("display","");
-            $(obj).val(old_code);
-            tishi_alert("修改成功！");
-        }
-        else
-        {
             $.ajax({
                 async:false,
                 url: "materials/modify_code",
@@ -1391,7 +1382,6 @@ function submit_code(obj,store_id){
                     }
                 }
             })
-        }
     }
 }
 
