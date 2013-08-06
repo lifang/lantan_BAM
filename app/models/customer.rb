@@ -144,7 +144,7 @@ class Customer < ActiveRecord::Base
   #客户使用套餐卡记录，门店后台跟api共用
   def pc_card_records_method(store_id)
     #套餐卡记录
-    c_pcard_relations_no_paginate = CPcardRelation.find_by_sql(["select p.id, p.name, cpr.content, cpr.ended_at
+    c_pcard_relations_no_paginate = CPcardRelation.find_by_sql(["select cpr.id cpr_id, p.id, p.name, cpr.content, cpr.ended_at
         from c_pcard_relations cpr
         inner join package_cards p on p.id = cpr.package_card_id
         where cpr.status = ? and cpr.customer_id = ? and p.store_id = ?",

@@ -178,6 +178,12 @@ LantanBAM::Application.routes.draw do
       end
     end
     resources :materials_in_outs
+
+    resources :work_orders do
+      collection do
+        get "work_orders_status"
+      end
+    end
   end
   
   match 'stores/:store_id/materials_in' => 'materials_in_outs#materials_in'
@@ -230,7 +236,6 @@ LantanBAM::Application.routes.draw do
   
   resources :work_orders do
     collection do
-      get "work_orders_status"
       post "login"
     end
   end

@@ -284,16 +284,12 @@ function update_status(){
     var check_val = [];
     for(var i = 0;i<checks.length;i++){
         check_ids.push(checks[i].value);
-        check_val.push(Number(checks[i].checked));
+        check_val.push(Number(!checks[i].checked));
     }
-    if ($("input:checkbox:checked").length !=0){
-        if (confirm("确定这些服务不在前端显示吗")){
-            $("#ids").val(check_ids.join(","));
-            $("#vals").val(check_val.join(","));
-            $("#update_ids").submit();
-        }
-    }else{
-        tishi_alert("请选择服务")
+    if (confirm("确定这些服务不在前端显示吗")){
+        $("#ids").val(check_ids.join(","));
+        $("#vals").val(check_val.join(","));
+        $("#update_ids").submit();
     }
    
 }

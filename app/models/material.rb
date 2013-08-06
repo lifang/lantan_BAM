@@ -1,8 +1,8 @@
 #encoding: utf-8
-#require 'barby'
-#require 'barby/barcode/ean_13'
-#require 'barby/outputter/custom_rmagick_outputter'
-#require 'barby/outputter/rmagick_outputter'
+require 'barby'
+require 'barby/barcode/ean_13'
+require 'barby/outputter/custom_rmagick_outputter'
+require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :material_losses
@@ -17,7 +17,7 @@ class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :mat_depot_relations
   has_many :depots, :through => :mat_depot_relations
-  attr_accessor :ifuse_code
+  attr_accessor :ifuse_code, :code_value
 
   before_create :generate_barcode
   after_create :generate_barcode_img
@@ -54,6 +54,9 @@ class Material < ActiveRecord::Base
       code[0] = ''
       code[0] = ''
       self.code = code
+    end
+    if self.code_value
+      self.code = self.code_value.strip[0..-2]
     end
   end
 
