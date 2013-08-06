@@ -757,24 +757,35 @@ class MaterialsController < ApplicationController
   def new
     @current_store = Store.find_by_id(params[:store_id])
     @material = Material.new
-    render :edit
   end
 
   def create
     params[:material][:name] = params[:material][:name].strip
     Material.transaction  do
-      material = Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
-            :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
-      
-      if material && material.errors.blank?
-        @status = 0
-        @flash_notice = "创建物料成功!"
-      elsif material && material.errors.any?
-        @flash_notice = "创建物料成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
-        @status = 1
-      else
-        @flash_notice = "创建物料失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
-        @status = 2
+      if params[:material][:ifuse_code]=="1"
+        material_tmp = Material.find_by_code_and_store_id(params[:material][:code], params[:store_id])
+        if material_tmp
+          @status = 2
+          @flash_notice = "具有相同条码的物料已存在！"
+        end
+      end
+      unless material_tmp
+        material = Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
+              :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
+
+        if material && material.errors.blank?
+          smaterial = SharedMaterial.find_by_code(material.code)
+          sm_params = params[:material].except(:price, :sale_price,:ifuse_code).merge({:code => material.code})
+          SharedMaterial.create(sm_params) unless smaterial
+          @status = 0
+          @flash_notice = "创建物料成功!"
+        elsif material && material.errors.any?
+          @flash_notice = "创建物料成功!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+          @status = 1
+        else
+          @flash_notice = "创建物料失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
+          @status = 2
+        end
       end
     end
   end
@@ -786,13 +797,17 @@ class MaterialsController < ApplicationController
   end
 
   def update
-    material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
+    @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     params[:material][:name] = params[:material][:name].strip
-    if material.update_attributes(params[:material])
-      @status = 1
-      @material = material
-    else
+    if @material.update_attributes(params[:material])&& @material.errors.blank?
       @status = 0
+      @flash_notice = "编辑物料成功!"
+    elsif @material.update_attributes(params[:material]) && @material.errors.any?
+      @flash_notice = "编辑物料成功!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
+      @status = 1
+    else
+      @flash_notice = "编辑物料失败!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
+      @status = 2
     end
   end
 
@@ -800,6 +815,11 @@ class MaterialsController < ApplicationController
     material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
     material.update_attribute(:status, Material::STATUS[:DELETE])
     redirect_to "/stores/#{params[:store_id]}/materials"
+  end
+
+  def search_by_code
+    @material = SharedMaterial.find_by_code(params[:code]) if params[:code]
+    @material = Material.new unless @material
   end
 
   #盘点物料清单

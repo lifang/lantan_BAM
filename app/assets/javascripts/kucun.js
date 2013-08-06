@@ -818,6 +818,9 @@ function checkMaterial(obj){              //编辑物料验证
     }else if($("#material_unit").val()==""){
         tishi_alert("请输入物料规格");
         f = false;
+    }else if($(".new_material .old_code").attr("checked")=="checked" && $.trim($(".new_material #use_existed_code").val())==""){
+        tishi_alert("请输入条形码");
+        f = false;
     }
       if(f){
        $(obj).parents("form").submit();
@@ -1309,70 +1312,4 @@ function close_notice(obj){
           $("#add_MaterialsLoss_btn").attr('disabled',true);
           $("#MaterialsLoss_form").submit();
       }
-}
-
-function change_code(obj){
-    var code = $(obj).text();
-    var width = $(obj).parent().width();
-    $(obj).css("display","none");
-    $(obj).prev().find("input").first().css("width",width+20);
-    $(obj).prev().find("input").first().css("height","30px");
-    $(obj).prev().find("input").first().val(code);
-    $(obj).prev().css("display","");
-    $(obj).prev().find("input").first().focus();
-}
-
-function submit_code(obj,store_id){
-    var new_code = $(obj).val().trim();
-    var old_code = $(obj).parent().next().text();
-    var mat_id = $(obj).attr("id").split("_")[1];
-
-    if(new_code=="")
-    {
-     $(obj).parent().css("display","none");
-     $(obj).parent().next().css("display","");
-     $(obj).val(old_code);
-     tishi_alert("条形码不能为空！");
-    }
-    else if(new_code == old_code)
-    {
-     $(obj).parent().css("display","none");
-     $(obj).parent().next().css("display","");
-    }
-    else
-    {
-        $.ajax({
-            async:false,
-            url: "materials/modify_code",
-            type: "post",
-            dataType: "json",
-            data: {
-                store_id : store_id,
-                new_code : new_code,
-                mat_id : mat_id
-            },
-            success: function(data){
-                if(data.status==0){
-                    tishi_alert("修改失败!");
-                    $(obj).parent().hide();
-                    $(obj).parent().next().show();
-//                    var old_name = $(obj).parent().next().text();
-                    $(obj).val(old_code);
-                };
-                if(data.status==2){
-                    tishi_alert("编辑失败,该条形码已存在!");
-                    $(obj).parent().hide();
-                    $(obj).parent().next().show();
-//                    var old_name = $(obj).parent().next().text();
-                    $(obj).val(old_code);
-                };
-                if(data.status==1){
-                    tishi_alert("编辑成功!");
-                    $(obj).parent().hide();
-                    $(obj).parent().next().text(data.new_code);
-                    $(obj).parent().next().show();
-                }
-            }
-        })
-    }
 }

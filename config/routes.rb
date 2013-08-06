@@ -195,6 +195,7 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
+  match 'materials/search_by_code' => 'materials#search_by_code'
 
   #match 'stores/:store_id/depots' => 'depots#index'
   #match 'stores/:store_id/depots/create' => 'depots#create'

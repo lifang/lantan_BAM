@@ -55,7 +55,7 @@ class WorkOrdersController < ApplicationController
                   #等待付款车牌号
                   if work_order.work_order_status == WorkOrder::STAT[:WAIT_PAY] || 
                       (work_order.work_order_status == WorkOrder::STAT[:COMPLETE] &&
-                        ((Time.now - work_order.wo_updated_at)/60).to_i <= 5)
+                        (Time.now - work_order.wo_updated_at)/60 <= 1)
                     wait_pay_car_nums << work_order.car_num
                   end
 
@@ -114,8 +114,9 @@ def login
       status = 1
     else
       status = 0
+      stations_count = Station.where(:store_id => staff.store_id, :status => Station::STAT[:NORMAL]).count
     end
-    render :json => {:store_id => staff.present? ? staff.store_id : 0, :status => status}
+    render :json => {:store_id => staff.present? ? staff.store_id : 0, :status => status, :stations_count => stations_count || 0}
 end
 
 end

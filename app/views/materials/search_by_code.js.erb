@@ -1,0 +1,7 @@
+<% if @material.new_record? %>
+$("#new_material .no_material_notice").html('未查到物料<br/>')
+$("#new_material .mat_search_result").html('<%= j (render :partial => 'mat_form', :locals => {:material => @material}) %>')
+<% else %>
+$("#new_material .no_material_notice").html('')
+$("#new_material .mat_search_result").html('<%= j (render :partial => 'mat_form', :locals => {:material => @material}) %>')
+<% end %>
