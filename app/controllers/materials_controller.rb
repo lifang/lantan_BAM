@@ -3,6 +3,10 @@ class MaterialsController < ApplicationController
   require 'uri'
   require 'net/http'
   require 'will_paginate/array'
+  require 'barby'
+  require 'barby/barcode/ean_13'
+  require 'barby/outputter/custom_rmagick_outputter'
+  require 'barby/outputter/rmagick_outputter'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
@@ -907,25 +911,26 @@ class MaterialsController < ApplicationController
     store_id = params[:store_id].to_i
     mat_id = params[:mat_id].strip
     new_code = params[:new_code]
-    barcode = Barby::EAN13.new(new_code)
-    if Material.where(["store_id = ? and code = ? and id != ?", store_id, new_code+barcode.checksum.to_s, mat_id]).blank?
-      material = Material.find_by_id_and_store_id(mat_id,store_id)
-      if material.nil?
-        render :json => {:status => 0}
-      else
-        barcode = Barby::EAN13.new(new_code)
-        if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}")
-          FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}"
-        end
-        barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{mat_id}", "barcode.png"))
-        if material.update_attributes(:code => new_code+barcode.checksum.to_s, :code_img => "/barcode/#{mat_id}/barcode.png")
-          render :json => {:status => 1, :new_code => material.code}
-        else
+    Material.transaction do
+      barcode = Barby::EAN13.new(new_code)
+      if Material.where(["store_id = ? and code = ? and id != ?", store_id, new_code+barcode.checksum.to_s, mat_id]).blank?
+        material = Material.find_by_id_and_store_id(mat_id,store_id)
+        if material.nil?
           render :json => {:status => 0}
+        else
+          if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}")
+            FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}"
+          end
+          barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{mat_id}", "barcode.png"))
+          if material.update_attributes(:code => new_code+barcode.checksum.to_s, :code_img => "/barcode/#{mat_id}/barcode.png")
+            render :json => {:status => 1, :new_code => material.code}
+          else
+            render :json => {:status => 0}
+          end
         end
+      else
+        render :json => {:status => 2}
       end
-    else
-      render :json => {:status => 2}
     end
   end
 
