@@ -192,7 +192,7 @@ function checkValid(obj){
             }
         })
        }
-    else if($(".station_form .popup_body_result").find("input[type='checkbox']:checked").length==0){
+    if($(".station_form .popup_body_result").find("input[type='checkbox']:checked").length==0){
         tishi_alert("服务不能为空!")
         flag = false;
     }

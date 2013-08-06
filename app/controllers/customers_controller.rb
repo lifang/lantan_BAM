@@ -1,4 +1,5 @@
 #encoding: utf-8
+require "uri"
 class CustomersController < ApplicationController
   before_filter :sign?
   include RemotePaginateHelper
@@ -45,6 +46,7 @@ class CustomersController < ApplicationController
   def destroy
     @customer = Customer.find(params[:id].to_i)
     @customer.update_attributes(:status => Customer::STATUS[:DELETED])
+    flash[:notice] = "删除成功。"
     redirect_to request.referer
   end
 
@@ -120,7 +122,7 @@ class CustomersController < ApplicationController
           :content => content, :phone => customer.mobilephone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
         begin
-          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{content}&Exno=0"
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{URI.escape(content)}&Exno=0"
           create_get_http(Constant::MESSAGE_URL, message_route)
         rescue
           flash[:notice] = "短信通道忙碌，请稍后重试。"

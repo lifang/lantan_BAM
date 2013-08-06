@@ -15,10 +15,10 @@ class Salary < ActiveRecord::Base
     staff_deduct_reward_hash = get_violation_reward_amount(salary_infos)
 
     #前台提成金额
-    front_deduct_amount = get_front_deduct_amount
+    front_deduct_amount = get_front_deduct_amount(start_time, end_time)
 
     #技师提成金额
-    technician_deduct_amount = get_technician_deduct_amount
+    technician_deduct_amount = get_technician_deduct_amount(start_time, end_time)
 
     #平均满意度
     avg_percent = get_avg_percent(start_time, end_time)
@@ -60,9 +60,10 @@ class Salary < ActiveRecord::Base
     staff_deduct_reward_hash
   end
 
-  def self.get_front_deduct_amount
+  def self.get_front_deduct_amount(start_time, end_time)
     front_deduct_amount = {}
-    orders_info = Order.all.group_by{|o|o.front_staff_id}
+    orders_info = Order.where("created_at >= '#{start_time}' and created_at <='#{end_time}'").
+      where("status = #{Order::STATUS[:BEEN_PAYMENT]} || status = #{Order::STATUS[:FINISHED]}").group_by{|o|o.front_staff_id}
     orders_info.each do |staff_id, orders_array|
       staff = Staff.find_by_id(staff_id)
       if !staff.nil? && !staff.deduct_at.nil? && !staff.deduct_end.nil? && !staff.deduct_percent.nil?
@@ -77,11 +78,12 @@ class Salary < ActiveRecord::Base
     front_deduct_amount
   end
 
-  def self.get_technician_deduct_amount
+  def self.get_technician_deduct_amount(start_time, end_time)
     orders = Order.find_by_sql("select s2.id id_2,s.id id_1,sum(op.price*p.deduct_percent*0.01) price from orders o left join staffs s on o.cons_staff_id_1 =  s.id
        left join staffs s2 on o.cons_staff_id_2 = s2.id inner join order_prod_relations op on
         op.order_id = o.id inner join products p on op.product_id = p.id
-        where p.is_service = #{Product::PROD_TYPES[:SERVICE]} group by s.id,s2.id")
+        where p.is_service = #{Product::PROD_TYPES[:SERVICE]} and o.created_at >= '#{start_time}' and o.created_at <='#{end_time}'
+        and (o.status = #{Order::STATUS[:BEEN_PAYMENT]} or o.status = #{Order::STATUS[:FINISHED]}) group by s.id,s2.id")
     technician_deduct_amount = {}
     orders.each do |order|
       if technician_deduct_amount.keys.include?(order.id_1)

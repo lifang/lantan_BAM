@@ -86,7 +86,7 @@ LantanBAM::Application.routes.draw do
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
           "mat_loss_delete","mat_loss"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
-             "mat_loss_add"
+             "mat_loss_add","modify_code"
       end
       member do
         get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"
@@ -195,6 +195,7 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
+  match 'materials/search_by_code' => 'materials#search_by_code'
 
   #match 'stores/:store_id/depots' => 'depots#index'
   #match 'stores/:store_id/depots/create' => 'depots#create'
@@ -240,7 +241,8 @@ LantanBAM::Application.routes.draw do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
           "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
           "use_svcard","work_order_finished","login_and_return_construction_order","check_num","out_materials",
-          "get_construction_order","search_by_car_num2","materials_verification","get_lastest_materails"
+          "get_construction_order","search_by_car_num2","materials_verification","get_lastest_materails","stop_construction",
+          "search_material"
       end
     end
     resources :syncs_datas do
