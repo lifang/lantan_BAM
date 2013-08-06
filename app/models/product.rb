@@ -24,7 +24,7 @@ class Product < ActiveRecord::Base
   PRODUCT_END = 6
   BEAUTY_SERVICE = 9
   PROD_TYPES = {:PRODUCT =>0, :SERVICE =>1}  #0 为产品 1 为服务
-  IS_VALIDATE ={:NO=>0,:YES=>1} #0 无效 已删除状态 1 有效   #是否在pad上显示 1为不显示 0 为显示
+  IS_VALIDATE ={:NO=>0,:YES=>1} #0 无效 已删除状态 1 有效   #是否在pad上显示 0为不显示 1为显示
   SHOW_ON_IPAD ={:NO=>0,:YES=>1} #是否在ipad端显示
   REVIST_TIME = [24,48,72,96,120]
   IS_AUTO = {:YES=>1,:NO=>0}
