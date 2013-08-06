@@ -193,10 +193,10 @@ function tishi_alert(message){
     })
     setTimeout(function(){
         jQuery('.tab_alert').fadeTo("slow",0);
-    }, 3000);
+    }, 4000);
     setTimeout(function(){
         $(".tab_alert").css('display','none');
-    }, 3000);
+    }, 4000);
 }
 
 //center popup div
