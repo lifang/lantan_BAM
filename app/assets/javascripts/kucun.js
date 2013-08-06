@@ -1384,3 +1384,21 @@ function submit_code(obj,store_id){
             })
     }
 }
+
+function enableNextInput(obj, flag){
+    if(flag){
+        $(obj).parent().next().attr('disabled', false);
+    }else{
+        $(obj).parents(".item").next().find("#use_existed_code").attr('disabled', true);
+    }
+}
+
+function search_material_barcode(obj){
+    var code = $(obj).parents('.search').find(".search-barcode").val();
+    $.ajax({
+        url: "/materials/search_by_code",
+        dataType:"script",
+        data:{code : code},
+        success:function(data,status){}
+    });
+}
