@@ -544,7 +544,8 @@ class Api::OrdersController < ApplicationController
                      where("work_orders.station_id = #{station.id}").select("work_orders.*,car_nums.num as car_num").first
         work_order["coutdown"] = work_order.ended_at - Time.now if work_order
         if work_order
-          products = Product.where("orders.id = #{work_order.order_id}").joins(:order_prod_relations => :order).select("name")
+          products = Product.where("products.is_service = #{Product::PROD_TYPES[:SERVICE]} and orders.id = #{work_order.order_id}").
+            joins(:order_prod_relations => :order).select("name")
           product_names = products.map(&:name).join(",")
           work_order["product_names"] = product_names
         end
