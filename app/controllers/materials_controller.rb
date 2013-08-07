@@ -769,7 +769,7 @@ class MaterialsController < ApplicationController
       if params[:material][:ifuse_code]=="1"
         code_value = params[:material][:code_value][0..-2]
         barcode = Barby::EAN13.new(code_value)
-        material_tmp = Material.find_by_code_and_store_id(code_value+barcode.checksum.to_s, params[:store_id])
+        material_tmp = Material.find_by_code_and_store_id_and_status(code_value+barcode.checksum.to_s, params[:store_id], Material::STATUS[:NORMAL])
         if material_tmp
           @status = 2
           @flash_notice = "条形码：根据输入值产生的条码在此门店中已存在！"
@@ -922,7 +922,7 @@ class MaterialsController < ApplicationController
     new_code = params[:new_code]
     Material.transaction do
       barcode = Barby::EAN13.new(new_code)
-      if Material.where(["store_id = ? and code = ? and id != ?", store_id, new_code+barcode.checksum.to_s, mat_id]).blank?
+      if Material.where(["store_id = ? and code = ? and id != ? and status = ?", store_id, new_code+barcode.checksum.to_s, mat_id, Material::STATUS[:NORMAL]]).blank?
         material = Material.find_by_id_and_store_id(mat_id,store_id)
         if material.nil?
           render :json => {:status => 0}

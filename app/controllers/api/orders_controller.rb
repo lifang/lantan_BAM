@@ -570,6 +570,7 @@ class Api::OrdersController < ApplicationController
     work_order.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if work_order
     order = work_order.order
     order.update_attribute(:status, Order::STATUS[:FINISHED]) if order
+    work_order.arrange_station(nil,nil,true) if work_order
     render :json => {:status => 1}
   end
 
