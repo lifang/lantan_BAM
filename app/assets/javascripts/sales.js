@@ -46,6 +46,11 @@ function publish_sale(e){
         tishi_alert("请输入活动开始和结束的时间,且开始日期小于结束日期");
         return false;
     }
+    var disc_times = $("#disc_times").val();
+    if ( disc_times == " " || disc_times.length ==0 || isNaN(parseInt(disc_times)) || parseInt(disc_times)<0){
+        tishi_alert("请输入优惠次数");
+        return false;
+    }
     var car_nums = $("#disc_car_nums").val();
     if ( car_nums == " " || car_nums.length==0 || isNaN(parseInt(car_nums))||parseInt(car_nums)<0){
         tishi_alert("请输入参加活动的总车辆数");
@@ -101,7 +106,9 @@ function delete_sale(sale_id,store_id){
             },
             success:function(data){
                 tishi_alert(data.message);
-                window.location.reload();
+                setTimeout(function(){
+                    window.location.reload();
+                },1000)
             }
         });
     }
@@ -119,7 +126,9 @@ function public_sale(sale_id,store_id){
             },
             success:function(data){
                 tishi_alert(data.message);
-                window.location.reload();
+                setTimeout(function(){
+                    window.location.reload();
+                },1000)
             }
         });
     }
@@ -277,7 +286,9 @@ function delete_pcard(pcard_id){
             url : "/package_cards/"+pcard_id+"/delete_pcard",
             success:function(data){
                 tishi_alert(data.message);
-                window.location.reload();
+                setTimeout(function(){
+                    window.location.reload();
+                },1000)
             }
         });
     }
