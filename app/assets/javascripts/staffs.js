@@ -514,6 +514,9 @@ $(document).ready(function(){
                     }
                     tishi_alert("编辑系统打分成功！");
                 }
+                if(data == "error"){
+                    tishi_alert("没有系统打分记录，无法编辑系统打分！");
+                }
             }
         });
         return false;
