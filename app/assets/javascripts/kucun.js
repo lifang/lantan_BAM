@@ -1395,7 +1395,7 @@ function enableNextInput(obj, flag){
 }
 
 function search_material_barcode(obj){
-    var code = $(obj).parents('.search').find(".search-barcode").val();
+    var code = $(obj).parent().prev().find(".search-barcode").val();
     $.ajax({
         url: "/materials/search_by_code",
         dataType:"script",
