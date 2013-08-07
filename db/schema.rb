@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130805092635) do
+ActiveRecord::Schema.define(:version => 20130807085139) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -495,6 +495,7 @@ ActiveRecord::Schema.define(:version => 20130805092635) do
     t.integer  "auto_time"
     t.text     "revist_content"
     t.integer  "prod_point"
+    t.string   "description"
   end
 
   add_index "package_cards", ["updated_at"], :name => "index_package_cards_on_updated_at"
