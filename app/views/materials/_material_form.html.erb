@@ -11,12 +11,11 @@
           <button class="search_btn" onclick="search_material_barcode(this)">查询</button>
         </div>
       </div>
-      <fieldset class="popup_body_fieldset" id="search_by_code" style="display: none;">
-        <legend class="popup_body_title">查询结果</legend>
-        <div class="popup_body_result no_material_notice">
+      <div id="search_by_code" style="display: none;">
+        <div class="no_material_notice">
 
         </div>
-      </fieldset>
+      </div>
     <% end %>
     <%= form_for [@current_store, @material], :id => "material_tab_form", :remote => true, :html => {"data-type" => "script"} do |f| %>
       <div class="popup_body_area">
