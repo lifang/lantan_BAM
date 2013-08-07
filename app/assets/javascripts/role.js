@@ -152,6 +152,7 @@ function reset_role(store_id){
             type:"POST",
             data:"staff_id="+$("#staff_id_h").val()+"&roles="+roles,
             success:function(){
+                tishi_alert("设定成功")
                 window.location.replace(window.location.href)
                 
             },

@@ -962,3 +962,6 @@ a.compile_btn { width: 100px;}
 	top: 200px; 
 	right: -90px; 
 }
+.no_material_notice{
+    margin: 0 0 10px 60px;
+}
