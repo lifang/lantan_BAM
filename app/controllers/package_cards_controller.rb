@@ -19,7 +19,7 @@ class PackageCardsController < ApplicationController
   def create
     parms = {:name=>params[:name], :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL], :price=>params[:price],
       :created_at=>Time.now.strftime("%Y-%M-%d"),:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point]
+      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:description=>params[:desc]
     }
     if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
       parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at])
@@ -73,7 +73,8 @@ class PackageCardsController < ApplicationController
   def update_pcard
     pcard=PackageCard.find(params[:id])
     parms = {:name=>params[:name],:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:price=>params[:price]
+      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:price=>params[:price],
+      :description=>params[:desc]
     }
     if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
       parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at])

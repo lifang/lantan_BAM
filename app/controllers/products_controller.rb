@@ -187,7 +187,7 @@ class ProductsController < ApplicationController
 
   def update_status
     vals =JSON params[:vals]
-    Product.find(params[:ids].split(",")).each {|prod|prod.update_attributes(:show_on_ipad =>vals["#{prod.id}"])}
+    Product.find(params[:ids].split(",")).each {|prod| prod.update_attributes(:show_on_ipad =>vals["#{prod.id}"]) if (prod.show_on_ipad ? 1 : 0) != vals["#{prod.id}"]}
     flash[:notice] = "更新成功"
     redirect_to request.referer
   end

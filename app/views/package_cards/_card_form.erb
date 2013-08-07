@@ -47,6 +47,9 @@
                                   <%unless @pcard.is_auto_revist%>disabled <%end%>><%=  @pcard.is_auto_revist ? @pcard.revist_content : ""  %></textarea>
   </div>
 </div>
+<div class="item_textarea">
+  <label>产品简介：</label><textarea name="desc" id="desc" cols="" rows="" class="width_textarea"><%=  @pcard.description  %></textarea>
+</div>
 <input type="hidden" value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>" id="date1" />
 <div class="clear"></div>
 <div class="card_content">
