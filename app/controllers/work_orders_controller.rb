@@ -8,8 +8,8 @@ class WorkOrdersController < ApplicationController
       current_info = {} #哈希：一个门店的数据（等待付款、工位信息（工位名称、状态、技师、正在施工车牌、剩余时间、等待施工车牌、剩余时间））
       wait_pay_car_nums = [] #定义数组存放所有待付款车牌
       #查询所有未删除的工位信息
-      stations = Station.find_by_sql("select s.id, s.status, s.name
-      from stations s where s.status !=#{Station::STAT[:DELETED]} and s.store_id = #{params[:store_id]} order by s.id")
+      stations = Station.find_by_sql(["select s.id, s.status, s.name
+      from stations s where s.status not in (?) and s.store_id = #{params[:store_id]} order by s.id", [Station::STAT[:WRONG], Station::STAT[:DELETED]]])
 
       #查询所有当天的技师信息
       cons_staffs = Station.find_by_sql("select s.id as station_id, staffs.name as staff_name
@@ -114,7 +114,7 @@ def login
       status = 1
     else
       status = 0
-      stations_count = Station.where(:store_id => staff.store_id, :status => Station::STAT[:NORMAL]).count
+      stations_count = Station.where("store_id =? and status not in (?) ",staff.store_id, [Station::STAT[:WRONG], Station::STAT[:DELETED]]).count
     end
     render :json => {:store_id => staff.present? ? staff.store_id : 0, :status => status, :stations_count => stations_count || 0}
 end

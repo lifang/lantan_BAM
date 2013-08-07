@@ -6,7 +6,7 @@ class SvCardsController < ApplicationController
 
   def index
     @sv_cards = SvCard.where(["store_id = ? ", params[:store_id].to_i]).where(["status = ?", SvCard::STATUS[:NORMAL]]).order("created_at desc")
-    .paginate(:page => params[:page] ||= 1, :per_page => 2)#SvCard::PER_PAGE)
+    .paginate(:page => params[:page] ||= 1, :per_page => SvCard::PER_PAGE)
   end
 
   def new
