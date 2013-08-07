@@ -95,14 +95,14 @@ function set_role(obj,role_id,store_id){
 
 function set_staff_role(staff_id,r_ids){
     popup("#set_role");
-    $(".groupFunc_b input[type='checked']").each(function(idx,item){
-        if($(item).attr("checked")){
-            $(item).removeAttribute("checked");
+    $(".groupFunc_b input[type='checkbox']").each(function(idx,item){
+        if($(item).attr("checked")=="checked"){
+            $(item).attr("checked", false)
         }
     });
     if(r_ids.length>0){
         for(var i=0;i<r_ids.split(",").length;i++){
-            $("#check_role_"+r_ids.split(",")[i]).attr("checked",'true');
+            $("#check_role_"+r_ids.split(",")[i]).attr("checked",'checked');
         }
     }
     $("#staff_id_h").attr("value",staff_id);
