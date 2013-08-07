@@ -27,6 +27,7 @@ class PackageCardsController < ApplicationController
       parms.merge!(:date_month =>params[:end_time])
     end
     pcard =PackageCard.create(parms)
+    flash[:notice] = "套餐卡添加成功"
     begin
       pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
     rescue
@@ -35,7 +36,7 @@ class PackageCardsController < ApplicationController
     params[:sale_prod].each do |key,value|
       PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
     end
-    redirect_to "/stores/#{params[:store_id]}/package_cards"
+    redirect_to request.referer
   end #添加套餐卡
 
 
@@ -79,6 +80,7 @@ class PackageCardsController < ApplicationController
     else
       parms.merge!(:date_month =>params[:end_time])
     end
+    flash[:notice] = "套餐卡更新成功"
     begin
       parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
     rescue
@@ -89,7 +91,7 @@ class PackageCardsController < ApplicationController
     params[:sale_prod].each do |key,value|
       PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
     end
-    redirect_to "/stores/#{params[:store_id]}/package_cards"
+    redirect_to request.referer
   end
 
   #删除活动

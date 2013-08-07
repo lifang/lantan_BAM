@@ -6,6 +6,7 @@
     <div class="data_box">
       <div class="data_menu">
         <% if permission?(:sales, :add_service) %>
+          <a href="javascript:void(0)" class="add_btn" onclick="update_status('<%= params[:store_id] %>')">销售端不显示</a>
           <a href="javascript:void(0)" class="add_btn" onclick="add_service('<%= params[:store_id] %>')">添加服务</a>
         <% end %></div>
       <div class="clear"></div>
@@ -15,15 +16,16 @@
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
+                  <td>&nbsp;&nbsp;&nbsp;</td>
                   <td>服务代码</td>
                   <td width="8%">服务名称</td>
-                  <td>成本价</td>
+                  <td width="5%">成本价</td>
                   <td>零售价格</td>
-                  <td>促销价</td>
+                  <td width="5%">促销价</td>
                   <td>积分</td>
-                  <td>施工时间（分钟）</td>
+                  <td width="10%">施工时间(分钟)</td>
                   <td>类别</td>
-                  <td>技师</td>
+                  <td width="9%">技师</td>
                   <td width="25%">所需物料</td>
                   <td width="10%">操作</td>
                 </tr>
@@ -31,12 +33,13 @@
               <tbody>
                 <% @services.each do |service| %>
                   <tr>
+                    <td><input type="checkbox" value="<%=service.id  %>"<% unless service.show_on_ipad %>checked<%end%> /></td>
                     <td><%= service.code %></td>
                     <td><%= service.name %></td>
                     <td><%= service.t_price %></td>
                     <td><%= service.base_price %></td>
                     <td><%= service.sale_price %></td>
-                     <td><%= service.prod_point %></td>
+                    <td><%= service.prod_point %></td>
                     <td><%= service.cost_time %></td>
                     <td><%= Product::PRODUCT_TYPES[service.types] %></td>
                     <td><%= "#{Staff::LEVELS[service.level1]} - #{Staff::LEVELS[service.level2]}" %></td>
@@ -71,6 +74,10 @@
                 <% end %>
               </tbody>
             </table>
+            <%= form_for :ids,:url=>"/stores/#{params[:store_id]}/products/update_status",:html=>{:id=>"update_ids"} do %>
+              <input type="hidden" value="" name="ids" id="ids"/>
+               <input type="hidden" value="" name="vals" id="vals"/>
+            <% end %>
             <div class="pageTurn">
               <%= will_paginate @services,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
             </div>

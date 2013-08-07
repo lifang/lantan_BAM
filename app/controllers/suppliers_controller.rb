@@ -1,3 +1,4 @@
+#encoding:utf-8
 class SuppliersController < ApplicationController
   layout "storage"
   before_filter :sign?
@@ -21,8 +22,10 @@ class SuppliersController < ApplicationController
     @supplier = Supplier.create(params[:supplier])
     if @supplier.save
       @store.suppliers << @supplier
+      flash[:notice] = "供应商创建成功"
       render :success
     else
+      flash[:notice] = "供应商创建失败"
       render :new
     end
   end
@@ -32,14 +35,17 @@ class SuppliersController < ApplicationController
 
   def update
     if @supplier.update_attributes(params[:supplier])
+      flash[:notice] = "供应商编辑成功"
       render :success
     else
+      flash[:notice] = "供应商编辑失败"
       render :edit
     end
   end
 
   def destroy
     @supplier.update_attribute(:status,Supplier::STATUS[:delete]) if @supplier && @supplier.status != Supplier::STATUS[:delete]
+    flash[:notice] = "供应商删除成功"
     redirect_to store_suppliers_path @store
   end
   

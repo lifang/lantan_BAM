@@ -15,15 +15,19 @@ class StationDatasController < ApplicationController
 
   def create
     if params[:product_ids]
-      products = Product.where(:id => params[:product_ids])
-      levels = (products.map(&:staff_level)|products.map(&:staff_level_1)).uniq.sort
-      @station = Station.create(params[:station].merge({:store_id => @store.id, :status => 2,:staff_level=>levels.min,
-            :staff_level1=>levels[0..(levels.length/2.0)].max   }))
-      if @station.save
-        @station.products = products
-        render :successful
-      else
-        render :replace_form
+      Station.transaction do
+        products = Product.where(:id => params[:product_ids])
+        levels = (products.map(&:staff_level)|products.map(&:staff_level_1)).uniq.sort
+        @station = Station.create(params[:station].merge({:store_id => @store.id, :status => 2,:staff_level=>levels.min,
+              :staff_level1=>levels[0..(levels.length/2.0)].max   }))
+        if @station.save
+          @station.products = products
+          flash[:notice] = "工位创建成功"
+          render :successful
+        else
+          flash[:notice] = "工位创建失败"
+          render :replace_form
+        end
       end
     else
       render :replace_form
@@ -46,8 +50,10 @@ class StationDatasController < ApplicationController
     if  @station.update_attributes(params[:station].merge({:staff_level=>levels.min,
             :staff_level1=>levels[0..(levels.length/2.0)].max   }))
       @station.products = products
+      flash[:notice] = "工位编辑成功"
       render :successful
     else
+      flash[:notice] = "工位编辑失败"
       render :replace_form
     end
   end
@@ -55,6 +61,7 @@ class StationDatasController < ApplicationController
   def destroy
     @station = Station.find(params[:id])
     @station.status = 4
+    flash[:notice] = "工位删除成功"
     redirect_to "/stores/#{@store.id}/station_datas" if @station.save
   end
 
