@@ -530,29 +530,34 @@ class Api::OrdersController < ApplicationController
         result << work_order
       end
 
-      station = Station.includes(:station_staff_relations => :staff).
+      stations = Station.includes(:station_staff_relations => :staff).
         where("staffs.id = #{staff.id}").
         where("station_staff_relations.store_id = #{staff.store.id}").
         where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
-        where("stations.status = #{Station::STAT[:NORMAL]}").first
-
-      if station
+        where("stations.status = #{Station::STAT[:NORMAL]}")
+      wo = nil
+      sta = nil
+      stations.each do |station|
         work_order = WorkOrder.joins([:order => :car_num], :station).where("work_orders.store_id = #{staff.store_id}").
-                     where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
-                     where("stations.status = #{Station::STAT[:NORMAL]}").
-                     where("work_orders.current_day = #{current_day}").
-                     where("work_orders.station_id = #{station.id}").select("work_orders.*,car_nums.num as car_num").first
-        work_order["coutdown"] = work_order.ended_at - Time.now if work_order
+          where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
+          where("stations.status = #{Station::STAT[:NORMAL]}").
+          where("work_orders.current_day = #{current_day}").
+          where("work_orders.station_id = #{station.id}").select("work_orders.*,car_nums.num as car_num").first
         if work_order
+          work_order["coutdown"] = work_order.ended_at - Time.now
           products = Product.where("products.is_service = #{Product::PROD_TYPES[:SERVICE]} and orders.id = #{work_order.order_id}").
             joins(:order_prod_relations => :order).select("name")
           product_names = products.map(&:name).join(",")
           work_order["product_names"] = product_names
+          wo = work_order
+          sta = station
+          break
         end
-      else
-        work_order = nil
-      end    
-      render :json => {:status => 1, :work_order => work_order, :station => station}
+      end
+#      else
+#        work_order = nil
+#      end
+      render :json => {:status => 1, :work_order => wo, :station => sta}
     else
       render :json => {:status => 0}
     end
