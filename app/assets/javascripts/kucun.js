@@ -680,12 +680,12 @@ function add_new_material(obj,idx,store_id){
        var order_count = $("#add_count_"+idx).val();
        $(obj).attr('disabled','disabled');
        $.ajax({
-           url:"/stores/" + store_id + "/materials/add",
+           url:"/stores/" + store_id + "/materials",
            dataType:"json",
            type:"POST",
-           data:"code="+$("#add_barcode_"+idx).val()+"&name="+$("#add_name_"+idx).val()+
-               "&cost_price="+$("#cost_price_"+idx).val() + "&sale_price=" + $("#sale_price_"+idx).val() +
-               "&count="+$("#add_count_"+idx).val()+"&types="+type,
+           data:"&material[name]="+$("#add_name_"+idx).val()+
+               "&material[price]="+$("#cost_price_"+idx).val()+"&material[ifuse_code]=0"
+               + "&material[sale_price]=" + $("#sale_price_"+idx).val() + "&material[types]="+type,
            success:function(data,status){
 //              alert(data.material.code);
                var m = data.material;
@@ -818,7 +818,7 @@ function checkMaterial(obj){              //编辑物料验证
     }else if($("#material_unit").val()==""){
         tishi_alert("请输入物料规格");
         f = false;
-    }else if($(".new_material .old_code").attr("checked")=="checked" && ($.trim($(".new_material #use_existed_code").val()).match(reg1)==null || $.trim($(".new_material #use_existed_code").val()).length<13)){
+    }else if($("#new_material .old_code").attr("checked")=="checked" && ($.trim($("#new_material #use_existed_code").val()).match(reg1)==null || $.trim($("#new_material #use_existed_code").val()).length!=13)){
         tishi_alert("请输入条形码, 条形码为数字，长度为13");
         f = false;
     }
@@ -1395,7 +1395,7 @@ function enableNextInput(obj, flag){
 }
 
 function search_material_barcode(obj){
-    var code = $(obj).parents('.search').find(".search-barcode").val();
+    var code = $(obj).parent().prev().find(".search-barcode").val();
     $.ajax({
         url: "/materials/search_by_code",
         dataType:"script",

@@ -19,7 +19,7 @@ class PackageCardsController < ApplicationController
   def create
     parms = {:name=>params[:name], :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL], :price=>params[:price],
       :created_at=>Time.now.strftime("%Y-%M-%d"),:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point]
+      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:description=>params[:desc]
     }
     if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
       parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at])
@@ -27,6 +27,7 @@ class PackageCardsController < ApplicationController
       parms.merge!(:date_month =>params[:end_time])
     end
     pcard =PackageCard.create(parms)
+    flash[:notice] = "套餐卡添加成功"
     begin
       pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
     rescue
@@ -35,7 +36,7 @@ class PackageCardsController < ApplicationController
     params[:sale_prod].each do |key,value|
       PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
     end
-    redirect_to "/stores/#{params[:store_id]}/package_cards"
+    redirect_to request.referer
   end #添加套餐卡
 
 
@@ -72,13 +73,15 @@ class PackageCardsController < ApplicationController
   def update_pcard
     pcard=PackageCard.find(params[:id])
     parms = {:name=>params[:name],:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:price=>params[:price]
+      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:price=>params[:price],
+      :description=>params[:desc]
     }
     if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
       parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at])
     else
       parms.merge!(:date_month =>params[:end_time])
     end
+    flash[:notice] = "套餐卡更新成功"
     begin
       parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
     rescue
@@ -89,7 +92,7 @@ class PackageCardsController < ApplicationController
     params[:sale_prod].each do |key,value|
       PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
     end
-    redirect_to "/stores/#{params[:store_id]}/package_cards"
+    redirect_to request.referer
   end
 
   #删除活动

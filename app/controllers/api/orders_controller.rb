@@ -105,7 +105,7 @@ class Api::OrdersController < ApplicationController
     prod_id = params[:prod_ids] #"10_3,311_0,226_2,"
     prod_id = prod_id[0...(prod_id.size-1)] if prod_id
     pre_arr = Order.pre_order params[:store_id],params[:carNum],params[:brand],params[:year],params[:userName],params[:phone],
-      params[:email],params[:birth],prod_id,params[:res_time],params[:sex]
+      params[:email],params[:birth],prod_id,params[:res_time],params[:sex], params[:from_pcard].to_i
     content = ""
     if pre_arr[5] == 0
       content = "数据出现异常"
@@ -570,6 +570,7 @@ class Api::OrdersController < ApplicationController
     work_order.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if work_order
     order = work_order.order
     order.update_attribute(:status, Order::STATUS[:FINISHED]) if order
+    work_order.arrange_station(nil,nil,true) if work_order
     render :json => {:status => 1}
   end
 

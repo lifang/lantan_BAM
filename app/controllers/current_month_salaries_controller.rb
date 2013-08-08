@@ -8,7 +8,7 @@ class CurrentMonthSalariesController < ApplicationController
 
   def index
     @statistics_date = params[:statistics_date] ||= DateTime.now.months_ago(1).strftime("%Y-%m")
-    @staffs = Staff.find_by_sql("select s.*,sa.reward_num reward_num,sa.deduct_num deduct_num,sa.total total,sa.id s_id from staffs s left join salaries sa on s.id=sa.staff_id where s.store_id = #{@store.id}  and sa.current_month = #{(@statistics_date.delete '-').to_i}")
+    @staffs = Staff.find_by_sql("select s.*,sa.reward_num reward_num,sa.deduct_num deduct_num,sa.total total,sa.id s_id from staffs s left join salaries sa on s.id=sa.staff_id where s.store_id = #{@store.id} and s.status != #{Staff::STATUS[:deleted]} and sa.current_month = #{(@statistics_date.delete '-').to_i}")
     respond_to do |format|
       format.xls {
         send_data(xls_content_for(@staffs),
