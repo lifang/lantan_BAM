@@ -396,7 +396,7 @@ class Api::OrdersController < ApplicationController
     materials = data["materials"]
     mat_arr = []
     materials.each do |mat|
-      material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
+      material = Material.where("code = #{mat['code']} and store_id = #{store_id} and status = #{Material::STATUS[:NORMAL]}").first
       if material
         material.check_num = mat['check_num']
         mat_arr << material
@@ -422,7 +422,7 @@ class Api::OrdersController < ApplicationController
     materials = data["materials"]
     mat_arr = []
     materials.each do |mat|
-      material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
+      material = Material.where("code = #{mat['code']} and store_id = #{store_id} and status = #{Material::STATUS[:NORMAL]}").first
       if material
         material.storage = mat['storage'].to_i
         material.check_num = nil
@@ -452,7 +452,7 @@ class Api::OrdersController < ApplicationController
     mat_out_types = data["mat_out_types"]
     mat_arr = []
     materials.each do |mat|
-      material = Material.where("code = #{mat['code']} and store_id = #{store_id}").first
+      material = Material.where("code = #{mat['code']} and store_id = #{store_id} and status = #{Material::STATUS[:NORMAL]}").first
       if material && material.storage >= mat['check_num'].to_i
         material.check_num = nil
         material.storage = material.storage - mat['check_num'].to_i
