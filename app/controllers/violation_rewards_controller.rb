@@ -17,6 +17,7 @@ class ViolationRewardsController < ApplicationController
           violation_reward.staff_id = staff_id
           violation_reward.save
         end
+        flash[:notice] = params[:violation_reward][:types] == "1" ? "新建奖励成功!" : "新建违规成功!"
       rescue
         flash[:notice] = params[:violation_reward][:types] == "1" ? "新建奖励失败!" : "新建违规失败!"
       end
