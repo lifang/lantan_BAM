@@ -5,12 +5,12 @@ class Api::LoginsController < ApplicationController
 
   #店长登录
   def check_staff
-    staff = Staff.find_by_username(params[:staff_name])
+    staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:staff_name], Staff::VALID_STATUS])
     message = "用户不存在或者密码有误"
     data_type = 1
     staffs =[]
-    if staff && staff.has_password?(params[:staff_password]) && Staff::VALID_STATUS.include?(staff.status)
-      if staff.position == Staff::S_HEAD[:MANAGER]
+    if staff && staff.has_password?(params[:staff_password])
+      if staff.position == Staff::S_HEAD[:MANAGER] or staff.position == Staff::S_HEAD[:BOSS]
         data_type = 0
         message = "登录成功"
         Staff.where("store_id=#{staff.store_id} and status=#{Staff::STATUS[:normal]} and position in (#{Staff::S_HEAD[:NORMAL]},#{Staff::S_HEAD[:MANAGER]})").each{|staff|
