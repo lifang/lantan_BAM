@@ -199,6 +199,7 @@ class Order < ActiveRecord::Base
         pc_record_hash[:cpard_relation_id] = cpr.cpr_id
         pc_record_hash[:id] = cpr.id
         pc_record_hash[:has_p_card] = 1
+        pc_record_hash[:expired] = (cpr.ended_at < Time.now ? 1 : 0)
         pc_record_hash[:products] = []
         cpr.content.split(",").each do |p_num|    
           prod_arr = p_num.split("-")
