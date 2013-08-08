@@ -169,7 +169,7 @@ function edit_serv(e){
         tishi_alert("请输入服务的成本价,价格为数字");
         return false;
     }
-    if((deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct)) || parseFloat(deduct)<0) &&
+    if((deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct)) || parseFloat(deduct)<0 || parseFloat(deduct)>100) &&
         (price == "" || price.length==0 || isNaN(parseFloat(price)) || parseFloat(price)<0)){
         tishi_alert("请输入技师提成");
         return false;

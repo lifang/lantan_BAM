@@ -127,6 +127,7 @@ class MarketManagesController < ApplicationController
         index +=1 if k.to_i >=4
       end
     end
+    flash[:notice] = "定制成功"
     redirect_to "/stores/#{params[:store_id]}/market_manages/"
   end
 

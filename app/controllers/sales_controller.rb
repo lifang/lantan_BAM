@@ -37,7 +37,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     params[:sale_prod].each do |key,value|
       SaleProdRelation.create({:sale_id=>sale.id,:product_id=>key,:prod_num=>value})
     end
-    redirect_to request.referer
+    redirect_to "/stores/#{params[:store_id]}/sales"
   end
 
   #编辑发布活动
@@ -84,7 +84,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     params[:sale_prod].each do |key,value|
       SaleProdRelation.create({:sale_id=>@sale.id,:product_id=>key,:prod_num=>value})
     end
-    redirect_to request.referer
+    redirect_to "/stores/#{params[:store_id]}/sales"
   end
 
   #发布活动

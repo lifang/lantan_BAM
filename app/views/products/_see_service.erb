@@ -26,6 +26,10 @@
         <div class="seeProDiv_l">类别：</div>
         <div class="seeProDiv_r"><%=Product::PRODUCT_TYPES[@serv.types]  %></div>
       </div>
+          <div class="seeProDiv">
+        <div class="seeProDiv_l">提成：</div>
+        <div class="seeProDiv_r"><%= (@serv.deduct_percent.nil? ? "" : "#{@serv.deduct_percent}(百分点)")+(@serv.deduct_price.nil? ? "" : "#{@serv.deduct_price}(元)")  %></div>
+      </div>
       <div class="seeProDiv">
         <div class="seeProDiv_l">技师：</div>
         <div class="seeProDiv_r"><%= "#{Staff::LEVELS[@serv.staff_level]} - #{Staff::LEVELS[@serv.staff_level_1]}" %></div>
