@@ -520,34 +520,39 @@ class Api::OrdersController < ApplicationController
     staff = Staff.find_by_id(params[:staff_id])
     if staff
       current_day = Time.now.strftime("%Y%m%d")
-      stations = Station.includes(:station_staff_relations => :staff).
-        where("staffs.id = #{staff.id}").
-        where("station_staff_relations.store_id = #{staff.store_id}").
-        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
-        where("stations.status = #{Station::STAT[:NORMAL]}")
-      wo = nil
-      sta = nil
-      stations.each do |station|
-        work_order = WorkOrder.joins([:order => :car_num], :station).where("work_orders.store_id = #{staff.store_id}").
+#      stations = Station.includes(:station_staff_relations => :staff).
+#        where("staffs.id = #{staff.id}").
+#        where("station_staff_relations.store_id = #{staff.store_id}").
+#        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
+#        where("stations.status = #{Station::STAT[:NORMAL]}")
+#      wo = nil
+#      sta = nil
+      #stations.each do |station|
+        work_order = WorkOrder.joins([:order => :car_num], :station => {:station_staff_relations => :staff}).
+          where("work_orders.store_id = #{staff.store_id}").
           where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
           where("stations.status = #{Station::STAT[:NORMAL]}").
           where("work_orders.current_day = #{current_day}").
-          where("work_orders.station_id = #{station.id}").select("work_orders.*,car_nums.num as car_num").first
+          where("staffs.id = #{staff.id}").
+          where("station_staff_relations.store_id = #{staff.store_id}").
+          where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
+          select("work_orders.*,car_nums.num as car_num").first
         if work_order
           work_order["coutdown"] = work_order.ended_at - Time.now
           products = Product.where("products.is_service = #{Product::PROD_TYPES[:SERVICE]} and orders.id = #{work_order.order_id}").
             joins(:order_prod_relations => :order).select("name")
           product_names = products.map(&:name).join(",")
           work_order["product_names"] = product_names
-          wo = work_order
-          sta = station
-          break
+#          wo = work_order
+#          sta = station
+#          break
         end
-      end
+      #end
 #      else
 #        work_order = nil
 #      end
-      render :json => {:status => 1, :work_order => wo, :station => sta}
+#      render :json => {:status => 1, :work_order => wo, :station => sta}
+        render :json => {:status => 1, :work_order => work_order, :station => work_order.nil? ? nil : work_order.station}
     else
       render :json => {:status => 0}
     end
@@ -572,7 +577,7 @@ class Api::OrdersController < ApplicationController
   #根据物料条形码查询物料
   def search_material
     staff = Staff.find_by_id(params[:staff_id])
-    material = Material.where(:code => params[:code], :store_id => staff.store_id).
+    material = Material.where(:code => params[:code], :store_id => staff.store_id, :status => Material::STATUS[:NORMAL]).
       select("name, code, storage, types, status, store_id, created_at, updated_at, remark, check_num, sale_price, unit, is_ignore, material_low, code_img").first if !staff.nil?
     render :json => {:material => material}
   end
