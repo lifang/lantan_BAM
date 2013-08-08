@@ -572,9 +572,9 @@ class Api::OrdersController < ApplicationController
   #终止施工
   def stop_construction
     work_order = WorkOrder.find_by_id(params[:work_order_id])
-    work_order.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if work_order
+    work_order.update_attribute(:status, WorkOrder::STAT[:END]) if work_order
     order = work_order.order
-    order.update_attribute(:status, Order::STATUS[:FINISHED]) if order
+    order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
     work_order.arrange_station(nil,nil,true) if work_order
     render :json => {:status => 1}
   end
