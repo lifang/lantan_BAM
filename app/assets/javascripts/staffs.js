@@ -214,9 +214,13 @@ $(document).ready(function(){
             //$(this).parent().parent().find($("#staff_probation_days")).val("");
             $(this).parent().parent().find($("#staff_probation_salary")).attr("disabled", "disabled");
             //$(this).parent().parent().find($("#staff_probation_salary")).val("");
+            $("#staff_probation_days").parent().find('span').hide();
+            $("#staff_probation_salary").parent().find('span').hide();
         }else{
             $(this).parent().parent().find($("#staff_probation_days")).removeAttr("disabled");
             $(this).parent().parent().find($("#staff_probation_salary")).removeAttr("disabled");
+            $("#staff_probation_days").parent().find('span').show();
+            $("#staff_probation_salary").parent().find('span').show();
         }
     });
     $("#staff_is_deduct").live("click", function(){             //是否参加提成

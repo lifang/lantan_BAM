@@ -27,7 +27,7 @@ class Salary < ActiveRecord::Base
       deduct_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:deduct_num]
       reward_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:reward_num]
       percent = avg_percent[staff.id].nil? ? 100 : avg_percent[staff.id]
-      if staff.working_stats
+      if staff.working_stats == 1
         staff_gr_record = StaffGrRecord.where("staff_id = #{staff.id} and created_at >= '#{Time.now.months_ago(1).at_beginning_of_month}' and created_at <= '#{Time.now.months_ago(1).at_end_of_month}'").order('created_at desc').first
         base_salary = (!staff_gr_record.nil? && !staff_gr_record.working_stats) ? staff.probation_salary : staff.base_salary
       else

@@ -3,8 +3,8 @@ class WorkOrder < ActiveRecord::Base
   belongs_to :station
   belongs_to :order
   belongs_to :store
-  STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成", 4 => "已取消"}
-  STAT = {:WAIT =>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE =>3, :CANCELED => 4}
+  STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成", 4 => "已取消", 5 => "已终止"}
+  STAT = {:WAIT =>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE =>3, :CANCELED => 4, :END => 5}
 
   def self.update_work_order
     current_time = Time.now
@@ -57,8 +57,8 @@ class WorkOrder < ActiveRecord::Base
   def arrange_station(gas_num=nil,water_num=nil,stop=false)
     current_time = Time.now
     #把完成的单的状态置为等待付款
+    order = self.order
     unless stop
-      order = self.order
       unless self.status ==  WorkOrder::STAT[:CANCELED]
         runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
         status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]

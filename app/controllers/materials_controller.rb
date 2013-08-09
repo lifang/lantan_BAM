@@ -772,7 +772,7 @@ class MaterialsController < ApplicationController
         material_tmp = Material.find_by_code_and_store_id_and_status(code_value+barcode.checksum.to_s, params[:store_id], Material::STATUS[:NORMAL])
         if material_tmp
           @status = 2
-          @flash_notice = "条形码：根据输入值产生的条码在此门店中已存在！"
+          @flash_notice = "该物料在当前门店中已经存在！"
         end
       end
       unless material_tmp
