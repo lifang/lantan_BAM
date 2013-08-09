@@ -33,7 +33,7 @@ class Customer < ActiveRecord::Base
     end
     unless name.nil? or name.strip.empty?
       condition_sql += " and cu.name like ? "
-      params_arr << "%#{name.strip}%"
+      params_arr << "\%#{name.strip.gsub('%', '\%')}\%"
     end
     unless phone.nil? or phone.strip.empty?
       condition_sql += " and cu.mobilephone = ? "
