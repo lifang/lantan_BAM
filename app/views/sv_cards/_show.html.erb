@@ -20,7 +20,7 @@
           <%= f.text_field :price, :disabled => (@sv_card.types==SvCard::FAVOR[:SAVE] ? true : false), :value => (@sv_card.types == SvCard::FAVOR[:DISCOUNT] ? @sv_card.price : nil)%>
         </div>
         <div class="item">
-          <label>使用范围:</label>
+          <label>使用范围：</label>
           <%= f.select :use_range, SvCard::S_USE_RANGE.invert %>
         </div>
         <div class="item_textarea">
