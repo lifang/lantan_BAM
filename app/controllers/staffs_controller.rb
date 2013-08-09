@@ -20,7 +20,9 @@ class StaffsController < ApplicationController
   end
 
   def search
-    name_sql = params[:name].blank? ? "1=1" : ["name like ?", "%#{params[:name]}%"]
+    name_condi = params[:name].gsub('%', '\%')
+    name_sql = params[:name].blank? ? "1=1" : ["name like (?)", "%"+name_condi+"%"]
+    #name_sql = params[:name].blank? ? "1=1" : ["name like ?", "%#{params[:name]}%"]
     types_sql = params[:types]=="-1" ? "1=1" : ["type_of_w = ?", "#{params[:types]}"]
     status_sql = params[:status]=="-1" ? "1=1" : ["status = ?", "#{params[:status]}"]
     type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
