@@ -184,8 +184,8 @@ class SvCardsController < ApplicationController
   end
 
   def search_left_price
-    @customer_name = params[:customer_name]
-    @customer_tel = params[:customer_tel]
+    @customer_name = params[:customer_name].gsub('%', '\%')
+    @customer_tel = params[:customer_tel].gsub('%', '\%')
     base_sql = (@customer_name.nil? || @customer_name.blank?) ? "1=1" : "c.name like '%#{@customer_name}%'"
     base_sql << " and "
     base_sql << ((@customer_tel.nil? || @customer_tel.blank?) ? "1=1" : "c.mobilephone like '%#{@customer_tel}%'")
