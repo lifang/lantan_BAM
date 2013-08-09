@@ -947,7 +947,7 @@ class MaterialsController < ApplicationController
   
   def make_search_sql
     mat_code_sql = params[:mat_code].blank? ? "1 = 1" : ["materials.code = ?", params[:mat_code]]
-    mat_name_sql = params[:mat_name].blank? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name]}%"]
+    mat_name_sql = params[:mat_name].blank? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name].gsub('%', '\%')}%"]
     mat_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["materials.types = ?", params[:mat_type].to_i]
     mo_code_sql = params[:mo_code].blank? ? "1=1" : ["material_orders.id = ?", params[:mo_code]]
     @s_sql = []
