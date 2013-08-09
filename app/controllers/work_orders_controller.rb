@@ -90,7 +90,7 @@ class WorkOrdersController < ApplicationController
       current_info[:wait_pay_car_nums] = nil
       current_info[:station_infos] = nil
       if wait_pay_car_nums.length != 0
-        current_info[:wait_pay_car_nums] = wait_pay_car_nums
+        current_info[:wait_pay_car_nums] = wait_pay_car_nums.uniq
       else
         current_info[:wait_pay_car_nums] = nil
       end
@@ -99,7 +99,7 @@ class WorkOrdersController < ApplicationController
       else
         current_info[:station_infos] = nil
       end
-      current_info[:no_station_wos] = Order.joins(:work_orders).where("work_orders.current_day =? and work_orders.store_id = ? and work_orders.status != ? and work_orders.station_id is null", now_date, params[:store_id], WorkOrder::STAT[:CANCELED]).map(&:car_num).map(&:num)
+      current_info[:no_station_wos] = Order.joins(:work_orders).where("work_orders.current_day =? and work_orders.store_id = ? and work_orders.status != ? and work_orders.station_id is null", now_date, params[:store_id], WorkOrder::STAT[:CANCELED]).map(&:car_num).map(&:num).uniq
       render :json => current_info
   end# work_orders_status 方法结束标记
 
