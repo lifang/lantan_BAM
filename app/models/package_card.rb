@@ -19,11 +19,11 @@ class PackageCard < ActiveRecord::Base
     sql += " and p.id=#{pcard}"  unless pcard.nil? || pcard == "" || pcard.length==0
     unless car_num.nil? || car_num == ""  || car_num.length ==0
       sql += " and n.num like ?"
-      conditions << car_num
+      conditions << "%#{car_num.gsub('%', '\%')}%"
     end
     unless c_name.nil? || c_name == "" || c_name.length == 0
       sql += " and c.name like ?"
-      conditions << c_name
+      conditions << "%#{c_name.gsub('%', '\%')}%"
     end
     sql += " and cp.created_at > '#{created_at}'" unless created_at.nil? || created_at == "" || created_at.length ==0
     sql += " and cp.created_at < '#{ended_at}'" unless ended_at.nil? ||  ended_at == "" || ended_at.length == 0
