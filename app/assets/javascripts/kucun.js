@@ -127,9 +127,8 @@ function submit_search_form(store_id,type,obj){
         }
         $.ajax({
             async:true,
-            url:"/stores/"+store_id+"/materials/search",
+            url:encodeURI("/stores/"+store_id+"/materials/search?"+data),
             dataType:"script",
-            data:data,
             type:"GET",
             success:function(){
                 $("#search_result").show();
