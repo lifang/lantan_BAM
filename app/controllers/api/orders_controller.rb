@@ -225,7 +225,7 @@ class Api::OrdersController < ApplicationController
       #同步订单信息
       codes_info = sync_info["code"]
       codes_info.each do |code_info|
-        order = Order.find_by_id(code_info["code"].to_i)
+        order = Order.find_by_code(code_info["code"])
         if order
           if code_info["status"].to_i == Order::STATUS[:DELETED]
             order.return_order_materials
