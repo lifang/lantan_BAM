@@ -52,7 +52,7 @@ class Customer < ActiveRecord::Base
     end
     unless car_num.nil? or car_num.strip.empty?
       condition_sql += " and ca.num like ? "
-      params_arr << "%#{car_num.strip}%"
+      params_arr << "\%#{car_num.strip.gsub('%', '\%')}\%"
     end
     is_has_order = false
     need_group_by = false
