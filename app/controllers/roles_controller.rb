@@ -46,7 +46,7 @@ class RolesController < ApplicationController
 
     if params[:name]
       str[0] += " and name like ?"
-      str << "%#{params[:name]}%"
+      str << "%#{params[:name].gsub('%', '\%')}%"
     end
     @staffs = Staff.valid.includes(:staff_role_relations => :role).paginate(:conditions => str,
       :page => params[:page], :per_page => Constant::PER_PAGE)

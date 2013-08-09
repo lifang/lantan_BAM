@@ -123,7 +123,12 @@ class WorkOrder < ActiveRecord::Base
         another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
           :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
         another_order = another_work_order.order
-        another_order.update_attribute(:status, Order::STATUS[:SERVICING]) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT]
+         station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day self.station_id, Time.now.strftime("%Y%m%d").to_i if self.station_id
+            if station_staffs
+             staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0
+             staff_id_2 = station_staffs[1].staff_id if station_staffs.size > 1
+            end
+        another_order.update_attribute(:status, Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2 ) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT]
         if another_work_orders.length >= 2
           another_work_orders.shift
           another_work_orders.each do |w_k|
@@ -161,8 +166,12 @@ class WorkOrder < ActiveRecord::Base
 
           same_work_orders[0].update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station.id,
             :started_at => Time.now, :ended_at => s_ended_at)
-          
-          same_work_orders[0].order.update_attribute(:status, Order::STATUS[:SERVICING]) if same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT]
+          station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day leave_station.id, Time.now.strftime("%Y%m%d").to_i if leave_station.id
+            if station_staffs
+             staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0
+             staff_id_2 = station_staffs[1].staff_id if station_staffs.size > 1
+            end
+          same_work_orders[0].order.update_attribute(:status, Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2) if same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT]
           WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id => leave_station.id,
             :current_times => s_ended_at.strftime("%Y%m%d%H%M"))
         end
