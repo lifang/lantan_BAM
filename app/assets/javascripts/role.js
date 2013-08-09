@@ -110,10 +110,9 @@ function set_staff_role(staff_id,r_ids){
 
 function search_staff(store_id){
     $.ajax({
-        url:'/stores/'+store_id+'/roles/staff',
+        url:encodeURI('/stores/'+store_id+'/roles/staff?name='+ $.trim($("#name").val())),
         dataType:"script",
         type:"GET",
-        data:"name="+ $.trim($("#name").val()),
         success:function(){
         //           alert(2);
         },

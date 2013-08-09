@@ -3,8 +3,8 @@ class WorkOrder < ActiveRecord::Base
   belongs_to :station
   belongs_to :order
   belongs_to :store
-  STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成", 4 => "已取消"}
-  STAT = {:WAIT =>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE =>3, :CANCELED => 4}
+  STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成", 4 => "已取消", 5 => "已终止"}
+  STAT = {:WAIT =>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE =>3, :CANCELED => 4, :END => 5}
 
   def self.update_work_order
     current_time = Time.now
@@ -54,28 +54,30 @@ class WorkOrder < ActiveRecord::Base
     end
   end
 
-  def arrange_station(gas_num=nil,water_num=nil)
+  def arrange_station(gas_num=nil,water_num=nil,stop=false)
     current_time = Time.now
     #把完成的单的状态置为等待付款
     order = self.order
-    unless self.status ==  WorkOrder::STAT[:CANCELED]
-      runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
-      status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
-      self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
-    
-      if !self.cost_time.nil?
-        if runtime > self.cost_time.to_f
-          staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
-          staffs.each do |staff_id|
-            ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
-              :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
-              :status => ViolationReward::STATUS[:NOMAL])
+    unless stop
+      unless self.status ==  WorkOrder::STAT[:CANCELED]
+        runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
+        status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
+        self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
+
+        if !self.cost_time.nil?
+          if runtime > self.cost_time.to_f
+            staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+            staffs.each do |staff_id|
+              ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
+                :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
+                :status => ViolationReward::STATUS[:NOMAL])
+            end
           end
         end
-      end
 
+      end
+      order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
     end
-    order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
 
     #排下一个单
     next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").

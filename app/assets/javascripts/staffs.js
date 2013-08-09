@@ -214,9 +214,13 @@ $(document).ready(function(){
             //$(this).parent().parent().find($("#staff_probation_days")).val("");
             $(this).parent().parent().find($("#staff_probation_salary")).attr("disabled", "disabled");
             //$(this).parent().parent().find($("#staff_probation_salary")).val("");
+            $("#staff_probation_days").parent().find('span').hide();
+            $("#staff_probation_salary").parent().find('span').hide();
         }else{
             $(this).parent().parent().find($("#staff_probation_days")).removeAttr("disabled");
             $(this).parent().parent().find($("#staff_probation_salary")).removeAttr("disabled");
+            $("#staff_probation_days").parent().find('span').show();
+            $("#staff_probation_salary").parent().find('span').show();
         }
     });
     $("#staff_is_deduct").live("click", function(){             //是否参加提成
@@ -513,6 +517,9 @@ $(document).ready(function(){
                         this_obj.parents('tr').find('.assess_result').text(assess_result(sys_score, manage_score));
                     }
                     tishi_alert("编辑系统打分成功！");
+                }
+                if(data == "error"){
+                    tishi_alert("没有系统打分记录，无法编辑系统打分！");
                 }
             }
         });

@@ -169,7 +169,7 @@ function edit_serv(e){
         tishi_alert("请输入服务的成本价,价格为数字");
         return false;
     }
-    if((deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct)) || parseFloat(deduct)<0) &&
+    if((deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct)) || parseFloat(deduct)<0 || parseFloat(deduct)>100) &&
         (price == "" || price.length==0 || isNaN(parseFloat(price)) || parseFloat(price)<0)){
         tishi_alert("请输入技师提成");
         return false;
@@ -281,14 +281,14 @@ function check_revist(){
 function update_status(){
     var checks = $("input:checkbox");
     var check_ids = [];
-    var check_val = [];
+    var check_val = {};
     for(var i = 0;i<checks.length;i++){
         check_ids.push(checks[i].value);
-        check_val.push(Number(!checks[i].checked));
+        check_val[checks[i].value]=Number(!checks[i].checked);
     }
     if (confirm("确定这些服务不在前端显示吗")){
         $("#ids").val(check_ids.join(","));
-        $("#vals").val(check_val.join(","));
+        $("#vals").val(JSON.stringify(check_val));
         $("#update_ids").submit();
     }
    

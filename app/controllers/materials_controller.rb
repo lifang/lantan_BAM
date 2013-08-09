@@ -769,10 +769,10 @@ class MaterialsController < ApplicationController
       if params[:material][:ifuse_code]=="1"
         code_value = params[:material][:code_value][0..-2]
         barcode = Barby::EAN13.new(code_value)
-        material_tmp = Material.find_by_code_and_store_id(code_value+barcode.checksum.to_s, params[:store_id])
+        material_tmp = Material.find_by_code_and_store_id_and_status(code_value+barcode.checksum.to_s, params[:store_id], Material::STATUS[:NORMAL])
         if material_tmp
           @status = 2
-          @flash_notice = "条形码：根据输入值产生的条码在此门店中已存在！"
+          @flash_notice = "该物料在当前门店中已经存在！"
         end
       end
       unless material_tmp
@@ -922,7 +922,7 @@ class MaterialsController < ApplicationController
     new_code = params[:new_code]
     Material.transaction do
       barcode = Barby::EAN13.new(new_code)
-      if Material.where(["store_id = ? and code = ? and id != ?", store_id, new_code+barcode.checksum.to_s, mat_id]).blank?
+      if Material.where(["store_id = ? and code = ? and id != ? and status = ?", store_id, new_code+barcode.checksum.to_s, mat_id, Material::STATUS[:NORMAL]]).blank?
         material = Material.find_by_id_and_store_id(mat_id,store_id)
         if material.nil?
           render :json => {:status => 0}
@@ -947,7 +947,7 @@ class MaterialsController < ApplicationController
   
   def make_search_sql
     mat_code_sql = params[:mat_code].blank? ? "1 = 1" : ["materials.code = ?", params[:mat_code]]
-    mat_name_sql = params[:mat_name].blank? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name]}%"]
+    mat_name_sql = params[:mat_name].blank? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name].gsub('%', '\%')}%"]
     mat_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["materials.types = ?", params[:mat_type].to_i]
     mo_code_sql = params[:mo_code].blank? ? "1=1" : ["material_orders.id = ?", params[:mo_code]]
     @s_sql = []

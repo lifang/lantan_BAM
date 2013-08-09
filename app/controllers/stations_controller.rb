@@ -49,7 +49,8 @@ class StationsController < ApplicationController
         station.update_attributes(:status=>params[:"stat#{station.id}"].to_i)
       end
     }
-    redirect_to "/stores/#{params[:store_id]}/stations/show_detail"
+    flash[:notice] = "技师分配成功"
+    redirect_to request.referer
   end
 
   def show_video
