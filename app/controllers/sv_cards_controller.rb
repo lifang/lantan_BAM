@@ -184,11 +184,11 @@ class SvCardsController < ApplicationController
   end
 
   def search_left_price
-    @customer_name = params[:customer_name].gsub('%', '\%')
-    @customer_tel = params[:customer_tel].gsub('%', '\%')
-    base_sql = (@customer_name.nil? || @customer_name.blank?) ? "1=1" : "c.name like '%#{@customer_name}%'"
+    @customer_name = params[:customer_name]
+    @customer_tel = params[:customer_tel]
+    base_sql = (@customer_name.nil? || @customer_name.blank?) ? "1=1" : "c.name like '%#{@customer_name.gsub('%', '\%')}%'"
     base_sql << " and "
-    base_sql << ((@customer_tel.nil? || @customer_tel.blank?) ? "1=1" : "c.mobilephone like '%#{@customer_tel}%'")
+    base_sql << ((@customer_tel.nil? || @customer_tel.blank?) ? "1=1" : "c.mobilephone like '%#{@customer_tel.gsub('%', '\%')}%'")
     @customers = Customer.find_by_sql("select csr.id csr_id, c.name name, cn.num num, c.mobilephone mobilephone, sc.name s_name, csr.left_price left_price from customers c
                                        inner join c_svc_relations csr on csr.customer_id = c.id left join sv_cards sc on sc.id = csr.sv_card_id
                                        left join customer_num_relations cnr on cnr.customer_id = c.id left join car_nums cn on cn.id = cnr.car_num_id
