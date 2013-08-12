@@ -105,41 +105,57 @@ class WorkOrder < ActiveRecord::Base
 
       products = Product.includes(:station_service_relations => :station).
         where(:stations=>{:id => self.station_id}).
-        where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").select("products.id")
-
+        where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").map(&:id)
+      #qualified_station_arr = Station.return_station_arr(products, self.store_id)[0]
       another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
         where("work_orders.station_id is null").
         where("work_orders.store_id = #{self.store_id}").
-        where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
-        where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
+       # where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
+       # where("stations.id in (?)",qualified_station_arr ).
+       # where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
         where("work_orders.current_day = #{self.current_day}").
         where(car_num_id_sql,orders.map(&:car_num_id)).
         readonly(false).order("work_orders.created_at asc")
 
-      if another_work_orders.length >= 1
-        another_work_order = another_work_orders.first
-        ended_at = current_time + another_work_order.cost_time*60
-        another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
-          :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
+      if_wo_set_station = false
+      same_car_num_id = nil
+      another_work_orders.each do |another_work_order|
+        #      if another_work_orders.length >= 1
         another_order = another_work_order.order
-        station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day self.station_id, Time.now.strftime("%Y%m%d").to_i if self.station_id
-        if station_staffs
-          staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0
-          staff_id_2 = station_staffs[1].staff_id if station_staffs.size > 1
-        end
-        another_order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2 ) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT]
-        if another_work_orders.length >= 2
-          another_work_orders.shift
-          another_work_orders.each do |w_k|
-            if w_k.order && w_k.order.car_num_id == another_order.car_num_id
-              w_k.update_attributes(:station_id => self.station_id)
+        order_product_ids = OrderProdRelation.joins(:product).where(:order_id => another_order,
+          :product => {:is_service => Product::PROD_TYPES[:SERVICE]}).map(&:product_id)
+        if (products & products).sort == order_product_ids.sort
+          if if_wo_set_station
+            another_work_order.update_attributes(:station_id => self.station_id) if same_car_num_id == another_work_order.order.car_num_id
+          else
+            ended_at = current_time + another_work_order.cost_time*60
+            another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
+              :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
+            same_car_num_id  = another_order.car_num_id
+            if_wo_set_station = true
+            station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day self.station_id, Time.now.strftime("%Y%m%d").to_i if self.station_id
+            if station_staffs
+              staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0
+              staff_id_2 = station_staffs[1].staff_id if station_staffs.size > 1
             end
+            another_order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2 ) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT]
+
           end
         end
-      else
-        message = "no_next_work_order"
-      end
+        #        if another_work_orders.length >= 2
+        #          another_work_orders.shift
+        #          another_work_orders.each do |w_k|
+        #            if w_k.order && w_k.order.car_num_id == another_order.car_num_id
+        #              w_k.update_attributes(:station_id => self.station_id)
+        #            end
+        #          end
+        #        end
+        #      else
+        #        message = "no_next_work_order"
+        #      end
+      end unless another_work_orders.blank?
+      
       #同一个car_num_id，当符合条件的工位为空时，排单
       same_work_orders = WorkOrder.joins(:order).
         where("work_orders.station_id is null").
