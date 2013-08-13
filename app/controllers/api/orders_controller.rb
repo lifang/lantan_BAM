@@ -226,19 +226,21 @@ class Api::OrdersController < ApplicationController
       codes_info = sync_info["code"]
       codes_info.each do |code_info|
         order = Order.find_by_code(code_info["code"])
-        if code_info["status"].to_i == Order::STATUS[:DELETED]
-          order.return_order_materials
-          order.update_attribute(:status, Order::STATUS[:DELETED])
-        elsif code_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT] || Order::STATUS[:FINISHED]
-          OrderPayType.create(:pay_type => code_info["pay_type"], :price => code_info["price"],
-            :created_at => code_info["time"], :order_id => order.id)
-          Complaint.create(:reason => code_info["complaint"]["reason"], :suggestion => code_info["complaint"]["request"],
-            :created_at => code_info["time"], :order_id => order.id, :customer_id => order.customer_id) if code_info["complaint"]
-          order.c_pcard_relations.each {|cpr| cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL])} if order.c_pcard_relations
-          CSvcRelation.find_all_by_order_id(order.id).each { |csr| csr.update_attributes(:status => CSvcRelation::STATUS[:valid]) }
-          is_free = (code_info["pay_type"].to_i == OrderPayType::PAY_TYPES[:IS_FREE]) ? true : false
-          order.update_attributes(:status => code_info["status"].to_i, :is_pleased => code_info["is_please"],
-            :is_billing => code_info["billing"].to_i, :is_free => is_free)
+        if order
+          if code_info["status"].to_i == Order::STATUS[:DELETED]
+            order.return_order_materials
+            order.update_attribute(:status, Order::STATUS[:DELETED])
+          elsif code_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT] || Order::STATUS[:FINISHED]
+            OrderPayType.create(:pay_type => code_info["pay_type"], :price => code_info["price"],
+              :created_at => code_info["time"], :order_id => order.id)
+            Complaint.create(:reason => code_info["complaint"]["reason"], :suggestion => code_info["complaint"]["request"],
+              :created_at => code_info["time"], :order_id => order.id, :customer_id => order.customer_id) if code_info["complaint"]
+            order.c_pcard_relations.each {|cpr| cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL])} if order.c_pcard_relations
+            CSvcRelation.find_all_by_order_id(order.id).each { |csr| csr.update_attributes(:status => CSvcRelation::STATUS[:valid]) }
+            is_free = (code_info["pay_type"].to_i == OrderPayType::PAY_TYPES[:IS_FREE]) ? true : false
+            order.update_attributes(:status => code_info["status"].to_i, :is_pleased => code_info["is_please"],
+              :is_billing => code_info["billing"].to_i, :is_free => is_free)
+          end
         end
       end if codes_info
 
@@ -380,11 +382,11 @@ class Api::OrdersController < ApplicationController
     work_order = WorkOrder.find_by_id(params[:work_order_id])
     if !work_order.nil?
       message = work_order.arrange_station
-      if message == "no_next_work_order"
-        render :json => {:status => 1, :message => "没有客户继续下单!"}
-      else
+#      if message == "no_next_work_order"
+#        render :json => {:status => 1, :message => "排单成功!!"}
+#      else
         render :json => {:status => 1, :message => "排单成功!"}
-      end
+#      end
     else
       render :json => {:status => 0, :message => "没有找到这个订单!"}
     end
@@ -521,39 +523,39 @@ class Api::OrdersController < ApplicationController
     staff = Staff.find_by_id(params[:staff_id])
     if staff
       current_day = Time.now.strftime("%Y%m%d")
-#      stations = Station.includes(:station_staff_relations => :staff).
-#        where("staffs.id = #{staff.id}").
-#        where("station_staff_relations.store_id = #{staff.store_id}").
-#        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
-#        where("stations.status = #{Station::STAT[:NORMAL]}")
-#      wo = nil
-#      sta = nil
+      #      stations = Station.includes(:station_staff_relations => :staff).
+      #        where("staffs.id = #{staff.id}").
+      #        where("station_staff_relations.store_id = #{staff.store_id}").
+      #        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
+      #        where("stations.status = #{Station::STAT[:NORMAL]}")
+      #      wo = nil
+      #      sta = nil
       #stations.each do |station|
-        work_order = WorkOrder.joins([:order => :car_num], :station => {:station_staff_relations => :staff}).
-          where("work_orders.store_id = #{staff.store_id}").
-          where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
-          where("stations.status = #{Station::STAT[:NORMAL]}").
-          where("work_orders.current_day = #{current_day}").
-          where("staffs.id = #{staff.id}").
-          where("station_staff_relations.store_id = #{staff.store_id}").
-          where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
-          select("work_orders.*,car_nums.num as car_num").first
-        if work_order
-          work_order["coutdown"] = work_order.ended_at - Time.now
-          products = Product.where("products.is_service = #{Product::PROD_TYPES[:SERVICE]} and orders.id = #{work_order.order_id}").
-            joins(:order_prod_relations => :order).select("name")
-          product_names = products.map(&:name).join(",")
-          work_order["product_names"] = product_names
-#          wo = work_order
-#          sta = station
-#          break
-        end
+      work_order = WorkOrder.joins([:order => :car_num], :station => {:station_staff_relations => :staff}).
+        where("work_orders.store_id = #{staff.store_id}").
+        where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
+        where("stations.status = #{Station::STAT[:NORMAL]}").
+        where("work_orders.current_day = #{current_day}").
+        where("staffs.id = #{staff.id}").
+        where("station_staff_relations.store_id = #{staff.store_id}").
+        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
+        select("work_orders.*,car_nums.num as car_num").first
+      if work_order
+        work_order["coutdown"] = work_order.ended_at - Time.now
+        products = Product.where("products.is_service = #{Product::PROD_TYPES[:SERVICE]} and orders.id = #{work_order.order_id}").
+          joins(:order_prod_relations => :order).select("name")
+        product_names = products.map(&:name).join(",")
+        work_order["product_names"] = product_names
+        #          wo = work_order
+        #          sta = station
+        #          break
+      end
       #end
-#      else
-#        work_order = nil
-#      end
-#      render :json => {:status => 1, :work_order => wo, :station => sta}
-        render :json => {:status => 1, :work_order => work_order, :station => work_order.nil? ? nil : work_order.station}
+      #      else
+      #        work_order = nil
+      #      end
+      #      render :json => {:status => 1, :work_order => wo, :station => sta}
+      render :json => {:status => 1, :work_order => work_order, :station => work_order.nil? ? nil : work_order.station}
     else
       render :json => {:status => 0}
     end

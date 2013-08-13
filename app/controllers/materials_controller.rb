@@ -55,7 +55,7 @@ class MaterialsController < ApplicationController
           @s_sql[0]).where(@s_sql[1]).where(@s_sql[2])
     elsif @tab_name == 'material_losses'
       @l_sql = []
-      @l_sql <<  params[:mat_code] << params[:mat_name] << params[:mat_type]
+      @l_sql <<  params[:mat_code] << params[:mat_name].gsub(/[%_]/){|x| '\\' + x} << params[:mat_type]
       @material_losses = MaterialLoss.list params[:page],Constant::PER_PAGE, params[:store_id],@l_sql
     elsif  @tab_name == 'in_records'
       @in_records = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@s_sql
@@ -239,7 +239,7 @@ class MaterialsController < ApplicationController
     str = ["status = ?", Material::STATUS[:NORMAL]]
     if params[:name].strip.length > 0
       str[0] += " and name like ?"
-      str << "%#{params[:name]}%"
+      str << "%#{params[:name].gsub(/[%_]/){|x| '\\' + x}}%"
     end
     if params[:types].strip.length > 0
       str[0] += " and types = ?"
@@ -767,7 +767,7 @@ class MaterialsController < ApplicationController
     params[:material][:name] = params[:material][:name].strip
     Material.transaction  do
       if params[:material][:ifuse_code]=="1"
-        code_value = params[:material][:code_value][0..-2]
+        code_value = params[:material][:code_value].strip[0..-2]
         barcode = Barby::EAN13.new(code_value)
         material_tmp = Material.find_by_code_and_store_id_and_status(code_value+barcode.checksum.to_s, params[:store_id], Material::STATUS[:NORMAL])
         if material_tmp
@@ -947,7 +947,7 @@ class MaterialsController < ApplicationController
   
   def make_search_sql
     mat_code_sql = params[:mat_code].blank? ? "1 = 1" : ["materials.code = ?", params[:mat_code]]
-    mat_name_sql = params[:mat_name].blank? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name].gsub('%', '\%')}%"]
+    mat_name_sql = params[:mat_name].blank? ? "1 = 1" : ["materials.name like ?", "%#{params[:mat_name].gsub(/[%_]/){|x| '\\' + x}}%"]
     mat_type_sql = params[:mat_type].blank? || params[:mat_type] == "-1" ? "1 = 1" : ["materials.types = ?", params[:mat_type].to_i]
     mo_code_sql = params[:mo_code].blank? ? "1=1" : ["material_orders.id = ?", params[:mo_code]]
     @s_sql = []
