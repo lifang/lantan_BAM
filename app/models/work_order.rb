@@ -124,7 +124,7 @@ class WorkOrder < ActiveRecord::Base
         #      if another_work_orders.length >= 1
         another_order = another_work_order.order
         order_product_ids = OrderProdRelation.joins(:product).where(:order_id => another_order,
-          :product => {:is_service => Product::PROD_TYPES[:SERVICE]}).map(&:product_id)
+          :products => {:is_service => Product::PROD_TYPES[:SERVICE]}).map(&:product_id)
         if (products & products).sort == order_product_ids.sort
           if if_wo_set_station
             another_work_order.update_attributes(:station_id => self.station_id) if same_car_num_id == another_work_order.order.car_num_id

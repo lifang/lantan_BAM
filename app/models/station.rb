@@ -227,6 +227,10 @@ class Station < ActiveRecord::Base
     #    end
     if station_arr.present?
       station_flag = 1 #有对应工位对应
+      station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i)
+      if station_staffs.blank?
+        station_flag = 3
+      end
     else
       if((station_prod_ids.flatten & prod_ids).sort == prod_ids.sort) && (!station_prod_ids.include?(prod_ids))
         station_flag = 2 #一个订单要使用多个工位
@@ -234,10 +238,7 @@ class Station < ActiveRecord::Base
         station_flag = 0 #没工位
       end
     end
-    station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i) if station_arr
-    if station_staffs.blank?
-      station_flag = 3
-    end
+    
 
 
     station_id = 0
