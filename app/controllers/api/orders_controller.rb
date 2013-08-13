@@ -382,11 +382,11 @@ class Api::OrdersController < ApplicationController
     work_order = WorkOrder.find_by_id(params[:work_order_id])
     if !work_order.nil?
       message = work_order.arrange_station
-      if message == "no_next_work_order"
-        render :json => {:status => 1, :message => "没有客户继续下单!"}
-      else
+#      if message == "no_next_work_order"
+#        render :json => {:status => 1, :message => "排单成功!!"}
+#      else
         render :json => {:status => 1, :message => "排单成功!"}
-      end
+#      end
     else
       render :json => {:status => 0, :message => "没有找到这个订单!"}
     end
