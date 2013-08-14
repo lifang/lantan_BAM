@@ -33,7 +33,7 @@ class Customer < ActiveRecord::Base
     end
     unless name.nil? or name.strip.empty?
       condition_sql += " and cu.name like ? "
-      params_arr << "\%#{name.strip.gsub('%', '\%')}\%"
+      params_arr << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     unless phone.nil? or phone.strip.empty?
       condition_sql += " and cu.mobilephone = ? "
@@ -52,7 +52,7 @@ class Customer < ActiveRecord::Base
     end
     unless car_num.nil? or car_num.strip.empty?
       condition_sql += " and ca.num like ? "
-      params_arr << "\%#{car_num.strip.gsub('%', '\%')}\%"
+      params_arr << "%#{car_num.strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     is_has_order = false
     need_group_by = false
