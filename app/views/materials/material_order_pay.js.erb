@@ -1,9 +1,0 @@
-<%if !@material_order.materials.map(&:status).include?(true)%>
-$("#final_fukuan_tab").html('<%= escape_javascript(render :partial => 'fukuan_tab') %>');
-hide_mask($("#fukuan_tab"));
-$('#final_fukuan_tab #if_refresh').val("1");
-popup("#final_fukuan_tab");
-<% else %>
-tishi_alert("当前订单中有物料被删除，请重新下单！")
-$("#order_form").find(".confirm_btn").attr('disabled', false)
-<% end %>

@@ -344,18 +344,21 @@ class MaterialsController < ApplicationController
               price = 0
               #订单相关的物料
               params[:selected_items].split(",").each do |item|
-                price += item.split("_")[2].to_f * item.split("_")[1].to_i
                 m = Material.normal.find_by_id item.split("_")[0]
+                price += item.split("_")[2].to_f * item.split("_")[1].to_i if m
                 MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
                     :price => item.split("_")[2].to_f})   if m
-
               end
               material_order.update_attribute(:price,price)
             end
           end
         end
-      
-      render :json => {:status => status, :mo_id => material_order.id}
+      if status == 0
+        @current_store = Store.find_by_id params[:store_id]
+        @store_account = @current_store.account if @current_store
+        @material_order = material_order
+      end
+      #render :json => {:status => status, :mo_id => material_order.id}
     end
   end
 #付款页面
