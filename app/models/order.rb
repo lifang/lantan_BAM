@@ -301,7 +301,8 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
 #      :conditions => ["status = ? and store_id = ? and
 #          ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?) or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})##",
 #        PackageCard::STAT[:NORMAL], store_id, Time.now])
-    cards = PackageCard.find_by_sql(["select pc.*,pcmr.material_num, m.storage m_storage from package_cards pc left join pcard_material_relations pcmr
+    cards = PackageCard.find_by_sql(["select pc.*,pcmr.material_num, m.storage m_storage from
+         package_cards pc left join pcard_material_relations pcmr
          on pc.id = pcmr.package_card_id left join materials m on m.id = pcmr.material_id where pc.status = ?
         and pc.store_id = ? and ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?)
  or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})",PackageCard::STAT[:NORMAL], store_id, Time.now])
@@ -755,6 +756,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
                   :status => CPcardRelation::STATUS[:INVALID], :ended_at => ended_at,
                   :content => CPcardRelation.set_content(p_card_id), :order_id => order.id,
                   :price => p_cards_hash[p_card_id][0].price)
+                #扣掉跟套餐卡相关的物料
                 pcmr = PcardMaterialRelation.find_by_package_card_id(p_card_id)
                 if pcmr
                   material = pcmr.material
@@ -1148,7 +1150,7 @@ on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} 
         m.update_attributes(:storage => (m.storage + order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
       end unless materials.blank?
     end
-    
+    #归还跟套餐卡相关的物料
     cpcard_relations = self.c_pcard_relations
     if cpcard_relations.present?
       package_card_ids = cpcard_relations.map(&:package_card_id)
