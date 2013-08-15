@@ -297,10 +297,16 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
     product_arr[:汽车配件类] = assis_prod_arr
     product_arr[:电子产品类] = elec_prod_arr
     product_arr[:汽车用品类] = other_prod_arr
-    cards = PackageCard.find(:all,
-      :conditions => ["status = ? and store_id = ? and
-          ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?) or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})",
-        PackageCard::STAT[:NORMAL], store_id, Time.now])
+#    cards = PackageCard.find(:all,
+#      :conditions => ["status = ? and store_id = ? and
+#          ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?) or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})##",
+#        PackageCard::STAT[:NORMAL], store_id, Time.now])
+    cards = PackageCard.find_by_sql(["select pc.*,pcmr.material_num, m.storage m_storage from
+         package_cards pc left join pcard_material_relations pcmr
+         on pc.id = pcmr.package_card_id left join materials m on m.id = pcmr.material_id where pc.status = ?
+        and pc.store_id = ? and ((date_types = #{PackageCard::TIME_SELCTED[:PERIOD]} and ended_at >= ?)
+ or date_types = #{PackageCard::TIME_SELCTED[:END_TIME]})",PackageCard::STAT[:NORMAL], store_id, Time.now])
+
     pcard_prod_relations = PcardProdRelation.find_by_sql(["select p.name, ppr.product_num, ppr.package_card_id
       from pcard_prod_relations ppr
       inner join products p on p.id = ppr.product_id where ppr.package_card_id in (?)", cards]).group_by{ |pcr| pcr.package_card_id }
@@ -317,6 +323,9 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         end if pcard_prod_relations[c.id]
         description += c.description.to_s
       end
+    if !c.is_a?(SvCard) and c.m_storage.present? and c.material_num.present? and c.m_storage < c.material_num
+      nil
+    else
       h = Hash.new
       h[:id] = c.id
       h[:name] = c.name
@@ -326,7 +335,8 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       h[:type] = c.is_a?(PackageCard) ? '0' : '1'
       h[:point] = c.is_a?(PackageCard) ? c.prod_point : nil
       h
-    }
+    end
+    }.compact
     arr[:products] = product_arr
     arr[:p_titles_order] = [:清洗美容类, :汽车用品类, :维修保养类, :美容产品类, :电子产品类, :装饰产品类, :汽车配件类, :优惠卡类]
     #    count = product_arr.values.map(&:length).max
@@ -646,7 +656,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           used_svcard_id = used_cards.flatten[1] #已经使用的打折卡的id
           #2_id_card_type_（is_new）_price 储值卡格式
           arr[2].select{|ele| ele[3].to_i == 1}.each do |uc|
-            if uc[3]=="1" #新套餐卡
+            if uc[3]=="1" #新储值卡 or 打折卡
               sv_card = SvCard.find_by_id uc[1]
               if sv_card
                 if sv_card.types== SvCard::FAVOR[:SAVE]  #储值卡
@@ -742,10 +752,17 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
                 else
                   ended_at = p_cards_hash[p_card_id][0].ended_at
                 end
-                cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id =>p_card_id,
+                cpr = CPcardRelation.create(:customer_id => c_id, :package_card_id => p_card_id,
                   :status => CPcardRelation::STATUS[:INVALID], :ended_at => ended_at,
                   :content => CPcardRelation.set_content(p_card_id), :order_id => order.id,
                   :price => p_cards_hash[p_card_id][0].price)
+                #扣掉跟套餐卡相关的物料
+                pcmr = PcardMaterialRelation.find_by_package_card_id(p_card_id)
+                if pcmr
+                  material = pcmr.material
+                  material.update_attribute(:storage, material.storage - pcmr.material_num) if material
+                end
+
                 if a_pc[3] # 如果使用套餐卡，把使用的次数保存
                   (prod_nums||[]).each do |pn|
                     prod_id = pn.split("=")[0]
@@ -1132,6 +1149,16 @@ on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} 
       materials.each do |m|
         m.update_attributes(:storage => (m.storage + order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
       end unless materials.blank?
+    end
+    #归还跟套餐卡相关的物料
+    cpcard_relations = self.c_pcard_relations
+    if cpcard_relations.present?
+      package_card_ids = cpcard_relations.map(&:package_card_id)
+      pcmrs = PcardMaterialRelation.where(:package_card_id => package_card_ids)
+      pcmrs.each do |pcmr|
+        material = pcmr.material
+        material.update_attribute(:storage, material.storage + pcmr.material_num) if material
+      end if pcmrs.present?
     end
   end
 

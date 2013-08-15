@@ -16,6 +16,7 @@ class Material < ActiveRecord::Base
   has_many  :mat_in_orders
   has_many :prod_mat_relations
   has_many :mat_depot_relations
+  has_many :pcard_material_relations
   has_many :depots, :through => :mat_depot_relations
   attr_accessor :ifuse_code, :code_value
 
