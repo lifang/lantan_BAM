@@ -566,6 +566,17 @@ ActiveRecord::Schema.define(:version => 20130815063055) do
   add_index "package_cards", ["store_id"], :name => "index_package_cards_on_store_id"
   add_index "package_cards", ["updated_at"], :name => "index_package_cards_on_updated_at"
 
+  create_table "pcard_material_relations", :force => true do |t|
+    t.integer  "material_id"
+    t.integer  "material_num"
+    t.integer  "package_card_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "pcard_material_relations", ["material_id"], :name => "index_pcard_material_relations_on_material_id"
+  add_index "pcard_material_relations", ["package_card_id"], :name => "index_pcard_material_relations_on_package_card_id"
+
   create_table "pcard_prod_relations", :force => true do |t|
     t.integer  "product_id"
     t.integer  "product_num"

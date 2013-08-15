@@ -52,7 +52,7 @@ class Complaint < ActiveRecord::Base
     end
     unless name.nil? || name =="" || name.length==0
       sql += " and s.name like ?"
-      conditions << "%#{name}%"
+      conditions << "%#{name.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     sql += " group by c.types"
     conditions[0] = sql

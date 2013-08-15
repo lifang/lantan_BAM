@@ -23,7 +23,7 @@ class PackageCard < ActiveRecord::Base
     end
     unless c_name.nil? || c_name == "" || c_name.length == 0
       sql += " and c.name like ?"
-      conditions << "%#{c_name.gsub('%', '\%')}%"
+      conditions << "%#{c_name.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     sql += " and cp.created_at > '#{created_at}'" unless created_at.nil? || created_at == "" || created_at.length ==0
     sql += " and cp.created_at < '#{ended_at}'" unless ended_at.nil? ||  ended_at == "" || ended_at.length == 0
