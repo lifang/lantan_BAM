@@ -95,8 +95,7 @@ textarea {
 	font-size: 18px;
 }
 .logo1 span { display: inline-block; padding-top: 60px;}
-.logo { 
-    width: 270px; 
+.logo {  
 	height: 50px; 
 	background: url(/assets/logo.jpg) no-repeat;
 	overflow: hidden; 
