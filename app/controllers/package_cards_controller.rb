@@ -10,9 +10,13 @@ class PackageCardsController < ApplicationController
     @cards =PackageCard.paginate_by_sql("select name,img_url,started_at,prod_point,ended_at,id,date_types,date_month from package_cards where
     store_id=#{params[:store_id]} and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => Constant::PER_PAGE)
     unless @cards.blank?
+      @prods,@materials = {},{}
       prods =Product.find_by_sql("select s.name,p.product_num num,package_card_id from products s inner join
     pcard_prod_relations p on s.id=p.product_id  where p.package_card_id in (#{@cards.map(&:id).join(",")})")
-      @prods =prods.inject(Hash.new){|hash,prod| hash[prod.package_card_id].nil? ? hash[prod.package_card_id]=[prod] : hash[prod.package_card_id] << prod;hash  }
+      prods.each {|prod| @prods[prod.package_card_id].nil? ? @prods[prod.package_card_id]=[prod] : @prods[prod.package_card_id] << prod }
+      materials =Product.find_by_sql("select s.name,p.material_num num,package_card_id from materials s inner join
+    pcard_material_relations p on s.id=p.material_id  where p.package_card_id in (#{@cards.map(&:id).join(",")})")
+      materials.each {|prod| @materials[prod.package_card_id].nil? ? @materials[prod.package_card_id]=[prod] : @materials[prod.package_card_id] << prod }
     end
   end #套餐卡列表
   
@@ -28,6 +32,9 @@ class PackageCardsController < ApplicationController
     end
     pcard =PackageCard.create(parms)
     flash[:notice] = "套餐卡添加成功"
+    if params[:material_types]
+      PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
+    end
     begin
       pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
     rescue
@@ -64,9 +71,11 @@ class PackageCardsController < ApplicationController
 
   #编辑套餐卡
   def edit_pcard
-    @pcard=PackageCard.find(params[:id])
-    @sale_prods=Product.find_by_sql("select s.name,p.product_num num,s.id from products s inner join
+    @pcard = PackageCard.find(params[:id])
+    @sale_prods= Product.find_by_sql("select s.name,p.product_num num,s.id from products s inner join
      pcard_prod_relations p on s.id=p.product_id  where p.package_card_id=#{params[:id]}")
+    @p_material = PcardMaterialRelation.find_by_package_card_id(@pcard.id)
+    @material = Material.find(@p_material.material_id) if @p_material
   end
 
   #更新套餐卡
@@ -88,6 +97,10 @@ class PackageCardsController < ApplicationController
       flash[:notice] ="图片上传失败，请重新添加！"
     end
     pcard.update_attributes(parms)
+    pcard.pcard_material_relations.destroy
+    if params[:material_types]
+      PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
+    end
     pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
     params[:sale_prod].each do |key,value|
       PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
@@ -118,6 +131,12 @@ class PackageCardsController < ApplicationController
     @card_fee = @p_cards.inject(0) {|num,card| num+card.price }
     @pcards = PackageCard.search_pcard(params[:store_id]).inject(Array.new) {|p_hash,card| p_hash << [card.p_id,card.p_name];p_hash.uniq }
     render "sale_records"
+  end
+  
+  def request_material
+    materials = Material.select("id,name").where(:store_id=>params[:store_id]).where(:types=>params[:id]).inject(Hash.new){|hash,material|
+      hash[material.id]=material.name;hash}
+    render :json=>materials
   end
   
 end

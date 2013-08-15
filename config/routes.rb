@@ -66,7 +66,7 @@ LantanBAM::Application.routes.draw do
         get "sale_records","search_list"
       end
       member do
-        post "edit_pcard","update_pcard"
+        post "edit_pcard","update_pcard","request_material"
       end
     end
     resources :products do
