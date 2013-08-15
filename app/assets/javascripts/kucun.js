@@ -432,14 +432,14 @@ function submit_material_order(form_id,obj){
         }else{
            data = "supplier="+$("#from").val()+"&selected_items="+$("#selected_items_dinghuo").val();
         }
-       $(obj).attr('disabled', 'disabled');
+       
         $.ajax({
             url:$("#"+form_id).attr("action"),
-            dataType:"json",
+            dataType:"script",
             data:data,
             type:"POST",
             success:function(data,status){
-                if(data["status"]==0){
+              /*  if(data["status"]==0){
                     $.ajax({
                         url: $("#"+form_id).attr("action") + "_pay",
                         data:{mo_id:data["mo_id"]},
@@ -456,6 +456,7 @@ function submit_material_order(form_id,obj){
                 }else if(data["status"]==3){
                     tishi_alert("物料保存失败！")
                 }
+                */
             },
             error:function(err){
                 tishi_alert("订货中...");
