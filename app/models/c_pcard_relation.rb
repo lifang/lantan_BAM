@@ -50,4 +50,25 @@ class CPcardRelation < ActiveRecord::Base
     }.join(",") if pcard_prod_relations
     content
   end
+
+  #删除已过期的客户-套餐卡记录
+  def self.delete_terminate_cards 
+    cards = self.where(["status = ?", self::STATUS[:NORMAL]])
+    current_time = Time.now.strftime("%Y%m%d").to_i
+    cards.each do |card|
+      if card.content && !card.content.empty? && card.ended_at
+        remain = card.content.split(",")
+        a = 0
+        remain.each do |r|
+          count = r.split("-")[2].to_i
+          a += count
+        end
+        if a == 0 || card.ended_at.strftime("%Y%m%d").to_i < current_time
+          card.update_attribute("status", self::STATUS[:INVALID])
+        end
+      else
+        card.update_attribute("status", self::STATUS[:INVALID])
+      end
+    end
+  end
 end
