@@ -134,8 +134,8 @@ class PackageCardsController < ApplicationController
   end
   
   def request_material
-    materials = Material.select("id,name").where(:store_id=>params[:store_id]).where(:types=>params[:id]).inject(Hash.new){|hash,material|
-      hash[material.id]=material.name;hash}
+    materials = Material.select("id,name").where(:store_id=>params[:store_id]).where(:types=>params[:id]).
+     where(:statu=>Material::STATUS[:NORMAL]).inject(Hash.new){|hash,material|hash[material.id]=material.name;hash}
     render :json=>materials
   end
   
