@@ -695,11 +695,12 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         hash[:types] = x > 0 ? TYPES[:SERVICE] : TYPES[:PRODUCT]
         if order_prod_relations  #如果是产品,则减掉对应库存
           order_prod_h = order_prod_relations.group_by { |o_p| o_p.product_id }
-          materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+          materials = Material.find_by_sql(["select m.id, pmr.product_id from materials m inner join prod_mat_relations pmr
                 on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
                 where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_prod_h.keys])
           materials.each do |m|
-            m.update_attributes(:storage => (m.storage - order_prod_h[m.product_id][0].pro_num)) if order_prod_h[m.product_id]
+            mat = Material.find_by_id m.id
+            mat.update_attributes(:storage => (mat.storage - order_prod_h[m.product_id][0].pro_num)) if mat and order_prod_h[m.product_id]
           end unless materials.blank?
         end
         #订单相关的活动
@@ -1143,11 +1144,12 @@ on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} 
   def return_order_materials # 取消订单后，退回产品或者服务相关物料数量
     order_products = self.order_prod_relations.group_by { |opr| opr.product_id }
     if order_products  #如果是产品,则减掉要加回来
-      materials = Material.find_by_sql(["select m.*, pmr.product_id from materials m inner join prod_mat_relations pmr
+      materials = Material.find_by_sql(["select m.id, pmr.product_id from materials m inner join prod_mat_relations pmr
                 on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
                 where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
       materials.each do |m|
-        m.update_attributes(:storage => (m.storage + order_products[m.product_id][0].pro_num)) if order_products[m.product_id]
+        mat = Material.find_by_id m.id
+        mat.update_attributes(:storage => (mat.storage + order_products[m.product_id][0].pro_num)) if mat and order_products[m.product_id]
       end unless materials.blank?
     end
     #归还跟套餐卡相关的物料
