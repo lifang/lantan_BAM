@@ -32,7 +32,7 @@ class PackageCardsController < ApplicationController
     end
     pcard =PackageCard.create(parms)
     flash[:notice] = "套餐卡添加成功"
-    if params[:material_types]
+    if params[:material_types] && params[:material_types] != ""  && params[:material_types].length != 0
       PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
     end
     begin
@@ -98,7 +98,7 @@ class PackageCardsController < ApplicationController
     end
     pcard.update_attributes(parms)
     PcardMaterialRelation.delete(pcard.pcard_material_relations.map(&:id))
-    if params[:material_types]
+    if params[:material_types] && params[:material_types] != ""  && params[:material_types].length != 0
       PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
     end
     pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}

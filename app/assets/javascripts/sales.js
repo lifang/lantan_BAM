@@ -273,7 +273,7 @@ function check_add(e){
         return false;
     }
     var p_types = $("#material_types option:checked").val();
-    if (p_types != "" || p_types.length !=0){
+    if (p_types != undefined &&  p_types != "" && p_types.length !=0){
         var m_num = $("#material_num").val();
         if (m_num =="" || m_num.length==0 || isNaN(parseInt(m_num))||parseInt(m_num)<0){
             tishi_alert("请输入物料数量");
