@@ -389,6 +389,7 @@ function request_material(store_id){
         });
     }else{
         $("#material_types").html("");
+        $("#material_num").html("").attr("disabled",true);
     }
 }
 function control_input(){
