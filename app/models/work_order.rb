@@ -18,23 +18,8 @@ class WorkOrder < ActiveRecord::Base
             station.update_attribute(:status, Station::STAT[:WRONG])
           else
             station.update_attribute(:status, Station::STAT[:NORMAL]) if station.status == Station::STAT[:WRONG]
-            work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").first
-            #              started_at_sql = work_order.nil? ? "1=1" : "started_at >= '#{work_order.started_at}'"
-            #              next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").where(started_at_sql).order("started_at asc").first
-            #              if work_order
-            #                runtime = sprintf('%.2f',(current_time - work_order.started_at)/60).to_f
-            #                order = work_order.order
-            #                status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
-            #                work_order.update_attributes(:status => status,
-            #                  :water_num => data_arr[3], :gas_num => data_arr[4], :runtime => runtime)
-            #                order = work_order.order
-            #                order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
-            #              end
-            #              if next_work_order
-            #                next_work_order.update_attribute(:status, WorkOrder::STAT[:SERVICING])
-            #                next_order = next_work_order.order
-            #                next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT]
-            #              end
+            work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
+                         current_day = #{current_day} and store_id = #{station.store_id}").first
             work_order.arrange_station(parms[:name2],parms[:name3]) if work_order
           end
           if equipment_info.nil?

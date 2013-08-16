@@ -11,13 +11,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130816052413) do
+ActiveRecord::Schema.define(:version => 20130816074515) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
     t.integer  "package_card_id"
     t.datetime "ended_at"
-    t.boolean  "status"
+    t.integer  "status"
     t.text     "content"
     t.datetime "created_at"
     t.integer  "price"

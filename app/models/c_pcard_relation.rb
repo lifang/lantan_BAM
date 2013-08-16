@@ -4,7 +4,7 @@ class CPcardRelation < ActiveRecord::Base
   belongs_to :customer
   belongs_to :order
 #  has_many :orders
-  STATUS = {:INVALID => 0,:NORMAL => 1} #0 为无效 1 为正常卡
+  STATUS = {:INVALID => 0,:NORMAL => 1,:NOTIME =>2} #0 为无效 1 为正常卡
   STATUS_NAME = {false => "过期/使用完", true => "正常使用"}
 
   def get_content ids    
@@ -49,5 +49,26 @@ class CPcardRelation < ActiveRecord::Base
       s
     }.join(",") if pcard_prod_relations
     content
+  end
+
+  #删除已过期的或者已经使用完毕的客户-套餐卡记录
+  def self.delete_terminate_cards 
+    cards = self.where(["status = ?", self::STATUS[:NORMAL]])
+    current_time = Time.now.strftime("%Y%m%d").to_i
+    cards.each do |card|
+      if card.content && !card.content.empty? && card.ended_at
+        remain = card.content.split(",")
+        a = 0
+        remain.each do |r|
+          count = r.split("-")[2].to_i
+          a += count
+        end
+        if a == 0 || card.ended_at.strftime("%Y%m%d").to_i < current_time
+          card.update_attribute("status", self::STATUS[:NOTIME])
+        end
+      else
+        card.update_attribute("status", self::STATUS[:NOTIME])
+      end
+    end
   end
 end
