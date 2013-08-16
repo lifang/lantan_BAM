@@ -53,23 +53,22 @@
                       </table>
                     </td>
                     <td style="padding: 0 5px;">
-                      <%unless @materials[card.id].blank? %>
-                        <%@materials[card.id].each do |prod|%>
-                          <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-                            <tr class="fws">
-                              <td width="75%">物料名称</td>
-                              <td width="25%">数量</td>
-                            </tr>
+                      <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                        <%unless @materials[card.id].blank? %>
+                          <tr class="fws">
+                            <td width="75%">物料名称</td>
+                            <td width="25%">数量</td>
+                          </tr>
+                          <%@materials[card.id].each do |prod|%>
                             <tr>
                               <td><%= prod.name %></td>
                               <td><%= prod.num %></td>
                             </tr>
                           <%end%>
-                        </table>
-                      <%else%>
-                        暂无
-                      <% end %>
-
+                        <%else%>
+                          暂无
+                        <% end %>
+                      </table>
                     </td>
                     <td> <% if permission?(:sales, :edit_p_card) %><a href="javascript:void(0)" onclick="edit_pcard('<%=card.id %>','<%=params[:store_id] %>')">修改</a><% end %>
                       <% if permission?(:sales, :del_p_card) %><a href="javascript:void(0)" onclick="delete_pcard('<%= card.id %>')">删除</a><% end %></td>

@@ -97,7 +97,7 @@ class PackageCardsController < ApplicationController
       flash[:notice] ="图片上传失败，请重新添加！"
     end
     pcard.update_attributes(parms)
-    pcard.pcard_material_relations.destroy
+    PcardMaterialRelation.delete(pcard.pcard_material_relations.map(&:id))
     if params[:material_types]
       PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
     end
