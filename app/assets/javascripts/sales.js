@@ -156,8 +156,8 @@ function load_types(store_id){
 
 //为套餐卡加载产品和服务
 function pcard_types(store_id){
-    var types=$("#sale_types option:checked").val();
-    var name=$("#sale_name").val();
+    var types=$("#t_prod #sale_types option:checked").val();
+    var name=$("#t_prod #sale_name").val();
     if (types != "" || name != ""){
         $.ajax({
             async:true,
@@ -272,6 +272,14 @@ function check_add(e){
         tishi_alert("图片名称不能包含特殊字符");
         return false;
     }
+    var p_types = $("#material_types option:checked").val();
+    if (p_types != undefined &&  p_types != "" && p_types.length !=0){
+        var m_num = $("#material_num").val();
+        if (m_num =="" || m_num.length==0 || isNaN(parseInt(m_num))||parseInt(m_num)<0){
+            tishi_alert("请输入物料数量");
+            return false;
+        }
+    }
     $("#add_pcard").submit();
     $(e).removeAttr("onclick");
 }
@@ -356,5 +364,39 @@ function check_revist(){
     $("#auto_revist").val($("#auto_revist")[0].checked+0);
     if (!$("#auto_revist")[0].checked){
         $("#con_revist,#time_revist").val("");
+    }
+}
+
+
+function request_material(store_id){
+    var p_types = $("#pcard_material option:checked").val();
+    if (p_types != "" || p_types.length !=0){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'json',
+            url : "/stores/"+ store_id+"/package_cards/"+ p_types+"/request_material",
+            success :function(data){
+                $("#material_types").html("<option value=''>请选择</option>")
+                for(var item in data){
+                    $("#material_types").append("<option value='"+item +"'>"+data[item] +"</option>")
+                }
+                var types = $("#m_types").val();
+                if (types != "" || types.length !=0){
+                    $("#material_types option[value='"+types+"']").attr("selected",true);
+                } 
+            }
+        });
+    }else{
+        $("#material_types").html("");
+        $("#material_num").html("").attr("disabled",true);
+    }
+}
+function control_input(){
+    var p_types = $("#material_types option:checked").val();
+    if (p_types != "" || p_types.length !=0){
+        $("#material_num").attr("disabled",false);
+    }else{
+        $("#material_num").attr("disabled",true);
     }
 }

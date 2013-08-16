@@ -17,7 +17,8 @@
                   <td>名称</td>
                   <td>有效时间</td>
                   <td>积分</td>
-                  <td>套餐内容</td>
+                  <td width="20%">套餐内容</td>
+                  <td width="20%">所需物料</td>
                   <td>操作</td>
                 </tr>
               </thead>
@@ -47,7 +48,25 @@
                             </tr>
                           <%end%>
                         <%else%>
-                          <tr class="fws"><td>暂无</td></tr>
+                          <tr><td>暂无</td></tr>
+                        <% end %>
+                      </table>
+                    </td>
+                    <td style="padding: 0 5px;">
+                      <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                        <%unless @materials[card.id].blank? %>
+                          <tr class="fws">
+                            <td width="75%">物料名称</td>
+                            <td width="25%">数量</td>
+                          </tr>
+                          <%@materials[card.id].each do |prod|%>
+                            <tr>
+                              <td><%= prod.name %></td>
+                              <td><%= prod.num %></td>
+                            </tr>
+                          <%end%>
+                        <%else%>
+                          暂无
                         <% end %>
                       </table>
                     </td>

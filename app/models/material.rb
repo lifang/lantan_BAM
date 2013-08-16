@@ -1,8 +1,8 @@
 #encoding: utf-8
-require 'barby'
-require 'barby/barcode/ean_13'
-require 'barby/outputter/custom_rmagick_outputter'
-require 'barby/outputter/rmagick_outputter'
+#require 'barby'
+#require 'barby/barcode/ean_13'
+#require 'barby/outputter/custom_rmagick_outputter'
+#require 'barby/outputter/rmagick_outputter'
 class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :material_losses
@@ -16,6 +16,7 @@ class Material < ActiveRecord::Base
   has_many  :mat_in_orders
   has_many :prod_mat_relations
   has_many :mat_depot_relations
+  has_many :pcard_material_relations
   has_many :depots, :through => :mat_depot_relations
   attr_accessor :ifuse_code, :code_value
 

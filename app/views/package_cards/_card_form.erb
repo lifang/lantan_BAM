@@ -52,6 +52,32 @@
 </div>
 <input type="hidden" value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>" id="date1" />
 <div class="clear"></div>
-<div class="card_content">
+<div class="card_content" id="t_prod">
   <%= render :partial=>"/sales/sale_search",:object=>[Product::PRODUCT_TYPES,"pcard_types"] %>
 </div>
+<div class="card_content">
+  <div class="search">
+    <div>
+      <label>物料类别：</label><select  id="pcard_material" name="pcard_material" onchange="request_material(<%= params[:store_id] %>)">
+        <option value="">请选择</option>
+        <% Material::TYPES_NAMES.each do |key,value| %>
+          <option value="<%= key %>"  <%if @material && @material.types==key%> selected<%end%> ><%= value %></option>
+        <% end %>
+      </select>
+    </div>
+    <div>
+      <label>所属物料：</label><select  id="material_types" name="material_types" onchange="control_input()">
+      </select>
+    </div>
+    <input type="hidden" id="m_types" value="" />
+    <div><label>数量：</label>
+      <input id="material_num" name="material_num" type="text" disabled value="<%= @p_material.nil? ? "" : @p_material.material_num %>" /></div>
+  </div>
+</div>
+<% if @material %>
+  <script type="text/javascript">
+    $("#pcard_material").trigger("onchange");
+    $("#material_num").attr("disabled",false);
+    $("#m_types").val(<%= @material.id %>);
+  </script>
+<% end %>

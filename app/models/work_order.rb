@@ -6,51 +6,32 @@ class WorkOrder < ActiveRecord::Base
   STATUS = {0=>"等待服务中",1=>"服务中",2=>"等待付款",3=>"已完成", 4 => "已取消", 5 => "已终止"}
   STAT = {:WAIT =>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE =>3, :CANCELED => 4, :END => 5}
 
-  def self.update_work_order
-    current_time = Time.now
-    current_day = Time.now.strftime("%Y%m%d")
-    file_path = Constant::WORK_ORDER_PATH+current_day+".txt"
-    if File.exist?(file_path)
-      equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i}").first
-      num = equipment_info.nil? ? 0 : equipment_info.num
-      file = File.read(file_path)
-      file_data_arr = file.split("\n")
-      if num < file_data_arr.length
-        (num..(file_data_arr.length-1)).each do |index|
-          data_arr = file_data_arr[index].split(",")
-          station = Station.find_by_id(data_arr[2].to_i)
-          if station && station.is_has_controller
-            if data_arr[6] == "1" || data_arr[7] == "1"
-              station.update_attribute(:status, Station::STAT[:WRONG])
-            else
-              station.update_attribute(:status, Station::STAT[:NORMAL]) if station.status == Station::STAT[:WRONG]
-              work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").first
-              #              started_at_sql = work_order.nil? ? "1=1" : "started_at >= '#{work_order.started_at}'"
-              #              next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]} and station_id = #{station.id} and current_day = #{current_day} and store_id = #{station.store_id}").where(started_at_sql).order("started_at asc").first
-              #              if work_order
-              #                runtime = sprintf('%.2f',(current_time - work_order.started_at)/60).to_f
-              #                order = work_order.order
-              #                status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
-              #                work_order.update_attributes(:status => status,
-              #                  :water_num => data_arr[3], :gas_num => data_arr[4], :runtime => runtime)
-              #                order = work_order.order
-              #                order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
-              #              end
-              #              if next_work_order
-              #                next_work_order.update_attribute(:status, WorkOrder::STAT[:SERVICING])
-              #                next_order = next_work_order.order
-              #                next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT]
-              #              end
-              work_order.arrange_station(data_arr[4],data_arr[3]) if work_order
-            end
+  def self.update_work_order(parms)
+    begin
+      current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i
+      if store
+        equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{parms[:work].to_i}
+                       and store_id=#{store.id}").first
+        station = Station.find_by_id(parms[:work].to_i)
+        if station && station.is_has_controller && (equipment_info.nil? || num != equipment_info.num )
+          if parms[:name8] == "1" || parms[:name9] == "1"
+            station.update_attribute(:status, Station::STAT[:WRONG])
+          else
+            station.update_attribute(:status, Station::STAT[:NORMAL]) if station.status == Station::STAT[:WRONG]
+            work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
+                         current_day = #{current_day} and store_id = #{station.store_id}").first
+            work_order.arrange_station(parms[:name2],parms[:name3]) if work_order
+          end
+          if equipment_info.nil?
+            EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)
+          else
+            equipment_info.update_attribute(:num,num)
           end
         end
-        if equipment_info.nil?
-          EquipmentInfo.create(:current_day => current_day.to_i, :num => file_data_arr.length)
-        else
-          equipment_info.update_attribute(:num, file_data_arr.length)
-        end
       end
+      message = "ok"
+    rescue
+      message = "fail"
     end
   end
 
@@ -111,10 +92,10 @@ class WorkOrder < ActiveRecord::Base
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
         where("work_orders.station_id is null").
         where("work_orders.store_id = #{self.store_id}").
-       # where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
-       # where("stations.id in (?)",qualified_station_arr ).
-       # where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
-        where("work_orders.current_day = #{self.current_day}").
+        # where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
+      # where("stations.id in (?)",qualified_station_arr ).
+      # where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
+      where("work_orders.current_day = #{self.current_day}").
         where(car_num_id_sql,orders.map(&:car_num_id)).
         readonly(false).order("work_orders.created_at asc")
 
@@ -196,12 +177,7 @@ class WorkOrder < ActiveRecord::Base
               same_work_order.update_attribute(:station_id, first_station.id) if first_station and station_arr.include?(first_station)
             end
           end
-
-
         end
-
-
-
       end
     end
     message
