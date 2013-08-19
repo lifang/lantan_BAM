@@ -39,26 +39,26 @@ class WorkOrder < ActiveRecord::Base
     current_time = Time.now
     #把完成的单的状态置为等待付款
     order = self.order
-    unless stop
-      unless self.status ==  WorkOrder::STAT[:CANCELED]
-        runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
-        status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
-        self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
+    #    unless stop
+    unless self.status ==  WorkOrder::STAT[:CANCELED]
+      runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
+      status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
+      self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
 
-        if !self.cost_time.nil?
-          if runtime > self.cost_time.to_f
-            staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
-            staffs.each do |staff_id|
-              ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
-                :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
-                :status => ViolationReward::STATUS[:NOMAL])
-            end
+      if !self.cost_time.nil?
+        if runtime > self.cost_time.to_f
+          staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+          staffs.each do |staff_id|
+            ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
+              :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
+              :status => ViolationReward::STATUS[:NOMAL])
           end
         end
-
       end
-      order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
+
     end
+    order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
+    #    end
 
     #排下一个单
     next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
