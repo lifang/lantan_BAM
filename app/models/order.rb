@@ -376,15 +376,17 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       info[:car_num_id] = carNum.id
       ids = []
       #prod_ids = "10_3,311_0,226_2"
+      cpcard_prod_ids = []
       if from_pcard == 1
-        ids = prod_ids.split(",").map{|a| a.split("_")[1].to_i}.flatten.uniq
-        pcard_ids = prod_ids.split(",").map{|a| a.split("_")[0].to_i}.flatten.uniq
+        #prod_ids = "180_213,181_213,181_214" cpcard_realtion_id和product_id
+        cpcard_prod_ids = prod_ids.split(",").collect{|pi| [pi.split("_")[0].to_i, pi.split("_")[1].to_i]}
+        ids = prod_ids.split(",").map{|a| a.split("_")[1].to_i}.flatten
+        pcard_ids = prod_ids.split(",").map{|a| a.split("_")[0].to_i}.flatten
       else
         prod_ids.split(",").each do |p_id|
           ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 7
         end
       end
-
       #ids = [311, 226]
       prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
       inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
@@ -511,19 +513,19 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         where cpr.status = ? and cpr.ended_at >= ?  and product_id in (?) and cpr.customer_id = ? group by cpr.id",
               CPcardRelation::STATUS[:NORMAL], Time.now, ids, customer.id])
         end
-        
+
         customer_pcards.each do |c_pr|
           p_c = c_pr.package_card
           p_c[:products] = p_c.pcard_prod_relations.collect{|r|
             p = Hash.new
             p[:name] = r.product.name
             prod_num = c_pr.get_prod_num r.product_id
-            p[:num] = from_pcard==1 && ids.include?(r.product_id) ? prod_num.to_i - 1 : prod_num.to_i
+            p[:num] = from_pcard==1 && cpcard_prod_ids.select{|cpi| cpi[0] == c_pr.id}.select{|c| c[1] == r.product_id}.present? ? prod_num.to_i - 1 : prod_num.to_i
             p[:Total_num] = prod_num.to_i if from_pcard==1
             p[:p_card_id] = r.package_card_id
             p[:product_id] = r.product_id
             p[:product_price] = r.product.sale_price
-            p[:selected] = ids.include?(r.product_id) && from_pcard==1 ? 0 : 1
+            p[:selected] = cpcard_prod_ids.select{|cpi| cpi[0] == c_pr.id}.select{|c| c[1] == r.product_id}.present? && from_pcard==1 ? 0 : 1
             p
           }
           p_c[:cpard_relation_id] = c_pr.id
