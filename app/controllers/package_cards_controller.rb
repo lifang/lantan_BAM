@@ -26,7 +26,7 @@ class PackageCardsController < ApplicationController
       :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:description=>params[:desc]
     }
     if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
-      parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at])
+      parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at].to_datetime.end_of_day.strftime("%Y-%m-%d %H:%M:%S"))
     else
       parms.merge!(:date_month =>params[:end_time])
     end
@@ -86,7 +86,7 @@ class PackageCardsController < ApplicationController
       :description=>params[:desc]
     }
     if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
-      parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at])
+      parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at].to_datetime.end_of_day.strftime("%Y-%m-%d %H:%M:%S"))
     else
       parms.merge!(:date_month =>params[:end_time])
     end
