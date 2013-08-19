@@ -4,8 +4,8 @@ class CPcardRelation < ActiveRecord::Base
   belongs_to :customer
   belongs_to :order
 #  has_many :orders
-  STATUS = {:INVALID => 0,:NORMAL => 1,:NOTIME =>2} #0 为无效 1 为正常卡
-  STATUS_NAME = {false => "过期/使用完", true => "正常使用"}
+  STATUS = {:INVALID => 0,:NORMAL => 1,:NOTIME =>2} #0 为无效 1 为正常卡 2 为过期/使用完
+  STATUS_NAME = {2 => "过期/使用完", 1 => "正常使用"}
 
   def get_content ids    
     current_prods_hash = {}

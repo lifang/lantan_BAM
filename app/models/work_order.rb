@@ -48,6 +48,8 @@ class WorkOrder < ActiveRecord::Base
         if !self.cost_time.nil?
           if runtime > self.cost_time.to_f
             staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+            p order.try(:cons_staff_id_1)
+            p staffs
             staffs.each do |staff_id|
               ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
                 :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
