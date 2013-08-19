@@ -751,7 +751,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
               if a_pc[2].to_i == 0 #has_p_card是0，表示是新买的套餐卡
                 p_card_id = a_pc[1].to_i
                 if p_cards_hash[p_card_id][0].date_types == PackageCard::TIME_SELCTED[:END_TIME]  #根据套餐卡的类型设置截止时间
-                  ended_at = (Time.now + (p_cards_hash[p_card_id][0].date_month).days).to_date
+                  ended_at = (Time.now + (p_cards_hash[p_card_id][0].date_month).days).to_datetime
                 else
                   ended_at = p_cards_hash[p_card_id][0].ended_at
                 end
