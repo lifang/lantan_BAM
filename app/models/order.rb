@@ -196,7 +196,8 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       pcard_records = []
       c_pcard_relations.each do |cpr|
         pc_record_hash ={}
-        pc_record_hash[:ended_at] = cpr.ended_at.strftime('%Y-%m-%d') if cpr.ended_at
+        pc_record_hash[:is_expired] = (cpr.ended_at and cpr.ended_at < Time.now) ? 1 : 0
+        pc_record_hash[:ended_at] = cpr.ended_at.strftime("%Y-%m-%d %H:%M:%S") if cpr.ended_at
         pc_record_hash[:name] = cpr.name
         pc_record_hash[:cpard_relation_id] = cpr.cpr_id
         pc_record_hash[:id] = cpr.id
