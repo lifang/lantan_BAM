@@ -13,7 +13,7 @@ class WorkOrder < ActiveRecord::Base
       if store
         equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{parms[:work].to_i}
                        and store_id=#{store.id}").first
-        station = Station.find_by_id(parms[:work].to_i)
+        station = Station.where(:id=>parms[:work].to_i).where(:store_id=>store.id).first
         if station && station.is_has_controller && (equipment_info.nil? || num != equipment_info.num )
           if parms[:name8] == "1" || parms[:name9] == "1"
             station.update_attribute(:status, Station::STAT[:WRONG])
