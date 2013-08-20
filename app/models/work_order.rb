@@ -44,7 +44,7 @@ class WorkOrder < ActiveRecord::Base
     unless stop
       unless self.status ==  WorkOrder::STAT[:CANCELED]
         runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
-        status = order.status == Order::STATUS[:BEEN_PAYMENT] ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
+        status = (order.status == Order::STATUS[:BEEN_PAYMENT]|| Order::STATUS[:FINISHED]) ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
         self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
 
         if !self.cost_time.nil?

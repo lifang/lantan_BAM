@@ -131,7 +131,7 @@ class Order < ActiveRecord::Base
     return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status from orders o inner join car_nums c on c.id=o.car_num_id
       inner join customers cu on cu.id=o.customer_id left join work_orders wo on wo.order_id = o.id
 and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
-      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]})
+      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]})
       and DATE_FORMAT(o.created_at, '%Y%m%d')=DATE_FORMAT(NOW(), '%Y%m%d') and cu.status=? and o.store_id = ? order by o.status", Customer::STATUS[:NOMAL], store_id])
   end
 
@@ -196,7 +196,8 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       pcard_records = []
       c_pcard_relations.each do |cpr|
         pc_record_hash ={}
-        pc_record_hash[:ended_at] = cpr.ended_at.strftime('%Y-%m-%d') if cpr.ended_at
+        pc_record_hash[:is_expired] = (cpr.ended_at and cpr.ended_at < Time.now) ? 1 : 0
+        pc_record_hash[:ended_at] = cpr.ended_at.strftime("%Y-%m-%d %H:%M:%S") if cpr.ended_at
         pc_record_hash[:name] = cpr.name
         pc_record_hash[:cpard_relation_id] = cpr.cpr_id
         pc_record_hash[:id] = cpr.id
@@ -467,17 +468,18 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         else
           #产品
           prod = Product.find_by_store_id_and_id_and_status store_id,id.split("_")[0].to_i,Product::IS_VALIDATE[:YES]
-          prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
+          
           if prod
+            prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
             sale_hash, prod_arr, total = Order.get_sale_by_product(prod, prod_mat_num, total, sale_hash, prod_arr)
           end
         end
       end if prod_ids && carNum && customer && from_pcard!=1
-
       prod_ids.split(",").each do |pc_p|
         prod = Product.find_by_store_id_and_id_and_status store_id,pc_p.split("_")[1].to_i,Product::IS_VALIDATE[:YES]
-        prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
+        
         if prod
+          prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
           sale_hash, prod_arr, total = Order.get_sale_by_product(prod, prod_mat_num, total, sale_hash, prod_arr)
         end
       end if prod_ids && carNum && customer && from_pcard==1
