@@ -293,10 +293,21 @@ class Api::OrdersController < ApplicationController
         end
         (prod_arr[3] || []).each do |pcard|
           package_card = PackageCard.find_by_id(pcard[1].to_i)
-          if order_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT]
-            order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1], :status => CPcardRelation::STATUS[:NORMAL], :price => package_card.try(:price), :created_at => order_info["time"])
+          if package_card.date_types == PackageCard::TIME_SELCTED[:END_TIME]  #根据套餐卡的类型设置截止时间
+            ended_at = (Time.now + (package_card.date_month).days).to_datetime
           else
-            order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1], :status => CPcardRelation::STATUS[:INVALID], :price => package_card.try(:price), :created_at => order_info["time"])
+            ended_at = package_card.ended_at
+          end
+          if order_info["status"].to_i == Order::STATUS[:BEEN_PAYMENT]
+            order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1],
+              :status => CPcardRelation::STATUS[:NORMAL], :price => package_card.try(:price),
+              :created_at => order_info["time"], :content => CPcardRelation.set_content(pcard[1]),
+              :ended_at => ended_at)
+          else
+            order.c_pcard_relations.new(:customer_id => customer_id, :package_card_id => pcard[1],
+              :status => CPcardRelation::STATUS[:INVALID], :price => package_card.try(:price),
+              :created_at => order_info["time"], :content => CPcardRelation.set_content(pcard[1]),
+              :ended_at => ended_at)
           end
         end
         order.save

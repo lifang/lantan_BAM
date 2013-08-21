@@ -44,7 +44,7 @@ class WorkOrder < ActiveRecord::Base
     unless stop
       unless self.status ==  WorkOrder::STAT[:CANCELED]
         runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
-        status = (order.status == Order::STATUS[:BEEN_PAYMENT]|| Order::STATUS[:FINISHED]) ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
+        status = (order.status == Order::STATUS[:BEEN_PAYMENT] || order.status == Order::STATUS[:FINISHED]) ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
         self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
 
         if !self.cost_time.nil?
@@ -59,7 +59,7 @@ class WorkOrder < ActiveRecord::Base
         end
 
       end
-      order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT]
+      order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT] && order.status != Order::STATUS[:FINISHED]
     end
 
     #排下一个单
@@ -75,7 +75,7 @@ class WorkOrder < ActiveRecord::Base
       wo_time = WkOrTime.find_by_station_id_and_current_day next_work_order.station_id, ended_at
       wo_time.update_attribute(:wait_num, wo_time.wait_num - 1) if wo_time and wo_time.wait_num
       next_order = next_work_order.order
-      next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT]
+      next_order.update_attribute(:status, Order::STATUS[:SERVICING]) if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT] && next_order.status != Order::STATUS[:FINISHED]
       message = "has_next_work_order"
     else
       #按照created_at时间来排单
@@ -123,7 +123,7 @@ class WorkOrder < ActiveRecord::Base
               :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
             same_car_num_id  = another_order.car_num_id
             if_wo_set_station = true
-            another_order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2 ) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT]
+            another_order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2 ) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT] && another_order.status != Order::STATUS[:FINISHED]
 
           end
         end
@@ -161,7 +161,7 @@ class WorkOrder < ActiveRecord::Base
               same_work_order.update_attribute(:station_id, leave_station.id)
               same_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station.id,
                 :started_at => Time.now, :ended_at => s_ended_at)
-              same_work_order.order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2) if same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT]
+              same_work_order.order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2) if same_work_orders[0].order && same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT] && same_work_orders[0].order.status != Order::STATUS[:FINISHED]
               WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id => leave_station.id,
                 :current_times => s_ended_at.strftime("%Y%m%d%H%M"))
             else
