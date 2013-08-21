@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130816074515) do
+ActiveRecord::Schema.define(:version => 20130821020219) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -198,6 +198,7 @@ ActiveRecord::Schema.define(:version => 20130816074515) do
   end
 
   add_index "equipment_infos", ["created_at"], :name => "index_equipment_infos_on_created_at"
+  add_index "equipment_infos", ["station_id"], :name => "index_equipment_infos_on_station_id"
   add_index "equipment_infos", ["store_id"], :name => "index_equipment_infos_on_store_id"
 
   create_table "goal_sale_types", :force => true do |t|
@@ -881,6 +882,8 @@ ActiveRecord::Schema.define(:version => 20130816074515) do
     t.string   "code"
   end
 
+  add_index "stores", ["code"], :name => "index_stores_on_code"
+
   create_table "suppliers", :force => true do |t|
     t.string   "name"
     t.string   "email"
@@ -956,6 +959,43 @@ ActiveRecord::Schema.define(:version => 20130816074515) do
   add_index "syncs", ["created_at"], :name => "index_syncs_on_created_at"
   add_index "syncs", ["sync_at"], :name => "index_syncs_on_sync_at"
   add_index "syncs", ["updated_at"], :name => "index_syncs_on_updated_at"
+
+  create_table "total_msgs", :force => true do |t|
+    t.string   "shop"
+    t.integer  "msgnum"
+    t.text     "msg1"
+    t.text     "msg2"
+    t.text     "msg3"
+    t.text     "msg4"
+    t.text     "msg5"
+    t.text     "msg6"
+    t.text     "msg7"
+    t.text     "msg8"
+    t.text     "msg9"
+    t.text     "msg10"
+    t.text     "msg11"
+    t.text     "msg12"
+    t.text     "msg13"
+    t.text     "msg14"
+    t.text     "msg15"
+    t.text     "msg16"
+    t.text     "msg17"
+    t.text     "msg18"
+    t.text     "msg19"
+    t.text     "msg20"
+    t.text     "msg21"
+    t.text     "msg22"
+    t.text     "msg23"
+    t.text     "msg24"
+    t.text     "msg25"
+    t.text     "msg26"
+    t.text     "msg27"
+    t.text     "msg28"
+    t.text     "msg29"
+    t.text     "msg30"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "train_staff_relations", :force => true do |t|
     t.integer  "train_id"
