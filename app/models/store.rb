@@ -36,6 +36,12 @@ class Store < ActiveRecord::Base
     2 => "装修中",
     3 => "已删除"
   }
+  EDITION_LV ={       #门店使用的系统的版本等级
+    0 => "实用版",
+    1 => "精英版",
+    2 => "豪华版",
+    3 => "旗舰版"
+  }
 
   def self.upload_img(img_url,store_id,pic_types,pics_size,img_code=nil)
     path = Constant::LOCAL_DIR
