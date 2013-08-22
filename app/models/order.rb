@@ -131,7 +131,7 @@ class Order < ActiveRecord::Base
     return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status from orders o inner join car_nums c on c.id=o.car_num_id
       inner join customers cu on cu.id=o.customer_id left join work_orders wo on wo.order_id = o.id
 and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
-      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]})
+      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]})
       and DATE_FORMAT(o.created_at, '%Y%m%d')=DATE_FORMAT(NOW(), '%Y%m%d') and cu.status=? and o.store_id = ? order by o.status", Customer::STATUS[:NOMAL], store_id])
   end
 
@@ -196,7 +196,8 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       pcard_records = []
       c_pcard_relations.each do |cpr|
         pc_record_hash ={}
-        pc_record_hash[:ended_at] = cpr.ended_at.strftime('%Y-%m-%d') if cpr.ended_at
+        pc_record_hash[:is_expired] = (cpr.ended_at and cpr.ended_at < Time.now) ? 1 : 0
+        pc_record_hash[:ended_at] = cpr.ended_at.strftime("%Y-%m-%d %H:%M:%S") if cpr.ended_at
         pc_record_hash[:name] = cpr.name
         pc_record_hash[:cpard_relation_id] = cpr.cpr_id
         pc_record_hash[:id] = cpr.id
@@ -376,15 +377,17 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       info[:car_num_id] = carNum.id
       ids = []
       #prod_ids = "10_3,311_0,226_2"
+      cpcard_prod_ids = []
       if from_pcard == 1
-        ids = prod_ids.split(",").map{|a| a.split("_")[1].to_i}.flatten.uniq
-        pcard_ids = prod_ids.split(",").map{|a| a.split("_")[0].to_i}.flatten.uniq
+        #prod_ids = "180_213,181_213,181_214" cpcard_realtion_id和product_id
+        cpcard_prod_ids = prod_ids.split(",").collect{|pi| [pi.split("_")[0].to_i, pi.split("_")[1].to_i]}
+        ids = prod_ids.split(",").map{|a| a.split("_")[1].to_i}.flatten
+        pcard_ids = prod_ids.split(",").map{|a| a.split("_")[0].to_i}.flatten
       else
         prod_ids.split(",").each do |p_id|
           ids << p_id.split("_")[0].to_i if p_id.split("_")[1].to_i < 7
         end
       end
-
       #ids = [311, 226]
       prod_mat_relations = Product.find_by_sql(["select distinct(pmr.product_id), m.storage from prod_mat_relations pmr
       inner join materials m on m.id = pmr.material_id where m.status = #{Material::STATUS[:NORMAL]}
@@ -465,17 +468,18 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         else
           #产品
           prod = Product.find_by_store_id_and_id_and_status store_id,id.split("_")[0].to_i,Product::IS_VALIDATE[:YES]
-          prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
+          
           if prod
+            prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
             sale_hash, prod_arr, total = Order.get_sale_by_product(prod, prod_mat_num, total, sale_hash, prod_arr)
           end
         end
       end if prod_ids && carNum && customer && from_pcard!=1
-
       prod_ids.split(",").each do |pc_p|
         prod = Product.find_by_store_id_and_id_and_status store_id,pc_p.split("_")[1].to_i,Product::IS_VALIDATE[:YES]
-        prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
+        
         if prod
+          prod_mat_num = prod_mat_relations[prod.id] ? prod_mat_relations[prod.id][0].try(:storage) : 0
           sale_hash, prod_arr, total = Order.get_sale_by_product(prod, prod_mat_num, total, sale_hash, prod_arr)
         end
       end if prod_ids && carNum && customer && from_pcard==1
@@ -511,19 +515,19 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         where cpr.status = ? and cpr.ended_at >= ?  and product_id in (?) and cpr.customer_id = ? group by cpr.id",
               CPcardRelation::STATUS[:NORMAL], Time.now, ids, customer.id])
         end
-        
+
         customer_pcards.each do |c_pr|
           p_c = c_pr.package_card
           p_c[:products] = p_c.pcard_prod_relations.collect{|r|
             p = Hash.new
             p[:name] = r.product.name
             prod_num = c_pr.get_prod_num r.product_id
-            p[:num] = from_pcard==1 && ids.include?(r.product_id) ? prod_num.to_i - 1 : prod_num.to_i
+            p[:num] = from_pcard==1 && cpcard_prod_ids.select{|cpi| cpi[0] == c_pr.id}.select{|c| c[1] == r.product_id}.present? ? prod_num.to_i - 1 : prod_num.to_i
             p[:Total_num] = prod_num.to_i if from_pcard==1
             p[:p_card_id] = r.package_card_id
             p[:product_id] = r.product_id
             p[:product_price] = r.product.sale_price
-            p[:selected] = ids.include?(r.product_id) && from_pcard==1 ? 0 : 1
+            p[:selected] = cpcard_prod_ids.select{|cpi| cpi[0] == c_pr.id}.select{|c| c[1] == r.product_id}.present? && from_pcard==1 ? 0 : 1
             p
           }
           p_c[:cpard_relation_id] = c_pr.id
@@ -749,7 +753,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
               if a_pc[2].to_i == 0 #has_p_card是0，表示是新买的套餐卡
                 p_card_id = a_pc[1].to_i
                 if p_cards_hash[p_card_id][0].date_types == PackageCard::TIME_SELCTED[:END_TIME]  #根据套餐卡的类型设置截止时间
-                  ended_at = (Time.now + (p_cards_hash[p_card_id][0].date_month).days).to_date
+                  ended_at = (Time.now + (p_cards_hash[p_card_id][0].date_month).days).to_datetime
                 else
                   ended_at = p_cards_hash[p_card_id][0].ended_at
                 end

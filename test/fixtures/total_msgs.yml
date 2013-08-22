@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  shop: MyString
+  msgnum: 1
+  msg1: MyText
+
+two:
+  shop: MyString
+  msgnum: 1
+  msg1: MyText

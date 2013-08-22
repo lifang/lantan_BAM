@@ -86,7 +86,7 @@ LantanBAM::Application.routes.draw do
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
           "mat_loss_delete","mat_loss"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
-             "mat_loss_add","modify_code"
+          "mat_loss_add","modify_code"
       end
       member do
         get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"
@@ -112,8 +112,8 @@ LantanBAM::Application.routes.draw do
     resources :material_order_manages do
       collection do
         get "mat_in_or_out_query", "search_mat_in_or_out","page_ins","page_outs",
-            "unsalable_materials","search_unsalable_materials","page_unsalable_materials",
-            "page_unsalable_materials"
+          "unsalable_materials","search_unsalable_materials","page_unsalable_materials",
+          "page_unsalable_materials"
       end
     end
     resources :staff_manages do
@@ -269,6 +269,9 @@ LantanBAM::Application.routes.draw do
   resources :return_backs do
     collection do
       get :return_info
+    end
+    member do
+      get :return_msg
     end
   end
 

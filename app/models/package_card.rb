@@ -16,7 +16,7 @@ class PackageCard < ActiveRecord::Base
     unless car_num.nil? || car_num == ""  || car_num.length ==0
       sql += " inner join customer_num_relations  cn on c.id=cn.customer_id inner join car_nums n on n.id=cn.car_num_id"
     end
-    sql += " where p.store_id=#{store_id} and p.status=#{PackageCard::STAT[:NORMAL]} and cp.status != #{CPcardRelation::STATUS[:NOTIME]}"
+    sql += " where p.store_id=#{store_id} and p.status=#{PackageCard::STAT[:NORMAL]} and cp.status != #{CPcardRelation::STATUS[:INVALID]}"
     sql += " and p.id=#{pcard}"  unless pcard.nil? || pcard == "" || pcard.length==0
     unless car_num.nil? || car_num == ""  || car_num.length ==0
       sql += " and n.num like ?"
