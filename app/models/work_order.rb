@@ -42,24 +42,25 @@ class WorkOrder < ActiveRecord::Base
     #把完成的单的状态置为等待付款
     order = self.order
     unless stop
-      unless self.status ==  WorkOrder::STAT[:CANCELED]
-        runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
-        status = (order.status == Order::STATUS[:BEEN_PAYMENT] || order.status == Order::STATUS[:FINISHED]) ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
-        self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
-
-        if !self.cost_time.nil?
-          if runtime > self.cost_time.to_f
-            staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
-            staffs.each do |staff_id|
-              ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
-                :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
-                :status => ViolationReward::STATUS[:NOMAL])
+      Order.transaction do
+        unless self.status ==  WorkOrder::STAT[:CANCELED]
+          runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
+          status = (order.status == Order::STATUS[:BEEN_PAYMENT] || order.status == Order::STATUS[:FINISHED]) ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
+          self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
+          if !self.cost_time.nil?
+            if runtime > self.cost_time.to_f
+              staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+              staffs.each do |staff_id|
+                ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
+                  :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
+                  :status => ViolationReward::STATUS[:NOMAL])
+              end
             end
           end
-        end
 
+        end
+        order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT] && order.status != Order::STATUS[:FINISHED]
       end
-      order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT] && order.status != Order::STATUS[:FINISHED]
     end
 
     #排下一个单
@@ -94,9 +95,6 @@ class WorkOrder < ActiveRecord::Base
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
         where("work_orders.station_id is null").
         where("work_orders.store_id = #{self.store_id}").
-        # where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").
-      # where("stations.id in (?)",qualified_station_arr ).
-      # where("products.id in (?)",products.length == 0 ? [] : products.map(&:id)).
       where("work_orders.current_day = #{self.current_day}").
         where(car_num_id_sql,orders.map(&:car_num_id)).
         readonly(false).order("work_orders.created_at asc")

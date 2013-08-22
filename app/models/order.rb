@@ -847,31 +847,28 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
           if arrange_time[0]
             new_station_id = arrange_time[0]
-            start_at = Time.now if arrange_time[2]
             station = Station.find_by_id_and_status new_station_id, Station::STAT[:NORMAL]
           end
           #end
 #          if station
             woTime = WkOrTime.find_by_station_id_and_current_day new_station_id, Time.now.strftime("%Y%m%d").to_i if new_station_id
             if woTime
-              t =  Time.zone.parse(woTime.current_times) + Constant::W_MIN.minutes
-              start  = start_at ? (t > start_at ? t : start_at) : nil
-              end_at = start + cost_time.minutes if start
               woTime.update_attributes( :wait_num => woTime.wait_num.to_i + 1)
-            else
-              start = Time.now
-              end_at = start + cost_time.minutes
+            else 
               WkOrTime.create(:current_times => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
                 :station_id => station.id, :worked_num => 1) if station and end_at.present?
             end
+            
+            started_at = Time.now
+            ended_at = started_at + cost_time.minutes
             work_order = WorkOrder.create({
                 :order_id => order.id,
                 :current_day => Time.now.strftime("%Y%m%d"),
                 :station_id => station ? station.id : nil,
                 :store_id => store_id,
                 :status => (arrange_time[2] ? WorkOrder::STAT[:SERVICING] : WorkOrder::STAT[:WAIT]),
-                :started_at => arrange_time[2] ? start : nil,
-                :ended_at => arrange_time[2] ? end_at : nil,
+                :started_at => arrange_time[2] ? started_at : nil,
+                :ended_at => arrange_time[2] ? ended_at : nil,
                 :cost_time => cost_time
               })
             hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? STATUS[:SERVICING] : STATUS[:NORMAL]
@@ -1190,16 +1187,6 @@ on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} 
       else
         work_order.update_attribute(:status, WorkOrder::STAT[:CANCELED])
       end
-      
-      #      wkor_time = WkOrTime.find_by_station_id_and_current_day(work_order.station_id, work_order.current_day)
-      #      max_time = [work_order.started_at,Time.now].max
-      #      difference = work_order.ended_at - max_time
-      #      work_orders_arrange = WorkOrder.where("station_id = ? and started_at > ? and current_day = ? and status != ?", work_order.station_id, work_order.started_at, work_order.current_day, WorkOrder::STAT[:CANCELED]).order("ended_at asc")
-      #      work_orders_arrange.each do |wo|
-      #        wo.update_attributes({:started_at => wo.started_at - difference, :ended_at => wo.ended_at - difference})
-      #      end
-      #      new_time = (Time.zone.parse(wkor_time.current_times) - difference).strftime("%Y%m%d%H%M")
-      #      wkor_time.update_attributes({:current_times => new_time, :wait_num => (wkor_time.wait_num.nil? ? nil : wkor_time.wait_num - 1)})
     end
   end
   
