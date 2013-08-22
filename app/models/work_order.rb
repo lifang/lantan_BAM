@@ -21,13 +21,15 @@ class WorkOrder < ActiveRecord::Base
             station.update_attribute(:status, Station::STAT[:NORMAL]) if station.status == Station::STAT[:WRONG]
             work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
                          current_day = #{current_day} and store_id = #{station.store_id}").first
-            work_order.arrange_station(parms[:name2],parms[:name3]) if work_order
-            message = "ok"
-          end
-          if equipment_info.nil?
-            EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)
-          else
-            equipment_info.update_attribute(:num,num)
+            if work_order
+              work_order.arrange_station(parms[:name2],parms[:name3])
+              message = "ok"
+              if equipment_info.nil?
+                EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)
+              else
+                equipment_info.update_attribute(:num,num)
+              end
+            end
           end
         end
       end

@@ -10,7 +10,7 @@ class ReturnBacksController < ApplicationController
     message = ""
     begin
       msg = TotalMsg.find params[:id]
-      message = msg.attributes.select { |key,value| key =~ /msg[0-9]{1,}/ }.values.join("?") if msg
+      message = msg.attributes.select { |key,value| key =~ /msg[0-9]{1,}/ && !value.nil? && value != "" }.values.join("?") if msg
     rescue
     end
     render :text=>message
