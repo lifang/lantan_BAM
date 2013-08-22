@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130821072912) do
+ActiveRecord::Schema.define(:version => 20130822021045) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -880,9 +880,11 @@ ActiveRecord::Schema.define(:version => 20130821072912) do
     t.integer  "status"
     t.integer  "material_low"
     t.string   "code"
+    t.integer  "edition_lv"
   end
 
   add_index "stores", ["code"], :name => "index_stores_on_code"
+  add_index "stores", ["edition_lv"], :name => "index_stores_on_edition_lv"
 
   create_table "suppliers", :force => true do |t|
     t.string   "name"

@@ -24,7 +24,7 @@ class Store < ActiveRecord::Base
 
   belongs_to :city
   has_many :roles
-   STATUS = {
+  STATUS = {
     :CLOSED => 0,       #0该门店已关闭，1正常营业，2装修中, 3已删除
     :OPENED => 1,
     :DECORATED => 2,
@@ -42,6 +42,7 @@ class Store < ActiveRecord::Base
     2 => "豪华版",
     3 => "旗舰版"
   }
+  EDITION_NAME = {:FACTUARL => 0} # 使用版  0
 
   def self.upload_img(img_url,store_id,pic_types,pics_size,img_code=nil)
     path = Constant::LOCAL_DIR

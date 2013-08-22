@@ -301,4 +301,28 @@ class Station < ActiveRecord::Base
     end
     [station_id, station_flag, has_start_end_time]
   end
+  
+  def self.turn_old_to_new
+    Store.where(:edition_lv=>Store::EDITION_NAME[:FACTUARL]).each do |store|
+      today_info = StationStaffRelation.where("current_day=#{Time.now.strftime("%Y%m%d")} and store_id=#{store.id}")
+      yesterday_info = StationStaffRelation.where("current_day=#{Time.now.yesterday.strftime("%Y%m%d")} and store_id=#{store.id}")
+      if today_info.blank?
+        if yesterday_info.blank?
+          Staff.where("store_id=#{store.id} and type_of_w=#{Staff::S_COMPANY[:TECHNICIAN]} and status=#{Staff::STATUS[:normal]}").each {|staff|
+            Station.set_station(store.id,staff.id,staff.level)
+          }
+        else
+          total_con = []
+          id = yesterday_info.map(&:id).max
+          yesterday_info.each {|info|
+            id += 1
+            object = StationStaffRelation.new(info.attributes)
+            object.id,object.current_day = id,Time.now.strftime("%Y%m%d")
+            total_con << object
+          }
+          StationStaffRelation.import total_con, :timestamps=>true
+        end
+      end
+    end
+  end
 end
