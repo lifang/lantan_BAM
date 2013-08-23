@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130822021045) do
+ActiveRecord::Schema.define(:version => 20130823013737) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -831,6 +831,7 @@ ActiveRecord::Schema.define(:version => 20130822021045) do
     t.integer  "staff_level"
     t.integer  "staff_level1"
     t.boolean  "is_has_controller"
+    t.string   "code"
   end
 
   create_table "store_chains_relations", :force => true do |t|
