@@ -33,7 +33,7 @@ namespace :daily do
   end
 
   #为实用版自动分配工位
-  task(:setfor_station => :enviroment) do
+  task(:setfor_station => :environment) do
     Station.turn_old_to_new
   end
 

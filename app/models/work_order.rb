@@ -11,9 +11,9 @@ class WorkOrder < ActiveRecord::Base
       message = "fail"
       current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i
       if store
-        equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{parms[:work].to_i}
+        station = Station.where(:station_code=>parms[:work].to_i).where(:store_id=>store.id).first
+        equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{station.id}
                        and store_id=#{store.id}").first
-        station = Station.where(:id=>parms[:work].to_i).where(:store_id=>store.id).first
         if station && station.is_has_controller && (equipment_info.nil? || num != equipment_info.num )
           if parms[:name8] == "1" || parms[:name9] == "1"
             station.update_attribute(:status, Station::STAT[:WRONG])
