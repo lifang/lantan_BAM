@@ -186,7 +186,7 @@ function checkValid(obj){
         flag = false;
         return false;
     }
-    else if($(".station_form").find("#station_code").val()=="" || $(".station_form").find("#station_code").val().match(reg1)==null){
+    else if($.trim($(".station_form").find("#station_code").val())=="" || $.trim($(".station_form").find("#station_code").val()).match(reg1)==null){
         tishi_alert("工位编号不能为空,且为数字!")
         flag = false;
         return false;

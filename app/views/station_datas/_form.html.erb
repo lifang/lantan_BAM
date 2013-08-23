@@ -3,7 +3,9 @@
     <h1>工位<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <% @station ||= Station.new %>
-      <%= form_for @station, :url => @action == 'new' ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => @action == 'new' ? :post : :put, :remote => true, :html => {"data-type" => 'script', :class=>"station_form"} do |f| %>
+      <%p controller.action_name
+     p ['new', 'create', 'index'].include?(controller.action_name) %>
+      <%= form_for @station, :url => ['new', 'create', 'index'].include?(controller.action_name) ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => ['new', 'create', 'index'].include?(controller.action_name) ? :post : :put, :remote => true, :html => {"data-type" => 'script', :class=>"station_form"} do |f| %>
         <div class="popup_body_area">
           <div class="item station_name">
             <%= f.label :name, ("<span class='red'>*</span>名称：").html_safe%>
@@ -77,7 +79,7 @@
                 <ul>
                   <% @products = Product.is_service.is_normal.where(:store_id => @store.id) %>
                   <% @products.each do |product| %>
-                    <li><%= check_box_tag 'product_ids[]', product.id, @station.new_record? ? false : @station.products.include?(product), :id => product.id  %><%= product.name %></li>
+                    <li><%= check_box_tag 'product_ids[]', product.id, @station.new_record? && (@product_ids.nil? || !@product_ids.include?(product.id)) ? false : ((@product_ids.nil? && @station.products.include?(product)) || (@product_ids && @product_ids.include?(product.id))), :id => product.id  %><%= product.name %></li>
                   <% end %>
                 </ul>
               </div>
