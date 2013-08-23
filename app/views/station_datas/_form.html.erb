@@ -3,8 +3,7 @@
     <h1>工位<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <% @station ||= Station.new %>
-      <%p controller.action_name
-     p ['new', 'create', 'index'].include?(controller.action_name) %>
+
       <%= form_for @station, :url => ['new', 'create', 'index'].include?(controller.action_name) ? store_station_datas_path(@store) : "/stores/#{@store.id}/station_datas/#{@station.id}", :method => ['new', 'create', 'index'].include?(controller.action_name) ? :post : :put, :remote => true, :html => {"data-type" => 'script', :class=>"station_form"} do |f| %>
         <div class="popup_body_area">
           <div class="item station_name">
