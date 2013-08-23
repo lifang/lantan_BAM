@@ -9,6 +9,10 @@
             <%= f.label :name, ("<span class='red'>*</span>名称：").html_safe%>
             <%= f.text_field :name%>
           </div>
+                    <div class="item">
+            <%= f.label :code, ("<span class='red'>*</span>工位编号：").html_safe%>
+            <%= f.text_field :code %>
+          </div>
           <div class="item">
             <%= f.label :is_has_controller, '是否有工控机：'%>
             <%= f.check_box :is_has_controller, :checked => @action == 'new' ? "checked" : f.object.is_has_controller, :onclick => "handleController()" %>
@@ -19,50 +23,52 @@
               <%= f.text_field :collector_code %>
             </div>
 
-            <div class="item">
-              <%= f.label :elec_switch, '工位配电开关通道：'%>
-              <%= f.text_field :elec_switch%>
-            </div>
-            <div class="item">
-              <%= f.label :clean_m_fb, '清洗机反馈通道：'%>
-              <%= f.text_field :clean_m_fb %>
-            </div>
-            <div class="item">
-              <%= f.label :gas_t_switch, '气体流量开关通道：'%>
-              <%= f.text_field :gas_t_switch%>
-            </div>
-            <div class="item">
-              <%= f.label :gas_run_fb, '空气机运行反馈通道：'%>
-              <%= f.text_field :gas_run_fb%>
-            </div>
-            <div class="item">
-              <%= f.label :gas_error_fb, '空气机故障反馈通道：'%>
-              <%= f.text_field :gas_error_fb%>
-            </div>
-            <div class="item">
-              <%= f.label :system_error, '系统报警通道：'%>
-              <%= f.text_field :system_error%>
-            </div>
-            <div class="item">
-              <%= f.label :is_using, '工位有效占用通道：'%>
-              <%= f.text_field :is_using%>
-            </div>
-            <div class="item">
-              <%= f.label :day_hmi, '工位日hmi复位通道：'%>
-              <%= f.text_field :day_hmi%>
-            </div>
-            <div class="item">
-              <%= f.label :month_hmi, '工位月hmi复位通道：'%>
-              <%= f.text_field :month_hmi%>
-            </div>
-            <div class="item">
-              <%= f.label :once_gas_use, '工位一次使用的气体数量通道：'%>
-              <%= f.text_field :once_gas_use%>
-            </div>
-            <div class="item">
-              <%= f.label :once_water_use, '工位一次使用的水数量通道：'%>
-              <%= f.text_field :once_water_use%>
-            </div>
+            <!--
+               <div class="item">
+  <%#= f.label :elec_switch, '工位配电开关通道：'%>
+  <%#= f.text_field :elec_switch%>
+               </div>
+               <div class="item">
+  <%#= f.label :clean_m_fb, '清洗机反馈通道：'%>
+  <%#= f.text_field :clean_m_fb %>
+               </div>
+               <div class="item">
+  <%#= f.label :gas_t_switch, '气体流量开关通道：'%>
+  <%#= f.text_field :gas_t_switch%>
+               </div>
+               <div class="item">
+  <%#= f.label :gas_run_fb, '空气机运行反馈通道：'%>
+  <%#= f.text_field :gas_run_fb%>
+               </div>
+               <div class="item">
+  <%#= f.label :gas_error_fb, '空气机故障反馈通道：'%>
+  <%#= f.text_field :gas_error_fb%>
+               </div>
+               <div class="item">
+  <%#= f.label :system_error, '系统报警通道：'%>
+  <%#= f.text_field :system_error%>
+               </div>
+               <div class="item">
+  <%#= f.label :is_using, '工位有效占用通道：'%>
+  <%#= f.text_field :is_using%>
+               </div>
+               <div class="item">
+  <%#= f.label :day_hmi, '工位日hmi复位通道：'%>
+  <%#= f.text_field :day_hmi%>
+               </div>
+               <div class="item">
+  <%#= f.label :month_hmi, '工位月hmi复位通道：'%>
+  <%#= f.text_field :month_hmi%>
+               </div>
+               <div class="item">
+  <%#= f.label :once_gas_use, '工位一次使用的气体数量通道：'%>
+  <%#= f.text_field :once_gas_use%>
+               </div>
+               <div class="item">
+  <%#= f.label :once_water_use, '工位一次使用的水数量通道：'%>
+  <%#= f.text_field :once_water_use%>
+               </div>
+            -->
           </div>
           <div class="seeProDiv">
             <div class="seeProDiv_l"><span class='red'>*</span>服务：</div>
@@ -71,7 +77,7 @@
                 <ul>
                   <% @products = Product.is_service.is_normal.where(:store_id => @store.id) %>
                   <% @products.each do |product| %>
-                    <li><%= check_box_tag 'product_ids[]', product.id, @station.new_record? ? false : @station.products.include?(product)  %><%= product.name %></li>
+                    <li><%= check_box_tag 'product_ids[]', product.id, @station.new_record? ? false : @station.products.include?(product), :id => product.id  %><%= product.name %></li>
                   <% end %>
                 </ul>
               </div>

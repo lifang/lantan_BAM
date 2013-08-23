@@ -25,7 +25,7 @@ class StationDatasController < ApplicationController
           flash[:notice] = "工位创建成功"
           render :successful
         else
-          flash[:notice] = "工位创建失败"
+          @notice = "工位创建失败！ #{@station.errors.messages.values.flatten.join("<br/>")}"
           render :replace_form
         end
       end
@@ -53,7 +53,7 @@ class StationDatasController < ApplicationController
       flash[:notice] = "工位编辑成功"
       render :successful
     else
-      flash[:notice] = "工位编辑失败"
+      @notice = "工位编辑失败！#{@station.errors.messages.values.flatten.join("<br/>")}"
       render :replace_form
     end
   end

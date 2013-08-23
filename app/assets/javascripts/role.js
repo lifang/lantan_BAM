@@ -5,7 +5,7 @@
  * Time: 下午1:16
  * To change this template use File | Settings | File Templates.
  */
-
+ var reg1 =  /^\d+$/;
 function add_role(store_id){
     popup("#add_role");
     $("#role_input").attr("value","");
@@ -179,15 +179,21 @@ function selectAll(obj){
 //这边是工位的开始
 function checkValid(obj){
     var flag = true;
+    var prod_length = $(".station_form .popup_body_result").find("input[type='checkbox']:checked").length
     if($(".station_form").find(".station_name input").val()=="")
-        {
-           tishi_alert("名称不能为空!")
-            flag = false;
-            return false;
-        }
+    {
+        tishi_alert("名称不能为空!")
+        flag = false;
+        return false;
+    }
+    else if($(".station_form").find("#station_code").val()=="" || $(".station_form").find("#station_code").val().match(reg1)==null){
+        tishi_alert("工位编号不能为空,且为数字!")
+        flag = false;
+        return false;
+    }
     else if($(".station_form #station_is_has_controller").attr("checked")=="checked")
-       {
-           $(".station_form .controller_input").find("input[type='text']").each(function(){
+    {
+        $(".station_form .controller_input").find("input[type='text']").each(function(){
             var name = $(this).prev().text().split("：")[0]
             if($(this).val()==""){
                 tishi_alert(name.split("*")[1]+"不能为空!")
@@ -195,10 +201,11 @@ function checkValid(obj){
                 return false;
             }
         })
-       }
-    if($(".station_form .popup_body_result").find("input[type='checkbox']:checked").length==0){
+    }
+    if(prod_length == 0){
         tishi_alert("服务不能为空!")
         flag = false;
+        return false;
     }
     if(flag)
     {
