@@ -20,7 +20,7 @@
             <tbody>
               <% @stations.each do |station| %>
                 <tr>
-                  <td width =150"><%= station.id %></td>
+                  <td width =150"><%= station.code %></td>
                   <td width =180"><%= station.name %></td>
                   <td width =200"><%= Product.includes(:station_service_relations).where(:station_service_relations => {:station_id => station.id}, :store_id => @store.id, :status => Product::IS_VALIDATE[:YES],:is_service =>Product::PROD_TYPES[:SERVICE]).map(&:name).join("、") %></td>
                   <td width =150"><%= Station::STAT_NAME[station.status] %></td>

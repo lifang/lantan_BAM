@@ -1,3 +1,6 @@
+<% if @station and @station.errors.any? %>
+tishi_alert("<%=  @notice.html_safe() %>");
+<% end %>
 $("#hidden_station_form").html('<%= j(render :partial => "form") %>');
 handleController()
 popup('#station_form')
