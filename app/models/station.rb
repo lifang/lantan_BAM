@@ -13,8 +13,7 @@ class Station < ActiveRecord::Base
   IS_CONTROLLER = {:YES=>1,:NO=>0} #定义是否拥有工控机
   PerPage = 10
   validates :name, :presence => true
-  validates :code, uniqueness: { scope: :store_id,
-    message: "工位编号在当前门店中已经存在！" }
+ # validates :code, uniqueness: { scope: :store_id, message: "工位编号在当前门店中已经存在！" }
   
   scope :valid, where("status != 4")
   
