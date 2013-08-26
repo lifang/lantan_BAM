@@ -90,12 +90,12 @@ class StationsController < ApplicationController
     conditions = "work_orders.status=#{WorkOrder::STAT[:COMPLETE]} and date_format(work_orders.updated_at,'%Y-%m')='#{Time.now.strftime('%Y-%m')}'
     and work_orders.store_id=#{params[:store_id]}"
     month_num = WorkOrder.joins(:station).select(content).group("station_id").where(conditions).inject(Hash.new){|hash,w_order| 
-      hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(1),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(1),
+      hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(2),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(2),
         w_order.num]; hash}
     d_conditions = "work_orders.status=#{WorkOrder::STAT[:COMPLETE]} and current_day=#{Time.now.strftime('%Y%m%d').to_i} 
     and work_orders.store_id=#{params[:store_id]}"
     day_num = WorkOrder.joins(:station).select(content).group("station_id").where(d_conditions).inject(Hash.new){|hash,w_order| 
-      hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(1),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(1),
+      hash[w_order.station_id]=[w_order.water.nil? ? 0 :(w_order.water/1000.0).round(2),w_order.gas.nil? ? 0 : (w_order.gas/1000.0).round(2),
         w_order.num];hash}
     p month_num
     render :json=>{:month_num=>month_num,:day_num=>day_num}
