@@ -9,36 +9,40 @@ class StationDatasController < ApplicationController
   end
 
   def new
-    @action = 'new'
+    #@action = 'new'
     render :replace_form
   end
 
   def create
     if params[:product_ids]
-      @product_ids = params[:product_ids].map(&:to_i)
       Station.transaction do
-        products = Product.where(:id => params[:product_ids])
-        levels = (products.map(&:staff_level)|products.map(&:staff_level_1)).uniq.sort
         params[:station][:name].strip!
         params[:station][:code].strip!
-        @station = Station.create(params[:station].merge({:store_id => @store.id, :status => 2,:staff_level=>levels.min,
+        @product_ids = params[:product_ids].map(&:to_i)
+        products = Product.where(:id => params[:product_ids])
+        levels = (products.map(&:staff_level)|products.map(&:staff_level_1)).uniq.sort
+
+        @station = Station.new(params[:station].merge({:store_id => @store.id, :status => 2,:staff_level=>levels.min,
               :staff_level1=>levels[0..(levels.length/2.0)].max   }))
+      
         if @station.save
           @station.products = products
           flash[:notice] = "工位创建成功"
           render :successful
         else
-          @notice = "工位创建失败！ #{@station.errors.messages.values.flatten.join("<br/>")}"
+          @notice = "工位创建失败! #{@station.errors.messages.values.flatten.join("<br/>")}"
           render :replace_form
         end
       end
     else
+      @notice = "工位创建失败！"
       render :replace_form
     end
+
   end
 
   def edit
-    @action = 'edit'
+    # @action = 'edit'
     @station = Station.includes(:products).find(params[:id])
     render :replace_form
   end
@@ -53,7 +57,8 @@ class StationDatasController < ApplicationController
     end
     params[:station][:name].strip!
     params[:station][:code].strip!
-    if  @station.update_attributes(params[:station].merge({:staff_level=>levels.min,
+
+    if @station.update_attributes(params[:station].merge({:staff_level=>levels.min,
             :staff_level1=>levels[0..(levels.length/2.0)].max   }))
       @station.products = products
       flash[:notice] = "工位编辑成功"
@@ -66,9 +71,10 @@ class StationDatasController < ApplicationController
 
   def destroy
     @station = Station.find(params[:id])
-    @station.status = 4
-    flash[:notice] = "工位删除成功"
-    redirect_to "/stores/#{@store.id}/station_datas" if @station.save
+    if @station.update_column(:status, 4)
+      flash[:notice] = "工位删除成功"
+      redirect_to "/stores/#{@store.id}/station_datas"
+    end
   end
 
   private
