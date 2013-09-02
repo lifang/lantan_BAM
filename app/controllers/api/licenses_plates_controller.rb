@@ -12,7 +12,7 @@ class Api::LicensesPlatesController < ApplicationController     #车牌识别的
   end
 
   def send_file   #返回图片名或配置文件
-    list = ""
+    list = []
     path = "#{Rails.root}/public/licenses_plates_folder"
     name = params[:folderName]
     file_type = name.split(".")[1] if name
@@ -23,10 +23,9 @@ class Api::LicensesPlatesController < ApplicationController     #车牌识别的
       list.delete("..") if list
     elsif file_type == "xml" || file_type == "XML"
       path = path + "/" + name
-      list = []
       list << name if File.exist?(path)
     end
-    return list.to_json
+    render :json=>list.to_json
   end
 
   def name_validate(path, name, i)      #验证文件是否重名

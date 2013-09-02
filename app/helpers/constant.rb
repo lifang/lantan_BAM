@@ -99,7 +99,8 @@ module Constant
       :print => ["打印单据", 65536],
       :chengben => ["成本统计",131072],
       :ruchuku => ["入/出库统计",262144],
-      :zhixiao => ["滞销统计",524288]
+      :zhixiao => ["滞销统计",524288],
+      :ave_cost_detail => ["平均成本明细统计", 1048576]
     },
     :stations => {
       :name => "现场",
