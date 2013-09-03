@@ -70,12 +70,15 @@ class StaffManagesController < ApplicationController
     @started_time = params[:search_s_time].nil?||params[:search_s_time].empty? ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:search_s_time]
     @ended_time = params[:search_e_time].nil?||params[:search_e_time].empty? ? Time.now.strftime("%Y-%m-%d") : params[:search_e_time]
     search_sql = "select o.id oid, opr.pro_num oprpnum, pmr.material_num pmrmnum, m.id mid, m.price mprice
-                  from orders o inner join order_prod_relations opr on o.id=opr.order_id
-                  inner join products p  on p.id=opr.product_id
+                  from orders o 
+                  inner join work_orders wo on o.id=wo.order_id
+                  inner join order_prod_relations opr on o.id=opr.order_id
+                  inner join products p on p.id=opr.product_id
                   inner join prod_mat_relations pmr on pmr.product_id=p.id
                   inner join materials m on m.id=pmr.material_id
-                  where o.status=#{Order::STATUS[:FINISHED]}
-                  and o.store_id=#{@store.id}
+                  where o.store_id=#{@store.id}
+                  and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]})
+                  and wo.status=#{WorkOrder::STAT[:COMPLETE]}
                   and p.is_service=#{Product::PROD_TYPES[:SERVICE]}
                   and date_format(o.created_at, '%Y-%m-%d')>='#{@started_time}'
                   and date_format(o.created_at, '%Y-%m-%d')<'#{@ended_time}'"
