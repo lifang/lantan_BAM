@@ -220,7 +220,7 @@ class ComplaintsController < ApplicationController
   end
 
   def cost_price
-    created,ended,types,store_id = params[:created],params[:ended_at],params[:types],params[:store_id]
+    created,ended,types,store_id,session[:types] = params[:created],params[:ended_at],params[:types],params[:store_id],params[:types]
     session[:created]=(created.nil? || created == "" || created.length == 0)? (Time.now - Constant::PRE_DAY.days).strftime("%Y-%m-%d") : created
     session[:ended] = (ended.nil? || ended == "" || ended.length == 0)? Time.now.strftime("%Y-%m-%d") : ended
     m_condit = "mat_out_orders.created_at >= '#{session[:created]}' and mat_out_orders.created_at < '#{session[:ended]}' and mat_out_orders.store_id=#{store_id}"
@@ -248,7 +248,7 @@ class ComplaintsController < ApplicationController
       gas_num,water_num,cost_price =0,0,m_price[staff.id].nil? ? 0 : m_price[staff.id]
       w_orders.select{|k,v|s_orders[staff.id].include? k}.values.each {|info| 
         gas_num += (info[0].nil? ? 0 : info[0]);water_num += (info[1].nil? ? 0 : info[1])}
-      price = s_price.select{|k,v|s_orders[staff.id].include? k}.values.inject(0){|num,price| num+price}
+      price = s_price.select{|k,v|s_orders[staff.id].include? k}.values.inject(0){|num,price| num+(price.nil? ? 0 : price)}
       infos << [staff.name,water_num,gas_num,cost_price,s_orders[staff.id].length,price]
     }
     @s_infos = infos.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)

@@ -2,7 +2,7 @@
   <% if permission?(:datas, :jixiao) %><%= link_to "绩效统计", store_staff_manages_path(@store), :class => "hover" %><% end %>
   <% if permission?(:datas, :shuip) %><a href="/stores/<%= @store.id %>/staff_manages/average_score_hart">平均水平统计</a><% end %>
   <% if permission?(:datas, :ave_cost_detail) %><a href="/stores/<%= @store.id %>/staff_manages/average_cost_detail_summary" style="font-size: 13px">平均成本明细汇总</a><% end %>
-  <a href="/stores/<%= params[:store_id]%>/complaints/cost_price">员工成本明细</a>
+  <% if permission?(:datas, :staff_detail) %><a href="/stores/<%= params[:store_id]%>/complaints/cost_price">员工成本明细</a><% end %>
 </div>
 <div class="clear"></div>
 <div class="data_body">

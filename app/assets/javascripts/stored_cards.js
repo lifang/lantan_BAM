@@ -133,3 +133,33 @@ function return_value(){
         }
     })
 }
+
+function send_request(store_id){
+    var c_time = $("#c_time").val();
+    var s_time = $("#e_time").val();
+    var types = $("#s_type option:selected").val();
+    var serach = false;
+    var condit = {}
+    if (c_time != "" && c_time.length !=0){
+        serach = true;
+        condit["created"] = c_time;
+    }
+    if (s_time != "" && s_time.length !=0){
+        serach = true;
+        condit["ended"] = s_time;
+    }
+    if (types != "" && types.length !=0){
+        serach = true;
+        condit["types"] = types;
+    }
+    if(serach){
+        var url ="/stores/"+store_id+"/complaints/cost_price?"
+        for(var item in condit){
+            url += item +"="+condit[item]+"&"
+            }
+        window.location.href = url
+    }else{
+        tishi_alert("请选择查询条件");
+    }
+    
+}

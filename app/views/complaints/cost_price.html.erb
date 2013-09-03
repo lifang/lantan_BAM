@@ -1,8 +1,25 @@
 <div class="second_menu">
   <% if permission?(:datas, :jixiao) %><%= link_to "绩效统计", store_staff_manages_path(params[:store_id]) %><% end %>
   <% if permission?(:datas, :shuip) %><a href="/stores/<%= params[:store_id] %>/staff_manages/average_score_hart">平均水平统计</a><% end %>
-   <% if permission?(:datas, :ave_cost_detail) %><a href="/stores/<%= @store.id %>/staff_manages/average_cost_detail_summary" style="font-size: 13px">平均成本明细汇总</a><% end %>
-  <a href="/stores/<%= params[:store_id]%>/complaints/cost_price" class="hover">员工成本明细</a>
+  <% if permission?(:datas, :ave_cost_detail) %><a href="/stores/<%= params[:store_id] %>/staff_manages/average_cost_detail_summary" style="font-size: 13px">平均成本明细汇总</a><% end %>
+  <% if permission?(:datas, :staff_detail) %><a href="/stores/<%= params[:store_id]%>/complaints/cost_price" class="hover">员工成本明细</a><% end %>
+</div>
+<div class="search">
+  <div>
+    <label>时间：</label>
+    <input type="text" class="Wdate" onclick="WdatePicker()" readonly value="<%= session[:created] %>" id="c_time"/>&nbsp;到&nbsp;
+    <input type="text" class="Wdate" onclick="WdatePicker()" readonly value="<%= session[:ended] %>" id="e_time"/>
+  </div>
+  <div>
+    <label>服务选择：</label>
+    <select id="s_type">
+      <option value="">全部</option>
+      <% Product::PRODUCT_TYPES.select{|k,v|k >= Product::PRODUCT_END}.each do |k, v| %>
+        <option value="<%= k %>"<% if session[:types] == "#{k}" %>selected<%end%>><%= v %></option>
+      <% end %>
+    </select>
+  </div>
+  <div><button class="search_btn" onclick="send_request(<%= params[:store_id] %>)">查询</button></div>
 </div>
 <div class="clear"></div>
 <div class="data_body">
