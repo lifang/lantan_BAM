@@ -248,7 +248,7 @@ class ComplaintsController < ApplicationController
       gas_num,water_num,cost_price =0,0,m_price[staff.id].nil? ? 0 : m_price[staff.id]
       w_orders.select{|k,v|s_orders[staff.id].include? k}.values.each {|info| 
         gas_num += (info[0].nil? ? 0 : info[0]);water_num += (info[1].nil? ? 0 : info[1])}
-      price = s_price.select{|k,v|s_orders[staff.id].include? k}.values.inject(0){|num,price| num+price}
+      price = s_price.select{|k,v|s_orders[staff.id].include? k}.values.inject(0){|num,price| num+(price.nil? ? 0 : price)}
       infos << [staff.name,water_num,gas_num,cost_price,s_orders[staff.id].length,price]
     }
     @s_infos = infos.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)

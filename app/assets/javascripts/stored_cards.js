@@ -157,7 +157,6 @@ function send_request(store_id){
         for(var item in condit){
             url += item +"="+condit[item]+"&"
             }
-        alert(url);
         window.location.href = url
     }else{
         tishi_alert("请选择查询条件");
