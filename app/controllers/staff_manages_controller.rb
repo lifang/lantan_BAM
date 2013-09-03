@@ -74,7 +74,9 @@ class StaffManagesController < ApplicationController
                   inner join products p  on p.id=opr.product_id
                   inner join prod_mat_relations pmr on pmr.product_id=p.id
                   inner join materials m on m.id=pmr.material_id
-                  where o.status=#{Order::STATUS[:FINISHED]} and p.is_service=#{Product::PROD_TYPES[:SERVICE]}
+                  where o.status=#{Order::STATUS[:FINISHED]}
+                  and o.store_id=#{@store.id}
+                  and p.is_service=#{Product::PROD_TYPES[:SERVICE]}
                   and date_format(o.created_at, '%Y-%m-%d')>='#{@started_time}'
                   and date_format(o.created_at, '%Y-%m-%d')<'#{@ended_time}'"
     unless params[:search_s_type].nil? || params[:search_s_type].to_i == 0
@@ -92,6 +94,7 @@ class StaffManagesController < ApplicationController
                                       from mat_out_orders moo
                                       inner join materials m on m.id=moo.material_id
                                       where moo.types=#{MatOutOrder::TYPES_VALUE[:cost]}
+                                      and moo.store_id=#{@store.id}
                                       and date_format(moo.created_at, '%Y-%m-%d')>='#{@started_time}'
                                       and date_format(moo.created_at, '%Y-%m-%d')<'#{@ended_time}'"
    actual = []
