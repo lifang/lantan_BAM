@@ -120,6 +120,7 @@ LantanBAM::Application.routes.draw do
       collection do
         get "get_year_staff_hart"
         get "average_score_hart"
+        get "average_cost_detail_summary"
       end
     end
 
@@ -264,7 +265,12 @@ LantanBAM::Application.routes.draw do
         get :download_staff_infos
       end
     end
-
+    resources :licenses_plates do
+      collection do
+        post :upload_file
+        get :send_file
+      end
+    end
   end
   resources :return_backs do
     collection do
