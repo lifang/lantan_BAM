@@ -40,7 +40,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post "search","search_degree","detail_s","search_time","degree_time","consumer_search"
         get "search_list","show_detail","satisfy_degree","degree_list","detail_list","date_list","time_list","consumer_list"
-        get "con_list"
+        get "con_list","cost_price"
       end
       member do
         get "complaint_detail"
