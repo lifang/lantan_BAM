@@ -220,7 +220,7 @@ class ComplaintsController < ApplicationController
   end
 
   def cost_price
-    created,ended,types,store_id = params[:created],params[:ended_at],params[:types],params[:store_id]
+    created,ended,types,store_id,session[:types] = params[:created],params[:ended_at],params[:types],params[:store_id],params[:types]
     session[:created]=(created.nil? || created == "" || created.length == 0)? (Time.now - Constant::PRE_DAY.days).strftime("%Y-%m-%d") : created
     session[:ended] = (ended.nil? || ended == "" || ended.length == 0)? Time.now.strftime("%Y-%m-%d") : ended
     m_condit = "mat_out_orders.created_at >= '#{session[:created]}' and mat_out_orders.created_at < '#{session[:ended]}' and mat_out_orders.store_id=#{store_id}"
