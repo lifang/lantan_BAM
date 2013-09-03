@@ -31,7 +31,7 @@
     <td><%= @total_num %></td>
     <td><%= @total_num==0 ? 0 : sprintf("%.2f", @actual_cost.to_f/@total_num) %></td>
     <td><%= @total_cost %></td>
-    <td><%= @total_cost==0 ? 0 : sprintf("%.2f", @actual_cost.to_f*100/@total_cost.to_f) %>%</td>
+    <td><%= @actual_cost==0 ? 0 : sprintf("%.2f", @total_cost.to_f*100/@actual_cost.to_f) %>%</td>
     <% end %>
     </tr>
   </tbody>
