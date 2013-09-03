@@ -74,7 +74,7 @@ class StaffManagesController < ApplicationController
                   inner join products p  on p.id=opr.product_id
                   inner join prod_mat_relations pmr on pmr.product_id=p.id
                   inner join materials m on m.id=pmr.material_id
-                  where o.status=#{Order::STATUS[:FINISHED]}
+                  where o.status=#{Order::STATUS[:FINISHED]} and p.is_service=#{Product::PROD_TYPES[:SERVICE]}
                   and date_format(o.created_at, '%Y-%m-%d')>='#{@started_time}'
                   and date_format(o.created_at, '%Y-%m-%d')<'#{@ended_time}'"
     unless params[:search_s_type].nil? || params[:search_s_type].to_i == 0
