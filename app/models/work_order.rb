@@ -7,22 +7,30 @@ class WorkOrder < ActiveRecord::Base
   STAT = {:WAIT =>0,:SERVICING=>1,:WAIT_PAY=>2,:COMPLETE =>3, :CANCELED => 4, :END => 5}
 
   def self.update_work_order(parms)
-    begin
-      message = "fail"
+#    begin
+      message,dir = "ok","#{Rails.root}/public/logs"
+      Dir.mkdir(dir)  unless File.directory?(dir)
+      file_path = dir+"/returnBack_#{Time.now.strftime("%Y%m%d")}.log"
+      if File.exists? file_path
+        file = File.open( file_path,"a")
+      else
+        file = File.new(file_path, "w")
+      end
+      file.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')}   #{parms}\r\n"
+      file.close
       current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i
       if store
-        station = Station.where(:code=>parms[:work].to_i).where(:store_id=>store.id).first
-        equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{station.id}
+        station = Station.where(:code=>parms[:work]).where(:store_id=>store.id).first
+        if station && station.is_has_controller
+          equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{station.id}
                        and store_id=#{store.id}").first
-        if station && station.is_has_controller && (equipment_info.nil? || num != equipment_info.num )
-          if parms[:name8] == "1" || parms[:name9] == "1"
-            station.update_attribute(:status, Station::STAT[:WRONG])
-          else
-            station.update_attribute(:status, Station::STAT[:NORMAL]) if station.status == Station::STAT[:WRONG]
+          if  (equipment_info.nil? || num != equipment_info.num )
             work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
                          current_day = #{current_day} and store_id = #{station.store_id}").first
             if work_order
-              work_order.arrange_station(parms[:name2],parms[:name3])
+              water = parms[:name12].to_f*10**4 + parms[:name2].to_f
+              gas = parms[:name13].to_f*10**4+parms[:name3].to_f
+              work_order.arrange_station(water,gas)
               message = "ok"
               if equipment_info.nil?
                 EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)
@@ -33,9 +41,9 @@ class WorkOrder < ActiveRecord::Base
           end
         end
       end
-    rescue
-      message = "fail"
-    end
+#    rescue
+#      message = "fail"
+#    end
     return message
   end
 
@@ -97,7 +105,7 @@ class WorkOrder < ActiveRecord::Base
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
         where("work_orders.station_id is null").
         where("work_orders.store_id = #{self.store_id}").
-      where("work_orders.current_day = #{self.current_day}").
+        where("work_orders.current_day = #{self.current_day}").
         where(car_num_id_sql,orders.map(&:car_num_id)).
         readonly(false).order("work_orders.created_at asc")
 

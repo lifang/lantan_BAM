@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130823013737) do
+ActiveRecord::Schema.define(:version => 20130902062716) do
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
@@ -466,7 +466,7 @@ ActiveRecord::Schema.define(:version => 20130823013737) do
     t.boolean  "is_billing"
     t.integer  "front_staff_id"
     t.integer  "cons_staff_id_1"
-    t.string   "cons_staff_id_2"
+    t.integer  "cons_staff_id_2"
     t.integer  "station_id"
     t.integer  "sale_id"
     t.integer  "c_pcard_relation_id"
