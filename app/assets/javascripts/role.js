@@ -15,6 +15,8 @@ function add_role(store_id){
 function new_role(store_id){
     if($.trim($("#role_input").val()).length==0){
         tishi_alert("请输入角色名称");
+    }else if($.trim($("#role_input").val()).length > 8){
+        tishi_alert("角色名称不能超过8个汉字");
     }else{
         $.ajax({
             url:"/stores/"+store_id+"/roles/",
@@ -47,6 +49,8 @@ function blur_role(obj,store_id){
     var role_id = $(obj).attr("id").split("_")[2];
     if($.trim($(obj).val()).length==0){
         tishi_alert("请输入角色名称");
+    }else if($.trim($(obj).val()).length > 8){
+        tishi_alert("角色名称不能超过8个汉字");
     }else if($.trim($(obj).val())==$("#a_role_"+role_id).text()){
         $("#a_role_"+role_id).show();
         $(obj).hide();
