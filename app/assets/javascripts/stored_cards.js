@@ -152,7 +152,7 @@ function send_request(store_id){
         serach = true;
         condit["types"] = types;
     }
-    if(serach){
+    if(serach &&　c_time < s_time){
         var url ="/stores/"+store_id+"/complaints/cost_price?"
         for(var item in condit){
             url += item +"="+condit[item]+"&"

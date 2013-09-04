@@ -220,16 +220,18 @@ class ComplaintsController < ApplicationController
   end
 
   def cost_price
-    created,ended,types,store_id,session[:types] = params[:created],params[:ended_at],params[:types],params[:store_id],params[:types]
+    created,ended,types,store_id,session[:types] = params[:created],params[:ended],params[:types],params[:store_id],params[:types]
     session[:created]=(created.nil? || created == "" || created.length == 0)? (Time.now - Constant::PRE_DAY.days).strftime("%Y-%m-%d") : created
     session[:ended] = (ended.nil? || ended == "" || ended.length == 0)? Time.now.strftime("%Y-%m-%d") : ended
     m_condit = "mat_out_orders.created_at >= '#{session[:created]}' and mat_out_orders.created_at < '#{session[:ended]}' and mat_out_orders.store_id=#{store_id}"
     order_con = "orders.created_at >= '#{session[:created]}' and orders.created_at < '#{session[:ended]}' and orders.store_id=#{store_id}"
     order_con += " and is_service=#{Product::PROD_TYPES[:SERVICE]} and orders.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]})"
     order_con += " and products.types = #{types}" unless types.nil? || types == "" || types.length == 0
-    s_price = Order.joins(:order_prod_relations=>:product).joins("inner join prod_mat_relations p on p.product_id = products.id inner join 
-    materials m on m.id = p.material_id"). select("sum(order_prod_relations.pro_num*m.price*p.material_num) total_price,orders.id").
-      where(order_con).group("id"). inject(Hash.new){|hash,order|hash[order.id]=order.total_price;hash}
+    t_orders = Order.joins(:order_prod_relations=>:product).joins("inner join prod_mat_relations p on p.product_id = products.id inner join
+    materials m on m.id = p.material_id").select("sum(order_prod_relations.pro_num*m.price*p.material_num) total_price,orders.id,m.id m_id").
+      where(order_con).group("id,m_id")
+    s_price = t_orders.inject(Hash.new){|hash,order|
+      price = order.total_price.nil? ? 0 : order.total_price;hash[order.id].nil? ? hash[order.id]=price : hash[order.id] += price;hash}
     order_staffs = Order.find s_price.keys
     staff_ids = (order_staffs.map(&:cons_staff_id_1) | order_staffs.map(&:cons_staff_id_2)).uniq.compact
     s_orders = {}
@@ -240,6 +242,7 @@ class ComplaintsController < ApplicationController
     staffs = Staff.find staff_ids
     w_orders = WorkOrder.find_all_by_order_id(order_staffs.map(&:id)).inject(Hash.new){|hash,w_order|
       hash[w_order.order_id]=[w_order.gas_num,w_order.water_num];hash}
+    m_condit += " and material_id in (#{t_orders.map(&:m_id).join(',')})" unless t_orders.blank?
     m_price = MatOutOrder.joins(:material).where(m_condit + " and mat_out_orders.types = #{MatOutOrder::TYPES_VALUE[:cost]}").
       select("staff_id,sum(material_num*mat_out_orders.price) sum").group("staff_id").inject(Hash.new){|hash,s| hash[s.staff_id] = s.sum;hash }
     infos = []
