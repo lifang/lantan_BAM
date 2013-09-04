@@ -110,15 +110,16 @@ class StaffManagesController < ApplicationController
      actual_cost += at.mmnum*at.mprice
    end if !actual.blank?
    @actual_cost = actual_cost #实际成本
-   hash = actual.group_by{|a|a.mname} unless actual.blank?
+   hash = actual.group_by{|a|a.mid} unless actual.blank?
    total_array = []
    hash.each do |k, v|
      a = 0
-     b = v[0].mprice
+     b = v[0].mname
+     c = v[0].mprice
      v.each do |obj|
        a += obj.mmnum
      end
-     total_array << k.to_s + "," + a.to_s + "," + b.to_s
+     total_array << k.to_s + "," + a.to_s + "," + b.to_s + "," + c.to_s
    end if hash
    @total_array = total_array
    respond_to do |f|
