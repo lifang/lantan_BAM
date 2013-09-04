@@ -1,9 +1,9 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
   <thead>
     <tr class="hbg">
-      <td>物料名称</td>
-      <td>数量</td>
-      <td>价值(元)</td>
+      <td width="160px">物料名称</td>
+      <td width="60px">数量</td>
+      <td width="80px">价值(元)</td>
       <td>总计</td>
       <td>施工车辆总数</td>
       <td>平均成本(元)</td>
@@ -20,9 +20,9 @@
       <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
         <% @total_array.each do |ta| %>
         <tr>
-          <td><%= ta.split(",")[0] %></td>
-          <td><%= ta.split(",")[1] %></td>
-          <td><%= ta.split(",")[2] %></td>
+          <td width="160px"><%= ta.split(",")[2] %></td>
+          <td width="60px"><%= ta.split(",")[1] %></td>
+          <td width="80px"><%= ta.split(",")[3] %></td>
         </tr>
         <% end %>
       </table>
@@ -31,7 +31,7 @@
     <td><%= @total_num %></td>
     <td><%= @total_num==0 ? 0 : sprintf("%.2f", @actual_cost.to_f/@total_num) %></td>
     <td><%= @total_cost %></td>
-    <td><%= @total_cost==0 ? 0 : sprintf("%.2f", @actual_cost.to_f*100/@total_cost.to_f) %>%</td>
+    <td><%= @actual_cost==0 ? 0 : sprintf("%.2f", @total_cost.to_f*100/@actual_cost.to_f) %>%</td>
     <% end %>
     </tr>
   </tbody>
