@@ -66,7 +66,7 @@ class StaffManagesController < ApplicationController
   end
 
   def average_cost_detail_summary  #平均成本明细汇总
-    @services = Product::PRODUCT_TYPES.select { |k,v|k >= Product::PRODUCT_END  }
+    @services = Product.is_service.is_normal.where("store_id=#{@store.id}")
     @started_time = params[:search_s_time].nil?||params[:search_s_time].empty? ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:search_s_time]
     @ended_time = params[:search_e_time].nil?||params[:search_e_time].empty? ? Time.now.strftime("%Y-%m-%d") : params[:search_e_time]
     search_sql = "select o.id oid, opr.pro_num oprpnum, pmr.material_num pmrmnum, m.id mid, m.price mprice
@@ -81,7 +81,7 @@ class StaffManagesController < ApplicationController
                   and date_format(o.created_at, '%Y-%m-%d')>='#{@started_time}'
                   and date_format(o.created_at, '%Y-%m-%d')<'#{@ended_time}'"
     unless params[:search_s_type].nil? || params[:search_s_type].to_i == 0
-      search_sql += " and p.types=#{params[:search_s_type].to_i}"
+      search_sql += " and p.id=#{params[:search_s_type].to_i}"
     end
     total = Order.find_by_sql(search_sql)
     total_cost = 0   
@@ -90,7 +90,7 @@ class StaffManagesController < ApplicationController
     end
     @total_cost = total_cost #标准成本
     @total_num = total.map(&:oid).uniq.length  #服务车辆总数
-    mid = total.map(&:mid).uniq.join(",")
+    #mid = total.map(&:mid).uniq.join(",")
     actual_search_sql = "select moo.material_num mmnum , m.id mid, m.name mname,m.price mprice
                                       from mat_out_orders moo
                                       inner join materials m on m.id=moo.material_id
@@ -98,11 +98,7 @@ class StaffManagesController < ApplicationController
                                       and moo.store_id=#{@store.id}
                                       and date_format(moo.created_at, '%Y-%m-%d')>='#{@started_time}'
                                       and date_format(moo.created_at, '%Y-%m-%d')<'#{@ended_time}'"
-   actual = []
-   if mid && !mid.blank?
-     actual_search_sql += " and m.id in (#{mid})"
-     actual = MatOutOrder.find_by_sql(actual_search_sql)
-   end
+   actual = MatOutOrder.find_by_sql(actual_search_sql)
    actual_cost = 0
    actual.each do |at|
      actual_cost += at.mmnum*at.mprice
