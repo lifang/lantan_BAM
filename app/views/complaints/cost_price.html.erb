@@ -14,7 +14,7 @@
     <label>服务选择：</label>
     <select id="s_type">
       <option value="">全部</option>
-      <% Product::PRODUCT_TYPES.select{|k,v|k >= Product::PRODUCT_END}.each do |k, v| %>
+      <% @service.each do |k, v| %>
         <option value="<%= k %>"<% if session[:types] == "#{k}" %>selected<%end%>><%= v %></option>
       <% end %>
     </select>
