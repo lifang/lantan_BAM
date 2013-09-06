@@ -91,7 +91,7 @@ class StaffManagesController < ApplicationController
     end
     @total_cost = total_cost #标准成本
     @total_num = total.map(&:oid).uniq.length  #服务车辆总数
-    #mid = total.map(&:mid).uniq.join(",")
+    mid = total.map(&:mid).uniq.join(",")
     actual_search_sql = "select moo.material_num mmnum , m.id mid, m.name mname,m.price mprice
                                       from mat_out_orders moo
                                       inner join materials m on m.id=moo.material_id
@@ -99,7 +99,11 @@ class StaffManagesController < ApplicationController
                                       and moo.store_id=#{@store.id}
                                       and date_format(moo.created_at, '%Y-%m-%d')>='#{@started_time}'
                                       and date_format(moo.created_at, '%Y-%m-%d')<'#{@ended_time}'"
-   actual = MatOutOrder.find_by_sql(actual_search_sql)
+   actual = []
+   if mid && !mid.blank?
+     actual_search_sql += " and m.id in (#{mid})"
+     actual = MatOutOrder.find_by_sql(actual_search_sql)
+   end
    actual_cost = 0
    actual.each do |at|
      actual_cost += at.mmnum*at.mprice
