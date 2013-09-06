@@ -80,6 +80,7 @@ class StaffManagesController < ApplicationController
                   and p.is_service=#{Product::PROD_TYPES[:SERVICE]}
                   and date_format(o.created_at, '%Y-%m-%d')>='#{@started_time}'
                   and date_format(o.created_at, '%Y-%m-%d')<'#{@ended_time}'"
+    @type = params[:search_s_type]
     unless params[:search_s_type].nil? || params[:search_s_type].to_i == 0
       search_sql += " and p.id=#{params[:search_s_type].to_i}"
     end
