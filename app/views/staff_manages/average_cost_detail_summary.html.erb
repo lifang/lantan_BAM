@@ -5,21 +5,23 @@
     <% if permission?(:datas, :staff_detail) %><a href="/stores/<%= params[:store_id]%>/complaints/cost_price">员工成本明细</a><% end %>
 </div>
 <div class="search">
+  <form action="/stores/<%= @store.id %>/staff_manages/average_cost_detail_summary" type="get">
   <div>
     <label>时间：</label>
-    <input type="text" class="Wdate" onclick="WdatePicker()" readonly value="<%= @started_time %>" id="search_s_time"/>&nbsp;到&nbsp;
-    <input type="text" class="Wdate" onclick="WdatePicker()" readonly value="<%= @ended_time %>" id="search_e_time"/>
+    <input type="text" class="Wdate" onclick="WdatePicker()" readonly value="<%= @started_time %>" name="search_s_time"/>&nbsp;到&nbsp;
+    <input type="text" class="Wdate" onclick="WdatePicker()" readonly value="<%= @ended_time %>" name="search_e_time"/>
   </div>
   <div>
     <label>服务选择：</label>
-    <select id="search_s_type">
+    <select name="search_s_type">
       <option value="0">全部</option>
-      <% @services.each do |k, v| %>
-      <option value="<%= k %>"><%= v %></option>
+      <% @services.each do |s| %>
+      <option value="<%= s.id %>" <% if @type && @type.to_i == s.id %>selected<% end %>><%= s.name %></option>
       <% end %>
     </select>
   </div>
-  <div><button class="search_btn" onclick="average_cost_detail_summary(<%= @store.id %>)">查询</button></div>
+  <div><button class="search_btn">查询</button></div>
+  </form>
 </div>
 <div class="clear"></div>
 <div class="data_body">
