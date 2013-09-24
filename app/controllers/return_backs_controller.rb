@@ -19,11 +19,68 @@ class ReturnBacksController < ApplicationController
   def return_msg
     message = ""
     begin
-      msg = TotalMsg.find params[:id]
-      message = msg.attributes.select { |key,value| key =~ /msg[0-9]{1,}/ && !value.nil? && value != "" }.values.join("?") if msg
+      #msg = TotalMsg.find params[:id]
+      #message = msg.attributes.select { |key,value| key =~ /msg[0-9]{1,}/ && !value.nil? && value != "" }.values.join("?") if msg
+      store = Store.find_by_code(params[:code])
+      current_date = Time.now.to_s
+      now_date = (current_date.slice(0,4) + current_date.slice(5,2) + current_date.slice(8,2)).to_i
+      if store
+        #查询所有未删除的工位信息
+        stations = Station.find_by_sql(["select s.id, s.status, s.name
+          from stations s where s.status != ?
+          and s.store_id = ? order by code asc", Station::STAT[:DELETED], store.id])
+        #查询工单
+        if stations.any?
+          work_orders = Station.find_by_sql("select s.id as station_id, TIMESTAMPDIFF(SECOND, now(), w.ended_at)
+            as time_left, c.num as car_num, o.id order_id
+            from stations s inner join
+            work_orders w on s.id =  w.station_id inner join orders o on w.order_id = o.id inner join
+            car_nums c on o.car_num_id = c.id where s.store_id = #{store.id} and w.current_day = #{now_date} and
+            o.status != #{Order::STATUS[:DELETED]} and w.status = #{ WorkOrder::STAT[:SERVICING]}")
+          s_w_os = {}
+          work_orders.each { |wo| s_w_os[wo.station_id] = wo }
+          #获取工单中的服务项目
+          order_ids = work_orders.map{|w| w.order_id }
+          order_products = Product.find_by_sql(["select p.name, opr.order_id from products p inner join order_prod_relations opr
+          on opr.product_id = p.id where p.is_service = ? and opr.order_id in (?)",
+              true, order_ids]).group_by {|item| item.order_id }
+          msg_arr = []
+          stations.each do |s|
+            puts  s_w_os.to_json
+            msg = ""
+            order_products[s_w_os[s.id].order_id].each_with_index do |p, index|
+              msg = " "*4 + s_w_os[s.id].car_num + " "*4 + "\n"
+              space_length = (16 - p.name.length * 2)/2
+              msg += " " * space_length + p.name + " " * (16 - p.name.length * 2 - space_length) + "\n"
+              puts "time_left====#{s_w_os[s.id].time_left}"
+              puts   "#{(s_w_os[s.id].time_left.to_i/60).to_i.to_s}:#{(s_w_os[s.id].time_left.to_i%60).to_i.to_s}"
+              time_left = s_w_os[s.id].time_left<0 ? "00:00" : "#{(s_w_os[s.id].time_left.to_i/60).to_i.to_s}:#{(s_w_os[s.id].time_left.to_i%60).to_i.to_s}"
+              puts time_left
+              msg +=  " " * 5 + time_left + " "*(16 - 5 - time_left.to_s.length)
+              msg += "\n" if (index + 1) < order_products[s_w_os[s.id].order_id].length
+            end if s_w_os[s.id]
+            msg = "\n\n\n" if msg == ""
+            puts "msg===#{msg}"
+            msg_arr << msg
+          end
+        end
+        message = msg_arr.join("?")
+      end
     rescue
     end
-    render :text=>message
+    render :text => message
   end
+
+  #此方法无其他用途，仅为更新萧山库存的code
+  def generate_b_code
+    materials = Material.find_all_by_store_id(100014)
+    materials.each do |m|
+      m.generate_barcode
+      m.generate_barcode_img
+    end if materials.any?
+  end
+
+
+
 
 end
