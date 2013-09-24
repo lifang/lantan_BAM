@@ -133,3 +133,26 @@ function return_value(){
         }
     })
 }
+
+function send_request(store_id){
+    var c_time = $("#c_time").val();
+    var s_time = $("#e_time").val();
+    var types = $("#s_type option:selected").val();
+    var condit = {};
+    condit["created"] = c_time;
+    condit["ended"] = s_time;
+    if (c_time != "" && c_time.length !=0 && s_time != "" && s_time.length !=0){
+        if (c_time > s_time){
+            tishi_alert("开始日期必须小于结束日期");
+            return false;
+        }
+    }
+    if (types != "" && types.length !=0){
+        condit["types"] = types;
+    }
+    var url ="/stores/"+store_id+"/complaints/cost_price?"
+    for(var item in condit){
+        url += item +"="+condit[item]+"&"
+    }
+    window.location.href = url
+}

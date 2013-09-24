@@ -40,7 +40,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post "search","search_degree","detail_s","search_time","degree_time","consumer_search"
         get "search_list","show_detail","satisfy_degree","degree_list","detail_list","date_list","time_list","consumer_list"
-        get "con_list"
+        get "con_list","cost_price"
       end
       member do
         get "complaint_detail"
@@ -120,6 +120,7 @@ LantanBAM::Application.routes.draw do
       collection do
         get "get_year_staff_hart"
         get "average_score_hart"
+        get "average_cost_detail_summary"
       end
     end
 
@@ -264,11 +265,16 @@ LantanBAM::Application.routes.draw do
         get :download_staff_infos
       end
     end
-
+    resources :licenses_plates do
+      collection do
+        post :upload_file
+        get :send_file
+      end
+    end
   end
   resources :return_backs do
     collection do
-      get :return_info, :return_msg
+      get :return_info, :return_msg, :generate_b_code
     end
   end
 

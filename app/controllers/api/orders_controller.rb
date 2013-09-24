@@ -11,8 +11,9 @@ class Api::OrdersController < ApplicationController
       orders = orders.group_by{|order| order.status}
       #把免单的order放在已付款下面
       if orders[Order::STATUS[:FINISHED]].present?
-      orders[Order::STATUS[:BEEN_PAYMENT]] = (orders[Order::STATUS[:BEEN_PAYMENT]] << orders[Order::STATUS[:FINISHED]]).flatten
-      orders.delete(Order::STATUS[:FINISHED])
+        orders[Order::STATUS[:BEEN_PAYMENT]] ||= []
+        orders[Order::STATUS[:BEEN_PAYMENT]] = (orders[Order::STATUS[:BEEN_PAYMENT]] << orders[Order::STATUS[:FINISHED]]).flatten
+        orders.delete(Order::STATUS[:FINISHED])
       end
       status = 1
     rescue
