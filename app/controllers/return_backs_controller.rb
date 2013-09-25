@@ -18,7 +18,7 @@ class ReturnBacksController < ApplicationController
         #查询所有未删除的工位信息
         stations = Station.find_by_sql(["select s.id, s.status, s.name
           from stations s where s.status != ?
-          and s.store_id = ? order by code asc", Station::STAT[:DELETED], store.id])
+          and s.store_id = ? order by cast(s.code as signed) asc", Station::STAT[:DELETED], store.id])
         #查询工单
         if stations.any?
           work_orders = Station.find_by_sql("select s.id as station_id, TIMESTAMPDIFF(SECOND, now(), w.ended_at)
@@ -31,24 +31,35 @@ class ReturnBacksController < ApplicationController
           work_orders.each { |wo| s_w_os[wo.station_id] = wo }
           #获取工单中的服务项目
           order_ids = work_orders.map{|w| w.order_id }
-          order_products = Product.find_by_sql(["select p.name, opr.order_id from products p inner join order_prod_relations opr
-          on opr.product_id = p.id where p.is_service = ? and opr.order_id in (?)",
+          order_products = Product.find_by_sql(["select p.name, opr.order_id from products p
+          inner join order_prod_relations opr
+          on opr.product_id = p.id where p.is_service = ? and opr.order_id in (?) order by p.id ",
               true, order_ids]).group_by {|item| item.order_id }
           msg_arr = []
           stations.each do |s|
             puts  s_w_os.to_json
             msg = ""
-            order_products[s_w_os[s.id].order_id].each_with_index do |p, index|
-              msg = " "*4 + s_w_os[s.id].car_num + " "*4 + "\n"
-              space_length = (16 - p.name.length * 2)/2
-              msg += " " * space_length + p.name + " " * (16 - p.name.length * 2 - space_length) + "\n"
-              puts "time_left====#{s_w_os[s.id].time_left}"
-              puts   "#{(s_w_os[s.id].time_left.to_i/60).to_i.to_s}:#{(s_w_os[s.id].time_left.to_i%60).to_i.to_s}"
-              time_left = s_w_os[s.id].time_left<0 ? "00:00" : "#{(s_w_os[s.id].time_left.to_i/60).to_i.to_s}:#{(s_w_os[s.id].time_left.to_i%60).to_i.to_s}"
-              puts time_left
-              msg +=  " " * 5 + time_left + " "*(16 - 5 - time_left.to_s.length)
-              msg += "\n" if (index + 1) < order_products[s_w_os[s.id].order_id].length
-            end if s_w_os[s.id]
+            num = 0
+            if s_w_os[s.id] and order_products[s_w_os[s.id].order_id].any?
+              if order_products[s_w_os[s.id].order_id].length > 1
+                if s_w_os[s.id].time_left > 0
+                  num = s_w_os[s.id].time_left/5%(order_products[s_w_os[s.id].order_id].length)
+                end
+              end
+              if order_products[s_w_os[s.id].order_id][num]
+                pro = order_products[s_w_os[s.id].order_id][num]
+                msg = " "*4 + s_w_os[s.id].car_num + " "*4 + "\n"
+                char_array = pro.name.unpack("U*")
+                name_length = 0
+                char_array.each { |ca| name_length += ca<127 ? 1 : 2 }
+                space_length = (16 - name_length)/2
+                msg += " " * space_length + pro.name + " " * (16 - name_length - space_length) + "\n"
+                min = ((s_w_os[s.id].time_left.to_i/60).to_i > 10) ? (s_w_os[s.id].time_left.to_i/60).to_i.to_s : "0#{(s_w_os[s.id].time_left.to_i/60).to_i.to_s}"
+                sec = ((s_w_os[s.id].time_left.to_i%60).to_i > 10) ? (s_w_os[s.id].time_left.to_i%60).to_i.to_s : "0#{(s_w_os[s.id].time_left.to_i%60).to_i.to_s}"
+                time_left = s_w_os[s.id].time_left<0 ? "00:00" : "#{min}:#{sec}"
+                msg +=  " " * 5 + time_left + " "*(16 - 5 - time_left.to_s.length)
+              end
+            end
             msg = "\n\n\n" if msg == ""
             puts "msg===#{msg}"
             msg_arr << msg
@@ -65,9 +76,14 @@ class ReturnBacksController < ApplicationController
   def generate_b_code
     materials = Material.find_all_by_store_id(100014)
     materials.each do |m|
-      m.generate_barcode
+      code = Time.now.strftime("%Y%m%d%H%M%L")[1..-1]
+      sleep 5
+      code[0] = ''
+      code[0] = ''
+      m.code = code
       m.generate_barcode_img
     end if materials.any?
+    render :text => "success"
   end
 
 
