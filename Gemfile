@@ -1,4 +1,4 @@
-source 'http://rubygems.org'
+source 'http://ruby.taobao.org/'
 
 gem 'rails', '3.1.2'
 
@@ -20,8 +20,8 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 gem 'json', '1.7.6'
-gem 'execjs', '1.4.0'
-gem 'therubyracer', '0.11.4'
+#gem 'execjs', '1.4.0'
+#gem 'therubyracer', '0.11.4'
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'
@@ -47,5 +47,5 @@ end
 #group :development do
 #  gem "better_errors"
 #end
-gem 'rmagick', '2.13.1'
-gem 'barby', '0.5.1'
+#gem 'rmagick', '2.13.1'
+#gem 'barby', '0.5.1'
