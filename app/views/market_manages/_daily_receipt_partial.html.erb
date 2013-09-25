@@ -1,47 +1,49 @@
 <div>
-   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-       <thead>
-            <tr class="hbg">
-              <td>日期</td>
-              <td>相关订单</td>
-              <td>服务项目</td>
-              <td>金额（元）</td>
-            </tr>
-        </thead>
-        <tbody>
-          <% @orders.each do |order| %>
-            <tr>
-              <td><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
-              <td>
-                <%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
-                  :remote => "true", "data-type" => "script", :class => "other_a" %>
-              </td>
-              <td>
-                <% if @product_hash[order.id] != 0 %>
-                  <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-                    <tr class="fws">
-                      <td>服务名称</td>
-                      <td>数量</td>
-                      <td>单价</td>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+    <thead>
+      <tr class="hbg">
+        <td>日期</td>
+        <td>相关订单</td>
+        <td>服务项目</td>
+        <td>金额（元）</td>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
+          <td>
+            <%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
+              :remote => "true", "data-type" => "script", :class => "other_a" %>
+          </td>
+          <td>
+            <% if @product_hash[order.id] != 0 %>
+              <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                <tr class="fws">
+                  <td>服务名称</td>
+                  <td>数量</td>
+                  <td>单价</td>
+                  <td>类型</td>
+                </tr>
+                <% if !@product_hash[order.id].nil? %>
+                  <% @product_hash[order.id].each do |prod| %>
+                    <tr>
+                      <td><%= prod.name %></td>
+                      <td><%= prod.pro_num %></td>
+                      <td><%= prod.price %></td>
+                      <td><%= Order::RETURN[prod.return_types] %></td>
                     </tr>
-                    <% if !@product_hash[order.id].nil? %>
-                      <% @product_hash[order.id].each do |prod| %>
-                      <tr>
-                        <td><%= prod.name %></td>
-                        <td><%= prod.pro_num %></td>
-                        <td><%= prod.price %></td>
-                      </tr>
-                      <% end %>
-                    <% end %>
-                  </table>
-                <% else %>
-                无服务项目
+                  <% end %>
                 <% end %>
-              </td>
-              <td><%= order.price %></td>
-            </tr>
-          <% end %>
-        </tbody>
+              </table>
+            <% else %>
+              无服务项目
+            <% end %>
+          </td>
+          <td><%= order.price %></td>
+        </tr>
+      <% end %>
+    </tbody>
   </table>
   <%= will_paginate @orders, :class => "pageTurn", :previous_label => "上一页",
     :next_label => "下一页" %>

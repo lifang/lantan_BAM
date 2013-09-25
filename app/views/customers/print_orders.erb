@@ -1,3 +1,7 @@
+<%= stylesheet_link_tag  "application"%>
+<link rel="stylesheet" type="text/css" media="print" href="/assets/style.css" />
+<%= javascript_include_tag "application", "main"%>
+
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
   <thead>
     <tr class="hbg">
@@ -11,7 +15,6 @@
       <td>付款方式</td>
       <td>是否满意</td>
       <td>是否开票</td>
-      <td>操作</td>
     </tr>
   </thead>
   <tbody>
@@ -28,14 +31,12 @@
               <td>名称</td>
               <td>单价</td>
               <td>数量</td>
-              <td>类型</td>
             </tr>
             <% @product_hash[order.id].each do |p| %>
               <tr>
                 <td><%= p.name %></td>
                 <td><%= p.price %></td>
                 <td><%= p.pro_num %></td>
-                <td><%= Order::RETURN[p.return_types] %></td>
               </tr>
             <% end if @product_hash[order.id] %>
           </table>
@@ -44,23 +45,7 @@
         <td><%= @order_pay_type[order.id] %></td>
         <td><%= Order::IS_PLEASED_NAME[order.is_pleased] %></td>
         <td><%= order.is_billing ? "是" : "否" %></td>
-        <td>
-          <% if permission?(:customers, :revisit) %>
-            <a href="javascript:void(0)"
-               onclick="javascript:customer_revisit(<%= order.id %>, <%= @customer.id %>)">回访</a>
-          <% if (order.status == Order::STATUS[:BEEN_PAYMENT] || order.status == Order::STATUS[:FINISHED]) && order.return_types == Order::IS_RETURN[:NO] %>
-            <a href="javascript:void(0)" onclick="return_order(<%= order.id %>, <%= @customer.id %>)">退单</a>
-            <% end %>
-           <% end %>
-        </td>
       </tr>
     <% end %>
   </tbody>
 </table>
-<%=  will_paginate_remote(@orders , "",
-  {:url => "/stores/#{@store.id}/customers/#{@customer.id}/order_prods"}) %>
-<script type="text/javascript">
-  function set_value(e){
-    $("input[id^='line']").attr('checked',e.checked)
-  }
-</script>

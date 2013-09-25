@@ -150,6 +150,26 @@ class Product < ActiveRecord::Base
     }
   end
 
+  def self.import_data
+    path = "/opt/data/"
+    get_dir_list(path).each do |model_name|
+      datas = File.readlines(path + model_name)[0].force_encoding("UTF-8").split("#;#")
+      model = eval(model_name.split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize})
+      attrits = model.first.attributes.keys
+      attrits.delete_at(0)
+      total_con = []
+      datas.each do |data|
+        hash ={}
+        cons = data.split(',')
+        attrits.each_with_index {|title,index| hash[title] = (cons[index+1].nil? || cons[index+1]=="NULL" )? nil : cons[index+1].force_encoding("UTF-8").gsub("'",'')}
+        object = model.new(hash)
+        object.store_id = 100014
+        total_con << object
+      end
+      model.import total_con, :timestamps=>false, :on_duplicate_key_update=>attrits
+    end
+  end
+
  
 
 end

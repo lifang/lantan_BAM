@@ -19,6 +19,7 @@ class Customer < ActiveRecord::Base
   IS_VIP = {:NORMAL => 0, :VIP => 1} #0 常态客户 1 会员卡客户
   TYPES = {:GOOD => 0, :NORMAL => 1, :STRESS => 2} #1 优质客户  2 一般客户  3 重点客户
   C_TYPES = {0 => "优质客户", 1 => "一般客户", 2 => "重点客户"}
+  RETURN_REASON = { 0 => "质量问题", 1 => "服务态度", 2 => "拍错买错",3 => "效果不好，不喜欢",4 => "操作失误", 5 => "其他"}
 
 
   def self.search_customer(c_types, car_num, started_at, ended_at, name, phone, is_vip, page, store_id)

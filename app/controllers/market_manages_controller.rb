@@ -194,27 +194,28 @@ class MarketManagesController < ApplicationController
   end
 
   def daily_consumption_receipt
-    @search_time = params[:search_time] || Time.now.strftime("%Y-%m-%d")
-    
-    #    @current_day_total = Order.where("created_at <= '#{Time.now}'").
-    #      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
-    #      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
-
-    orders = Order.where("date_format(created_at,'%Y-%m-%d') <= '#{@search_time}'").
-      where("created_at >= '#{@search_time}'").
-      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").
-      where("store_id = #{params[:store_id]}")
+    @search_time = (params[:search_time].nil? || params[:search_time] == "") ? Time.now.strftime("%Y-%m-%d") : params[:search_time]
+    condit = "status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and store_id = #{params[:store_id]}"
+    condit += " and date_format(created_at,'%Y-%m-%d') = '#{@search_time}'"
+    if !params[:return_types].nil?  and  params[:return_types] != ""
+      condit += " and return_types="+params[:return_types]
+      @types = params[:return_types]
+    end
+    orders = Order.where(condit)
     @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
     @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 
   def daily_consumption_receipt_blank
-    @search_time = params[:search_time]
-    @orders = Order.where("date_format(created_at, '%Y-%m-%d') <= '#{@search_time}'").
-      where("created_at >= '#{@search_time}'").
-      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").
-      where("store_id = #{params[:store_id]}")
+    @search_time = (params[:search_time].nil? || params[:search_time] == "") ? Time.now.strftime("%Y-%m-%d") : params[:search_time]
+    condit = "status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and store_id = #{params[:store_id]}"
+    condit += " and date_format(created_at,'%Y-%m-%d') = '#{@search_time}'"
+    if !params[:return_types].nil?  and  params[:return_types] != ""
+      condit += " and return_types="+params[:return_types]
+      @types = params[:return_types]
+    end
+    @orders = Order.where(condit)
     @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
   end

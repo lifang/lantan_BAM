@@ -3,6 +3,9 @@
     <div class="way_menu"><a href="/stores/<%= @store.id %>/customers/">客户列表</a> &gt; 客户详情</div>
     <%= render :partial => "single_customer" %>
     <div class="clear"></div>
+    <div class="data_menu">
+      <a href="javascript:void(0)" onclick="print_orders(<%= @store.id %>)">打印</a>
+    </div>
     <div class="tab_head">
       <ul>
         <li class="hover">消费记录</li>
@@ -35,6 +38,7 @@
 <div id="process_complaint_div"></div>
 <div id="process"></div>
 <div id="show_revisit_detail" class="tab_popup"></div>
+<div id="return_order" class="tab_popup"></div>
 <script type="text/javascript">
 <% if params[:comp] == "1" %>
     $(".tab_head ul li").removeClass("hover");

@@ -3,7 +3,7 @@ require "uri"
 class CustomersController < ApplicationController
   before_filter :sign?
   include RemotePaginateHelper
-  layout "customer"
+  layout "customer", :except => [:print_orders,:operate_order]
   require 'will_paginate/array'
   before_filter :customer_tips
 
@@ -262,6 +262,39 @@ class CustomersController < ApplicationController
     respond_to do |format|
       format.js
     end
+  end
+
+  def print_orders
+    @orders = Order.find(params[:ids].split(","))
+    @product_hash = OrderProdRelation.order_products(@orders)
+    @order_pay_type = OrderPayType.order_pay_types(@orders)
+  end
+
+  def return_order
+    @order = Order.find(params[:o_id])
+    @product_hash = OrderProdRelation.s_order_products(@order.id)
+    @staffs = Staff.find([@order.try(:front_staff_id),@order.try(:cons_staff_id_1),@order.try(:cons_staff_id_2)]).inject(Hash.new){
+      |hash,staff| hash[staff.id] = staff.name;hash
+    }
+  end
+
+  def operate_order
+    params[:types].split(",").each {|types|
+      params[:"#{types}"].split(",").each do |type_id|
+        m_model = types.split("#")
+        eval(m_model[0].split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize}).where({:order_id=>params[:order_id],
+            :"#{m_model[1]}_id"=> type_id}).first.update_attributes(:return_types=>Order::IS_RETURN[:YES])
+      end }
+    order = Order.find(params[:order_id])
+    order.update_attributes(:return_reason=>params[:reason],:return_types=>Order::IS_RETURN[:YES],:price => (order.price.nil? ? 0 : order.price) - params[:account].to_f,
+      :return_fee => params[:account].to_f,:return_direct => params[:direct],:return_staff_id =>cookies[:user_id])
+    if params[:direct].to_i == Order::O_RETURN[:REUSE] and params[:types].index("product")
+      mats =ProdMatRelation.where("product_id in (#{params[:"order_prod_relation#product"]})").inject(Hash.new){|hash,mat|
+        hash[mat.material_id] = mat.material_num;hash
+      }
+      Material.find(mats.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ mats[mat.id])}
+    end
+    render :json =>{:msg=>order.code}
   end
 
   private

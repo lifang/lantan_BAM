@@ -1,0 +1,68 @@
+<div class="popup_box">
+  <h1>退单<a href="javascript:void(0)" class="close">关闭</a></h1>
+  <div class="popup_body">
+    <div class="popup_body_area">
+      <div class="seeProDiv">
+        <div class="seeProDiv_l">订单编号：</div>
+        <div class="seeProDiv_r"><%=  @order.nil? ? "" : @order.code  %></div>
+      </div>
+      <div class="seeProDiv">
+        <div class="seeProDiv_l">消费时间：</div>
+        <div class="seeProDiv_r"><%=(@order.nil? || @order.created_at.nil?) ? "" : @order.created_at.strftime("%Y-%m-%d") %></div>
+      </div>
+      <div class="seeProDiv">
+        <div class="seeProDiv_l">接单人员：</div>
+        <div class="seeProDiv_r"><%= @staffs[@order.front_staff_id]  %></div>
+      </div>
+      <div class="seeProDiv">
+        <div class="seeProDiv_l">施工人员：</div>
+        <div class="seeProDiv_r"><%= [@staffs[@order.cons_staff_id_1],@staffs[@order.cons_staff_id_2]].join("、")  %></div>
+      </div>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+        <thead>
+          <tr class="hbg">
+            <td><input type="checkbox"  onclick="$('#return :checkbox').attr('checked',this.checked);$(':disabled').attr('checked',false)"/></td>
+            <td>服务项目</td>
+            <td>数量</td>
+            <td>单价</td>
+          </tr>
+        </thead>
+        <input type="hidden" value="<%= @product_hash.keys.join(",") %>" id="p_types" />
+        <input type="hidden" value="<%= @order.id %>" id="order_id" />
+        <tbody id="return">
+          <% @product_hash.each do |k,v| %>
+            <% v.each_with_index do |p,index| %>
+              <tr>
+                <td><input type="checkbox" value="<%= p.id %>" id="<%= k %>|<%= index %>"
+                           <%if k.index("product") && p.is_service==Product::PROD_TYPES[:SERVICE] %>disabled<% end  %> /></td>
+                <td><%= p.name %></td>
+                <td><%= p.pro_num %></td>
+                <td><%= p.price %></td>
+              </tr>
+            <% end %>
+          <% end if @product_hash != {} %>
+        </tbody>
+      </table>
+      <div class="seeProDiv">
+        <div class="seeProDiv_l">退单原因：</div>
+        <select id="return_reason">
+          <% Customer::RETURN_REASON.each do |k,v| %>
+            <option value="<%= k %>"><%= v %></option>
+          <% end %>
+        </select>
+      </div>
+      <div class="seeProDiv">
+        <div class="seeProDiv_l">退单折价：</div>
+        <input id="sub_content" type="text" id="sub_content"/>
+      </div>
+      <div class="seeProDiv">
+        <div class="seeProDiv_l"> 商品去向：</div>
+        <input name="direct" id="" type="radio" checked  onclick="$('#sub_content').attr('disabled',this.checked)" value="<%=Order::O_RETURN[:WASTE]  %>"/>报损&nbsp;&nbsp;
+        <input name="direct" type="radio" onclick="$('#sub_content').attr('disabled',!this.checked)" value="<%= Order::O_RETURN[:REUSE] %>" />&nbsp;&nbsp;回库
+      </div>
+    </div>
+    <div class="btn_box_s"><input value="确定" class="confirm_btn"  onclick="operate_order()" type="button" /></div>
+  </div>
+</div>
+
+
