@@ -47,7 +47,7 @@ class Material < ActiveRecord::Base
     #{sql[0]} and #{sql[1]} and types = 3 and store_id = #{store_id} group by material_id  #{sql[2]}) and m.status !=#{Material::STATUS[:DELETE]} and m.store_id = #{store_id} and #{sql[3]} and created_at < '#{start_date} 00:00:00';")
   end
 
-  private
+  #private
   
   def generate_barcode
     if self.ifuse_code=="0"
@@ -64,11 +64,11 @@ class Material < ActiveRecord::Base
   def generate_barcode_img
     begin
       barcode = Barby::EAN13.new(self.code)
-      if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{self.id}")
-        FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{self.id}"
+      if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{Time.now.strftime("%Y-%m")}")
+        FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{Time.now.strftime("%Y-%m")}"
       end
-      barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{self.id}", "barcode.png"))
-      self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{self.id}/barcode.png")
+      barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{Time.now.strftime("%Y-%m")}", "#{self.id}.png"))
+      self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{Time.now.strftime("%Y-%m")}/#{self.id}.png")
     rescue
       self.errors[:barby] << "条形码图片生成失败！"
     end

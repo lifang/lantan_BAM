@@ -274,7 +274,7 @@ LantanBAM::Application.routes.draw do
   end
   resources :return_backs do
     collection do
-      get :return_info,:return_msg
+      get :return_info, :return_msg, :generate_b_code
     end
   end
 
