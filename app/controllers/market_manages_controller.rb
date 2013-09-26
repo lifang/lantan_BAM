@@ -207,6 +207,7 @@ class MarketManagesController < ApplicationController
       condit += " and return_types="+params[:return_types]
       @types = params[:return_types]
     end
+    condit += " order by created_at desc"
     orders = Order.where(condit)
     @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
@@ -227,6 +228,7 @@ class MarketManagesController < ApplicationController
       condit += " and return_types="+params[:return_types]
       @types = params[:return_types]
     end
+    condit += " order by created_at desc"
     @orders = Order.where(condit)
     @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
