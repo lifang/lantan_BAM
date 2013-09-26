@@ -14,7 +14,7 @@
     <% end %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
-    <%= link_to "批量退货", back_good_store_materials_url(@current_store.id), :remote => true, 'data-type' => 'script' %>
+    <% if permission?(:materials, :back_good) %><%= link_to "批量退货", back_good_store_materials_url(@current_store.id), :remote => true, 'data-type' => 'script' %><% end %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store_id]), :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印条形码",print_code_store_materials_path(params[:store_id]),:remote => true, 'data-type' => 'script', :class => "",:target => "_blank" %><% end %>
