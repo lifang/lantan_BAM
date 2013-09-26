@@ -57,8 +57,8 @@
       </div>
       <div class="seeProDiv">
         <div class="seeProDiv_l"> 商品去向：</div>
-        <input name="direct" id="" type="radio" checked  onclick="$('#sub_content').attr('disabled',this.checked)" value="<%=Order::O_RETURN[:WASTE]  %>"/>报损&nbsp;&nbsp;
-        <input name="direct" type="radio" onclick="$('#sub_content').attr('disabled',!this.checked)" value="<%= Order::O_RETURN[:REUSE] %>" />&nbsp;&nbsp;回库
+        <input name="direct" id="" type="radio" checked   value="<%=Order::O_RETURN[:WASTE]  %>"/>报损&nbsp;&nbsp;
+        <input name="direct" type="radio" value="<%= Order::O_RETURN[:REUSE] %>" />&nbsp;&nbsp;回库
       </div>
     </div>
     <div class="btn_box_s"><input value="确定" class="confirm_btn"  onclick="operate_order()" type="button" /></div>

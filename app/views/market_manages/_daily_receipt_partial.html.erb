@@ -11,7 +11,7 @@
     <tbody>
       <% @orders.each do |order| %>
         <tr>
-          <td><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
+          <td <%if order.return_types == Order::IS_RETURN[:YES]%> class="gray_table_error" title="<%= Order::RETURN[order.return_types] %>" <%end%>><%= order.created_at.strftime("%Y.%m.%d--%H:%M") %></td>
           <td>
             <%= link_to "#{order.code}", "/orders/#{order.id}/order_info",
               :remote => "true", "data-type" => "script", :class => "other_a" %>
