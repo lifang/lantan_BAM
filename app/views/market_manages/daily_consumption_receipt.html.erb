@@ -1,18 +1,25 @@
 <%= render 'second_menu'%>
-<form accept-charset="UTF-8" action="/stores/<%= @store.id %>/market_manages/daily_consumption_receipt" method="get">
-  <div class="search">
-    <div><label>时间：</label>
-      <input name="search_time" type="text" id="search_time_at" value="<%= @search_time %>" class="Wdate" readonly onClick="WdatePicker();"/></div>
-    <div><button class="search_btn">查询</button></div>
+<div class="search">
+  <div><label>时间：</label>
+    <input name="search_time" type="text" id="time" value="<%= @search_time %>" class="Wdate" readonly onClick="WdatePicker();"/></div>
+  <div><label>类型：</label>
+    <select id="types">
+      <option value="">全部</option>
+      <%Order::RETURN.each do |k,v|%>
+        <option value="<%= k %>" <% if params[:return_types] == "#{k}" %>selected<%end%>><%= v %></option>
+      <% end %>
+    </select>
   </div>
-</form>
+  <div><button class="search_btn"
+               onclick="window.location.href='/stores/<%= @store.id %>/market_manages/daily_consumption_receipt?search_time='+$('#time').val() +'&return_types='+$('#types option:selected').val()">查询</button></div>
+</div>
 <input type="hidden" id="store_id" value="<%= @store.id %>"/>
 <div class="data_body_title">
   <h2 class="data_body_h">当日销售额：<%= sprintf('%.2f', @search_total) %>（元）</h2>
 </div>
 <div class="data_menu">
   <% if permission?(:datas, :print) %>
-    <a href="/stores/<%= @store.id %>/market_manages/daily_consumption_receipt_blank?search_time=<%=@search_time%>" class="add_btn" id="print_daily_receipt" target="_blank">打印单据</a>
+    <a href="/stores/<%= @store.id %>/market_manages/daily_consumption_receipt_blank?search_time=<%=@search_time%><%=  "&return_types=#{@types}" if !params[:return_types].nil?  and  params[:return_types] != "" %>" class="add_btn" id="print_daily_receipt" target="_blank">打印单据</a>
   <% end %>
 </div>
 <div class="clear"></div>

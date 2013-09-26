@@ -210,8 +210,8 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/check_mat_num' => 'materials#check_mat_num'
   resources :customers do
     collection do
-      post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"
-      get "show_revisit_detail"
+      post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num","return_order","operate_order"
+      get "show_revisit_detail","print_orders"
     end
     member do
       post "edit_car_num"
@@ -274,7 +274,7 @@ LantanBAM::Application.routes.draw do
   end
   resources :return_backs do
     collection do
-      get :return_info,:return_msg
+      get :return_info, :return_msg, :generate_b_code
     end
   end
 
