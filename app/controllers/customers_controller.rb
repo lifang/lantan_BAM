@@ -296,7 +296,7 @@ class CustomersController < ApplicationController
         Material.find(mats.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ mats[mat.id])}
       end
       if params[:types].index("package_card")
-        PackageCard.find(params[:"c_pcard_relation#package_card"].split(",")).each {|card| card.status = PackageCard::STAT[:INVALID]}
+        PackageCard.find(params[:"c_pcard_relation#package_card"].split(",")).each {|card| card.update_attributes(:status=>PackageCard::STAT[:INVALID])}
         Material.find(PcardMaterialRelation.where("package_card_id in (#{params[:"c_pcard_relation#package_card"]})").map(&:material_id)).each {|mat| mat.update_attributes(:storage => mat.storage+1)}
       end
     end

@@ -207,8 +207,7 @@ class MarketManagesController < ApplicationController
       condit += " and return_types="+params[:return_types]
       @types = params[:return_types]
     end
-    condit += " order by created_at desc"
-    orders = Order.where(condit)
+    orders = Order.where(condit).order("created_at desc")
     @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
     @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
@@ -228,8 +227,7 @@ class MarketManagesController < ApplicationController
       condit += " and return_types="+params[:return_types]
       @types = params[:return_types]
     end
-    condit += " order by created_at desc"
-    @orders = Order.where(condit)
+    @orders = Order.where(condit).order("created_at desc")
     @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
   end
