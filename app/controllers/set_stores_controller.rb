@@ -20,7 +20,7 @@ class SetStoresController < ApplicationController
           url = Store.upload_img(params[:store_img], store.id, Constant::STORE_PICS, Constant::STORE_PICSIZE)
           store.update_attribute("img_url", url)
           rescue
-            flash[:nitice] = "图片上传失败!"
+            flash[:notice] = "图片上传失败!"
           end
       end
       cookies.delete(:store_name) if cookies[:store_name]

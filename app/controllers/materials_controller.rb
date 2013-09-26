@@ -31,6 +31,9 @@ class MaterialsController < ApplicationController
     @mat_in = params[:mat_in] if params[:mat_in]
     @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
                                     and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
+    @back_good_records = BackGoodRecord.all.paginate(:page => params[:page] ||= 1, :per_page => 2)
+    @suppliers = Supplier.all(:select => "s.id,s.name", :from => "suppliers s",
+      :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=0")
     date_now = Time.now.to_s[0..9]
     before_thirty_day =  (Time.now - 30.day).to_s[0..9]
     @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
@@ -155,6 +158,36 @@ class MaterialsController < ApplicationController
     end
   end
 
+  #退货记录分页
+  def page_back_records
+    
+    sql = "select bgr.* from back_good_records bgr inner join materials m on bgr.material_id = m.id
+           where 1=1"
+    unless params[:back_type].nil? || params[:back_type].strip == "" || params[:back_type].to_i == -1
+      sql += " and m.types = #{params[:back_type]}"
+    end
+    unless params[:back_name].nil? || params[:back_name].strip.empty?
+      name = params[:back_name].strip.gsub(/[%_]/){|x|'\\' + x}
+      sql += " and m.name like '%#{name}%'"
+    end
+    unless params[:back_code].nil? || params[:back_code].strip.empty?
+      code = params[:back_code].strip
+      sql += " and m.code = '#{code}'"
+    end
+    unless params[:back_supp].nil? || params[:back_supp].to_i==0
+      sql += " and bgr.supplier_id = #{params[:back_supp]}"
+    end
+    @back_type = params[:back_type]
+    @back_name = params[:back_name]
+    @back_code = params[:back_code]
+    @back_supp = params[:back_supp]
+     @back_good_records = BackGoodRecord.find_by_sql(sql).paginate(:page => params[:page] ||= 1, :per_page => 2)
+     @current_store = Store.find_by_id(params[:store_id].to_i)
+     respond_with(@back_good_records) do |f|
+       f.html
+       f.js
+     end
+  end
   #入库
   def mat_in
     @material = Material.find_by_code_and_status_and_store_id params[:barcode].strip,Material::STATUS[:NORMAL],params[:store_id]
@@ -359,6 +392,55 @@ class MaterialsController < ApplicationController
         @material_order = material_order
       end
       #render :json => {:status => status, :mo_id => material_order.id}
+    end
+  end
+
+  #退货
+  def back_good     #主页面导航栏上的退货
+    store_id = params[:store_id].to_i
+#    a = Item.new
+#    a.id = 0
+#    a.name = "总部"
+    suppliers = Supplier.all(:select => "s.id,s.name", :from => "suppliers s",
+      :conditions => "s.store_id=#{store_id} and s.status=0")
+    @store_id = store_id
+    @suppliers = suppliers
+    respond_to do |f|
+      f.js
+    end
+  end
+
+  #退货时查询物料
+  def back_good_search
+    supp = params[:supplier_id]
+    good_type = params[:good_type]
+    sql = "select sum(moi.material_num) mnum,moi.material_id mid, mo.supplier_id msuid, m.name mname, m.storage mstorage, m.types mtype
+                                           from material_orders mo inner join mat_order_items moi
+                                           on mo.id=moi.material_order_id inner join materials m
+                                           on moi.material_id=m.id
+                                           where mo.supplier_id=#{supp} and m.types=#{good_type}"
+    unless params[:good_name].strip.empty? || params[:good_name].strip == ""
+      good_name = params[:good_name].strip.gsub(/[%_]/){|x|'\\' + x}
+      sql += " and m.name like '%#{good_name}%'"
+    end
+    sql += " group by mid"
+    @materials = MaterialOrder.find_by_sql(sql)
+  end
+
+  #退货提交
+  def back_good_commit
+    if  params[:data].nil? || params[:data].blank?
+      render :json => 0
+    else
+      params[:data].each do |d|
+        id = d.split("-")[0].to_i
+        num = d.split("-")[1].to_i
+        sup_id = d.split("-")[2].to_i
+        material = Material.find_by_id(id)
+        material.update_attribute("storage", material.storage - num) if material
+        BackGoodRecord.create(:material_id => id, :material_num => num, :supplier_id => sup_id)
+      end
+      render :json => 1
     end
   end
 #付款页面

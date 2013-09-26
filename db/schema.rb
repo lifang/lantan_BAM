@@ -11,7 +11,18 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130924060302) do
+
+ActiveRecord::Schema.define(:version => 20130924054439) do
+
+  create_table "back_good_records", :force => true do |t|
+    t.integer  "material_id"
+    t.integer  "material_num"
+    t.integer  "supplier_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "back_good_records", ["material_id"], :name => "index_back_good_records_on_material_id"
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"

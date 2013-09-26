@@ -34,6 +34,7 @@ GEM
       multi_json (~> 1.0)
     ansi (1.4.3)
     arel (2.2.3)
+    barby (0.5.1)
     builder (3.0.4)
     capistrano (2.15.4)
       highline
@@ -127,6 +128,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import (~> 0.2.8)
+  barby (= 0.5.1)
   capistrano (~> 2.15.4)
   capistrano_colors (~> 0.5.5)
   execjs (= 1.4.0)
