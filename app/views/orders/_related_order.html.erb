@@ -75,7 +75,7 @@
         <% if @order[0].return_types == Order::IS_RETURN[:YES] %>
           <div class="seeProDiv">
             <div class="seeProDiv_l">退单原因：</div>
-            <div class="seeProDiv_r"><%=  Customer::RETURN_REASON[@order[0].return_types] %></div>
+            <div class="seeProDiv_r"><%=  Customer::RETURN_REASON[@order[0].return_reason] %></div>
           </div>
           <div class="seeProDiv">
             <div class="seeProDiv_l">接单人员：</div>

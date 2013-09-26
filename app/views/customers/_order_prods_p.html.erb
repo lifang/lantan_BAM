@@ -1,9 +1,7 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
   <thead>
     <tr class="hbg">
-      <% if controller.action_name == "show" %>
-        <td><input type="checkbox" value="全选" onclick='set_value(this)' /></td>
-      <% end %>
+      <td><input type="checkbox" value="全选" onclick='set_value(this)' /></td>
       <td>订单号</td>
       <td>消费日期</td>
       <td>消费项目</td>
@@ -17,9 +15,7 @@
   <tbody>
     <% @orders.each do |order| %>
       <tr>
-        <% if controller.action_name == "show" %>
-          <td><input type="checkbox" id="line_<%= order.id %>" value="<%= order.id %>" /></td>
-        <% end %>
+        <td><input type="checkbox" id="line_<%= order.id %>" value="<%= order.id %>" /></td>
         <td><%= order.code %></td>
         <td><%= order.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
         <td>
@@ -48,10 +44,10 @@
           <% if permission?(:customers, :revisit) %>
             <a href="javascript:void(0)"
                onclick="javascript:customer_revisit(<%= order.id %>, <%= @customer.id %>)">回访</a>
-          <% if (order.status == Order::STATUS[:BEEN_PAYMENT] || order.status == Order::STATUS[:FINISHED]) && order.return_types == Order::IS_RETURN[:NO] %>
-            <a href="javascript:void(0)" onclick="return_order(<%= order.id %>, <%= @customer.id %>)">退单</a>
+               <% if (order.status == Order::STATUS[:BEEN_PAYMENT] || order.status == Order::STATUS[:FINISHED]) && order.return_types == Order::IS_RETURN[:NO] %>
+              <a href="javascript:void(0)" onclick="return_order(<%= order.id %>, <%= @customer.id %>)">退单</a>
             <% end %>
-           <% end %>
+          <% end %>
         </td>
       </tr>
     <% end %>
