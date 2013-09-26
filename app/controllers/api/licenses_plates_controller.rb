@@ -8,7 +8,8 @@ class Api::LicensesPlatesController < ApplicationController     #车牌识别的
     folder_name = params[:folderName].nil? ? nil : params[:folderName]
     path = path + "/" + folder_name unless folder_name.nil?
     Dir.mkdir(path) unless File.directory?(path)
-    name_validate(path, name, 0)
+    msg = name_validate(path, name, 0)
+    return msg
   end
 
   def send_file   #返回图片名或配置文件
@@ -41,6 +42,8 @@ class Api::LicensesPlatesController < ApplicationController     #车牌识别的
       name_validate(path, n_name, i)
     else
       File.open(path + "/" + name, "wb"){|f| f.write(params[:img].read)}
+      a = "success"
+      return a
     end
   end
 

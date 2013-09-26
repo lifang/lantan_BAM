@@ -1403,3 +1403,89 @@ function search_material_barcode(obj){
         success:function(data,status){}
     });
 }
+
+function back_good_records_button(store_id){
+    var type = $("#back_good_records_search_type").val();
+    var name = $("#back_good_records_search_name").val();
+    var code = $("#back_good_records_search_code").val();
+    var supplier = $("#back_good_records_search_supp").val();
+    $.ajax({
+        url: "/stores/"+store_id+"/materials/page_back_records",
+        type: "get",
+        dataType: "script",
+        data: {back_type : type, back_name : name, back_code : code, back_supp : supplier}
+    })
+}
+
+function back_good_search(store_id){
+    var type = $("#back_good_supplier").val();
+    var type2 = $("#back_good_type_").val();
+    var name = $.trim($("#back_good_name").val());
+    $.ajax({
+        url: "/stores/"+store_id+"/materials/back_good_search",
+        type: "get",
+        dataType: "script",
+        data: {supplier_id : type, good_type : type2, good_name : name}
+    })
+}
+
+function back_good_select(mat,obj){
+    var type = type_name(mat.mtype);
+    if($(obj).attr("checked")=="checked"){
+        $("#back_good_tbody").append("<tr id=back_good_tr"+mat.mid+"><input type='hidden' name='good_id' value='"+mat.mid+"'/><input type='hidden' name='supp_id' value='"+mat.msuid+"'><td>"+mat.mname+"</td><td>"+type+"</td><td>"+mat.mstorage+
+                                      "</td><td>"+parseInt(mat.mnum)+"</td><td><input type='text' name='back_good_count' style='width:50px' value='1'></td><td><a href='javascript:void(0)' onclick='back_good_remove_tr("+mat.mid+")'>删除</a></td></tr>")
+    }else{
+        $("#back_good_tr"+mat.mid).remove();
+    }
+}
+
+function back_good_remove_tr(mid){          //退货时删除已选择的物料
+    $("#back_good_tr"+mid).remove();
+    $("#back_good_li"+mid+" input").attr("checked",false);
+}
+
+function back_good_validate(store_id){      //退货确定按钮验证
+    var data = new Array();
+    var flag = true;
+    $("input[name='back_good_count']").each(function(){
+        if ((new RegExp(/^\d+$/)).test($.trim($(this).val()))==false){
+            tishi_alert("请输入正确的退货数量，数量必须为大于零的整数!");
+            flag = false;
+            return false;
+        }
+    });
+    $("#back_good_tbody tr").each(function(){
+        var storage = parseInt($(this).find("td:nth-child(5)").text());
+        var num = parseInt($(this).find("td:nth-child(6)").text());
+        var back_num = parseInt($(this).find("td:nth-child(7) input").val());
+        if(back_num > num || back_num > storage){
+            tishi_alert("退货量不能大于库存量或者订货量!");
+            flag = false;
+            return false;
+        }else{
+            var id = $(this).find("input[name='good_id']")[0].value;
+            var su_id = $(this).find("input[name='supp_id']")[0].value;
+            data.push(id+"-"+back_num+"-"+su_id);
+        }
+    })
+    if(flag){
+        $.ajax({
+            url: "/stores/"+store_id+"/materials/back_good_commit",
+            dataType : "json",
+            type : "get",
+            data : {data : data},
+            success:function(data){
+               if(data==1){
+                   tishi_alert("提交成功!")
+                   window.location.reload();
+               }else{
+                   tishi_alert("无数据!");
+               }
+            },
+            error:function(data){
+                tishi_alert("提交错误!");
+            }
+        })
+    }
+            
+}

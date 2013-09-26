@@ -7,7 +7,8 @@ class Material < ActiveRecord::Base
   has_many :prod_mat_relations
   has_many :material_losses
   has_many :mat_order_items
-  has_many :material_orders, :through => :mat_order_items do 
+  has_many :back_good_records
+  has_many :material_orders, :through => :mat_order_items do  
     def not_all_in
       where("m_status not in (?) and status != ?",[3,4], MaterialOrder::STATUS[:cancel])
     end
@@ -22,7 +23,6 @@ class Material < ActiveRecord::Base
 
   before_create :generate_barcode
   after_create :generate_barcode_img
-
   STATUS = {:NORMAL => 0, :DELETE => 1}
   TYPES_NAMES = {0 => "清洁用品", 1 => "美容用品", 2 => "装饰产品", 3 => "配件产品", 4 => "电子产品",
     5 =>"其他产品",6 => "辅助工具", 7 => "劳动保护"}

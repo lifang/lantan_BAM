@@ -14,6 +14,7 @@
     <% end %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
+    <%= link_to "批量退货", back_good_store_materials_url(@current_store.id), :remote => true, 'data-type' => 'script' %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store_id]), :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印条形码",print_code_store_materials_path(params[:store_id]),:remote => true, 'data-type' => 'script', :class => "",:target => "_blank" %><% end %>
@@ -29,6 +30,7 @@
       <li>向总部订货记录</li>
       <li>向供应商订货记录</li>
       <li>库存报损</li>
+      <li>退货记录</li>
     </ul>
   </div>
   <div class="data_body">
@@ -49,6 +51,9 @@
     </div>
     <div style="display: none;">
       <%= render :partial => "materials_losses_panel" %>
+    </div>
+    <div style="display: none;">
+      <%= render :partial => "back_materials_records_panel" %>
     </div>
   </div>
 </div>
@@ -191,6 +196,9 @@
 <div class="tab_popup" id="material_div">
 </div>
 
+<div class="tab_popup" id="tuihuo_div">     <!--退货form-->
+
+</div>
 <script type="text/javascript">
   $(function() {
 <% if @status %>
