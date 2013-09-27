@@ -131,6 +131,7 @@ DEPENDENCIES
   barby (= 0.5.1)
   capistrano (~> 2.15.4)
   capistrano_colors (~> 0.5.5)
+  execjs (= 1.4.0)
   gchartrb (= 0.8)
   jquery-rails (~> 2.1.0)
   json (= 1.7.6)

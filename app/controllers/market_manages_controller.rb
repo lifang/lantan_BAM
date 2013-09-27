@@ -194,28 +194,40 @@ class MarketManagesController < ApplicationController
   end
 
   def daily_consumption_receipt
-    @search_time = (params[:search_time].nil? || params[:search_time] == "") ? Time.now.strftime("%Y-%m-%d") : params[:search_time]
+    @c_time = params[:c_time].nil? ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:c_time]
+    @e_time = params[:e_time].nil? ? Time.now.strftime("%Y-%m-%d") : params[:e_time]
     condit = "status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and store_id = #{params[:store_id]}"
-    condit += " and date_format(created_at,'%Y-%m-%d') = '#{@search_time}'"
+    unless  @c_time == ""
+      condit += " and date_format(created_at,'%Y-%m-%d') >= '#{@c_time}'"
+    end
+    unless  @e_time == ""
+      condit += " and date_format(created_at,'%Y-%m-%d') <= '#{@e_time}'"
+    end
     if !params[:return_types].nil?  and  params[:return_types] != ""
       condit += " and return_types="+params[:return_types]
       @types = params[:return_types]
     end
-    orders = Order.where(condit)
+    orders = Order.where(condit).order("created_at desc")
     @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
     @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 
   def daily_consumption_receipt_blank
-    @search_time = (params[:search_time].nil? || params[:search_time] == "") ? Time.now.strftime("%Y-%m-%d") : params[:search_time]
+    @c_time = params[:c_time].nil? ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:c_time]
+    @e_time = params[:e_time].nil? ? Time.now.strftime("%Y-%m-%d") : params[:e_time]
     condit = "status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and store_id = #{params[:store_id]}"
-    condit += " and date_format(created_at,'%Y-%m-%d') = '#{@search_time}'"
+    unless  @c_time == ""
+      condit += " and date_format(created_at,'%Y-%m-%d') >= '#{@c_time}'"
+    end
+    unless  @e_time == ""
+      condit += " and date_format(created_at,'%Y-%m-%d') <= '#{@e_time}'"
+    end
     if !params[:return_types].nil?  and  params[:return_types] != ""
       condit += " and return_types="+params[:return_types]
       @types = params[:return_types]
     end
-    @orders = Order.where(condit)
+    @orders = Order.where(condit).order("created_at desc")
     @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
   end

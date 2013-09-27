@@ -1,6 +1,6 @@
 <div class="tab_popup" id="related_order_partial" style="z-index:101 !important">
   <div class="popup_box">
-    <h1>相关<% @order[0].return_types == Order::IS_RETURN[:YES] ? "退单" : "订单" %>订单<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <h1>相关<%= @order[0].return_types == Order::IS_RETURN[:YES] ? "退单" : "订单" %><a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
         <% if @order[0].return_types != Order::IS_RETURN[:YES] %>
@@ -75,10 +75,10 @@
         <% if @order[0].return_types == Order::IS_RETURN[:YES] %>
           <div class="seeProDiv">
             <div class="seeProDiv_l">退单原因：</div>
-            <div class="seeProDiv_r"><%=  Customer::RETURN_REASON[@order[0].return_types] %></div>
+            <div class="seeProDiv_r"><%=  Customer::RETURN_REASON[@order[0].return_reason] %></div>
           </div>
           <div class="seeProDiv">
-            <div class="seeProDiv_l">接单人员：</div>
+            <div class="seeProDiv_l">退单金额：</div>
             <div class="seeProDiv_r"><%= @order[0].return_fee %></div>
           </div>
           <div class="seeProDiv">

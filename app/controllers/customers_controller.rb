@@ -288,11 +288,17 @@ class CustomersController < ApplicationController
     order = Order.find(params[:order_id])
     order.update_attributes(:return_reason=>params[:reason],:return_types=>Order::IS_RETURN[:YES],:price => (order.price.nil? ? 0 : order.price) - params[:account].to_f,
       :return_fee => params[:account].to_f,:return_direct => params[:direct],:return_staff_id =>cookies[:user_id])
-    if params[:direct].to_i == Order::O_RETURN[:REUSE] and params[:types].index("product")
-      mats =ProdMatRelation.where("product_id in (#{params[:"order_prod_relation#product"]})").inject(Hash.new){|hash,mat|
-        hash[mat.material_id] = mat.material_num;hash
-      }
-      Material.find(mats.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ mats[mat.id])}
+    if params[:direct].to_i == Order::O_RETURN[:REUSE]
+      if  params[:types].index("product")
+        mats =ProdMatRelation.where("product_id in (#{params[:"order_prod_relation#product"]})").inject(Hash.new){|hash,mat|
+          hash[mat.material_id] = mat.material_num;hash
+        }
+        Material.find(mats.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ mats[mat.id])}
+      end
+      if params[:types].index("package_card")
+        CPcardRelation.where("order_id = #{params[:order_id]} and package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each {|card| card.update_attributes(:status=>PackageCard::STAT[:INVALID])}
+        Material.find(PcardMaterialRelation.where("package_card_id in (#{params[:"c_pcard_relation#package_card"]})").map(&:material_id)).each {|mat| mat.update_attributes(:storage => mat.storage+1)}
+      end
     end
     render :json =>{:msg=>order.code}
   end
