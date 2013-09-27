@@ -296,9 +296,14 @@ class CustomersController < ApplicationController
         Material.find(mats.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ mats[mat.id])}
       end
       if params[:types].index("package_card")
-        CPcardRelation.where("order_id = #{params[:order_id]} and package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each {|card| card.update_attributes(:status=>PackageCard::STAT[:INVALID])}
-        Material.find(PcardMaterialRelation.where("package_card_id in (#{params[:"c_pcard_relation#package_card"]})").map(&:material_id)).each {|mat| mat.update_attributes(:storage => mat.storage+1)}
+        mats = PcardMaterialRelation.where("package_card_id in (#{params[:"c_pcard_relation#package_card"]})").inject(Hash.new){|hash,mat|
+          hash[mat.material_id] = mat.material_num;hash
+        }
+        Material.find(mats.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ mats[mat.id])}
       end
+    end
+    if params[:types].index("package_card")
+      CPcardRelation.where("order_id = #{params[:order_id]} and package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each {|card| card.update_attributes(:status=>PackageCard::STAT[:INVALID])}
     end
     render :json =>{:msg=>order.code}
   end
