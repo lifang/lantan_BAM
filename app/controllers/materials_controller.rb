@@ -31,7 +31,7 @@ class MaterialsController < ApplicationController
     @mat_in = params[:mat_in] if params[:mat_in]
     @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
                                     and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
-    @back_good_records = BackGoodRecord.all.paginate(:page => params[:page] ||= 1, :per_page => 2)
+    @back_good_records = BackGoodRecord.all.paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
     @suppliers = Supplier.all(:select => "s.id,s.name", :from => "suppliers s",
       :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=0")
     date_now = Time.now.to_s[0..9]
@@ -181,7 +181,7 @@ class MaterialsController < ApplicationController
     @back_name = params[:back_name]
     @back_code = params[:back_code]
     @back_supp = params[:back_supp]
-     @back_good_records = BackGoodRecord.find_by_sql(sql).paginate(:page => params[:page] ||= 1, :per_page => 2)
+     @back_good_records = BackGoodRecord.find_by_sql(sql).paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
      @current_store = Store.find_by_id(params[:store_id].to_i)
      respond_with(@back_good_records) do |f|
        f.html

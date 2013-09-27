@@ -1448,7 +1448,7 @@ function back_good_validate(store_id){      //退货确定按钮验证
     var data = new Array();
     var flag = true;
     $("input[name='back_good_count']").each(function(){
-        if ((new RegExp(/^\d+$/)).test($.trim($(this).val()))==false){
+        if ((new RegExp(/^\d+$/)).test($.trim($(this).val()))==false || parseInt($.trim($(this).val()))<=0){
             tishi_alert("请输入正确的退货数量，数量必须为大于零的整数!");
             flag = false;
             return false;
