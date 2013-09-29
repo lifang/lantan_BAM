@@ -304,7 +304,7 @@ class CustomersController < ApplicationController
     if params[:direct].to_i == Order::O_RETURN[:REUSE]
       Material.find(materials.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ materials[mat.id])}
     else     
-      materials.each {|k,v|MaterialLosse.create(:loss_num=>v,:staff_id => cookies[:user_id],:store_id=>params[:order_id],:material_id => k)}
+      materials.each {|k,v|MaterialLoss.create(:loss_num=>v,:staff_id => cookies[:user_id],:store_id=>order.store_id,:material_id => k)}
     end
     render :json =>{:msg=>order.code}
   end
