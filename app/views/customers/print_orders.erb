@@ -42,7 +42,7 @@
           </table>
         </td>
         <td><%= order.price %></td>
-        <td><%= @order_pay_type[order.id] %></td>
+        <td><%= @order_pay_type[order.id].nil? ? "" : @order_pay_type[order.id].join(",") %></td>
         <td><%= Order::IS_PLEASED_NAME[order.is_pleased] %></td>
         <td><%= order.is_billing ? "是" : "否" %></td>
       </tr>
