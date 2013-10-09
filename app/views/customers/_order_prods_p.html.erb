@@ -6,7 +6,7 @@
       <td>消费日期</td>
       <td width="35%">消费项目</td>
       <td>总价（元）</td>
-      <td>付款方式</td>
+      <td width="10%">付款方式</td>
       <td>是否满意</td>
       <td>是否开票</td>
       <td>操作</td>
@@ -37,7 +37,7 @@
           </table>
         </td>
         <td><%= order.price %></td>
-        <td><%= @order_pay_type[order.id] %></td>
+        <td><%= @order_pay_type[order.id].nil? ? "" : @order_pay_type[order.id].join(",") %></td>
         <td><%= Order::IS_PLEASED_NAME[order.is_pleased] %></td>
         <td><%= order.is_billing ? "是" : "否" %></td>
         <td>
