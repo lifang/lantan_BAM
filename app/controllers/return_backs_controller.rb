@@ -60,7 +60,7 @@ class ReturnBacksController < ApplicationController
                 msg +=  " " * 5 + time_left + " "*(16 - 5 - time_left.to_s.length)
               end
             end
-            msg = "\n\n\n" if msg == ""
+            msg = "\n    欢迎光临    \n\n" if msg == ""
             puts "msg===#{msg}"
             msg_arr << msg
           end
