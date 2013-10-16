@@ -131,8 +131,8 @@ class Order < ActiveRecord::Base
   end
 
   #正在进行中的订单
-  def self.working_orders store_id
-    return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status from orders o inner join car_nums c on c.id=o.car_num_id
+  def self.working_orders store_id,is_service=0
+    return Order.find_by_sql(["select o.id, c.num, c.id car_num_id, o.status, wo.id wo_id, wo.status wo_status from orders o inner join car_nums c on c.id=o.car_num_id
       inner join customers cu on cu.id=o.customer_id left join work_orders wo on wo.order_id = o.id
 and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
       where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]})
@@ -399,22 +399,8 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           ids]) if ids.any?
       unless products.nil? or products.blank?
         service_ids = products.collect { |p| p.id  } #[311]
-        time_arr = Station.arrange_time store_id, service_ids, nil, res_time
-        info[:start] = ""
-        info[:end] = ""
-        info[:station_id] = time_arr[0] || ""
-
-        case time_arr[1]
-        when 0
-          status = 2 #没工位
-        when 1
-          status = 1  #有符合工位
-        when 2
-          status = 3 #多个工位
-        when 3
-          status = 4 #工位上暂无技师
-        end
-
+        status,info = Product.return_station_status(service_ids, store_id, info, nil)[0..1]
+        
       else
         info[:start] = ""
         info[:end] = ""
@@ -478,6 +464,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           end
         end
       end if prod_ids && carNum && customer && from_pcard!=1
+      # 产品相关活动
       prod_ids.split(",").each do |pc_p|
         prod = Product.find_by_store_id_and_id_and_status store_id,pc_p.split("_")[1].to_i,Product::IS_VALIDATE[:YES]
         
@@ -488,24 +475,9 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       end if prod_ids && carNum && customer && from_pcard==1
 
       #用户相关的打折卡
-      discont_card = CSvcRelation.find(:all, :select => "c_svc_relations.*",
-        :conditions => ["c_svc_relations.customer_id = ? and c_svc_relations.status = ? and s.types= ?", customer.id, CSvcRelation::STATUS[:valid], SvCard::FAVOR[:DISCOUNT]],
-        :joins => ["inner join sv_cards s on s.id = c_svc_relations.sv_card_id"]) if customer
-      if discont_card.any?
-        discont_card.each{|r|
-          s = Hash.new
-          s[:scard_id] = r.sv_card_id
-          s[:scard_name] = r.sv_card.name
-          s[:scard_discount] = r.sv_card.discount
-          s[:price] = 0
-          s[:selected] = 1
-          s[:show_price] = 0.0#"-" + s[:price].to_s
-          s[:card_type] = 0
-          s[:is_new] = 0 #表示旧的储值卡
-          svcard_arr << s
-          #total -= s[:price]
-        }
-      end
+
+      svcard_arr = customer.get_discount_cards(svcard_arr)
+ 
       #产品相关套餐卡
       if ids.any?
         if from_pcard == 1
@@ -847,44 +819,18 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           #创建工位订单
           #station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
           #unless station
-          arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
+          arrange_time = Station.arrange_time(store_id,prod_ids,order)
           if arrange_time[0]
             new_station_id = arrange_time[0]
             station = Station.find_by_id_and_status new_station_id, Station::STAT[:NORMAL]
           end
           #end
           #          if station
-          woTime = WkOrTime.find_by_station_id_and_current_day new_station_id, Time.now.strftime("%Y%m%d").to_i if new_station_id
-          if woTime
-            woTime.update_attributes( :wait_num => woTime.wait_num.to_i + 1)
-          else
-            WkOrTime.create(:current_times => end_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
-              :station_id => station.id, :worked_num => 1) if station and end_at.present?
-          end
-            
-          started_at = Time.now
-          ended_at = started_at + cost_time.minutes
-          work_order = WorkOrder.create({
-              :order_id => order.id,
-              :current_day => Time.now.strftime("%Y%m%d"),
-              :station_id => station ? station.id : nil,
-              :store_id => store_id,
-              :status => (arrange_time[2] ? WorkOrder::STAT[:SERVICING] : WorkOrder::STAT[:WAIT]),
-              :started_at => arrange_time[2] ? started_at : nil,
-              :ended_at => arrange_time[2] ? ended_at : nil,
-              :cost_time => cost_time
-            })
-          hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? STATUS[:SERVICING] : STATUS[:NORMAL]
-          hash[:station_id] = new_station_id if new_station_id  #这个可能暂时没有值，一个完成后要更新
-          station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station.id, Time.now.strftime("%Y%m%d").to_i if station
-          if station_staffs
-            hash[:cons_staff_id_1] = station_staffs[0].staff_id if station_staffs.size > 0
-            hash[:cons_staff_id_2] = station_staffs[1].staff_id if station_staffs.size > 1
-          end
-          hash[:started_at] = arrange_time[2] ? start : nil
-          hash[:ended_at] = arrange_time[2] ? end_at : nil
-          order.update_attributes hash
-          status = 1
+          #下单排工位
+          hash = Station.create_work_order(new_station_id, store_id,order, hash, arrange_time[2],cost_time)[0]
+         if order.update_attributes hash
+           status = 1
+         end
           #          else
           #            status = 3
           #          end

@@ -30,6 +30,7 @@ class Product < ActiveRecord::Base
   IS_AUTO = {:YES=>1,:NO=>0}
   scope :is_service, where(:is_service => true)
   scope :is_normal, where(:status => true)
+  scope :commonly_used, where(:commonly_used => true)
 
   #根据回访要求发送客户短信，会查询所有的门店信息发送,设置的时间为每天的11:30和8点半左右，每天两次执行
   def self.revist_message()
@@ -170,6 +171,25 @@ class Product < ActiveRecord::Base
     end
   end
 
+  def self.return_station_status(service_ids, store_id, info, order)
+    time_arr = Station.arrange_time store_id, service_ids, order
+    if info
+      info[:start] = ""
+      info[:end] = ""
+      info[:station_id] = time_arr[0] || ""
+    end
+    case time_arr[1]
+    when 0
+      status = 2 #没工位
+    when 1
+      status = 1  #有符合工位
+    when 2
+      status = 3 #多个工位
+    when 3
+      status = 4 #工位上暂无技师
+    end
+    return [status,info,time_arr[0],time_arr[2]]
+  end
  
 
 end

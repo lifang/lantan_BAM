@@ -24,7 +24,7 @@ class ProductsController < ApplicationController
 
   def prod_services
     @services = Product.paginate_by_sql("select id, service_code code,prod_point,store_id,name,types,base_price,show_on_ipad,cost_time,t_price,sale_price,staff_level level1,staff_level_1
-    level2 from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}
+    level2, commonly_used from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}
     order by created_at asc", :page => params[:page], :per_page => Constant::PER_PAGE)
     @materials={}
     @services.each do |service|
@@ -190,5 +190,23 @@ class ProductsController < ApplicationController
     Product.find(params[:ids].split(",")).each {|prod| prod.update_attributes(:show_on_ipad =>vals["#{prod.id}"]) if (prod.show_on_ipad ? 1 : 0) != vals["#{prod.id}"]}
     flash[:notice] = "更新成功"
     redirect_to request.referer
+  end
+
+  #服务作为常用显示在new app上面
+  def commonly_used
+    #store_id, id
+    @service = Product.find_by_id(params[:id])
+    if @service
+      if @service.commonly_used
+        @service.update_attribute(:commonly_used, false)
+      else
+        @service.update_attribute(:commonly_used, true)
+      end
+      @status = 1
+      @notice = "操作成功"
+    else
+      @status = 0
+      @notice = "服务未找到"
+    end
   end
 end

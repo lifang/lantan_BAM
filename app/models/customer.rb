@@ -150,7 +150,7 @@ class Customer < ActiveRecord::Base
         inner join package_cards p on p.id = cpr.package_card_id
         where cpr.status = ? and cpr.customer_id = ? and p.store_id = ?",
         CPcardRelation::STATUS[:NORMAL], self.id, store_id])
-#    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
+    #    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
     already_used_count = {}
     if c_pcard_relations_no_paginate.present?
       c_pcard_relations_no_paginate.each do |r|
@@ -171,6 +171,29 @@ class Customer < ActiveRecord::Base
     else
       [{}, []]
     end
+  end
+
+
+  def get_discount_cards(svcard_arr)
+    discont_card = CSvcRelation.find(:all, :select => "c_svc_relations.*",
+      :conditions => ["c_svc_relations.customer_id = ? and c_svc_relations.status = ? and s.types= ?", self.id, CSvcRelation::STATUS[:valid], SvCard::FAVOR[:DISCOUNT]],
+      :joins => ["inner join sv_cards s on s.id = c_svc_relations.sv_card_id"])
+    if discont_card.any?
+      discont_card.each{|r|
+        s = Hash.new
+        s[:scard_id] = r.sv_card_id
+        s[:scard_name] = r.sv_card.name
+        s[:scard_discount] = r.sv_card.discount
+        s[:price] = 0
+        s[:selected] = 1
+        s[:show_price] = 0.0#"-" + s[:price].to_s
+        s[:card_type] = 0
+        s[:is_new] = 0 #表示旧的储值卡
+        svcard_arr << s
+        #total -= s[:price]
+      }
+    end
+    return svcard_arr
   end
 
   private
