@@ -116,7 +116,7 @@ class WorkOrder < ActiveRecord::Base
         another_order = another_work_order.order
         order_product_ids = OrderProdRelation.joins(:product).where(:order_id => another_order,
           :products => {:is_service => Product::PROD_TYPES[:SERVICE]}).map(&:product_id)
-        if (products & products).sort == order_product_ids.sort
+        if (products & order_product_ids).sort == order_product_ids.sort
           station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day self.station_id, Time.now.strftime("%Y%m%d").to_i if self.station_id
           if station_staffs
             staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0

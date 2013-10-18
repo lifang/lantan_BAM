@@ -69,7 +69,7 @@ p customer
             :price => service.try(:sale_price),
             :is_billing => false,
             :front_staff_id => params[:user_id],
-            :customer_id => customer.id,
+            :customer_id => customer.id || customer.customer_id,
             :store_id => params[:store_id],
             :is_visited => Order::IS_VISITED[:NO],
             :types => Order::TYPES[:SERVICE]
