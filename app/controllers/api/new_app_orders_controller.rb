@@ -35,14 +35,15 @@ class Api::NewAppOrdersController < ApplicationController
     if params[:is_car_num]=="1"
       customer = CarNum.get_customer_info_by_carnum(params[:store_id], params[:num])
     else
-      customers = Customer.find_by_sql(["select distinct cu.id id, cu.name name, cn.num car_num from customers cu 
+      customers = Customer.find_by_sql(["select distinct cu.id customer_id, cu.name name, cn.num car_num from customers cu
         inner join customer_num_relations cnr on cu.id=cnr.customer_id inner join customer_store_relations csr on csr.customer_id = cu.id
         inner join car_nums cn on cn.id=cnr.car_num_id where csr.store_id in (?) and cu.mobilephone = ? and cu.status= ? ",
           StoreChainsRelation.return_chain_stores(params[:store_id]), params[:num].strip,Customer::STATUS[:NOMAL] ])
       customer = customers[0]
       status = customers.length > 1 ? 5 : 1
     end
-
+p 1111111111111111
+p customer
     if status == 5 #多个车牌
       render :json => {:status => status, :car_nums => customers.map(&:car_num)}
     else
@@ -56,7 +57,7 @@ class Api::NewAppOrdersController < ApplicationController
           customer.save
         end
       else
-        car_num = CarNum.find_by_sql("select cn.id from car_nums cn inner join customer_num_relations cnr on cnr.car_num_id=cn.id where cnr.customer_id = #{customer.id}")[0]
+        car_num = CarNum.find_by_sql("select cn.id from car_nums cn inner join customer_num_relations cnr on cnr.car_num_id=cn.id where cnr.customer_id = #{customer.customer_id}")[0]
       end
       Order.transaction do
         service = Product.find_by_id_and_status(params[:service_id], Product::IS_VALIDATE[:YES])
@@ -95,7 +96,7 @@ class Api::NewAppOrdersController < ApplicationController
 
   #根据实际情况调换工位
   def change_station
-    #参数 "(work_order_id)_(station_id),(work_order_id)_(station_id)"
+    #参数 "(work_order_id)_(station_id),(work_order_id)_(station_id)", store_id
     status = 0
     if params[:wo_station_ids]
       WorkOrder.transaction do
@@ -103,10 +104,7 @@ class Api::NewAppOrdersController < ApplicationController
         wo_station_ids.each do |wo_station|
           wo_id,station_id = wo_station.split("_")
           wo = WorkOrder.find_by_id(wo_id)
-          if wo
-            status = 1
-            wo.update_attribute(:station_id, station_id.to_i)
-          end
+          status = wo && wo.update_attribute(:station_id, station_id.to_i) ? 0 : 1
         end
       end
       work_orders = working_orders params[:store_id]
@@ -120,16 +118,17 @@ class Api::NewAppOrdersController < ApplicationController
   def work_order_finished
     #work_order_id
     work_order = WorkOrder.find_by_id(params[:work_order_id])
+    work_orders = working_orders params[:store_id]
     if work_order
       if work_order.status==WorkOrder::STAT[:WAIT_PAY]
         status = 0
         msg = "此车等待付款"
+        work_orders = working_orders params[:store_id]
       else
         status = 1
         msg = "操作成功"
         work_order.arrange_station
       end
-      work_orders = working_orders params[:store_id]
     else
       msg = "工单未找到"
       status = 2
@@ -267,8 +266,7 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
         content = "储值卡余额不足，请选择其他支付方式"
       end
       work_orders = working_orders params[:store_id]
-      p 11111111111111111
-      p work_orders
+
       render :json => {:status => order_pay[0], :content => content, :orders => work_orders}
     end
   end
