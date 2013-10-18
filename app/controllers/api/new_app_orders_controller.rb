@@ -8,25 +8,17 @@ class Api::NewAppOrdersController < ApplicationController
     #参数store_id
     status = 0
     #orders => 车位施工情况
-    begin
-      orders = Order.working_orders params[:store_id], 1
-      orders = orders.group_by{|order| order.status}
-      #把免单的order放在已付款下面
-      if orders[Order::STATUS[:FINISHED]].present?
-        orders[Order::STATUS[:BEEN_PAYMENT]] ||= []
-        orders[Order::STATUS[:BEEN_PAYMENT]] = (orders[Order::STATUS[:BEEN_PAYMENT]] << orders[Order::STATUS[:FINISHED]]).flatten
-        orders.delete(Order::STATUS[:FINISHED])
-      end
+    #    begin
+    #订单分组
+    work_orders = working_orders params[:store_id]
+    #stations_count => 工位数目
+    station_ids = Station.where("store_id =? and status not in (?) ",params[:store_id], [Station::STAT[:WRONG], Station::STAT[:DELETED]]).map(&:id)
+    services = Product.is_service.is_normal.commonly_used.where(:store_id => params[:store_id]).select("id, name, sale_price as price")
+    #    rescue
+    #      status = 1
+    #    end
 
-      #stations_count => 工位数目
-      station_ids = Station.where("store_id =? and status not in (?) ",params[:store_id], [Station::STAT[:WRONG], Station::STAT[:DELETED]]).map(&:id)
-
-      services = Product.is_service.is_normal.commonly_used.where(:store_id => params[:store_id]).select("id, name, sale_price as price")
-    rescue
-      status = 1
-    end
-
-    render :json => {:status => status, :orders => orders, :station => {:ids => station_ids}, :services => services}
+    render :json => {:status => status, :orders => work_orders, :station_ids => station_ids, :services => services}
   end
 
   #生成订单
@@ -63,6 +55,8 @@ class Api::NewAppOrdersController < ApplicationController
           customer.customer_store_relations.create({:customer_id => customer.id, :store_id => params[:store_id]}) unless relation
           customer.save
         end
+      else
+        car_num = CarNum.find_by_sql("select cn.id from car_nums cn inner join customer_num_relations cnr on cnr.car_num_id=cn.id where cnr.customer_id = #{customer.id}")[0]
       end
       Order.transaction do
         service = Product.find_by_id_and_status(params[:service_id], Product::IS_VALIDATE[:YES])
@@ -82,17 +76,18 @@ class Api::NewAppOrdersController < ApplicationController
         
         status = Product.return_station_status([service.id], params[:store_id], nil, order)[0] # 1 有符合工位 2 没工位 3 多个工位 4 工位上暂无技师
         station_id = Product.return_station_status([service.id], params[:store_id], nil, order)[2]
+        p 11111111111111111111
+        p station_id
         work_order_status = Product.return_station_status([service.id], params[:store_id], nil, order)[3]
-        hash,work_order = Station.create_work_order(station_id, params[:store_id],order, hash, work_order_status,service.cost_time.to_i)
+        hash = Station.create_work_order(station_id, params[:store_id],order, hash, work_order_status,service.cost_time.to_i)
         if order.update_attributes hash
           status = 1
           OrderProdRelation.create(:order_id => order.id, :product_id => service.id,
             :pro_num => 1, :price => service.sale_price, :t_price => service.t_price, :total_price => service.sale_price.to_f)
         end
-
-        render :json => {:status => status, :order_num => order.code,:car_num => car_num.num, :car_num_id =>car_num.id, :work_order_id => work_order.id,
-          :wo_started_at => (work_order.started_at && work_order.started_at.strftime("%Y-%m-%d %H:%M:%S")) || "" , :wo_ended_at => (work_order.ended_at && work_order.ended_at.strftime("%Y-%m-%d %H:%M:%S")) || "", :work_order_status => work_order.status,
-          :service_name => service.name, :service_cost_time => service.try(:cost_time),:station_id => station_id}
+        #再次返回orders
+        work_orders = working_orders params[:store_id]
+        render :json => {:status => status, :orders => work_orders}
       end
     end
     
@@ -108,13 +103,17 @@ class Api::NewAppOrdersController < ApplicationController
         wo_station_ids.each do |wo_station|
           wo_id,station_id = wo_station.split("_")
           wo = WorkOrder.find_by_id(wo_id)
-          wo.update_attribute(:station_id, station_id.to_i) if wo
+          if wo
+            status = 1
+            wo.update_attribute(:station_id, station_id.to_i)
+          end
         end
       end
+      work_orders = working_orders params[:store_id]
     else
       status = 1  
     end
-    render :json => {:status => status}
+    render :json => {:status => status, :orders => work_orders}
   end
 
   #施工完成 -> 等待付款
@@ -122,63 +121,71 @@ class Api::NewAppOrdersController < ApplicationController
     #work_order_id
     work_order = WorkOrder.find_by_id(params[:work_order_id])
     if work_order
-      if work_order.status==WorkOrder::STAT[:SERVICING]
+      if work_order.status==WorkOrder::STAT[:WAIT_PAY]
         status = 0
-        mag = "此车已在施工中"
+        msg = "此车等待付款"
       else
         status = 1
         msg = "操作成功"
         work_order.arrange_station
       end
+      work_orders = working_orders params[:store_id]
     else
       msg = "工单未找到"
       status = 2
     end
-    render :json => {:status => status, :msg => msg}
+
+    render :json => {:status => status, :msg => msg, :orders => work_orders}
   end
 
   #准备order相关内容付款
   def order_info
-    #order_code
-
-    p_cards = []
-    order = Order.find_by_code(params[:order_code])
-    product = Product.find_by_sql(["select p.* from products p inner join order_prod_relations opr on opr.product_id = p.id
-inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service = ? and o.id = ?",Product::IS_VALIDATE[:YES], Product::PROD_TYPES[:SERVICE],order.id])[0]
-    #产品相关活动
-    sale_hash, prod_arr = Order.get_sale_by_product(product, nil, 0, {}, [])[0..1] if product
-    sale_arr = sale_hash.values if sale_hash
-    #客户相关打折卡
-    customer = Customer.find_by_id(order.customer_id)
-    discount_card_arr = customer.get_discount_cards([]) if customer
-    #客户相关套餐卡
-    customer_pcards = CPcardRelation.find_by_sql("select cpr.* from c_pcard_relations cpr
+    #order_id
+    status = 0
+    order = Order.find_by_id(params[:order_id])
+    if order.status == Order::STATUS[:BEEN_PAYMENT]
+      status = 1 #已经付过款
+      work_orders = working_orders params[:store_id]
+      render :json => {:status => status, :orders => work_orders}
+    else
+      p_cards = []
+      product = Product.find_by_sql(["select p.* from products p inner join order_prod_relations opr on opr.product_id = p.id
+inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service = ? and o.id = ?",Product::IS_VALIDATE[:YES], Product::PROD_TYPES[:SERVICE], order.id])[0]
+      #产品相关活动
+      sale_hash, prod_arr = Order.get_sale_by_product(product, nil, 0, {}, [])[0..1] if product
+      sale_arr = sale_hash.values if sale_hash
+      #客户相关打折卡
+      customer = Customer.find_by_id(order.customer_id)
+      discount_card_arr = customer.get_discount_cards([]) if customer
+      #客户相关套餐卡
+      customer_pcards = CPcardRelation.find_by_sql("select cpr.* from c_pcard_relations cpr
         inner join pcard_prod_relations ppr on ppr.package_card_id = cpr.package_card_id
         where cpr.status = #{CPcardRelation::STATUS[:NORMAL]} and cpr.ended_at >= '#{Time.now()}'
       and product_id = #{product.id} and cpr.customer_id = #{customer.id} group by cpr.id")
     
-    customer_pcards.each do |c_pr|
-      p_c = c_pr.package_card
-      p_c[:products] = p_c.pcard_prod_relations.collect{|r|
-        p = Hash.new
-        p[:name] = r.product.name
-        prod_num = c_pr.get_prod_num r.product_id
-        p[:num] =  prod_num.to_i 
-        p[:p_card_id] = r.package_card_id
-        p[:product_id] = r.product_id
-        p[:product_price] = r.product.sale_price
-        p[:selected] = 1
-        p
-      }
-      p_c[:cpard_relation_id] = c_pr.id
-      p_c[:has_p_card] = 1
-      p_c[:show_price] = 0.0
-      p_cards << p_c
-    end if customer_pcards.any?
+      customer_pcards.each do |c_pr|
+        p_c = c_pr.package_card
+        p_c[:products] = p_c.pcard_prod_relations.collect{|r|
+          p = Hash.new
+          p[:name] = r.product.name
+          prod_num = c_pr.get_prod_num r.product_id
+          p[:num] =  prod_num.to_i
+          p[:p_card_id] = r.package_card_id
+          p[:product_id] = r.product_id
+          p[:product_price] = r.product.sale_price
+          p[:selected] = 1
+          p
+        }
+        p_c[:cpard_relation_id] = c_pr.id
+        p_c[:has_p_card] = 1
+        p_c[:show_price] = 0.0
+        p_cards << p_c
+      end if customer_pcards.any?
 
-    result = {:status => 1, :info => {}, :products => prod_arr, :sales => sale_arr,
-      :svcards => discount_card_arr, :pcards => p_cards, :total => order.price, :content  => "成功"}
-    render :json => result.to_json
+      result = {:status => status, :info => {:order_id => order.id, :order_code => order.code}, :products => prod_arr, :sales => sale_arr,
+        :svcards => discount_card_arr, :pcards => p_cards, :total => order.price, :content  => "成功", :car_num => order.car_num.try(:num)}
+      render :json => result.to_json
+    end
   end
 
   #付款
@@ -189,7 +196,7 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
     Order.transaction do
       hash = {}
       hash[:price] = params[:price].to_f
-      order = Order.find_by_code(params[:order_code]) if params[:order_code]
+      order = Order.find_by_code(params[:order_id]) if params[:order_id]
 
       #保存order使用的相关优惠
       prod_arr = params[:prods].split(",") if params[:prods]
@@ -247,19 +254,29 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
       order.update_attributes hash
 
       #实际付款
-      order = Order.pay(order.id, params[:store_id], params[:please],
+      order_pay = Order.pay(order.id, params[:store_id], params[:please],
         params[:pay_type], params[:billing], params[:code], params[:is_free], params[:appid])
       content = ""
-      if order[0] == 0
+      if order_pay[0] == 0
         content = ""
-      elsif order[0] == 1
+      elsif order_pay[0] == 1
         content = "success"
-      elsif order[0] == 2
+      elsif order_pay[0] == 2
         content = "订单不存在"
-      elsif order[0] == 3
+      elsif order_pay[0] == 3
         content = "储值卡余额不足，请选择其他支付方式"
       end
-      render :json => {:status => order[0], :content => content}
+      work_orders = working_orders params[:store_id]
+      p 11111111111111111
+      p work_orders
+      render :json => {:status => order_pay[0], :content => content, :orders => work_orders}
     end
+  end
+
+  def working_orders(store_id)
+    orders = Order.working_orders store_id
+    orders = combin_orders(orders)
+    orders = order_by_status(orders)
+    orders
   end
 end

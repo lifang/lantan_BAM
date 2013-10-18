@@ -827,7 +827,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           #end
           #          if station
           #下单排工位
-          hash = Station.create_work_order(new_station_id, store_id,order, hash, arrange_time[2],cost_time)[0]
+          hash = Station.create_work_order(new_station_id, store_id,order, hash, arrange_time[2],cost_time)
          if order.update_attributes hash
            status = 1
          end

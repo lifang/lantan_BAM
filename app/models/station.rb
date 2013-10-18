@@ -226,8 +226,6 @@ class Station < ActiveRecord::Base
   def self.arrange_time store_id, prod_ids, order
     #查询所有满足条件的工位
     infos = self.return_station_arr(prod_ids, store_id)
-    p 111111111111111
-    p infos
     station_arr = infos[0]
     station_prod_ids = infos[1]
     #    prod_ids = prod_ids.collect{|p| p.to_i }
@@ -239,11 +237,13 @@ class Station < ActiveRecord::Base
     #        station_arr << station if (prods & prod_ids).sort == prod_ids.sort
     #      end
     #    end
+    p "---------------------------"
+    p station_arr
     if station_arr.present?
       station_flag = 1 #有对应工位对应
       station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i)
       if station_staffs.blank?
-        station_flag = 3
+        station_flag = 3 #工位上无技师
       end
     else
       if((station_prod_ids.flatten & prod_ids).sort == prod_ids.sort) && (!station_prod_ids.include?(prod_ids))
@@ -275,6 +275,8 @@ class Station < ActiveRecord::Base
         :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
       
       availbale_stations = station_arr.map(&:id) - busy_stations
+      p "3333333333333333333333333333333"
+      p availbale_stations
       if availbale_stations.present?
         if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
           station_id = nil
@@ -341,6 +343,8 @@ class Station < ActiveRecord::Base
 
   #根据，订单，工位，门店id排空工位
   def self.create_work_order(station_id, store_id,order, hash, work_order_status, cost_time)
+    p "+++++++++++++++++++++++++++"
+    p station_id
     started_at = Time.now
     ended_at = started_at + cost_time.minutes
     wo_time = WkOrTime.find_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id
@@ -372,6 +376,6 @@ class Station < ActiveRecord::Base
     hash[:started_at] = work_order_status ? started_at : nil
     hash[:ended_at] = work_order_status ? ended_at : nil
 
-    return [hash, work_order]
+    return hash
   end
 end

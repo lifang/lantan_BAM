@@ -93,21 +93,21 @@ class WorkOrder < ActiveRecord::Base
       #正在施工中的订单
       orders = Order.includes(:work_orders).where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
         where("work_orders.current_day = #{Time.now.strftime("%Y%m%d")}").
-        where("work_orders.store_id = #{self.store_id}")
+        where("work_orders.store_id = #{self.store_id}") #[1341,1344,1354,1356,1357,1360]
 
       car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
 
       products = Product.includes(:station_service_relations => :station).
         where(:stations=>{:id => self.station_id}).
-        where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").map(&:id)
+        where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").map(&:id) #[5,1005,12]
       #qualified_station_arr = Station.return_station_arr(products, self.store_id)[0]
       another_work_orders = WorkOrder.joins(:order => {:order_prod_relations => :product}).
         where("work_orders.status = #{WorkOrder::STAT[:WAIT]}").
         where("work_orders.station_id is null").
         where("work_orders.store_id = #{self.store_id}").
         where("work_orders.current_day = #{self.current_day}").
-        where(car_num_id_sql,orders.map(&:car_num_id)).
-        readonly(false).order("work_orders.created_at asc")
+        where(car_num_id_sql,orders.map(&:car_num_id).compact).
+        readonly(false).order("work_orders.created_at asc")#[]
 
       if_wo_set_station = false
       same_car_num_id = nil
