@@ -33,7 +33,7 @@ class Api::NewAppOrdersController < ApplicationController
     car_num = nil
     customer = nil
     if params[:is_car_num]=="1"
-      customer = CarNum.get_customer_info_by_carnum(params[:num], params[:store_id])
+      customer = CarNum.get_customer_info_by_carnum(params[:store_id], params[:num])
     else
       customers = Customer.find_by_sql(["select distinct cu.id id, cu.name name, cn.num car_num from customers cu 
         inner join customer_num_relations cnr on cu.id=cnr.customer_id inner join customer_store_relations csr on csr.customer_id = cu.id
@@ -196,7 +196,7 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
     Order.transaction do
       hash = {}
       hash[:price] = params[:price].to_f
-      order = Order.find_by_code(params[:order_id]) if params[:order_id]
+      order = Order.find_by_id(params[:order_id]) if params[:order_id]
 
       #保存order使用的相关优惠
       prod_arr = params[:prods].split(",") if params[:prods]
