@@ -69,7 +69,11 @@
                       <% if permission?(:sales, :delete_service) %><a href="javascript:void(0)"  onclick="serve_delete('<%=  service.id %>','<%=params[:store_id] %>')">删除</a><% end %>
                       <% if permission?(:sales, :edit_service) %><a href="javascript:void(0)" onclick="edit_service('<%= params[:store_id] %>','<%=  service.id %>')">编辑</a><% end %>
                       <a href="javascript:void(0)" class="see_btn" onclick="show_service('<%=params[:store_id] %>','<%=  service.id %>')">查看</a>
-                      <a href="/stores/<%= params[:store_id] %>/products/<%=service.id %>" target="_blank" class="see_btn"  >预览</a></td>
+                      <a href="/stores/<%= params[:store_id] %>/products/<%=service.id %>" target="_blank" class="see_btn"  >预览</a>
+                      <% if permission?(:sales, :add_service) %>
+                        <%= link_to (!service.commonly_used ? "作为常用" : "不作为常用"), commonly_used_store_product_path(params[:store_id], service.id), :remote => true, 'data-type' => "script", :method => :post, :class => "see_btn", :id => service.id %>
+                      <% end %>
+                    </td>
                   </tr>
                 <% end %>
               </tbody>

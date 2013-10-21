@@ -191,4 +191,22 @@ class ProductsController < ApplicationController
     flash[:notice] = "更新成功"
     redirect_to request.referer
   end
+
+  #服务作为常用显示在new app上面
+  def commonly_used
+    #store_id, id
+    @service = Product.find_by_id(params[:id])
+    if @service
+      if @service.commonly_used
+        @service.update_attribute(:commonly_used, false)
+      else
+        @service.update_attribute(:commonly_used, true)
+      end
+      @status = 1
+      @notice = "操作成功"
+    else
+      @status = 0
+      @notice = "服务未找到"
+    end
+  end
 end

@@ -17,12 +17,12 @@ class Station < ActiveRecord::Base
   validate :unique_code
 
   def unique_code
-     station = Station.where("store_id = ? and status != ? and code = ?", store_id, STAT[:DELETED], code).first
+    station = Station.where("store_id = ? and status != ? and code = ?", store_id, STAT[:DELETED], code).first
     if (station && station.id != self.id)
       errors.add(:code, "工位编号在当前门店中已经存在")
     end
   end
- # validates :code, uniqueness: { scope: :store_id, message: "工位编号在当前门店中已经存在！" }, :if => :has_no_existed_code
+  # validates :code, uniqueness: { scope: :store_id, message: "工位编号在当前门店中已经存在！" }, :if => :has_no_existed_code
   
   scope :valid, where("status != 4")
   
@@ -335,5 +335,43 @@ class Station < ActiveRecord::Base
         end
       end
     end
+  end
+
+  #根据，订单，工位，门店id排空工位
+  def self.create_work_order(station_id, store_id,order, hash, work_order_status, cost_time)
+    p "+++++++++++++++++++++++++++"
+    p station_id
+    started_at = Time.now
+    ended_at = started_at + cost_time.minutes
+    wo_time = WkOrTime.find_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id
+    if wo_time
+      wo_time.update_attributes( :wait_num => wo_time.wait_num.to_i + 1)
+    else
+      WkOrTime.create(:current_times => ended_at.strftime("%Y%m%d%H%M"), :current_day => Time.now.strftime("%Y%m%d").to_i,
+        :station_id => station_id, :worked_num => 1) if station_id and ended_at.present?
+    end
+    work_order = WorkOrder.create({
+        :order_id => order.id,
+        :current_day => Time.now.strftime("%Y%m%d"),
+        :station_id => station_id || nil,
+        :store_id => store_id,
+        :status => (work_order_status ? WorkOrder::STAT[:SERVICING] : WorkOrder::STAT[:WAIT]),
+        :started_at => work_order_status ? started_at : nil,
+        :ended_at => work_order_status ? ended_at : nil,
+        :cost_time => cost_time
+      })
+
+    hash ||= {}
+    hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? Order::STATUS[:SERVICING] : Order::STATUS[:NORMAL]
+    hash[:station_id] = station_id if station_id  #这个可能暂时没有值，一个完成后要更新
+    station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id
+    if station_staffs
+      hash[:cons_staff_id_1] = station_staffs[0].staff_id if station_staffs.size > 0
+      hash[:cons_staff_id_2] = station_staffs[1].staff_id if station_staffs.size > 1
+    end
+    hash[:started_at] = work_order_status ? started_at : nil
+    hash[:ended_at] = work_order_status ? ended_at : nil
+
+    return hash
   end
 end

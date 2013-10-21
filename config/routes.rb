@@ -75,7 +75,7 @@ LantanBAM::Application.routes.draw do
         get "prod_services"
       end
       member do
-        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv","serve_delete","prod_delete"
+        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv","serve_delete","prod_delete","commonly_used"
       end
     end
     resources :materials do
@@ -277,5 +277,12 @@ LantanBAM::Application.routes.draw do
       get :return_info, :return_msg, :generate_b_code
     end
   end
+  #新的app
+  resources :new_app_orders do
+    collection do
+      post :new_index_list,:make_order, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order
+    end
+  end
+
 
 end

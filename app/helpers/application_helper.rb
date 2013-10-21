@@ -161,7 +161,8 @@ module ApplicationHelper
     return code_array.join("")
   end
 
-#物料
+
+  #物料
   def get_mo(material,material_orders)
     mos = {}
     material_orders.each do |material_order|
@@ -173,4 +174,35 @@ module ApplicationHelper
     end
     mos
   end
+
+
+
+  #根据订单分组
+  def order_by_status(orders)
+    orders = orders.group_by{|order| order.status}
+    #把免单的order放在已付款下面
+    if orders[Order::STATUS[:FINISHED]].present?
+      orders[Order::STATUS[:BEEN_PAYMENT]] ||= []
+      orders[Order::STATUS[:BEEN_PAYMENT]] = (orders[Order::STATUS[:BEEN_PAYMENT]] << orders[Order::STATUS[:FINISHED]]).flatten
+      orders.delete(Order::STATUS[:FINISHED])
+    end
+    orders
+  end
+
+  #
+  def combin_orders(orders)
+    orders.map{|order|
+      work_order = WorkOrder.find_by_order_id(order.id)
+      service_name = Order.find_by_sql("select p.name p_name from orders o inner join order_prod_relations opr on opr.order_id=o.id inner join
+            products p on p.id=opr.product_id where p.is_service=#{Product::PROD_TYPES[:SERVICE]}").map(&:p_name)
+      order[:wo_started_at] = (work_order && work_order.started_at && work_order.started_at.strftime("%Y-%m-%d %H:%M:%S")) || ""
+      order[:wo_ended_at] = (work_order && work_order.ended_at && work_order.ended_at.strftime("%Y-%m-%d %H:%M:%S")) || ""
+      order[:car_num] = order.car_num.try(:num)
+      order[:service_name] = service_name.join(",")
+      order[:cost_time] = work_order.try(:cost_time)
+      order[:station_id] = work_order.try(:station_id)
+    }
+    orders
+  end
+
 end

@@ -8,6 +8,7 @@ class Api::OrdersController < ApplicationController
     begin
       reservations = Reservation.store_reservations params[:store_id]
       orders = Order.working_orders params[:store_id]
+<<<<<<< HEAD
       orders = orders.group_by{|order| order.status}
       #把免单的order放在已付款下面
       if orders[Order::STATUS[:FINISHED]].present?
@@ -15,6 +16,9 @@ class Api::OrdersController < ApplicationController
         orders[Order::STATUS[:BEEN_PAYMENT]] = (orders[Order::STATUS[:BEEN_PAYMENT]] << orders[Order::STATUS[:FINISHED]]).flatten
         orders.delete(Order::STATUS[:FINISHED])
       end
+=======
+      orders = order_by_status(orders)
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
       status = 1
     rescue
       status = 2
@@ -176,6 +180,7 @@ class Api::OrdersController < ApplicationController
   #查询订单后的支付，取消订单
   def pay_order
     order = Order.find_by_id params[:order_id]
+    info = order.nil? ? nil : order.get_info
     status = 0
     if params[:opt_type].to_i == 1
       if order && (order.status == Order::STATUS[:NORMAL] or order.status == Order::STATUS[:SERVICING] or order.status == Order::STATUS[:WAIT_PAYMENT])
@@ -190,14 +195,14 @@ class Api::OrdersController < ApplicationController
       else
         status = 2
       end
-      info = order.nil? ? nil : order.get_info
-      render :json  => {:status => status}
     else
-      info = order.nil? ? nil : order.get_info
       status = 1
-      render :json  => {:status => status, :order => info}
+      
     end
-
+    orders = Order.working_orders params[:store_id]
+    orders = combin_orders(orders)
+    orders = order_by_status(orders)
+    render :json  => {:status => status, :order => info,:orders => orders}
   end
 
   def checkin
