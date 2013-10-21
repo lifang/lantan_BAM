@@ -3,7 +3,7 @@
 <%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
 <%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
 <div class="releaseDiv">
-  <div class="releaseDiv_l">标题：</div>
+  <div class="releaseDiv_l"><span class="red">*</span>标题：</div>
   <div class="releaseDiv_r">
     <input name="name" type="text" class="title_input" id="sale_title" value="<%= @sale.name %>" />
   </div>
@@ -15,7 +15,7 @@
   </div>
 </div>
 <div class="releaseDiv">
-  <div class="releaseDiv_l">优惠：</div>
+  <div class="releaseDiv_l"><span class="red">*</span>优惠：</div>
   <div class="releaseDiv_r" id="s_disc">
     <input name="discount" type="radio"  <% if @sale.disc_types == Sale::DISC_TYPES[:FEE] %> checked <%end%>
            value="<%= Sale::DISC_TYPES[:FEE] %>" />金额：<input name="disc_1" id="disc_1" type="text" />
@@ -25,7 +25,7 @@
   </div>
 </div>
 <div class="releaseDiv">
-  <div class="releaseDiv_l">优惠时间：</div>
+  <div class="releaseDiv_l"><span class="red">*</span>优惠时间：</div>
   <div class="releaseDiv_r" id="s_time">
     <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:DAY] %>" checked onclick="input_time()" />日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <input name="disc_time" type="radio" value="<%= Sale::DISC_TIME[:WEEK] %>" onclick="input_time()"
@@ -42,12 +42,12 @@
 </div>
 
 <div class="releaseDiv">
-  <div class="releaseDiv_l">每辆车享受优惠次数：</div>
+  <div class="releaseDiv_l"><span class="red">*</span>每辆车享受优惠次数：</div>
   <div class="releaseDiv_r"><input name="every_car" id="disc_times" type="text" value="1" />&nbsp;&nbsp;次</div>
 </div>
 
 <div class="releaseDiv">
-  <div class="releaseDiv_l">本次活动车辆总数：</div>
+  <div class="releaseDiv_l"><span class="red">*</span>本次活动车辆总数：</div>
   <div class="releaseDiv_r"><input id="disc_car_nums" name="car_num" type="text" value="<%= @sale.car_num %>" />&nbsp;&nbsp;辆</div>
 </div>
 

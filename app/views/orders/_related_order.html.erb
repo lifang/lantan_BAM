@@ -1,23 +1,44 @@
 <div class="tab_popup" id="related_order_partial" style="z-index:101 !important">
   <div class="popup_box">
-    <h1>相关订单<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <h1>相关<%= @order[0].return_types == Order::IS_RETURN[:YES] ? "退单" : "订单" %><a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
-        <div class="data_body_p">
-          <span>订单编号： <%= @order[0].code %></span>
-          <span>消费时间：<%= @order[0].created_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
-          <span>接待人员：<%= @order[0].front_s_name %></span>
-          <span>施工人员：
-            <% if @order[0].cons_s_name1 or @order[0].cons_s_name2 %>
-            <%= (@order[0].cons_s_name1 +  "、") if @order[0].cons_s_name1 %>
-            <%= @order[0].cons_s_name2 if @order[0].cons_s_name2 %>
-            <% else %>--
-            <% end %>
-          </span>
-        </div>
+        <% if @order[0].return_types != Order::IS_RETURN[:YES] %>
+          <div class="data_body_p">
+            <span>订单编号： <%= @order[0].code %></span>
+            <span>消费时间：<%= @order[0].created_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
+            <span>接待人员：<%= @order[0].front_s_name %></span>
+            <span>施工人员：
+              <% if @order[0].cons_s_name1 or @order[0].cons_s_name2 %>
+                <%= (@order[0].cons_s_name1 +  "、") if @order[0].cons_s_name1 %>
+                <%= @order[0].cons_s_name2 if @order[0].cons_s_name2 %>
+              <% else %>--
+              <% end %>
+            </span>
+          </div>
+        <%else%>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">退单号(原单号)：</div>
+            <div class="seeProDiv_r"><%=  @order[0].nil? ? "" : @order[0].code  %></div>
+          </div>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">接单人员：</div>
+            <div class="seeProDiv_r"><%= @order[0].front_s_name %></div>
+          </div>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">退单时间：</div>
+            <div class="seeProDiv_r"><%=(@order[0].nil? || @order[0].updated_at.nil?) ? "" : @order[0].updated_at.strftime("%Y-%m-%d") %></div>
+          </div>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">原消费时间：</div>
+            <div class="seeProDiv_r"><%=(@order[0].nil? || @order[0].created_at.nil?) ? "" : @order[0].created_at.strftime("%Y-%m-%d") %></div>
+          </div>
+        <% end %>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
           <thead>
             <tr class="hbg">
+              <% if  @order[0].return_types == Order::IS_RETURN[:YES] %>
+                <td>退单状态</td><%end%>
               <td>服务项目</td>
               <td>数量</td>
               <td>单价(元)</td>
@@ -26,6 +47,10 @@
           <tbody>
             <% @order_prods[@order[0].id].each do |v| %>
               <tr>
+                <% if @order[0].return_types == Order::IS_RETURN[:YES] %>
+                  <td><input type="checkbox" disabled
+                             <%if v.return_types == Order::IS_RETURN[:YES] %>checked<% end  %> /></td>
+                  <% end %>
                 <td><%= v.name %></td>
                 <td><%= v.pro_num %></td>
                 <td><%= v.price %></td>
@@ -47,6 +72,25 @@
             <% end %>
           </tbody>
         </table>
+        <% if @order[0].return_types == Order::IS_RETURN[:YES] %>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">退单原因：</div>
+            <div class="seeProDiv_r"><%=  Customer::RETURN_REASON[@order[0].return_reason] %></div>
+          </div>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">退单金额：</div>
+            <div class="seeProDiv_r"><%= @order[0].return_fee %></div>
+          </div>
+          <div class="seeProDiv">
+            <div class="seeProDiv_l">商品去向：</div>
+            <div class="seeProDiv_r"><%= Order::DIRECT[@order[0].return_direct]%></div>
+          </div>
+              <div class="seeProDiv">
+            <div class="seeProDiv_l">操作员：</div>
+            <div class="seeProDiv_r"><%=@order[0].return_name%></div>
+          </div>
+        <% end %>
+        <div class="clear"></div>
         <div class="otherWay">
           <div class="amount">
             总计(元)：<%= format("%.2f", @order[0].price) %>&nbsp;&nbsp;<% if @order[0].is_free %>(本次免单)<% end %>

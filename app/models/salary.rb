@@ -15,10 +15,10 @@ class Salary < ActiveRecord::Base
     staff_deduct_reward_hash = get_violation_reward_amount(salary_infos)
 
     #前台提成金额
-    front_deduct_amount = get_front_deduct_amount
+    front_deduct_amount = get_front_deduct_amount(start_time, end_time)
 
     #技师提成金额
-    technician_deduct_amount = get_technician_deduct_amount
+    technician_deduct_amount = get_technician_deduct_amount(start_time, end_time)
 
     #平均满意度
     avg_percent = get_avg_percent(start_time, end_time)
@@ -27,7 +27,7 @@ class Salary < ActiveRecord::Base
       deduct_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:deduct_num]
       reward_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:reward_num]
       percent = avg_percent[staff.id].nil? ? 100 : avg_percent[staff.id]
-      if staff.working_stats
+      if staff.working_stats == 1
         staff_gr_record = StaffGrRecord.where("staff_id = #{staff.id} and created_at >= '#{Time.now.months_ago(1).at_beginning_of_month}' and created_at <= '#{Time.now.months_ago(1).at_end_of_month}'").order('created_at desc').first
         base_salary = (!staff_gr_record.nil? && !staff_gr_record.working_stats) ? staff.probation_salary : staff.base_salary
       else
@@ -42,7 +42,7 @@ class Salary < ActiveRecord::Base
           :staff_id => staff.id, :satisfied_perc => percent)
       elsif staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN] #技师
         technician_amount = staff.is_deduct ? (technician_deduct_amount[staff.id].nil? ? 0 : technician_deduct_amount[staff.id]) : 0
-        total = base_salary + reward_amount - deduct_amount + technician_amount*staff.deduct_percent*0.01
+        total = base_salary + reward_amount - deduct_amount + technician_amount*(staff.deduct_percent||=0)*0.01
         Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,
           :total => total, :current_month => start_time.strftime("%Y%m"),
           :staff_id => staff.id, :satisfied_perc => percent)
@@ -60,9 +60,10 @@ class Salary < ActiveRecord::Base
     staff_deduct_reward_hash
   end
 
-  def self.get_front_deduct_amount
+  def self.get_front_deduct_amount(start_time, end_time)
     front_deduct_amount = {}
-    orders_info = Order.all.group_by{|o|o.front_staff_id}
+    orders_info = Order.where("created_at >= '#{start_time}' and created_at <='#{end_time}'").
+      where("status = #{Order::STATUS[:BEEN_PAYMENT]} || status = #{Order::STATUS[:FINISHED]}").group_by{|o|o.front_staff_id}
     orders_info.each do |staff_id, orders_array|
       staff = Staff.find_by_id(staff_id)
       if !staff.nil? && !staff.deduct_at.nil? && !staff.deduct_end.nil? && !staff.deduct_percent.nil?
@@ -70,18 +71,20 @@ class Salary < ActiveRecord::Base
         order_total_price = order_total_price.nil? ? 0 : order_total_price
         difference_price = order_total_price - staff.deduct_at
         duduct_num = difference_price < 0 ? 0 : (order_total_price > staff.deduct_end ? staff.deduct_end : difference_price)
-        deduct_amount = duduct_num * staff.deduct_percent * 0.01
+        deduct_amount = duduct_num * (staff.deduct_percent||=0) * 0.01
         front_deduct_amount[staff_id] = deduct_amount
       end
     end
     front_deduct_amount
   end
 
-  def self.get_technician_deduct_amount
-    orders = Order.find_by_sql("select s2.id id_2,s.id id_1,sum(op.price*p.deduct_percent*0.01) price from orders o left join staffs s on o.cons_staff_id_1 =  s.id
+  def self.get_technician_deduct_amount(start_time, end_time)
+    orders = Order.find_by_sql("select s2.id id_2,s.id id_1,sum(op.pro_num*op.price*ifnull(p.deduct_percent,0)*0.01+ifnull(p.deduct_price,0)*op.pro_num) price from orders o left join staffs s on o.cons_staff_id_1 =  s.id
        left join staffs s2 on o.cons_staff_id_2 = s2.id inner join order_prod_relations op on
         op.order_id = o.id inner join products p on op.product_id = p.id
-        where p.is_service = #{Product::PROD_TYPES[:SERVICE]} group by s.id,s2.id")
+        where p.is_service = #{Product::PROD_TYPES[:SERVICE]} and o.created_at >= '#{start_time}' and o.created_at <='#{end_time}'
+        and (o.status = #{Order::STATUS[:BEEN_PAYMENT]} or o.status = #{Order::STATUS[:FINISHED]}) group by s.id,s2.id")
+
     technician_deduct_amount = {}
     orders.each do |order|
       if technician_deduct_amount.keys.include?(order.id_1)
@@ -101,6 +104,7 @@ class Salary < ActiveRecord::Base
   def self.get_avg_percent(start_time, end_time)
     orders = Order.find_by_sql("select o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2, count(*) total_count from orders o left join staffs s on o.cons_staff_id_1 =  s.id
        left join staffs s2 on o.cons_staff_id_2 = s2.id left join staffs s3 on o.front_staff_id = s3.id where o.created_at >= '#{start_time}' and o.created_at <='#{end_time}'
+       and (o.status = #{Order::STATUS[:BEEN_PAYMENT]} or o.status = #{Order::STATUS[:FINISHED]})
        group by o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2")
 
     orders_info = {}

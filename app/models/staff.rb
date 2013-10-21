@@ -15,8 +15,9 @@ class Staff < ActiveRecord::Base
   has_many :material_losses
   belongs_to :store
 
-  validates :phone, :uniqueness => { :message => "联系方式已经存在!"}
-  validates :username, :uniqueness => { :message => "用户名已经存在!"}
+  
+  validates :phone, :uniqueness => { :message => "联系方式已经存在!", :scope => :status}, :if => :staff_not_deleted?
+  validates :username, :uniqueness => { :message => "用户名已经存在!", :scope => :status}, :if => :staff_not_deleted?
   #门店员工职务
   S_COMPANY = {:BOSS=>0,:CHIC=>2,:FRONT=>3,:TECHNICIAN=>1,:OTHER=>4} #0 老板 2 店长 3接待 1 技师 4其他
   N_COMPANY = {1=>"技师",3=>"接待",0=>"老板",2=>"店长",4=>"其他"}
@@ -30,7 +31,7 @@ class Staff < ActiveRecord::Base
   scope :valid, where(:status => VALID_STATUS)
   scope :not_deleted, where("status != #{STATUS[:deleted]}")
 
-  S_HEAD = {:BOSS=>0,:MANAGER=>2,:NORMAL=>1} #0老板 2 店长 1员工
+  S_HEAD = {:BOSS=>0,:MANAGER =>2,:NORMAL=>1} #0老板 2 店长 1员工
   N_HEAD = {1=>"员工",0=>"老板", 2=>"店长"}
   WORKING_STATS = {:FORMAL => 1, :PROBATION => 0}   #在职状态 0试用 1正式
   S_WORKING_STATS = {1 => "正式", 0 => "实习"}
@@ -46,7 +47,10 @@ class Staff < ActiveRecord::Base
 
   #分页页数
   PerPage = 10
-  
+
+  def staff_not_deleted?
+    status != STATUS[:deleted]
+  end
 
   attr_accessor :password
   #validates :password, :allow_nil => true, :length=>{:within=>6..20} #:confirmation=>true
@@ -93,7 +97,7 @@ class Staff < ActiveRecord::Base
   def self.update_staff_working_stats
     Staff.where("working_stats = 0").each do |staff|
       diff_day = (Time.now - staff.created_at).to_i / (24 * 60 * 60)
-      if diff_day >= staff.probation_days
+      if diff_day >= (staff.probation_days||=0)
         staff.update_attribute(:working_stats, 1)
       end
     end

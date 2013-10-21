@@ -33,7 +33,7 @@
                       <td><%= prod.pro_num %></td>
                       <td><%= prod.price %></td>
                     </tr>
-                    <% end %>
+                    <% end if @product_hash[order.id] %>
                   </table>
                 <% else %>
                 无服务项目

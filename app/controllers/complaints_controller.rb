@@ -40,7 +40,7 @@ class ComplaintsController < ApplicationController
   #投诉分类按时间和性别查询统计列表
   def date_list
     @complaint =Complaint.search_lis(params[:store_id],session[:created_at])
-    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex],params[:end_name])
+    @total_com = Complaint.show_types(params[:store_id],session[:start_sex],session[:end_sex],session[:sex],session[:end_name])
     @size = ((@total_com.values.max.nil? ? 1 :@total_com.values.max)/10+1)*10#生成图表的y的坐标
     render 'index'
   end
@@ -50,7 +50,9 @@ class ComplaintsController < ApplicationController
     session[:start_detail],session[:end_detail] =Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d")
     total = Complaint.search_detail(params[:store_id],session[:start_detail],session[:end_detail])
     @complaint = total.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    non_time =total.inject(0){|num,complaint|num +=1 if complaint.diff_time && complaint.diff_time <= Complaint::TIMELY_DAY;num }
+    time = Complaint::TIMELY_DAY
+    non_time =total.inject(0){|num,complaint| 
+      num +=1 if complaint.diff_time && (complaint.diff_time/60 < time ||(complaint.diff_time/60 == time && complaint.diff_time%60==0) );num }
     un_done = total.inject(0){|num,complaint| num +=1 if complaint.process_at;num}
     @staff_name ={}
     @complaint.each do |comp|
@@ -70,7 +72,8 @@ class ComplaintsController < ApplicationController
   #投诉详细查询列表
   def detail_list
     total = Complaint.search_detail(params[:store_id],session[:start_detail],session[:end_detail])
-    non_time =total.inject(0){|num,complaint|num +=1 if complaint.diff_time && complaint.diff_time <= Complaint::TIMELY_DAY;num }
+    time = Complaint::TIMELY_DAY
+    non_time =total.inject(0){|num,complaint|num +=1 if complaint.diff_time && (complaint.diff_time/60 < time ||(complaint.diff_time/60 == time && complaint.diff_time%60==0));num }
     un_done = total.inject(0){|num,complaint| num +=1 if complaint.process_at;num}
     @complaint = total.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @staff_name ={}
@@ -215,4 +218,49 @@ class ComplaintsController < ApplicationController
     end
     render "consumer_list"
   end
+
+  def cost_price
+    created,ended,types,store_id,session[:types] = params[:created],params[:ended],params[:types],params[:store_id],params[:types]
+    session[:created]= created.nil? ? (Time.now - Constant::PRE_DAY.days).strftime("%Y-%m-%d") : created
+    session[:ended] = ended.nil? ? Time.now.strftime("%Y-%m-%d") : ended
+    m_condit,order_con = "mat_out_orders.store_id=#{store_id}","orders.store_id=#{store_id}"
+    unless created == ""
+      m_condit += "  and mat_out_orders.created_at >= '#{session[:created]}' "
+      order_con += " and orders.created_at >= '#{session[:created]}'"
+    end
+    unless  ended == ""
+      m_condit += " and mat_out_orders.created_at < '#{session[:ended]}' "
+      order_con += " and orders.created_at < '#{session[:ended]}'"
+    end
+    order_con += " and is_service=#{Product::PROD_TYPES[:SERVICE]} and orders.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]})"
+    order_con += " and products.id = #{types}" unless types.nil? || types == "" || types.length == 0
+    t_orders = Order.joins(:order_prod_relations=>:product).joins("inner join prod_mat_relations p on p.product_id = products.id inner join
+    materials m on m.id = p.material_id").select("sum(order_prod_relations.pro_num*m.price*p.material_num) total_price,
+    orders.id,m.id m_id,orders.cons_staff_id_1,orders.cons_staff_id_2").where(order_con).group("id,m_id")
+    @service = Product.where(:is_service =>Product::PROD_TYPES[:SERVICE],:store_id => store_id).inject(Hash.new){|hash,serv| hash[serv.id]=serv.name;hash}
+    s_price = t_orders.inject(Hash.new){|hash,order|
+      price = order.total_price.nil? ? 0 : order.total_price;hash[order.id].nil? ? hash[order.id]=price : hash[order.id] += price;hash}
+    staff_ids = (t_orders.map(&:cons_staff_id_1) | t_orders.map(&:cons_staff_id_2)).uniq.compact
+    s_orders = {}
+    t_orders.each do |order|
+      s_orders[order.cons_staff_id_1].nil? ? s_orders[order.cons_staff_id_1]=[order.id] : s_orders[order.cons_staff_id_1] << order.id
+      s_orders[order.cons_staff_id_2].nil? ? s_orders[order.cons_staff_id_2]=[order.id] : s_orders[order.cons_staff_id_2] << order.id
+    end
+    staffs = Staff.find staff_ids
+    w_orders = WorkOrder.find_all_by_order_id(t_orders.map(&:id).uniq.compact).inject(Hash.new){|hash,w_order|
+      hash[w_order.order_id]=[w_order.gas_num,w_order.water_num];hash}
+    m_condit += " and material_id in (#{t_orders.map(&:m_id).uniq.compact.join(',')})" unless t_orders.blank? || session[:types].nil?
+    m_price = MatOutOrder.joins(:material).where(m_condit + " and mat_out_orders.types = #{MatOutOrder::TYPES_VALUE[:cost]}").
+      select("staff_id,sum(material_num*mat_out_orders.price) sum").group("staff_id").inject(Hash.new){|hash,s| hash[s.staff_id] = s.sum;hash }
+    infos = []
+    staffs.each {|staff|
+      gas_num,water_num,cost_price =0,0,m_price[staff.id].nil? ? 0 : m_price[staff.id]
+      w_orders.select{|k,v|s_orders[staff.id].include? k}.values.each {|info| 
+        gas_num += (info[0].nil? ? 0 : info[0]);water_num += (info[1].nil? ? 0 : info[1])}
+      price = s_price.select{|k,v|s_orders[staff.id].include? k}.values.inject(0){|num,price| num+(price.nil? ? 0 : price)}
+      infos << [staff.name,water_num,gas_num,cost_price,s_orders[staff.id].uniq.compact.length,price]
+    }
+    @s_infos = infos.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+  end
+
 end

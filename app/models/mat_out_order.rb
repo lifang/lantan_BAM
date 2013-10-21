@@ -4,6 +4,7 @@ class MatOutOrder < ActiveRecord::Base
   belongs_to :material_order
 
   TYPES = {0 => "消耗", 1 => "调拨", 2 => "赠送", 3 => "销售"}
+  TYPES_VALUE = {:cost => 0, :transfer => 1, :send => 2, :sale => 3}
 
   def self.out_list page,per_page, store_id,sql = [nil,nil,nil]
     MatOutOrder.where(sql[0]).where(sql[1]).where(sql[2]).where("materials.status=#{Material::STATUS[:NORMAL]} and materials.store_id=#{store_id}")
@@ -22,7 +23,8 @@ class MatOutOrder < ActiveRecord::Base
           material = Material.find_by_id_and_store_id item.split("_")[0],store_id
           if material
             #出库记录 门店出库没有订单id和价格，并修改库存量
-            MatOutOrder.create(:material => material, :material_num => item.split("_")[1],:staff_id => staff, :price => material.price, :types => types)
+            MatOutOrder.create(:material => material, :material_num => item.split("_")[1],
+              :staff_id => staff, :price => material.price, :types => types, :store_id => store_id)
             material.update_attribute(:storage, material.storage - item.split("_")[1].to_i)
           end
         end

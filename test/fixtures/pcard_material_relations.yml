@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  material_id: 1
+  material_num: 1
+  package_card_id: 1
+
+two:
+  material_id: 1
+  material_num: 1
+  package_card_id: 1

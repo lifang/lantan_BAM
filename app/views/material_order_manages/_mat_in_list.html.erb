@@ -1,0 +1,61 @@
+<script>
+    $(document).ready(function(){
+        $("#materials_in_tab").tablesorter({
+            headers:
+            {
+                0: {
+                    sorter: false
+                },
+                1: {
+                    sorter: false
+                },
+                4: {
+                    sorter: false
+                },
+                5: {
+                    sorter: false
+                },
+                6: {
+                    sorter: false
+                }
+            }
+        });
+
+        $("#materials_in_tab").bind("sortEnd",function() {
+            $("#materials_in_tab tbody").find('tr').each(function(i){
+                if(i%2==0){
+                    $(this).removeClass('tbg');
+                }else{
+                    $(this).addClass('tbg');
+                }
+            })
+        });
+    });
+</script>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_in_tab">
+  <thead>
+  <tr class="hbg">
+    <th>订货单号</th>
+    <th width="150">条形码</th>
+    <th><span class="sort_u" onclick="sort_change(this)">物料名称</span></th>
+    <th><span class="sort_d" onclick="sort_change(this)">物料类别</span></th>
+    <th>入库量</th>
+    <th>操作人</th>
+    <th>入库时间</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% (@mat_in_orders || []).each do |record| %>
+      <tr class="<%= cycle('', 'tbg') %>">
+        <td><%= record.order_code %></td>
+        <td><%= record.code %></td>
+        <td><%= record.name %></td>
+        <td><%= Material::TYPES_NAMES[record.types.to_i] %></td>
+        <td><%= record.material_num.to_i %></td>
+        <td><%= record.staff_name %></td>
+        <td><%= record.out_time.strftime("%Y-%m-%d %H:%M") %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+<%= will_paginate_remote(@mat_in_orders,"start_date=#{@start_date}&end_date=#{@end_date}&mat_types=#{@mat_type}",{:url => page_ins_store_material_order_manages_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @mat_in_orders.size > 0 %>

@@ -19,7 +19,7 @@ class Complaint < ActiveRecord::Base
 
   #投诉状态
   STATUS = {:UNTREATED => 0, :PROCESSED => 1} #0 未处理  1 已处理
-  STATUS_NAME ={0=>"未处理",1=>"已处理"}
+  STATUS_NAME ={0 =>"未处理",1 =>"已处理"}
   VIOLATE = {:NORMAL=>1,:INVALID=>0} #0  不纳入  1 纳入
   VIOLATE_N = {true=>"是",false=>"否"}
   SEX = {:MALE =>1,:FEMALE =>0,:NONE=>2} # 0 未选择 1 男 2 女
@@ -35,14 +35,28 @@ class Complaint < ActiveRecord::Base
   end
   
   def self.show_types(store_id,created,ended,sex,name=nil)
-    sql = "select count(c.id) total_num,c.types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=#{store_id}
-      and c.status=#{Complaint::STATUS[:PROCESSED]} "
-    sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
-    sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
-    sql += " and s.sex=#{sex}" unless sex.to_i==2
-     sql += " and s.name like '%#{name}%'" unless name.nil? || name =="" || name.length==0
+    sql = "select count(c.id) total_num,c.types from complaints c inner join customers s on c.customer_id=s.id where c.store_id=?
+      and c.status=? "
+    conditions = ["",store_id,Complaint::STATUS[:PROCESSED]]
+    unless created.nil? || created =="" || created.length==0
+      sql += "and date_format(c.created_at,'%Y-%m-%d')>= ? "
+      conditions << created
+    end
+    unless ended.nil? || ended =="" || ended.length==0
+      sql += " and date_format(c.created_at,'%Y-%m-%d')<=?"
+      conditions << ended
+    end
+    unless sex.to_i==2
+      sql += " and s.sex=?"
+      conditions << sex
+    end
+    unless name.nil? || name =="" || name.length==0
+      sql += " and s.name like ?"
+      conditions << "%#{name.gsub(/[%_]/){|x| '\\' + x}}%"
+    end
     sql += " group by c.types"
-    return  Complaint.find_by_sql(sql).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
+    conditions[0] = sql
+    return  Complaint.find_by_sql(conditions).inject(Hash.new) {|panel,complaint| panel[complaint.types]=complaint.total_num;panel}
     
   end
 
@@ -124,20 +138,34 @@ class Complaint < ActiveRecord::Base
 
 
   def self.degree_day(store_id,created,ended,sex,c_name=nil)
-    sql="select count(*) num,is_pleased from orders o inner join customers c on c.id=o.customer_id where o.store_id=#{store_id}
-     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]})"
-    sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
-    sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
-    sql += " and c.sex=#{sex}" unless sex.to_i==2
-    sql += " and c.name like '%#{c_name}%'" unless c_name.nil? || c_name =="" || c_name.length==0
+    sql="select count(*) num,is_pleased from orders o inner join customers c on c.id=o.customer_id where 
+      o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and o.store_id=? "
+    conditions =["",store_id]
+    unless created.nil? || created =="" || created.length==0
+      sql += " and date_format(o.created_at,'%Y-%m-%d')>=?"
+      conditions << created
+    end
+    unless ended.nil? || ended =="" || ended.length==0
+      sql += " and date_format(o.created_at,'%Y-%m-%d')<=?"
+      conditions << ended
+    end
+    unless sex.to_i==2
+      sql += " and c.sex=?"
+      conditions << sex
+    end
+    unless c_name.nil? || c_name =="" || c_name.length==0
+      sql += " and c.name like ?"
+      conditions << "%#{c_name}%"
+    end
     sql += " group by is_pleased"
-    orders =Order.find_by_sql(sql).inject(Hash.new){|hash,order| hash[order.is_pleased].nil? ? hash[order.is_pleased]=order.num : hash[order.is_pleased] +=order.num;hash}
+    conditions[0] = sql
+    orders =Order.find_by_sql(conditions).inject(Hash.new){|hash,order| hash[order.is_pleased].nil? ? hash[order.is_pleased]=order.num : hash[order.is_pleased] +=order.num;hash}
     return orders=={} ? nil : orders.select{|k,v|  k != Order::IS_PLEASED[:BAD]}=={} ? 0 :
       orders.select{|k,v|  k != Order::IS_PLEASED[:BAD]}.values.inject(0){|num,level| num+level}*100/(orders.values.inject(0){|num,level| num+level})
   end
   
   def self.search_detail(store_id,created,ended)
-    sql ="select c.*,o.code,o.id o_id,timestampdiff(hour,c.created_at,c.process_at) diff_time,c.process_at from complaints c inner join orders o on o.id=c.order_id  where c.store_id=#{store_id} "
+    sql ="select c.*,o.code,o.id o_id,timestampdiff(minute,c.created_at,c.process_at) diff_time,c.process_at from complaints c inner join orders o on o.id=c.order_id  where c.store_id=#{store_id} "
     sql += " and date_format(c.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(c.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql += " order by c.created_at desc"
@@ -175,32 +203,72 @@ class Complaint < ActiveRecord::Base
 
   def self.consumer_types(store_id,sear,created=nil,ended=nil,sex=nil,car_model=nil,year=nil,name=nil,price=nil)
     sql = "select o.created_at,o.code,m.name,n.buy_year,o.id,o.price from orders o inner join customers c on c.id=o.customer_id inner join
-    car_nums n on o.car_num_id=n.id inner join car_models m on m.id=n.car_model_id where store_id=#{store_id} and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
-    sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
-    sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
-    sql += " and c.sex=#{sex}" unless sex.nil? || sex =="" || sex.length==0
-    sql += " and m.id='#{car_model}'" unless car_model.nil? || car_model =="" || car_model.length==0
-    sql += " and n.buy_year ='#{year}'" unless year.nil? || year =="" || year.length==0
-    sql += " and c.name='#{name}'" unless name.nil? || name =="" || name.length==0
+    car_nums n on o.car_num_id=n.id inner join car_models m on m.id=n.car_model_id where o.store_id=? and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
+    conditions = ["",store_id]
+    unless created.nil? || created =="" || created.length==0
+      sql += " and date_format(o.created_at,'%Y-%m-%d')>=?" 
+      conditions << created
+    end
+    unless ended.nil? || ended =="" || ended.length==0
+      sql += " and date_format(o.created_at,'%Y-%m-%d')<=?"
+      conditions << ended
+    end
+    unless sex.nil? || sex =="" || sex.length==0
+      sql += " and c.sex=?"
+      conditions << sex
+    end
+    unless car_model.nil? || car_model =="" || car_model.length==0
+      sql += " and m.id=?"
+      conditions << car_model
+    end
+    unless year.nil? || year =="" || year.length==0
+      sql += " and n.buy_year = ?"
+      conditions << year
+    end
+    unless name.nil? || name =="" || name.length==0
+      sql += " and c.name=?"
+      conditions << name
+    end
     sql += " and #{price}" unless price.nil? || price =="" || price.length==0
     sql += " and TO_DAYS(NOW())-TO_DAYS(o.created_at)<=15 "   if sear == 1
     sql += " order by created_at desc"
-    return Order.find_by_sql(sql)
+    conditions[0] = sql
+    return Order.find_by_sql(conditions)
   end
 
   def self.consumer_t(store_id,sear,created=nil,ended=nil,sex=nil,car_model=nil,year=nil,name=nil,price=nil)
     sql = "select o.created_at,o.code,m.name,n.buy_year,o.id,o.price from orders o inner join customers c on c.id=o.customer_id inner join
-    car_nums n on o.car_num_id=n.id inner join car_models m on m.id=n.car_model_id  where store_id=#{store_id} and o.id in (#{sear.uniq.join(",")})
+    car_nums n on o.car_num_id=n.id inner join car_models m on m.id=n.car_model_id  where store_id=? and o.id in (#{sear.uniq.join(",")})
     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
-    sql += " and date_format(o.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
-    sql += " and date_format(o.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
-    sql += " and c.sex=#{sex}" unless sex.nil? || sex =="" || sex.length==0
-    sql += " and m.id='#{car_model}'" unless car_model.nil? || car_model =="" || car_model.length==0
-    sql += " and n.buy_year ='#{year}'" unless year.nil? || year =="" || year.length==0
-    sql += " and c.name='#{name}'" unless name.nil? || name =="" || name.length==0
+    conditions = ["",store_id]
+    unless created.nil? || created =="" || created.length==0
+      sql += " and date_format(o.created_at,'%Y-%m-%d')>= ? "
+      conditions << created
+    end
+    unless ended.nil? || ended =="" || ended.length==0
+      sql += " and date_format(o.created_at,'%Y-%m-%d')<=?"
+      conditions << ended
+    end
+    unless sex.nil? || sex =="" || sex.length==0
+      sql += " and c.sex=?"
+      conditions << sex
+    end
+    unless car_model.nil? || car_model =="" || car_model.length==0
+      sql += " and m.id=?"
+      conditions << car_model
+    end
+    unless year.nil? || year =="" || year.length==0
+      sql += " and n.buy_year =?"
+      conditions << year
+    end
+    unless name.nil? || name =="" || name.length==0
+      sql += " and c.name=?"
+      conditions << name
+    end
     sql += " and #{price}" unless price.nil? || price =="" || price.length==0
     sql += " order by created_at desc"
-    return Order.find_by_sql(sql)
+    conditions[0] = sql
+    return Order.find_by_sql(conditions)
   end
   
 end

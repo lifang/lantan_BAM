@@ -30,7 +30,7 @@ function publish_sale(e){
         tishi_alert("请选择优惠类型");
         return false;
     }
-    if (parseInt(disc)==1 && ($("#disc_"+disc).val().length==0 || isNaN(parseFloat($("#disc_"+disc).val())) )){
+    if (parseInt(disc)==1 && ($("#disc_"+disc).val().length==0 || isNaN(parseFloat($("#disc_"+disc).val())) || parseFloat($("#disc_"+disc).val())<0 )){
         tishi_alert("请填写优惠的金额，且为数字");
         return false;
     }
@@ -46,7 +46,13 @@ function publish_sale(e){
         tishi_alert("请输入活动开始和结束的时间,且开始日期小于结束日期");
         return false;
     }
-    if ($("#disc_car_nums").val() == " " || $("#disc_car_nums").val().length==0 ){
+    var disc_times = $("#disc_times").val();
+    if ( disc_times == " " || disc_times.length ==0 || isNaN(parseInt(disc_times)) || parseInt(disc_times)<0){
+        tishi_alert("请输入优惠次数");
+        return false;
+    }
+    var car_nums = $("#disc_car_nums").val();
+    if ( car_nums == " " || car_nums.length==0 || isNaN(parseInt(car_nums))||parseInt(car_nums)<0){
         tishi_alert("请输入参加活动的总车辆数");
         return false;
     }
@@ -100,7 +106,9 @@ function delete_sale(sale_id,store_id){
             },
             success:function(data){
                 tishi_alert(data.message);
-                window.location.reload();
+                setTimeout(function(){
+                    window.location.reload();
+                },1000)
             }
         });
     }
@@ -118,7 +126,9 @@ function public_sale(sale_id,store_id){
             },
             success:function(data){
                 tishi_alert(data.message);
-                window.location.reload();
+                setTimeout(function(){
+                    window.location.reload();
+                },1000)
             }
         });
     }
@@ -146,8 +156,8 @@ function load_types(store_id){
 
 //为套餐卡加载产品和服务
 function pcard_types(store_id){
-    var types=$("#sale_types option:checked").val();
-    var name=$("#sale_name").val();
+    var types=$("#t_prod #sale_types option:checked").val();
+    var name=$("#t_prod #sale_name").val();
     if (types != "" || name != ""){
         $.ajax({
             async:true,
@@ -187,9 +197,18 @@ function check_add(e){
     var name=$("#name").val();
     var base=$("#price").val();
     var end_time = $("#end_time").val();
+    var point =$("#prod_point").val();
     var pattern = new RegExp("[`~@#$^&*()=:;,\\[\\].<>?~！@#￥……&*（）——|{}。，、？-]")
     if (name=="" || name.length==0 || pattern.test(name)){
         tishi_alert("请输入套餐卡的名称,不能包含非法字符");
+        return false;
+    }
+    if(base == "" || base.length==0 || isNaN(parseFloat(base)) || parseFloat(base)<0){
+        tishi_alert("请输入套餐卡的价格");
+        return false;
+    }
+    if (point=="" || point.length==0 || isNaN(parseFloat(point))||parseFloat(point)<0){
+        tishi_alert("请输入产品的积分，积分是数字");
         return false;
     }
     if($("[name='time_select']:checked").val()==$("#date1").val()){
@@ -202,14 +221,23 @@ function check_add(e){
             return false;
         }
     }else{
-        if(end_time == "" || end_time.length==0 || isNaN(parseFloat(end_time))){
+        if(end_time == "" || end_time.length==0 || isNaN(parseFloat(end_time)||parseFloat(end_time)<0)){
             tishi_alert("请输入套餐卡的有效时长，且为整数");
             return false;
         }
     }
-    if(base == "" || base.length==0 || isNaN(parseFloat(base))){
-        tishi_alert("请输入套餐卡的价格");
-        return false;
+
+    if($("#auto_revist")[0].checked){
+        var time_revist =$("#time_revist option:selected").val();
+        var con_revist =$("#con_revist").val();
+        if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))||parseFloat(time_revist)<0){
+            tishi_alert("请选择回访的时长，时长是数字");
+            return false;
+        }
+        if (con_revist =="" || con_revist.length==0){
+            tishi_alert("请输入回访的内容");
+            return false;
+        }
     }
     if($("#add_products").children().length == 0){
         tishi_alert("请选择产品或服务");
@@ -244,6 +272,14 @@ function check_add(e){
         tishi_alert("图片名称不能包含特殊字符");
         return false;
     }
+    var p_types = $("#material_types option:checked").val();
+    if (p_types != undefined &&  p_types != "" && p_types.length !=0){
+        var m_num = $("#material_num").val();
+        if (m_num =="" || m_num.length==0 || isNaN(parseInt(m_num))||parseInt(m_num)<0){
+            tishi_alert("请输入物料数量");
+            return false;
+        }
+    }
     $("#add_pcard").submit();
     $(e).removeAttr("onclick");
 }
@@ -258,7 +294,9 @@ function delete_pcard(pcard_id){
             url : "/package_cards/"+pcard_id+"/delete_pcard",
             success:function(data){
                 tishi_alert(data.message);
-                window.location.reload();
+                setTimeout(function(){
+                    window.location.reload();
+                },1000)
             }
         });
     }
@@ -319,4 +357,46 @@ function show_pic(){
             "left":left+"px"
         })
     })
+}
+
+function check_revist(){
+    $("#con_revist,#time_revist").attr("disabled",!$("#auto_revist")[0].checked);
+    $("#auto_revist").val($("#auto_revist")[0].checked+0);
+    if (!$("#auto_revist")[0].checked){
+        $("#con_revist,#time_revist").val("");
+    }
+}
+
+
+function request_material(store_id){
+    var p_types = $("#pcard_material option:checked").val();
+    if (p_types != "" || p_types.length !=0){
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'json',
+            url : "/stores/"+ store_id+"/package_cards/"+ p_types+"/request_material",
+            success :function(data){
+                $("#material_types").html("<option value=''>请选择</option>")
+                for(var item in data){
+                    $("#material_types").append("<option value='"+item +"'>"+data[item] +"</option>")
+                }
+                var types = $("#m_types").val();
+                if (types != "" || types.length !=0){
+                    $("#material_types option[value='"+types+"']").attr("selected",true);
+                } 
+            }
+        });
+    }else{
+        $("#material_types").html("");
+        $("#material_num").html("").attr("disabled",true);
+    }
+}
+function control_input(){
+    var p_types = $("#material_types option:checked").val();
+    if (p_types != "" || p_types.length !=0){
+        $("#material_num").attr("disabled",false);
+    }else{
+        $("#material_num").attr("disabled",true);
+    }
 }

@@ -37,7 +37,7 @@ $(function(){
 
 //弹出层
 function popup(t){
-var scolltop = document.body.scrollTop|document.documentElement.scrollTop; //滚动条高度
+    var scolltop = document.body.scrollTop|document.documentElement.scrollTop; //滚动条高度
     var doc_height = $(document).height(); //页面高度
     var doc_width = $(document).width(); //页面宽度
     //var win_height = document.documentElement.clientHeight;//jQuery(document).height();
@@ -48,16 +48,16 @@ var scolltop = document.body.scrollTop|document.documentElement.scrollTop; //滚
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
 
-     if((scolltop+100+layer_height)>doc_height){
-         $(".mask").css({
-       display:'block',
-       height: scolltop+100+layer_height
-    })
+    if((scolltop+100+layer_height)>doc_height){
+        $(".mask").css({
+            display:'block',
+            height: scolltop+100+layer_height
+        })
     }else{
         $(".mask").css({
-       display:'block',
-       height: doc_height
-    })
+            display:'block',
+            height: doc_height
+        })
     }
     $(t+" a.close").live("click",function(){
         $(t).css('display','none');
@@ -118,15 +118,17 @@ function delete_one(id){
 }
 
 function show_center(t){
+    var mouse_position = document.body.scrollTop+document.documentElement.scrollTop;
     var doc_height = $(document).height();
     var doc_width = $(document).width();
     var layer_height = $(t).height();
     var layer_width = $(t).width();
+    var win_height =  $(window).height();
     $(".mask").css({
         display:'block',
-        height:($(t).height()+100)>doc_height?　$(t).height()+280 : doc_height+50
+        height:　(layer_height+mouse_position+100)<doc_height ? doc_height+100 : doc_height+(layer_height+100-win_height+50)
     });
-    $(t).css('top',"100px");
+    $(t).css('top',mouse_position+100+"px" );
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
     $(t + " .close").click(function(){
@@ -135,15 +137,17 @@ function show_center(t){
     });
 }
 function before_center(t){
+    var mouse_position = document.body.scrollTop+document.documentElement.scrollTop;
+    var win_height =  $(window).height();
     var doc_height = $(document).height();
     var doc_width = $(document).width();
     var layer_height = $(t).height();
     var layer_width = $(t).width();
     $(".maskOne").css({
         display:'block',
-        height:($(t).height()+100)>doc_height?　$(t).height()+280 : doc_height+50
+        height:(layer_height+mouse_position+100)<doc_height ? doc_height+100 : doc_height+(layer_height+100-win_height+50)
     });
-    $(t).css('top',"100px");
+    $(t).css('top',mouse_position+100+"px");
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
     $(t + " .close").click(function(){
@@ -160,9 +164,9 @@ $(function() {
         var index = $('.groupFunc_h li').index(this);
         $('.groupFunc_b > div').eq(index).show().siblings().hide();
     });
-    });
+});
 
-   //排序切换箭头
+//排序切换箭头
 function sort_change(obj){
     if($(obj).attr("class") == "sort_u"){
         $(obj).attr("class", "sort_d");
@@ -193,10 +197,10 @@ function tishi_alert(message){
     })
     setTimeout(function(){
         jQuery('.tab_alert').fadeTo("slow",0);
-    }, 3000);
+    }, 4000);
     setTimeout(function(){
         $(".tab_alert").css('display','none');
-    }, 3000);
+    }, 4000);
 }
 
 //center popup div

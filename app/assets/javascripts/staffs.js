@@ -214,9 +214,13 @@ $(document).ready(function(){
             //$(this).parent().parent().find($("#staff_probation_days")).val("");
             $(this).parent().parent().find($("#staff_probation_salary")).attr("disabled", "disabled");
             //$(this).parent().parent().find($("#staff_probation_salary")).val("");
+            $("#staff_probation_days").parent().find('span').hide();
+            $("#staff_probation_salary").parent().find('span').hide();
         }else{
             $(this).parent().parent().find($("#staff_probation_days")).removeAttr("disabled");
             $(this).parent().parent().find($("#staff_probation_salary")).removeAttr("disabled");
+            $("#staff_probation_days").parent().find('span').show();
+            $("#staff_probation_salary").parent().find('span').show();
         }
     });
     $("#staff_is_deduct").live("click", function(){             //是否参加提成
@@ -275,6 +279,10 @@ $(document).ready(function(){
            tishi_alert("正式薪资标准必须为数字!");
            return false;
        }
+       if(parseFloat($(this).parents('form').find("#staff_base_salary").val())<0.0){
+           tishi_alert("正式薪资标准必须大于等于0!");
+           return false;
+       }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
            tishi_alert("提成起始额不能为空!");
            return false;
@@ -283,12 +291,20 @@ $(document).ready(function(){
            tishi_alert("提成起始额必须为数字!");
            return false;
        }
+       if(parseFloat($(this).parents('form').find("#staff_deduct_at").val())<0.0){
+           tishi_alert("提成起始额必须大于等于0!");
+           return false;
+       }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
            tishi_alert("结束额度不能为空!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_end").val())){
            tishi_alert("结束额度必须为数字!");
+           return false;
+       }
+       if(parseFloat($(this).parents('form').find("#staff_deduct_end").val())<0.0){
+           tishi_alert("结束额度必须大于等于0!");
            return false;
        }
        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && (parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val()))){
@@ -303,35 +319,40 @@ $(document).ready(function(){
            tishi_alert("提成率必须为数字!");
            return false;
        }
-       if($(this).attr("id") == "new_staff_btn"){
-           if($(this).parents('form').find("#staff_photo").val() == ''){
-               tishi_alert("照片不能为空!");
-               return false;
-           }else{
-               var input_s = document.getElementById('staff_photo');
-               var file_size = input_s.files[0].size;
-               if(file_size > 500*1024){
-                  tishi_alert("图片大小不能超过500k！");
-                  return false;
-               }
-               var img_val = $(this).parents('form').find("#staff_photo").val();
-               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
-               var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
-               var g_name_val = img_name_val.substring(1,img_name_val.length);
-               if(pattern_str.test(g_name_val.split(".")[0])){
-                  tishi_alert(g_name_val+"不能包含特殊字符!");
-                  return false;
-               }
-
-               var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
-               if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
-               }else{
-                  tishi_alert("图片格式不对!");
-                  return false;
-               }
-           }
+       var staff_deduct_percent = $(this).parents('form').find("#staff_deduct_percent").val();
+       if(parseFloat(staff_deduct_percent) < 0.0 || parseFloat(staff_deduct_percent) > 100.0){
+           tishi_alert("提成率必须在0-100之间!");
+           return false;
        }
-       if($(this).attr("id") == "edit_staff_btn"){
+//       if($(this).attr("id") == "new_staff_btn"){
+//           if($(this).parents('form').find("#staff_photo").val() == ''){
+//               tishi_alert("照片不能为空!");
+//               return false;
+//           }else{
+//               var input_s = document.getElementById('staff_photo');
+//               var file_size = input_s.files[0].size;
+//               if(file_size > 500*1024){
+//                  tishi_alert("图片大小不能超过500k！");
+//                  return false;
+//               }
+//               var img_val = $(this).parents('form').find("#staff_photo").val();
+//               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+//               var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
+//               var g_name_val = img_name_val.substring(1,img_name_val.length);
+//               if(pattern_str.test(g_name_val.split(".")[0])){
+//                  tishi_alert(g_name_val+"不能包含特殊字符!");
+//                  return false;
+//               }
+//
+//               var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
+//               if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
+//               }else{
+//                  tishi_alert("图片格式不对!");
+//                  return false;
+//               }
+//           }
+//       }
+       //if($(this).attr("id") == "edit_staff_btn"){
            if($(this).parents('form').find("#staff_photo").val() != ''){
                var input_e = document.getElementById('staff_photo');
                var file_size_e = input_e.files[0].size;
@@ -354,14 +375,33 @@ $(document).ready(function(){
                   return false;
                }
            }
-       }
+       //}
        $(this).parents('form').submit();
        $(this).attr("disabled", "disabled");
     });
 
+//    $("#staff_phone").live("blur", function(){
+//       var store_id = $("#store_id").val();
+//       var phone = $(this).val();
+//       $.ajax({
+//            type : 'get',
+//            url : "/stores/"+ store_id+"/staffs/validate_phone",
+//            data : {
+//                phone : phone
+//            },
+//            success: function(data){
+//                if(data == "error"){
+//                   tishi_alert("联系方式已经存在!");
+//                   return false;
+//                }
+//            }
+//        });
+//       return false;
+//    });
+
     //新建奖励信息验证
     $("#new_reward_btn").click(function(){
-        if($("#new_reward_area input:checked").length == 0){
+        if($("#new_reward_area input[type='checkbox']:checked").length == 0){
             tishi_alert("至少选择一个奖励人员!");
             return false;
         }
@@ -379,7 +419,7 @@ $(document).ready(function(){
 
     //新建违规信息验证
     $("#new_violation_btn").click(function(){
-        if($("#new_violation_area input:checked").length == 0){
+        if($("#new_violation_area input[type='checkbox']:checked").length == 0){
             tishi_alert("至少选择一个违规人员!");
             return false;
         }
@@ -409,7 +449,7 @@ $(document).ready(function(){
             tishi_alert("培训开始时间必须在培训结束时间之后!");
             return false;
         }
-        if($("#new_train_area input:checked").length == 0){
+        if($("#new_train_area .width_div input[type='checkbox']:checked").length == 0){
             tishi_alert("至少选择一个培训人员!");
             return false;
         }
@@ -429,7 +469,7 @@ $(document).ready(function(){
     });
 
     //编辑系统打分
-    $("#staff_info .bz_btn").click(function(){
+    $("#staff_info .bz_btn").live("click", function(){
         $(this).prev().show();
         $(this).hide();
         $(this).parents('tr').find(".sys_score_text").hide();
@@ -438,7 +478,7 @@ $(document).ready(function(){
     });
 
     //编辑提交系统打分
-    $(".edit_btn").click(function(){
+    $(".edit_btn").live("click", function(){
         var this_obj = $(this);
         var store_id = $("#store_id").val();
         var month_score_id = $(this).parents('tr').find(".data_input_s").attr("id");
@@ -476,6 +516,10 @@ $(document).ready(function(){
                     if(manage_score != ""){
                         this_obj.parents('tr').find('.assess_result').text(assess_result(sys_score, manage_score));
                     }
+                    tishi_alert("编辑系统打分成功！");
+                }
+                if(data == "error"){
+                    tishi_alert("没有系统打分记录，无法编辑系统打分！");
                 }
             }
         });
@@ -604,6 +648,7 @@ $(document).ready(function(){
                     this_obj.parents('tr').find(".deduct_num_text").text(deduct_num).show();
                     this_obj.parents('tr').find(".reward_num_text").text(reward_num).show();
                     this_obj.parents('tr').find(".total_price_text").text(total_price);
+                    tishi_alert("编辑提成金额和扣款金额成功!");
                 }
             }
         });
@@ -685,6 +730,7 @@ $(document).ready(function(){
                         this_obj.parents('tr').find("span.train_status").text("通过");
                         this_obj.hide();
                         this_obj.next().show();
+                        tishi_alert("处理培训成功!");
                     }
                 }
             });

@@ -5,7 +5,7 @@
   <div class="box">
     <div class="rightAera">
       <div class="rightTitle">
-        <h1><a href="#"><%=@prod.is_service ? "服务"  :  "产品" %></a> &gt; <%= Product::PRODUCT_TYPES[@prod.types] %></h1>
+        <h1><a href="/stores/<%=params[:store_id]%>/products/<%="prod_services" if @prod.is_service %>"><%=@prod.is_service ? "服务"  :  "产品" %></a> &gt; <%= Product::PRODUCT_TYPES[@prod.types] %></h1>
         <div class="pro_show">
           <div class="bigImg jqzoom">
             <%if @img_urls[0]%>
@@ -23,8 +23,8 @@
         </div>
         <div class="pro_price">
           <h2><%= @prod.name %></h2>
-          <p>价格：<span><%= @prod.base_price %></span>元</p>
-          <p>促销：<span><%= @prod.sale_price %></span>元</p>
+          <p>全国零售价：<span><%= @prod.base_price %></span>元</p>
+          <p>全国促销价：<span><%= @prod.sale_price %></span>元</p>
         </div>
         <div class="clear"></div>
         <div class="pro_text">

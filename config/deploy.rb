@@ -10,8 +10,8 @@ set :scm, :git   # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `pe
 # 如果SCM设为空， 也可通过直接copy本地repo部署
 set :repository,  "git@github.com:lifang/lantan_BAM.git" #项目在github上的地址
 #set :ssh_options, { :forward_agent => true }  #deploy时获取github上项目使用你本地的ssh key
-set :git_shallow_clone, 1  #Shallow cloning will do a clone each time, but will only get the top commit, not the entire repository history
-set :short_branch, "master"  #deploy的时候默认checkout master branch
+#set :git_shallow_clone, 1  #Shallow cloning will do a clone each time, but will only get the top commit, not the entire repository history
+set :branch, "master"  #deploy的时候默认checkout master branch
 
 #$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
 #require "rvm/capistrano"           # Load RVM's capistrano plugin.
@@ -19,7 +19,7 @@ set :short_branch, "master"  #deploy的时候默认checkout master branch
 set :rvm_type, :user
 
 set :default_stage, "staging"     #一般不写成production，因为写成production的时候运行touch #{current_path}/tmp/restart.txt没效果
-set :stages, %w(staging production)
+set :stages, %w(staging sandbox production)
 set :rvm_ruby_string, '1.9.2-p320@rails3.1.2'  #设置ruby具体版本号 去rvm安装目录/wrappers里面查看具体ruby版本
 
 require 'capistrano/ext/multistage' #多stage部署所需
@@ -28,17 +28,18 @@ require 'capistrano_colors'
 
 after("deploy:symlink") do    #after， before 表示在特定操作之后或之前执行其他任务  
  
-  # log link
-  run "rm -rf #{current_path}/log"        #移除当前路径下的log文件
-  run "ln -s #{shared_path}/log/ #{current_path}/log"  #link日志文件到share下的日志文件
-
-  run "ln -s /opt/projects/public/bam_public/* #{current_path}/public/"  #link public文件夹到/opt/projects/public/bam_public/
-  run "cd #{current_path} && bundle install"
+ 
 end
 
 namespace :deploy do  
   task :restart do
     #    run "chmod -R 777 /opt/projects/lantan_BAM/" # 每次deploy完给目录下新产生的文件赋权限
+ # log link
+  run "rm -rf #{current_path}/log"        #移除当前路径下的log文件
+  run "ln -s #{shared_path}/log/ #{current_path}/log"  #link日志文件到share下的日志文件
+
+#  run "ln -s /opt/projects/public/bam_public/storeimg /opt/projects/public/headoffice_public/storeimg"
+  run "ln -s /opt/projects/public/bam_public/* #{current_path}/public/"  #link public文件夹到/opt/projects/public/bam_public/
 
     # database.yml for localized database connection
     run "rm #{current_path}/config/database.yml"  #移除当前路径下的数据库配置文件

@@ -1,8 +1,10 @@
 #encoding: utf-8
+require "uri"
 class CustomersController < ApplicationController
   before_filter :sign?
   include RemotePaginateHelper
-  layout "customer"
+  layout "customer", :except => [:print_orders,:operate_order]
+  require 'will_paginate/array'
   before_filter :customer_tips
 
   def index
@@ -14,10 +16,11 @@ class CustomersController < ApplicationController
     session[:phone] = nil
     session[:is_vip] = nil
 
-    @store = @store = Store.find_by_id(params[:store_id]) || not_found
+    @store = Store.find_by_id(params[:store_id]) || not_found
     @customers = Customer.search_customer(params[:c_types], params[:car_num], params[:started_at], params[:ended_at],
-      params[:name], params[:phone], params[:is_vip], params[:page])
-    @car_nums = Customer.customer_car_num(@customers)
+      params[:name], params[:phone], params[:is_vip], params[:page], params[:store_id].to_i) if @store
+    @car_nums = Customer.customer_car_num(@customers) if @customers
+    @is_vips = CustomerStoreRelation.where(["store_id = ? and customer_id in (?)", @store, @customers]).group_by{|i| i.customer_id }
   end
 
   def search
@@ -34,14 +37,16 @@ class CustomersController < ApplicationController
   def search_list
     @store = Store.find(params[:store_id].to_i)
     @customers = Customer.search_customer(session[:c_types], session[:car_num], session[:started_at], session[:ended_at],
-      session[:name], session[:phone], session[:is_vip], params[:page])
-    @car_nums = Customer.customer_car_num(@customers)
+      session[:name], session[:phone], session[:is_vip], params[:page], params[:store_id].to_i) if @store
+    @car_nums = Customer.customer_car_num(@customers) if @customers
+    @is_vips = CustomerStoreRelation.where(["store_id = ? and customer_id in (?)", @store, @customers]).group_by{|i| i.customer_id }
     render "index"
   end
 
   def destroy
     @customer = Customer.find(params[:id].to_i)
     @customer.update_attributes(:status => Customer::STATUS[:DELETED])
+    flash[:notice] = "删除成功。"
     redirect_to request.referer
   end
 
@@ -50,11 +55,27 @@ class CustomersController < ApplicationController
       customer = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], params[:mobilephone].strip)
       car_num = CarNum.find_by_num(params[:new_car_num].strip)
       if customer
-        flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
+        relation = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id].to_i, customer.id)
+        if relation
+          flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
+        else
+          if car_num
+            cnr = CustomerNumRelation.find_by_car_num_id_and_customer_id(car_num.id, customer.id)
+            unless cnr
+              CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
+              CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
+            end
+          else
+            car_num = CarNum.create(:num => params[:new_car_num].strip, :buy_year => params[:buy_year],
+              :car_model_id => params[:car_models])
+            CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
+          end
+          CustomerStoreRelation.create(:store_id => params[:store_id].to_i, :customer_id => customer.id, :is_vip => params[:is_vip])
+        end
       else
         Customer.create_single_cus(customer, car_num, params[:mobilephone].strip, params[:new_car_num].strip,
-          params[:new_name].strip, params[:other_way].strip,
-          params[:birthday], params[:buy_year], params[:car_models], params[:sex], params[:address], params[:is_vip])
+          params[:new_name].strip, params[:other_way].strip, params[:birthday], 
+          params[:buy_year], params[:car_models], params[:sex], params[:address], params[:is_vip], params[:store_id].to_i)
         flash[:notice] = "客户信息创建成功。"
       end
     end
@@ -70,7 +91,13 @@ class CustomersController < ApplicationController
       else
         customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
           :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
-          :address => params[:address], :is_vip => params[:is_vip])
+          :address => params[:address])
+        c_store = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id],customer.id)
+        if c_store
+          c_store.update_attributes( :is_vip => params[:is_vip])
+        else
+          CustomerStoreRelation.create({:store_id => params[:store_id], :customer_id => customer.id, :is_vip => params[:is_vip]}) if params[:is_vip].to_i==1
+        end
         flash[:notice] = "客户信息更新成功。"
       end
     end
@@ -90,12 +117,12 @@ class CustomersController < ApplicationController
         message_record = MessageRecord.create(:store_id => params[:store_id].to_i, :content => params[:content].strip,
           :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
         customer = Customer.find(params[:m_customer_id].to_i)
-        content = params[:content].strip.gsub("%name%", customer.name)
+        content = params[:content].strip.gsub("%name%", customer.name).gsub(" ", "")
         SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id,
           :content => content, :phone => customer.mobilephone,
           :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
         begin
-          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{content}&Exno=0"
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{URI.escape(content)}&Exno=0"
           create_get_http(Constant::MESSAGE_URL, message_route)
         rescue
           flash[:notice] = "短信通道忙碌，请稍后重试。"
@@ -116,6 +143,7 @@ class CustomersController < ApplicationController
         inner join customer_num_relations cr on cr.car_num_id = c.id
         where cr.customer_id = ?", @customer.id])
     order_page = params[:rev_page] ? params[:rev_page] : 1
+    @s_customer = CustomerStoreRelation.find_by_customer_id_and_store_id(@customer.id,params[:store_id])
     @orders = Order.one_customer_orders(Order::STATUS[:DELETED], params[:store_id].to_i, @customer.id, 10, order_page)
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
@@ -123,8 +151,9 @@ class CustomersController < ApplicationController
     @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, 1)
     comp_page = params[:comp_page] ? params[:comp_page] : 1
     @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, comp_page)
-    svc_card_records_method(@customer.id)  #储值卡and套餐卡记录
-    pc_card_records_method(@customer.id)  #储值卡and套餐卡记录
+    svc_card_records_method(@customer.id)  #储值卡记录
+    @c_pcard_relations = @customer.pc_card_records_method(params[:store_id])[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if @customer.pc_card_records_method(params[:store_id])[1] #套餐卡记录
+    @already_used_count = @customer.pc_card_records_method(params[:store_id])[0]
   end
   
   def order_prods
@@ -147,7 +176,8 @@ class CustomersController < ApplicationController
   def pc_card_records
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    pc_card_records_method(@customer.id)
+    @c_pcard_relations = @customer.pc_card_records_method(params[:store_id])[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if @customer.pc_card_records_method(params[:store_id])[1]  #套餐卡记录
+    @already_used_count = @customer.pc_card_records_method(params[:store_id])[0]
   end
 
   def revisits
@@ -234,6 +264,51 @@ class CustomersController < ApplicationController
     end
   end
 
+  def print_orders
+    @orders = Order.find(params[:ids].split(","))
+    @product_hash = OrderProdRelation.order_products(@orders)
+    @order_pay_type = OrderPayType.order_pay_types(@orders)
+  end
+
+  def return_order
+    @order = Order.find(params[:o_id])
+    @product_hash = OrderProdRelation.s_order_products(@order.id)
+    @staffs = Staff.find([@order.try(:front_staff_id),@order.try(:cons_staff_id_1),@order.try(:cons_staff_id_2)]).inject(Hash.new){
+      |hash,staff| hash[staff.id] = staff.name;hash
+    }
+  end
+
+  def operate_order
+    params[:types].split(",").each {|types|
+      params[:"#{types}"].split(",").each do |type_id|
+        m_model = types.split("#")
+        eval(m_model[0].split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize}).where({:order_id=>params[:order_id],
+            :"#{m_model[1]}_id"=> type_id}).first.update_attributes(:return_types=>Order::IS_RETURN[:YES])
+      end }
+    order = Order.find(params[:order_id])
+    order.update_attributes(:return_reason=>params[:reason],:return_types=>Order::IS_RETURN[:YES],:price => (order.price.nil? ? 0 : order.price) - params[:account].to_f,
+      :return_fee => params[:account].to_f,:return_direct => params[:direct],:return_staff_id =>cookies[:user_id])
+    materials = {}
+    if  params[:types].index("product")
+      ProdMatRelation.where("product_id in (#{params[:"order_prod_relation#product"]})").each{|mat|
+        materials[mat.material_id].nil? ?  materials[mat.material_id] = mat.material_num : materials[mat.material_id] += mat.material_num
+      }
+    elsif  params[:types].index("package_card")
+      PcardMaterialRelation.where("package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each{|mat|
+        materials[mat.material_id].nil? ?  materials[mat.material_id] = mat.material_num : materials[mat.material_id] += mat.material_num
+      }
+      CPcardRelation.where("order_id = #{params[:order_id]} and package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each {|card| card.update_attributes(:status=>PackageCard::STAT[:INVALID])}
+    elsif   params[:types].index("sv_card")
+      CSvcRelation.where("order_id = #{params[:order_id]} and sv_card_id in (#{params[:"c_svc_relation#sv_card"]})").each {|card| card.update_attributes(:status=>CSvcRelation::STATUS[:invalid])}
+    end
+    if params[:direct].to_i == Order::O_RETURN[:REUSE]
+      Material.find(materials.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ materials[mat.id])}
+    else     
+      materials.each {|k,v|MaterialLoss.create(:loss_num=>v,:staff_id => cookies[:user_id],:store_id=>order.store_id,:material_id => k)}
+    end
+    render :json =>{:msg=>order.code}
+  end
+
   private
   
   def svc_card_records_method(customer_id)
@@ -244,30 +319,5 @@ class CustomersController < ApplicationController
       :per_page => Constant::PER_PAGE)
   end
 
-  def pc_card_records_method(customer_id)
-    #套餐卡记录
-    @c_pcard_relations = CPcardRelation.paginate_by_sql(["select p.id, p.name, cpr.content, cpr.ended_at
-        from c_pcard_relations cpr
-        inner join package_cards p on p.id = cpr.package_card_id
-        where cpr.status = ? and cpr.customer_id = ?",
-        CPcardRelation::STATUS[:NORMAL], customer_id], :page => params[:page],
-      :per_page => Constant::PER_PAGE)
-    @already_used_count = {}
-    unless @c_pcard_relations.blank?
-      @c_pcard_relations.each do |r|
-        service_infos = r.content.split(",")
-        single_car_content = {}
-        service_infos.each do |s|
-          content_arr = s.split("-")
-          single_car_content[content_arr[0].to_i] = [content_arr[1], content_arr[2].to_i] if content_arr.length == 3
-        end
-        @already_used_count[r.id] = single_car_content unless single_car_content.empty?
-      end
-      @pcard_prod_relations = PcardProdRelation.find(:all, :conditions => ["package_card_id in (?)", @c_pcard_relations])
-      @pcard_prod_relations.each do |ppr|
-        used_count = ppr.product_num - @already_used_count[ppr.package_card_id][ppr.product_id][1] if !@already_used_count.empty? and @already_used_count[ppr.package_card_id].present? and @already_used_count[ppr.package_card_id][ppr.product_id]
-        @already_used_count[ppr.package_card_id][ppr.product_id][1] = used_count ? used_count : 0 unless @already_used_count.empty? or @already_used_count[ppr.package_card_id].blank? or @already_used_count[ppr.package_card_id][ppr.product_id].nil?
-      end
-    end
-  end
+  
 end

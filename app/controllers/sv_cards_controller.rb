@@ -17,7 +17,8 @@ class SvCardsController < ApplicationController
   end
 
   def create
-    if SvCard.where(["types = ? and name = ?", params[:sv_card][:types], params[:sv_card][:name]]).blank?
+    if SvCard.where(["types = ? and name = ? and status = ? and store_id = ?",
+                  params[:sv_card][:types], params[:sv_card][:name], SvCard::STATUS[:NORMAL], @store.id]).blank?
       img_obj = params[:sv_card][:img_url]
       params[:sv_card].delete_if{|key, value| key=="img_url"}
       if params[:sv_card][:types].to_i == SvCard::FAVOR[:DISCOUNT] #打折卡
@@ -70,12 +71,13 @@ class SvCardsController < ApplicationController
         flash[:notice] = "删除失败!"
       end
     end
-       redirect_to request.referer
+       redirect_to store_sv_cards_path(@store)
   end
 
   def update
     sv_card = SvCard.find_by_id(params[:id].to_i)
-    if SvCard.where(["id != ? and types= ? and name = ?", sv_card.id, sv_card.types, params[:sv_card][:name]]).blank?
+    if SvCard.where(["id != ? and types= ? and name = ? and status = ? and store_id = ?", sv_card.id, sv_card.types,
+                    params[:sv_card][:name], SvCard::STATUS[:NORMAL], sv_card.store_id]).blank?
       img_obj = params[:sv_card][:img_url]
       params[:sv_card].delete_if{|key, value| key=="img_url"}
       if sv_card.update_attributes(params[:sv_card])
@@ -171,9 +173,9 @@ class SvCardsController < ApplicationController
   def use_detail
     @started_time = params[:started_time]
     @ended_time = params[:ended_time]
-    base_sql = (@started_time.nil? || @started_time.blank?) ? "1=1" : "o.started_at >= '#{@started_time}'"
+    base_sql = (@started_time.nil? || @started_time.blank?) ? "1=1" : "o.created_at >= '#{@started_time}'"
     base_sql << " and "
-    base_sql << ((@ended_time.nil? || @ended_time.blank?) ? "1=1" : "date_format(o.ended_at,'%Y-%m-%d') <= '#{@ended_time}'")
+    base_sql << ((@ended_time.nil? || @ended_time.blank?) ? "1=1" : "date_format(o.created_at,'%Y-%m-%d') <= '#{@ended_time}'")
     orders = Order.find_by_sql("select o.id id, o.code code,o.price price, c.name name, cn.num num from orders o left join customers c on c.id = o.customer_id
                                  left join car_nums cn on cn.id = o.car_num_id inner join order_pay_types opt on opt.order_id = o.id
                                  where o.store_id = #{@store.id} and (opt.pay_type = #{OrderPayType::PAY_TYPES[:SV_CARD]} || opt.pay_type = #{OrderPayType::PAY_TYPES[:DISCOUNT_CARD]}) and #{base_sql} group by o.id")
@@ -184,13 +186,13 @@ class SvCardsController < ApplicationController
   def search_left_price
     @customer_name = params[:customer_name]
     @customer_tel = params[:customer_tel]
-    base_sql = (@customer_name.nil? || @customer_name.blank?) ? "1=1" : "c.name like '%#{@customer_name}%'"
+    base_sql = (@customer_name.nil? || @customer_name.blank?) ? "1=1" : "c.name like '%#{@customer_name.gsub(/[%_]/){|x|'\\' + x}}%'"
     base_sql << " and "
-    base_sql << ((@customer_tel.nil? || @customer_tel.blank?) ? "1=1" : "c.mobilephone like '%#{@customer_tel}%'")
+    base_sql << ((@customer_tel.nil? || @customer_tel.blank?) ? "1=1" : "c.mobilephone like '%#{@customer_tel.gsub(/[%_]/){|x|'\\' + x}}%'")
     @customers = Customer.find_by_sql("select csr.id csr_id, c.name name, cn.num num, c.mobilephone mobilephone, sc.name s_name, csr.left_price left_price from customers c
                                        inner join c_svc_relations csr on csr.customer_id = c.id left join sv_cards sc on sc.id = csr.sv_card_id
                                        left join customer_num_relations cnr on cnr.customer_id = c.id left join car_nums cn on cn.id = cnr.car_num_id
-                                       where c.status = #{Customer::STATUS[:NOMAL]} and #{base_sql} and sc.types = #{SvCard::FAVOR[:SAVE]}").
+                                       where c.status = #{Customer::STATUS[:NOMAL]} and #{base_sql} and sc.types = #{SvCard::FAVOR[:SAVE]} and sc.store_id=#{params[:store_id]}").
                                        paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 

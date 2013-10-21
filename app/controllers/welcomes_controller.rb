@@ -1,12 +1,13 @@
 #encoding: utf-8
 class WelcomesController < ApplicationController
   before_filter :sign?
-  before_filter :customer_tips,:material_order_tips, :except => [:edit_store_name]
+  before_filter :customer_tips,:material_order_tips, :except => [:edit_store_name, :update_staff_password]
 
   def index
     store = Store.find_by_id(params[:store_id].to_i)
+    @staff = Staff.find_by_id(cookies[:user_id])
     cookies[:store_name] = {:value => store.name, :path => "/", :secure => false} if store
-    cookies[:store_id] = {:value => store.id, :path => "/", :secure => false} if store
+    #cookies[:store_id] = {:value => store.id, :path => "/", :secure => false} if store
     render :index, :layout => false
   end
 
@@ -26,6 +27,27 @@ class WelcomesController < ApplicationController
     end
     else
       render :json => {:status => 2}
+    end
+  end
+
+  def update_staff_password
+    @flag = false
+    if params[:new_password] != params[:confirm_password]
+      @notice = "新密码和确认密码不一致！"
+      return
+    end
+    staff = Staff.find_by_id(cookies[:user_id])
+    if staff.has_password?(params[:old_password])
+        staff.password = params[:new_password]
+        staff.encrypt_password
+        if staff.save
+          @notice = "密码修改成功！"
+          @flag = true
+        else
+          @notice = "密码修改失败! #{staff.errors.messages.values.flatten.join("<br/>")}"
+        end
+    else
+      @notice = "请输入正确的旧密码！"
     end
   end
 

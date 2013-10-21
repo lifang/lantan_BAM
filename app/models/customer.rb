@@ -7,6 +7,8 @@ class Customer < ActiveRecord::Base
   has_many :send_messages
   has_many :c_svc_relations
   has_many :reservations
+  has_many :customer_store_relations
+  has_many :stores, :through => :customer_store_relations
 
   attr_accessor :password
   validates :password, :allow_nil => true, :length =>{:within=>6..20, :message => "密码长度必须在6-20位之间"}
@@ -17,10 +19,11 @@ class Customer < ActiveRecord::Base
   IS_VIP = {:NORMAL => 0, :VIP => 1} #0 常态客户 1 会员卡客户
   TYPES = {:GOOD => 0, :NORMAL => 1, :STRESS => 2} #1 优质客户  2 一般客户  3 重点客户
   C_TYPES = {0 => "优质客户", 1 => "一般客户", 2 => "重点客户"}
+  RETURN_REASON = { 0 => "质量问题", 1 => "服务态度", 2 => "拍错买错",3 => "效果不好，不喜欢",4 => "操作失误", 5 => "其他"}
 
 
-  def self.search_customer(c_types, car_num, started_at, ended_at, name, phone, is_vip, page)
-    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.is_vip, cu.mark from customers cu
+  def self.search_customer(c_types, car_num, started_at, ended_at, name, phone, is_vip, page, store_id)
+    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.mark from customers cu
         left join customer_num_relations cnr on cnr.customer_id = cu.id
         left join car_nums ca on ca.id = cnr.car_num_id "
     condition_sql = "where cu.status = #{STATUS[:NOMAL]} "
@@ -31,19 +34,26 @@ class Customer < ActiveRecord::Base
     end
     unless name.nil? or name.strip.empty?
       condition_sql += " and cu.name like ? "
-      params_arr << "%#{name.strip}%"
+      params_arr << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     unless phone.nil? or phone.strip.empty?
       condition_sql += " and cu.mobilephone = ? "
       params_arr << phone.strip
     end
     unless is_vip.nil? or is_vip.strip.empty?
-      condition_sql += " and cu.is_vip = ? "
+      base_sql += " inner join customer_store_relations csr on csr.customer_id = cu.id "
+      condition_sql += " and csr.store_id = ? "
+      params_arr << store_id.to_i
+      condition_sql += " and csr.is_vip = ? "
       params_arr << is_vip.to_i
+    else
+      base_sql += " left join customer_store_relations csr on csr.customer_id = cu.id "
+      condition_sql += " and csr.store_id in(?) "
+      params_arr << StoreChainsRelation.return_chain_stores(store_id)
     end
     unless car_num.nil? or car_num.strip.empty?
       condition_sql += " and ca.num like ? "
-      params_arr << "%#{car_num.strip}%"
+      params_arr << "%#{car_num.strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     is_has_order = false
     need_group_by = false
@@ -94,16 +104,18 @@ class Customer < ActiveRecord::Base
   end
 
   def Customer.create_single_cus(customer, carnum, phone, car_num, user_name, other_way,
-      birth, buy_year, car_model_id, sex, address, is_vip)
+      birth, buy_year, car_model_id, sex, address, is_vip, store_id)
     Customer.transaction do
       if customer.nil?
         customer = Customer.create(:name => user_name, :mobilephone => phone,
           :other_way => other_way, :birthday => birth, :status => Customer::STATUS[:NOMAL],
-          :types => Customer::TYPES[:NORMAL], :is_vip => is_vip, :username => user_name,
+          :types => Customer::TYPES[:NORMAL], :username => user_name,
           :password => phone, :sex => sex, :address => address)
         customer.encrypt_password
-        customer.save
+        customer.save        
       end
+      relation = CustomerStoreRelation.find_by_store_id_and_customer_id(store_id, customer.id)
+      CustomerStoreRelation.create(:store_id => store_id, :customer_id => customer.id, :is_vip => is_vip) unless relation
       if carnum
         carnum.update_attributes(:buy_year => buy_year, :car_model_id => car_model_id)
       else
@@ -128,6 +140,37 @@ class Customer < ActiveRecord::Base
 
   def encrypt_password
     self.encrypted_password=encrypt(password)
+  end
+
+  #客户使用套餐卡记录，门店后台跟api共用
+  def pc_card_records_method(store_id)
+    #套餐卡记录
+    c_pcard_relations_no_paginate = CPcardRelation.find_by_sql(["select cpr.id cpr_id, p.id, p.name, cpr.content, cpr.ended_at
+        from c_pcard_relations cpr
+        inner join package_cards p on p.id = cpr.package_card_id
+        where cpr.status = ? and cpr.customer_id = ? and p.store_id = ?",
+        CPcardRelation::STATUS[:NORMAL], self.id, store_id])
+#    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
+    already_used_count = {}
+    if c_pcard_relations_no_paginate.present?
+      c_pcard_relations_no_paginate.each do |r|
+        service_infos = r.content.split(",")
+        single_car_content = {}
+        service_infos.each do |s|
+          content_arr = s.split("-")
+          single_car_content[content_arr[0].to_i] = [content_arr[1], content_arr[2].to_i] if content_arr.length == 3
+        end
+        already_used_count[r.id] = single_car_content unless single_car_content.empty?
+      end
+      pcard_prod_relations = PcardProdRelation.joins(:package_card).find(:all, :conditions => ["package_card_id in (?) and package_cards.store_id = ?", c_pcard_relations_no_paginate, store_id])
+      pcard_prod_relations.each do |ppr|
+        used_count = ppr.product_num - already_used_count[ppr.package_card_id][ppr.product_id][1] if !already_used_count.empty? and already_used_count[ppr.package_card_id].present? and already_used_count[ppr.package_card_id][ppr.product_id]
+        already_used_count[ppr.package_card_id][ppr.product_id][1] = used_count ? used_count : 0 unless already_used_count.empty? or already_used_count[ppr.package_card_id].blank? or already_used_count[ppr.package_card_id][ppr.product_id].nil?
+      end
+      [already_used_count, c_pcard_relations_no_paginate]
+    else
+      [{}, []]
+    end
   end
 
   private

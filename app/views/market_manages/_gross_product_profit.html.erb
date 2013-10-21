@@ -24,26 +24,24 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
         <thead>
           <tr class="hbg">
-            <td>日期</td>
-            <td>相关订单</td>
-            <td>成本价</td>
-            <td>零售价</td>
-            <td>毛利</td>
+            <th width="200">日期</th>
+            <th width="250">相关订单</th>
+            <th width="180">成本价</th>
+            <th width="180">零售价</th>
+            <th width="170">毛利</th>
           </tr>
         </thead>
         <tbody>
             <% @orders.each do |order| %>
-              <% @order_prod_relations[order.id].each do |oprr| %>
-                <% prod_cost_price =  prod_gross_price(order.id, oprr, @order_pay_types)%>
+              
           <tr class="<%= cycle("","tbg")%>">
-                  <td><%= order.o_created_at %></td>
-                  <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
+                  <td><%= order[:created_at] %></td>
+                  <td><%= link_to "#{order[:code]}", "/orders/#{order[:id]}/order_info" ,
             :remote => "true", "data-type" => "script", :class => "other_a"  %></td>
-                  <td><%= format("%.2f",prod_cost_price[0]) %></td>
-                  <td><%= format("%.2f",prod_cost_price[1]) %></td>
-                  <td><%= format("%.2f",prod_cost_price[2] > 0 ? prod_cost_price[2] : 0) %></td>
+                  <td><%= format("%.2f",order[:cost_price]) %></td>
+                  <td><%= format("%.2f",order[:price]) %></td>
+                  <td><%= format("%.2f",order[:gross_profit]) %></td>
                 </tr>
-              <% end unless @order_prod_relations[order.id].nil?%>
             <% end %>
           </tbody>
       </table>

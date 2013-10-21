@@ -26,7 +26,7 @@
                                   <th><span class="sort_u_s" onclick="sort_change(this)">姓名</span></th>
                                   <th>职务</th>
                                   <th>底薪</th>
-                                  <th><span class="sort_u" onclick="sort_change(this)">提成金额</span></th>
+                                  <th><span class="sort_u" onclick="sort_change(this)">奖励金额</span></th>
                                   <th><span class="sort_d" onclick="sort_change(this)">扣款金额</span></th>
                                   <th>总额</th>
                                   <th>操作</th>
@@ -56,9 +56,11 @@
                               <% end %>
                             </tbody>
                       </table>
+                     <%= will_paginate @staffs, :class => "pageTurn", :previous_label => "上一页",
+    :next_label => "下一页" %>
                    </div>
               </div>
          </div>
     </div>
 </div>
-<div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+<div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>

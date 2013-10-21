@@ -24,7 +24,7 @@
         <div class="nav">
           <ul>
             <li><a href="/stores/<%= @store.id %>/customers" <% if controller.controller_name=="customers" %>class="hover"<% end %>>客户列表</a></li>
-             <% if permission?(:customers, :revisit) %><li><a href="/stores/<%= @store.id %>/revisits" <% if controller.controller_name=="revisits" %>class="hover"<% end %>>客户回访</a></li><% end %>
+             <% if permission?(:customers, :revisit_all) %><li><a href="/stores/<%= @store.id %>/revisits" <% if controller.controller_name=="revisits" %>class="hover"<% end %>>客户回访</a></li><% end %>
             <% if permission?(:customers, :group_msg) %><li><a href="/stores/<%= @store.id %>/messages" <% if controller.controller_name=="messages" %>class="hover"<% end %>>群发短信</a></li><% end %>
           </ul>
         </div>
@@ -34,7 +34,7 @@
     <div class="main">
       <%= yield %>
     </div>
-    <div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+    <div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
     <div class="mask"></div>
     <div class="maskOne"></div>
     <%= render :partial => "/shared/tishi_alert" %>

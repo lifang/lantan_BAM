@@ -25,6 +25,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     pams.merge!({:started_at=>params[:started_at],:ended_at=>params[:ended_at]})  if params[:disc_time].to_i == Sale::DISC_TIME[:TIME]
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]
     sale=Sale.create!(pams)
+    flash[:notice] = "活动添加成功"
     begin
       if params[:img_url]
         filename=Sale.upload_img(params[:img_url],sale.id,Constant::SALE_PICS,sale.store_id,Constant::SALE_PICSIZE)
@@ -36,7 +37,6 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     params[:sale_prod].each do |key,value|
       SaleProdRelation.create({:sale_id=>sale.id,:product_id=>key,:prod_num=>value})
     end
-
     redirect_to "/stores/#{params[:store_id]}/sales"
   end
 
@@ -71,6 +71,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     pams={:name=>params[:name],:car_num=>params[:car_num],:everycar_times=>params[:every_car], :introduction=>params[:intro],
       :discount=>params["disc_"+params[:discount]],:is_subsidy =>params[:subsidy], :disc_types=>params[:discount],:disc_time_types=>params[:disc_time]
     }
+    flash[:notice] = "活动更新成功"
     begin
       pams.merge!({:img_url=>Sale.upload_img(params[:img_url],@sale.id,Constant::SALE_PICS,@sale.store_id,Constant::SALE_PICSIZE)}) if params[:img_url]
     rescue

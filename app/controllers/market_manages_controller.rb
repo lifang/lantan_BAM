@@ -1,5 +1,6 @@
 #encoding: utf-8
 class MarketManagesController < ApplicationController
+  include MarketManagesHelper
   before_filter :sign?
   layout "complaint", :except => [:daily_consumption_receipt_blank, :stored_card_bill_blank]
   require 'will_paginate/array'
@@ -80,14 +81,16 @@ class MarketManagesController < ApplicationController
   end
 
   def load_pcard
-    @total_product,@total_fee,pcards = {},0,[]
+    @total_product,@total_fee,pcards,@pcards = {},0,[],[]
     session[:r_created],session[:r_ended],session[:time]=params[:created],params[:ended],params[:time].to_i
     pays = MonthScore.sort_pay_types(params[:store_id],session[:time],session[:r_created],session[:r_ended])
-    pays.inject(Hash.new){ |hash,prod|
-      @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
-    }.sort.reverse.each {|k,v| pcards << [k,v]}
-    @pcards = pcards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    @products = Product.where("id in (#{pays.map(&:product_id).join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
+    unless pays.blank?
+      pays.inject(Hash.new){ |hash,prod|
+        @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
+      }.sort.reverse.each {|k,v| pcards << [k,v]}
+      @pcards = pcards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+      @products = Product.where("id in (#{pays.map(&:product_id).compact.uniq.join(',')})").inject(Hash.new){|hash,prod| hash[prod.id]=prod;hash}
+    end
   end
 
   #加载进行中的目标销售额
@@ -124,20 +127,27 @@ class MarketManagesController < ApplicationController
         index +=1 if k.to_i >=4
       end
     end
+    flash[:notice] = "定制成功"
     redirect_to "/stores/#{params[:store_id]}/market_manages/"
   end
 
   #活动订单显示
   def sale_orders
-    session[:o_created],session[:o_ended],session[:order_name]=nil,nil,nil
-    orders = Sale.count_sale_orders(params[:store_id])
+    session[:o_created],session[:o_ended],session[:order_name]=Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d"),nil
+    orders = Sale.count_sale_orders_search(params[:store_id],session[:o_created],session[:o_ended])
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
-      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{@sale_orders.map(&:o_id).join(',')}) ").inject(Hash.new) {
-        |hash,order_pay| hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=[order_pay] : hash[order_pay.order_id] << order_pay;hash }
+      s_orders = Order.where("sale_id in (#{@sale_orders.map(&:id).join(',')})")
+      o_sales ={}
+      s_orders.each {|order|o_sales[order.sale_id].nil? ? o_sales[order.sale_id]=[order.id] : o_sales[order.sale_id] << order.id}
+      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{s_orders.map(&:id).join(',')}) ").inject(Hash.new) {
+        |hash,order_pay| 
+        o_sales.each do |key,value|
+          hash[key].nil? ? hash[key]=[order_pay] : hash[key] << order_pay if value.include? order_pay.order_id
+        end;hash }
       @hash_favor = {}
       pays.each {|key,value| @hash_favor[key]=value.inject(Hash.new){|hash,pay| hash[pay.pay_type].nil? ? hash[pay.pay_type]=pay.price : hash[pay.pay_type] += pay.price;hash }}
-      @sale_names =orders.map(&:name)
+      @sale_names = Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     end
   end
 
@@ -151,12 +161,18 @@ class MarketManagesController < ApplicationController
     orders = Sale.count_sale_orders_search(params[:store_id],session[:o_created],session[:o_ended],session[:order_name])
     @sale_orders =  orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     unless @sale_orders.blank?
-      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{@sale_orders.map(&:o_id).join(',')}) ").inject(Hash.new) {
-        |hash,order_pay| hash[order_pay.order_id].nil? ? hash[order_pay.order_id]=[order_pay] : hash[order_pay.order_id] << order_pay;hash }
+      s_orders = Order.where("sale_id in (#{@sale_orders.map(&:id).join(',')})")
+      o_sales ={}
+      s_orders.each {|order|o_sales[order.sale_id].nil? ? o_sales[order.sale_id]=[order.id] : o_sales[order.sale_id] << order.id}
+      pays = OrderPayType.find_by_sql("select price,pay_type,order_id from order_pay_types where order_id in (#{s_orders.map(&:id).join(',')}) ").inject(Hash.new) {
+        |hash,order_pay|
+        o_sales.each do |key,value|
+          hash[key].nil? ? hash[key]=[order_pay] : hash[key] << order_pay if value.include? order_pay.order_id
+        end;hash }
       @hash_favor = {}
       pays.each {|key,value| @hash_favor[key]=value.inject(Hash.new){|hash,pay| hash[pay.pay_type].nil? ? hash[pay.pay_type]=pay.price : hash[pay.pay_type] += pay.price;hash }}
+      @sale_names = Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     end
-    @sale_names =Sale.count_sale_orders_search(params[:store_id]).map(&:name)
     render 'sale_orders'
   end
 
@@ -170,7 +186,7 @@ class MarketManagesController < ApplicationController
                                 op.order_id = o.id left join products p on op.product_id = p.id
                                 where opt.pay_type=#{OrderPayType::PAY_TYPES[:SV_CARD]} and
                                 o.status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and
-                                #{started_at_sql} and #{ended_at_sql} group by o.id")
+                                #{started_at_sql} and #{ended_at_sql} and o.store_id = #{params[:store_id]} group by o.id")
 
     @product_hash = OrderProdRelation.order_products(orders)
     @total_price = orders.sum(&:price)
@@ -178,25 +194,40 @@ class MarketManagesController < ApplicationController
   end
 
   def daily_consumption_receipt
-    @search_time = params[:search_time] || Time.now.strftime("%Y-%m-%d")
-    
-    #    @current_day_total = Order.where("created_at <= '#{Time.now}'").
-    #      where("created_at >= '#{Time.now.strftime("%Y-%m-%d")}'").
-    #      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}").sum(:price)
-
-    orders = Order.where("date_format(created_at,'%Y-%m-%d') <= '#{@search_time}'").
-      where("created_at >= '#{@search_time}'").
-      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
+    @c_time = params[:c_time].nil? ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:c_time]
+    @e_time = params[:e_time].nil? ? Time.now.strftime("%Y-%m-%d") : params[:e_time]
+    condit = "status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and store_id = #{params[:store_id]}"
+    unless  @c_time == ""
+      condit += " and date_format(created_at,'%Y-%m-%d') >= '#{@c_time}'"
+    end
+    unless  @e_time == ""
+      condit += " and date_format(created_at,'%Y-%m-%d') <= '#{@e_time}'"
+    end
+    if !params[:return_types].nil?  and  params[:return_types] != ""
+      condit += " and return_types="+params[:return_types]
+      @types = params[:return_types]
+    end
+    orders = Order.where(condit).order("created_at desc")
     @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
     @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
   end
 
   def daily_consumption_receipt_blank
-    @search_time = params[:search_time]
-    @orders = Order.where("date_format(created_at, '%Y-%m-%d') <= '#{@search_time}'").
-      where("created_at >= '#{@search_time}'").
-      where("status = #{Order::STATUS[:BEEN_PAYMENT]} or status = #{Order::STATUS[:FINISHED]}")
+    @c_time = params[:c_time].nil? ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:c_time]
+    @e_time = params[:e_time].nil? ? Time.now.strftime("%Y-%m-%d") : params[:e_time]
+    condit = "status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) and store_id = #{params[:store_id]}"
+    unless  @c_time == ""
+      condit += " and date_format(created_at,'%Y-%m-%d') >= '#{@c_time}'"
+    end
+    unless  @e_time == ""
+      condit += " and date_format(created_at,'%Y-%m-%d') <= '#{@e_time}'"
+    end
+    if !params[:return_types].nil?  and  params[:return_types] != ""
+      condit += " and return_types="+params[:return_types]
+      @types = params[:return_types]
+    end
+    @orders = Order.where(condit).order("created_at desc")
     @product_hash = OrderProdRelation.order_products(@orders)
     @search_total = @orders.sum(:price)
   end
@@ -214,10 +245,16 @@ class MarketManagesController < ApplicationController
   end
 
   def gross_profit
-    @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
-    .where("date_format(created_at,'%Y-%m-%d') = curdate()")
-    .select("distinct orders.*")
-    .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+    orders = Order.includes(:order_prod_relations,:c_pcard_relations =>
+        {:package_card => {:pcard_prod_relations => :product}}).
+      where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
+      where("date_format(created_at,'%Y-%m-%d') = curdate()").
+      select("distinct orders.*").
+      paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+    
+    orders_arr = formatted_order_price(orders)[0]
+    @toal_gross_price = formatted_order_price(orders)[1]
+    @orders = orders_arr.paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
   end
 
   def search_gross_profit
@@ -227,27 +264,31 @@ class MarketManagesController < ApplicationController
     types_sql = params[:prod_types] =="-1" ? nil : "products.types = #{params[:prod_types]}"
    
     @flag = "product"
-    if start_sql.nil? and end_sql.nil?
-        time_sql = "date_format(orders.created_at,'%Y-%m-%d') = curdate()"
-        sql << time_sql
-      end
     if types_sql.nil?
       sql<< start_sql << end_sql
       sql = sql.compact.join(" and ")
-      @orders = Order.includes(:order_prod_relations,:c_pcard_relations => {:package_card => {:pcard_prod_relations => :product}}).where(:status => Order::VALID_STATUS)
-      .where(sql)
-      .select("distinct orders.*")
-      .paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
+      orders = Order.includes(:order_prod_relations,:c_pcard_relations =>
+          {:package_card => {:pcard_prod_relations => :product}}).
+        where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
+        where(sql).
+        select("distinct orders.*")
+
+      orders_arr = formatted_order_price(orders)[0]
+      @toal_gross_price = formatted_order_price(orders)[1]
+      @orders = orders_arr.paginate(:page=>params[:page] || 1,:per_page=> Constant::PER_PAGE )
       @flag = "order"
     else
       sql<< start_sql << end_sql << types_sql
       sql = sql.compact.join(" and ")
-      @orders = Order.joins(:order_prod_relations => :product).where(:status => Order::VALID_STATUS)
-      .where(sql).select("orders.id, date_format(orders.created_at,'%Y-%m-%d') o_created_at, orders.code, products.types").uniq
-      .paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
-      @order_pay_types = OrderPayType.where(:order_id => @orders.map(&:id) ).where("product_id is not null").group_by{|opt| opt.order_id}
-      #      @o_pcard_relations = OPcardRelation.where(:order_id => @orders.map(&:id)).group_by{|opt| opt.order_id}
-      @order_prod_relations = OrderProdRelation.joins(:product).where(:order_id => @orders.map(&:id)).where(types_sql).group_by{|opt| opt.order_id}
+      orders = Order.joins(:order_prod_relations => :product).
+        where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
+        where(sql).select("orders.id, date_format(orders.created_at,'%Y-%m-%d') o_created_at, orders.code, products.types").uniq
+      
+      order_pay_types = OrderPayType.where(:order_id => orders.map(&:id) ).where("product_id is not null").group_by{|opt| opt.order_id}
+      order_prod_relations = OrderProdRelation.joins(:product).where(:order_id => orders.map(&:id)).where(types_sql).group_by{|opt| opt.order_id}
+      orders_arr = format_product_price(orders, order_pay_types, order_prod_relations)[0]
+      @toal_gross_price = format_product_price(orders, order_pay_types, order_prod_relations)[1]
+      @orders = orders_arr.paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE)
     end
   end
 
@@ -275,5 +316,42 @@ class MarketManagesController < ApplicationController
     material_order_svc_returns = SvcReturnRecord.find_by_sql(relation_material_order_sql)
 
     (order_svc_returns + material_order_svc_returns).sort{|a,b| a[:id] <=> b[:id]}
+  end
+
+  def formatted_order_price(orders)
+    orders_arr = []
+    toal_gross_price = 0
+    orders.each do |order|
+      order_hash = {}
+      order_hash[:created_at] = order.created_at
+      order_hash[:id] = order.id
+      order_hash[:code] = order.code
+      order_hash[:cost_price] = order_cost_price(order)
+      order_hash[:price] = order.price
+      order_hash[:gross_profit] = (order_hash[:price] - order_hash[:cost_price]) > 0 ? (order_hash[:price] - order_hash[:cost_price]) : 0
+      orders_arr << order_hash
+      toal_gross_price += order_hash[:gross_profit]
+    end
+    [orders_arr,'%.2f' % toal_gross_price]
+  end
+
+  def format_product_price(orders, order_pay_types, order_prod_relations)
+    order_prod_arrs = []
+    toal_gross_price = 0
+    orders.each do |order|
+      order_prod_relations[order.id].each do |oprr|
+        prod_cost_price =  prod_gross_price(order.id, oprr, order_pay_types)
+        op_hash = {}
+        op_hash[:created_at] = order.o_created_at
+        op_hash[:id] = order.id
+        op_hash[:code] = order.code
+        op_hash[:cost_price] = prod_cost_price[0]
+        op_hash[:price] = prod_cost_price[1]
+        op_hash[:gross_profit] = prod_cost_price[2] > 0 ? prod_cost_price[2] : 0
+        toal_gross_price += op_hash[:gross_profit]
+        order_prod_arrs << op_hash
+      end unless order_prod_relations[order.id].nil?
+    end
+    [order_prod_arrs,toal_gross_price]
   end
 end

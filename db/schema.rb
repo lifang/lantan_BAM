@@ -11,18 +11,29 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130709073850) do
+ActiveRecord::Schema.define(:version => 20130926013253) do
+
+  create_table "back_good_records", :force => true do |t|
+    t.integer  "material_id"
+    t.integer  "material_num"
+    t.integer  "supplier_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "back_good_records", ["material_id"], :name => "index_back_good_records_on_material_id"
 
   create_table "c_pcard_relations", :force => true do |t|
     t.integer  "customer_id"
     t.integer  "package_card_id"
     t.datetime "ended_at"
-    t.boolean  "status"
+    t.integer  "status"
     t.string   "content"
     t.datetime "created_at"
     t.float    "price"
     t.datetime "updated_at"
     t.integer  "order_id"
+    t.integer  "return_types",    :default => 0
   end
 
   add_index "c_pcard_relations", ["customer_id"], :name => "index_c_pcard_relations_on_customer_id"
@@ -43,6 +54,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.string   "verify_code"
     t.integer  "order_id"
     t.boolean  "status"
+    t.integer  "return_types", :default => 0
   end
 
   add_index "c_svc_relations", ["customer_id"], :name => "index_c_svc_relations_on_customer_id"
@@ -100,7 +112,10 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "staff_id"
   end
+
+  add_index "chains", ["staff_id"], :name => "index_chains_on_staff_id"
 
   create_table "chart_images", :force => true do |t|
     t.integer  "store_id"
@@ -173,6 +188,8 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "total_point"
+    t.boolean  "is_vip",      :default => false
   end
 
   add_index "customer_store_relations", ["customer_id"], :name => "index_customer_store_relations_on_customer_id"
@@ -194,6 +211,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.string   "encrypted_password"
     t.string   "username"
     t.string   "salt"
+    t.integer  "total_point"
   end
 
   add_index "customers", ["birthday"], :name => "index_customers_on_birthday"
@@ -220,9 +238,11 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.datetime "updated_at"
     t.integer  "current_day"
     t.integer  "num"
+    t.integer  "station_id"
   end
 
   add_index "equipment_infos", ["created_at"], :name => "index_equipment_infos_on_created_at"
+  add_index "equipment_infos", ["station_id"], :name => "index_equipment_infos_on_station_id"
   add_index "equipment_infos", ["store_id"], :name => "index_equipment_infos_on_store_id"
 
   create_table "goal_sale_types", :force => true do |t|
@@ -294,6 +314,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "check_num"
   end
 
   add_index "mat_depot_relations", ["depot_id"], :name => "index_mat_depot_relations_on_depot_id"
@@ -338,6 +359,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "types",             :limit => 1
+    t.integer  "store_id"
   end
 
   add_index "mat_out_orders", ["created_at"], :name => "index_mat_out_orders_on_created_at"
@@ -347,19 +369,15 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
   add_index "mat_out_orders", ["updated_at"], :name => "index_mat_out_orders_on_updated_at"
 
   create_table "material_losses", :force => true do |t|
-    t.string   "code"
-    t.string   "name"
-    t.integer  "types"
     t.integer  "loss_num"
-    t.string   "specifications"
-    t.float    "price"
-    t.float    "sale_price"
     t.integer  "staff_id"
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "material_id"
   end
 
+  add_index "material_losses", ["material_id"], :name => "index_material_losses_on_material_id"
   add_index "material_losses", ["staff_id"], :name => "index_material_losses_on_staff_id"
 
   create_table "material_orders", :force => true do |t|
@@ -399,12 +417,12 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "store_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "remark",     :limit => 1000
+    t.string   "remark",       :limit => 1000
     t.integer  "check_num"
     t.float    "sale_price"
     t.string   "unit"
-    t.boolean  "is_ignore",                  :default => false
-    t.integer  "low_count"
+    t.boolean  "is_ignore",                    :default => false
+    t.integer  "material_low"
     t.string   "code_img"
   end
 
@@ -513,6 +531,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.datetime "updated_at"
     t.float    "total_price"
     t.float    "t_price"
+    t.integer  "return_types", :default => 0
   end
 
   add_index "order_prod_relations", ["created_at"], :name => "index_order_prod_relations_on_created_at"
@@ -532,7 +551,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.boolean  "is_billing"
     t.integer  "front_staff_id"
     t.integer  "cons_staff_id_1"
-    t.string   "cons_staff_id_2"
+    t.integer  "cons_staff_id_2"
     t.integer  "station_id"
     t.integer  "sale_id"
     t.integer  "c_pcard_relation_id"
@@ -544,6 +563,12 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.datetime "updated_at"
     t.integer  "customer_id"
     t.string   "qfpos_id"
+    t.datetime "auto_time"
+    t.integer  "return_types",        :default => 0
+    t.integer  "return_direct"
+    t.float    "return_fee",          :default => 0.0
+    t.integer  "return_staff_id"
+    t.integer  "return_reason"
   end
 
   add_index "orders", ["c_pcard_relation_id"], :name => "index_orders_on_c_pcard_relation_id"
@@ -573,14 +598,30 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "price"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "date_types", :default => 0
+    t.integer  "date_types",     :default => 0
     t.integer  "date_month"
+    t.boolean  "is_auto_revist"
+    t.integer  "auto_time"
+    t.text     "revist_content"
+    t.integer  "prod_point"
+    t.string   "description"
   end
 
   add_index "package_cards", ["created_at"], :name => "index_package_cards_on_created_at"
   add_index "package_cards", ["status"], :name => "index_package_cards_on_status"
   add_index "package_cards", ["store_id"], :name => "index_package_cards_on_store_id"
   add_index "package_cards", ["updated_at"], :name => "index_package_cards_on_updated_at"
+
+  create_table "pcard_material_relations", :force => true do |t|
+    t.integer  "material_id"
+    t.integer  "material_num"
+    t.integer  "package_card_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "pcard_material_relations", ["material_id"], :name => "index_pcard_material_relations_on_material_id"
+  add_index "pcard_material_relations", ["package_card_id"], :name => "index_pcard_material_relations_on_package_card_id"
 
   create_table "pcard_prod_relations", :force => true do |t|
     t.integer  "product_id"
@@ -594,6 +635,19 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
   add_index "pcard_prod_relations", ["package_card_id"], :name => "index_pcard_prod_relations_on_package_card_id"
   add_index "pcard_prod_relations", ["product_id"], :name => "index_pcard_prod_relations_on_product_id"
   add_index "pcard_prod_relations", ["updated_at"], :name => "index_pcard_prod_relations_on_updated_at"
+
+  create_table "points", :force => true do |t|
+    t.integer  "customer_id"
+    t.integer  "target_id"
+    t.integer  "point_num"
+    t.string   "target_content"
+    t.integer  "types"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "points", ["customer_id"], :name => "index_points_on_customer_id"
+  add_index "points", ["target_id"], :name => "index_points_on_target_id"
 
   create_table "prod_mat_relations", :force => true do |t|
     t.integer  "product_id"
@@ -631,6 +685,9 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.boolean  "is_auto_revist"
     t.integer  "auto_time"
     t.text     "revist_content"
+    t.integer  "prod_point"
+    t.float    "deduct_price"
+    t.boolean  "show_on_ipad",   :default => true
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"
@@ -699,6 +756,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "menu_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "role_menu_relations", ["created_at"], :name => "index_role_menu_relations_on_created_at"
@@ -708,10 +766,11 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
 
   create_table "role_model_relations", :force => true do |t|
     t.integer  "role_id"
-    t.integer  "num"
+    t.integer  "num",        :limit => 8
     t.string   "model_name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "role_model_relations", ["created_at"], :name => "index_role_model_relations_on_created_at"
@@ -722,6 +781,8 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
+    t.integer  "role_type"
   end
 
   add_index "roles", ["created_at"], :name => "index_roles_on_created_at"
@@ -813,6 +874,15 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
   add_index "send_messages", ["status"], :name => "index_send_messages_on_status"
   add_index "send_messages", ["updated_at"], :name => "index_send_messages_on_updated_at"
 
+  create_table "shared_materials", :force => true do |t|
+    t.string   "code"
+    t.string   "name"
+    t.integer  "types",      :limit => 1
+    t.string   "unit"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "staff_gr_records", :force => true do |t|
     t.integer  "staff_id"
     t.integer  "level"
@@ -872,6 +942,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.float    "probation_salary"
     t.boolean  "is_deduct"
     t.integer  "probation_days"
+    t.string   "validate_code"
   end
 
   add_index "staffs", ["level"], :name => "index_staffs_on_level"
@@ -898,11 +969,13 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "current_day"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "station_staff_relations", ["current_day"], :name => "index_station_staff_relations_on_current_day"
   add_index "station_staff_relations", ["staff_id"], :name => "index_station_staff_relations_on_staff_id"
   add_index "station_staff_relations", ["station_id"], :name => "index_station_staff_relations_on_station_id"
+  add_index "station_staff_relations", ["store_id"], :name => "index_station_staff_relations_on_store_id"
   add_index "station_staff_relations", ["updated_at"], :name => "index_station_staff_relations_on_updated_at"
 
   create_table "stations", :force => true do |t|
@@ -923,6 +996,10 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.string   "month_hmi"
     t.string   "once_gas_use"
     t.string   "once_water_use"
+    t.boolean  "is_has_controller"
+    t.integer  "staff_level"
+    t.integer  "staff_level1"
+    t.string   "code"
   end
 
   add_index "stations", ["status"], :name => "index_stations_on_status"
@@ -954,10 +1031,14 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.integer  "city_id"
     t.integer  "status"
     t.integer  "material_low"
+    t.string   "code"
+    t.integer  "edition_lv"
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"
+  add_index "stores", ["code"], :name => "index_stores_on_code"
   add_index "stores", ["created_at"], :name => "index_stores_on_created_at"
+  add_index "stores", ["edition_lv"], :name => "index_stores_on_edition_lv"
   add_index "stores", ["status"], :name => "index_stores_on_status"
 
   create_table "suppliers", :force => true do |t|
@@ -1049,6 +1130,43 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
   add_index "syncs", ["sync_at"], :name => "index_syncs_on_sync_at"
   add_index "syncs", ["updated_at"], :name => "index_syncs_on_updated_at"
 
+  create_table "total_msgs", :force => true do |t|
+    t.string   "shop"
+    t.integer  "msgnum"
+    t.string   "msg1"
+    t.string   "msg2"
+    t.string   "msg3"
+    t.string   "msg4"
+    t.string   "msg5"
+    t.string   "msg6"
+    t.string   "msg7"
+    t.string   "msg8"
+    t.string   "msg9"
+    t.string   "msg10"
+    t.string   "msg11"
+    t.string   "msg12"
+    t.string   "msg13"
+    t.string   "msg14"
+    t.string   "msg15"
+    t.string   "msg16"
+    t.string   "msg17"
+    t.string   "msg18"
+    t.string   "msg19"
+    t.string   "msg20"
+    t.string   "msg21"
+    t.string   "msg22"
+    t.string   "msg23"
+    t.string   "msg24"
+    t.string   "msg25"
+    t.string   "msg26"
+    t.string   "msg27"
+    t.string   "msg28"
+    t.string   "msg29"
+    t.string   "msg30"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "train_staff_relations", :force => true do |t|
     t.integer  "train_id"
     t.integer  "staff_id"
@@ -1123,6 +1241,7 @@ ActiveRecord::Schema.define(:version => 20130709073850) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.float    "gas_num"
+    t.integer  "cost_time"
   end
 
   add_index "work_orders", ["current_day"], :name => "index_work_orders_on_current_day"

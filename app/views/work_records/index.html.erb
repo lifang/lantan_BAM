@@ -1,0 +1,37 @@
+<div class="main">
+    <div class="box">
+         <div class="data_box">
+           <div class="data_body_p" style="padding: 0 10px 0px 10px;float:left">员工出勤统计：<%= Time.now.strftime("%Y-%m-%d") %></div>
+              
+              <input type="hidden" value="<%= @store.id %>" id="store_id"/>
+              <div class="clear"></div>
+              <div class="data_body" id="staff_info">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="staffs_table">
+                  <thead>
+                    <tr class="hbg">
+                      <th>姓名</th>
+                      <th>职务</th>
+                      <th>等级</th>
+                      <th>出勤情况</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% @staffs.each do |staff| %>
+                    <tr>
+                      <td><%= staff.name %></td>
+                      <td><%= Staff::N_COMPANY[staff.type_of_w] %></td>
+                      <td><%= Staff::LEVELS[staff.level] %></td>
+                      <td><%= get_work_record(staff) %></td>
+                    </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+                <%= will_paginate @staffs, :class => "pageTurn", :previous_label => "上一页",
+                  :next_label => "下一页" %>
+              </div>
+         </div>
+    </div>
+
+</div>
+<div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
+

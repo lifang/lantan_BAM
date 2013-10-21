@@ -29,10 +29,10 @@
 
     <div class="data_body_title">
       <h2 class="data_body_h">
-        上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints/satisfy_degree"><%= "#{satisfy}%" %></a>&nbsp;&nbsp;&nbsp;
-        上月门店不满意度 ：<a href="/stores/<%= @store.id %>/complaints"><%= "#{100-satisfy}%" %></a>
+        上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints/satisfy_degree"><%= "#{satisfy[0]}%" %></a>&nbsp;&nbsp;&nbsp;
+        上月门店不满意度 ：<a href="/stores/<%= @store.id %>/complaints"><%= "#{satisfy[1]}%" %></a>
       </h2>
-      <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries %></span>位</p>
+      <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries if @customers %></span>位</p>
     </div>
     <div class="data_menu">
       <% if permission?(controller.controller_name.to_sym, :create) %>
@@ -52,29 +52,35 @@
             </tr>
           </thead>
           <tbody>
-            <% @customers.each do |customer| %>
-              <tr>
-                <td width="25%" class="wordBreak">
-                  <% @car_nums[customer.id].each_with_index do |cn, index| %>
-                  <span><%= cn.num %><% if index < (@car_nums[customer.id].length - 1) %>，<% end %></span>
-                <% end if @car_nums[customer.id] %>
-                </td>
-                <td width="25%" class="wordBreak"><%= customer.name %></td>
-                <td width="20%" class="wordBreak"><%= customer.mobilephone %></td>
-                <td width="10%" class="wordBreak"><%= customer.is_vip ? "是" : "否"  %></td>
-                <td width="20%" class="wordBreak">
-                  <% if permission?(controller.controller_name.to_sym, :detail) %><a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a><% end %>
-                  <a href="javascript:void(0)" onclick="customer_mark(<%= customer.id %>)">备注</a>
-                  <% if permission?(controller.controller_name.to_sym, :send_msg) %><a href="javascript:void(0)" onclick="single_send_message(<%= customer.id %>)">发短信</a><% end %>
-                  <% if permission?(controller.controller_name.to_sym, :delete) %><%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
-                      :confirm => "您确认要删除 #{customer.name} 信息么？" %><% end %>
-                  <div id="mark_<%= customer.id %>" style="display: none;"><%= customer.mark %></div>
-                </td>
-              </tr>
+            <% if @customers.any? %>
+              <% @customers.each do |customer| %>
+                <tr>
+                  <td width="25%" class="wordBreak">
+                    <% @car_nums[customer.id].each_with_index do |cn, index| %>
+                      <span><%= cn.num %><% if index < (@car_nums[customer.id].length - 1) %>，<% end %></span>
+                    <% end if @car_nums[customer.id] %>
+                  </td>
+                  <td width="25%" class="wordBreak"><%= customer.name %></td>
+                  <td width="20%" class="wordBreak"><%= customer.mobilephone %></td>
+                  <td width="10%" class="wordBreak">
+                    <%= (@is_vips and @is_vips[customer.id] and @is_vips[customer.id][0].is_vip) ? "是" : "否" %>
+                  </td>
+                  <td width="20%" class="wordBreak">
+                    <% if permission?(controller.controller_name.to_sym, :detail) %><a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a><% end %>
+                    <% if permission?(controller.controller_name.to_sym, :remark) %><a href="javascript:void(0)" onclick="customer_mark(<%= customer.id %>)">备注</a><% end %>
+                    <% if permission?(controller.controller_name.to_sym, :send_msg) %><a href="javascript:void(0)" onclick="single_send_message(<%= customer.id %>)">发短信</a><% end %>
+                    <% if permission?(controller.controller_name.to_sym, :delete) %><%= link_to "删除", "/stores/#{@store.id}/customers/#{customer.id}", :method => :delete,
+                        :confirm => "您确认要删除 #{customer.name} 信息么？" %><% end %>
+                    <div id="mark_<%= customer.id %>" style="display: none;"><%= customer.mark %></div>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr><td colspan="5">暂无客户信息</td></tr>
             <% end %>
           </tbody>
         </table>
-        <%=  will_paginate @customers , :previous_label=>" 上一页", :next_label=>" 下一页", :class => "pageTurn" %>
+        <%=  will_paginate @customers , :previous_label=>" 上一页", :next_label=>" 下一页", :class => "pageTurn" if @customers.any? %>
       </div>
     </div>
   </div>

@@ -6,26 +6,13 @@ LantanBAM::Application.routes.draw do
       post "upload_image"
     end
   end
-  resources :materials_losses do
-    collection do
-      post 'add'
-      get 'delete','view'
-    end
-  end
-  resources :work_orders do
-    collection do
-      get "work_orders_status"
-    end
-  end
+
   resources :package_cards do
     member do
       post :delete_pcard
     end
   end
   resources :stations do
-    collection do
-      get "simple_station"
-    end
   end
 
   # The priority is based upon order of creation:
@@ -33,12 +20,13 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins do
     collection do
-      get "logout"
+      get "logout", "send_validate_code"
+      post "forgot_password"
     end
   end
   match "logout" => "logins#logout"
   resources :stores do
-    resources :depots
+    #resources :depots
     resources :market_manages do
       collection do
         get "makets_totals","makets_list","makets_reports","makets_views","makets_goal",
@@ -52,7 +40,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post "search","search_degree","detail_s","search_time","degree_time","consumer_search"
         get "search_list","show_detail","satisfy_degree","degree_list","detail_list","date_list","time_list","consumer_list"
-        get "con_list"
+        get "con_list","cost_price"
       end
       member do
         get "complaint_detail"
@@ -60,8 +48,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :stations do
       collection do
-        get "show_detail","show_video","see_video","search_video"
-        post "search"
+        get "show_detail","show_video","see_video","search_video", "simple_station"
+        post "search","collect_info"
       end
     end
     resources :sales do
@@ -78,12 +66,12 @@ LantanBAM::Application.routes.draw do
         get "sale_records","search_list"
       end
       member do
-        post "edit_pcard","update_pcard"
+        post "edit_pcard","update_pcard","request_material"
       end
     end
     resources :products do
       collection do
-        post "edit_prod","add_prod","add_serv","serv_create","load_material"
+        post "edit_prod","add_prod","add_serv","serv_create","load_material","update_status"
         get "prod_services"
       end
       member do
@@ -93,10 +81,12 @@ LantanBAM::Application.routes.draw do
     resources :materials do
       collection do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
-          "print","cuihuo","cancel_order","page_outs","page_ins","page_head_orders","page_supplier_orders",
+          "print","cuihuo","cancel_order","page_outs","page_ins","page_back_records","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
-          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit"
-        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit"
+          "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
+          "mat_loss_delete","mat_loss","back_good","back_good_search","back_good_commit"
+        post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
+          "mat_loss_add","modify_code"
       end
       member do
         get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"
@@ -106,10 +96,10 @@ LantanBAM::Application.routes.draw do
 
     resources :staffs do
       collection do
-        post "search", "update_info"
-        get "edit_info"
+        post "search"
       end
     end
+    resources :work_records
     resources :violation_rewards
     resources :trains
     resources :month_scores do
@@ -119,11 +109,18 @@ LantanBAM::Application.routes.draw do
     end
     resources :salaries
     resources :current_month_salaries
-    resources :material_order_manages
+    resources :material_order_manages do
+      collection do
+        get "mat_in_or_out_query", "search_mat_in_or_out","page_ins","page_outs",
+          "unsalable_materials","search_unsalable_materials","page_unsalable_materials",
+          "page_unsalable_materials"
+      end
+    end
     resources :staff_manages do
       collection do
         get "get_year_staff_hart"
         get "average_score_hart"
+        get "average_cost_detail_summary"
       end
     end
 
@@ -137,7 +134,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :welcomes do
       collection do
-        post "edit_store_name"
+        post "edit_store_name", "update_staff_password"
       end
     end
     resources :customers do
@@ -169,19 +166,31 @@ LantanBAM::Application.routes.draw do
       end
     end
 
-    
+    resources :set_stores do
+      collection do
+        get "edit"
+        get "select_cities"
+      end
+    end
     resources :station_datas
     resources :sv_cards do
       collection do
         get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
       end
+    end
+    resources :materials_in_outs
+
+    resources :work_orders do
+      collection do
+        get "work_orders_status"
+      end
+    end
   end
-  end
-  resources :materials_in_outs
-  match 'stores/:id/materials_in' => 'materials_in_outs#materials_in'
-  match 'stores/:id/materials_out' => 'materials_in_outs#materials_out'
+  
+  match 'stores/:store_id/materials_in' => 'materials_in_outs#materials_in'
+  match 'stores/:store_id/materials_out' => 'materials_in_outs#materials_out'
   match 'get_material' => 'materials_in_outs#get_material'
-  match 'create_materials_in' => 'materials_in_outs#create_materials_in'
+  match 'stores/:store_id/create_materials_in' => 'materials_in_outs#create_materials_in'
   match 'create_materials_out' => 'materials_in_outs#create_materials_out'
   match 'save_cookies' => 'materials_in_outs#save_cookies'
   match 'stores/:store_id/materials/:mo_id/get_mo_remark' => 'materials#get_mo_remark'
@@ -193,11 +202,16 @@ LantanBAM::Application.routes.draw do
   match 'stores/:store_id/materials_losses/add' => 'materials_losses#add'
   match 'stores/:store_id/materials_losses/delete' => 'materials_losses#delete'
   match 'stores/:store_id/materials_losses/view' => 'materials_losses#view'
+  match 'materials/search_by_code' => 'materials#search_by_code'
+
+  #match 'stores/:store_id/depots' => 'depots#index'
+  #match 'stores/:store_id/depots/create' => 'depots#create'
   match 'stores/:store_id/depots' => 'depots#index'
+  match 'stores/:store_id/check_mat_num' => 'materials#check_mat_num'
   resources :customers do
     collection do
-      post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num"
-      get "show_revisit_detail"
+      post "get_car_brands", "get_car_models", "check_car_num", "check_e_car_num","return_order","operate_order"
+      get "show_revisit_detail","print_orders"
     end
     member do
       post "edit_car_num"
@@ -221,11 +235,20 @@ LantanBAM::Application.routes.draw do
     end
   end
   
+  resources :work_orders do
+    collection do
+      post "login"
+    end
+  end
+
   namespace :api do
     resources :orders do
       collection do
         post "login","add","pay","complaint","search_car","send_code","index_list","brands_products","finish",
-          "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard","use_svcard"
+          "confirm_reservation","refresh","pay_order","checkin", "show_car", "sync_orders_and_customer","get_user_svcard",
+          "use_svcard","work_order_finished","login_and_return_construction_order","check_num","out_materials",
+          "get_construction_order","search_by_car_num2","materials_verification","get_lastest_materails","stop_construction",
+          "search_material"
       end
     end
     resources :syncs_datas do
@@ -235,6 +258,23 @@ LantanBAM::Application.routes.draw do
       member do
         get :return_sync_all_to_db
       end
+    end
+    resources :logins do
+      collection do
+        post :check_staff,:staff_login,:staff_checkin,:upload_img,:recgnite_pic
+        get :download_staff_infos
+      end
+    end
+    resources :licenses_plates do
+      collection do
+        post :upload_file
+        get :send_file
+      end
+    end
+  end
+  resources :return_backs do
+    collection do
+      get :return_info, :return_msg, :generate_b_code
     end
   end
 

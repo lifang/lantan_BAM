@@ -36,7 +36,7 @@
              <%# if @material_order.svc_use_price.blank? %>
                 <!--<li><%#= check_box_tag "use_card",@use_card_count.to_f,false, :onclick => "use_sale(this, 'sav')" %>本店累计使用储值卡<%#= @use_card_count.to_f() %>元，使用<%#= text_field_tag "sav_price", nil, :onkeyup => "removeChecked(this)" %>元来抵货款</li>-->
              <%# end %>
-              <% if @material_order.sale_price.blank? %>
+              <% if @material_order.sale_price.blank? and @material_order.supplier_type == 0 %>
                 <li><%= check_box_tag "use_code","",false, :onclick => "use_sale(this, 'sale')" %>使用活动代码<%= text_field_tag "act_code","",{:onblur => "get_act_count(this, #{@material_order.id})"} %><span id="use_code_count" class="red"></span>
                 <%= hidden_field_tag "sale_id", nil %>
                 </li>
@@ -54,11 +54,11 @@
           <%= hidden_field_tag "pay_order_type", @material_order.supplier_type %>
           <%= hidden_field_tag "if_refresh", "0"%>
           <div class="fukuan_btn">
-            <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('final_fukuan_tab', 1,<%= @current_store.id %>)"></a></span>
+            <span><a href="javascript:void(0)" class="zfb" onclick="pay_material_order('final_fukuan_tab', 1,<%= @current_store.id %>, this)"></a></span>
             <span><button class="confirm_btn" type="button" onclick="if(confirm('确认已付款了吗？')){pay_material_order('final_fukuan_tab', 3, <%= @current_store.id %>, this)}">现金</button></span>
             <span><button class="confirm_btn" type="button" onclick="pay_material_order('final_fukuan_tab', 5, <%= @current_store.id %>, this)">货到付款</button></span>
             <% if @material_order.supplier_type == 0 %>
-              <span id="mendian_account"><button class="confirm_btn" type="button" onclick="pay_material_order('final_fukuan_tab', 4, <%= @current_store.id %>, this)">门店账户扣款</button><em id="rest_count">（余额：<%= @store_account.to_f %>）</em></span>
+              <span id="mendian_account"><button class="confirm_btn" type="button" onclick="pay_material_order('final_fukuan_tab', 4, <%= @current_store.id %>, this)">门店账户扣款</button><em id="rest_count">（余额：<span><%= @store_account.to_f %></span>）</em></span>
             <% end %>
           </div>
           <div class="clear"></div>

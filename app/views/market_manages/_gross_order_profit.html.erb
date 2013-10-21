@@ -26,24 +26,23 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
         <thead>
           <tr class="hbg">
-            <td>日期</td>
-            <td>相关订单</td>
-            <td>成本价</td>
-            <td>零售价</td>
-            <td>毛利</td>
+            <th width="200">日期</th>
+            <th width="250">相关订单</th>
+            <th width="180">成本价</th>
+            <th width="180">零售价</th>
+            <th width="170">毛利</th>
           </tr>
         </thead>
         <tbody>
           <% @orders.each do |order| %>
-          <% order_cost_price = order_cost_price(order) %>
             <tr class="<%= cycle("","tbg")%>">
-              <td><%= order.created_at.strftime("%Y-%m-%d") if order.created_at %></td>
+              <td><%= order[:created_at].strftime("%Y-%m-%d") if order[:created_at] %></td>
               <td>
-              <%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
+              <%= link_to "#{order[:code]}", "/orders/#{order[:id]}/order_info" ,
             :remote => "true", "data-type" => "script", :class => "other_a" %></td>
-              <td><%= format("%.2f",order_cost_price) %></td>
-              <td><%= format("%.2f",order.price) %></td>
-              <td><%= format("%.2f",(order.price.to_f - order_cost_price.to_f) > 0 ? (order.price.to_f - order_cost_price.to_f) : 0) %></td>
+              <td><%= format("%.2f", order[:cost_price]) %></td>
+              <td><%= format("%.2f", order[:price]) %></td>
+              <td><%= format("%.2f", order[:gross_profit]) %></td>
             </tr>
           <% end %>
         </tbody>

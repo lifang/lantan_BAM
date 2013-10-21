@@ -56,7 +56,7 @@ module Constant
       :edit_supplier => ["编辑供应商",134217728],
       :material_loss_add => ["添加库存报损",268435456],
       :material_loss_delete => ["删除库存报损",536870912],
-      :material_loss_modify => ["修改库存报损",1073741824],
+      :modify_mat_code => ["修改条形码",1073741824]
     },
     :staffs => {
       :name => "员工",
@@ -75,8 +75,8 @@ module Constant
       :manager_score => ["店长打分",4096],
       :del_salary => ["删除工资",8192],
       :deal_violation => ["处理奖励违规",16384],
-      :search_staff => ["搜索员工", 32768]
-
+      :search_staff => ["搜索员工", 32768],
+      :phone_inventory => ["手机出库盘点", 65536]
     },
     :datas => {
       :name => "统计",
@@ -96,7 +96,12 @@ module Constant
       :kucun => ["库存订货统计", 8192],
       :jixiao => ["员工绩效统计", 16384],
       :shuip => ["员工平均水平统计", 32768],
-      :print => ["打印单据", 65536]
+      :print => ["打印单据", 65536],
+      :chengben => ["成本统计",131072],
+      :ruchuku => ["入/出库统计",262144],
+      :zhixiao => ["滞销统计",524288],
+      :ave_cost_detail => ["平均成本明细统计", 1048576],
+      :staff_detail => ["员工成本明细", 1048576*2]
     },
     :stations => {
       :name => "现场",
@@ -140,9 +145,11 @@ module Constant
       :edit_role => ["编辑角色",128],
       :del_role => ["删除角色",256],
       :role_role_set => ["角色设定",512],
-      :new_depot => ["新建仓库",1024],
-      :edit_depot => ["编辑仓库",2048],
-      :del_depot => ["删除仓库",4096]
+      
+      #:new_depot => ["新建仓库",1024],
+      #:edit_depot => ["编辑仓库",2048],
+      #:del_depot => ["删除仓库",4096],
+      :edit_store_datas => ["设置门店信息", 8192]
     }
   }
 
@@ -181,7 +188,7 @@ module Constant
   
   SERVER_PATH = "http://bam.gankao.co"
   #  SERVER_PATH = "http://192.168.1.100:3001"
-  HEAD_OFFICE_API_PATH = "http://headoffice.gankao.co/"
+  HEAD_OFFICE_API_PATH = "http://116.255.135.175:3005/"
   #  HEAD_OFFICE_API_PATH = "http://192.168.1.100:3002/"
 
   HEAD_OFFICE = HEAD_OFFICE_API_PATH + "syncs/upload_file"
@@ -190,6 +197,8 @@ module Constant
   PCARD_PICS = "pcard_pics"
   SALE_PICS = "sale_pics"
   SVCARD_PICS = "svcardimg"
+  STORE_PICS = "storeimg"
+  STORE_PICSIZE = [1000,50]
   #产品和活动的类别  图片名称分别为 product_pics 和service_pics
   PRODUCT = "PRODUCT"
   SERVICE = "SERVICE"
@@ -198,9 +207,9 @@ module Constant
 
   PIC_SIZE =1024  #按kb计算
   DATE_YEAR = 1990
-  STORE_PICSIZE = [1000,50]
+  
   #消费金额区间段
-  CONSUME_P = {"0-1000"=>"o.price>0 and o.price <=1000","1000-5000"=>"o.price>1000 and o.price <=5000",
+  CONSUME_P = {"0-1000"=>"o.price>=0 and o.price <=1000","1000-5000"=>"o.price>1000 and o.price <=5000",
     "5000-10000"=>"o.price > 5000 and o.price <=10000","10000以上"=>"o.price > 10000"}
   PRE_DAY = 15
   ##    上面修改部分 在此处添加

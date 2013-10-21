@@ -1,20 +1,19 @@
-<% if @status == 2 %>
-tishi_alert("编辑失败，当前门店已有相同条形码的物料存在!");
-<% elsif @status == 0 %>
-tishi_alert("编辑失败!");
-<% else %>
-tishi_alert("编辑成功!");
+<%if @status == 2 %>
+tishi_alert("<%= @flash_notice.html_safe() %>");
+$(".edit_material #material_ce_bn").attr('disabled', false);
+<% elsif @status == 0 || @status == 1%>
+tishi_alert("<%= @flash_notice.html_safe() %>");
 
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(1)").text("<%= @material.code %>");
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(2)").text("<%= @material.name %>");
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(3)").text("<%= Material::TYPES_NAMES[@material.types.to_i] %>");
-$("#showmaterial<%= @material.id %>tr").find("td:nth-child(4)").text("<%= @material.is_ignore || @material.storage.to_i > @current_store.material_low.to_i ? '存货' : '缺货' %>");
+$("#showmaterial<%= @material.id %>tr").find("td:nth-child(4)").text("<%= @material.is_ignore || @material.storage.to_i > @material.material_low.to_i ? '存货' : '缺货' %>");
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(6)").text("<%= @material.unit %>");
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(7)").text("<%= @material.price %>");
 $("#showmaterial<%= @material.id %>tr").find("td:nth-child(8)").text("<%= @material.sale_price %>");
 $("#showmaterial<%= @material.id %>span").text(<%= @material.storage %>);
 
-<% if @material.storage <= @current_store.material_low.to_i %>       <!--如果小于预警值，则要加上信息提示-->
+<% if @material.storage <= @material.material_low.to_i %>       <!--如果小于预警值，则要加上信息提示-->
 
 $("#showmaterial<%= @material.id %>tr").find("td:first").removeAttr("class");
 $("#showmaterial<%= @material.id %>tr").find("td:first").attr("class", "data_table_error");

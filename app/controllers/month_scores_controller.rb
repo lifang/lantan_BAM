@@ -15,8 +15,12 @@ class MonthScoresController < ApplicationController
 
   def update_sys_score
     month_score = MonthScore.find_by_id(params[:month_score_id])
-    month_score.update_attribute(:sys_score, params[:sys_score]) if month_score
-    render :text => "success"
+    if month_score
+      month_score.update_attribute(:sys_score, params[:sys_score])
+      render :text => "success"
+    else
+      render :text => "error"
+    end
   end
 
   private

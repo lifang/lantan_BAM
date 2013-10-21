@@ -37,7 +37,7 @@
                   :remote => "true", "data-type" => "script", :class => "other_a" %>
                 </td>
                 <td>
-                  <% if @product_hash[order.id].length != 0 %>
+                  <% if !@product_hash[order.id].nil? && @product_hash[order.id].length != 0 %>
                   <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
                     <tr class="fws">
                       <td>服务名称</td>
@@ -68,6 +68,6 @@
   </div>
 </div>
 </div>
-<div class="foot"><p>Copyright © 2013 杭州澜泰 版权所有</p></div>
+<div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
 <div class="maskOne"></div>
 <div id="related_order_div"></div>

@@ -1,0 +1,28 @@
+<div class="item">
+  <label><span class='red'>*</span>物料名称：</label>
+  <%= text_field_tag 'material[name]', material.name %>
+</div>
+<div class="item">
+  <label><span class='red'>*</span>物料类型：</label>
+  <%= select("material", "types",  Material::TYPES_NAMES.invert, {:prompt => "请选择"}) %>
+  <%#= f.select :types, Material::TYPES_NAMES.invert,{:prompt => "请选择"} %>
+</div>
+<div class="item">
+  <label><span class='red'>*</span>成本价：</label>
+  <%= text_field_tag 'material[price]', nil %>
+</div>
+<div class="item">
+  <label><span class='red'>*</span>零售价：</label>
+  <%= text_field_tag 'material[sale_price]', nil %>
+</div>
+<div class="item">
+  <label><span class='red'>*</span>规格：</label>
+  <%= text_field_tag 'material[unit]', material.unit,  :placeholder => "件" %>
+</div>
+<div class="item">
+  <label><input type="radio" name="material[ifuse_code]" class="new_code" value="0" checked="checked" onclick="enableNextInput(this, false)" />自动生成条码：</label>
+</div>
+<div class="item" style="float: right">
+  <label><input type="radio" name="material[ifuse_code]" class="old_code" value="1" onclick="enableNextInput(this, true)"/>使用已有条码：</label>
+  <input name="material[code_value]" id="use_existed_code" value="<%= material.try(:code) %>" disabled="true" type="text"/>
+</div>
