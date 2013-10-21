@@ -290,31 +290,31 @@ function return_order(o_id,c_id){
 }
 
 function operate_order(){
-    var total = $("#return tr");
+    var total = $("#return input");
     var t_fee = $("#sub_content").val();
     if (t_fee == "" || t_fee.length==0 || isNaN(parseFloat(t_fee)) || parseFloat(t_fee)<0){
         tishi_alert("请输入退单折价");
         return false;
     }
     if (confirm("确定要退单吗？")){
-        var types = [];
         var reason = $("#return_reason option:selected").val();
         var direct = $("input[name='direct']:checked").val();
         var post_data = {
             order_id : $("#order_id").val(),
             reason : reason,
             direct : direct,
-            account : t_fee
+            account : t_fee,
+            types : $("#p_types").val()
         };
         for(var i=0; i < total.length; i++){
+            alert(total[i].value);
             if (post_data[total[i].id.split("|")[0]]==null){
-                post_data[total[i].id.split("|")[0]] = total[i].value
-                types.push(total[i].id.split("|")[0])
+                post_data[total[i].id.split("|")[0]] = total[i].value;
             }else{
-                post_data[total[i].id.split("|")[0]] += ","+total[i].value
+                post_data[total[i].id.split("|")[0]] += ","+total[i].value;
             }
+            alert(post_data[total[i].id.split("|")[0]]);
         }
-        post_data["types"] = types.join(",")
         $.ajax({
             async:true,
             dataType: "json",

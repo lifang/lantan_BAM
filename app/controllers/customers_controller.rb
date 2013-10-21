@@ -282,8 +282,9 @@ class CustomersController < ApplicationController
     params[:types].split(",").each {|types|
       params[:"#{types}"].split(",").each do |type_id|
         m_model = types.split("#")
+        model_name =  m_model[1] == "service" ? "product" : m_model[1]
         eval(m_model[0].split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize}).where({:order_id=>params[:order_id],
-            :"#{m_model[1]}_id"=> type_id}).first.update_attributes(:return_types=>Order::IS_RETURN[:YES])
+            :"#{model_name}_id"=> type_id}).first.update_attributes(:return_types=>Order::IS_RETURN[:YES])
       end }
     order = Order.find(params[:order_id])
     order.update_attributes(:return_reason=>params[:reason],:return_types=>Order::IS_RETURN[:YES],:price => (order.price.nil? ? 0 : order.price) - params[:account].to_f,
@@ -303,7 +304,7 @@ class CustomersController < ApplicationController
     end
     if params[:direct].to_i == Order::O_RETURN[:REUSE]
       Material.find(materials.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ materials[mat.id])}
-    else     
+    else
       materials.each {|k,v|MaterialLoss.create(:loss_num=>v,:staff_id => cookies[:user_id],:store_id=>order.store_id,:material_id => k)}
     end
     render :json =>{:msg=>order.code}
