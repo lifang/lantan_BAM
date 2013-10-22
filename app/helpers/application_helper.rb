@@ -194,7 +194,7 @@ module ApplicationHelper
     orders.map{|order|
       work_order = WorkOrder.find_by_order_id(order.id)
       service_name = Order.find_by_sql("select p.name p_name from orders o inner join order_prod_relations opr on opr.order_id=o.id inner join
-            products p on p.id=opr.product_id where p.is_service=#{Product::PROD_TYPES[:SERVICE]}").map(&:p_name)
+            products p on p.id=opr.product_id where p.is_service=#{Product::PROD_TYPES[:SERVICE]} and o.id = #{order.id}").map(&:p_name).compact.uniq
       order[:wo_started_at] = (work_order && work_order.started_at && work_order.started_at.strftime("%Y-%m-%d %H:%M:%S")) || ""
       order[:wo_ended_at] = (work_order && work_order.ended_at && work_order.ended_at.strftime("%Y-%m-%d %H:%M:%S")) || ""
       order[:car_num] = order.car_num.try(:num)
