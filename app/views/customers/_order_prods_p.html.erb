@@ -31,7 +31,6 @@
                 <td><%= p.name %></td>
                 <td><%= p.price %></td>
                 <td><%= p.pro_num %></td>
-                <td><%= Order::RETURN[p.return_types] %></td>
               </tr>
             <% end if @product_hash[order.id] %>
           </table>

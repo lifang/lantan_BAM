@@ -490,7 +490,6 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       end if prod_ids && carNum && customer && from_pcard==1
 
       #用户相关的打折卡
-<<<<<<< HEAD
       discont_card = CSvcRelation.find(:all, :select => "c_svc_relations.*",
         :conditions => ["c_svc_relations.customer_id = ? and c_svc_relations.status = ? and s.types= ?", customer.id, CSvcRelation::STATUS[:valid], SvCard::FAVOR[:DISCOUNT]],
         :joins => ["inner join sv_cards s on s.id = c_svc_relations.sv_card_id"]) if customer
@@ -509,11 +508,6 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           #total -= s[:price]
         }
       end
-=======
-
-      svcard_arr = customer.get_discount_cards(svcard_arr)
- 
->>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
       #产品相关套餐卡
       if ids.any?
         if from_pcard == 1
@@ -855,18 +849,15 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           #创建工位订单
           #station = Station.find_by_id_and_status station_id, Station::STAT[:NORMAL]
           #unless station
-<<<<<<< HEAD
           arrange_time = Station.arrange_time(store_id,prod_ids,order,nil)
-=======
-          arrange_time = Station.arrange_time(store_id,prod_ids,order)
->>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
+
+
           if arrange_time[0]
             new_station_id = arrange_time[0]
             station = Station.find_by_id_and_status new_station_id, Station::STAT[:NORMAL]
           end
           #end
           #          if station
-<<<<<<< HEAD
           woTime = WkOrTime.find_by_station_id_and_current_day new_station_id, Time.now.strftime("%Y%m%d").to_i if new_station_id
           if woTime
             woTime.update_attributes( :wait_num => woTime.wait_num.to_i + 1)
@@ -898,13 +889,6 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           hash[:ended_at] = arrange_time[2] ? end_at : nil
           order.update_attributes hash
           status = 1
-=======
-          #下单排工位
-          hash = Station.create_work_order(new_station_id, store_id,order, hash, arrange_time[2],cost_time)
-         if order.update_attributes hash
-           status = 1
-         end
->>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
           #          else
           #            status = 3
           #          end

@@ -8,7 +8,6 @@ class Api::OrdersController < ApplicationController
     begin
       reservations = Reservation.store_reservations params[:store_id]
       orders = Order.working_orders params[:store_id]
-<<<<<<< HEAD
       orders = orders.group_by{|order| order.status}
       #把免单的order放在已付款下面
       if orders[Order::STATUS[:FINISHED]].present?
@@ -16,9 +15,6 @@ class Api::OrdersController < ApplicationController
         orders[Order::STATUS[:BEEN_PAYMENT]] = (orders[Order::STATUS[:BEEN_PAYMENT]] << orders[Order::STATUS[:FINISHED]]).flatten
         orders.delete(Order::STATUS[:FINISHED])
       end
-=======
-      orders = order_by_status(orders)
->>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
       status = 1
     rescue
       status = 2
