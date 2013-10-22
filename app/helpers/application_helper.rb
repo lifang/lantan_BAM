@@ -161,6 +161,7 @@ module ApplicationHelper
     return code_array.join("")
   end
 
+
   #物料
   def get_mo(material,material_orders)
     mos = {}
@@ -173,6 +174,7 @@ module ApplicationHelper
     end
     mos
   end
+
 
 
   #根据订单分组

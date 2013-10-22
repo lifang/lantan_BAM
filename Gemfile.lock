@@ -128,7 +128,10 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import (~> 0.2.8)
+<<<<<<< HEAD
+=======
   barby (= 0.5.1)
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
   capistrano (~> 2.15.4)
   capistrano_colors (~> 0.5.5)
   execjs (= 1.4.0)

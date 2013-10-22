@@ -31,7 +31,8 @@ class OrderProdRelation < ActiveRecord::Base
         from order_prod_relations opr left join products p on p.id = opr.product_id where opr.order_id = #{order_id}")
     @product_hash = {}
     products.each { |p|
-      @product_hash["order_prod_relation#product"].nil? ? @product_hash["order_prod_relation#product"] = [p] : @product_hash["order_prod_relation#product"] << p
+      name = p.is_service== Product::PROD_TYPES[:PRODUCT] ?  "order_prod_relation#product" :  "order_prod_relation#service"
+      @product_hash[name].nil? ? @product_hash[name] = [p] : @product_hash[name] << p
     } if products.any?
     pcar_relations = CPcardRelation.find_by_sql("select cpr.order_id, 1 pro_num, pc.price, pc.name,pc.id
         from c_pcard_relations cpr inner join package_cards pc

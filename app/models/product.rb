@@ -171,6 +171,7 @@ class Product < ActiveRecord::Base
     end
   end
 
+
   def self.return_station_status(service_ids, store_id, info, order)
     time_arr = Station.arrange_time store_id, service_ids, order
     if info

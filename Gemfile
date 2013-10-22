@@ -21,7 +21,11 @@ group :assets do
 end
 gem 'json', '1.7.6'
 gem 'execjs', '1.4.0'
+<<<<<<< HEAD
+#gem 'therubyracer', '0.11.4'
+=======
 gem 'therubyracer', '0.11.4'
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'
@@ -43,9 +47,16 @@ group :test do
   # Pretty printed test output
   gem 'turn', '0.8.2', :require => false
 end
+#gem 'mechanize', '2.0.1'
+#gem 'hpricot', '0.8.4'
 #gem "bullet", :group => "development"
 #group :development do
 #  gem "better_errors"
 #end
+<<<<<<< HEAD
+#gem 'rmagick', '2.13.1'
+#gem 'barby', '0.5.1'
+=======
 gem 'rmagick', '2.13.1'
 gem 'barby', '0.5.1'
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621

@@ -290,6 +290,46 @@ function return_order(o_id,c_id){
 }
 
 function operate_order(){
+<<<<<<< HEAD
+    var total = $("#return input");
+    var t_fee = $("#sub_content").val();
+    if (t_fee == "" || t_fee.length==0 || isNaN(parseFloat(t_fee)) || parseFloat(t_fee)<0){
+        tishi_alert("请输入退单折价");
+        return false;
+    }
+    if (confirm("确定要退单吗？")){
+        var reason = $("#return_reason option:selected").val();
+        var direct = $("input[name='direct']:checked").val();
+        var post_data = {
+            order_id : $("#order_id").val(),
+            reason : reason,
+            direct : direct,
+            account : t_fee,
+            types : $("#p_types").val()
+        };
+        for(var i=0; i < total.length; i++){
+            alert(total[i].value);
+            if (post_data[total[i].id.split("|")[0]]==null){
+                post_data[total[i].id.split("|")[0]] = total[i].value;
+            }else{
+                post_data[total[i].id.split("|")[0]] += ","+total[i].value;
+            }
+            alert(post_data[total[i].id.split("|")[0]]);
+        }
+        $.ajax({
+            async:true,
+            dataType: "json",
+            type: "post",
+            url: "/customers/operate_order",
+            data: post_data,
+            success :function(data){
+                tishi_alert("订单" +data.msg+"退单完成");
+                setTimeout(function(){
+                    window.location.reload();
+                },300)
+            }
+        })
+=======
     var total = $("#return :checkbox:checked");
     if (total.length == 0){
         tishi_alert("请选择退单的产品");
@@ -332,6 +372,7 @@ function operate_order(){
                 }
             })
         }
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
     }
 }
 

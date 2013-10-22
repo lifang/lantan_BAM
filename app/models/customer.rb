@@ -150,7 +150,7 @@ class Customer < ActiveRecord::Base
         inner join package_cards p on p.id = cpr.package_card_id
         where cpr.status = ? and cpr.customer_id = ? and p.store_id = ?",
         CPcardRelation::STATUS[:NORMAL], self.id, store_id])
-    #    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
+#    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
     already_used_count = {}
     if c_pcard_relations_no_paginate.present?
       c_pcard_relations_no_paginate.each do |r|

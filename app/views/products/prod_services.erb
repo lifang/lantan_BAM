@@ -80,7 +80,7 @@
             </table>
             <%= form_for :ids,:url=>"/stores/#{params[:store_id]}/products/update_status",:html=>{:id=>"update_ids"} do %>
               <input type="hidden" value="" name="ids" id="ids"/>
-              <input type="hidden" value="" name="vals" id="vals"/>
+               <input type="hidden" value="" name="vals" id="vals"/>
             <% end %>
             <div class="pageTurn">
               <%= will_paginate @services,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>

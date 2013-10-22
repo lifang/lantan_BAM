@@ -11,8 +11,12 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
+<<<<<<< HEAD
+ActiveRecord::Schema.define(:version => 20130926013253) do
+=======
 
 ActiveRecord::Schema.define(:version => 20130924054439) do
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -29,7 +33,11 @@ ActiveRecord::Schema.define(:version => 20130924054439) do
     t.integer  "package_card_id"
     t.datetime "ended_at"
     t.integer  "status"
+<<<<<<< HEAD
+    t.string   "content"
+=======
     t.text     "content"
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
     t.datetime "created_at"
     t.integer  "price"
     t.datetime "updated_at"
@@ -103,6 +111,8 @@ ActiveRecord::Schema.define(:version => 20130924054439) do
     t.datetime "updated_at"
     t.integer  "staff_id"
   end
+
+  add_index "chains", ["staff_id"], :name => "index_chains_on_staff_id"
 
   create_table "chart_images", :force => true do |t|
     t.integer  "store_id"
@@ -493,6 +503,14 @@ ActiveRecord::Schema.define(:version => 20130924054439) do
     t.integer  "customer_id"
     t.string   "qfpos_id"
     t.datetime "auto_time"
+<<<<<<< HEAD
+    t.integer  "return_types",        :default => 0
+    t.integer  "return_direct"
+    t.float    "return_fee",          :default => 0.0
+    t.integer  "return_staff_id"
+    t.integer  "return_reason"
+=======
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
   end
 
   create_table "package_cards", :force => true do |t|
@@ -586,8 +604,13 @@ ActiveRecord::Schema.define(:version => 20130924054439) do
     t.integer  "auto_time"
     t.text     "revist_content"
     t.integer  "prod_point"
+<<<<<<< HEAD
+    t.float    "deduct_price"
+    t.boolean  "show_on_ipad",   :default => true
+=======
     t.boolean  "show_on_ipad",   :default => false
     t.float    "deduct_price"
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
   end
 
   create_table "res_prod_relations", :force => true do |t|
@@ -645,7 +668,7 @@ ActiveRecord::Schema.define(:version => 20130924054439) do
 
   create_table "role_model_relations", :force => true do |t|
     t.integer  "role_id"
-    t.integer  "num"
+    t.integer  "num",        :limit => 8
     t.string   "model_name"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -821,6 +844,12 @@ ActiveRecord::Schema.define(:version => 20130924054439) do
     t.integer  "store_id"
   end
 
+<<<<<<< HEAD
+  add_index "station_staff_relations", ["current_day"], :name => "index_station_staff_relations_on_current_day"
+  add_index "station_staff_relations", ["staff_id"], :name => "index_station_staff_relations_on_staff_id"
+  add_index "station_staff_relations", ["station_id"], :name => "index_station_staff_relations_on_station_id"
+=======
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
   add_index "station_staff_relations", ["store_id"], :name => "index_station_staff_relations_on_store_id"
   add_index "station_staff_relations", ["updated_at"], :name => "index_station_staff_relations_on_updated_at"
 
@@ -842,9 +871,15 @@ ActiveRecord::Schema.define(:version => 20130924054439) do
     t.string   "month_hmi"
     t.string   "once_gas_use"
     t.string   "once_water_use"
+<<<<<<< HEAD
+    t.boolean  "is_has_controller"
+    t.integer  "staff_level"
+    t.integer  "staff_level1"
+=======
     t.integer  "staff_level"
     t.integer  "staff_level1"
     t.boolean  "is_has_controller"
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
     t.string   "code"
   end
 
@@ -898,8 +933,16 @@ ActiveRecord::Schema.define(:version => 20130924054439) do
     t.integer  "edition_lv"
   end
 
+<<<<<<< HEAD
+  add_index "stores", ["city_id"], :name => "index_stores_on_city_id"
+  add_index "stores", ["code"], :name => "index_stores_on_code"
+  add_index "stores", ["created_at"], :name => "index_stores_on_created_at"
+  add_index "stores", ["edition_lv"], :name => "index_stores_on_edition_lv"
+  add_index "stores", ["status"], :name => "index_stores_on_status"
+=======
   add_index "stores", ["code"], :name => "index_stores_on_code"
   add_index "stores", ["edition_lv"], :name => "index_stores_on_edition_lv"
+>>>>>>> 6ae5663175df07a3810a08d3ea0ada3d1d607621
 
   create_table "suppliers", :force => true do |t|
     t.string   "name"

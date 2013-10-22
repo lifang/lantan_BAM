@@ -1,20 +1,20 @@
 <div id="mo_notice"><%= render :partial => "notice_panel" %></div>
 
 <% unless  @unsalable_materials.blank? %>
-    <div class="message" id="unsalable_materials_notice">
-      最近30天有 <span class="red" id="unsalable_materials_span"><%=  @unsalable_materials.length %></span>种物料滞销
-      <a href="javascript:void(0)" onclick="toggle_low_materials(this)">点击查看</a>
-      <%= render :partial => 'show_unsalable_materials', :locals => {:unsalable_materials => @unsalable_materials} %>
-    </div>
+  <div class="message" id="unsalable_materials_notice">
+    最近30天有 <span class="red" id="unsalable_materials_span"><%=  @unsalable_materials.length %></span>种物料滞销
+    <a href="javascript:void(0)" onclick="toggle_low_materials(this)">点击查看</a>
+    <%= render :partial => 'show_unsalable_materials', :locals => {:unsalable_materials => @unsalable_materials} %>
+  </div>
 <% end %>
 <div class="data_box" id="material_data_box">
   <div class="data_menu">
     <% if permission?(:materials, :add) %>
-    <%= link_to "添加物料", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
+      <%= link_to "添加物料", new_store_material_path(@current_store), :remote => true, 'data-type' => 'script', :class => "am_btn" %>
     <% end %>
     <% if permission?(:materials, :in) %><%= link_to_function "入库","ruku()", :class => "rk_btn" %><% end %>
     <% if permission?(:materials, :out) %><%= link_to_function "出库","chuku()", :class => "ck_btn" %><% end %>
-    <% if permission?(:materials, :back_good) %><%= link_to "批量退货", back_good_store_materials_url(@current_store.id), :remote => true, 'data-type' => 'script' %><% end %>
+    <%= link_to "批量退货", back_good_store_materials_url(@current_store.id), :remote => true, 'data-type' => 'script' %>
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store_id]), :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印条形码",print_code_store_materials_path(params[:store_id]),:remote => true, 'data-type' => 'script', :class => "",:target => "_blank" %><% end %>
@@ -68,22 +68,22 @@
 <div class="tab_popup print_code_tab" id="print_code_tab"></div>
 
 <div class="tab_popup" id="setMaterialLow">
-<div class="popup_box" >
-  <h1>设置库存预警<a href="javascript:void(0)" class="close">关闭</a></h1>
-  <div class="popup_body">
-    <%= form_tag "/stores/#{@current_store.id}/materials/set_material_low_commit" do %>
-    <div class="popup_body_area">
-      <div class="item" >
-        <%= label_tag "库存预警值:" %>&nbsp;<%= text_field_tag "material_low_value", @current_store.material_low.to_i %>
-      </div>
+  <div class="popup_box" >
+    <h1>设置库存预警<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <div class="popup_body">
+      <%= form_tag "/stores/#{@current_store.id}/materials/set_material_low_commit" do %>
+        <div class="popup_body_area">
+          <div class="item" >
+            <%= label_tag "库存预警值:" %>&nbsp;<%= text_field_tag "material_low_value", @current_store.material_low.to_i %>
+          </div>
+        </div>
+        <div class="btn_box">
+          <button type="commit" onclick="return set_validate()" class="confirm_btn" id="set_material_low_commit_button">确定</button>
+        </div>
+      <% end %>
+      <div class="clear"></div>
     </div>
-    <div class="btn_box">
-      <button type="commit" onclick="return set_validate()" class="confirm_btn" id="set_material_low_commit_button">确定</button>
-    </div>
-    <% end %>
-    <div class="clear"></div>
   </div>
-</div>
 </div>
 
 <div class="tab_popup ruku_tab" id="ruku_tab">
@@ -91,33 +91,33 @@
     <h1>入库<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
-          <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1, :mo_search => true}  %>
+        <%= render :partial => "search_materials", :locals => {:tab_name => "materials", :mat_in_flag => 1, :mo_search => true}  %>
         <div class="search_result_mat"></div>
         <div class="data_body">
-      <%= form_tag  "/stores/#{@current_store.id}/create_materials_in" , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
-          <thead>
-            <tr class="hbg">
-              <td>订货编号</td>
-              <td>条形码</td>
-              <td>物料名称</td>
-              <td>规格</td>
-              <td>数量</td>
-              <td>操作</td>
-            </tr>
-          </thead>
-          <tbody class="mat-out-list"></tbody>
-        </table>
-              <input type="hidden" id="mat_in_hidden_value" name="mat_in_items"/>
-              <input type="hidden" id="mat_in_create" name="mat_in_create"/>
-        <div class="clear"></div>
-        <div class="btn_box_s">
-          <button onclick="checkNums(<%= @current_store.id %>)" type="button" class="confirm_btn">入库</button>
-          <button onclick="fetchMatIn(this, <%= @current_store.id %>, 0)" type="button" class="confirm_btn">打印入库清单</button>
-          <button onclick="fetchMatIn(this, <%= @current_store.id %>, 1)" type="button" class="confirm_btn">打印条形码</button>
+          <%= form_tag  "/stores/#{@current_store.id}/create_materials_in" , :id => "create_mat_in_form", :target =>'_blank' do |f|%>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
+              <thead>
+                <tr class="hbg">
+                  <td>订货编号</td>
+                  <td>条形码</td>
+                  <td>物料名称</td>
+                  <td>规格</td>
+                  <td>数量</td>
+                  <td>操作</td>
+                </tr>
+              </thead>
+              <tbody class="mat-out-list"></tbody>
+            </table>
+            <input type="hidden" id="mat_in_hidden_value" name="mat_in_items"/>
+            <input type="hidden" id="mat_in_create" name="mat_in_create"/>
+            <div class="clear"></div>
+            <div class="btn_box_s">
+              <button onclick="checkNums(<%= @current_store.id %>)" type="button" class="confirm_btn">入库</button>
+              <button onclick="fetchMatIn(this, <%= @current_store.id %>, 0)" type="button" class="confirm_btn">打印入库清单</button>
+              <button onclick="fetchMatIn(this, <%= @current_store.id %>, 1)" type="button" class="confirm_btn">打印条形码</button>
+            </div>
+          <% end %>
         </div>
-      <% end %>
-    </div>
       </div>
     </div>
   </div>
@@ -176,14 +176,14 @@
     <h1>库存报损<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <%= form_tag "/stores/#{@current_store.id}/materials/set_material_low_commit" do %>
-          <div class="popup_body_area">
-            <div class="item" >
-              <%= label_tag "库存预警值:" %>&nbsp;<%= text_field_tag "material_low_value", @current_store.material_low.to_i %>
-            </div>
+        <div class="popup_body_area">
+          <div class="item" >
+            <%= label_tag "库存预警值:" %>&nbsp;<%= text_field_tag "material_low_value", @current_store.material_low.to_i %>
           </div>
-          <div class="btn_box">
-            <button type="commit" onclick="return set_validate()" class="confirm_btn" id="set_material_low_commit_button">确定</button>
-          </div>
+        </div>
+        <div class="btn_box">
+          <button type="commit" onclick="return set_validate()" class="confirm_btn" id="set_material_low_commit_button">确定</button>
+        </div>
       <% end %>
       <div class="clear"></div>
     </div>

@@ -17,12 +17,12 @@ class Station < ActiveRecord::Base
   validate :unique_code
 
   def unique_code
-     station = Station.where("store_id = ? and status != ? and code = ?", store_id, STAT[:DELETED], code).first
+    station = Station.where("store_id = ? and status != ? and code = ?", store_id, STAT[:DELETED], code).first
     if (station && station.id != self.id)
       errors.add(:code, "工位编号在当前门店中已经存在")
     end
   end
- # validates :code, uniqueness: { scope: :store_id, message: "工位编号在当前门店中已经存在！" }, :if => :has_no_existed_code
+  # validates :code, uniqueness: { scope: :store_id, message: "工位编号在当前门店中已经存在！" }, :if => :has_no_existed_code
   
   scope :valid, where("status != 4")
   
@@ -223,7 +223,7 @@ class Station < ActiveRecord::Base
   end
 
 
-  def self.arrange_time store_id, prod_ids, order
+  def self.arrange_time store_id, prod_ids, order = nil, res_time = nil
     #查询所有满足条件的工位
     infos = self.return_station_arr(prod_ids, store_id)
     station_arr = infos[0]
@@ -237,13 +237,11 @@ class Station < ActiveRecord::Base
     #        station_arr << station if (prods & prod_ids).sort == prod_ids.sort
     #      end
     #    end
-    p "---------------------------"
-    p station_arr
     if station_arr.present?
       station_flag = 1 #有对应工位对应
       station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i)
       if station_staffs.blank?
-        station_flag = 3 #工位上无技师
+        station_flag = 3
       end
     else
       if((station_prod_ids.flatten & prod_ids).sort == prod_ids.sort) && (!station_prod_ids.include?(prod_ids))
@@ -275,8 +273,6 @@ class Station < ActiveRecord::Base
         :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
       
       availbale_stations = station_arr.map(&:id) - busy_stations
-      p "3333333333333333333333333333333"
-      p availbale_stations
       if availbale_stations.present?
         if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
           station_id = nil

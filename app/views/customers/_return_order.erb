@@ -21,7 +21,6 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
         <thead>
           <tr class="hbg">
-            <td><input type="checkbox"  onclick="$('#return :checkbox').attr('checked',this.checked);$(':disabled').attr('checked',false)"/></td>
             <td>服务项目</td>
             <td>数量</td>
             <td>单价</td>
@@ -32,15 +31,14 @@
         <tbody id="return">
           <% @product_hash.each do |k,v| %>
             <% v.each_with_index do |p,index| %>
-              <tr>
-                <td><input type="checkbox" value="<%= p.id %>" id="<%= k %>|<%= index %>"
-                           <%if k.index("product") && p.is_service==Product::PROD_TYPES[:SERVICE] %>disabled<% end  %> /></td>
-                <td><%= p.name %></td>
-                <td><%= p.pro_num %></td>
-                <td><%= p.price %></td>
-              </tr>
-            <% end %>
-          <% end if @product_hash != {} %>
+            <input type="hidden"  value="<%= p.id %>" id="<%= k %>|<%= index %>" />
+            <tr >
+              <td><%= p.name %></td>
+              <td><%= p.pro_num %></td>
+              <td><%= p.price %></td>
+            </tr>
+          <% end %>
+        <% end if @product_hash != {} %>
         </tbody>
       </table>
       <div class="seeProDiv">
