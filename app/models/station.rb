@@ -273,6 +273,7 @@ class Station < ActiveRecord::Base
         :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
       
       availbale_stations = station_arr.map(&:id) - busy_stations
+
       if availbale_stations.present?
         if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
           station_id = nil
@@ -339,8 +340,6 @@ class Station < ActiveRecord::Base
 
   #根据，订单，工位，门店id排空工位
   def self.create_work_order(station_id, store_id,order, hash, work_order_status, cost_time)
-    p "+++++++++++++++++++++++++++"
-    p station_id
     started_at = Time.now
     ended_at = started_at + cost_time.minutes
     wo_time = WkOrTime.find_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id

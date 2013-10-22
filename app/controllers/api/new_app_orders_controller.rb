@@ -12,7 +12,7 @@ class Api::NewAppOrdersController < ApplicationController
     #订单分组
     work_orders = working_orders params[:store_id]
     #stations_count => 工位数目
-    station_ids = Station.where("store_id =? and status not in (?) ",params[:store_id], [Station::STAT[:WRONG], Station::STAT[:DELETED]]).map(&:id)
+    station_ids = Station.where("store_id =? and status not in (?) ",params[:store_id], [Station::STAT[:WRONG], Station::STAT[:DELETED]]).select("id, name")
     services = Product.is_service.is_normal.commonly_used.where(:store_id => params[:store_id]).select("id, name, sale_price as price")
     #    rescue
     #      status = 1
@@ -75,15 +75,21 @@ class Api::NewAppOrdersController < ApplicationController
           })
         
         status = Product.return_station_status([service.id], params[:store_id], nil, order)[0] # 1 有符合工位 2 没工位 3 多个工位 4 工位上暂无技师
-        station_id = Product.return_station_status([service.id], params[:store_id], nil, order)[2]
 
-        work_order_status = Product.return_station_status([service.id], params[:store_id], nil, order)[3]
-        hash = Station.create_work_order(station_id, params[:store_id],order, hash, work_order_status,service.cost_time.to_i)
-        if order.update_attributes hash
-          status = 1
-          OrderProdRelation.create(:order_id => order.id, :product_id => service.id,
-            :pro_num => 1, :price => service.sale_price, :t_price => service.t_price, :total_price => service.sale_price.to_f)
+        if status != 1
+          order.destroy
+        else
+          station_id = Product.return_station_status([service.id], params[:store_id], nil, order)[2]
+
+          work_order_status = Product.return_station_status([service.id], params[:store_id], nil, order)[3]
+          hash = Station.create_work_order(station_id, params[:store_id],order, hash, work_order_status,service.cost_time.to_i)
+          if order.update_attributes hash
+            status = 1
+            OrderProdRelation.create(:order_id => order.id, :product_id => service.id,
+              :pro_num => 1, :price => service.sale_price, :t_price => service.t_price, :total_price => service.sale_price.to_f)
+          end
         end
+
         #再次返回orders
         work_orders = working_orders params[:store_id]
         render :json => {:status => status, :orders => work_orders}
@@ -120,14 +126,14 @@ class Api::NewAppOrdersController < ApplicationController
     if work_order
       if work_order.status==WorkOrder::STAT[:WAIT_PAY]
         status = 0
-       #"此车等待付款"
+        #"此车等待付款"
       else
         status = 1
         # "操作成功"
         work_order.arrange_station
       end
     else
-     #"工单未找到"
+      #"工单未找到"
       status = 2
     end
     work_orders = working_orders params[:store_id]
