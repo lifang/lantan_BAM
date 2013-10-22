@@ -832,7 +832,6 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
 
         if is_has_service
           #创建工位订单
-
           arrange_time = Station.arrange_time(store_id,prod_ids,order)
           if arrange_time[0]
             new_station_id = arrange_time[0]
