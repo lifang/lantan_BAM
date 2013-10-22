@@ -152,7 +152,7 @@ class WorkOrder < ActiveRecord::Base
         where("orders.car_num_id = #{order.car_num_id}").
         where("work_orders.store_id = #{self.store_id}").
         where("work_orders.current_day = #{self.current_day}").readonly(false).order("work_orders.created_at asc")
-      if same_work_orders.any?
+      if same_work_orders.any? && !if_wo_set_station
         first_station = nil
         same_work_orders.each_with_index do |same_work_order, index|
           product_ids = same_work_order.order.order_prod_relations.map(&:product_id)
@@ -172,6 +172,7 @@ class WorkOrder < ActiveRecord::Base
             if index == 0
               s_ended_at = Time.now + same_work_order.cost_time*60
               first_station = leave_station
+              if_wo_set_station = true
               same_work_order.update_attribute(:station_id, leave_station.id)
               same_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station.id,
                 :started_at => Time.now, :ended_at => s_ended_at)
@@ -194,7 +195,7 @@ class WorkOrder < ActiveRecord::Base
         where("store_id = #{self.store_id}").
         where("current_day = #{self.current_day}")
 
-      if next_diff_station_work_order
+      if next_diff_station_work_order && !if_wo_set_station
         this_car_num_id = next_diff_station_work_order.order.car_num_id
         if !orders.map(&:car_num_id).compact.include?(this_car_num_id) && !serving_work_orders.map(&:station_id).include?(next_diff_station_work_order.station_id)
           station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day next_diff_station_work_order.station_id, Time.now.strftime("%Y%m%d").to_i
