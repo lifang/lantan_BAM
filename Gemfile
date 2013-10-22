@@ -21,7 +21,11 @@ group :assets do
 end
 gem 'json', '1.7.6'
 gem 'execjs', '1.4.0'
+<<<<<<< HEAD
+#gem 'therubyracer', '0.11.4'
+=======
 gem 'therubyracer', '0.11.4'
+>>>>>>> ffd2611c2b7d1d88b9c47f043b7d7cf0a46136e9
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'
@@ -50,5 +54,6 @@ end
 #  gem "better_errors"
 #end
 
-gem 'rmagick', '2.13.1'
-gem 'barby', '0.5.1'
+#gem 'rmagick', '2.13.1'
+#gem 'barby', '0.5.1'
+
