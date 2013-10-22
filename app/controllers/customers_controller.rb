@@ -291,15 +291,20 @@ class CustomersController < ApplicationController
       :return_fee => params[:account].to_f,:return_direct => params[:direct],:return_staff_id =>cookies[:user_id])
     materials = {}
     if  params[:types].index("product")
-      ProdMatRelation.where("product_id in (#{params[:"order_prod_relation#product"]})").each{|mat|
-        materials[mat.material_id].nil? ?  materials[mat.material_id] = mat.material_num : materials[mat.material_id] += mat.material_num
+      prod_nums = OrderProdRelation.where("order_id= #{order.id} and product_id in (#{params[:"order_prod_relation#product"]})").inject(Hash.new) {|hash,prod|
+        hash[prod.product_id] = prod.pro_num;hash
       }
-    elsif  params[:types].index("package_card")
+      ProdMatRelation.where("product_id in (#{params[:"order_prod_relation#product"]})").each{|mat|
+        materials[mat.material_id].nil? ?  materials[mat.material_id] = mat.material_num*prod_nums[mat.product_id] : materials[mat.material_id] += mat.material_num*prod_nums[mat.product_id]
+      }
+    end
+    if  params[:types].index("package_card")
       PcardMaterialRelation.where("package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each{|mat|
         materials[mat.material_id].nil? ?  materials[mat.material_id] = mat.material_num : materials[mat.material_id] += mat.material_num
       }
       CPcardRelation.where("order_id = #{params[:order_id]} and package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each {|card| card.update_attributes(:status=>PackageCard::STAT[:INVALID])}
-    elsif   params[:types].index("sv_card")
+    end
+    if   params[:types].index("sv_card")
       CSvcRelation.where("order_id = #{params[:order_id]} and sv_card_id in (#{params[:"c_svc_relation#sv_card"]})").each {|card| card.update_attributes(:status=>CSvcRelation::STATUS[:invalid])}
     end
     if params[:direct].to_i == Order::O_RETURN[:REUSE]

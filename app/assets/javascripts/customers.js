@@ -307,13 +307,11 @@ function operate_order(){
             types : $("#p_types").val()
         };
         for(var i=0; i < total.length; i++){
-            alert(total[i].value);
             if (post_data[total[i].id.split("|")[0]]==null){
                 post_data[total[i].id.split("|")[0]] = total[i].value;
             }else{
                 post_data[total[i].id.split("|")[0]] += ","+total[i].value;
             }
-            alert(post_data[total[i].id.split("|")[0]]);
         }
         $.ajax({
             async:true,
