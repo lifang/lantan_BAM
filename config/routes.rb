@@ -271,16 +271,18 @@ LantanBAM::Application.routes.draw do
         get :send_file
       end
     end
+
+    #新的app
+  resources :new_app_orders do
+    collection do
+      post :new_index_list,:make_order, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order
+    end
+  end
+  
   end
   resources :return_backs do
     collection do
       get :return_info, :return_msg, :generate_b_code
-    end
-  end
-  #新的app
-  resources :new_app_orders do
-    collection do
-      post :new_index_list,:make_order, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order
     end
   end
 
