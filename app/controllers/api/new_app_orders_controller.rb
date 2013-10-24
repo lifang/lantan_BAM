@@ -32,6 +32,7 @@ class Api::NewAppOrdersController < ApplicationController
     status = 1
     car_num = nil
     customer = nil
+    phone_flag = false
     if params[:is_car_num]=="1"
       customer = CarNum.get_customer_info_by_carnum(params[:store_id], params[:num])
     else
@@ -40,6 +41,9 @@ class Api::NewAppOrdersController < ApplicationController
         inner join car_nums cn on cn.id=cnr.car_num_id where csr.store_id in (?) and cu.mobilephone = ? and cu.status= ? ",
           StoreChainsRelation.return_chain_stores(params[:store_id]), params[:num].strip,Customer::STATUS[:NOMAL] ])
       customer = customers[0]
+      if customers.length == 1
+        phone_flag = true
+      end
       status = customers.length > 1 ? 5 : 1
     end
 
@@ -56,7 +60,11 @@ class Api::NewAppOrdersController < ApplicationController
           customer.save
         end
       else
-        car_num = CarNum.find_by_sql("select cn.id from car_nums cn inner join customer_num_relations cnr on cnr.car_num_id=cn.id where cnr.customer_id = #{customer.customer_id}")[0]
+        if phone_flag
+          car_num = CarNum.find_by_sql("select cn.id from car_nums cn inner join customer_num_relations cnr on cnr.car_num_id=cn.id where cnr.customer_id = #{customer.customer_id}")[0]
+        else
+          car_num = CarNum.find_by_num(params[:num])
+        end
       end
       Order.transaction do
         service = Product.find_by_id_and_status(params[:service_id], Product::IS_VALIDATE[:YES])
@@ -202,7 +210,7 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
 
       #保存order使用的相关优惠
       prod_arr = params[:prods].split(",") if params[:prods]
-      prod_ids,sale_ids,discount_card_ids,pcard_ids = [],nil,nil,[]
+      prod_ids,sale_ids,discount_card_ids,cp_relation_ids = [],nil,nil,[]
       prod_arr.each do |p|
         a = p.split("_")
         case a[0].to_i
@@ -213,7 +221,7 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
         when 2
           discount_card_ids = {:id => a[1].to_i, :price => a[2].to_f}
         when 3
-          pcard_ids << a[1].to_i
+          cp_relation_ids << a[1].to_i
         end
       end
       product = Product.find_by_id(prod_ids[0])
@@ -232,12 +240,12 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
         end
 
         #储值卡优惠
-        if pcard_ids.present?
+        if cp_relation_ids.present?
           OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
             :product_id => product.id, :price => product.sale_price, :product_num => 1)
           #customer = Customer.find_by_id order.customer_id
-          c_pcard_relations = CPcardRelations.find_by_order_id_and_package_card_id(order.id, pcard_ids[0])
-          cpr_content = c_pcard_relations.content.split(",")
+          c_pcard_relations = CPcardRelation.find_by_id(cp_relation_ids[0])
+          cpr_content = c_pcard_relations.content.split(",") if c_pcard_relations
           content = []
           (cpr_content ||[]).each do |pnn|
             prod_name_num = pnn.split("-")
@@ -248,9 +256,11 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
               content << pnn
             end
           end
-          c_pcard_relations.update_attribute(:content, content.join(","))
-          OPcardRelation.create({:order_id => order.id, :c_pcard_relation_id => c_pcard_relations.id,
-              :product_id =>product.id, :product_num => 1}) if c_pcard_relations
+          unless content.blank?
+            c_pcard_relations.update_attribute(:content, content.join(","))
+            OPcardRelation.create({:order_id => order.id, :c_pcard_relation_id => c_pcard_relations.id,
+                :product_id =>product.id, :product_num => 1}) if c_pcard_relations
+          end
         end
       end
       order.update_attributes hash

@@ -360,39 +360,41 @@ class Api::OrdersController < ApplicationController
     status = 0
     message = "支付失败。"
     price = params[:price].to_f
-    if record
-      if record.left_price >= price
-        left_price = record.left_price - price
-        SvcardUseRecord.create(:c_svc_relation_id => record.id, :types => SvcardUseRecord::TYPES[:OUT],
-          :use_price => price, :left_price => left_price, :content => params[:content].strip)
-        record.update_attribute(:left_price, left_price)
-      else
-        csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
+    SvcardUseRecord.transaction do
+      if record
+        if record.left_price >= price
+          left_price = record.left_price - price
+          SvcardUseRecord.create(:c_svc_relation_id => record.id, :types => SvcardUseRecord::TYPES[:OUT],
+            :use_price => price, :left_price => left_price, :content => params[:content].strip)
+          record.update_attribute(:left_price, left_price)
+        else
+          csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
       left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
  where sc.types = 1 and c.mobilephone = ? and left_price != ? and csr.status = ?
             and ((sc.use_range = #{SvCard::USE_RANGE[:LOCAL]} and sc.store_id = #{params[:store_id]})
         or (sc.use_range = #{SvCard::USE_RANGE[:CHAIN_STORE]} and sc.store_id in (?)) or (sc.use_range = #{SvCard::USE_RANGE[:ALL]}))",
-            params[:mobilephone].strip, 0, CSvcRelation::STATUS[:valid], StoreChainsRelation.return_chain_stores(params[:store_id])])
-        csvc_relaions.each do |csv|
-          if price > 0
-            if price - csv.left_price >= 0
-              SvcardUseRecord.create(:c_svc_relation_id => csv.id, :types => SvcardUseRecord::TYPES[:OUT],
-                :use_price => csv.left_price, :left_price => 0, :content => params[:content].strip)
-              price = price - csv.left_price
-              csv.update_attribute(:left_price, 0)
-            else
-              SvcardUseRecord.create(:c_svc_relation_id => csv.id, :types => SvcardUseRecord::TYPES[:OUT],
-                :use_price => price, :left_price => csv.left_price - price, :content => params[:content].strip)
-              csv.update_attribute(:left_price, csv.left_price - price)
-              price = 0
+              params[:mobilephone].strip, 0, CSvcRelation::STATUS[:valid], StoreChainsRelation.return_chain_stores(params[:store_id])])
+          csvc_relaions.each do |csv|
+            if price > 0
+              if price - csv.left_price >= 0
+                SvcardUseRecord.create(:c_svc_relation_id => csv.id, :types => SvcardUseRecord::TYPES[:OUT],
+                  :use_price => csv.left_price, :left_price => 0, :content => params[:content].strip)
+                price = price - csv.left_price
+                csv.update_attribute(:left_price, 0)
+              else
+                SvcardUseRecord.create(:c_svc_relation_id => csv.id, :types => SvcardUseRecord::TYPES[:OUT],
+                  :use_price => price, :left_price => csv.left_price - price, :content => params[:content].strip)
+                csv.update_attribute(:left_price, csv.left_price - price)
+                price = 0
+              end
             end
           end
         end
+        status = 1
+        message = "支付成功。"
       end
-      status = 1
-      message = "支付成功。"
+      render :json => {:content => message, :status => status}
     end
-    render :json => {:content => message, :status => status}
   end
 
   #工位完成施工，技师会用手机触发，给工位进行排单
@@ -400,11 +402,11 @@ class Api::OrdersController < ApplicationController
     work_order = WorkOrder.find_by_id(params[:work_order_id])
     if !work_order.nil?
       message = work_order.arrange_station
-#      if message == "no_next_work_order"
-#        render :json => {:status => 1, :message => "排单成功!!"}
-#      else
-        render :json => {:status => 1, :message => "排单成功!"}
-#      end
+      #      if message == "no_next_work_order"
+      #        render :json => {:status => 1, :message => "排单成功!!"}
+      #      else
+      render :json => {:status => 1, :message => "排单成功!"}
+      #      end
     else
       render :json => {:status => 0, :message => "没有找到这个订单!"}
     end
