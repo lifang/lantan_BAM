@@ -7,18 +7,6 @@ class CarBrand < ActiveRecord::Base
   end
 
 
-  def self.load_car
-    url = "http://data.auto.sina.com.cn/"
-    agent = Mechanize.new
-    page = agent.get(url)
-    source = Hpricot(page.body)
-    if source.search('div[@class=ppai clearfix]').length != 0
-      source.search('div[@class=ppai clearfix]').each do |ppai|
-        p ppai.search('div[@class=mod]').inner_html
-      end
-   
-    end
-  end
 
   
 end
