@@ -29,7 +29,7 @@
                   <tr>
                     <td><%= prod.code %></td>
                     <td><%= prod.name %></td>
-                    <td><%= prod.t_price %></td>
+                    <td><%= permission?(:materials, :show_sale) ? prod.t_price : 0%></td>
                     <td><%= prod.base_price %></td>
                     <td><%= prod.sale_price %></td>
                      <td><%= prod.prod_point %></td>

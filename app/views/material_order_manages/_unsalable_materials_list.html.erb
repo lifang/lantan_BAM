@@ -55,7 +55,7 @@
             <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
             <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= material.storage.to_i %></span></td>
             <td><%= material.unit %></td>
-            <td><%= material.price %></td>
+            <td><%= permission?(:materials, :show_sale) ? material.price : 0%></td>
             <td><%= material.sale_price %></td>
           </tr>
       <% end %>

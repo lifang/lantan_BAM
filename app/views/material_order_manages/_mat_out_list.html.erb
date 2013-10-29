@@ -62,7 +62,7 @@
         <td><%= out.staff_name %></td>
 
         <td><%= out.material_num.to_i %></td>
-        <td><%= out.out_price %></td>
+        <td><%= permission?(:materials, :show_sale) ? out.out_price : 0%></td>
         <td><%= out.sale_price %></td>
         <td><%= out.out_time.strftime("%Y-%m-%d %H:%M") unless out.out_time.nil?%></td>
       </tr>

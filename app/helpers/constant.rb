@@ -57,7 +57,8 @@ module Constant
       :material_loss_add => ["添加库存报损",268435456],
       :material_loss_delete => ["删除库存报损",536870912],
       :modify_mat_code => ["修改条形码",1073741824],
-      :back_good => ["批量退货", 2147483648]
+      :back_good => ["批量退货", 2147483648],
+      :show_sale => ["显示成本价", 2147483648*2]
     },
     :staffs => {
       :name => "员工",

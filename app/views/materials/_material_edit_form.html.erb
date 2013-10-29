@@ -14,7 +14,7 @@
           </div>
           <div class="item">
             <label><span class='red'>*</span>成本价：</label>
-            <%= text_field_tag 'material[price]', @material.price %>
+            <%= text_field_tag 'material[price]', permission?(:materials, :show_sale) ? @material.price : 0 %>
           </div>
           <div class="item">
             <label><span class='red'>*</span>零售价：</label>

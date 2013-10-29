@@ -1,7 +1,7 @@
 <div class="item">
   <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="modify_value()">
     <% @materials.each do |material| %>
-      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{material.price}||#{material.types}||#{material.sale_price}" %>" ><%= material.name%></option>
+      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{permission?(:materials, :show_sale) ? material.price : 0}||#{material.types}||#{material.sale_price}" %>" ><%= material.name%></option>
     <% end unless @materials.blank?%>
   </select>
 </div>
@@ -16,7 +16,7 @@
 </div>
 
 <div class="item">
-  <label><span class="red">*</span>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= @product.t_price.nil? ? @materials[0].nil? ? "" : @materials[0].price : @product.t_price %>" />
+  <label><span class="red">*</span>成本价：</label><input name="t_price" id="t_price" type="text" value="<%= permission?(:materials, :show_sale) ? @product.t_price.nil? ? @materials[0].nil? ? "" : @materials[0].price : @product.t_price : 0%>" />
 </div>
 <div class="item">
   <label><span class="red">*</span>全国零售价：</label><input name="base_price" id="base_price" type="text" value="<%= @product.base_price.nil? ? @materials[0].nil? ? "" : @materials[0].sale_price : @product.base_price %>" />
@@ -51,12 +51,12 @@
 <div class="item">
   <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @product.prod_point %>" />
 </div>
- <div class="clear"></div>
+<div class="clear"></div>
 <div class="item_blockArea">
-   <div class="item">
-         <label>自动回访：</label><input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @product.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @product.is_auto_revist  %>"
-         onclick="check_revist()" <% if @product.is_auto_revist %>checked<%end%>/>
-       </div>
+  <div class="item">
+    <label>自动回访：</label><input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @product.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @product.is_auto_revist  %>"
+                               onclick="check_revist()" <% if @product.is_auto_revist %>checked<%end%>/>
+  </div>
   <div class="item"><label>回访时间：</label>
     <select  id="time_revist" name="time_revist" <%unless @product.is_auto_revist%>disabled <%end%>>
       <option value="">请选择</option>

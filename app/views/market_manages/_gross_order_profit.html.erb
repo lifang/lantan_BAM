@@ -40,7 +40,7 @@
               <td>
               <%= link_to "#{order[:code]}", "/orders/#{order[:id]}/order_info" ,
             :remote => "true", "data-type" => "script", :class => "other_a" %></td>
-              <td><%= format("%.2f", order[:cost_price]) %></td>
+              <td><%= format("%.2f", permission?(:materials, :show_sale) ? order[:cost_price] : 0) %></td>
               <td><%= format("%.2f", order[:price]) %></td>
               <td><%= format("%.2f", order[:gross_profit]) %></td>
             </tr>

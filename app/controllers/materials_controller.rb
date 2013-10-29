@@ -3,10 +3,10 @@ class MaterialsController < ApplicationController
   require 'uri'
   require 'net/http'
   require 'will_paginate/array'
-  require 'barby'
-  require 'barby/barcode/ean_13'
-  require 'barby/outputter/custom_rmagick_outputter'
-  require 'barby/outputter/rmagick_outputter'
+#  require 'barby'
+#  require 'barby/barcode/ean_13'
+#  require 'barby/outputter/custom_rmagick_outputter'
+#  require 'barby/outputter/rmagick_outputter'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
