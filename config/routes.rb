@@ -166,9 +166,17 @@ LantanBAM::Application.routes.draw do
       end
     end
 
+    resources :set_functions do
+      collection do
+        get "market_new", "market_new_commit", "market_edit", "market_edit_commit", "storage_new", "storage_new_commit",
+            "storage_edit", "storage_edit_commit", "depart_new", "depart_new_commit", "sibling_depart_new",
+            "sibling_depart_new_commit","depart_edit", "depart_edit_commit", "depart_del", "position_new",
+            "position_new_commit", "position_edit_commit", "position_del_commit"
+      end
+    end
+
     resources :set_stores do
       collection do
-        get "edit"
         get "select_cities"
       end
     end
