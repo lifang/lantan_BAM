@@ -6,7 +6,6 @@
     <td>物料类别</td>
     <td>报损数量</td>
     <td>规格</td>
-    <td>成本价（元）</td>
     <td>零售价（元）</td>
     <td>报损人</td>
     <td>操作</td>
@@ -20,7 +19,6 @@
         <td><%= Material::TYPES_NAMES[mat_loss.types.to_i] %></td>
         <td><%= mat_loss.loss_num %></td>
         <td><%= mat_loss.unit %></td>
-        <td><%= mat_loss.price %></td>
         <td><%= mat_loss.sale_price %></td>
         <td>
           <%= mat_loss.staff_name %>

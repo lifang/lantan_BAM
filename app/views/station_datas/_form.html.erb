@@ -74,7 +74,7 @@
           <div class="seeProDiv">
             <div class="seeProDiv_l"><span class='red'>*</span>服务：</div>
             <div class="seeProDiv_rWidth width640">
-              <div class="popup_body_result resultHeight">
+              <div class="popup_body_result resultHeight" style="height:240px;">
                 <ul>
                   <% @products = Product.is_service.is_normal.where(:store_id => @store.id) %>
                   <% @products.each do |product| %>

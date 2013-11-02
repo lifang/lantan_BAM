@@ -1,7 +1,8 @@
 <div class="item">
   <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="modify_value()">
     <% @materials.each do |material| %>
-      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{permission?(:materials, :show_sale) ? material.price : 0}||#{material.types}||#{material.sale_price}" %>" ><%= material.name%></option>
+      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{permission?(:materials, :show_sale) ? material.price : 0}||#{material.types}||#{material.sale_price}" %>" ><%=
+        "#{material.name}#{(0..(@max_len-check_str(material.name)+3)).inject(String.new){|str,n|str +="-"}}#{Material::TYPES_NAMES[material.types]}"%></option>
     <% end unless @materials.blank?%>
   </select>
 </div>
@@ -49,7 +50,7 @@
   <label><span class="red">*</span>规格：</label><input name="standard" id="standard" type="text" value="<%= @product.standard %>" />
 </div>
 <div class="item">
-  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @product.prod_point %>" />
+  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @product.prod_point.nil? ? 0 : @product.prod_point  %>" />
 </div>
 <div class="clear"></div>
 <div class="item_blockArea">
@@ -87,8 +88,8 @@
   });
 
   function modify_value(){
-    var html = $('#prod_material option:selected')
-    $('#name').val(html.html());
+    var html = $('#prod_material option:selected');
+    $('#name').val(html.html().split("-")[0]);
     $("#item_txm").html(html.attr("o_value").split("||")[0]);
     $("#item_kc").html(html.attr("o_value").split("||")[1]);
     $("#t_price").val(html.attr("o_value").split("||")[2]);

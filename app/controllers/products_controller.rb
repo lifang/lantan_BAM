@@ -12,8 +12,10 @@ class ProductsController < ApplicationController
   #新建
   def add_prod
     @product=Product.new
-    @materials =Material.find_by_sql( ["select id,name,code,storage,price,sale_price,types from materials  where  store_id=#{params[:store_id]} and
-              status=#{Material::STATUS[:NORMAL]} and types in (?)", Material::PRODUCT_TYPE])
+    @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL],:types =>Material::PRODUCT_TYPE).order(:types)
+    @max_len = check_str(@materials.map(&:name)[0])
+    @materials.map(&:name).each{|name| @max_len = check_str(name) if check_str(name) >= @max_len}
+    p @max_len
   end
   
   def create
@@ -42,7 +44,7 @@ class ProductsController < ApplicationController
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
       :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],:t_price=>params[:t_price],
       :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product","service_code")}",
-      :is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]}
+      :is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]=="" ? 0 : params[:prod_point]}
     if types == Constant::SERVICE
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
           :deduct_percent=>params[:deduct_percent],:deduct_price=>params[:deduct_price] })
@@ -56,6 +58,7 @@ class ProductsController < ApplicationController
       ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
     end
     flash[:notice] = "添加成功"
+    flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).map(&:name).include? product.name
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
         params[:img_url].each_with_index {|img,index|
@@ -72,8 +75,9 @@ class ProductsController < ApplicationController
   def edit_prod
     @product =Product.find(params[:id])
     @img_urls=@product.image_urls
-    @materials =Material.find_by_sql(["select id,name,code,storage,price,sale_price,types from materials  where  store_id=#{params[:store_id]} and
-              status=#{Material::STATUS[:NORMAL]} and types in (?)", Material::PRODUCT_TYPE])
+    @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL],:types =>Material::PRODUCT_TYPE).order(:types)
+    @max_len = check_str(@materials.map(&:name)[0])
+    @materials.map(&:name).each{|name| @max_len = check_str(name) if check_str(name) >= @max_len}
     @material = @product.prod_mat_relations[0]
   end
 
@@ -85,7 +89,7 @@ class ProductsController < ApplicationController
   def update_product(types,product)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
       :types=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price], :is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]}
+      :auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]=="" ? 0 : params[:prod_point]}
     service = false
     if types == Constant::SERVICE
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
@@ -106,7 +110,8 @@ class ProductsController < ApplicationController
       parms.merge!({:standard=>params[:standard],:is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],
           :revist_content=>params[:con_revist],:prod_point=>params[:prod_point]})
     end
-    flash[:notice] = "更新成功"
+    flash[:notice] = "添加成功"
+    flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).map(&:name).include? product.name
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
         product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}

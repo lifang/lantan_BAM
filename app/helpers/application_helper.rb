@@ -205,4 +205,11 @@ module ApplicationHelper
     orders
   end
 
+
+  def check_str(str)
+    no_ch = str.gsub(/[\u4e00-\u9fa5]/,"").bytesize
+#    no_ch_en = str.gsub(/[\u4e00-\u9fa5]/,"").gsub(/[a-zA-z]/,"").bytesize
+    return (str.bytesize-no_ch)+no_ch*1.5
+  end
+
 end

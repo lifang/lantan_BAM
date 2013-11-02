@@ -62,8 +62,8 @@ function add_product(e){
         tishi_alert("请输入产品的规格");
         return false;
     }
-    if (point=="" || point.length==0 || isNaN(parseFloat(point)) || parseFloat(point)<0){
-        tishi_alert("请输入产品的积分，积分是数字");
+    if ((point!="" && point.length!=0) && isNaN(parseFloat(point)) || parseFloat(point)<0){
+        tishi_alert("积分不能小于0");
         return false;
     }
     if($("#auto_revist")[0].checked){
