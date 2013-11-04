@@ -6,7 +6,7 @@ class ProductsController < ApplicationController
 
   def index
     @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,t_price,base_price,id,store_id,prod_point from products where  store_id=#{params[:store_id]}
-    and is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]} order by created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
+    and is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]} order by created_at desc", :page => params[:page], :per_page =>20)
   end  #产品列表页
 
   #新建
@@ -15,7 +15,6 @@ class ProductsController < ApplicationController
     @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL],:types =>Material::PRODUCT_TYPE).order(:types)
     @max_len = check_str(@materials.map(&:name)[0])
     @materials.map(&:name).each{|name| @max_len = check_str(name) if check_str(name) >= @max_len}
-    p @max_len
   end
   
   def create
@@ -41,6 +40,7 @@ class ProductsController < ApplicationController
   end   #添加服务
 
   def set_product(types)
+    flash[:notice] = "添加成功"
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
       :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],:t_price=>params[:t_price],
       :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product","service_code")}",
@@ -53,12 +53,11 @@ class ProductsController < ApplicationController
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
       end if params[:sale_prod]
     else
+      flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).map(&:name).include? params[:name]
       parms.merge!({:standard=>params[:standard]})
       product =Product.create(parms)
       ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
     end
-    flash[:notice] = "添加成功"
-    flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).map(&:name).include? product.name
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
         params[:img_url].each_with_index {|img,index|
@@ -90,7 +89,7 @@ class ProductsController < ApplicationController
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
       :types=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price], :is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]=="" ? 0 : params[:prod_point]}
-    service = false
+    service,flash[:notice] = false,"更新成功"
     if types == Constant::SERVICE
       parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
           :deduct_percent=>params[:deduct_percent],:deduct_price=>params[:deduct_price] })
@@ -109,9 +108,8 @@ class ProductsController < ApplicationController
       end
       parms.merge!({:standard=>params[:standard],:is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],
           :revist_content=>params[:con_revist],:prod_point=>params[:prod_point]})
+      flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).where("id != (?)",product.id).map(&:name).include? params[:name]
     end
-    flash[:notice] = "添加成功"
-    flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).map(&:name).include? product.name
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
         product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}

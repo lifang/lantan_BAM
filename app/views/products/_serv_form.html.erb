@@ -34,7 +34,7 @@
   </select>
 </div>
 <div class="item">
-  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @service.prod_point %>" />
+  <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @service.prod_point.nil? ? 0 : @service.prod_point %>" />
 </div>
 <div class="item_textarea">
   <label>相关物料：</label><input type="button" value="选择物料" class="other_btn" onclick="before_center('.mat_tab');" />
