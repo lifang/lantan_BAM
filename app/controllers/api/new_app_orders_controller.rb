@@ -8,24 +8,17 @@ class Api::NewAppOrdersController < ApplicationController
     #参数store_id
     status = 0
     #orders => 车位施工情况
-    #    begin
     #订单分组
     work_orders = working_orders params[:store_id]
     #stations_count => 工位数目
     station_ids = Station.where("store_id =? and status not in (?) ",params[:store_id], [Station::STAT[:WRONG], Station::STAT[:DELETED]]).select("id, name")
     services = Product.is_service.is_normal.commonly_used.where(:store_id => params[:store_id]).select("id, name, sale_price as price")
-    #    rescue
-    #      status = 1
-    #    end
 
     render :json => {:status => status, :orders => work_orders, :station_ids => station_ids, :services => services}
   end
 
   #生成订单
-  #  Started POST "/api/new_app_orders/make_order" for 192.168.0.104 at 2013-10-15 19:53:26 +0800
-  #  Processing by Api::NewAppOrdersController#make_order as */*
-  #  Parameters: {"is_car_num"=>"1", "num"=>"鑻廞12345", "service_id"=>"12", "store_id"=>"1", "user_id"
-  #=>"3"}
+
   def make_order
     #参数num(car_num||phone), is_car_num(标志是否是车牌号)，service_id, store_id, user_id
     hash = {}
@@ -66,6 +59,7 @@ class Api::NewAppOrdersController < ApplicationController
           car_num = CarNum.find_by_num(params[:num])
         end
       end
+
       Order.transaction do
         service = Product.find_by_id_and_status(params[:service_id], Product::IS_VALIDATE[:YES])
         
@@ -117,6 +111,13 @@ class Api::NewAppOrdersController < ApplicationController
           wo_id,station_id = wo_station.split("_")
           wo = WorkOrder.find_by_id(wo_id)
           status = wo && wo.update_attribute(:station_id, station_id.to_i) ? 0 : 1
+          station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id
+          if station_staffs
+            staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0
+            staff_id_2 = station_staffs[1].staff_id if station_staffs.size > 1
+          end
+          order = wo.order
+          order.update_attributes(:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2) if order
         end
       end
       work_orders = working_orders params[:store_id]
@@ -132,14 +133,9 @@ class Api::NewAppOrdersController < ApplicationController
     work_order = WorkOrder.find_by_id(params[:work_order_id])
     
     if work_order
-      if work_order.status==WorkOrder::STAT[:WAIT_PAY]
-        status = 0
-        #"此车等待付款"
-      else
-        status = 1
-        # "操作成功"
-        work_order.arrange_station
-      end
+        status = work_order.status==WorkOrder::STAT[:WAIT_PAY]? 0 : 1
+        #0:"此车等待付款"1:未付款
+      work_order.arrange_station
     else
       #"工单未找到"
       status = 2
