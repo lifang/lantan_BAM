@@ -189,6 +189,17 @@ module ApplicationHelper
     orders
   end
 
+  #新的app，order分组，把已付款，但是施工中的放在施工中
+  def new_app_order_by_status(orders)
+    orders[Order::STATUS[:BEEN_PAYMENT]].each{|order|
+      if order.wo_status == WorkOrder::STAT[:SERVICING]
+        orders[Order::STATUS[:SERVICING]] << order
+      end
+    }
+    orders.delete(Order::STATUS[:BEEN_PAYMENT])
+    orders
+  end
+
   #
   def combin_orders(orders)
     orders.map{|order|
