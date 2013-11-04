@@ -1,5 +1,9 @@
 <%= javascript_include_tag "set_stores" %>
 <div class="data_box">
+  <div class="second_menu">
+    <a href="/stores/<%= @store.id %>/set_functions">功能设置</a>
+    <a href="/stores/<%= @store.id %>/set_stores" class="hover">门店信息</a>
+  </div>
   <div class="clear"></div>
   <div class="data_body">
     <div>

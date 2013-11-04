@@ -303,8 +303,8 @@ function position_new_commit(store_id, dpt_id){         //组织架构-新建职
                     tishi_alert("创建失败!");
                 }else{
                     tishi_alert("创建成功!");
-                    $("#position_new").empty();
-                    $("#position_new").hide();
+                    $("#set_functions_position_new").empty();
+                    $("#set_functions_position_new").hide();
                     $(".maskOne").hide();
                     $.ajax({        //重新加载编辑部门弹出层
                         type: "get",
