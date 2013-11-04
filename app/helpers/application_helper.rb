@@ -191,13 +191,11 @@ module ApplicationHelper
 
   #新的app，order分组，把已付款，但是施工中的放在施工中
   def new_app_order_by_status(orders)
-    orders[Order::STATUS[:BEEN_PAYMENT]].each{|order|
-      if order.wo_status == WorkOrder::STAT[:SERVICING]
-        orders[Order::STATUS[:SERVICING]] << order
-      end
-    }
-    orders.delete(Order::STATUS[:BEEN_PAYMENT])
-    orders
+    order_hash = {}
+    order_hash[Order::STATUS[:WAIT_PAYMENT]] = orders.select{|order| order.status == Order::STATUS[:WAIT_PAYMENT]}
+    order_hash[WorkOrder::STAT[:WAIT]] = orders.select{|order| order.wo_status == WorkOrder::STAT[:WAIT]}
+    order_hash[WorkOrder::STAT[:SERVICING]] = orders.select{|order| order.wo_status == WorkOrder::STAT[:SERVICING]}
+    order_hash
   end
 
   #
