@@ -64,11 +64,11 @@ class Material < ActiveRecord::Base
   def generate_barcode_img
     begin
       barcode = Barby::EAN13.new(self.code)
-      if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{Time.now.strftime("%Y-%m")}")
-        FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{Time.now.strftime("%Y-%m")}"
+      if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{Time.now.strftime("%Y%m")}")
+        FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{Time.now.strftime("%Y%m")}"
       end
-      barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{Time.now.strftime("%Y-%m")}", "#{self.id}.png"))
-      self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{Time.now.strftime("%Y-%m")}/#{self.id}.png")
+      barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{Time.now.strftime("%Y%m")}", "#{self.id}.png"))
+      self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{Time.now.strftime("%Y%m")}/#{self.id}.png")
     rescue
       self.errors[:barby] << "条形码图片生成失败！"
     end
