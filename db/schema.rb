@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131015025446) do
+ActiveRecord::Schema.define(:version => 20131106043943) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -567,6 +567,8 @@ ActiveRecord::Schema.define(:version => 20131015025446) do
     t.float    "return_fee",                       :default => 0.0
     t.integer  "return_staff_id"
     t.integer  "return_reason"
+    t.float    "front_deduct",                     :default => 0.0
+    t.float    "technician_deduct",                :default => 0.0
   end
 
   add_index "orders", ["c_pcard_relation_id"], :name => "index_orders_on_c_pcard_relation_id"
@@ -603,6 +605,8 @@ ActiveRecord::Schema.define(:version => 20131015025446) do
     t.text     "revist_content"
     t.integer  "prod_point"
     t.string   "description"
+    t.float    "deduct_price",   :default => 0.0
+    t.float    "deduct_percent", :default => 0.0
   end
 
   add_index "package_cards", ["created_at"], :name => "index_package_cards_on_created_at"
@@ -678,15 +682,19 @@ ActiveRecord::Schema.define(:version => 20131015025446) do
     t.string   "standard"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.float    "deduct_percent"
+    t.float    "deduct_percent", :default => 0.0
     t.float    "t_price"
     t.boolean  "is_auto_revist"
     t.integer  "auto_time"
     t.text     "revist_content"
     t.integer  "prod_point"
-    t.float    "deduct_price"
+    t.float    "deduct_price",   :default => 0.0
     t.boolean  "show_on_ipad",   :default => true
     t.boolean  "commonly_used",  :default => false
+    t.boolean  "is_added",       :default => false
+    t.float    "techin_price",   :default => 0.0
+    t.float    "techin_percent", :default => 0.0
+    t.integer  "single_types"
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"

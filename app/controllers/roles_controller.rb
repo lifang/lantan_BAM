@@ -50,7 +50,7 @@ class RolesController < ApplicationController
     end
     @staffs = Staff.valid.includes(:staff_role_relations => :role).paginate(:conditions => str,
       :page => params[:page], :per_page => Constant::PER_PAGE)
-    @roles = Role.find_all_by_store_id(params[:store_id].to_i)
+    @roles = Role.where(:store_id =>params[:store_id].to_i).where("role_type = (?)",Role::ROLE_TYPE[:NORMAL])
     respond_to do |f|
       f.html
       f.js

@@ -24,9 +24,9 @@ class ProductsController < ApplicationController
 
 
   def prod_services
-    @services = Product.paginate_by_sql("select id, service_code code,prod_point,store_id,name,types,base_price,show_on_ipad,cost_time,t_price,sale_price,staff_level level1,staff_level_1
-    level2,commonly_used from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]}
-    order by created_at asc", :page => params[:page], :per_page => Constant::PER_PAGE)
+    @services = Product.paginate_by_sql("select id, service_code code,prod_point,store_id,name,types,base_price,show_on_ipad,cost_time,t_price,sale_price,
+    staff_level level1,staff_level_1 level2,commonly_used from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
+    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:SIN]} order by created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
     @materials={}
     @services.each do |service|
       @materials[service.id]=Material.find_by_sql("select name,code,p.material_num num from materials m inner join prod_mat_relations p on
@@ -45,16 +45,19 @@ class ProductsController < ApplicationController
       :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],:t_price=>params[:t_price],
       :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product","service_code")}",
       :is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]=="" ? 0 : params[:prod_point]}
+    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
+    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
+    parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
     if types == Constant::SERVICE
-      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
-          :deduct_percent=>params[:deduct_percent],:deduct_price=>params[:deduct_price] })
+      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2]})
       product =Product.create(parms)
       params[:sale_prod].each do |key,value|
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
       end if params[:sale_prod]
     else
+      added = params[:is_added].nil? ? 0 : params[:is_added]
       flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).map(&:name).include? params[:name]
-      parms.merge!({:standard=>params[:standard]})
+      parms.merge!({:standard=>params[:standard],:is_added =>added})
       product =Product.create(parms)
       ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
     end
@@ -89,10 +92,12 @@ class ProductsController < ApplicationController
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
       :types=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price], :is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]=="" ? 0 : params[:prod_point]}
+    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
+    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
+    parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
     service,flash[:notice] = false,"更新成功"
     if types == Constant::SERVICE
-      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
-          :deduct_percent=>params[:deduct_percent],:deduct_price=>params[:deduct_price] })
+      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2] })
       service = true if [product.staff_level,product.staff_level_1].sort != [params[:level1].to_i,params[:level2].to_i].sort
       if params[:sale_prod]
         product.prod_mat_relations.inject(Array.new) {|arr,mat| mat.destroy}
@@ -106,8 +111,9 @@ class ProductsController < ApplicationController
       else
         ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>params[:prod_material].to_i)
       end
+      added = params[:is_added].nil? ? 0 : params[:is_added]
       parms.merge!({:standard=>params[:standard],:is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],
-          :revist_content=>params[:con_revist],:prod_point=>params[:prod_point]})
+          :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:is_added =>added})
       flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).where("id != (?)",product.id).map(&:name).include? params[:name]
     end
     begin
@@ -211,5 +217,40 @@ class ProductsController < ApplicationController
       @status = 0
       @notice = "服务未找到"
     end
+  end
+
+  def package_service
+    @services = Product.paginate_by_sql("select id, service_code code,store_id,name,types,show_on_ipad,cost_time,staff_level level1,
+    staff_level_1 level2,commonly_used from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
+    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]} order by created_at desc", :page => params[:page],
+      :per_page => Constant::PER_PAGE)
+  end
+
+  def pack_create
+    flash[:notice] = "添加成功"
+    parms = {:name=>params[:name],:types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
+      :created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"S#{Sale.set_code(3,"product","service_code")}",:is_auto_revist=>params[:auto_revist],
+      :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB]}
+    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
+    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
+    parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
+    parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2]})
+    Product.create(parms)
+    redirect_to "/stores/#{params[:store_id]}/products/package_service"
+    #    begin
+    #      if params[:img_url] and !params[:img_url].keys.blank?
+    #        params[:img_url].each_with_index {|img,index|
+    #          url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
+    #          ImageUrl.create(:product_id=>product.id,:img_url=>url)
+    #          product.update_attributes({:img_url=>url}) if index == 0
+    #        }
+    #      end
+    #    rescue
+    #      flash[:notice] ="图片上传失败，请重新添加！"
+    #    end
+  end
+
+  def add_package
+    @package = Product.new
   end
 end
