@@ -132,6 +132,7 @@ class Order < ActiveRecord::Base
 
   #正在进行中的订单
   def self.working_orders store_id
+    #wo_status不在（2,3,4,5）o.status 在（0,1,2,3,4）
     return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status from orders o inner join car_nums c on c.id=o.car_num_id
       inner join customers cu on cu.id=o.customer_id left join work_orders wo on wo.order_id = o.id
 and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
