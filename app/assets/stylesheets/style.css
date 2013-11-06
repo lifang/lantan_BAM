@@ -1016,4 +1016,4 @@ a.compile_btn { width: 100px;}
 .item_rbox { padding: 10px; border: 1px #CCCCCC solid; overflow: auto; height: 150px;}
 .item_rbox dl { margin-bottom: 10px; overflow: hidden;}
 .item_rbox dt { color:#930205; line-height: 24px;}
-.item_rbox dd { float: left; margin: 5px; background: #ededed; padding: 5px;}
+.item_rbox dd { display: inline-block; margin: 5px; background: #ededed; padding: 5px;}

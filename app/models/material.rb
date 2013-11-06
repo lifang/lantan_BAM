@@ -19,6 +19,7 @@ class Material < ActiveRecord::Base
   has_many :mat_depot_relations
   has_many :pcard_material_relations
   has_many :depots, :through => :mat_depot_relations
+  belongs_to :category
   attr_accessor :ifuse_code, :code_value
 
   before_create :generate_barcode
