@@ -1,0 +1,50 @@
+<div class="popup_box">
+  <h1>编辑工位<a href="javascript:void(0)" class="close">关闭</a></h1>
+  <div class="popup_body">
+    <%= form_tag "/stores/#{@store.id}/station_datas/#{@station.id}", :method => :put, :remote => true, "data-type" => 'script', :class=>"station_form" do %>
+      <div class="popup_body_area">
+        <div class="item station_name">
+          <label><span class="red">*</span>名称：</label>
+          <input type="text" size="30" id="edit_station_name" name="edit_station_name" value="<%= @station.name %>"/>
+        </div>
+        <div class="item">
+          <label><span class="red">*</span>编号：</label>
+          <input type="text" size="30" id="edit_station_code" name="edit_station_code" value="<%= @station.code %>"/>
+        </div>
+        <div class="item">
+          <label>是否有工控机：</label>
+          <input type="checkbox" id="edit_station_has_controller" name="edit_station_has_controller" value="1"
+                 <% if @station.is_has_controller %>checked<% end %> onclick="handleController(this)"/>
+        </div>
+        <div class="controller_input">
+          <div class="item">
+            <label><% if @station.is_has_controller %><span class="red">*</span><% end %>采集器编号：</label>
+            <input type="text" size="30" id="edit_station_collector_code" name="edit_station_collector_code"
+                   value="<%= @station.collector_code.nil? || @station.collector_code.empty? ? "" : @station.collector_code %>"
+                   <% if !@station.is_has_controller %>disabled="disabled"<% end %>/>
+          </div>
+        </div>
+        <div class="item_textarea">
+          <label><span class='red'>*</span>服务：</label>
+          <div class="item_rbox">
+            <% @categories.each do |c| %>
+              <dl>
+                <dt>o<%= c.name %></dt>
+                <% @services[c.id].each do |p| %>
+                <dd>
+                  <input type="checkbox" name="edit_product_ids[]" <% if @has_services.include?(p.id) %>checked<% end %>
+                         value="<%= p.id %>"/>
+                   <%= p.name %>
+                </dd>&nbsp;&nbsp;
+                <% end if @services[c.id] %>
+              </dl>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div class="btn_box">
+        <button type="button" class="confirm_btn" onclick="edit_station_valid(this)">确定</button>
+      </div>
+    <% end %>
+  </div>
+</div>

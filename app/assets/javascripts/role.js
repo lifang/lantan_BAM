@@ -181,50 +181,52 @@ function selectAll(obj){
     }
 }
 //这边是工位的开始
-function checkValid(obj){
-    var flag = true;
-    var prod_length = $(".station_form .popup_body_result").find("input[type='checkbox']:checked").length
-    if($(".station_form").find(".station_name input").val()=="")
-    {
-        tishi_alert("名称不能为空!")
-        flag = false;
-        return false;
-    }
-    else if($.trim($(".station_form").find("#station_code").val())=="" || $.trim($(".station_form").find("#station_code").val()).match(reg1)==null){
-        tishi_alert("工位编号不能为空,且为数字!")
-        flag = false;
-        return false;
-    }
-    else if($(".station_form #station_is_has_controller").attr("checked")=="checked")
-    {
-        $(".station_form .controller_input").find("input[type='text']").each(function(){
-            var name = $(this).prev().text().split("：")[0]
-            if($(this).val()==""){
-                tishi_alert(name.split("*")[1]+"不能为空!")
-                flag = false;
-                return false;
-            }
-        })
-    }
-    if(prod_length == 0){
-        tishi_alert("服务不能为空!")
-        flag = false;
-        return false;
-    }
-    if(flag)
-    {
+function new_station_valid(obj){ //新建工控机验证
+    var product = $("input[name='product_ids[]']:checked").length;
+    var name = $("#station_name").val();
+    var code = $("#station_code").val();
+    var has_controller = $("#station_has_controller").attr("checked")=="checked";
+    var station_code = $.trim($("#station_collector_code").val());
+    if(name==""){
+        tishi_alert("工控机名称不能为空!");
+    }else if(code==""){
+        tishi_alert("工控机编号不能为空!");
+    }else if(has_controller && station_code==""){
+        tishi_alert("采集器编号不能为空!")
+    }else if(product==0){
+        tishi_alert("至少选择一个服务项目!");
+    }else{
         $(obj).parents("form").submit();
+        //$(obj).attr("disabled", "disabled");
     }
 }
-function handleController(){
-    var input_div = $("#station_is_has_controller").parent().next();
-    if($("#station_is_has_controller").attr("checked")=="checked")
-    {
-        $(".station_form .controller_input").find('label').prepend("<span class='red'>*</span>");
-        input_div.find("input").attr("disabled", false);
+
+function edit_station_valid(obj){ //编辑工控机验证
+    var product = $("input[name='edit_product_ids[]']:checked").length;
+    var name = $("#edit_station_name").val();
+    var code = $("#edit_station_code").val();
+    var has_controller = $("#edit_station_has_controller").attr("checked")=="checked";
+    var station_code = $.trim($("#edit_station_collector_code").val());
+    if(name==""){
+        tishi_alert("工控机名称不能为空!");
+    }else if(code==""){
+        tishi_alert("工控机编号不能为空!");
+    }else if(has_controller && station_code==""){
+        tishi_alert("采集器编号不能为空!")
+    }else if(product==0){
+        tishi_alert("至少选择一个服务项目!");
+    }else{
+        $(obj).parents("form").submit();
+        //$(obj).attr("disabled", "disabled");
     }
-    else{
-        input_div.find("input").attr("disabled","disabled");
-        $(".station_form .controller_input").find('label span').remove();
-    }
+}
+
+function handleController(obj){            //修改是否有工控机修改采集器编号可否输入
+   if($(obj).attr("checked")=="checked"){
+       $(".controller_input label").prepend("<span class='red'>*</span>");
+       $(".controller_input input").removeAttr("disabled");
+   }else{
+       $(".controller_input span").remove();
+       $(".controller_input input").attr("disabled", "disabled");
+   }
 }

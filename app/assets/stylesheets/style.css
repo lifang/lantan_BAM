@@ -883,7 +883,7 @@ a.compile_btn { width: 100px;}
 
 .groupFunc_b { padding: 10px; overflow: hidden; clear: both;}
 .groupFunc_b li { display: inline; margin: 5px 10px; line-height: 24px;}
-.groupFunc_b dl { margin: 0 10px 10px 0; overflow: hidden;}
+.groupFunc_b dl { margin: 0 10px 10px 0;}
 .groupFunc_b dt { font-size: 14px; font-weight: bold; line-height: 32px;}
 .groupFunc_b dd {line-height: 24px; display: inline-block; width: 190px; float: left;}
 
@@ -965,3 +965,55 @@ a.compile_btn { width: 100px;}
 .no_material_notice{
     margin: 0 0 10px 60px;
 }
+
+/*基础数据---组织架构*/
+.organization { overflow: hidden; margin: 10px 0; border: 1px #B72629 solid; padding: 10px;}
+.organization dl { float: left; display: block; width: 150px;}
+.organization dl dt { width: 100px; text-align: center; padding: 2px 10px; border: 1px #CCCCCC solid; position: relative;}
+.organization dl dt a { color: #333;}
+.organization dl dt .group_func a { color: #FFF; font-size: 12px; margin: 0 5px; font-weight:100;}
+.organization dl dd { display: block; line-height: 24px; margin: 5px 0;}
+
+.main:after, .box:after, .data_box:after, .data_body:after, .groupFunc_area:after {
+	display: block;
+	overflow:hidden;
+	clear: both;
+	height:0;
+	visibility:hidden;
+	content:".";
+}
+.gr_h { line-height: 32px; color: #930205; overflow: hidden;}
+
+
+.func_set_ul li {
+	border: 1px #CCCCCC solid;
+	width: 120px;
+	height: 36px;
+	line-height: 36px;
+	text-align: center;
+	position: relative;
+	float: left;
+	margin: 0 20px 30px 0;
+}
+
+/*职务*/
+.duty_center { padding: 10px 10px 10px 50px;}
+.duty { margin:5px 10px;}
+.duty_left {
+    width: 115px;
+	height: 24px;
+	line-height: 24px;
+	display: inline-block;
+	text-align: right;
+	float: left;
+	font-weight: bold;
+	color: #930205;
+}
+.duty_right { padding-left: 120px;}
+.duty_right li { line-height: 24px;}
+.duty .a_btn { background:#026C93; color: #FFF; font-size: 12px; margin: 0 5px; padding: 0 5px;}
+
+.item_rbox { padding: 10px; border: 1px #CCCCCC solid; overflow: auto; height: 150px;}
+.item_rbox dl { margin-bottom: 10px; overflow: hidden;}
+.item_rbox dt { color:#930205; line-height: 24px;}
+.item_rbox dd { display: inline-block; margin: 5px; background: #ededed; padding: 5px;}

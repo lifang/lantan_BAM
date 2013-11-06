@@ -22,27 +22,23 @@
                 <tr>
                   <td width =150"><%= station.code %></td>
                   <td width =180"><%= station.name %></td>
-                  <td width =200"><%= Product.includes(:station_service_relations).where(:station_service_relations => {:station_id => station.id}, :store_id => @store.id, :status => Product::IS_VALIDATE[:YES],:is_service =>Product::PROD_TYPES[:SERVICE]).map(&:name).join("、") %></td>
+                  <td width =200"><%= station.products.where(["status = ?", Product::IS_VALIDATE[:YES]]).map(&:name).join("、") %></td>
                   <td width =150"><%= Station::STAT_NAME[station.status] %></td>
                   <td width =100"><%= station.is_has_controller ? "有" : "无" %></td>
                   <td><% if permission?(:base_datas, :edit_station_data) %><%= link_to "编辑", edit_store_station_data_path(@store, station), remote: :true, "data-type" => 'script' %><% end %>
-                      <% if permission?(:base_datas, :del_station_data) %><%= link_to "删除", "/stores/#{@store.id}/station_datas/#{station.id}", :confirm => "确定需要删除工位吗？", :method => 'delete' %><% end %>
+                      <% if permission?(:base_datas, :del_station_data) %><%= link_to "删除", "/stores/#{@store.id}/station_datas/#{station.id}",remote: :true, "data-type" => 'script',  :confirm => "确定需要删除工位吗？", :method => 'delete' %><% end %>
                   </td>
-
                 </tr>
               <% end %>
-
             </tbody>
           </table>
           <%= will_paginate @stations, :class => "pageTurn", :previous_label => "上一页",
             :next_label => "下一页"  unless @stations.empty?%>
-
         </div>
       </div>
     </div>
   </div>
 </div>
 <div class="mask"></div>
-<div id="hidden_station_form">
-  <%= render 'form' %>
+<div class="tab_popup" id="station_div" style="display:none;">
 </div>

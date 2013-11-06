@@ -1012,11 +1012,11 @@ class MaterialsController < ApplicationController
         if material.nil?
           render :json => {:status => 0}
         else
-          if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}")
-            FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{mat_id}"
+          if !FileTest.directory?("#{File.expand_path(Rails.root)}/public/barcode/#{Time.now.strftime("%Y%m")}")
+            FileUtils.mkdir_p "#{File.expand_path(Rails.root)}/public/barcode/#{Time.now.strftime("%Y%m")}"
           end
-          barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{mat_id}", "barcode.png"))
-          if material.update_attributes(:code => new_code+barcode.checksum.to_s, :code_img => "/barcode/#{mat_id}/barcode.png")
+          barcode.to_image_with_data(:height => 210, :margin => 60, :xdim => 5).write(Rails.root.join('public', "barcode", "#{Time.now.strftime("%Y%m")}", "#{mat_id}.png"))
+          if material.update_attributes(:code => new_code+barcode.checksum.to_s, :code_img => "/barcode/#{Time.now.strftime("%Y%m")}/#{mat_id}.png")
             render :json => {:status => 1, :new_code => material.code}
           else
             render :json => {:status => 0}

@@ -13,6 +13,7 @@ LantanBAM::Application.routes.draw do
     end
   end
   resources :stations do
+   
   end
 
   # The priority is based upon order of creation:
@@ -166,13 +167,25 @@ LantanBAM::Application.routes.draw do
       end
     end
 
+    resources :set_functions do
+      collection do
+        get "market_new", "market_new_commit", "market_edit", "market_edit_commit", "storage_new", "storage_new_commit",
+          "storage_edit", "storage_edit_commit", "depart_new", "depart_new_commit", "sibling_depart_new",
+          "sibling_depart_new_commit","depart_edit", "depart_edit_commit", "depart_del", "position_new",
+          "position_new_commit", "position_edit_commit", "position_del_commit"
+      end
+    end
+
     resources :set_stores do
       collection do
-        get "edit"
         get "select_cities"
       end
     end
-    resources :station_datas
+    resources :station_datas do
+      collection do
+        post "create"
+      end
+    end
     resources :sv_cards do
       collection do
         get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
@@ -273,11 +286,11 @@ LantanBAM::Application.routes.draw do
     end
 
     #新的app
-  resources :new_app_orders do
-    collection do
-      post :new_index_list,:make_order, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order
+    resources :new_app_orders do
+      collection do
+        post :new_index_list,:make_order, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order
+      end
     end
-  end
   
   end
   resources :return_backs do

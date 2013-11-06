@@ -2,7 +2,7 @@
 class SetStoresController < ApplicationController
   layout "role"
   before_filter :sign?, :except => [:update]
-  def edit
+  def index
     @store = Store.find_by_id(params[:store_id].to_i)
     @store_city = City.find_by_id(@store.city_id) if @store.city_id
     @cities = City.where(["parent_id = ?", @store_city.parent_id]) if @store_city
@@ -29,7 +29,7 @@ class SetStoresController < ApplicationController
     else
       flash[:notice] = "更新失败!"
     end
-    redirect_to edit_store_set_store_path
+    redirect_to store_set_stores_path
   end
 
   def select_cities   #选择省份时加载下面的所有城市

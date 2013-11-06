@@ -1,6 +1,0 @@
-<% if @notice %>
-tishi_alert("<%=  @notice.html_safe() %>");
-<% end %>
-$("#hidden_station_form").html('<%= j(render :partial => "form") %>');
-handleController()
-popup('#station_form')
