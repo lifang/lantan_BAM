@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131015025446) do
+ActiveRecord::Schema.define(:version => 20131107041801) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(:version => 20131015025446) do
     t.integer  "supplier_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "back_good_records", ["material_id"], :name => "index_back_good_records_on_material_id"
@@ -106,6 +107,14 @@ ActiveRecord::Schema.define(:version => 20131015025446) do
   add_index "car_nums", ["created_at"], :name => "index_car_nums_on_created_at"
   add_index "car_nums", ["num"], :name => "index_car_nums_on_num"
   add_index "car_nums", ["updated_at"], :name => "index_car_nums_on_updated_at"
+
+  create_table "categories", :force => true do |t|
+    t.string   "name"
+    t.integer  "types"
+    t.integer  "store_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "chains", :force => true do |t|
     t.string   "name"
@@ -219,6 +228,17 @@ ActiveRecord::Schema.define(:version => 20131015025446) do
   add_index "customers", ["status"], :name => "index_customers_on_status"
   add_index "customers", ["types"], :name => "index_customers_on_types"
   add_index "customers", ["username"], :name => "index_customers_on_username"
+
+  create_table "departments", :force => true do |t|
+    t.string   "name"
+    t.integer  "types"
+    t.integer  "dpt_id"
+    t.integer  "dpt_lv"
+    t.integer  "store_id"
+    t.integer  "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "depots", :force => true do |t|
     t.string   "name"
@@ -422,6 +442,7 @@ ActiveRecord::Schema.define(:version => 20131015025446) do
     t.boolean  "is_ignore",                    :default => false
     t.integer  "material_low"
     t.string   "code_img"
+    t.integer  "category_id"
   end
 
   add_index "materials", ["name"], :name => "index_materials_on_name"
@@ -687,6 +708,7 @@ ActiveRecord::Schema.define(:version => 20131015025446) do
     t.float    "deduct_price"
     t.boolean  "show_on_ipad",   :default => true
     t.boolean  "commonly_used",  :default => false
+    t.integer  "category_id"
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"
