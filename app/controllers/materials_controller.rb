@@ -31,7 +31,7 @@ class MaterialsController < ApplicationController
     @mat_in = params[:mat_in] if params[:mat_in]
     @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
                                     and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
-    @back_good_records = BackGoodRecord.all.paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
+    @back_good_records = BackGoodRecord.where(["store_id = ?",  params[:store_id].to_i]).paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
     @suppliers = Supplier.all(:select => "s.id,s.name", :from => "suppliers s",
       :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=0")
     date_now = Time.now.to_s[0..9]
@@ -398,9 +398,6 @@ class MaterialsController < ApplicationController
   #退货
   def back_good     #主页面导航栏上的退货
     store_id = params[:store_id].to_i
-#    a = Item.new
-#    a.id = 0
-#    a.name = "总部"
     suppliers = Supplier.all(:select => "s.id,s.name", :from => "suppliers s",
       :conditions => "s.store_id=#{store_id} and s.status=0")
     @store_id = store_id
@@ -438,7 +435,8 @@ class MaterialsController < ApplicationController
         sup_id = d.split("-")[2].to_i
         material = Material.find_by_id(id)
         material.update_attribute("storage", material.storage - num) if material
-        BackGoodRecord.create(:material_id => id, :material_num => num, :supplier_id => sup_id)
+        BackGoodRecord.create(:material_id => id, :material_num => num, :supplier_id => sup_id,
+                            :store_id => params[:store_id].to_i)
       end
       render :json => 1
     end
