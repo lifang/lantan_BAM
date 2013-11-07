@@ -1017,3 +1017,33 @@ a.compile_btn { width: 100px;}
 .item_rbox dl { margin-bottom: 10px; overflow: hidden;}
 .item_rbox dt { color:#930205; line-height: 24px;}
 .item_rbox dd { display: inline-block; margin: 5px; background: #ededed; padding: 5px;}
+
+/*11-6*/
+/*表格出现滑动条*/
+.table_box_h { height: 32px; overflow: scroll; overflow: hidden; z-index:10; position: relative;}
+.table_box_h tbody {visibility: hidden;}
+.table_box { margin-bottom: 30px; overflow: scroll; width: 1000px; height: 500px; margin-top: -32px;}
+.table_box thead { visibility: hidden;}
+
+.collect { padding: 5px 0;}
+.collect li { display: inline-block; margin-right: 10px;}
+.collect li span { margin: 0 5px; color:#930205;}
+
+.register { font-size: 16px; margin-bottom: 10px; padding-bottom: 10px; border: 1px #CCCCCC solid;}
+.orderGoods {
+    color:#930205;
+	padding-left: 10px;
+	height: 32px;
+	line-height: 32px;
+	background: url(/assets/tab_head_bg.jpg) repeat-x;
+}
+.orderGoods li { display: inline-block; margin-right: 20px;}
+
+.merchant, .staffDetails { font-size: 14px; padding: 10px; border-bottom: 1px #CCCCCC dashed;}
+.merchantNumber {height: 32px; line-height: 32px; font-size: 14px; color:#930205;}
+.merchant li, .staffDetails li {height: 32px; line-height: 32px; display: inline-block; margin-right: 30px;}
+
+
+.item_w { width: 90%; position: relative;}
+.item_radio_b {position: absolute; top: 0px; left: 10px;}
+.popup_body_area h2.item_blockArea_h2 { font-size: 16px; padding: 5px 5px 5px 20px;}

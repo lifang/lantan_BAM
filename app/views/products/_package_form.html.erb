@@ -19,8 +19,8 @@
 </div>
 <div class="item">
   <label>类别：</label><select  id="prod_types" name="prod_types">
-    <% Product::PRODUCT_TYPES.select {|k,v| k >=Product::PRODUCT_END}.each do |key,value| %>
-      <option value="<%= key %>" <%if @package.types==key%> selected<%end%> ><%= value %></option>
+    <% @cates.each do |cate| %>
+      <option value="<%= cate.id %>" <%if @package.category_id==cate.id%> selected<%end%> ><%= cate.name %></option>
     <% end %>
   </select>
 </div>
@@ -37,32 +37,13 @@
     <a href="javascript:void(0)" class="compile_btn" onclick="before_center('.add_img');">添加图片</a><span>*添加新图片会使已上传图片被删除，请为图片做好备份</span>
   </div>
 </div>
-<div class="item_textarea"><span class="item_radio">
-    <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
-  <label>提成(点)：</label>
-  <input name="deduct_percent" id="deduct_percent" type="text" <%if @package.deduct_percent==0.0 && @package.deduct_price != 0.0%> disabled<%else%>
-           value="<%= (@package.deduct_percent.nil? ? 0 :@package.deduct_percent)/(@package.sale_price.nil? ? 1 : @package.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>百分点
+<div class="item">
+  <label><span class="red">*</span>销售提成(元)：</label>
+  <input name="deduct_price" id="deduct_price" type="text" value="<%= @package.deduct_price %>" />
 </div>
-<div class="item_textarea"><span class="item_radio">
-    <input name="deduct_type" type="radio" <% if @package.deduct_price && @package.deduct_price != 0.0 %>checked<%end%>
-           onclick="change_input('#deduct_percent','#deduct_price')" /></span>
-  <label>提成(元)：</label>
-  <input name="deduct_price" id="deduct_price" type="text"
-         <%if @package.deduct_price.nil? || @package.deduct_price === 0 %> disabled <%else%> value="<%= @package.deduct_price %>"<%end%>  class="item_areaInput_s" />金额(元)
-</div>
-<div class="item_textarea" id="techin_p"><span class="item_radio">
-    <input name="techin_type" type="radio" checked onclick="change_input('#techin_price','#techin_percent')" /></span>
-  <label>提成(点)：</label>
-  <input name="techin_percent" id="techin_percent" type="text"
-         <% if @package.techin_percent==0.0 && @package.techin_price != 0.0 %> disabled <%else%>
-           value="<%= (@package.techin_percent.nil? ? 0 :@package.techin_percent)/(@package.sale_price.nil? ? 1 : @package.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>百分点
-</div>
-<div class="item_textarea" id="techin_t"><span class="item_radio">
-    <input name="techin_type" type="radio" <% if @package.techin_price && @package.techin_price != 0.0 %>checked<%end%>
-           onclick="change_input('#techin_percent','#techin_price')" /></span>
-  <label>提成(元)：</label>
-  <input name="techin_price" id="techin_price" type="text"
-         <% if @package.techin_price.nil? || @package.techin_price === 0 %> disabled <%else%> value="<%= @package.techin_price %>"<%end%> class="item_areaInput_s" />金额(元)
+<div class="item">
+  <label><span class="red">*</span>技师提成(元)：</label>
+  <input name="techin_price" id="techin_price" type="text" value="<%= @package.techin_price %>" />
 </div>
 <div class="clear"></div>
 <div class="item_blockArea">
@@ -70,7 +51,7 @@
     <label>自动回访：</label><input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @package.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @package.is_auto_revist  %>"
                                onclick="check_revist()" <% if @package.is_auto_revist %>checked<%end%>/>
   </div>
-  <div class="item"><label>回访时间：</label>
+  <div class="item"><label>回访间隔：</label>
     <select  id="time_revist" name="time_revist" <%unless @package.is_auto_revist%>disabled <%end%>>
       <option value="">请选择</option>
       <% Product::REVIST_TIME.each do |key| %>

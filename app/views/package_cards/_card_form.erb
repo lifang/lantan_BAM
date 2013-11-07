@@ -1,10 +1,42 @@
 <%= javascript_include_tag "/assets/My97DatePicker/WdatePicker.js" %>
 <%= stylesheet_link_tag    "/assets/My97DatePicker/skin/WdatePicker" %>
+<div class="card_content">
+  <div class="search">
+    <div>
+      <label>物料类别：</label><select  id="pcard_material" name="pcard_material" onchange="request_material(<%= params[:store_id] %>)">
+        <option value="">请选择</option>
+        <% Material::TYPES_NAMES.each do |key,value| %>
+          <option value="<%= key %>"  <%if @material && @material.types==key%> selected<%end%> ><%= value %></option>
+        <% end %>
+      </select>
+    </div>
+    <div>
+      <label>所属物料：</label><select  id="material_types" name="material_types" onchange="control_input()">
+      </select>
+    </div>
+    <input type="hidden" id="m_types" value="" />
+    <div><label>数量：</label>
+      <input id="material_num" name="material_num" type="text" disabled value="<%= @p_material.nil? ? "" : @p_material.material_num %>" /></div>
+  </div>
+</div>
 <div class="item">
   <label><span class="red">*</span>套餐卡名称：</label><input name="name" id="name" type="text" value="<%= @pcard.name %>" />
 </div>
 <div class="item">
   <label><span class="red">*</span>套餐价格：</label><input name="price" id="price" type="text" value="<%= @pcard.price %>" />
+</div>
+<div class="item_textarea"><span class="item_radio">
+    <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
+  <label>百分点：</label>
+  <input name="deduct_percent" id="deduct_percent" type="text" <%if @pcard.deduct_percent==0.0 && @pcard.deduct_price != 0.0%> disabled<%else%>
+           value="<%= (@pcard.deduct_percent.nil? ? 0 :@pcard.deduct_percent)/(@pcard.price.nil? ? 1 : @pcard.price)*100 %>" <%end%>  class="item_areaInput_s"/>
+</div>
+<div class="item_textarea"><span class="item_radio">
+    <input name="deduct_type" type="radio" <% if @pcard.deduct_price && @pcard.deduct_price != 0.0 %>checked<%end%>
+           onclick="change_input('#deduct_percent','#deduct_price')" /></span>
+  <label>金额(元)：</label>
+  <input name="deduct_price" id="deduct_price" type="text"
+         <%if @pcard.deduct_price.nil? || @pcard.deduct_price === 0 %> disabled <%else%> value="<%= @pcard.deduct_price %>"<%end%>  class="item_areaInput_s" />
 </div>
 <div class="item">
   <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @pcard.prod_point.nil? ? 0 : @pcard.prod_point %>" />
@@ -53,27 +85,9 @@
 <input type="hidden" value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>" id="date1" />
 <div class="clear"></div>
 <div class="card_content" id="t_prod">
-  <%= render :partial=>"/sales/sale_search",:object=>[Product::PRODUCT_TYPES,"pcard_types"] %>
+  <%= render :partial=>"/sales/sale_search",:object=>[@cates,"pcard_types"] %>
 </div>
-<div class="card_content">
-  <div class="search">
-    <div>
-      <label>物料类别：</label><select  id="pcard_material" name="pcard_material" onchange="request_material(<%= params[:store_id] %>)">
-        <option value="">请选择</option>
-        <% Material::TYPES_NAMES.each do |key,value| %>
-          <option value="<%= key %>"  <%if @material && @material.types==key%> selected<%end%> ><%= value %></option>
-        <% end %>
-      </select>
-    </div>
-    <div>
-      <label>所属物料：</label><select  id="material_types" name="material_types" onchange="control_input()">
-      </select>
-    </div>
-    <input type="hidden" id="m_types" value="" />
-    <div><label>数量：</label>
-      <input id="material_num" name="material_num" type="text" disabled value="<%= @p_material.nil? ? "" : @p_material.material_num %>" /></div>
-  </div>
-</div>
+
 <% if @material %>
   <script type="text/javascript">
     $("#pcard_material").trigger("onchange");

@@ -70,7 +70,7 @@ function add_product(e){
         var time_revist =$("#time_revist option:selected").val();
         var con_revist =$("#con_revist").val();
         if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
-            tishi_alert("请选择回访的时长，时长是数字");
+            tishi_alert("请选择回访间隔");
             return false;
         }
         if (con_revist =="" || con_revist.length==0){
@@ -196,7 +196,7 @@ function edit_serv(e){
         var time_revist =$("#time_revist option:selected").val();
         var con_revist =$("#con_revist").val();
         if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
-            tishi_alert("请选择回访的时长，时长是数字");
+            tishi_alert("请选择回访间隔");
             return false;
         }
         if (con_revist =="" || con_revist.length==0){
@@ -309,12 +309,12 @@ function add_package(store_id){
 }
 
 //编辑服务
-function edit_package(store_id,id){
+function edit_pack(store_id,id){
     $.ajax({
         async:true,
         type : 'post',
         dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/edit_package"
+        url : "/stores/"+ store_id+"/products/"+ id+"/edit_pack"
     });
 }
 
@@ -353,7 +353,7 @@ function edit_package(e){
         var time_revist =$("#time_revist option:selected").val();
         var con_revist =$("#con_revist").val();
         if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
-            tishi_alert("请选择回访的时长，时长是数字");
+            tishi_alert("请选择回访间隔");
             return false;
         }
         if (con_revist =="" || con_revist.length==0){

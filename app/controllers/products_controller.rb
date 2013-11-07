@@ -220,15 +220,15 @@ class ProductsController < ApplicationController
   end
 
   def package_service
-    @services = Product.paginate_by_sql("select id, service_code code,store_id,name,types,show_on_ipad,cost_time,staff_level level1,
-    staff_level_1 level2,commonly_used from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
-    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]} order by created_at desc", :page => params[:page],
-      :per_page => Constant::PER_PAGE)
+    @services = Product.paginate_by_sql("select p.id, service_code code,p.store_id,p.name,c.name c_name,show_on_ipad,cost_time,staff_level level1,
+    staff_level_1 level2,commonly_used from products p  inner join categories c on c.id=p.category_id where p.store_id=#{params[:store_id]}
+    and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]}
+    order by p.created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
   end
 
   def pack_create
     flash[:notice] = "添加成功"
-    parms = {:name=>params[:name],:types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
+    parms = {:name=>params[:name],:category_id=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
       :created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"S#{Sale.set_code(3,"product","service_code")}",:is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB]}
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
@@ -252,5 +252,23 @@ class ProductsController < ApplicationController
 
   def add_package
     @package = Product.new
+    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:service])
+  end
+
+  def edit_pack
+    @package = Product.find params[:id]
+    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:service])
+  end
+
+  def pack_update
+    flash[:notice] = "更新成功"
+    parms = {:name=>params[:name],:category_id=>params[:prod_types],:is_auto_revist=>params[:auto_revist],
+      :auto_time=>params[:time_revist],:revist_content=>params[:con_revist]}
+    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
+    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
+    parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
+    parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2]})
+    Product.find(params[:id]).update_attributes(parms)
+    redirect_to request.referer
   end
 end

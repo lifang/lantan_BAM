@@ -76,7 +76,8 @@ LantanBAM::Application.routes.draw do
         get "prod_services","package_service"
       end
       member do
-        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv","serve_delete","prod_delete","commonly_used","edit_package"
+        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv","serve_delete","prod_delete","commonly_used",
+          "edit_pack","pack_update"
       end
     end
     resources :materials do

@@ -9,7 +9,7 @@
       <div class="clear"></div>
       <div class="data_body">
         <div>
-          <% unless @cards.blank? %>
+          <div class="table_box_h">
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
@@ -23,7 +23,8 @@
                 </tr>
               </thead>
               <tbody>
-                <%@cards.each do |card|%>
+                <% unless @cards.blank? %>
+                  <% card = @cards[0] %>
                   <tr>
                     <td class="data_table_img"><img src="<%= card.img_url.nil? ? "" : card.img_url.gsub("img#{card.id}","img#{card.id}_#{Constant::C_PICSIZE[0]}")  %>" /></td>
                     <td><%= card.name %></td>
@@ -76,12 +77,82 @@
                 <% end %>
               </tbody>
             </table>
+          </div>
+          <div class="table_box">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+              <thead>
+                <tr class="hbg">
+                  <td>&nbsp;</td>
+                  <td>名称</td>
+                  <td>有效时间</td>
+                  <td>积分</td>
+                  <td width="20%">套餐内容</td>
+                  <td width="20%">所需物料</td>
+                  <td>操作</td>
+                </tr>
+              </thead>
+              <tbody>
+                <% unless @cards.blank? %>
+                  <%@cards.each do |card|%>
+                    <tr>
+                      <td class="data_table_img"><img src="<%= card.img_url.nil? ? "" : card.img_url.gsub("img#{card.id}","img#{card.id}_#{Constant::C_PICSIZE[0]}")  %>" /></td>
+                      <td><%= card.name %></td>
+                      <td><%= if card.date_types == PackageCard::TIME_SELCTED[:END_TIME]
+                          "#{card.date_month}天"
+                        else
+                          "#{card.started_at.nil?? "" : card.started_at.strftime("%Y.%m.%d")}-#{card.ended_at.nil??  "" : card.ended_at.strftime("%Y.%m.%d")}"
+                        end
+                      %></td>
+                      <td><%= card.prod_point %></td>
+                      <td>
+                        <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                          <%unless @prods[card.id].blank? %>
+                            <tr class="fws">
+                              <td width="75%">名称</td>
+                              <td width="25%">数量</td>
+                            </tr>
+                            <%@prods[card.id].each do |prod|%>
+                              <tr>
+                                <td><%= prod.name %></td>
+                                <td><%= prod.num %></td>
+                              </tr>
+                            <%end%>
+                          <%else%>
+                            <tr><td>暂无</td></tr>
+                          <% end %>
+                        </table>
+                      </td>
+                      <td style="padding: 0 5px;">
+                        <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
+                          <%unless @materials[card.id].blank? %>
+                            <tr class="fws">
+                              <td width="75%">物料名称</td>
+                              <td width="25%">数量</td>
+                            </tr>
+                            <%@materials[card.id].each do |prod|%>
+                              <tr>
+                                <td><%= prod.name %></td>
+                                <td><%= prod.num %></td>
+                              </tr>
+                            <%end%>
+                          <%else%>
+                            暂无
+                          <% end %>
+                        </table>
+                      </td>
+                      <td> <% if permission?(:sales, :edit_p_card) %><a href="javascript:void(0)" onclick="edit_pcard('<%=card.id %>','<%=params[:store_id] %>')">修改</a><% end %>
+                        <% if permission?(:sales, :del_p_card) %><a href="javascript:void(0)" onclick="delete_pcard('<%= card.id %>')">删除</a><% end %></td>
+                    </tr>
+                  <% end %>
+                <% else %>
+                  暂无套餐卡信息
+                <% end %>
+              </tbody>
+            </table>
             <div class="pageTurn">
-              <%= will_paginate @cards,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页"%>
+              <%= will_paginate @cards,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" unless @cards.blank? %>
             </div>
-          <% else %>
-            暂无套餐卡信息
-          <% end %>
+          </div>
         </div>
       </div>
     </div>
@@ -93,5 +164,4 @@
 <div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
 <div class="mask"></div>
 <div class="tab_popup add_tab" id="add_tab">
-  <div class="popup_box"></div>
-</div>
+  <div class="popup_box"></div></div>
