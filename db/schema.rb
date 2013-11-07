@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(:version => 20131106043943) do
     t.integer  "supplier_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "back_good_records", ["material_id"], :name => "index_back_good_records_on_material_id"
@@ -711,6 +712,7 @@ ActiveRecord::Schema.define(:version => 20131106043943) do
     t.float    "deduct_price",   :default => 0.0
     t.boolean  "show_on_ipad",   :default => true
     t.boolean  "commonly_used",  :default => false
+    t.integer  "category_id"
     t.boolean  "is_added",       :default => false
     t.float    "techin_price",   :default => 0.0
     t.float    "techin_percent", :default => 0.0

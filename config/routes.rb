@@ -187,9 +187,14 @@ LantanBAM::Application.routes.draw do
         post "create"
       end
     end
-    resources :sv_cards do
+    #    resources :sv_cards do
+    #      collection do
+    #        get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
+    #      end
+    #    end
+    resources :discount_cards do
       collection do
-        get "use_detail", "search_left_price", "left_price", "sell_situation", "make_billing", "use_collect"
+        get "select_products"
       end
     end
     resources :materials_in_outs
