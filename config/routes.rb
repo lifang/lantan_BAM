@@ -72,11 +72,11 @@ LantanBAM::Application.routes.draw do
     end
     resources :products do
       collection do
-        post "edit_prod","add_prod","add_serv","serv_create","load_material","update_status"
-        get "prod_services"
+        post "edit_prod","add_prod","add_serv","serv_create","load_material","update_status","add_package","pack_create"
+        get "prod_services","package_service"
       end
       member do
-        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv","serve_delete","prod_delete","commonly_used"
+        post "edit_prod","update_prod","serv_update","edit_serv","show_prod","show_serv","serve_delete","prod_delete","commonly_used","edit_package"
       end
     end
     resources :materials do

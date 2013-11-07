@@ -1,0 +1,85 @@
+<div class="item">
+  <label><span class="red">*</span>名称：</label><input name="name" id="name" type="text" value="<%= @package.name %>" />
+</div>
+<div class="item">
+  <label><span class="red">*</span>施工时间(分)：</label><input name="cost_time" id="cost_time" type="text" value="<%= @package.cost_time %>" />
+</div>
+<div class="item">
+  <label>技师：</label>
+  <select name="level1" id="level1" class="staff">
+    <% Staff::LEVELS.each do |key,value| %>
+      <option value="<%= key %>" <%if @package.staff_level==key%> selected<%end%> ><%= value %></option>
+    <% end %>
+  </select>
+  <select name="level2" id="level2" class="staff">
+    <% Staff::LEVELS.each do |key,value| %>
+      <option value="<%= key %>" <%if @package.staff_level_1==key%> selected<%end%> ><%= value %></option>
+    <% end %>
+  </select>
+</div>
+<div class="item">
+  <label>类别：</label><select  id="prod_types" name="prod_types">
+    <% Product::PRODUCT_TYPES.select {|k,v| k >=Product::PRODUCT_END}.each do |key,value| %>
+      <option value="<%= key %>" <%if @package.types==key%> selected<%end%> ><%= value %></option>
+    <% end %>
+  </select>
+</div>
+<div class="seeProDiv">
+  <div class="seeProDiv_l">配图：</div>
+  <div class="seeProDiv_rWidth">
+    <% if @img_urls %>
+      <ul class="seeProPic">
+        <%@img_urls.each do |url|%>
+          <li><img src="<%=url.img_url.nil? ? "" : url.img_url.gsub("img#{@package.id}","img#{@package.id}_#{Constant::P_PICSIZE[0]}") %>" /></li>
+        <%end unless @img_urls.blank?%>
+      </ul>
+    <% end %>
+    <a href="javascript:void(0)" class="compile_btn" onclick="before_center('.add_img');">添加图片</a><span>*添加新图片会使已上传图片被删除，请为图片做好备份</span>
+  </div>
+</div>
+<div class="item_textarea"><span class="item_radio">
+    <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
+  <label>提成(点)：</label>
+  <input name="deduct_percent" id="deduct_percent" type="text" <%if @package.deduct_percent==0.0 && @package.deduct_price != 0.0%> disabled<%else%>
+           value="<%= (@package.deduct_percent.nil? ? 0 :@package.deduct_percent)/(@package.sale_price.nil? ? 1 : @package.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>百分点
+</div>
+<div class="item_textarea"><span class="item_radio">
+    <input name="deduct_type" type="radio" <% if @package.deduct_price && @package.deduct_price != 0.0 %>checked<%end%>
+           onclick="change_input('#deduct_percent','#deduct_price')" /></span>
+  <label>提成(元)：</label>
+  <input name="deduct_price" id="deduct_price" type="text"
+         <%if @package.deduct_price.nil? || @package.deduct_price === 0 %> disabled <%else%> value="<%= @package.deduct_price %>"<%end%>  class="item_areaInput_s" />金额(元)
+</div>
+<div class="item_textarea" id="techin_p"><span class="item_radio">
+    <input name="techin_type" type="radio" checked onclick="change_input('#techin_price','#techin_percent')" /></span>
+  <label>提成(点)：</label>
+  <input name="techin_percent" id="techin_percent" type="text"
+         <% if @package.techin_percent==0.0 && @package.techin_price != 0.0 %> disabled <%else%>
+           value="<%= (@package.techin_percent.nil? ? 0 :@package.techin_percent)/(@package.sale_price.nil? ? 1 : @package.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>百分点
+</div>
+<div class="item_textarea" id="techin_t"><span class="item_radio">
+    <input name="techin_type" type="radio" <% if @package.techin_price && @package.techin_price != 0.0 %>checked<%end%>
+           onclick="change_input('#techin_percent','#techin_price')" /></span>
+  <label>提成(元)：</label>
+  <input name="techin_price" id="techin_price" type="text"
+         <% if @package.techin_price.nil? || @package.techin_price === 0 %> disabled <%else%> value="<%= @package.techin_price %>"<%end%> class="item_areaInput_s" />金额(元)
+</div>
+<div class="clear"></div>
+<div class="item_blockArea">
+  <div class="item">
+    <label>自动回访：</label><input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @package.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @package.is_auto_revist  %>"
+                               onclick="check_revist()" <% if @package.is_auto_revist %>checked<%end%>/>
+  </div>
+  <div class="item"><label>回访时间：</label>
+    <select  id="time_revist" name="time_revist" <%unless @package.is_auto_revist%>disabled <%end%>>
+      <option value="">请选择</option>
+      <% Product::REVIST_TIME.each do |key| %>
+        <option value="<%= key %>" id="<%=key%>" <%if @package.auto_time ==key%> selected<%end%> ><%= key %>小时</option>
+      <% end %>
+    </select>
+  </div>
+  <div class="item_textarea">
+    <label>回访内容：</label><textarea name="con_revist" id="con_revist" cols="" rows="" class="width_textarea"
+                                  <%unless @package.is_auto_revist%>disabled <%end%>><%=  @package.is_auto_revist ? @package.revist_content : ""  %></textarea>
+  </div>
+</div>

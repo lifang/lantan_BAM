@@ -139,8 +139,6 @@ function edit_serv(e){
     var sale=$("#sale_price").val();
     var origin =$("#t_price").val();
     var time=$("#cost_time").val();
-    var deduct =$("#deduct_percent").val();
-    var price =$("#deduct_price").val();
     var point =$("#prod_point").val();
     var pic_format =["png","gif","jpg","bmp"];
     if (name=="" || name.length==0 || pattern.test(name)){
@@ -167,11 +165,6 @@ function edit_serv(e){
     }
     if(origin == "" || origin.length==0 || isNaN(parseFloat(origin)) || parseFloat(origin)<0){
         tishi_alert("请输入服务的成本价,价格为数字");
-        return false;
-    }
-    if((deduct == "" || deduct.length==0 || isNaN(parseFloat(deduct)) || parseFloat(deduct)<0 || parseFloat(deduct)>100) &&
-        (price == "" || price.length==0 || isNaN(parseFloat(price)) || parseFloat(price)<0)){
-        tishi_alert("请输入技师提成");
         return false;
     }
     if(time== "" || time.length==0 || isNaN(parseInt(time)) || parseInt(time)<0){
@@ -293,3 +286,82 @@ function update_status(){
     }
    
 }
+
+function control_deduct(e){
+    var display = e.checked ? "" : "none";
+    $("#techin_p,#techin_t").css("display",display);
+    $("#is_added").val(e.checked+0);
+}
+
+function change_input(front,back){
+    $(front).attr('disabled',true).val('');
+    $(back).attr('disabled',false).val('0.0');
+}
+
+// 添加服务
+function add_package(store_id){
+    $.ajax({
+        async:true,
+        type : 'post',
+        dataType : 'script',
+        url : "/stores/"+ store_id+"/products/add_package"
+    });
+}
+
+//编辑服务
+function edit_package(store_id,id){
+    $.ajax({
+        async:true,
+        type : 'post',
+        dataType : 'script',
+        url : "/stores/"+ store_id+"/products/"+ id+"/edit_package"
+    });
+}
+
+//添加或者编辑服务
+function edit_package(e){
+    var pattern = new RegExp("[=-]");
+    var name=$("#name").val();
+    var time=$("#cost_time").val();
+    var pic_format =["png","gif","jpg","bmp"];
+    if (name=="" || name.length==0 || pattern.test(name)){
+        tishi_alert("请输入服务的名称,不能包含非法字符");
+        return false;
+    }
+    if(time== "" || time.length==0 || isNaN(parseInt(time)) || parseInt(time)<0){
+        tishi_alert("请输入服务的施工时间");
+        return false;
+    }
+    var img_f  = false
+    $(".add_img #img_div input[name$='img_url']").each(function (){
+        if (this.value!="" || this.value.length!=0){
+            var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
+            var img_name = this.value.substring(this.value.lastIndexOf("\\")).toLowerCase();
+            var g_name = img_name.substring(1,img_name.length);
+            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0])){
+                img_f = true
+            }else{
+                $(this).attr("name","img_url["+this.id+"]");
+            }
+        }
+    })
+    if(img_f){
+        tishi_alert("请选择"+pic_format+"格式的图片，且名称不能包含非法字符" );
+        return false
+    }
+    if($("#auto_revist")[0].checked){
+        var time_revist =$("#time_revist option:selected").val();
+        var con_revist =$("#con_revist").val();
+        if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
+            tishi_alert("请选择回访的时长，时长是数字");
+            return false;
+        }
+        if (con_revist =="" || con_revist.length==0){
+            tishi_alert("请输入回访的内容");
+            return false;
+        }
+    }
+    $(e).removeAttr("onclick");
+    $("#edit_serv").submit();
+}
+

@@ -29,6 +29,8 @@ class Product < ActiveRecord::Base
   SHOW_ON_IPAD ={:NO=>0,:YES=>1} #是否在ipad端显示
   REVIST_TIME = [24,48,72,96,120]
   IS_AUTO = {:YES=>1,:NO=>0}
+  IS_ADDED = {:YES=>1,:NO=>0}
+  SINGLE_TYPE = {:SIN =>0,:DOUB =>1} #单次服务0 套装 1
   #scope :is_service, joins(:categories).where("categories.types = ?", Category::TYPES[:service])
   scope :is_service, where(:is_service => true)
   scope :is_normal, where(:status => true)
