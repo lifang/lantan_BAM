@@ -289,7 +289,7 @@ function update_status(){
 
 function control_deduct(e){
     var display = e.checked ? "" : "none";
-    $("#techin_p,#techin_t").css("display",display);
+    $("#techin_p,#techin_t,#techin_lable").css("display",display);
     $("#is_added").val(e.checked+0);
 }
 
@@ -365,3 +365,37 @@ function edit_package(e){
     $("#edit_serv").submit();
 }
 
+function set_value(e){
+    $("input[id^='line']").attr('checked',e.checked)
+}
+
+function delete_prods(store_id){
+    var checked_ids = $("input[id^='line']:checked");
+    var ids = [];
+    for(var i=0; i < checked_ids.length; i++){
+        ids.push(checked_ids[i].value)
+    }
+    if (checked_ids.length == 0){
+        tishi_alert("请选择删除的对象");
+    }else{
+        if(confirm("确认删除选中的对象吗？")){
+            $.ajax({
+                async:true,
+                type : 'post',
+                dataType : 'json',
+                url : "/stores/"+ store_id+"/products/destroy_prod",
+                data : {
+                    ids : ids
+                },
+                success : function(data){
+                    //                    $(":checked").attr("checked",false);
+                    tishi_alert(data.msg);
+                    setTimeout(function(){
+                        window.location.reload();
+                    },1000)
+                }
+            });
+        //        window.open("/customers/print_orders?ids="+ids.join(","),"_blank")
+        }
+    }
+}

@@ -18,6 +18,7 @@ class PackageCardsController < ApplicationController
     pcard_material_relations p on s.id=p.material_id  where p.package_card_id in (#{@cards.map(&:id).join(",")})")
       materials.each {|prod| @materials[prod.package_card_id].nil? ? @materials[prod.package_card_id]=[prod] : @materials[prod.package_card_id] << prod }
     end
+    @total = PackageCard.where("package_cards.store_id=#{params[:store_id]} and status=#{PackageCard::STAT[:NORMAL]}").select("count(*) num").first
   end #套餐卡列表
   
   def create
@@ -71,7 +72,6 @@ class PackageCardsController < ApplicationController
     @pcard=PackageCard.new
     @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:service],Category::TYPES[:good]]).inject(Hash.new){
       |hash,cate| hash[cate.id]=cate.name;hash}
-    p @cates
   end
 
   #编辑套餐卡

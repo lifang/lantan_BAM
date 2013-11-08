@@ -6,6 +6,9 @@
         <a href="/stores/<%= params[:store_id] %>/package_cards" <% if params[:action] == "index"  %> class="hover"<%end%>>套餐卡列表</a>
         <% if permission?(:sales, :show_sale_records) %><a href="/stores/<%= params[:store_id] %>/package_cards/sale_records" <% if params[:action] == "sale_records"  %> class="hover"<%end%>>销售记录</a><% end %></div>
       <div class="data_menu"><% if permission?(:sales, :add_p_card) %><a href="javascript:void(0)" class="add_btn" onclick="add_pcard('<%=params[:store_id] %>')">添加套餐卡</a><% end %></div>
+      <div class="collect">
+        <ul><li>服务项目共：<span><%= @total.num %></span>项</li> </ul>
+      </div>
       <div class="clear"></div>
       <div class="data_body">
         <div>
@@ -144,8 +147,6 @@
                         <% if permission?(:sales, :del_p_card) %><a href="javascript:void(0)" onclick="delete_pcard('<%= card.id %>')">删除</a><% end %></td>
                     </tr>
                   <% end %>
-                <% else %>
-                  暂无套餐卡信息
                 <% end %>
               </tbody>
             </table>
@@ -162,6 +163,5 @@
   <script type="text/javascript">tishi_alert("<%=  flash[:notice] %>")</script>
 <% end %>
 <div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
-<div class="mask"></div>
 <div class="tab_popup add_tab" id="add_tab">
   <div class="popup_box"></div></div>

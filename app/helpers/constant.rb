@@ -171,7 +171,7 @@ module Constant
   CODE_PATH =  LOCAL_DIR + "code_file.txt"
   LOG_DIR = LOCAL_DIR + "logs/"
 
-  PER_PAGE = 10
+  PER_PAGE = 20
 
   #施工时间（分钟）
   STATION_MIN = 30

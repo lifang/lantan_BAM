@@ -126,7 +126,7 @@ function show_center(t){
     var win_height =  $(window).height();
     $(".mask").css({
         display:'block',
-        height:　(layer_height+mouse_position+100)<doc_height ? doc_height+100 : doc_height+(layer_height+100-win_height+50)
+        height:　(layer_height+mouse_position+100)<doc_height ? doc_height+100 : layer_height+100+50
     });
     $(t).css('top',mouse_position+100+"px" );
     $(t).css('left',(doc_width-layer_width)/2);
@@ -216,3 +216,10 @@ function hide_mask(t){
     $(t).css('display','none');
     $(".mask").css('display','none');
 }
+
+///*获取data_table的宽度*/
+//$(function(){
+//	var div_w=$(".table_box").width();
+//	var table_w =$(".table_box > .data_table").width();
+//	$(".table_box_h").css("paddingRight",div_w-table_w)
+//})

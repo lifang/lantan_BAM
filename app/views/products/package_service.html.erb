@@ -4,41 +4,82 @@
 <div class="main">
   <div class="box">
     <div class="data_box">
+      <div class="second_menu"><a href="/stores/<%=params[:store_id]%>/products/prod_services" >单项服务</a>
+        <a href="/stores/<%=params[:store_id]%>/products/package_service" class="hover">产品套装服务</a></div>
       <div class="data_menu">
         <% if permission?(:sales, :add_service) %>
           <a href="javascript:void(0)" class="add_btn" onclick="update_status('<%= params[:store_id] %>')">销售端不显示</a>
-          <a href="javascript:void(0)" class="add_btn" onclick="add_package('<%= params[:store_id] %>')">添加产品套装</a>
-        <% end %></div>
+          <a href="javascript:void(0)" class="add_btn" onclick="add_package('<%= params[:store_id] %>')">添加套装</a> <% end %>
+        <% if permission?(:sales, :delete_service) && @total.num > 0 %>
+          <a href="javascript:void(0)" class="add_btn" onclick="delete_prods(<%= params[:store_id] %>)">删除套装</a><%end%>
+      </div>
+      <div class="collect">
+        <ul>
+          <li>服务项目共：<span><%= @total.num %></span>项</li>
+        </ul>
+      </div>
       <div class="clear"></div>
       <div class="data_body" id="materials_tab_table">
         <div>
-          <% unless @services.blank? %>
+          <div class="table_box_h">
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
-                  <td>&nbsp;&nbsp;&nbsp;</td>
+                  <td width="5%"><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
                   <td>服务代码</td>
                   <td>服务名称</td>
                   <td>施工时间(分钟)</td>
                   <td>类别</td>
                   <td>技师</td>
-                  <td width="15%">操作</td>
+                  <td>操作</td>
                 </tr>
               </thead>
               <tbody>
-                <% @services.each do |service| %>
+                <% unless @services.blank? %>
+                  <%service =@services[0] %>
                   <tr>
-                    <td><input type="checkbox" value="<%=service.id  %>"<% unless service.show_on_ipad %>checked<%end%> /></td>
+                    <td><input type="checkbox" id="line_<%= service.id %>" value="<%=service.id  %>"<% unless service.show_on_ipad %>checked<%end%> /></td>
                     <td><%= service.code %></td>
                     <td><%= service.name %></td>
                     <td><%= service.cost_time %></td>
                     <td><%= service.c_name %></td>
                     <td><%= "#{Staff::LEVELS[service.level1]} - #{Staff::LEVELS[service.level2]}" %></td>
-                    <td class="operation" >
-                      <% if permission?(:sales, :delete_service) %><a href="javascript:void(0)"  onclick="serve_delete('<%=  service.id %>','<%=params[:store_id] %>')">删除</a><% end %>
+                    <td class="operation" style="text-align:center;" >
                       <% if permission?(:sales, :edit_service) %><a href="javascript:void(0)" onclick="edit_pack('<%= params[:store_id] %>','<%=  service.id %>')">编辑</a><% end %>
                     </td>
                   </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          <div class="table_box">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+              <thead>
+                <tr class="hbg">
+                  <td width="5%"><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
+                  <td>服务代码</td>
+                  <td>服务名称</td>
+                  <td>施工时间(分钟)</td>
+                  <td>类别</td>
+                  <td>技师</td>
+                  <td>操作</td>
+                </tr>
+              </thead>
+              <tbody>
+                <% unless @services.blank? %>
+                  <% @services.each do |service| %>
+                    <tr>
+                      <td><input type="checkbox" id="line_<%= service.id %>" value="<%=service.id  %>"<% unless service.show_on_ipad %>checked<%end%> /></td>
+                      <td><%= service.code %></td>
+                      <td><%= service.name %></td>
+                      <td><%= service.cost_time %></td>
+                      <td><%= service.c_name %></td>
+                      <td><%= "#{Staff::LEVELS[service.level1]} - #{Staff::LEVELS[service.level2]}" %></td>
+                      <td class="operation" style="text-align:center;">
+                        <% if permission?(:sales, :edit_service) %><a href="javascript:void(0)" onclick="edit_pack('<%= params[:store_id] %>','<%=  service.id %>')">编辑</a><% end %>
+                      </td>
+                    </tr>
+                  <% end %>
                 <% end %>
               </tbody>
             </table>
@@ -47,11 +88,9 @@
               <input type="hidden" value="" name="vals" id="vals"/>
             <% end %>
             <div class="pageTurn">
-              <%= will_paginate @services,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+              <%= will_paginate @services,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页"  unless @services.blank?%>
             </div>
-          <%else%>
-            目前没有服务
-          <% end %>
+          </div>
         </div>
       </div>
     </div>
@@ -61,7 +100,5 @@
   <script type="text/javascript">tishi_alert("<%=  flash[:notice] %>")</script>
 <% end %>
 <div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
-<div class="mask"></div>
-<div class="maskOne"></div>
 <div class="tab_popup see_tab"></div>
 <div id="serv_add_edit"></div>

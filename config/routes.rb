@@ -21,7 +21,7 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins do
     collection do
-      get "logout", "send_validate_code"
+      get "logout", "send_validate_code","phone_login"
       post "forgot_password"
     end
   end
@@ -72,7 +72,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :products do
       collection do
-        post "edit_prod","add_prod","add_serv","serv_create","load_material","update_status","add_package","pack_create"
+        post "edit_prod","add_prod","add_serv","serv_create","load_material","update_status","add_package","pack_create","destroy_prod"
         get "prod_services","package_service"
       end
       member do

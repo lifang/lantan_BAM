@@ -14,11 +14,11 @@
       <h1>选择物料<a href="javascript:void(0)" class="close">关闭</a></h1>
       <div class="popup_body">
         <div class="popup_body_area">
-          <%= render :partial=>"/sales/sale_search",:object=>[Material::TYPES_NAMES,"load_material"] %>
+          <%= render :partial=>"/sales/sale_search",:object=>[@search_cates,"load_material"] %>
         </div>
         <div class="btn_box_s"><input value="确定" class="confirm_btn" onclick="show_mat()" type="button"  /></div>
       </div>
     </div>
   </div>
-<%= render 'img_url' %>
- <% end %>
+  <%= render 'img_url' %>
+<% end %>
