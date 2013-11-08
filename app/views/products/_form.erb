@@ -28,8 +28,8 @@
 
 <div class="item">
   <label>类别：</label><select  id="prod_types" name="prod_types">
-    <% Product::PRODUCT_TYPES.select {|k,v| k < Product::PRODUCT_END}.each do |key,value| %>
-      <option value="<%= key %>" id="<%=key%>" <%if @product.types==key%> selected<%end%> ><%= value %></option>
+    <% @cates.each do |cate| %>
+      <option value="<%= cate.id %>" <%if @product.category_id==cate.id%> selected<%end%> ><%= cate.name %></option>
     <% end %>
   </select>
 </div>
@@ -52,38 +52,43 @@
 <div class="item">
   <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @product.prod_point.nil? ? 0 : @product.prod_point  %>" />
 </div>
-<div class="item_textarea"><span class="item_radio">
-    <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
-  <label>提成(点)：</label>
-  <input name="deduct_percent" id="deduct_percent" type="text" <%if @product.deduct_percent==0.0 && @product.deduct_price != 0.0%> disabled<%else%>
-           value="<%= (@product.deduct_percent.nil? ? 0 :@product.deduct_percent)/(@product.sale_price.nil? ? 1 : @product.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>百分点
-</div>
-<div class="item_textarea"><span class="item_radio">
-    <input name="deduct_type" type="radio" <% if @product.deduct_price && @product.deduct_price != 0.0 %>checked<%end%>
-           onclick="change_input('#deduct_percent','#deduct_price')" /></span>
-  <label>提成(元)：</label>
-  <input name="deduct_price" id="deduct_price" type="text"
-         <%if @product.deduct_price.nil? || @product.deduct_price === 0 %> disabled <%else%> value="<%= @product.deduct_price %>"<%end%>  class="item_areaInput_s" />金额(元)
-</div>
-<div class="item">
-  <label>需要施工：</label><input name="is_added" id="is_added" type="checkbox" value="<%= @product.is_added.nil? ? Product::IS_ADDED[:NO] : @product.is_added  %>"
-                             onclick="control_deduct(this)" <% if @product.is_added %>checked<%end%>/>
-</div>
-<div class="item_textarea" id="techin_p" <% if !@product.is_added %> style="display: none"<%end%>><span class="item_radio">
-    <input name="techin_type" type="radio" checked onclick="change_input('#techin_price','#techin_percent')" /></span>
-  <label>提成(点)：</label>
-  <input name="techin_percent" id="techin_percent" type="text"
-         <% if @product.techin_percent==0.0 && @product.techin_price != 0.0 %> disabled <%else%>
-           value="<%= (@product.techin_percent.nil? ? 0 :@product.techin_percent)/(@product.sale_price.nil? ? 1 : @product.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>百分点
-</div>
-<div class="item_textarea" id="techin_t" <% if !@product.is_added %>style="display: none"<%end%>><span class="item_radio">
-    <input name="techin_type" type="radio" <% if @product.techin_price && @product.techin_price != 0.0 %>checked<%end%>
-           onclick="change_input('#techin_percent','#techin_price')" /></span>
-  <label>提成(元)：</label>
-  <input name="techin_price" id="techin_price" type="text" 
-         <% if @product.techin_price.nil? || @product.techin_price === 0 %> disabled <%else%> value="<%= @product.techin_price %>"<%end%> class="item_areaInput_s" />金额(元)
-</div>
 <div class="clear"></div>
+<div class="item_blockArea">
+  <h2 class="item_blockArea_h2">销售提成</h2>
+  <div class="item item_w"><span class="item_radio_b">
+      <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
+    <label>百分点：</label>
+    <input name="deduct_percent" id="deduct_percent" type="text" <%if @product.deduct_percent==0.0 && @product.deduct_price != 0.0%> disabled<%else%>
+             value="<%= (@product.deduct_percent.nil? ? 0 :@product.deduct_percent)/(@product.sale_price.nil? ? 1 : @product.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>
+  </div>
+  <div class="item item_w"><span class="item_radio_b">
+      <input name="deduct_type" type="radio" <% if @product.deduct_price && @product.deduct_price != 0.0 %>checked<%end%>
+             onclick="change_input('#deduct_percent','#deduct_price')" /></span>
+    <label>金 额：</label>
+    <input name="deduct_price" id="deduct_price" type="text"
+           <%if @product.deduct_price.nil? || @product.deduct_price === 0 %> disabled <%else%> value="<%= @product.deduct_price %>"<%end%>  class="item_areaInput_s" />
+  </div>
+  <div class="item">
+    <label>需要施工：</label><input name="is_added" id="is_added" type="checkbox" value="<%= @product.is_added.nil? ? Product::IS_ADDED[:NO] : @product.is_added  %>"
+                               onclick="control_deduct(this)" <% if @product.is_added %>checked<%end%>/>
+  </div>
+  <div class="clear"></div>
+  <h2 class="item_blockArea_h2" <% if !@product.is_added %> style="display: none"<%end%> id="techin_lable">技师提成</h2>
+  <div class="item item_w" id="techin_p" <% if !@product.is_added %> style="display: none"<%end%>><span class="item_radio_b">
+      <input name="techin_type" type="radio" checked onclick="change_input('#techin_price','#techin_percent')" /></span>
+    <label>百分点：</label>
+    <input name="techin_percent" id="techin_percent" type="text"
+           <% if @product.techin_percent==0.0 && @product.techin_price != 0.0 %> disabled <%else%>
+             value="<%= (@product.techin_percent.nil? ? 0 :@product.techin_percent)/(@product.sale_price.nil? ? 1 : @product.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>
+  </div>
+  <div class="item item_w" id="techin_t" <% if !@product.is_added %>style="display: none"<%end%>><span class="item_radio_b">
+      <input name="techin_type" type="radio" <% if @product.techin_price && @product.techin_price != 0.0 %>checked<%end%>
+             onclick="change_input('#techin_percent','#techin_price')" /></span>
+    <label>金 额：</label>
+    <input name="techin_price" id="techin_price" type="text"
+           <% if @product.techin_price.nil? || @product.techin_price === 0 %> disabled <%else%> value="<%= @product.techin_price %>"<%end%> class="item_areaInput_s" />
+  </div>
+</div>
 <div class="item_blockArea">
   <div class="item">
     <label>自动回访：</label><input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @product.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @product.is_auto_revist  %>"
@@ -132,9 +137,6 @@
     $("#item_txm").html($('#prod_material option:selected').attr("o_value").split("||")[0]);
     $("#item_kc").html($('#prod_material option:selected').attr("o_value").split("||")[1]);
 <% end %>
-
-
-
 </script>
 
 

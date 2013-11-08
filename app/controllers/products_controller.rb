@@ -5,8 +5,11 @@ class ProductsController < ApplicationController
   layout 'sale'
 
   def index
-    @products = Product.paginate_by_sql("select service_code code,name,types,sale_price,t_price,base_price,id,store_id,prod_point from products where  store_id=#{params[:store_id]}
-    and is_service=#{Product::PROD_TYPES[:PRODUCT]} and status=#{Product::IS_VALIDATE[:YES]} order by created_at desc", :page => params[:page], :per_page =>20)
+    @products = Product.paginate_by_sql("select service_code code,p.name,sale_price,t_price,base_price,p.id,p.store_id,prod_point,c.name c_name
+    from products p inner join categories c on p.category_id=c.id where  p.store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]}
+    and is_service=#{Product::PROD_TYPES[:PRODUCT]} order by p.created_at desc", :page => params[:page], :per_page =>Constant::PER_PAGE)
+    @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]} and 
+    is_service=#{Product::PROD_TYPES[:PRODUCT]}").select("count(*) num").first
   end  #产品列表页
 
   #新建
@@ -15,6 +18,7 @@ class ProductsController < ApplicationController
     @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL],:types =>Material::PRODUCT_TYPE).order(:types)
     @max_len = check_str(@materials.map(&:name)[0])
     @materials.map(&:name).each{|name| @max_len = check_str(name) if check_str(name) >= @max_len}
+    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:good])
   end
   
   def create
@@ -24,14 +28,15 @@ class ProductsController < ApplicationController
 
 
   def prod_services
-    @services = Product.paginate_by_sql("select id, service_code code,prod_point,store_id,name,types,base_price,show_on_ipad,cost_time,t_price,sale_price,
-    staff_level level1,staff_level_1 level2,commonly_used from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
-    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:SIN]} order by created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
-    @materials={}
-    @services.each do |service|
-      @materials[service.id]=Material.find_by_sql("select name,code,p.material_num num from materials m inner join prod_mat_relations p on
-        p.material_id=m.id  where p.product_id=#{service.id}")
-    end
+    @services = Product.paginate_by_sql("select p.id, service_code code,prod_point,p.store_id,p.name,base_price,show_on_ipad,cost_time,t_price,sale_price,
+    staff_level level1,staff_level_1 level2,commonly_used,c.name c_name from products p inner join categories c on c.id=p.category_id where p.store_id=#{params[:store_id]}
+    and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:SIN]}
+    order by p.created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
+    @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
+    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:SIN]}").select("count(*) num").first
+    @materials = @services.blank? ? {} : Material.find_by_sql("select name,code,p.material_num num,product_id from materials m inner join
+    prod_mat_relations p on  p.material_id=m.id  where p.product_id in (#{@services.map(&:id).join(',')})").inject(Hash.new){|hash,mat|
+      hash[mat.product_id].nil? ? hash[mat.product_id] = [mat] : hash[mat.product_id] << mat;hash} || {}
   end   #服务列表
 
   def serv_create
@@ -42,14 +47,15 @@ class ProductsController < ApplicationController
   def set_product(types)
     flash[:notice] = "添加成功"
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
-      :types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],:t_price=>params[:t_price],
+      :category_id=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],:t_price=>params[:t_price],
       :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product","service_code")}",
       :is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]=="" ? 0 : params[:prod_point]}
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
     parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
     parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
     if types == Constant::SERVICE
-      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2]})
+      parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2],
+          :single_types=>Product::SINGLE_TYPE[:SIN]})
       product =Product.create(parms)
       params[:sale_prod].each do |key,value|
         ProdMatRelation.create(:product_id=>product.id,:material_num=>value,:material_id=>key)
@@ -81,6 +87,7 @@ class ProductsController < ApplicationController
     @max_len = check_str(@materials.map(&:name)[0])
     @materials.map(&:name).each{|name| @max_len = check_str(name) if check_str(name) >= @max_len}
     @material = @product.prod_mat_relations[0]
+    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:good])
   end
 
   def show_prod
@@ -90,7 +97,7 @@ class ProductsController < ApplicationController
 
   def update_product(types,product)
     parms = {:name=>params[:name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
-      :types=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price], :is_auto_revist=>params[:auto_revist],
+      :category_id=>params[:prod_types],:introduction=>params[:desc],:t_price=>params[:t_price], :is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]=="" ? 0 : params[:prod_point]}
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
     parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
@@ -146,6 +153,9 @@ class ProductsController < ApplicationController
 
   def add_serv
     @service=Product.new
+    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:service])
+    @search_cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:material]).inject(Hash.new){
+      |hash,cate| hash[cate.id]=cate.name;hash}
   end
 
   def edit_serv
@@ -153,6 +163,9 @@ class ProductsController < ApplicationController
     @sale_prods =ProdMatRelation.find_by_sql("select m.name,s.material_num num,m.id from materials m inner join prod_mat_relations s on s.material_id=m.id
       where s.product_id=#{params[:id]}")
     @img_urls = @service.image_urls
+    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:service])
+    @search_cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:material]).inject(Hash.new){
+      |hash,cate| hash[cate.id]=cate.name;hash}
   end
 
   def serv_update
@@ -163,7 +176,7 @@ class ProductsController < ApplicationController
   #加载物料信息
   def load_material
     sql = "select id,name from materials  where  store_id=#{params[:store_id]} and status=#{Material::STATUS[:NORMAL]}"
-    sql += " and types=#{params[:mat_types]}" if params[:mat_types] != "" || params[:mat_types].length !=0
+    sql += " and category_id=#{params[:mat_types]}" if params[:mat_types] != "" || params[:mat_types].length !=0
     sql += " and name like '%#{params[:mat_name]}%'" if params[:mat_name] != "" || params[:mat_name].length !=0
     @materials=Material.find_by_sql(sql)
   end
@@ -171,6 +184,11 @@ class ProductsController < ApplicationController
   def show
     @prod =Product.find(params[:id])
     @img_urls = @prod.image_urls
+  end
+
+  def destroy_prod
+    Product.find(params[:ids]).each{|prod| prod.destroy}
+    render :json=>{:msg=>"删除成功"}
   end
 
   def prod_delete
@@ -220,15 +238,17 @@ class ProductsController < ApplicationController
   end
 
   def package_service
-    @services = Product.paginate_by_sql("select id, service_code code,store_id,name,types,show_on_ipad,cost_time,staff_level level1,
-    staff_level_1 level2,commonly_used from products where store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
-    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]} order by created_at desc", :page => params[:page],
-      :per_page => Constant::PER_PAGE)
+    @services = Product.paginate_by_sql("select p.id, service_code code,p.store_id,p.name,c.name c_name,show_on_ipad,cost_time,staff_level level1,
+    staff_level_1 level2,commonly_used from products p inner join categories c on c.id=p.category_id where p.store_id=#{params[:store_id]}
+    and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]}
+    order by p.created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
+     @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
+    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]}").select("count(*) num").first
   end
 
   def pack_create
     flash[:notice] = "添加成功"
-    parms = {:name=>params[:name],:types=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
+    parms = {:name=>params[:name],:category_id=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
       :created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"S#{Sale.set_code(3,"product","service_code")}",:is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB]}
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
@@ -252,5 +272,23 @@ class ProductsController < ApplicationController
 
   def add_package
     @package = Product.new
+    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:service])
+  end
+
+  def edit_pack
+    @package = Product.find params[:id]
+    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:service])
+  end
+
+  def pack_update
+    flash[:notice] = "更新成功"
+    parms = {:name=>params[:name],:category_id=>params[:prod_types],:is_auto_revist=>params[:auto_revist],
+      :auto_time=>params[:time_revist],:revist_content=>params[:con_revist]}
+    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
+    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
+    parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
+    parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2]})
+    Product.find(params[:id]).update_attributes(parms)
+    redirect_to request.referer
   end
 end

@@ -199,6 +199,14 @@ function check_add(e){
     var end_time = $("#end_time").val();
     var point =$("#prod_point").val();
     var pattern = new RegExp("[`~@#$^&*()=:;,\\[\\].<>?~！@#￥……&*（）——|{}。，、？-]")
+    var p_types = $("#material_types option:checked").val();
+    if (p_types != undefined &&  p_types != "" && p_types.length !=0){
+        var m_num = $("#material_num").val();
+        if (m_num =="" || m_num.length==0 || isNaN(parseInt(m_num))||parseInt(m_num)<0){
+            tishi_alert("请输入物料数量");
+            return false;
+        }
+    }
     if (name=="" || name.length==0 || pattern.test(name)){
         tishi_alert("请输入套餐卡的名称,不能包含非法字符");
         return false;
@@ -271,14 +279,6 @@ function check_add(e){
     if ((img != "" || img.length !=0) && pattern.test(g_name.split(".")[0])){
         tishi_alert("图片名称不能包含特殊字符");
         return false;
-    }
-    var p_types = $("#material_types option:checked").val();
-    if (p_types != undefined &&  p_types != "" && p_types.length !=0){
-        var m_num = $("#material_num").val();
-        if (m_num =="" || m_num.length==0 || isNaN(parseInt(m_num))||parseInt(m_num)<0){
-            tishi_alert("请输入物料数量");
-            return false;
-        }
     }
     $("#add_pcard").submit();
     $(e).removeAttr("onclick");
@@ -396,7 +396,13 @@ function control_input(){
     var p_types = $("#material_types option:checked").val();
     if (p_types != "" || p_types.length !=0){
         $("#material_num").attr("disabled",false);
+        $("#name").val($("#material_types option:checked").html());
     }else{
         $("#material_num").attr("disabled",true);
     }
+}
+
+function change_input(front,back){
+    $(front).attr('disabled',true).val('');
+    $(back).attr('disabled',false).val('0.0');
 }

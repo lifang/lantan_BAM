@@ -4,19 +4,19 @@ class LoginsController < ApplicationController
   
   def index
     #if cookies[:user_id]
-      #@staff = Staff.find_by_id(cookies[:user_id].to_i)
-      #if @staff.nil?
-        #render :index, :layout => false
-      #else
-        #session_role(cookies[:user_id])
-        #if has_authority?
-        #redirect_to "/stores/#{@staff.store_id}/welcomes"
-        #else
-        #render :index, :layout => false
-        #end
-      #end
+    #@staff = Staff.find_by_id(cookies[:user_id].to_i)
+    #if @staff.nil?
+    #render :index, :layout => false
     #else
-      render :index, :layout => false
+    #session_role(cookies[:user_id])
+    #if has_authority?
+    #redirect_to "/stores/#{@staff.store_id}/welcomes"
+    #else
+    #render :index, :layout => false
+    #end
+    #end
+    #else
+    render :index, :layout => false
     #end
     
   end
@@ -61,7 +61,7 @@ class LoginsController < ApplicationController
 
   def forgot_password
     staff = Staff.where("phone = '#{params[:telphone]}' and validate_code = '#{params[:validate_code]}'").
-                  where("status in (?)", Staff::VALID_STATUS).first
+      where("status in (?)", Staff::VALID_STATUS).first
     if staff && !params[:validate_code].nil? && !params[:validate_code].blank?
       
       random_password = [*100000..999999].sample
@@ -114,5 +114,9 @@ class LoginsController < ApplicationController
     else
       render :text => "手机号码不存在!"
     end
+  end
+
+  def phone_login
+    render :layout=>nil
   end
 end

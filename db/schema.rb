@@ -717,6 +717,7 @@ ActiveRecord::Schema.define(:version => 20131108042108) do
     t.float    "techin_price",   :default => 0.0
     t.float    "techin_percent", :default => 0.0
     t.integer  "single_types"
+    t.integer  "category_id"
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"

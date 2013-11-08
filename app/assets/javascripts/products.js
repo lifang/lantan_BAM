@@ -70,7 +70,7 @@ function add_product(e){
         var time_revist =$("#time_revist option:selected").val();
         var con_revist =$("#con_revist").val();
         if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
-            tishi_alert("请选择回访的时长，时长是数字");
+            tishi_alert("请选择回访间隔");
             return false;
         }
         if (con_revist =="" || con_revist.length==0){
@@ -196,7 +196,7 @@ function edit_serv(e){
         var time_revist =$("#time_revist option:selected").val();
         var con_revist =$("#con_revist").val();
         if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
-            tishi_alert("请选择回访的时长，时长是数字");
+            tishi_alert("请选择回访间隔");
             return false;
         }
         if (con_revist =="" || con_revist.length==0){
@@ -289,7 +289,7 @@ function update_status(){
 
 function control_deduct(e){
     var display = e.checked ? "" : "none";
-    $("#techin_p,#techin_t").css("display",display);
+    $("#techin_p,#techin_t,#techin_lable").css("display",display);
     $("#is_added").val(e.checked+0);
 }
 
@@ -309,12 +309,12 @@ function add_package(store_id){
 }
 
 //编辑服务
-function edit_package(store_id,id){
+function edit_pack(store_id,id){
     $.ajax({
         async:true,
         type : 'post',
         dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/edit_package"
+        url : "/stores/"+ store_id+"/products/"+ id+"/edit_pack"
     });
 }
 
@@ -353,7 +353,7 @@ function edit_package(e){
         var time_revist =$("#time_revist option:selected").val();
         var con_revist =$("#con_revist").val();
         if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
-            tishi_alert("请选择回访的时长，时长是数字");
+            tishi_alert("请选择回访间隔");
             return false;
         }
         if (con_revist =="" || con_revist.length==0){
@@ -365,3 +365,37 @@ function edit_package(e){
     $("#edit_serv").submit();
 }
 
+function set_value(e){
+    $("input[id^='line']").attr('checked',e.checked)
+}
+
+function delete_prods(store_id){
+    var checked_ids = $("input[id^='line']:checked");
+    var ids = [];
+    for(var i=0; i < checked_ids.length; i++){
+        ids.push(checked_ids[i].value)
+    }
+    if (checked_ids.length == 0){
+        tishi_alert("请选择删除的对象");
+    }else{
+        if(confirm("确认删除选中的对象吗？")){
+            $.ajax({
+                async:true,
+                type : 'post',
+                dataType : 'json',
+                url : "/stores/"+ store_id+"/products/destroy_prod",
+                data : {
+                    ids : ids
+                },
+                success : function(data){
+                    //                    $(":checked").attr("checked",false);
+                    tishi_alert(data.msg);
+                    setTimeout(function(){
+                        window.location.reload();
+                    },1000)
+                }
+            });
+        //        window.open("/customers/print_orders?ids="+ids.join(","),"_blank")
+        }
+    }
+}

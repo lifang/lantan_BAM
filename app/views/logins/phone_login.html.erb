@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <title>无标题文档</title>
+    <style type="text/css">
+      * { padding: 0; margin: 0;}
+      body {
+        background: #9db79a;
+        /*background:-webkit-gradient(linear, 0 0, 0 100%, from(#638382), to(#9db79a));
+	background:-moz-linear-gradient(top, #638382,#9db79a);
+	-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#638382,endColorstr=#9db79a,grandientType=1);
+	*/
+        font-family:"微软雅黑", "宋体", Arial;
+        font-size: 14px;
+      }
+      li { list-style: none;}
+      .white_bg { background: #FFF;}
+      .login {
+        width: 400px;
+        height: 400px;
+        background: url(/assets/phone_bg.png) no-repeat;
+        margin: 200px auto;
+        overflow: hidden;
+      }
+      .login_item { margin: 140px 0 0 95px;}
+      .login_item input { width: 247px; height: 46px; line-height: 46px; margin-top: 1px; background: none; border: none;}
+      .login_btn { width: 296px; margin: 20px auto;}
+      .login_btn button {
+        width: 294px;
+        height: 50px;
+        border: 1px #730002 solid;
+        background: #a30104;
+        /*
+	background:-webkit-gradient(linear, 0 0, 0 100%, from(#b60004), to(#a30104));
+	background:-moz-linear-gradient(top, #b60004,#a30104);
+	-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#b60004,endColorstr=#a30104,grandientType=1);
+	*/
+        font-size: 18px;
+        color: #FFF;
+        line-height: 50px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-family:"微软雅黑", "宋体", Arial;
+      }
+
+      .head { background: #a30104; color: #FFF; padding: 5px 10px;}
+      .head h1 { font-size: 16px; line-height: 32px;}
+      .head p { line-height: 24px; font-size: 12px;}
+      .main { background: #FFF;}
+      .box { border-bottom: 1px #CCCCCC solid; padding: 5px 10px;}
+      .box .day, .box .week, .box .month {
+        color: #FFF;
+        line-height: 24px;
+        text-align: center;
+      }
+      .box .day { background: #090; width: 50px;}
+      .box .week { background: #06F; width: 100px;}
+      .box .month { background: #FC0; width: 200px;}
+
+      .box dl { line-height: 24px; padding: 10px 0;}
+      .box dt { font-weight:bold;}
+      .box dd span, .box dd em { color: #a30104;}
+      .box dd em { margin-left: 10px;}
+      .all { height: 40px; line-height: 40px; overflow: hidden;}
+      .all .all_money { float: left; font-size: 24px; margin-right: 20px;}
+      .all .all_amount { float: left;}
+
+      .all .up, .all .down {
+        width: 14px;
+        height: 20px;
+        display: inline-block;
+        overflow:hidden;
+        text-indent: -999px;
+        margin: 0 5px;
+      }
+      .all .up {
+        background: url(/assets/phone.png) no-repeat 0px 0px;
+      }
+      .all .down {
+        background: url(/assets/phone.png) no-repeat 0px -20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="login">
+      <div class="login_item">
+        <ul>
+          <li><input name="" type="text" /></li>
+          <li><input name="" type="text" /></li>
+        </ul>
+      </div>
+      <div class="login_btn"><button>登录</button></div>
+    </div>
+  </body>
+</html>

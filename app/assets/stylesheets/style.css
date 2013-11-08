@@ -9,12 +9,12 @@ input {font-family: "微软雅黑";}
 input[type="button"] {font-family: "微软雅黑"; border: none;}
 textarea {
     height: 80px;
-	font-size: 14px;
-	line-height: 24px;
-	padding: 5px;
-	font-family: "微软雅黑";
-	border: 1px #CCCCCC solid;
-	resize: none;
+    font-size: 14px;
+    line-height: 24px;
+    padding: 5px;
+    font-family: "微软雅黑";
+    border: 1px #CCCCCC solid;
+    resize: none;
 }
 .box { width: 1000px; margin: 0 auto; overflow: hidden;}
 .clear { clear: both;}
@@ -86,21 +86,21 @@ textarea {
 .head { height: 100px; background: #930205;}
 .logo1 { 
     width: 164px; 
-	height: 100px; 
-	overflow: hidden; 
-	float: left;
-	background: url(/assets/logo1.jpg) no-repeat;
-	padding-left: 170px;
-	color: #FFF;
-	font-size: 18px;
+    height: 100px;
+    overflow: hidden;
+    float: left;
+    background: url(/assets/logo1.jpg) no-repeat;
+    padding-left: 170px;
+    color: #FFF;
+    font-size: 18px;
 }
 .logo1 span { display: inline-block; padding-top: 60px;}
 .logo {  
-	height: 50px; 
-	background: url(/assets/logo.jpg) no-repeat;
-	overflow: hidden; 
-	float: left;
-	padding-left: 90px;
+    height: 50px;
+    background: url(/assets/logo.jpg) no-repeat;
+    overflow: hidden;
+    float: left;
+    padding-left: 90px;
 }
 .logo span { display: inline-block; padding-top: 22px; color: #FFF; font-size: 18px;}
 
@@ -110,24 +110,24 @@ textarea {
 
 .name { 
     font-size: 24px; 
-	color: #FFF; 
-	text-align: center; 
-	position: absolute; 
-	top: 50px; 
-	left: 0; 
-	width:100%;
-	height: 30px;
-	line-height: 30px;
+    color: #FFF;
+    text-align: center;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width:100%;
+    height: 30px;
+    line-height: 30px;
 }
 .name span { display: inline-block;}
 .name .nameInput { 
     height: 24px; 
-	width: 80px; 
-	display: inline; 
-	background: none; 
-	border: none; 
-	border-bottom: 1px #FFFFFF solid; 
-	color: #FFF;
+    width: 80px;
+    display: inline;
+    background: none;
+    border: none;
+    border-bottom: 1px #FFFFFF solid;
+    color: #FFF;
 }
 /*入口*/
 .module { width: 480px; margin: 50px auto 10px auto;}
@@ -165,22 +165,22 @@ textarea {
 .module li a.m_seven:hover { background: #a60205 url(/assets/module.png) no-repeat 0px -310px;}
 /*登录首页信息*/
 .module li a.message {
-	width: 31px;
-	height:24px;
-	background: url(/assets/message.png) no-repeat;
-	position:absolute;
-	top: 0px;
-	right: 0px;
-	padding-top:3px;
+    width: 31px;
+    height:24px;
+    background: url(/assets/message.png) no-repeat;
+    position:absolute;
+    top: 0px;
+    right: 0px;
+    padding-top:3px;
 }
 /*内容页信息*/
 .box .message {
     padding: 5px 10px;
-	margin: 5px 0;
-	background: #fffbc1;
-	border: 1px #ed1010 solid;
-	line-height: 24px;
-	position: relative;
+    margin: 5px 0;
+    background: #fffbc1;
+    border: 1px #ed1010 solid;
+    line-height: 24px;
+    position: relative;
 }
 .message a { margin-left: 10px;}
 
@@ -299,11 +299,11 @@ textarea {
 .data_table tr.hbg td, .data_table tr.hbg th { background: #c59fa0; color: #FFF; font-weight: bolder; font-size: 14px;}
 .data_table td, .data_table th { 
     background: #FFF; 
-	height: 32px; 
-	font-size: 12px;
-	word-break: break-all;
-	word-wrap: break-word;
-	vertical-align: middle;
+    height: 32px;
+    font-size: 12px;
+    word-break: break-all;
+    word-wrap: break-word;
+    vertical-align: middle;
 }
 .data_table td .gray_table_error {background: url(/assets/alert.png) no-repeat 0px center; padding-left: 20px;}
 
@@ -367,14 +367,14 @@ textarea {
 
 .search select.select_marginRight { margin-right: 10px;}
 .input[type="button"].search_btn, .search .search_btn, .search_btn, .compile_btn, a.compile_btn {
-	line-height: 25px;
-	height: 25px;
-	text-align: center;
-	background: #930205;
-	border: none;
-	padding: 0 10px;
-	color: #FFF;
-	display: inline-block;
+    line-height: 25px;
+    height: 25px;
+    text-align: center;
+    background: #930205;
+    border: none;
+    padding: 0 10px;
+    color: #FFF;
+    display: inline-block;
 }
 a.compile_btn { width: 100px;}
 
@@ -386,10 +386,10 @@ a.compile_btn { width: 100px;}
 
 .tab_popup {
     width: 650px;
-	padding: 10px;
-	background: url(/assets/black.png) repeat;
-	border-radius: 0.6em;
-	display: none;
+    padding: 10px;
+    background: url(/assets/black.png) repeat;
+    border-radius: 0.6em;
+    display: none;
     position: absolute;
     z-index: 100;
 }
@@ -457,9 +457,9 @@ a.compile_btn { width: 100px;}
 
 .item input[type="text"], .item input[type="password"], .item select, .item_textarea select, .seeProDiv input[type="text"]{
     height: 24px;
-	line-height: 24px;
-	width: 160px;
-	border: 1px #CCCCCC solid;
+    line-height: 24px;
+    width: 160px;
+    border: 1px #CCCCCC solid;
 }
 .item input[type="text"].input_s{ width: 115px; margin-right:8px;text-align: right;}
 .item_textarea input[type="text"]{ height: 24px; line-height: 24px; width: 320px; border: 1px #CCCCCC solid;}
@@ -494,17 +494,17 @@ a.compile_btn { width: 100px;}
     font-size: 35px;
 }
 .item_reItem {
-	width: 30px;
-	height: 27px;
-	display: block;
-	line-height: 22px;
-	text-align: center;
-	background: #CCC;
-	color: #FFF;
-	font-size: 35px;
-	position: absolute;
-	right: 0px;
-	top: -1px;
+    width: 30px;
+    height: 27px;
+    display: block;
+    line-height: 22px;
+    text-align: center;
+    background: #CCC;
+    color: #FFF;
+    font-size: 35px;
+    position: absolute;
+    right: 0px;
+    top: -1px;
 }
 
 /*suggest*/
@@ -652,26 +652,26 @@ a.compile_btn { width: 100px;}
 
 .loadList_name {
     width: 80px;
-	display:inline-block;
-	text-align: right;
-	height:24px;
-	line-height:24px;
-	float: left;
-	font-weight:bolder;
-	color: #930205;
+    display:inline-block;
+    text-align: right;
+    height:24px;
+    line-height:24px;
+    float: left;
+    font-weight:bolder;
+    color: #930205;
 }
 
 .loadList_box, .loadList_line {height: 16px; display: inline-block;}
 .loadList_box { width:600px; overflow: hidden; border: 1px #e1e1e1 solid; position: relative; margin-top: 5px;}
 .loadList_line {
-	background: #F92328;
-	position: absolute;
-	top: 0;
-	left: 0;
-	color: #FFF;
-	text-align:right;
-	font-size:10px;
-	line-height:16px;
+    background: #F92328;
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #FFF;
+    text-align:right;
+    font-size:10px;
+    line-height:16px;
 }
 
 /*员工--统计表*/
@@ -749,7 +749,7 @@ a.compile_btn { width: 100px;}
 }
 .site_teacher { 
     width: 160px;
-	padding: 0 5px;
+    padding: 0 5px;
     word-break:keep-all;
     white-space:nowrap;
     overflow:hidden;
@@ -765,14 +765,14 @@ a.compile_btn { width: 100px;}
 .site_m .close { right: -13px; top: 0px;}
 .site_table { 
     background: #FFF; 
-	width: 170px;  
-	height: 100px; 
-	font-size: 12px; 
-	overflow: hidden; 
-	position: absolute; 
-	top: 0;
-	left: 0;
-	z-index:10;
+    width: 170px;
+    height: 100px;
+    font-size: 12px;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index:10;
 }
 .site_table_text { line-height:100px; text-align: center;}
 .site_tdThead { background: #930205; color: #FFF;}
@@ -918,7 +918,7 @@ a.compile_btn { width: 100px;}
     color: #CCC;
 }
 .data_table tr.hbg td a{
-     background: none;
+    background: none;
     color: #FFFFFF;
     font-size: 14px;
     margin: 0 auto;
@@ -931,11 +931,11 @@ a.compile_btn { width: 100px;}
 .pw_list { padding: 5px 0; margin-bottom: 10px;}
 .pw_list label {
     width: 100px;
-	line-height: 24px;
-	display: inline-block;
-	text-align: right;
-	color: #930205;
-	font-weight:bold;
+    line-height: 24px;
+    display: inline-block;
+    text-align: right;
+    color: #930205;
+    font-weight:bold;
 }
 .pw_list input { height: 24px; line-height: 24px; border: 1px #CCCCCC solid; width: 200px;}
 
@@ -956,11 +956,11 @@ a.compile_btn { width: 100px;}
 
 /*在线QQ*/
 .online_qq { 
-	padding: 10px 10px 10px 35px; 
-	background: url(/assets/online_qq.jpg) no-repeat 3px center #930205;
-	position: fixed; 
-	top: 200px; 
-	right: -90px; 
+    padding: 10px 10px 10px 35px;
+    background: url(/assets/online_qq.jpg) no-repeat 3px center #930205;
+    position: fixed;
+    top: 200px;
+    right: -90px;
 }
 .no_material_notice{
     margin: 0 0 10px 60px;
@@ -975,25 +975,25 @@ a.compile_btn { width: 100px;}
 .organization dl dd { display: block; line-height: 24px; margin: 5px 0;}
 
 .main:after, .box:after, .data_box:after, .data_body:after, .groupFunc_area:after {
-	display: block;
-	overflow:hidden;
-	clear: both;
-	height:0;
-	visibility:hidden;
-	content:".";
+    display: block;
+    overflow:hidden;
+    clear: both;
+    height:0;
+    visibility:hidden;
+    content:".";
 }
 .gr_h { line-height: 32px; color: #930205; overflow: hidden;}
 
 
 .func_set_ul li {
-	border: 1px #CCCCCC solid;
-	width: 120px;
-	height: 36px;
-	line-height: 36px;
-	text-align: center;
-	position: relative;
-	float: left;
-	margin: 0 20px 30px 0;
+    border: 1px #CCCCCC solid;
+    width: 120px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    position: relative;
+    float: left;
+    margin: 0 20px 30px 0;
 }
 
 /*职务*/
@@ -1001,13 +1001,13 @@ a.compile_btn { width: 100px;}
 .duty { margin:5px 10px;}
 .duty_left {
     width: 115px;
-	height: 24px;
-	line-height: 24px;
-	display: inline-block;
-	text-align: right;
-	float: left;
-	font-weight: bold;
-	color: #930205;
+    height: 24px;
+    line-height: 24px;
+    display: inline-block;
+    text-align: right;
+    float: left;
+    font-weight: bold;
+    color: #930205;
 }
 .duty_right { padding-left: 120px;}
 .duty_right li { line-height: 24px;}
@@ -1021,19 +1021,24 @@ a.compile_btn { width: 100px;}
 
 /*11-6*/
 /*表格出现滑动条*/
-.table_box { height: 600px; overflow: auto;}
+.table_box_h { height: 32px; overflow: scroll; overflow: hidden; z-index:10; position: relative;}
+.table_box_h tbody {visibility: hidden;}
+.table_box { margin-bottom: 30px; overflow: scroll; width: 1000px; height: 700px; margin-top: -32px;}
+.table_box thead { visibility: hidden;}
 
 .collect { padding: 5px 0;}
 .collect li { display: inline-block; margin-right: 10px;}
 .collect li span { margin: 0 5px; color:#930205;}
 
 .register { font-size: 16px; margin-bottom: 10px; padding-bottom: 10px; border: 1px #CCCCCC solid;}
-.orderGoods { 
-    color:#930205; 
-	padding-left: 10px; 
-	height: 32px; 
-	line-height: 32px; 
-	background: url(/assets/tab_head_bg.jpg) repeat-x;
+
+.orderGoods {
+    color:#930205;
+    padding-left: 10px;
+    height: 32px;
+    line-height: 32px;
+    background: url(/assets/tab_head_bg.jpg) repeat-x;
+
 }
 .orderGoods li { display: inline-block; margin-right: 20px;}
 
@@ -1043,5 +1048,6 @@ a.compile_btn { width: 100px;}
 
 
 .item_w { width: 90%; position: relative;}
-.item_radio_b {position: absolute; top: 0px; left: 10px;}
+
+.item_radio_b {position: absolute; top: 0px; left: 40px;}
 .popup_body_area h2.item_blockArea_h2 { font-size: 16px; padding: 5px 5px 5px 20px;}

@@ -18,13 +18,16 @@ class PackageCardsController < ApplicationController
     pcard_material_relations p on s.id=p.material_id  where p.package_card_id in (#{@cards.map(&:id).join(",")})")
       materials.each {|prod| @materials[prod.package_card_id].nil? ? @materials[prod.package_card_id]=[prod] : @materials[prod.package_card_id] << prod }
     end
+    @total = PackageCard.where("package_cards.store_id=#{params[:store_id]} and status=#{PackageCard::STAT[:NORMAL]}").select("count(*) num").first
   end #套餐卡列表
   
   def create
     parms = {:name=>params[:name], :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL], :price=>params[:price],
       :created_at=>Time.now.strftime("%Y-%M-%d"),:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:description=>params[:desc]
-    }
+      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],
+      :description=>params[:desc]}
+    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price])
+    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:price].to_f/100)
     if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
       parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at].to_datetime.end_of_day.strftime("%Y-%m-%d %H:%M:%S"))
     else
@@ -59,7 +62,7 @@ class PackageCardsController < ApplicationController
   #加载产品或者服务类型
   def pcard_types
     sql = "select id,name from products where  store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]}"
-    sql += " and types=#{params[:sale_types]}" if params[:sale_types] != "" || params[:sale_types].length !=0
+    sql += " and category_id=#{params[:sale_types]}" if params[:sale_types] != "" || params[:sale_types].length !=0
     sql += " and name like '%#{params[:sale_name]}%'" if params[:sale_name] != "" || params[:sale_name].length !=0
     @products=Product.find_by_sql(sql)
   end
@@ -67,6 +70,8 @@ class PackageCardsController < ApplicationController
   #添加套餐卡
   def add_pcard
     @pcard=PackageCard.new
+    @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:service],Category::TYPES[:good]]).inject(Hash.new){
+      |hash,cate| hash[cate.id]=cate.name;hash}
   end
 
   #编辑套餐卡
@@ -76,6 +81,8 @@ class PackageCardsController < ApplicationController
      pcard_prod_relations p on s.id=p.product_id  where p.package_card_id=#{params[:id]}")
     @p_material = PcardMaterialRelation.find_by_package_card_id(@pcard.id)
     @material = Material.find(@p_material.material_id) if @p_material
+    @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:service],Category::TYPES[:good]]).inject(Hash.new){
+      |hash,cate| hash[cate.id]=cate.name}
   end
 
   #更新套餐卡
@@ -85,6 +92,8 @@ class PackageCardsController < ApplicationController
       :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:price=>params[:price],
       :description=>params[:desc]
     }
+    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price])
+    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:price].to_f/100)
     if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
       parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at].to_datetime.end_of_day.strftime("%Y-%m-%d %H:%M:%S"))
     else
@@ -135,7 +144,7 @@ class PackageCardsController < ApplicationController
   
   def request_material
     materials = Material.select("id,name").where(:store_id=>params[:store_id]).where(:types=>params[:id]).
-     where(:status=>Material::STATUS[:NORMAL]).inject(Hash.new){|hash,material|hash[material.id]=material.name;hash}
+      where(:status=>Material::STATUS[:NORMAL]).inject(Hash.new){|hash,material|hash[material.id]=material.name;hash}
     render :json=>materials
   end
   
