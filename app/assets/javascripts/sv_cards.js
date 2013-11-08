@@ -1,169 +1,214 @@
-$(document).ready(function(){
-
-})
-
 function date_picker(){
     WdatePicker();
 }
-function new_sv_card(store_id){                 //新建优惠卡
+
+function new_discount_card(){       //新建打折卡按钮
+    popup("#discount_card_div");
+}
+function dcard_add_products(){   //新建打折卡添加按钮
+    before_center("#add_products");
+}
+
+function add_products_search(store_id, obj){    //新建打折卡 查询服务或产品
+    var type = $(obj).parents("div .search").find("select").val();
+    var name = $(obj).parents("div .search").find("input").val();
+    var arr = new Array();
+    $("div[name='p_div']").each(function(){
+         var id = $(this).find("input[name='p_hidden']").val();
+         arr.push(id);
+    })
     $.ajax({
-        url: "/stores/"+store_id+"/sv_cards/new",
         type: "get",
-        dataType: "script"
+        url: "/stores/"+store_id+"/discount_cards/add_products_search",
+        dataType: "script",
+        data: {
+            type : type,
+            name : name,
+            arr : arr
+        }
     })
 }
- function card_type_validate(){  //创建优惠卡时根据选择的卡类型改变表单
-     var type = $("#sv_card_types").val();
-     if(type == 0){
-         $("#sv_card_discount").removeAttr("disabled");
-         $("#sv_card_discount").prev().prepend("<span class='red'>*</span>");
-         $("#sv_card_price").removeAttr("disabled");
-         $("#sv_card_price").prev().prepend("<span class='red'>*</span>");
-         $("#setObj").remove();
-     }else{
-         $("#sv_card_discount").attr("disabled", "disabled");
-         $("#sv_card_discount").prev().html("折扣：");
-         $("#sv_card_price").attr("disabled", "disabled");
-         $("#sv_card_price").prev().html("打折卡金额：");
-         $("#sv_card_discount").val("");
-         $("#sv_card_price").val("");
-         $("#popup_body_area").append("<div id='setObj' class='setObj'><div class='setobj_name'><span class='red'>*</span>项目:</div><div class='setobj_box'>\n\
-             <div class='seto_list'><span>充<input id='started_money' name='started_money' type='text' class='input_s'/>元</span>&nbsp;&nbsp;\n\
-              <span>送<input id='ended_money' name='ended_money' type='text' class='input_s'/>元</span></div></div></div>")
-     } 
- }
- function create_card_validation(){  //创建优惠卡验证
-     var type =  $("#sv_card_types").val();
-     if($.trim($("#sv_card_name").val()) == null || $.trim($("#sv_card_name").val()) == ""){
-             tishi_alert("优惠卡名称不能为空");
-             return false;
-         };
-     if($("#sv_card_img_url").val() == ""){
-        tishi_alert("请上传卡的图片!");
-        return false;
-      }else{
-        var img = $("#sv_card_img_url").val();
-        var img_suff = img.substring(img.lastIndexOf('.')+1).toLowerCase();
-        if(img_suff != "jpg" && img_suff != "png" && img_suff != "gif" && img_suff != "bmp"){
-             tishi_alert("请上传格式正确的图片!");
-             return false;
-        }
-      };
-      if($.trim($("#sv_card_description").val()) == ""){
-        tishi_alert("请描述该卡!");
-        return false;
-      };
-     if(type==0){   //打折卡
-         if($.trim($("#sv_card_discount").val()) == ""){
-          tishi_alert("请输入折扣!");
-          return false;
-        }else if(isNaN($("#sv_card_discount").val()) || parseFloat($("#sv_card_discount").val()) > 10 || parseFloat($("#sv_card_discount").val()) < 1){
-          tishi_alert("折扣必须在1~10之间的数字!");
-          return false;
-       };
-       if($.trim($("#sv_card_price").val()) == ""){
-          tishi_alert("请输入打折卡金额!");
-          return false;
-      }else if(isNaN($.trim($("#sv_card_price").val()))){
-          tishi_alert("请输入有效的打折卡金额!");
-          return false;
-      }else if(parseFloat($.trim($("#sv_card_price").val()))<=0){
-          tishi_alert("金额至少大于零!");
-          return false;
-      };
-     }else if(type==1){ //储值卡
-        if($.trim($("#started_money").val()) == ""){
-        tishi_alert("请输入充值金额!");
-        return false;
-      }else if(isNaN($.trim($("#started_money").val())) || parseFloat($.trim($("#started_money").val()))<=0){
-        tishi_alert("请输入正确的充值金额!");
-        return false;
-      };
-       if($.trim($("#ended_money").val()) == "" ){
-        tishi_alert("请输入赠送金额!");
-        return false;
-      }else if(isNaN($.trim($("#ended_money").val())) || parseFloat($.trim($("#ended_money").val()))<0){
-        tishi_alert("请输入正确的赠送金额!");
-        return false;
-      }
-     }
-     $("#new_card_form").submit();
-     $("#new_sv_card_btn").attr("disabled", "disabled"); 
- }
- function show_svcard_detail(svcard_id, store_id){    //显示优惠卡详情
-     $.ajax({
-         url: "/stores/"+store_id+"/sv_cards/"+svcard_id,
-         dataType: "script",
-         type: "get"
-     })
- }
- function edit_card_validation(){    //更新优惠卡验证
-    var type =  $("#edit_svcard_form #sv_card_types").val();
-    if($.trim($("#sv_card_name").val()) == null || $.trim($("#edit_svcard_form #sv_card_name").val()) == ""){
-        tishi_alert("优惠卡名称不能为空");
-        return false;
+
+function selected_product(obj, name){       //选中产品或服务
+    var id = $(obj).val();
+    if($(obj).attr("checked")=="checked"){
+        $("#selected_products_div").append("<div id='product_"+id+"_div' name='p_div'><em>"+name+"</em>\n\
+            <span><input type='text' value='1' name='p_text' class='addre_input'/></span>\n\
+           <a href='javascript:void(0)' class='remove_a' onclick='\n\
+           cancel_product("+id+")'>删除</a><input type='hidden' id='hidden_"+id+"' name='p_hidden' value='"+id+"'/></div>");
+    }else{
+        $("#product_"+id+"_div").remove();
     }
-    if($.trim($("#edit_svcard_form #sv_card_description").val()) == null || $.trim($("#edit_svcard_form #sv_card_description").val()) == ""){
-        tishi_alert("请描述该卡!");
-        return false;
-    }
-    if($("#edit_svcard_form #sv_card_img_url").val() != ""){
-        var img = $("#edit_svcard_form #sv_card_img_url").val();
-        var img_suff = img.substring(img.lastIndexOf('.')+1).toLowerCase();
-        if(img_suff != "jpg" && img_suff != "png" && img_suff != "gif" && img_suff != "bmp"){
-             tishi_alert("请上传格式正确的图片!");
-             return false;
-        }
-      }
-    if(type==0){   //打折卡
-         if($.trim($("#edit_svcard_form #sv_card_discount").val()) == ""){
-          tishi_alert("请输入折扣!");
-          return false;
-        }else if(isNaN($("#edit_svcard_form #sv_card_discount").val()) || parseFloat($("#edit_svcard_form #sv_card_discount").val()) > 10 || parseFloat($("#edit_svcard_form #sv_card_discount").val()) < 1){
-          tishi_alert("折扣必须在1~10之间的数字!");
-          return false;
-       };
-       if($.trim($("#edit_svcard_form #sv_card_price").val()) == ""){
-          tishi_alert("请输入打折卡金额!");
-          return false;
-      }else if(isNaN($.trim($("#edit_svcard_form #sv_card_price").val())) || parseFloat($.trim($("#edit_svcard_form #sv_card_price").val()))<=0){
-          tishi_alert("请输入正确的打折卡金额,金额至少大于零!");
-          return false;
-      };
-     }else if(type==1){ //储值卡
-       if($.trim($("#edit_svcard_form #started_money").val()) == ""){
-        tishi_alert("请输入充值金额!");
-        return false;
-      }else if(isNaN($.trim($("#edit_svcard_form #started_money").val())) || parseFloat($.trim($("#edit_svcard_form #started_money").val()))<=0){
-           tishi_alert("请输入正确的充值金额,金额至少大于零!");
-        return false;
-      };
-       if($.trim($("#edit_svcard_form #ended_money").val()) == ""){
-        tishi_alert("请输入赠送金额!");
-        return false;
-      }else if(isNaN($.trim($("#edit_svcard_form #ended_money").val())) || parseFloat($.trim($("#edit_svcard_form #ended_money").val()))<0){
-        tishi_alert("请输入正确的赠送金额!");
-        return false;
-      }
-     }
-     $("#edit_svcard_form").submit();
-     $("#edit_svcard_btn").attr("disabled", "disabled");
 }
-function make_billing(c_svc_rel_id, store_id,obj){   //开具发票
-    $.ajax({
-        url: "/stores/"+store_id+"/sv_cards/make_billing",
-        dataType: "json",
-        type: "get",
-        data: {svcard_id : c_svc_rel_id},
-        success: function(data){
-            if(data.status==0){
-                tishi_alert("操作失败!");
-            }else{
-                tishi_alert("操作成功!");
-                $(obj).parent().text("----");
-                $("#is_billing"+c_svc_rel_id).text("是");
-                $(obj).remove();
+
+function selected_product_submit(){     //添加产品或服务中的确定按钮
+    var flag = true;
+    if($("input[name='p_text']").length<=0){
+        tishi_alert("请至少选择一个项目!");
+        flag = false;
+        return false;
+    }else{
+        $("input[name='p_text']").each(function(){
+            var discount = $.trim($(this).val());
+            if((new RegExp(/^\d+$/)).test(discount)==false || parseInt(discount)<1 || parseInt(discount)>100){
+                tishi_alert("请输入正确的折扣， 必须为1~100之间的整数!");
+                flag = false;
+                return false;
             }
+        });
+    };
+    if(flag){
+        var h_str = ""
+        $("div[name='p_div']").each(function(){
+            var name = $(this).find("em").text();
+            var discount = $.trim($(this).find("input[name='p_text']").val());
+            if(parseInt(discount) >=1 && parseInt(discount) <=9){
+                discount = "0"+discount
+            };
+            var id = $(this).find("input[name='p_hidden']").val();
+            h_str += "<li>"+name+"<span>/"+discount+"折</span><input type='hidden' name='dcard_products[]'\n\
+            value='"+id+"-"+discount+"'/></li>";
+        });
+        $("#discount_card_div .srw_ul").html(h_str);
+        $("#add_products").hide();
+        $(".maskOne").hide();
+    }
+}
+
+function cancel_product(pid){          //新建打折卡-删除按钮
+    $("#product_"+pid+"_div").remove();
+    if($("#product_"+pid+"_li input").attr("checked")=="checked"){
+        $("#product_"+pid+"_li input").removeAttr("checked");
+    }
+}
+
+function create_dcard_valid(obj){     //新建打折卡验证
+    var name = $.trim($("#dcard_name").val());
+    var price = $.trim($("#dcard_price").val());
+    var img = $.trim($("#dcard_img").val());
+    var desc = $.trim($("#dcard_description").val());
+    var len = $("input[name='dcard_products[]']").length;
+    if(name==""){
+        tishi_alert("请输入打折卡名称!");
+    }else if(price=="" || isNaN(price) || parseInt(price)<=0){
+        tishi_alert("请输入正确的打折卡金额!");
+    }else if(len<=0){
+        tishi_alert("至少选择一个项目!");
+    }else if(img==""){
+        tishi_alert("请添加打折卡图片!")
+    }else if(desc==""){
+        tishi_alert("请输入具体内容!")
+    }else{
+        $(obj).parents("form").submit();
+    }
+}
+
+function edit_discount_card(cid, store_id){     //编辑打折卡按钮
+    $.ajax({
+        type: "get",
+        url: "/stores/"+store_id+"/discount_cards/edit",
+        dataType: "script",
+        data: { cid : cid}
+    })
+}
+
+function edit_dcard_add_products(cid, store_id){   //编辑打折卡添加按钮
+    $.ajax({
+        type: "get",
+        url: "/stores/"+store_id+"/discount_cards/edit_dcard_add_products",
+        dataType: "script",
+        data: {cid : cid}
+    })
+}
+
+function edit_add_products_search(store_id, obj){    //编辑打折卡 查询服务或产品
+    var type = $(obj).parents("div .search").find("select").val();
+    var name = $(obj).parents("div .search").find("input").val();
+    var arr = new Array();
+    $("div[name='edit_p_div']").each(function(){
+         var id = $(this).find("input[name='edit_p_hidden']").val();
+         arr.push(id);
+    })
+    $.ajax({
+        type: "get",
+        url: "/stores/"+store_id+"/discount_cards/edit_add_products_search",
+        dataType: "script",
+        data: {
+            type : type,
+            name : name,
+            arr : arr
         }
     })
 }
+
+function edit_selected_product(obj, name){       //编辑-选中产品或服务
+    var id = $(obj).val();
+    if($(obj).attr("checked")=="checked"){
+        $("#edit_selected_products_div").append("<div id='edit_product_"+id+"_div' name='edit_p_div'><em>"+name+"</em>\n\
+            <span><input type='text' value='1' name='edit_p_text' class='addre_input'/></span>\n\
+           <a href='javascript:void(0)' class='remove_a' onclick='\n\
+           edit_cancel_product("+id+")'>删除</a><input type='hidden' id='edit_hidden_"+id+"' name='edit_p_hidden' value='"+id+"'/></div>");
+    }else{
+        $("#edit_product_"+id+"_div").remove();
+    }
+}
+
+function edit_cancel_product(pid){          //编辑-删除按钮
+    $("#edit_product_"+pid+"_div").remove();
+    if($("#edit_product_"+pid+"_li input").attr("checked")=="checked"){
+        $("#edit_product_"+pid+"_li input").removeAttr("checked");
+    }
+}
+
+function edit_selected_product_submit(){     //编辑时添加产品或服务中的确定按钮
+    var flag = true;
+    if($("input[name='edit_p_text']").length<=0){
+        tishi_alert("请至少选择一个项目!");
+        flag = false;
+        return false;
+    }else{
+        $("input[name='edit_p_text']").each(function(){
+            var discount = $.trim($(this).val());
+            if((new RegExp(/^\d+$/)).test(discount)==false || parseInt(discount)<1 || parseInt(discount)>100){
+                tishi_alert("请输入正确的折扣，必须为1~100之间的整数!");
+                flag = false;
+                return false;
+            }
+        });
+    };
+    if(flag){
+        var h_str = ""
+        $("div[name='edit_p_div']").each(function(){
+            var name = $(this).find("em").text();
+            var discount = $.trim($(this).find("input[name='edit_p_text']").val());
+            if(parseInt(discount) >=1 && parseInt(discount) <=9){
+                discount = "0"+discount
+            };
+            var id = $(this).find("input[name='edit_p_hidden']").val();
+            h_str += "<li>"+name+"<span>/"+discount+"折</span><input type='hidden' name='edit_dcard_products[]'\n\
+            value='"+id+"-"+discount+"'/></li>";
+        });
+        $("#edit_discount_card_div .srw_ul").html(h_str);
+        $("#edit_add_products").hide();
+        $(".maskOne").hide();
+    }
+}
+
+function edit_dcard_valid(obj){     //编辑打折卡验证
+    var name = $.trim($("#edit_dcard_name").val());
+    var price = $.trim($("#edit_dcard_price").val());
+    var desc = $.trim($("#edit_dcard_description").val());
+    var len = $("input[name='edit_dcard_products[]']").length;
+    if(name==""){
+        tishi_alert("请输入打折卡名称!");
+    }else if(price=="" || isNaN(price) || parseInt(price)<=0){
+        tishi_alert("请输入正确的打折卡金额!");
+    }else if(len<=0){
+        tishi_alert("至少选择一个项目!");
+    }else if(desc==""){
+        tishi_alert("请输入具体内容!")
+    }else{
+        $(obj).parents("form").submit();
+    }
+}
+

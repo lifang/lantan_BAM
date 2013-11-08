@@ -5,7 +5,7 @@ class CustomersController < ApplicationController
   include RemotePaginateHelper
   layout "customer", :except => [:print_orders,:operate_order]
   require 'will_paginate/array'
-  before_filter :customer_tips
+  before_filter :customer_tips, :except => [:get_car_brands]
 
   def index
     session[:c_types] = nil

@@ -1,0 +1,61 @@
+<script type="text/javascript" src="/assets/sv_cards.js" ></script>
+<div class="main">
+  <div class="box">
+    <div class="data_box">
+      <div class="second_menu">
+        <a href="/stores/<%= @store.id %>/discount_cards" class="hover">打折卡</a>
+        <a href="javaScript:viod(0)">储值卡</a>
+        <a href="javaScript:viod(0)">套餐卡</a>
+      </div>
+      <div class="data_menu">
+        <a href="JavaScript:void(0)" class="add_btn" onclick="new_discount_card()">新建打折卡</a>
+      </div>
+      <div class="clear"></div>
+      <div class="data_body">
+        <div>       
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+            <thead>
+              <tr class="hbg">
+                <td>&nbsp;</td>
+                <td>名称</td>
+                <td>单价</td>
+                <td>内容</td>
+                <td>使用范围</td>
+                <td>操作</td>
+              </tr>
+            </thead>
+            <tbody>
+              <% @sv_cards.each do |sc| %>
+                <tr>
+                  <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
+                  <td><%= sc.name %></td>
+                  <td><%= format("%.2f", sc.price) if sc.price %></td>
+                  <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
+                  <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
+                  <td>
+                    <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>
+                    <%= link_to "删除", store_discount_card_path(@store, sc), :method => :delete, :confirm => "确定删除该优惠卡?" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+          <% if !@sv_cards.blank? %>
+            <%= will_paginate  @sv_cards, :class => "pageTurn", :previous_label => "上一页",
+              :next_label=> "下一页" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="discount_card_div" class="tab_popup" style="display: none;" > <!--打折卡弹出层-->
+    <%= render "new" %>
+  </div>
+  <div id="add_products" class="tab_popup" style="display:none;">   <!--添加项目弹出层-->
+    <%= render "add_products" %>
+  </div>
+  <div id="edit_discount_card_div" class="tab_popup" style="display: none;"></div> <!--编辑打折卡弹出层-->
+  <div id="edit_add_products" class="tab_popup" style="display:none;">   <!--编辑..添加项目弹出层-->
+  </div>
+</div>
+<div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
