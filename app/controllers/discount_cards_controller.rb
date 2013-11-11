@@ -1,5 +1,5 @@
 #encoding: utf-8
-class DiscountCardsController < ApplicationController
+class DiscountCardsController < ApplicationController   #打折卡
   require 'will_paginate/array'
   layout "sale"
   before_filter :get_store
@@ -29,15 +29,22 @@ class DiscountCardsController < ApplicationController
           pdiscount = p.split("-")[1].to_i
           SvcardProdRelation.create(:product_id => pid, :sv_card_id => dcard.id, :product_discount => pdiscount)
         end
-        begin
-          url = SvCard.upload_img(img, dcard.id, Constant::SVCARD_PICS, @store.id, Constant::SVCARD_PICSIZE)
-          dcard.update_attribute("img_url", url)
-          flash[:notice] = "新建成功!"
-        rescue
-          flash[:notice] = "图片上传失败!"
+        if img
+          begin
+            url = SvCard.upload_img(img, dcard.id, Constant::SVCARD_PICS, @store.id, Constant::SVCARD_PICSIZE)
+            dcard.update_attribute("img_url", url)
+            flash[:notice] = "新建成功!"
+          rescue
+            flash[:notice] = "图片上传失败!"
+          end
+        else
+          flash[:notice] = "新建成功!"         
         end
-      end    
-      redirect_to "/stores/#{@store.id}/discount_cards"
+        redirect_to "/stores/#{@store.id}/discount_cards"
+      else
+        flsh[:notice] = "新建失败"
+        redirect_to request.referer
+      end          
     else
       flash[:notice] = "新建失败，已存在同名的打折卡!"
       redirect_to request.referer
@@ -73,13 +80,13 @@ class DiscountCardsController < ApplicationController
   end
 
   def update
-   name = params[:edit_dcard_name]
-   use_range = params[:edit_dcard_userange]
-   price = params[:edit_dcard_price]
-   products = params[:edit_dcard_products]
-   img = params[:edit_dcard_img]
-   desc = params[:edit_dcard_description]
-   id = params[:id]
+    name = params[:edit_dcard_name]
+    use_range = params[:edit_dcard_userange]
+    price = params[:edit_dcard_price]
+    products = params[:edit_dcard_products]
+    img = params[:edit_dcard_img]
+    desc = params[:edit_dcard_description]
+    id = params[:id]
     s = SvCard.where(["id != ? and types = ? and name = ? and status = ? and store_id = ?", id,
         SvCard::FAVOR[:DISCOUNT], name, SvCard::STATUS[:NORMAL], @store.id])
     if s.blank?
@@ -94,11 +101,12 @@ class DiscountCardsController < ApplicationController
         end
         if img
           begin
-          url = SvCard.upload_img(img, dcard.id, Constant::SVCARD_PICS, @store.id, Constant::SVCARD_PICSIZE)
-          dcard.update_attribute("img_url", url)
-        rescue
-          flash[:notice] = "图片上传失败!"
-        end
+            url = SvCard.upload_img(img, dcard.id, Constant::SVCARD_PICS, @store.id, Constant::SVCARD_PICSIZE)
+            dcard.update_attribute("img_url", url)
+            flash[:notice] = "编辑成功!"
+          rescue
+            flash[:notice] = "图片上传失败!"
+          end
         else
           flash[:notice] = "编辑成功!"
         end

@@ -1,0 +1,57 @@
+<script type="text/javascript" src="/assets/save_cards.js" ></script>
+<div class="main">
+  <div class="box">
+    <div class="data_box">
+      <div class="second_menu">
+        <a href="/stores/<%= @store.id %>/discount_cards">打折卡</a>
+        <a href="/stores/<%= @store.id %>/save_cards" class="hover">储值卡</a>
+        <a href="javaScript:viod(0)">套餐卡</a>
+      </div>
+      <div class="data_menu">
+        <a href="JavaScript:void(0)" class="add_btn" onclick="new_save_card()">新建储值卡</a>
+      </div>
+      <div class="clear"></div>
+      <div class="data_body">
+        <div>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+            <thead>
+              <tr class="hbg">
+                <td>&nbsp;</td>
+                <td>名称</td>
+                <td>单价</td>
+                <td>面值</td>
+                <td>内容</td>
+                <td>适用项目</td>
+                <td>使用范围</td>
+                <td>操作</td>
+              </tr>
+            </thead>
+            <tbody>
+              <% @sv_cards .each do |sc| %>
+              <tr>
+                <td class="data_table_img"><img src="<%= sc.surl.nil? ? "" : sc.surl.gsub("img#{sc.sid}", "img#{sc.sid}_#{Constant::SVCARD_PICSIZE[0]}") %>"/></td>
+                <td><%= sc.sname %></td>
+                <td><%= format("%.2f", sc.sprice) if sc.sprice %></td>
+                <td><%= sc.bprice + sc.mprice %></td>
+                <td><%= sc.sdesc %></td>
+                <td><%= sc.cname %></td>
+                <td><%= SvCard::S_USE_RANGE[sc.srange] %></td>
+                <td>
+                  <a href="javascript:void(0)" onclick="edit_save_card(<%= @store.id %>, <%= sc.sid %>)">编辑</a>
+                  <a  href="/stores/<%= @store.id %>/save_cards/<%= sc.sid %>" data-confirm="确定删除该储值卡?" data-method="delete" rel="nofollow">删除</a>
+                </td>
+              </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div> 
+  <div class="tab_popup" style="display:none;" id="save_cards_div">  <!--新建储值卡-->
+     <%= render "new" %>
+  </div>
+  <div class="tab_popup" style="display:none;" id="edit_save_cards_div">  <!--编辑储值卡-->
+  </div>
+</div>
+<div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>

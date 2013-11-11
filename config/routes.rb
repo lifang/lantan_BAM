@@ -197,6 +197,9 @@ LantanBAM::Application.routes.draw do
         get  "add_products_search", "edit", "edit_dcard_add_products", "edit_add_products_search"
       end
     end
+    resources :save_cards do
+
+    end
     resources :materials_in_outs
 
     resources :work_orders do
