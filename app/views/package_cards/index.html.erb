@@ -5,7 +5,9 @@
       <div class="second_menu">
         <a href="/stores/<%= params[:store_id] %>/package_cards" <% if params[:action] == "index"  %> class="hover"<%end%>>套餐卡列表</a>
         <% if permission?(:sales, :show_sale_records) %><a href="/stores/<%= params[:store_id] %>/package_cards/sale_records" <% if params[:action] == "sale_records"  %> class="hover"<%end%>>销售记录</a><% end %></div>
-      <div class="data_menu"><% if permission?(:sales, :add_p_card) %><a href="javascript:void(0)" class="add_btn" onclick="add_pcard('<%=params[:store_id] %>')">添加套餐卡</a><% end %></div>
+      <div class="data_menu"><% if permission?(:sales, :add_p_card) %><a href="javascript:void(0)" class="add_btn" onclick="add_pcard('<%=params[:store_id] %>')">添加套餐卡</a><% end %>
+        <% if permission?(:sales, :del_p_card) %><a href="javascript:void(0)" class="add_btn" onclick="delete_pcard('<%=params[:store_id] %>')">删除套餐卡</a><% end %>
+      </div>
       <div class="collect">
         <ul><li>服务项目共：<span><%= @total.num %></span>项</li> </ul>
       </div>
@@ -16,6 +18,7 @@
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
+                  <td><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
                   <td>&nbsp;</td>
                   <td>名称</td>
                   <td>有效时间</td>
@@ -29,6 +32,7 @@
                 <% unless @cards.blank? %>
                   <% card = @cards[0] %>
                   <tr>
+                    <td><input type="checkbox" id="line_<%= card.id %>" value="<%=  card.id  %>" /></td>
                     <td class="data_table_img"><img src="<%= card.img_url.nil? ? "" : card.img_url.gsub("img#{card.id}","img#{card.id}_#{Constant::C_PICSIZE[0]}")  %>" /></td>
                     <td><%= card.name %></td>
                     <td><%= if card.date_types == PackageCard::TIME_SELCTED[:END_TIME]
@@ -74,8 +78,9 @@
                         <% end %>
                       </table>
                     </td>
-                    <td> <% if permission?(:sales, :edit_p_card) %><a href="javascript:void(0)" onclick="edit_pcard('<%=card.id %>','<%=params[:store_id] %>')">修改</a><% end %>
-                      <% if permission?(:sales, :del_p_card) %><a href="javascript:void(0)" onclick="delete_pcard('<%= card.id %>')">删除</a><% end %></td>
+                    <td>
+                      <% if permission?(:sales, :edit_p_card) %><a href="javascript:void(0)" onclick="edit_pcard('<%=card.id %>','<%=params[:store_id] %>')">修改</a><% end %>
+                    </td>
                   </tr>
                 <% end %>
               </tbody>
@@ -85,6 +90,7 @@
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
+                  <td><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
                   <td>&nbsp;</td>
                   <td>名称</td>
                   <td>有效时间</td>
@@ -98,6 +104,7 @@
                 <% unless @cards.blank? %>
                   <%@cards.each do |card|%>
                     <tr>
+                      <td><input type="checkbox" id="line_<%= card.id %>" value="<%=  card.id  %>" /></td>
                       <td class="data_table_img"><img src="<%= card.img_url.nil? ? "" : card.img_url.gsub("img#{card.id}","img#{card.id}_#{Constant::C_PICSIZE[0]}")  %>" /></td>
                       <td><%= card.name %></td>
                       <td><%= if card.date_types == PackageCard::TIME_SELCTED[:END_TIME]
@@ -143,8 +150,9 @@
                           <% end %>
                         </table>
                       </td>
-                      <td> <% if permission?(:sales, :edit_p_card) %><a href="javascript:void(0)" onclick="edit_pcard('<%=card.id %>','<%=params[:store_id] %>')">修改</a><% end %>
-                        <% if permission?(:sales, :del_p_card) %><a href="javascript:void(0)" onclick="delete_pcard('<%= card.id %>')">删除</a><% end %></td>
+                      <td>
+                        <% if permission?(:sales, :edit_p_card) %><a href="javascript:void(0)" onclick="edit_pcard('<%=card.id %>','<%=params[:store_id] %>')">修改</a><% end %>
+                      </td>
                     </tr>
                   <% end %>
                 <% end %>

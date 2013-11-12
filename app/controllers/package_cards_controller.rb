@@ -119,12 +119,8 @@ class PackageCardsController < ApplicationController
 
   #删除活动
   def delete_pcard
-    PackageCard.find(params[:id]).update_attributes(:status=>PackageCard::STAT[:INVALID])
-    respond_to do |format|
-      format.json {
-        render :json=>{:message=>"删除成功"}
-      }
-    end
+    PackageCard.find(params[:ids]).each{|pcard| pcard.update_attributes(:status=>PackageCard::STAT[:INVALID])}
+    render :json=>{:msg=>"删除成功"}
   end
 
   def search

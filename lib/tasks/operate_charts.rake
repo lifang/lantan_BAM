@@ -24,7 +24,15 @@ end
 task(:change_types => :environment) do
   Store.where(:status=>Store::STATUS[:OPENED]).each do |store|
     #需要先把预存数据加进去
-    
+    Material::TYPES_NAMES.values.each do |mat_name|
+      Category.create(:name => mat_name, :types =>Category::TYPES[:material], :store_id => store.id)
+    end
+    Product::PRODUCT_TYPES.select{|k,v| k<Product::PRODUCT_END}.values.each do |prod_name|
+      Category.create(:name => prod_name, :types =>Category::TYPES[:good], :store_id => store.id)
+    end
+    Product::PRODUCT_TYPES.select{|k,v| k>=Product::PRODUCT_END}.values.each do |serv_name|
+      Category.create(:name => serv_name, :types =>Category::TYPES[:service], :store_id => store.id)
+    end
     #---记得哦
     cates = Category.where(:store_id =>store.id ).inject(Hash.new){|hash,ca|hash[ca.types].nil? ? hash[ca.types]=[ca] : hash[ca.types] << ca;hash }
     prods = Product.where(:status=>Product::IS_VALIDATE[:YES]).inject(Hash.new){|hash,prod|

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131106043943) do
+ActiveRecord::Schema.define(:version => 20131107041801) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -712,11 +712,10 @@ ActiveRecord::Schema.define(:version => 20131106043943) do
     t.float    "deduct_price",   :default => 0.0
     t.boolean  "show_on_ipad",   :default => true
     t.boolean  "commonly_used",  :default => false
-    t.integer  "category_id"
     t.boolean  "is_added",       :default => false
     t.float    "techin_price",   :default => 0.0
     t.float    "techin_percent", :default => 0.0
-    t.integer  "single_types"
+    t.integer  "single_types",   :default => 0
     t.integer  "category_id"
   end
 

@@ -57,12 +57,8 @@ class SalesController < ApplicationController    #营销管理 -- 活动
 
   #删除活动
   def delete_sale
-    Sale.find(params[:sale_id]).update_attributes(:status=>Sale::STATUS[:DESTROY])
-    respond_to do |format|
-      format.json {
-        render :json=>{:message=>"删除成功"}
-      }
-    end
+    Sale.find(params[:ids]).each{|sale|sale.update_attributes(:status=>Sale::STATUS[:DESTROY])}
+    render :json=>{:msg=>"删除成功"}
   end
   
   #更新活动

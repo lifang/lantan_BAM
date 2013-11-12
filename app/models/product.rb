@@ -148,11 +148,12 @@ class Product < ActiveRecord::Base
   end
 
   def alter_level
-    Station.find(self.station_service_relations.map(&:station_id)).each {|station|
+    station_ids = self.station_service_relations.map(&:station_id)
+    Station.find(station_ids).each {|station|
       products = Product.find(station.station_service_relations.joins(:product).where("status = #{Product::IS_VALIDATE[:YES]}").map(&:product_id).compact.uniq)
       levels = (products.map(&:staff_level) | products.map(&:staff_level_1)).uniq.sort
       station.update_attributes({:staff_level=>levels.min,:staff_level1=>levels[0..(levels.length/2.0)].max   })
-    }
+    } unless station_ids.blank?
   end
 
   def self.import_data

@@ -187,30 +187,11 @@ class ProductsController < ApplicationController
   end
 
   def destroy_prod
-    Product.find(params[:ids]).each{|prod| prod.destroy}
+    Product.find(params[:ids]).each{|prod| prod.update_attribute(:status, Product::IS_VALIDATE[:NO]);
+      prod.alter_level}
     render :json=>{:msg=>"删除成功"}
   end
 
-  def prod_delete
-    @redit = delete_p(Constant::PRODUCT,params[:id],params[:store_id])
-  end
-
-  def serve_delete
-    @redit = delete_p(Constant::SERVICE,params[:id],params[:store_id])
-  end
-
-  def delete_p(types,id,store_id)
-    product = Product.find(id)
-    product.update_attribute(:status, Product::IS_VALIDATE[:NO])
-    flash[:notice] = "删除成功"
-    if types == Constant::SERVICE
-      product.alter_level
-      redit = "/stores/#{store_id}/products/prod_services"
-    else
-      redit =  "/stores/#{store_id}/products"
-    end
-    return redit
-  end
 
   def update_status
     vals =JSON params[:vals]
@@ -242,7 +223,7 @@ class ProductsController < ApplicationController
     staff_level_1 level2,commonly_used from products p inner join categories c on c.id=p.category_id where p.store_id=#{params[:store_id]}
     and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]}
     order by p.created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
-     @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
+    @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
     and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]}").select("count(*) num").first
   end
 
@@ -250,7 +231,8 @@ class ProductsController < ApplicationController
     flash[:notice] = "添加成功"
     parms = {:name=>params[:name],:category_id=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
       :created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"S#{Sale.set_code(3,"product","service_code")}",:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB]}
+      :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB],
+      :show_on_pad=>Product::SHOW_ON_IPAD[:NO]}
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
     parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
     parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
