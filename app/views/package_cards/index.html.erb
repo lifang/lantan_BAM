@@ -3,9 +3,12 @@
   <div class="box">
     <div class="data_box">
       <div class="second_menu">
-        <a href="/stores/<%= params[:store_id] %>/package_cards" <% if params[:action] == "index"  %> class="hover"<%end%>>套餐卡列表</a>
-        <% if permission?(:sales, :show_sale_records) %><a href="/stores/<%= params[:store_id] %>/package_cards/sale_records" <% if params[:action] == "sale_records"  %> class="hover"<%end%>>销售记录</a><% end %></div>
-      <div class="data_menu"><% if permission?(:sales, :add_p_card) %><a href="javascript:void(0)" class="add_btn" onclick="add_pcard('<%=params[:store_id] %>')">添加套餐卡</a><% end %>
+        <a href="/stores/<%= params[:store_id] %>/discount_cards">打折卡</a>
+        <a href="/stores/<%= params[:store_id] %>/save_cards">储值卡</a>
+        <a href="/stores/<%= params[:store_id] %>/package_cards" class="hover">套餐卡</a>
+      </div>
+      <div class="data_menu">
+        <% if permission?(:sales, :add_p_card) %><a href="javascript:void(0)" class="add_btn" onclick="add_pcard('<%=params[:store_id] %>')">添加套餐卡</a><% end %>
         <% if permission?(:sales, :del_p_card) %><a href="javascript:void(0)" class="add_btn" onclick="delete_pcard('<%=params[:store_id] %>')">删除套餐卡</a><% end %>
       </div>
       <div class="collect">
