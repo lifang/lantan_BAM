@@ -1,5 +1,6 @@
 #encoding: utf-8
 class SvCard < ActiveRecord::Base
+  require 'mini_magick'
   has_many :svcard_prod_relations
   has_many :c_svc_relations
   belongs_to :store

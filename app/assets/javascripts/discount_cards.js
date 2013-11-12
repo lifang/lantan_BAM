@@ -1,7 +1,3 @@
-function date_picker(){
-    WdatePicker();
-}
-
 function new_discount_card(){       //新建打折卡按钮
     popup("#discount_card_div");
 }

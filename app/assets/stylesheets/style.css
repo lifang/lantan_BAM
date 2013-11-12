@@ -432,7 +432,7 @@ a.compile_btn { width: 100px;}
 .item.item_width { width: 460px;}
 
 
-.item_blockArea { background: #f3f3f3; overflow: hidden;}
+.item_blockArea { background: #f3f3f3; overflow: hidden; margin: 10px 0;}
 .item_title { font-size: 16px; line-height: 32px; padding-left: 55px; background: #fafafa;}
 .item_add { float: right; margin-right: 49px;}
 .item label, .item_textarea label {
@@ -624,9 +624,9 @@ a.compile_btn { width: 100px;}
 .seeProDiv_textarea { margin: 20px 10px; float: left; overflow: hidden; width: 590px;}
 .seeProDiv_r select {  height: 24px; line-height: 24px; width: 160px; border: 1px #CCCCCC solid;}
 
-.srw_ul { padding: 5px;}
-.srw_ul li { margin: 0 5px; display: inline;}
-.srw_ul li span {color: #930;}
+.item_textarea ul.srw_ul { padding: 5px;}
+.item_textarea .srw_ul li { margin: 0 5px; display: inline;}
+.item_textarea .srw_ul li span {color: #930;}
 
 
 .seeProPic { line-height: inherit;}
@@ -1018,6 +1018,7 @@ a.compile_btn { width: 100px;}
 .item_rbox dt { color:#930205; line-height: 24px;}
 .item_rbox dd { display: inline-block; margin: 5px; background: #ededed; padding: 5px;}
 
+
 /*11-6*/
 /*表格出现滑动条*/
 .table_box_h { height: 32px; overflow: scroll; overflow: hidden; z-index:10; position: relative;}
@@ -1030,12 +1031,14 @@ a.compile_btn { width: 100px;}
 .collect li span { margin: 0 5px; color:#930205;}
 
 .register { font-size: 16px; margin-bottom: 10px; padding-bottom: 10px; border: 1px #CCCCCC solid;}
+
 .orderGoods {
     color:#930205;
     padding-left: 10px;
     height: 32px;
     line-height: 32px;
     background: url(/assets/tab_head_bg.jpg) repeat-x;
+
 }
 .orderGoods li { display: inline-block; margin-right: 20px;}
 
@@ -1045,5 +1048,6 @@ a.compile_btn { width: 100px;}
 
 
 .item_w { width: 90%; position: relative;}
+
 .item_radio_b {position: absolute; top: 0px; left: 40px;}
 .popup_body_area h2.item_blockArea_h2 { font-size: 16px; padding: 5px 5px 5px 20px;}
