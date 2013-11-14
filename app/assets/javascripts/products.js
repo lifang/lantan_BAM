@@ -388,7 +388,7 @@ function delete_prods(store_id){
                     ids : ids
                 },
                 success : function(data){
-                    //                    $(":checked").attr("checked",false);
+                    $(":checked").attr("checked",false);
                     tishi_alert(data.msg);
                     setTimeout(function(){
                         window.location.reload();

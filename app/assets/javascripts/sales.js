@@ -94,23 +94,34 @@ function input_time(){
     }
 }
 
-function delete_sale(sale_id,store_id){
-    if(confirm("确定要删除这项活动吗？")){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'json',
-            url : "/stores/"+ store_id+"/sales/delete_sale",
-            data : {
-                sale_id : sale_id
-            },
-            success:function(data){
-                tishi_alert(data.message);
-                setTimeout(function(){
-                    window.location.reload();
-                },1000)
-            }
-        });
+function delete_sale(store_id){
+    var checked_ids = $("input[id^='line']:checked");
+    var ids = [];
+    for(var i=0; i < checked_ids.length; i++){
+        ids.push(checked_ids[i].value)
+    }
+    if (checked_ids.length == 0){
+        tishi_alert("请选择删除的活动");
+    }else{
+        if(confirm("确认删除选中的活动吗？")){
+            $.ajax({
+                async:true,
+                type : 'post',
+                dataType : 'json',
+                url : "/stores/"+ store_id+"/sales/delete_sale",
+                data : {
+                    ids : ids
+                },
+                success : function(data){
+                    $(":checked").attr("checked",false);
+                    tishi_alert(data.msg);
+                    setTimeout(function(){
+                        window.location.reload();
+                    },1000)
+                }
+            });
+        //        window.open("/customers/print_orders?ids="+ids.join(","),"_blank")
+        }
     }
 }
 
@@ -285,20 +296,34 @@ function check_add(e){
 }
 
 //删除套餐卡
-function delete_pcard(pcard_id){
-    if(confirm("确定要删除此套餐卡吗？")){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'json',
-            url : "/package_cards/"+pcard_id+"/delete_pcard",
-            success:function(data){
-                tishi_alert(data.message);
-                setTimeout(function(){
-                    window.location.reload();
-                },1000)
-            }
-        });
+function delete_pcard(store_id){
+    var checked_ids = $("input[id^='line']:checked");
+    var ids = [];
+    for(var i=0; i < checked_ids.length; i++){
+        ids.push(checked_ids[i].value)
+    }
+    if (checked_ids.length == 0){
+        tishi_alert("请选择删除的套餐卡");
+    }else{
+        if(confirm("确认删除选中的套餐卡吗？")){
+            $.ajax({
+                async:true,
+                type : 'post',
+                dataType : 'json',
+                url : "/stores/"+ store_id+"/package_cards/delete_pcard",
+                data : {
+                    ids : ids
+                },
+                success : function(data){
+                    $(":checked").attr("checked",false);
+                    tishi_alert(data.msg);
+                    setTimeout(function(){
+                        window.location.reload();
+                    },1000)
+                }
+            });
+        //        window.open("/customers/print_orders?ids="+ids.join(","),"_blank")
+        }
     }
 }
 
@@ -405,4 +430,8 @@ function control_input(){
 function change_input(front,back){
     $(front).attr('disabled',true).val('');
     $(back).attr('disabled',false).val('0.0');
+}
+
+function set_value(e){
+    $("input[id^='line']").attr('checked',e.checked)
 }

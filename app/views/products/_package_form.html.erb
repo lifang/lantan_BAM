@@ -24,19 +24,6 @@
     <% end %>
   </select>
 </div>
-<div class="seeProDiv">
-  <div class="seeProDiv_l">配图：</div>
-  <div class="seeProDiv_rWidth">
-    <% if @img_urls %>
-      <ul class="seeProPic">
-        <%@img_urls.each do |url|%>
-          <li><img src="<%=url.img_url.nil? ? "" : url.img_url.gsub("img#{@package.id}","img#{@package.id}_#{Constant::P_PICSIZE[0]}") %>" /></li>
-        <%end unless @img_urls.blank?%>
-      </ul>
-    <% end %>
-    <a href="javascript:void(0)" class="compile_btn" onclick="before_center('.add_img');">添加图片</a><span>*添加新图片会使已上传图片被删除，请为图片做好备份</span>
-  </div>
-</div>
 <div class="item">
   <label><span class="red">*</span>销售提成(元)：</label>
   <input name="deduct_price" id="deduct_price" type="text" value="<%= @package.deduct_price %>" />

@@ -7,11 +7,6 @@ LantanBAM::Application.routes.draw do
     end
   end
 
-  resources :package_cards do
-    member do
-      post :delete_pcard
-    end
-  end
   resources :stations do
    
   end
@@ -21,8 +16,8 @@ LantanBAM::Application.routes.draw do
   root :to => 'logins#index'
   resources :logins do
     collection do
-      get "logout", "send_validate_code","phone_login"
-      post "forgot_password"
+      get "logout", "send_validate_code","phone_login","manage_content"
+      post "forgot_password","login_phone"
     end
   end
   match "logout" => "logins#logout"
@@ -63,7 +58,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :package_cards do
       collection do
-        post "pcard_types","add_pcard","search"
+        post "pcard_types","add_pcard","search","delete_pcard"
         get "sale_records","search_list"
       end
       member do
@@ -208,7 +203,8 @@ LantanBAM::Application.routes.draw do
       end
     end
   end
-  
+
+  match 'stores/:store_id/manage_content' => 'logins#manage_content'
   match 'stores/:store_id/materials_in' => 'materials_in_outs#materials_in'
   match 'stores/:store_id/materials_out' => 'materials_in_outs#materials_out'
   match 'get_material' => 'materials_in_outs#get_material'

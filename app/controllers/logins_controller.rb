@@ -119,4 +119,35 @@ class LoginsController < ApplicationController
   def phone_login
     render :layout=>nil
   end
+
+  def manage_content
+    session[:time] = (session[:time].nil? || session[:time] != Time.now.strftime("%Y-%m-%d %H")) ?  Time.now.strftime("%Y-%m-%d %H") :  session[:time]
+    @store = Store.find(params[:store_id])
+    @orders = Order.joins("inner join order_prod_relations op on op.order_id=orders.id inner join products p on p.id=op.product_id").
+      select("sum(op.pro_num*op.price) num,date_format(orders.created_at,'%Y-%m-%d') day,is_service").where(:status=>[Order::STATUS[:BEEN_PAYMENT],Order::STATUS[:FINISHED]]).
+      where("date_format(orders.created_at,'%Y-%m-%d') > '#{Time.now.beginning_of_month.strftime('%Y-%m-%d')}' and date_format(orders.created_at,'%Y-%m-%d %H') <= '#{session[:time]}'").
+      group("date_format(orders.created_at,'%Y-%m-%d'),is_service").inject(Hash.new){|hash,order|
+      hash[order.day].nil? ? hash[order.day]={order.is_service => order.num} : hash[order.day][order.is_service]=order.num;hash}
+    @total_week = @orders.select{|k,v| k>= Time.now.beginning_of_week.strftime('%Y-%m-%d')}.values.inject(Hash.new){|hash,total|total.each{|k,v|
+        hash[k].nil? ? hash[k]=v : hash[k] += v};hash}
+    @total_month = @orders.values.inject(Hash.new){|hash,total|total.each{|k,v| hash[k].nil? ? hash[k]=v : hash[k] += v};hash}
+    render :layout=>nil
+  end
+
+  def login_phone
+    @staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:login_name], Staff::VALID_STATUS])
+    if  @staff.nil? or !@staff.has_password?(params[:login_pwd])
+      flash.now[:notice] = "用户名或密码错误"
+      @user_name = params[:login_name]
+      render 'phone_login', :layout => false
+    elsif @staff.store.nil? || @staff.store.status != Store::STATUS[:OPENED]
+      flash.now[:notice] = "用户不存在"
+      @user_name = params[:login_name]
+      render 'phone_login', :layout => false
+    else
+      cookies[:phone_id]={:value =>@staff.id, :path => "/", :secure  => false}
+      cookies[:phone_name]={:value =>@staff.name, :path => "/", :secure  => false}
+      redirect_to "/stores/#{@staff.store_id}/manage_content"
+    end
+  end
 end

@@ -4,8 +4,9 @@
 <div class="main">
   <div class="box">
     <div class="data_box">
-      <div class="data_menu"> <% if permission?(:sales, :delete_product) && @total.num > 0 %><a href="javascript:void(0)" class="add_btn" onclick="delete_prods(<%= params[:store_id] %>)">删除产品</a><%end%>
+      <div class="data_menu"> 
         <% if permission?(:sales, :add_product) %><a href="javascript:void(0)" class="add_btn" onclick="add_prod(<%= params[:store_id] %>)" >添加产品</a><% end %>
+        <% if permission?(:sales, :delete_product) && @total.num > 0 %><a href="javascript:void(0)" class="add_btn" onclick="delete_prods(<%= params[:store_id] %>)">删除产品</a><%end%>
       </div>
       <div class="collect">
         <ul><li>服务项目共：<span><%= @total.num %></span>项</li></ul>
@@ -13,7 +14,7 @@
       <div class="clear"></div>
       <div class="data_body">
         <div>
-          <%unless @products.blank? %>
+          <div class="table_box_h">
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
@@ -29,7 +30,8 @@
                 </tr>
               </thead>
               <tbody>
-                <% @products.each do |prod| %>
+                <%unless @products.blank? %>
+                  <% prod = @products[0] %>
                   <tr>
                     <td><input type="checkbox" id="line_<%= prod.id %>" value="<%= prod.id %>" /></td>
                     <td><%= prod.code %></td>
@@ -48,12 +50,48 @@
                 <% end %>
               </tbody>
             </table>
+          </div>
+          <div class="table_box">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+              <thead>
+                <tr class="hbg">
+                  <td width="5%"><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
+                  <td>产品编号</td>
+                  <td>产品名称</td>
+                  <td>成本价</td>
+                  <td>零售价格</td>
+                  <td>促销价</td>
+                  <td>积分</td>
+                  <td>类别</td>
+                  <td>操作</td>
+                </tr>
+              </thead>
+              <tbody>
+                <%unless @products.blank? %>
+                  <% @products.each do |prod| %>
+                    <tr>
+                      <td><input type="checkbox" id="line_<%= prod.id %>" value="<%= prod.id %>" /></td>
+                      <td><%= prod.code %></td>
+                      <td><%= prod.name %></td>
+                      <td><%= permission?(:materials, :show_sale) ? prod.t_price : 0%></td>
+                      <td><%= prod.base_price %></td>
+                      <td><%= prod.sale_price %></td>
+                      <td><%= prod.prod_point %></td>
+                      <td><%= prod.c_name %></td>
+                      <td>
+                        <% if permission?(:sales, :edit_product) %><a href="javascript:void(0)"  onclick="edit_prod('<%=prod.id %>','<%=params[:store_id] %>')">编辑</a><% end %>
+                        <a href="javascript:void(0)" class="see_btn" onclick="show_prod('<%=prod.id %>','<%=params[:store_id] %>')">查看</a>
+                        <a href="/stores/<%= params[:store_id] %>/products/<%=prod.id %>" target="_blank" class="see_btn"  >预览</a>
+                      </td>
+                    </tr>
+                  <% end %>
+                <% end %>
+              </tbody>
+            </table>
             <div class="pageTurn">
-              <%= will_paginate @products,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+              <%= will_paginate @products,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" unless @products.blank?%>
             </div>
-          <% else %>
-            暂无产品信息
-          <% end %>
+          </div>
         </div>
       </div>
     </div>
