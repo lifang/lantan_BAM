@@ -65,7 +65,7 @@ class DiscountCardsController < ApplicationController   #打折卡
     end
     unless name.nil? || name.empty?
       sql[0] += " and p.name like ?"
-      sql << "%#{name}%"
+      sql << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"     
     end
     @products = Product.find_by_sql(sql)
   end
@@ -150,7 +150,7 @@ class DiscountCardsController < ApplicationController   #打折卡
     end
     unless name.nil? || name.empty?
       sql[0] += " and p.name like ?"
-      sql << "%#{name}%"
+      sql << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     @products = Product.find_by_sql(sql)
   end

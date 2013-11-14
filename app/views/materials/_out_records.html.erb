@@ -53,6 +53,12 @@
   });
     });
 </script>
+<div class="collect">
+  <ul>
+    <li>出库记录：<span><%= @out_arr[0] %></span>条</li>
+    <li>金额：<span><%= format("%.2f", @out_arr[1]) if @out_arr[1] %></span></li>
+  </ul>
+</div>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_out_tab">
   <thead>
   <tr class="hbg">
@@ -73,7 +79,7 @@
         <td><%= out.code %></td>
         <td><%= out.name %></td>
          <td><%= MatOutOrder::TYPES[out.out_types] %></td>
-        <td><%= Material::TYPES_NAMES[out.types.to_i] %></td>
+        <td><%= out.cname %></td>
         <td><%= out.staff_name %></td>
 
         <td><%= out.material_num.to_i %></td>

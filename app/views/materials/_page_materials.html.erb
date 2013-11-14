@@ -82,7 +82,7 @@
           <span <% if permission?(:materials, :modify_mat_code) %>title="双击修改条形码" style="cursor: pointer;" ondblclick="change_code(this)"<% end %> ><%= material.code %></span>
         </td>
         <td><%= material.name %></td>
-        <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
+        <td><%= material.cname %></td>
         <td class="sstatus"><%= material.is_ignore || material.storage.to_i > material.material_low.to_i ? "存货" : "缺货" %></td>
         <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= material.storage.to_i %></span></td>
         <td><%= material.unit %></td>

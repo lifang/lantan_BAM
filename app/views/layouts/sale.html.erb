@@ -14,7 +14,7 @@
         <div class="nav">
           <ul>
             <li><a href="/stores/<%= params[:store_id] %>/discount_cards"
-                   <% if  ["sv_cards", "discount_cards", "package_cards"].include?(controller.controller_name) %> class="hover" <%end%>>卡类</a></li>
+                   <% if  ["save_cards", "discount_cards", "package_cards"].include?(controller.controller_name) %> class="hover" <%end%>>卡类</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/sales" 
                    <% if  controller.controller_name=="sales" %> class="hover" <%end%>>活动</a></li>
             <li><a href="/stores/<%= params[:store_id] %>/products" 

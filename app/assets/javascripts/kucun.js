@@ -40,7 +40,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
     else{
        check_num = $("#print_sort_table #check_num_"+m_id).val();
     }
-    
+
     if(check_num.match(reg1)==null){
         tishi_alert("请输入有效数字");
     }else{
@@ -117,7 +117,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
 function submit_search_form(store_id,type,obj){
     var form = $(obj).parent().parent().find("#select_types");
     var name = $.trim($(obj).parent().parent().find("#name").val());
-    var types = $(form).find("#material_types").val();
+    var types = $(form).find("#material_category_id").val();
     if(types==""&&name==""){
         tishi_alert("请选择类型或填写名称！");
     }else{
@@ -1394,12 +1394,12 @@ function enableNextInput(obj, flag){
     }
 }
 
-function search_material_barcode(obj){
+function search_material_barcode(store_id, obj){
     var code = $(obj).parent().prev().find(".search-barcode").val();
     $.ajax({
         url: "/materials/search_by_code",
         dataType:"script",
-        data:{code : code},
+        data:{code : code, store_id : store_id},
         success:function(data,status){}
     });
 }
@@ -1419,13 +1419,17 @@ function back_good_records_button(store_id){
 
 function back_good_search(store_id){
     var type = $("#back_good_supplier").val();
-    var type2 = $("#back_good_type_").val();
+    var type2 = $("#back_good_type").val();
     var name = $.trim($("#back_good_name").val());
+    var c = new Array();
+    $("input[name='good_id']").each(function(){
+        c.push($(this).val());
+    })
     $.ajax({
         url: "/stores/"+store_id+"/materials/back_good_search",
         type: "get",
         dataType: "script",
-        data: {supplier_id : type, good_type : type2, good_name : name}
+        data: {supplier_id : type, good_type : type2, good_name : name, checked : c}
     })
 }
 

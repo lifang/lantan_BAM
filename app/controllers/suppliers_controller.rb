@@ -6,6 +6,7 @@ class SuppliersController < ApplicationController
   before_filter :find_supplier, :only => [:edit, :update, :destroy]
 
   def index
+    @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @store.id])
     @suppliers = Supplier.paginate(:conditions => "status= #{Supplier::STATUS[:normal]} and store_id=#{params[:store_id]}",
                                    :per_page => Constant::PER_PAGE, :page => params[:page])
     respond_to do |f|

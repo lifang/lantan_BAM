@@ -3,8 +3,8 @@
     <label>物料类型：</label>
     <select id="back_good_records_search_type">
       <option value="-1">全部</option>
-      <% Material::TYPES_NAMES.each do |k, v| %>
-      <option value="<%= k %>"><%= v %></option>
+      <% @types.each do |t| %>
+      <option value="<%= t.id %>"><%= t.name %></option>
       <% end %>
     </select>
   </div>

@@ -46,10 +46,10 @@
   <tbody>
     <% @back_good_records.each do |b| %>
     <tr>
-      <td><%= b.material_id.nil? ? "----" : b.material.code %></td>
-      <td><%= b.material_id.nil? ? "----" : b.material.name %></td>
-      <td><%= b.material_id.nil? ? "----" : Material::TYPES_NAMES[b.material.types] %></td>
-      <td><%= b.supplier_id.nil? ? "----" : b.supplier.name %></td>
+      <td><%= b.mcode ||= "----" %></td>
+      <td><%= b.mname ||= "----" %></td>
+      <td><%= b.cname ||= "----" %></td>
+      <td><%= b.sname ||= "----" %></td>
       <td><%= b.material_num.to_i %></td>
       <td><%= b.created_at.nil? ? "----" : b.created_at.strftime("%Y-%m-%d %H:%M") %></td>
     </tr>

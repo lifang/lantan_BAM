@@ -38,6 +38,25 @@ class Material < ActiveRecord::Base
   DEFAULT_MATERIAL_LOW = 0    #默认库存预警为0
   scope :normal, where(:status => STATUS[:NORMAL])
 
+  def self.materials_list store_id,types=nil,name=nil,code=nil
+    sql = ["select m.*, c.name cname from materials m inner join categories c on m.category_id=c.id
+      where c.types=? and c.store_id=? and m.status=?", Category::TYPES[:material], store_id, Material::STATUS[:NORMAL]]
+    unless types.nil? || types==0 || types==-1
+      sql[0] += " and c.id=?"
+      sql << types
+    end
+    unless name.nil? || name.strip.empty?
+      sql[0] += " and m.name like ?"
+      sql << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
+    end
+    unless code.nil? || code.strip.empty?
+      sql[0] += " and m.code=?"
+      sql << code.strip
+    end
+    records = Material.find_by_sql(sql)
+    return records
+  end
+
   def self.unsalable_list store_id,sql=[nil,nil,nil,nil]
     start_date = sql[0]
     sql[0] = sql[0].blank? ? "'1 = 1'" : "created_at >='#{sql[0]} 00:00:00'"
