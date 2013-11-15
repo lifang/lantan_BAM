@@ -1044,6 +1044,7 @@ a.compile_btn { width: 100px;}
 
 .merchant, .staffDetails { font-size: 14px; padding: 10px; border-bottom: 1px #CCCCCC dashed;}
 .merchantNumber {height: 32px; line-height: 32px; font-size: 14px; color:#930205;}
+.merchantNumber .a_btn { background: #026C93; color: #FFF; margin: 0 5px; padding: 0 5px;}
 .merchant li, .staffDetails li {height: 32px; line-height: 32px; display: inline-block; margin-right: 30px;}
 
 

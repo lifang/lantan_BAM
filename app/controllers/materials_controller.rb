@@ -30,8 +30,17 @@ class MaterialsController < ApplicationController
     @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
       :conditions => "s.store_id=#{@current_store.id} and s.status=#{Staff::STATUS[:normal]}")
     @status = params[:status] if params[:status]
-    @head_order_records = MaterialOrder.head_order_records(params[:page], Constant::PER_PAGE, @current_store.id, @status)
-    @supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, @current_store.id
+    head_order_records = MaterialOrder.material_order_list(@current_store.id,nil,nil,nil,nil,0)
+    @head_order_records = head_order_records[0].paginate(:per_page => 10, :page => params[:page])
+    @head_total_money = head_order_records[1]
+    @head_pay_money = head_order_records[2]
+    @head_total_count = head_order_records[3]
+    #@supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, @current_store.id
+    supplier_order_records = MaterialOrder.material_order_list(@current_store.id,nil,nil,nil,nil,nil)
+    @supplier_order_records = supplier_order_records[0].paginate(:per_page => 10, :page => params[:page])
+    @supp_total_money = supplier_order_records[1]
+    @supp_pay_money = supplier_order_records[2]
+    @supp_total_count = supplier_order_records[3]
     @material_order_urgent = MaterialOrder.where(:id => @material_pay_notices.map(&:target_id))
     @mat_in = params[:mat_in] if params[:mat_in]
     @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
@@ -133,13 +142,16 @@ class MaterialsController < ApplicationController
 
   #向总部订货分页
   def page_head_orders
-    @head_order_records =  []
-    if params[:from] || params[:to]
-      @head_order_records =  MaterialOrder.search_orders params[:store_id], params[:from],params[:to],params[:status].to_i,
-        0,params[:page],Constant::PER_PAGE,params[:m_status].to_i
-    else
-      @head_order_records = MaterialOrder.head_order_records params[:page], Constant::PER_PAGE, params[:store_id]
-    end
+    store_id = params[:store_id].to_i
+    m_status = params[:m_status].to_i
+    from = params[:from]
+    to = params[:to]
+    status = params[:status].to_i
+    records = MaterialOrder.material_order_list(store_id, status,m_status,from,to,0)
+    @head_order_records = records[0].paginate(:per_page => 10, :page => params[:page])
+    @head_total_money = records[1]
+    @head_pay_money = records[2]
+    @head_total_count = records[3]
     respond_with(@head_order_records) do |f|
       f.html
       f.js
@@ -148,14 +160,17 @@ class MaterialsController < ApplicationController
 
   #向供应商订货分页
   def page_supplier_orders
-    @supplier_order_records = []
-    if params[:from] || params[:to]
-      @supplier_order_records = MaterialOrder.search_orders params[:store_id], params[:from],params[:to],params[:status].to_i,
-        1,params[:page],Constant::PER_PAGE,params[:m_status].to_i
-    else
-      @supplier_order_records =  MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, params[:store_id]
-    end
-
+    store_id = params[:store_id].to_i
+    m_status = params[:m_status].to_i
+    from = params[:from]
+    to = params[:to]
+    status = params[:status].to_i
+    supp = params[:supp].to_i==0 ? nil : params[:supp].to_i
+    records = MaterialOrder.material_order_list(store_id, status,m_status,from,to,supp)
+    @supplier_order_records = records[0].paginate(:per_page => 10, :page => params[:page])
+    @supp_total_money = records[1]
+    @supp_pay_money = records[2]
+    @supp_total_count = records[3]
     respond_with(@supplier_order_records) do |f|
       f.html
       f.js
@@ -487,9 +502,16 @@ class MaterialsController < ApplicationController
 
   #查询向总部订货的订单
   def search_head_orders
-    supplier_id = params[:type] && params[:type].to_i == 1 ? 1 : 0
-    @head_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,
-      supplier_id,params[:page],Constant::PER_PAGE,params[:m_status].to_i
+    store_id = params[:store_id].to_i
+    m_status = params[:m_status].to_i
+    from = params[:from]
+    to = params[:to]
+    status = params[:status].to_i
+    records = MaterialOrder.material_order_list(store_id, status,m_status,from,to,0)
+    @head_order_records = records[0].paginate(:per_page => 10, :page => params[:page])
+    @head_total_money = records[1]
+    @head_pay_money = records[2]
+    @head_total_count = records[3]
     respond_with(@head_order_records) do |f|
       f.html
       f.js
@@ -498,9 +520,20 @@ class MaterialsController < ApplicationController
 
   #查询向供应商订货的订单
   def search_supplier_orders
-    supplier_id = params[:type] && params[:type].to_i == 1 ? 1 : 0
-    @supplier_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,
-      supplier_id,params[:page],Constant::PER_PAGE,params[:m_status].to_i
+    #    supplier_id = params[:type] && params[:type].to_i == 1 ? 1 : 0
+    #    @supplier_order_records = MaterialOrder.search_orders params[:store_id],params[:from],params[:to],params[:status].to_i,
+    #      supplier_id,params[:page],Constant::PER_PAGE,params[:m_status].to_i
+    store_id = params[:store_id].to_i
+    m_status = params[:m_status].to_i
+    from = params[:from]
+    to = params[:to]
+    status = params[:status].to_i
+    supp = params[:supp].to_i==0 ? nil : params[:supp].to_i
+    records = MaterialOrder.material_order_list(store_id, status,m_status,from,to,supp)
+    @supplier_order_records = records[0].paginate(:per_page => 10, :page => params[:page])
+    @supp_total_money = records[1]
+    @supp_pay_money = records[2]
+    @supp_total_count = records[3]
     respond_with(@supplier_order_records) do |f|
       f.html
       f.js
@@ -967,7 +1000,7 @@ class MaterialsController < ApplicationController
 
   #库存报损
   def mat_loss
-     @current_store = get_store
+    @current_store = get_store
     @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
     @staffs = Staff.all(:select => "s.id,s.name",:from => "staffs s",
       :conditions => "s.store_id=#{params[:store_id].to_i} and s.status=#{Staff::STATUS[:normal]}")   
