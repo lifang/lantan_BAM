@@ -7,7 +7,7 @@
           <label><span class="red">*</span>名称：</label><input type="text" name="scard_name" id="scard_name"/>
         </div>
         <div class="item">
-          <label>使用范围：</label>
+          <label>适用门店：</label>
           <select name="scard_userange">
             <% SvCard::S_USE_RANGE.each do |k, v| %>
               <option value="<%= k %>"><%= v %></option>

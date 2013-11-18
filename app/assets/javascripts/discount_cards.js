@@ -1,3 +1,4 @@
+
 function new_discount_card(){       //新建打折卡按钮
     popup("#discount_card_div");
 }
@@ -10,8 +11,8 @@ function add_products_search(store_id, obj){    //新建打折卡 查询服务�
     var name = $(obj).parents("div .search").find("input").val();
     var arr = new Array();
     $("div[name='p_div']").each(function(){
-         var id = $(this).find("input[name='p_hidden']").val();
-         arr.push(id);
+        var id = $(this).find("input[name='p_hidden']").val();
+        arr.push(id);
     })
     $.ajax({
         type: "get",
@@ -84,16 +85,29 @@ function create_dcard_valid(obj){     //新建打折卡验证
     var img = $.trim($("#dcard_img").val());
     var desc = $.trim($("#dcard_description").val());
     var len = $("input[name='dcard_products[]']").length;
+    var img_format =["png","gif","jpg","bmp"];
+    var img_type = img.substring(img.lastIndexOf(".")).toLowerCase();
+    var pattern = new RegExp("[`~@#$^&*()=:;,\\[\\].<>?~！@#￥……&*（）——|{}。，、？-]");
+    var img_name = img.substring(img.lastIndexOf("\\")).toLowerCase();
+    var g_name = img_name.substring(1,img_name.length);
+    Array.prototype.indexOf=function(el, index){
+        var n = this.length>>>0, i = ~~index;
+        if(i < 0) i += n;
+        for(; i < n; i++) if(i in this && this[i] === el) return i;
+        return -1;
+    }
     if(name==""){
         tishi_alert("请输入打折卡名称!");
     }else if(price=="" || isNaN(price) || parseInt(price)<=0){
         tishi_alert("请输入正确的打折卡金额!");
     }else if(len<=0){
         tishi_alert("至少选择一个项目!");
-    }else if(img==""){
-        tishi_alert("请添加打折卡图片!")
+    }else if((img!="" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
+        tishi_alert("请选择正确的图片格式,格式为:"+img_format);
+    }else if((img!="" || img.length!=0) && pattern.test(g_name.split(".")[0])){
+        tishi_alert("图片名称包含非法字符!");
     }else if(desc==""){
-        tishi_alert("请输入具体内容!")
+        tishi_alert("请输入具体内容!");
     }else{
         $(obj).parents("form").submit();
     }
@@ -104,7 +118,9 @@ function edit_discount_card(cid, store_id){     //编辑打折卡按钮
         type: "get",
         url: "/stores/"+store_id+"/discount_cards/edit",
         dataType: "script",
-        data: { cid : cid}
+        data: {
+            cid : cid
+        }
     })
 }
 
@@ -113,7 +129,9 @@ function edit_dcard_add_products(cid, store_id){   //编辑打折卡添加按钮
         type: "get",
         url: "/stores/"+store_id+"/discount_cards/edit_dcard_add_products",
         dataType: "script",
-        data: {cid : cid}
+        data: {
+            cid : cid
+        }
     })
 }
 
@@ -122,8 +140,8 @@ function edit_add_products_search(store_id, obj){    //编辑打折卡 查询服
     var name = $(obj).parents("div .search").find("input").val();
     var arr = new Array();
     $("div[name='edit_p_div']").each(function(){
-         var id = $(this).find("input[name='edit_p_hidden']").val();
-         arr.push(id);
+        var id = $(this).find("input[name='edit_p_hidden']").val();
+        arr.push(id);
     })
     $.ajax({
         type: "get",
@@ -195,16 +213,73 @@ function edit_dcard_valid(obj){     //编辑打折卡验证
     var price = $.trim($("#edit_dcard_price").val());
     var desc = $.trim($("#edit_dcard_description").val());
     var len = $("input[name='edit_dcard_products[]']").length;
+    var img = $.trim($("#edit_dcard_img").val());
+    var img_format =["png","gif","jpg","bmp"];
+    var img_type = img.substring(img.lastIndexOf(".")).toLowerCase();
+    var pattern = new RegExp("[`~@#$^&*()=:;,\\[\\].<>?~！@#￥……&*（）——|{}。，、？-]");
+    var img_name = img.substring(img.lastIndexOf("\\")).toLowerCase();
+    var g_name = img_name.substring(1,img_name.length);
+    Array.prototype.indexOf=function(el, index){
+        var n = this.length>>>0, i = ~~index;
+        if(i < 0) i += n;
+        for(; i < n; i++) if(i in this && this[i] === el) return i;
+        return -1;
+    }
     if(name==""){
         tishi_alert("请输入打折卡名称!");
     }else if(price=="" || isNaN(price) || parseInt(price)<=0){
         tishi_alert("请输入正确的打折卡金额!");
     }else if(len<=0){
         tishi_alert("至少选择一个项目!");
+    }else if((img!= "" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
+        tishi_alert("请选择正确的图片格式,格式为:"+img_format);
+    }else if((img!= "" || img.length!=0) && pattern.test(g_name.split(".")[0])){
+        tishi_alert("图片名称包含非法字符!");
     }else if(desc==""){
         tishi_alert("请输入具体内容!")
     }else{
         $(obj).parents("form").submit();
+    }
+}
+
+function get_del_dcards(obj){
+    var arr = $("input[name='del_dcards']");
+    if($(obj).attr("checked")=="checked"){
+        arr.each(function(){
+            $(this).attr("checked", true);
+        })
+    }else{
+        arr.each(function(){
+            $(this).removeAttr("checked");
+        })
+    }
+}
+
+function del_all_dcards(store_id){
+    var arr = $("input[name='del_dcards']:checked");
+    if(arr.length==0){
+        tishi_alert("至少选中一个需要删除的打折卡!");
+    }else{
+        var flag = confirm("是否删除选中的打折卡?");
+        if(flag){
+            var ids = new Array();
+            arr.each(function(){
+                ids.push($(this).val());
+            });
+            $.ajax({
+                async: false,
+                type: "post",
+                url: "/stores/"+store_id+"/discount_cards/del_all_dcards",
+                dataType: "json",
+                data: {
+                    ids : ids
+                },
+                success: function(data){
+                    tishi_alert("删除成功!");
+                    window.location.href="/stores/"+store_id+"/discount_cards"
+                }
+            })
+        }
     }
 }
 

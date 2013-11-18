@@ -9,37 +9,76 @@
       </div>
       <div class="data_menu">
         <a href="JavaScript:void(0)" class="add_btn" onclick="new_discount_card()">新建打折卡</a>
+        <a href="JavaScript:void(0)" class="add_btn" onclick="del_all_dcards(<%=  @store.id %>)">删除打折卡</a>
       </div>
       <div class="clear"></div>
       <div class="data_body">
-        <div>       
-          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-            <thead>
-              <tr class="hbg">
-                <td>&nbsp;</td>
-                <td>名称</td>
-                <td>单价</td>
-                <td>内容</td>
-                <td>使用范围</td>
-                <td>操作</td>
-              </tr>
-            </thead>
-            <tbody>
-              <% @sv_cards.each do |sc| %>
-                <tr>
-                  <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
-                  <td><%= sc.name %></td>
-                  <td><%= format("%.2f", sc.price) if sc.price %></td>
-                  <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
-                  <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
-                  <td>
-                    <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>
-                    <%= link_to "删除", store_discount_card_path(@store, sc), :method => :delete, :confirm => "确定删除该优惠卡?" %>
-                  </td>
+        <div>
+          <div class="table_box_h">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+              <thead>
+                <tr class="hbg">
+                  <td><input type="checkbox" onclick="get_del_dcards(this)"/></td>
+                  <td>&nbsp;</td>
+                  <td>名称</td>
+                  <td>单价</td>
+                  <td>内容</td>
+                  <td>使用范围</td>
+                  <td>操作</td>
                 </tr>
+              </thead>
+              <tbody>
+                <% unless @sv_cards.blank? %>
+                  <% sc = @sv_cards[0] %>
+                  <tr>
+                    <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
+                    <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
+                    <td><%= sc.name %></td>
+                    <td><%= format("%.2f", sc.price) if sc.price %></td>
+                    <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
+                    <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
+                    <td>
+                      <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>
+                      <%= link_to "删除", store_discount_card_path(@store, sc), :method => :delete, :confirm => "确定删除该优惠卡?" %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          <div class="table_box">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+              <thead>
+                <tr class="hbg">
+                  <td><input type="checkbox" onclick="get_del_dcards(this)"/></td>
+                  <td>&nbsp;</td>
+                  <td>名称</td>
+                  <td>单价</td>
+                  <td>内容</td>
+                  <td>使用范围</td>
+                  <td>操作</td>
+                </tr>
+              </thead>
+              <tbody>
+              <% unless @sv_cards.blank? %>
+                <% @sv_cards.each do |sc| %>
+                  <tr>
+                    <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
+                    <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
+                    <td><%= sc.name %></td>
+                    <td><%= format("%.2f", sc.price) if sc.price %></td>
+                    <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
+                    <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
+                    <td>
+                      <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>
+                      <%= link_to "删除", store_discount_card_path(@store, sc), :method => :delete, :confirm => "确定删除该优惠卡?" %>
+                    </td>
+                  </tr>
+                <% end %>
               <% end %>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
           <% if !@sv_cards.blank? %>
             <%= will_paginate  @sv_cards, :class => "pageTurn", :previous_label => "上一页",
               :next_label=> "下一页" %>
