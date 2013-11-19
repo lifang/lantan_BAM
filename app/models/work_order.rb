@@ -7,43 +7,43 @@ class WorkOrder < ActiveRecord::Base
   STAT = {:WAIT => 0,:SERVICING => 1,:WAIT_PAY => 2,:COMPLETE => 3, :CANCELED => 4, :END => 5}
 
   def self.update_work_order(parms)
-#    begin
-      message,dir = "ok","#{Rails.root}/public/logs"
-      Dir.mkdir(dir)  unless File.directory?(dir)
-      file_path = dir+"/returnBack_#{Time.now.strftime("%Y%m%d")}.log"
-      if File.exists? file_path
-        file = File.open( file_path,"a")
-      else
-        file = File.new(file_path, "w")
-      end
-      file.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')}   #{parms}\r\n"
-      file.close
-      current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i
-      if store
-        station = Station.where(:code=>parms[:work]).where(:store_id=>store.id).first
-        if station && station.is_has_controller
-          equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{station.id}
+    #    begin
+    message,dir = "ok","#{Rails.root}/public/logs"
+    Dir.mkdir(dir)  unless File.directory?(dir)
+    file_path = dir+"/returnBack_#{Time.now.strftime("%Y%m%d")}.log"
+    if File.exists? file_path
+      file = File.open( file_path,"a")
+    else
+      file = File.new(file_path, "w")
+    end
+    file.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')}   #{parms}\r\n"
+    file.close
+    current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i
+    if store
+      station = Station.where(:code=>parms[:work]).where(:store_id=>store.id).first
+      if station && station.is_has_controller
+        equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{station.id}
                        and store_id=#{store.id}").first
-          if  (equipment_info.nil? || num != equipment_info.num )
-            work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
+        if  (equipment_info.nil? || num != equipment_info.num )
+          work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
                          current_day = #{current_day} and store_id = #{station.store_id}").first
-            if work_order
-              water = parms[:name12].to_f*10**4 + parms[:name2].to_f
-              gas = parms[:name13].to_f*10**4+parms[:name3].to_f
-              work_order.arrange_station(water,gas)
-              message = "ok"
-              if equipment_info.nil?
-                EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)
-              else
-                equipment_info.update_attribute(:num,num)
-              end
+          if work_order
+            water = parms[:name12].to_f*10**4 + parms[:name2].to_f
+            gas = parms[:name13].to_f*10**4+parms[:name3].to_f
+            work_order.arrange_station(water,gas)
+            message = "ok"
+            if equipment_info.nil?
+              EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)
+            else
+              equipment_info.update_attribute(:num,num)
             end
           end
         end
       end
-#    rescue
-#      message = "fail"
-#    end
+    end
+    #    rescue
+    #      message = "fail"
+    #    end
     return message
   end
 
@@ -62,7 +62,7 @@ class WorkOrder < ActiveRecord::Base
               staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
               staffs.each do |staff_id|
                 ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
-                  :situation => "订单号#{order.code}超时#{runtime - self.cost_time}分钟",
+                  :situation => "订单号#{order.code}超时#{sprintf('%.2f',runtime - self.cost_time)}分钟",
                   :status => ViolationReward::STATUS[:NOMAL])
               end
             end

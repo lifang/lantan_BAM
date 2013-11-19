@@ -8,7 +8,14 @@ LantanBAM::Application.routes.draw do
   end
 
   resources :stations do
-   
+    collection do
+      post "handle_order"
+    end
+  end
+  resources :work_records do
+    collection do
+      post "adjust_types"
+    end
   end
 
   # The priority is based upon order of creation:
@@ -95,9 +102,16 @@ LantanBAM::Application.routes.draw do
       collection do
         post "search"
       end
+      member do
+        post "load_work"
+      end
     end
     resources :work_records
-    resources :violation_rewards
+    resources :violation_rewards do
+      collection do
+        post "operate_voilate"
+      end
+    end
     resources :trains
     resources :month_scores do
       collection do

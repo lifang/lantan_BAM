@@ -34,15 +34,33 @@ $(document).ready(function(){
         headers:
         {
 
-            1: {sorter: false},
-            2: {sorter: false},
-            3: {sorter: false},
-            4: {sorter: false},
-            5: {sorter: false},
-            6: {sorter: false},
-            7: {sorter: false},
-            8: {sorter: false},
-            9: {sorter: false}
+            1: {
+                sorter: false
+            },
+            2: {
+                sorter: false
+            },
+            3: {
+                sorter: false
+            },
+            4: {
+                sorter: false
+            },
+            5: {
+                sorter: false
+            },
+            6: {
+                sorter: false
+            },
+            7: {
+                sorter: false
+            },
+            8: {
+                sorter: false
+            },
+            9: {
+                sorter: false
+            }
 
         }
     });
@@ -59,9 +77,15 @@ $(document).ready(function(){
         headers:
         {
 
-            1: {sorter: false},
-            2: {sorter: false},
-            3: {sorter: false}
+            1: {
+                sorter: false
+            },
+            2: {
+                sorter: false
+            },
+            3: {
+                sorter: false
+            }
 
         }
     });
@@ -78,10 +102,18 @@ $(document).ready(function(){
         headers:
         {
 
-            1: {sorter: false},
-            2: {sorter: false},
-            3: {sorter: false},
-            4: {sorter: false}
+            1: {
+                sorter: false
+            },
+            2: {
+                sorter: false
+            },
+            3: {
+                sorter: false
+            },
+            4: {
+                sorter: false
+            }
 
         }
     });
@@ -97,10 +129,18 @@ $(document).ready(function(){
     $("#salary_table").tablesorter({
         headers:
         {
-            1: {sorter: false},
-            2: {sorter: false},
-            3: {sorter: false},
-            4: {sorter: false}
+            1: {
+                sorter: false
+            },
+            2: {
+                sorter: false
+            },
+            3: {
+                sorter: false
+            },
+            4: {
+                sorter: false
+            }
         }
     });
     $("#salary_table").bind("sortEnd",function() {
@@ -116,11 +156,21 @@ $(document).ready(function(){
         headers:
         {
 
-            1: {sorter: false},
-            2: {sorter: false},
-            3: {sorter: false},
-            4: {sorter: false},
-            5: {sorter: false}
+            1: {
+                sorter: false
+            },
+            2: {
+                sorter: false
+            },
+            3: {
+                sorter: false
+            },
+            4: {
+                sorter: false
+            },
+            5: {
+                sorter: false
+            }
 
         }
     });
@@ -137,10 +187,18 @@ $(document).ready(function(){
         headers:
         {
 
-            1: {sorter: false},
-            2: {sorter: false},
-            3: {sorter: false},
-            4: {sorter: false}
+            1: {
+                sorter: false
+            },
+            2: {
+                sorter: false
+            },
+            3: {
+                sorter: false
+            },
+            4: {
+                sorter: false
+            }
 
         }
     });
@@ -157,10 +215,18 @@ $(document).ready(function(){
         headers:
         {
 
-            1: {sorter: false},
-            2: {sorter: false},
-            5: {sorter: false},
-            6: {sorter: false}
+            1: {
+                sorter: false
+            },
+            2: {
+                sorter: false
+            },
+            5: {
+                sorter: false
+            },
+            6: {
+                sorter: false
+            }
 
         }
     });
@@ -173,13 +239,13 @@ $(document).ready(function(){
             }
         })
     });
-//    $(".sort_u_s, .sort_d_s").click(function(){
-//        if($(this).attr("class") == "sort_u_s"){
-//            $(this).attr("class", "sort_d_s");
-//        }else{
-//            $(this).attr("class", "sort_u_s");
-//        }
-//    });
+    //    $(".sort_u_s, .sort_d_s").click(function(){
+    //        if($(this).attr("class") == "sort_u_s"){
+    //            $(this).attr("class", "sort_d_s");
+    //        }else{
+    //            $(this).attr("class", "sort_u_s");
+    //        }
+    //    });
 
     //提示信息居中
     //popup(".tab_alert");
@@ -234,170 +300,170 @@ $(document).ready(function(){
             $(this).parent().parent().find($("#staff_deduct_end")).attr("disabled", "disabled");
             //$(this).parent().parent().find($("#staff_deduct_end")).val("");
             $(this).parent().parent().find($("#staff_deduct_percent")).attr("disabled", "disabled");
-            //$(this).parent().parent().find($("#staff_deduct_percent")).val("");
+        //$(this).parent().parent().find($("#staff_deduct_percent")).val("");
         }
     })
     //创建员工信息验证, 编辑员工信息验证
     $("#new_staff_btn, #edit_staff_btn").live("click", function(){
-       if($.trim($(this).parents('form').find("#staff_name").val()) == ''){
-           tishi_alert("名称不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_working_stats").val() == 0 && $(this).parents('form').find("#staff_probation_days").val()==''){
-           tishi_alert("请输入实习时间!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_working_stats").val() == 0 && isNaN($(this).parents('form').find("#staff_probation_days").val())){
-           tishi_alert("请输入有效的实习期!");
-           return false;
-       }
-       if($.trim($(this).parents('form').find("#staff_phone").val()) == ''){
-           tishi_alert("联系方式不能为空!");
-           return false;
-       }
-       if($.trim($(this).parents('form').find("#staff_id_card").val()) == ''){
-           tishi_alert("身份证不能为空!");
-           return false;
-       }
-       if($.trim($(this).parents('form').find("#staff_address").val()) == ''){
-           tishi_alert("地址不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_working_stats").val() == 0 && $.trim($(this).parents('form').find("#staff_probation_salary").val()) == ''){
-           tishi_alert("实习期薪资标准不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_working_stats").val() == 0 && isNaN($(this).parents('form').find("#staff_probation_salary").val())){
-           tishi_alert("实习薪资必须为数字!");
-           return false;
-       }
-       if($.trim($(this).parents('form').find("#staff_base_salary").val()) == ''){
-           tishi_alert("正式薪资标准不能为空!");
-           return false;
-       }
-       if(isNaN($(this).parents('form').find("#staff_base_salary").val())){
-           tishi_alert("正式薪资标准必须为数字!");
-           return false;
-       }
-       if(parseFloat($(this).parents('form').find("#staff_base_salary").val())<0.0){
-           tishi_alert("正式薪资标准必须大于等于0!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
-           tishi_alert("提成起始额不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_at").val())){
-           tishi_alert("提成起始额必须为数字!");
-           return false;
-       }
-       if(parseFloat($(this).parents('form').find("#staff_deduct_at").val())<0.0){
-           tishi_alert("提成起始额必须大于等于0!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
-           tishi_alert("结束额度不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_end").val())){
-           tishi_alert("结束额度必须为数字!");
-           return false;
-       }
-       if(parseFloat($(this).parents('form').find("#staff_deduct_end").val())<0.0){
-           tishi_alert("结束额度必须大于等于0!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && (parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val()))){
-           tishi_alert("起始额必须不能大于结束额度!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_percent").val()) == ''){
-           tishi_alert("提成率不能为空!");
-           return false;
-       }
-       if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_percent").val())){
-           tishi_alert("提成率必须为数字!");
-           return false;
-       }
-       var staff_deduct_percent = $(this).parents('form').find("#staff_deduct_percent").val();
-       if(parseFloat(staff_deduct_percent) < 0.0 || parseFloat(staff_deduct_percent) > 100.0){
-           tishi_alert("提成率必须在0-100之间!");
-           return false;
-       }
-//       if($(this).attr("id") == "new_staff_btn"){
-//           if($(this).parents('form').find("#staff_photo").val() == ''){
-//               tishi_alert("照片不能为空!");
-//               return false;
-//           }else{
-//               var input_s = document.getElementById('staff_photo');
-//               var file_size = input_s.files[0].size;
-//               if(file_size > 500*1024){
-//                  tishi_alert("图片大小不能超过500k！");
-//                  return false;
-//               }
-//               var img_val = $(this).parents('form').find("#staff_photo").val();
-//               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
-//               var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
-//               var g_name_val = img_name_val.substring(1,img_name_val.length);
-//               if(pattern_str.test(g_name_val.split(".")[0])){
-//                  tishi_alert(g_name_val+"不能包含特殊字符!");
-//                  return false;
-//               }
-//
-//               var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
-//               if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
-//               }else{
-//                  tishi_alert("图片格式不对!");
-//                  return false;
-//               }
-//           }
-//       }
-       //if($(this).attr("id") == "edit_staff_btn"){
-           if($(this).parents('form').find("#staff_photo").val() != ''){
-               var input_e = document.getElementById('staff_photo');
-               var file_size_e = input_e.files[0].size;
-               if(file_size_e > 500*1024){
-                  tishi_alert("图片大小不能超过500k！");
-                  return false;
-               }
-               var edit_img_val = $(this).parents('form').find("#staff_photo").val();
-               var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
-               var img_name = edit_img_val.substring(edit_img_val.lastIndexOf("\\")).toLowerCase();
-               var g_name = img_name.substring(1,img_name.length);
-               if(pattern.test(g_name.split(".")[0])){
-                  tishi_alert(g_name+"不能包含特殊字符!");
-                  return false;
-               }
-               var edit_img_suff = edit_img_val.substring(edit_img_val.lastIndexOf('.') + 1).toLowerCase();
-               if(edit_img_suff == "gif" || edit_img_suff == "jpg" || edit_img_suff == "png" || edit_img_suff == "bmp"){
-               }else{
-                  tishi_alert("图片格式不对!");
-                  return false;
-               }
-           }
-       //}
-       $(this).parents('form').submit();
-       $(this).attr("disabled", "disabled");
+        if($.trim($(this).parents('form').find("#staff_name").val()) == ''){
+            tishi_alert("名称不能为空!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_working_stats").val() == 0 && $(this).parents('form').find("#staff_probation_days").val()==''){
+            tishi_alert("请输入实习时间!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_working_stats").val() == 0 && isNaN($(this).parents('form').find("#staff_probation_days").val())){
+            tishi_alert("请输入有效的实习期!");
+            return false;
+        }
+        if($.trim($(this).parents('form').find("#staff_phone").val()) == ''){
+            tishi_alert("联系方式不能为空!");
+            return false;
+        }
+        if($.trim($(this).parents('form').find("#staff_id_card").val()) == ''){
+            tishi_alert("身份证不能为空!");
+            return false;
+        }
+        if($.trim($(this).parents('form').find("#staff_address").val()) == ''){
+            tishi_alert("地址不能为空!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_working_stats").val() == 0 && $.trim($(this).parents('form').find("#staff_probation_salary").val()) == ''){
+            tishi_alert("实习期薪资标准不能为空!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_working_stats").val() == 0 && isNaN($(this).parents('form').find("#staff_probation_salary").val())){
+            tishi_alert("实习薪资必须为数字!");
+            return false;
+        }
+        if($.trim($(this).parents('form').find("#staff_base_salary").val()) == ''){
+            tishi_alert("正式薪资标准不能为空!");
+            return false;
+        }
+        if(isNaN($(this).parents('form').find("#staff_base_salary").val())){
+            tishi_alert("正式薪资标准必须为数字!");
+            return false;
+        }
+        if(parseFloat($(this).parents('form').find("#staff_base_salary").val())<0.0){
+            tishi_alert("正式薪资标准必须大于等于0!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
+            tishi_alert("提成起始额不能为空!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_at").val())){
+            tishi_alert("提成起始额必须为数字!");
+            return false;
+        }
+        if(parseFloat($(this).parents('form').find("#staff_deduct_at").val())<0.0){
+            tishi_alert("提成起始额必须大于等于0!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
+            tishi_alert("结束额度不能为空!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_end").val())){
+            tishi_alert("结束额度必须为数字!");
+            return false;
+        }
+        if(parseFloat($(this).parents('form').find("#staff_deduct_end").val())<0.0){
+            tishi_alert("结束额度必须大于等于0!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && (parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val()))){
+            tishi_alert("起始额必须不能大于结束额度!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_percent").val()) == ''){
+            tishi_alert("提成率不能为空!");
+            return false;
+        }
+        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_percent").val())){
+            tishi_alert("提成率必须为数字!");
+            return false;
+        }
+        var staff_deduct_percent = $(this).parents('form').find("#staff_deduct_percent").val();
+        if(parseFloat(staff_deduct_percent) < 0.0 || parseFloat(staff_deduct_percent) > 100.0){
+            tishi_alert("提成率必须在0-100之间!");
+            return false;
+        }
+        //       if($(this).attr("id") == "new_staff_btn"){
+        //           if($(this).parents('form').find("#staff_photo").val() == ''){
+        //               tishi_alert("照片不能为空!");
+        //               return false;
+        //           }else{
+        //               var input_s = document.getElementById('staff_photo');
+        //               var file_size = input_s.files[0].size;
+        //               if(file_size > 500*1024){
+        //                  tishi_alert("图片大小不能超过500k！");
+        //                  return false;
+        //               }
+        //               var img_val = $(this).parents('form').find("#staff_photo").val();
+        //               var pattern_str = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+        //               var img_name_val = img_val.substring(img_val.lastIndexOf("\\")).toLowerCase();
+        //               var g_name_val = img_name_val.substring(1,img_name_val.length);
+        //               if(pattern_str.test(g_name_val.split(".")[0])){
+        //                  tishi_alert(g_name_val+"不能包含特殊字符!");
+        //                  return false;
+        //               }
+        //
+        //               var img_suff = img_val.substring(img_val.lastIndexOf('.') + 1).toLowerCase();
+        //               if(img_suff == "gif" || img_suff == "jpg" || img_suff == "png" || img_suff == "bmp"){
+        //               }else{
+        //                  tishi_alert("图片格式不对!");
+        //                  return false;
+        //               }
+        //           }
+        //       }
+        //if($(this).attr("id") == "edit_staff_btn"){
+        if($(this).parents('form').find("#staff_photo").val() != ''){
+            var input_e = document.getElementById('staff_photo');
+            var file_size_e = input_e.files[0].size;
+            if(file_size_e > 500*1024){
+                tishi_alert("图片大小不能超过500k！");
+                return false;
+            }
+            var edit_img_val = $(this).parents('form').find("#staff_photo").val();
+            var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
+            var img_name = edit_img_val.substring(edit_img_val.lastIndexOf("\\")).toLowerCase();
+            var g_name = img_name.substring(1,img_name.length);
+            if(pattern.test(g_name.split(".")[0])){
+                tishi_alert(g_name+"不能包含特殊字符!");
+                return false;
+            }
+            var edit_img_suff = edit_img_val.substring(edit_img_val.lastIndexOf('.') + 1).toLowerCase();
+            if(edit_img_suff == "gif" || edit_img_suff == "jpg" || edit_img_suff == "png" || edit_img_suff == "bmp"){
+            }else{
+                tishi_alert("图片格式不对!");
+                return false;
+            }
+        }
+        //}
+        $(this).parents('form').submit();
+        $(this).attr("disabled", "disabled");
     });
 
-//    $("#staff_phone").live("blur", function(){
-//       var store_id = $("#store_id").val();
-//       var phone = $(this).val();
-//       $.ajax({
-//            type : 'get',
-//            url : "/stores/"+ store_id+"/staffs/validate_phone",
-//            data : {
-//                phone : phone
-//            },
-//            success: function(data){
-//                if(data == "error"){
-//                   tishi_alert("联系方式已经存在!");
-//                   return false;
-//                }
-//            }
-//        });
-//       return false;
-//    });
+    //    $("#staff_phone").live("blur", function(){
+    //       var store_id = $("#store_id").val();
+    //       var phone = $(this).val();
+    //       $.ajax({
+    //            type : 'get',
+    //            url : "/stores/"+ store_id+"/staffs/validate_phone",
+    //            data : {
+    //                phone : phone
+    //            },
+    //            success: function(data){
+    //                if(data == "error"){
+    //                   tishi_alert("联系方式已经存在!");
+    //                   return false;
+    //                }
+    //            }
+    //        });
+    //       return false;
+    //    });
 
     //新建奖励信息验证
     $("#new_reward_btn").click(function(){
@@ -806,3 +872,55 @@ $(document).ready(function(){
     });
 
 });
+
+function adjust_types(id){
+    var types = $("#change_"+id+" option:selected").val();
+    var current_types = $("#change_"+id).attr("s_id");
+    if (current_types==types){
+        tishi_alert("员工的状态没有改变！");
+        return false;
+    }else{
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'json',
+            url : "/work_records/adjust_types",
+            data : {
+                id : id,
+                types : types
+            },
+            success : function(data){
+                tishi_alert(data.msg);
+            }
+        });
+    }
+}
+
+function toggle_voilation(obj){
+    if($(obj).text()=="点击查看"){
+        $(obj).text(" 隐藏");
+    }else{
+        $(obj).text("点击查看");
+    }
+    $(obj).next().toggle();
+}
+
+function operate_voilate(voi_id,store_id){
+    var types = $("#violate_"+voi_id+" option:selected").val();
+    $.ajax({
+        async:true,
+        type : 'post',
+        dataType : 'script',
+        url : "/stores/"+store_id +"/violation_rewards/operate_voilate",
+        data : {
+            id : voi_id,
+            types : types
+        }
+    });
+}
+
+function load_work(){
+    var depart_id = $("#staff_position option:selected").val();
+    $("#staff_department_id option").css("display","none").removeAttr("selected");
+    $("#staff_department_id #"+depart_id).css("display","");
+}

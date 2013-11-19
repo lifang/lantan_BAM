@@ -3,17 +3,19 @@ require "uri"
 class StaffsController < ApplicationController
   before_filter :sign?
   layout "staff"
-
   before_filter :get_store
   before_filter :search_work_record, :only => :show
 
   def index
     type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
     @staffs_names = @store.staffs.not_deleted.where(type_of_w_sql).select("id, name")
-    @staffs = @store.staffs.not_deleted.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
-    staff_scores = MonthScore.where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")} and store_id = ?", @store.id)
-    @staff_scores_hash = staff_scores.group_by{|ms| ms.staff_id}
+    @staffs = @store.staffs.not_deleted.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
+    @staff_scores_hash = MonthScore.select("sum(sys_score) sys_score,staff_id").where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")}
+   and store_id = ?", @store.id).group("staff_id").inject(Hash.new){|hash,month| hash[month.staff_id] = month;hash}
+    @violations = ViolationReward.joins(:staff).where(:types => false).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name")
     @staff =  Staff.new
+    @departs = Department.where(:store_id=>@store.id,:status=>Department::STATUS[:NORMAL]).inject(Hash.new){
+      |hash,depar| hash[depar.types].nil? ? hash[depar.types]={depar.id=>depar} : hash[depar.types][depar.id]=depar;hash}
     @violation_reward = ViolationReward.new
     @train = Train.new
     @latest_updated_at = Staff.maximum("updated_at").strftime("%Y-%m-%d") unless Staff.maximum("updated_at").blank?
@@ -54,21 +56,17 @@ class StaffsController < ApplicationController
 
   def show       
     @violations = @staff.violation_rewards.where("types = false").
-                  paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("violation_tab")
+      paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("violation_tab")
 
     @rewards = @staff.violation_rewards.where("types = true").
-                paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("reward_tab")
+      paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("reward_tab")
               
     @trains = Train.includes(:train_staff_relations).
-              where("train_staff_relations.staff_id = #{@staff.id}").
-              paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("train_tab")
-
+      where("train_staff_relations.staff_id = #{@staff.id}").
+      paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("train_tab")
     @month_scores = @staff.month_scores.order("current_month desc").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("month_score_tab")
-
     @salaries = @staff.salaries.where("status = false").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("salary_tab")
-
     current_month = Time.now().months_ago(1).strftime("%Y%m")
-
     @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
 
     respond_to do |format|
@@ -78,6 +76,8 @@ class StaffsController < ApplicationController
   end
 
   def edit
+    @departs = Department.where(:store_id=>@store.id,:status=>Department::STATUS[:NORMAL]).inject(Hash.new){
+      |hash,depar| hash[depar.types].nil? ? hash[depar.types]={depar.id=>depar} : hash[depar.types][depar.id]=depar;hash}
     @staff = Staff.find_by_id(params[:staff_id])
     respond_to do |format| 
       format.js
@@ -92,7 +92,7 @@ class StaffsController < ApplicationController
     @staff.attributes = params[:staff]
     notice = @staff.status_changed? ? "员工在职状态已经改变，请注意检查员工的工作状态" : ""
     if @staff && @staff.save
-    #if  @staff && @staff.update_attributes(params[:staff])
+      #if  @staff && @staff.update_attributes(params[:staff])
       flash[:notice] = "更新员工成功！"+notice
       @flash_notice = "success"
     else
@@ -110,14 +110,19 @@ class StaffsController < ApplicationController
     redirect_to store_staffs_path(@store)
   end
 
-#  def validate_phone
-#    staff = Staff.find_by_phone(params[:phone])
-#    if staff && staff.status != Staff::STATUS[:deleted]
-#      render :text => "error"
-#    else
-#      render :text => "success"
-#    end
-#  end
+  #  def validate_phone
+  #    staff = Staff.find_by_phone(params[:phone])
+  #    if staff && staff.status != Staff::STATUS[:deleted]
+  #      render :text => "error"
+  #    else
+  #      render :text => "success"
+  #    end
+  #  end
+  
+  #加载职务
+  #  def load_work
+  #    render :json=>Department.where(:store_id=>@store.id,:status=>Department::STATUS[:NORMAL],:types=>Department::TYPES[:POSITION])
+  #  end
 
   private
 
@@ -130,16 +135,12 @@ class StaffsController < ApplicationController
     @tab = params[:tab]
     if @tab.nil? || @tab.eql?("work_record_tab")
       @cal_style = params[:cal_style]
-
       start_at = (params[:start_at].nil? || params[:start_at].empty?) ? "1 = 1" : "current_day >= '#{params[:start_at]}'"
-
       end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "date_format(current_day, '%Y-%m-%d') <= '#{params[:end_at]}'"
-
       if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day")
         @work_records = @staff.work_records.where(start_at).where(end_at).order("current_day desc").
-                    paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+          paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
       end
-
       if @cal_style.eql?("week") || @cal_style.eql?("month")
         base_sql = Staff.search_work_record_sql
         @work_records = @staff.work_records.select(base_sql).
@@ -169,5 +170,7 @@ class StaffsController < ApplicationController
       end
     end
   end
+
+
   
 end

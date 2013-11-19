@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131111024518) do
+ActiveRecord::Schema.define(:version => 20131115062437) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -973,6 +973,9 @@ ActiveRecord::Schema.define(:version => 20131111024518) do
     t.boolean  "is_deduct"
     t.integer  "probation_days"
     t.string   "validate_code"
+    t.integer  "department_id"
+    t.float    "secure_fee"
+    t.float    "reward_fee"
   end
 
   add_index "staffs", ["level"], :name => "index_staffs_on_level"
@@ -1260,6 +1263,7 @@ ActiveRecord::Schema.define(:version => 20131111024518) do
     t.float    "score_num"
     t.float    "salary_num"
     t.datetime "process_at"
+    t.integer  "belong_types"
   end
 
   add_index "violation_rewards", ["created_at"], :name => "index_violation_rewards_on_created_at"
@@ -1335,6 +1339,7 @@ ActiveRecord::Schema.define(:version => 20131111024518) do
     t.datetime "updated_at"
     t.float    "gas_num"
     t.integer  "store_id"
+    t.integer  "attend_types",          :default => 0
   end
 
   add_index "work_records", ["created_at"], :name => "index_work_records_on_created_at"

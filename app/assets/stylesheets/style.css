@@ -477,7 +477,7 @@ a.compile_btn { width: 100px;}
 .item_textarea { margin: 10px 10px; float: left; overflow: hidden; width: 590px; position: relative;}
 .width_textarea { width: 460px;}
 
-.width_div { width: 460px; height:80px;border: 1px #CCCCCC solid; overflow: auto; line-height:24px; float: left; padding-top: 2px;}
+.width_div { width: 460px; height:145px;border: 1px #CCCCCC solid; overflow: auto; line-height:24px; float: left; padding-top: 2px;}
 .width_div span { margin: 0px 8px; float: left;}
 
 .item_radio { position: absolute; top: 5px; left: 30px;}
