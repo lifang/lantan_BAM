@@ -6,7 +6,7 @@ class DiscountCardsController < ApplicationController   #打折卡
 
   def index
     @types = Category.where(["store_id = ? and types in (?)", @store.id, [Category::TYPES[:good], Category::TYPES[:service]]])
-    @sv_cards = SvCard.where(["store_id = ? and status = ? and types = ? ", params[:store_id].to_i, SvCard::STATUS[:NORMAL],
+    @sv_cards = SvCard.where(["store_id = ? and status = ? and types = ? ",  @store.id, SvCard::STATUS[:NORMAL],
         SvCard::FAVOR[:DISCOUNT]]).order("created_at desc")
     .paginate(:page => params[:page] ||= 1, :per_page => SvCard::PER_PAGE)
   end
@@ -65,7 +65,7 @@ class DiscountCardsController < ApplicationController   #打折卡
     end
     unless name.nil? || name.empty?
       sql[0] += " and p.name like ?"
-      sql << "%#{name}%"
+      sql << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"     
     end
     @products = Product.find_by_sql(sql)
   end
@@ -150,10 +150,17 @@ class DiscountCardsController < ApplicationController   #打折卡
     end
     unless name.nil? || name.empty?
       sql[0] += " and p.name like ?"
-      sql << "%#{name}%"
+      sql << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     @products = Product.find_by_sql(sql)
   end
+
+  def del_all_dcards    #批量删除打折卡
+    a = params[:ids]
+    SvCard.where(:id=>a).update_all(:status => SvCard::STATUS[:DELETED])
+    render :json => 0
+  end
+
   private
   def get_store
     @store = Store.find_by_id(params[:store_id])

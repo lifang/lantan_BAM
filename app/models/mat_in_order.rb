@@ -4,12 +4,34 @@ class MatInOrder < ActiveRecord::Base
   belongs_to :material_order
   belongs_to :staff
 
-  def self.in_list page,per_page,store_id,sql = [nil,nil,nil]
-    MatInOrder.where(sql[0]).where(sql[1]).where(sql[2]).where("materials.status=#{Material::STATUS[:NORMAL]} and materials.store_id=#{store_id}")
-              .paginate(:select =>"materials.*,o.material_num,s.name staff_name,o.price out_price,o.created_at out_time, mo.code order_code",
-                        :from => "mat_in_orders o",
-                        :joins => "inner join materials on materials.id=o.material_id inner join staffs s on s.id=o.staff_id left join material_orders mo on mo.id=o.material_order_id",
-                        :order => "o.created_at desc",
-                        :page => page,:per_page => per_page)
+  def self.in_list store_id,types=nil,name=nil,code=nil
+    sql = ["select materials.*,o.material_num,s.name staff_name,o.price out_price,o.created_at out_time,mo.code order_code,c.name cname
+      from mat_in_orders o inner join materials on materials.id=o.material_id inner join categories c on materials.category_id=c.id
+      inner join staffs s on s.id=o.staff_id left join material_orders mo on mo.id=o.material_order_id where c.types=? and c.store_id=?
+      and materials.status=?", Category::TYPES[:material], store_id,
+      Material::STATUS[:NORMAL]]
+    unless types.nil? || types==0 || types==-1
+      sql[0] += " and c.id=?"
+      sql << types
+    end
+    unless name.nil? || name.strip.empty?
+      sql[0] += " and materials.name like ?"
+      sql << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
+    end
+    unless code.nil? || code.strip.empty?
+      sql[0] += " and materials.code=?"
+      sql << code
+    end
+    sql[0] += " order by o.created_at desc"
+    records = Material.find_by_sql(sql)
+    arr = []
+    arr << records
+    t_money = 0
+    records.each do |r|
+      t_money += r.out_price.to_f * r.material_num.to_i
+    end
+    arr << records.length
+    arr << t_money
+    return arr
   end
 end

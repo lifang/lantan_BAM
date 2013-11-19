@@ -9,3 +9,6 @@ $(".mask").hide();
 <% end %>
 $("#add_MaterialsLoss_btn").removeAttr("disabled");
 $("#page_materails_losses").html('<%= escape_javascript(render :partial => '/materials/materials_losses') %>');
+$("#page_loss_div #search_material_type option").first().attr("selected","selected");
+$("#page_loss_div #search_material_name").val("");
+$("#page_loss_div #search_material_code").val("");

@@ -8,7 +8,7 @@
           <input type="text" name="edit_scard_name" id="edit_scard_name" value="<%= @save_card.name %>"/>
         </div>
         <div class="item">
-          <label>使用范围：</label>
+          <label>适用门店：</label>
           <select name="edit_scard_userange">
             <% SvCard::S_USE_RANGE.each do |k, v| %>
               <option value="<%= k %>" <% if @save_card.use_range == k.to_i %>selected<% end %>><%= v %></option>

@@ -92,7 +92,7 @@ class SaveCardsController < ApplicationController   #储值卡
     else
       flash[:notice] = "编辑失败，已存在同名的"
     end
-     redirect_to request.referer
+    redirect_to request.referer
   end
 
   def destroy
@@ -104,6 +104,12 @@ class SaveCardsController < ApplicationController   #储值卡
       flash[:notice] = "删除失败!"
       redirect_to request.referer
     end
+  end
+
+  def del_all_scards    #批量删除储值卡
+    a = params[:ids]
+    SvCard.where(:id=>a).update_all(:status => SvCard::STATUS[:DELETED])
+    render :json => 0
   end
   private
   def get_store

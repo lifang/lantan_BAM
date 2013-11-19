@@ -23,7 +23,7 @@
                   <td <% if !material.is_ignore && material.storage.to_i<=material.material_low.to_i %>class="data_table_error"<% end %>>
 <%= material.name %></td>
                   <td><%= material.code %></td>
-                  <td><%= Material::TYPES_NAMES[material.types.to_i] %></td>
+                  <td><%= material.cname %></td>
                   <td><%= material.unit %></td>
                   <td class="su"><span class="storage" id="showmaterial<%= material.id %>span"><%= storage = material.storage %></span></td>
                   <td class="check_num"><%= text_field_tag "materials[#{material.id}][num]", material.check_num, :id => "check_num_#{material.id}", :style => 'width:50px' %></td>

@@ -6,8 +6,9 @@ class SuppliersController < ApplicationController
   before_filter :find_supplier, :only => [:edit, :update, :destroy]
 
   def index
+    @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @store.id])
     @suppliers = Supplier.paginate(:conditions => "status= #{Supplier::STATUS[:normal]} and store_id=#{params[:store_id]}",
-                                   :per_page => Constant::PER_PAGE, :page => params[:page])
+      :per_page => Constant::PER_PAGE, :page => params[:page])
     respond_to do |f|
       f.html
       f.js
@@ -34,7 +35,15 @@ class SuppliersController < ApplicationController
   end
 
   def update
-    if @supplier.update_attributes(params[:supplier])
+    name = params[:edit_supplier_name].strip
+    contact = params[:edit_supplier_contact].strip
+    phone = params[:edit_supplier_phone].strip
+    email = params[:edit_supplier_email].strip
+    addr = params[:edit_supplier_addr].strip
+    check_type = params[:edit_supplier_check_type].to_i
+    check_time = check_type==1 ? params[:edit_supplier_check_time].to_i : nil
+    if @supplier.update_attributes(:name => name, :contact => contact, :phone => phone, :email => email, :address => addr,
+        :check_type => check_type, :check_time => check_time)
       flash[:notice] = "供应商编辑成功"
       render :success
     else

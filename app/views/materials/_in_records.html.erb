@@ -55,6 +55,12 @@
 
     });
 </script>
+<div class="collect">
+  <ul>
+    <li>入库记录：<span><%= @in_arr[0] %></span>条</li>
+    <li>金额：<span><%= format("%.2f", @in_arr[1]) if @in_arr[1] %></span></li>
+  </ul>
+</div>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_in_tab">
   <thead>
   <tr class="hbg">
@@ -73,7 +79,7 @@
         <td><%= record.order_code %></td>
         <td><%= record.code %></td>
         <td><%= record.name %></td>
-        <td><%= Material::TYPES_NAMES[record.types.to_i] %></td>
+        <td><%= record.cname %></td>
         <td><%= record.material_num.to_i %></td>
         <td><%= record.staff_name %></td>
         <td><%= record.out_time.strftime("%Y-%m-%d %H:%M") %></td>

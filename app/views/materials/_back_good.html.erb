@@ -1,5 +1,5 @@
 <div class="popup_box">
-  <h1>退货<a href="javascript:void(0)" class="close">关闭</a></h1>
+  <h1>批量退货<a href="javascript:void(0)" class="close">关闭</a></h1>
   <div class="popup_body">
     <div class="popup_body_area">
       <div class="search">
@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="search">
-        <div><label>物料类型：</label><span><%= select("back_good_type","", Material::TYPES_NAMES.invert) %></span></div>
+        <div><label>物料类型：</label><span><%= select_tag "back_good_type", options_from_collection_for_select(@types, "id", "name") %></span></div>
         <div><label>物料名称：</label><%= text_field_tag "back_good_name" %></div>
         <div><%= button_to_function "查询", "back_good_search(#{@store_id})", :class => "search_btn" %></div>
       </div>

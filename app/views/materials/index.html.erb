@@ -43,13 +43,13 @@
     <div style="display: none;" id="page_ins">
       <%= render :partial => "in_records_panel" %>
     </div>
-    <div style="display: none;">
+    <div style="display: none;" id="head_orders_panel">
       <%= render :partial => "head_orders_panel" %>
     </div>
-    <div style="display: none;">
+    <div style="display: none;" id="supp_orders_panel">
       <%= render :partial => "supplier_orders_panel" %>
     </div>
-    <div style="display: none;">
+    <div style="display: none;" id="page_loss_div">
       <%= render :partial => "materials_losses_panel" %>
     </div>
     <div style="display: none;">
@@ -145,7 +145,9 @@
           </table>
           <div class="search"><%= hidden_field_tag "selected_items" %>
             <div><%= label_tag "staff","申请人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
-            <div><%= label_tag "out_types"," 出库类型：" %><%= select("mat_out", "types", MatOutOrder::TYPES.invert.to_a, { :prompt => "选择出库类型" }) %></div>
+            <div><%= label_tag "out_types"," 出库类型：" %>
+                <%= select("mat_out", "types", MatOutOrder::TYPES.invert.to_a, { :prompt => "选择出库类型" }) %>
+            </div>
           </div>
         </div>
         <div class="btn_box"><%= button_to_function "确定","submit_out_order('out_order_form')", :class => "confirm_btn" %>
