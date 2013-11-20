@@ -1,62 +1,71 @@
 <div class="main">
-    <div class="box">
-         <div class="data_box">
-              <div class="way_menu"><%= link_to "本月工资", store_current_month_salaries_path(@store) %> &gt; 工资详情</div>
-              <div class="data_body_title">
-                   <div class="data_body_p">
-                     <span>姓名：<%= @staff.name %></span>
-                     <span>岗位：<%= Staff::N_HEAD[@staff.position] %></span>
-                     <span>等级职称：<%= Staff::LEVELS[@staff.level] %></span>
-                     <span>职务：<%= Staff::N_COMPANY[@staff.type_of_w] %></span>
-                     <span>底薪：<%= @staff.base_salary.to_i %></span>
-                   </div>
-              </div>
-              <div class="search">
-                   <div>统计时间：<%= @statistics_date %></div>
-              </div>
-              <div class="clear"></div>
-              <div class="data_body">
-                   <div>
-                       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-                           <thead>
-                                <tr class="hbg">
-                                  <th>日期</th>
-                                  <th>提成政策</th>
-                                  <th>提成标准</th>
-                                  <th>满意度</th>
-                                  <th>平均满意度</th>
-                                  <th>提成金额</th>
-                                  <th>扣款金额</th>
-                                  <th>合计</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                              <% flag = true %>
-                              <% @salary_details.each do |salary_detail| %>
-                                <tr>
-                                  <td><%= salary_detail.current_day %></td>
-                                  <% if flag %>
-                                  <td rowspan="<%= @salary_details.length %>"><p class="td_p">满意度98%以上每低一个百分点，扣底薪200，100%满意度，奖励200元。</p></td>
-                                  <td rowspan="<%= @salary_details.length %>"><%= @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN] ? (@salary.nil? ? 0 : @salary.reward_num) : @staff.deduct_at %></td>
-                                  <% end %>
-                                  <td><%= salary_detail.satisfied_perc %></td>
-                                  <% if flag %>
-                                  <td rowspan="<%= @salary_details.length %>"><%= @salary.satisfied_perc unless @salary.nil? %></td>
-                                  <% end %>
-                                  <td><%= salary_detail.reward_num %></td>
-                                  <td><%= salary_detail.deduct_num %></td>
-                                  <% if flag %>
-                                  <td rowspan="<%= @salary_details.length %>"><%= @salary.total.to_i unless @salary.nil? %></td>
-                                  <% end %>
-                                </tr>
-                                <% flag = false %>
-                              <% end %>
-                            </tbody>
-                      </table>
-                   </div>
-
-              </div>
-         </div>
+  <div class="box">
+    <div class="data_box">
+      <div class="way_menu"><%= link_to "本月工资", store_current_month_salaries_path(@store) %> &gt; 工资详情</div>
+      <div class="staffDetails">
+        <ul>
+          <li><strong>姓名：</strong><%= @staff.name %></li>
+          <li><strong>部门：</strong><%= @departs[@staff.position] %></li>
+          <li><strong>职务：</strong><%= @departs[@staff.department_id] %></li>
+          <li><strong>等级：</strong><%= Staff::LEVELS[@staff.level] %></li>
+          <li><strong>基本工资：</strong><%= @staff.base_salary.to_i %>元</li>
+          <li><strong>提成方式：</strong>金额/提成率</li>
+          <li><strong>本月订单：</strong><%= @salary_details.length %></li>
+          <li><strong>考核：</strong>90分</li>
+          <li><strong>提成：</strong><%=@salary_details.map(&:total_deduct).compact.inject(0){|sum,t|sum+t}%>元</li>
+          <li><strong>扣款：</strong>300元</li>
+        </ul>
+      </div>
+      <div class="search">
+        <div>统计时间：<%= @statistics_date %></div>
+      </div>
+      <div class="clear"></div>
+      <div class="data_body">
+        <div>
+          <div class="table_box_h">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+              <thead>
+                <tr class="hbg">
+                  <th>日期</th>
+                  <th>订单号</th>
+                  <th>提成金额</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% unless @salary_details.blank? %>
+                  <% salary_detail = @salary_details[0] %>
+                  <tr>
+                    <td><%=salary_detail.created_at.nil? ? "" : salary_detail.created_at.strftime("%Y-%m-%d") %></td>
+                    <td><%=salary_detail.code %></td>
+                    <td><%=salary_detail.total_deduct.nil? ? 0 : salary_detail.total_deduct  %>元</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          <div class="table_box">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+              <thead>
+                <tr class="hbg">
+                  <th>日期</th>
+                  <th>订单号</th>
+                  <th>提成金额</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @salary_details.each do |salary_detail| %>
+                  <tr>
+                    <td><%=salary_detail.created_at.nil? ? "" : salary_detail.created_at.strftime("%Y-%m-%d") %></td>
+                    <td><%=salary_detail.code %></td>
+                    <td><%=salary_detail.total_deduct.nil? ? 0 : salary_detail.total_deduct %>元</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 <div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>

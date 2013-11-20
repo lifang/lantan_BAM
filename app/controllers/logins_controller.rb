@@ -122,9 +122,9 @@ class LoginsController < ApplicationController
 
   def manage_content
     if cookies[:phone_store].nil?
-      redirect_to "/logins/phone_login"
+      redirect_to "/phone_login"
     else
-      @store = Store.find(params[:store_id])
+      @store = Store.find(cookies[:phone_store])
       if @store && cookies[:phone_store].to_i == @store.id
         session[:time] = (session[:time].nil? || session[:time] != Time.now.strftime("%Y-%m-%d %H")) ?  Time.now.strftime("%Y-%m-%d %H") :  session[:time]
         @orders = Order.joins("inner join order_prod_relations op on op.order_id=orders.id inner join products p on p.id=op.product_id").
@@ -139,10 +139,9 @@ class LoginsController < ApplicationController
           total.each{|k,v| hash[k].nil? ? hash[k]=v : hash[k] += v};hash}
         render :layout=>nil
       else
-        redirect_to "/logins/phone_login"
+        redirect_to "/phone_login"
       end
     end
-   
   end
 
   def login_phone
@@ -150,15 +149,16 @@ class LoginsController < ApplicationController
     if  @staff.nil? or !@staff.has_password?(params[:login_pwd])
       flash.now[:notice] = "用户名或密码错误"
       @user_name = params[:login_name]
-      render 'phone_login', :layout => false
+      msg =0
     elsif @staff.store.nil? || @staff.store.status != Store::STATUS[:OPENED]
       flash.now[:notice] = "用户不存在"
       @user_name = params[:login_name]
-      render 'phone_login', :layout => false
+      msg = 0
     else
       cookies[:phone_id] ={:value =>@staff.id, :path => "/", :secure  => false}
       cookies[:phone_store]={:value =>@staff.store_id, :path => "/", :secure  => false}
-      redirect_to "/stores/#{@staff.store_id}/manage_content"
+      msg = 1
     end
+    render :json=> {:msg=>msg}
   end
 end

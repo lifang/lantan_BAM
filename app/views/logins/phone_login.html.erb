@@ -10,8 +10,8 @@
       <%= form_for :login,:url=>"/logins/login_phone",:method=>:post,:html=>{:id=>"phone_form"} do %>
         <div class="login_item">
           <ul>
-            <li><input name="login_name" id="login_name" type="text" value="<%= @user_name.nil? ? "" : @user_name %>" /></li>
-            <li><input name="login_pwd" id="login_pwd" type="password" /></li>
+            <li><input class="name" type="text" value="<%= @user_name.nil? ? "" : @user_name %>" /></li>
+            <li><input type="password" class="pressword" value="" /></li>
           </ul>
         </div>
       <% end %>

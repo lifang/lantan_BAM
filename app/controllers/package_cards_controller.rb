@@ -82,7 +82,7 @@ class PackageCardsController < ApplicationController
     @p_material = PcardMaterialRelation.find_by_package_card_id(@pcard.id)
     @material = Material.find(@p_material.material_id) if @p_material
     @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:service],Category::TYPES[:good]]).inject(Hash.new){
-      |hash,cate| hash[cate.id]=cate.name}
+      |hash,cate| hash[cate.id]=cate.name;hash}
   end
 
   #更新套餐卡

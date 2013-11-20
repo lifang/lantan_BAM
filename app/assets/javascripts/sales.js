@@ -240,8 +240,8 @@ function check_add(e){
             return false;
         }
     }else{
-        if(end_time == "" || end_time.length==0 || isNaN(parseFloat(end_time)||parseFloat(end_time)<0)){
-            tishi_alert("请输入套餐卡的有效时长，且为整数");
+        if(end_time == "" || end_time.length==0 || isNaN(parseFloat(end_time)||parseFloat(end_time)<=0||parseFloat(end_time)>10000)){
+            tishi_alert("请输入套餐卡的有效时长，1-10000");
             return false;
         }
     }

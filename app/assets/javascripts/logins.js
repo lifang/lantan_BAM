@@ -76,11 +76,28 @@ function removeDisable(){
 
 
 function check_phone(){
-    if ($.trim($("#login_name").val()) == null || $.trim($("#login_name").val()) == ""
-        || $.trim($("#login_pwd").val()) == null || $.trim($("#login_pwd").val()) == "") {
+    var name = $(".login_item input").first().val();
+    var pwd = $(".login_item input").last().val()
+    if ($.trim(name) == null || $.trim(name) == "" || $.trim(pwd) == null || $.trim(pwd) == "") {
         tishi_alert("请输入用户名和密码");
         return false;
     }else{
-        $("#phone_form").submit();
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType : 'json',
+            url : "/logins/login_phone",
+            data:{
+                login_name : $(".login_item input").first().val(),
+                login_pwd : $(".login_item input").last().val()
+            },
+            success :function(data){
+                if(data.msg==1){
+                    window.location.href="/manage_content"
+                }else{
+                    tishi_alert("用户名或密码错误")
+                }
+            }
+        });
     }
 }
