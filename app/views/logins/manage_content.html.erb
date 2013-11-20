@@ -11,15 +11,59 @@
       <h1><%= @store.name %></h1>
       <p><%= session[:time] %></p>
     </div>
-    <div class="main" style="width:160px">
-      if i can get your herrtddddd;
-  与美国妈妈做邻居——一个中国妈妈眼里真实的美式育儿经！
-　　原来美国父母原来也打孩子！美国父母原来也有家规，也很专制
-　　这与我们心目中的“民主、自由、尊重、信任”式的美式家教大相径庭
-　　美国人到底怎么教孩子？中式家教VS美式家教
-　　——告诉你一个不一样的美式家教！
-　　在本书中，我们采用小说的方式，用生动、有趣、幽默地语言讲述发生在北京一个社区里中美邻居间的教子故事，
-将发生在这两个家庭中的一系列让人啼笑皆非又令人深思的家庭故事生动地展现在读者面前，让大家的忍俊不禁的同时，产生强烈的共鸣感——教子之路，看似简单，实则难行啊！
-    </div>
-  </body>
-</html>
+    <div class="main">
+      <div class="box">
+        <div class="day">今天</div>
+         <%  time,mo_time,is_up = Time.now.strftime('%Y-%m-%d'),Time.now.yesterday.strftime('%Y-%m-%d'),true
+         if  @orders[time].nil?
+           to_total = {0=>0,1=>0}
+           up_rate = 0
+           total = 0
+         else
+           to_total = @orders[time]
+           total = @orders[time].values.inject(0){|num,v|num+v}
+           if @orders[mo_time].nil?
+            up_rate = 100
+          else
+            mo_total = @orders[mo_time].values.inject(0){|num,v|num+v}
+             if mo_total > total
+               is_up = false
+               up_rate = (mo_total-total)*100/mo_total
+             else
+               up_rate = (total-mo_total)*100/mo_total
+             end
+           end
+         end
+       %>
+         <dl>
+           <dd><span>产品销售金额：</span><%= to_total[Product::PROD_TYPES[:PRODUCT]] %>元</dd>
+           <dd><span>服务销售金额：</span><%= to_total[Product::PROD_TYPES[:SERVICE]] %>元</dd>
+         </dl>
+         <div class="all">
+          <div class="all_money">合计：<%= total %></div>
+           <div class="all_amount">比昨天<span <% if is_up %>class="up"<% else %>class="down"<%end%>>上升</span><%= "#{format("%.1f",up_rate)}%" %></div>
+         </div>
+      </div>
+       <div class="box">
+        <div class="week">本周</div>
+        <dl>
+           <dd><span>产品销售金额：</span><%= @total_week[Product::PROD_TYPES[:PRODUCT]] %>元</dd>
+           <dd><span>服务销售金额：</span><%= @total_week[Product::PROD_TYPES[:SERVICE]] %>元</dd>
+         </dl>
+         <div class="all">
+           <div class="all_money">合计：<%=@total_week.values.inject(0){|num,price| num+price}  %>元</div>
+         </div>
+       </div>
+      <div class="box">
+         <div class="month">本月</div>
+         <dl>
+           <dd><span>产品销售金额：</span><%= @total_month[Product::PROD_TYPES[:PRODUCT]] %>元</dd>
+           <dd><span>服务销售金额：</span><%= @total_month[Product::PROD_TYPES[:SERVICE]] %>元</dd>
+         </dl>
+         <div class="all">
+          <div class="all_money">合计：<%= @total_month.values.inject(0){|num,price| num+price}  %>元</div>
+         </div>
+       </div>
+     </div>
+   </body>
+ </html>

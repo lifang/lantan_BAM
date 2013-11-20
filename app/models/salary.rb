@@ -1,6 +1,6 @@
 #encoding: utf-8
 class Salary < ActiveRecord::Base
- belongs_to :staff
+  belongs_to :staff
 
   def self.generate_month_salary
     #说明:员工的工资 = 奖励违规金额 + 基本工资 + 提成金额
@@ -9,17 +9,13 @@ class Salary < ActiveRecord::Base
     Salary.destroy_all("current_month = #{start_time.strftime("%Y%m")}") #删除已经生成的月工资，避免重复生成
     end_time = Time.now.months_ago(1).at_end_of_month
     salary_infos = SalaryDetail.where("current_day >= #{start_time.strftime("%Y%m%d").to_i}").
-                where("current_day <= '#{end_time.strftime("%Y%m%d").to_i}'").group_by{|s|s.staff_id}
-
+      where("current_day <= '#{end_time.strftime("%Y%m%d").to_i}'").group_by{|s|s.staff_id}
     #奖励违规的金额
     staff_deduct_reward_hash = get_violation_reward_amount(salary_infos)
-
     #前台提成金额
     front_deduct_amount = get_front_deduct_amount(start_time, end_time)
-
     #技师提成金额
     technician_deduct_amount = get_technician_deduct_amount(start_time, end_time)
-
     #平均满意度
     avg_percent = get_avg_percent(start_time, end_time)
 
@@ -55,36 +51,21 @@ class Salary < ActiveRecord::Base
     staff_deduct_reward_hash = {} #奖励违规的金额
     salary_infos.each do |staff_id, salary_details|
       staff_deduct_reward_hash[staff_id] = {:deduct_num => salary_details.sum(&:deduct_num),
-                                            :reward_num => salary_details.sum(&:reward_num)}
+        :reward_num => salary_details.sum(&:reward_num)}
     end
     staff_deduct_reward_hash
   end
 
   def self.get_front_deduct_amount(start_time, end_time)
-    front_deduct_amount = {}
-    orders_info = Order.where("created_at >= '#{start_time}' and created_at <='#{end_time}'").
-      where("status = #{Order::STATUS[:BEEN_PAYMENT]} || status = #{Order::STATUS[:FINISHED]}").group_by{|o|o.front_staff_id}
-    orders_info.each do |staff_id, orders_array|
-      staff = Staff.find_by_id(staff_id)
-      if !staff.nil? && !staff.deduct_at.nil? && !staff.deduct_end.nil? && !staff.deduct_percent.nil?
-        order_total_price = orders_array.sum(&:price)
-        order_total_price = order_total_price.nil? ? 0 : order_total_price
-        difference_price = order_total_price - staff.deduct_at
-        duduct_num = difference_price < 0 ? 0 : (order_total_price > staff.deduct_end ? staff.deduct_end : difference_price)
-        deduct_amount = duduct_num * (staff.deduct_percent||=0) * 0.01
-        front_deduct_amount[staff_id] = deduct_amount
-      end
-    end
-    front_deduct_amount
+    return Order.select("sum(front_deduct) sum,front_staff_id").where("created_at >= '#{start_time}' and created_at <='#{end_time}'").
+      where("status = #{Order::STATUS[:BEEN_PAYMENT]} || status = #{Order::STATUS[:FINISHED]}").group("front_staff_id").inject(Hash.new){
+      |hash,order| hash[order.front_staff_id] = order.sum;hash}
   end
 
   def self.get_technician_deduct_amount(start_time, end_time)
-    orders = Order.find_by_sql("select s2.id id_2,s.id id_1,sum(op.pro_num*op.price*ifnull(p.deduct_percent,0)*0.01+ifnull(p.deduct_price,0)*op.pro_num) price from orders o left join staffs s on o.cons_staff_id_1 =  s.id
-       left join staffs s2 on o.cons_staff_id_2 = s2.id inner join order_prod_relations op on
-        op.order_id = o.id inner join products p on op.product_id = p.id
-        where p.is_service = #{Product::PROD_TYPES[:SERVICE]} and o.created_at >= '#{start_time}' and o.created_at <='#{end_time}'
-        and (o.status = #{Order::STATUS[:BEEN_PAYMENT]} or o.status = #{Order::STATUS[:FINISHED]}) group by s.id,s2.id")
-
+    orders = Order.find_by_sql("select s2.id id_2,s.id id_1,sum(o.technician_deduct) price from orders o left join staffs s on
+    o.cons_staff_id_1 =  s.id  left join staffs s2 on o.cons_staff_id_2 = s2.id where  o.created_at >= '#{start_time}'
+    and o.created_at <='#{end_time}' and (o.status = #{Order::STATUS[:BEEN_PAYMENT]} or o.status = #{Order::STATUS[:FINISHED]}) group by s.id,s2.id")
     technician_deduct_amount = {}
     orders.each do |order|
       if technician_deduct_amount.keys.include?(order.id_1)

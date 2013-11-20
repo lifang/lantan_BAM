@@ -28,6 +28,8 @@ LantanBAM::Application.routes.draw do
     end
   end
   match "logout" => "logins#logout"
+  match "phone_login" => "logins#phone_login"
+  match "manage_content" => "logins#manage_content"
   resources :stores do
     #resources :depots
     resources :market_manages do

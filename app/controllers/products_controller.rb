@@ -12,13 +12,14 @@ class ProductsController < ApplicationController
     is_service=#{Product::PROD_TYPES[:PRODUCT]}").select("count(*) num").first
   end  #产品列表页
 
-  #新建
+  #新建产品
   def add_prod
     @product=Product.new
-    @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL],:types =>Material::PRODUCT_TYPE).order(:types)
+    @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:good],Category::TYPES[:material]]).inject(Hash.new){
+      |hash,ca| hash[ca.types].nil? ? hash[ca.types] = {ca.id => ca.name}:hash[ca.types][ca.id]=ca.name;hash}
+    p @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL]).where("category_id is not null").order(:category_id)
     @max_len = check_str(@materials.map(&:name)[0])
     @materials.map(&:name).each{|name| @max_len = check_str(name) if check_str(name) >= @max_len}
-    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:good])
   end
   
   def create
@@ -36,7 +37,7 @@ class ProductsController < ApplicationController
     and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:SIN]}").select("count(*) num").first
     @materials = @services.blank? ? {} : Material.find_by_sql("select name,code,p.material_num num,product_id from materials m inner join
     prod_mat_relations p on  p.material_id=m.id  where p.product_id in (#{@services.map(&:id).join(',')})").inject(Hash.new){|hash,mat|
-      hash[mat.product_id].nil? ? hash[mat.product_id] = [mat] : hash[mat.product_id] << mat;hash} || {}
+      hash[mat.product_id].nil? ? hash[mat.product_id] = [mat] : hash[mat.product_id] << mat;hash}
   end   #服务列表
 
   def serv_create
@@ -146,7 +147,7 @@ class ProductsController < ApplicationController
 
   def show_serv
     @serv=Product.find(params[:id])
-    @mats=Material.find_by_sql("select name from materials m inner join prod_mat_relations p on
+    @mats= Material.find_by_sql("select name from materials m inner join prod_mat_relations p on
         p.material_id=m.id  where p.product_id=#{@serv.id}").map(&:name).join("  ")
     @img_urls = @serv.image_urls
   end

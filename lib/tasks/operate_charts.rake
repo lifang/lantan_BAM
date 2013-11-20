@@ -36,12 +36,13 @@ task(:change_types => :environment) do
     #---记得哦
     cates = Category.where(:store_id =>store.id ).inject(Hash.new){|hash,ca|
       hash[ca.types].nil? ? hash[ca.types]={ca.name=>ca.id} :  hash[ca.types][ca.name]=ca.id;hash }
-    prods = Product.where(:status=>Product::IS_VALIDATE[:YES]).inject(Hash.new){|hash,prod|
+    prods = Product.where(:status=>Product::IS_VALIDATE[:YES],:store_id=>store.id).inject(Hash.new){|hash,prod|
       prod_types = prod.is_service ? "service" : "prod";
       hash[prod_types].nil? ? hash[prod_types]=[prod] : hash[prod_types] << prod;hash}
-    prods["prod"].each {|pro| pro.update_attributes(:category_id=>cates[Category::TYPES[:good]][Product::PRODUCT_TYPES[pro.types]])} if cates[Category::TYPES[:good]]
-    prods["service"].each {|pro| pro.update_attributes(:category_id=>cates[Category::TYPES[:service]][Product::PRODUCT_TYPES[pro.types]],:single_types=>Product::SINGLE_TYPE[:SIN])} if cates[Category::TYPES[:service]]
-    Material.where(:status=>Material::STATUS[:NORMAL]).each {|mat| mat.update_attributes(:category_id=>cates[Category::TYPES[:material]][Material::TYPES_NAMES[mat.types]])} if cates[Category::TYPES[:material]]
+    prods["prod"].each {|pro| pro.update_attributes(:category_id=>cates[Category::TYPES[:good]][Product::PRODUCT_TYPES[pro.types]])} if cates[Category::TYPES[:good]] && prods["prod"]
+    prods["service"].each {|pro| pro.update_attributes(:category_id=>cates[Category::TYPES[:service]][Product::PRODUCT_TYPES[pro.types]],:single_types=>Product::SINGLE_TYPE[:SIN])} if cates[Category::TYPES[:service]] && prods["service"]
+    materials = Material.where(:status=>Material::STATUS[:NORMAL],:store_id=>store.id)
+    materials.each {|mat| mat.update_attributes(:category_id=>cates[Category::TYPES[:material]][Material::TYPES_NAMES[mat.types]])} if cates[Category::TYPES[:material]] && materials
   end
 end
 

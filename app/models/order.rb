@@ -840,9 +840,9 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
 
           #下单排工位
           hash = Station.create_work_order(new_station_id, store_id,order, hash, arrange_time[2],cost_time)
-         if order.update_attributes hash
-           status = 1
-         end
+          if order.update_attributes hash
+            status = 1
+          end
  
         else
           hash[:station_id] = ""
@@ -967,7 +967,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
             hash[:status] = STATUS[:FINISHED]
             hash[:is_free] = true
             hash[:price] = 0
-          end          
+          end
           #如果有套餐卡，则更新状态
           c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
           c_pcard_relations.each do |cpr|
@@ -994,7 +994,6 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
             #c_svc_relation.update_attribute(:left_price,sv_use_record.left_price) if sv_use_record
             svc_return_record = SvcReturnRecord.find_all_by_store_id(store_id,:order => "created_at desc", :limit => 1)
             if svc_return_record.size > 0
-
               total = svc_return_record[0].total_price - order.price
               SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:OUT],
                 :content => content, :target_id => order.id, :total_price => total)
@@ -1002,11 +1001,10 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
               SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:OUT],
                 :content => content, :target_id => order.id, :total_price => -order.price)
             end
-            order.update_attributes hash
+            
             OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
             status = 1
           else
-            order.update_attributes hash
             OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
             status = 1
           end
@@ -1022,13 +1020,21 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
             c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
           end
           #生成出库记录
-          order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id, m.price m_price FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
-p.id = opr.product_id inner join prod_mat_relations pmr on pmr.product_id = p.id inner join materials m
-on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and o.status in (?) and o.id = ?", [STATUS[:BEEN_PAYMENT], STATUS[:FINISHED]], order.id])
+          order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id,
+          m.price m_price FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
+          p.id = opr.product_id inner join prod_mat_relations pmr on pmr.product_id = p.id inner join materials m
+           on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and o.status in (?) and o.id = ?", [STATUS[:BEEN_PAYMENT], STATUS[:FINISHED]], order.id])
           order_mat_infos.each do |omi|
             MatOutOrder.create({:material_id => omi.m_id, :staff_id => omi.front_staff_id, :material_num => omi.material_num,
                 :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => store_id})
           end
+          #更新订单提成
+          hash[:front_deduct],hash[:technician_deduct] = 0,0
+          hash[:front_deduct] += PackageCard.select("sum(deduct_price+deduct_percent) sum").where(:id=>c_pcard_relations.map(&:package_card_id)).sum unless c_pcard_relations.blank?
+          deduct_order = Order.joins(:order_prod_relations=>:product).select("sum((deduct_price+deduct_percent)*pro_num) deduct_sum,sum((technician_price+technician_percent)*pro_num) technician_sum").where("orders.id=#{order.id}")
+          hash[:front_deduct] += deduct_order.deduct_sum
+          hash[:technician_deduct] += deduct_order.technician_sum/2.0
+          order.update_attributes hash
         rescue
           status = 2
         end

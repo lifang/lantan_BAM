@@ -1,8 +1,8 @@
 <div class="item">
   <label>相关物料：</label><select  id="prod_material" name="prod_material" onchange="modify_value()">
     <% @materials.each do |material| %>
-      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{permission?(:materials, :show_sale) ? material.price : 0}||#{material.types}||#{material.sale_price}" %>" ><%=
-        "#{material.name}#{(0..(@max_len-check_str(material.name)+3)).inject(String.new){|str,n|str +="-"}}#{Material::TYPES_NAMES[material.types]}"%></option>
+      <option value="<%= material.id %>" <%  if (@material.nil? ? 0 : @material.material_id) == material.id%> selected<%end%> o_value="<%= "#{material.code}||#{material.storage}||#{permission?(:materials, :show_sale) ? material.price : 0}||#{@cates[Category::TYPES[:material]][material.category_id]}||#{material.sale_price}" %>" ><%=
+        "#{material.name}#{(0..(@max_len-check_str(material.name)+3)).inject(String.new){|str,n|str +="-"}}#{@cates[Category::TYPES[:material]][material.category_id]}"%></option>
     <% end unless @materials.blank?%>
   </select>
 </div>
@@ -28,8 +28,8 @@
 
 <div class="item">
   <label>类别：</label><select  id="prod_types" name="prod_types">
-    <% @cates.each do |cate| %>
-      <option value="<%= cate.id %>" <%if @product.category_id==cate.id%> selected<%end%> ><%= cate.name %></option>
+    <% @cates[Category::TYPES[:good]].each do |k,v| %>
+      <option value="<%= k %>" <%if @product.category_id==k%> selected<%end%> ><%= v %></option>
     <% end %>
   </select>
 </div>

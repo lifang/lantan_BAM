@@ -1,57 +1,57 @@
 * { padding: 0; margin: 0;}
 body {
-	background: #9db79a;
-	/*background:-webkit-gradient(linear, 0 0, 0 100%, from(#638382), to(#9db79a));
+    background: #9db79a;
+    /*background:-webkit-gradient(linear, 0 0, 0 100%, from(#638382), to(#9db79a));
 	background:-moz-linear-gradient(top, #638382,#9db79a);
 	-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#638382,endColorstr=#9db79a,grandientType=1);
 	*/
-	font-family:"微软雅黑", "宋体", Arial;
-	font-size: 14px;
+    font-family:"微软雅黑", "宋体", Arial;
+    font-size: 14px;
 }
 li { list-style: none;}
 .white_bg { background: #FFF;}
 .login {
-	width: 800px;
-	height: 600px;
-	padding-top: 30px;
-	background: #030;
-	margin: 200px auto;
-	overflow: hidden;
-	background: #FFF;
-	box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
-	border-radius: 10px;
+    width: 800px;
+    height: 600px;
+    padding-top: 30px;
+    background: #030;
+    margin: 200px auto;
+    overflow: hidden;
+    background: #FFF;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+    border-radius: 10px;
 }
 .login h1 { text-align: center; line-height: 40px; margin-top: 20px; color: #A30104; font-size: 46px;}
 .login_item { width: 600px; margin: 70px auto; border-radius: 10px;}
 .login_item li { margin: 40px 0;}
 .login_item input {
     width: 90%;
-	height: 80px;
-	line-height: 46px;
-	background: none;
-	border: none;
-	padding-left: 10%;
-	font-size: 24px;
+    height: 80px;
+    line-height: 46px;
+    background: none;
+    border: none;
+    padding-left: 10%;
+    font-size: 24px;
 }
 .login_item input.name {background: url(/assets/p_login.png) no-repeat 10px 5px #e9e7e7;}
 .login_item input.pressword {background: url(/assets/p_login.png) no-repeat 10px -77px #e9e7e7;}
 .login_btn { width: 600px; margin: 80px auto;}
 .login_btn button {
     width: 100%;
-	height: 80px;
-	border: 1px #730002 solid;
-	background: #a30104;
-	/*
+    height: 80px;
+    border: 1px #730002 solid;
+    background: #a30104;
+    /*
 	background:-webkit-gradient(linear, 0 0, 0 100%, from(#b60004), to(#a30104));
 	background:-moz-linear-gradient(top, #b60004,#a30104);
 	-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#b60004,endColorstr=#a30104,grandientType=1);
 	*/
-	font-size: 42px;
-	color: #FFF;
-	line-height: 80px;
-	cursor: pointer;
-	border-radius: 5px;
-	font-family:"微软雅黑", "宋体", Arial;
+    font-size: 42px;
+    color: #FFF;
+    line-height: 80px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family:"微软雅黑", "宋体", Arial;
 }
 
 .head { background: #a30104; color: #FFF; padding: 10px;}
@@ -60,9 +60,9 @@ li { list-style: none;}
 .main { background: #FFF;}
 .box { border-bottom: 1px #CCCCCC solid; padding: 5px 10px; font-size: 24px; }
 .box .day, .box .week, .box .month {
-	color: #FFF;
-	line-height: 36px;
-	text-align: center;
+    color: #FFF;
+    line-height: 36px;
+    text-align: center;
 }
 .box .day { background: #090; width: 150px;}
 .box .week { background: #06F; width: 200px;}
@@ -77,20 +77,21 @@ li { list-style: none;}
 .all .all_amount { float: left;}
 
 .all .up, .all .down {
-	width: 14px;
-	height: 20px;
-	display: inline-block;
-	overflow:hidden;
-	text-indent: -999px;
-	margin: 0 5px;
+    width: 14px;
+    height: 20px;
+    display: inline-block;
+    overflow:hidden;
+    text-indent: -999px;
+    margin: 0 5px;
 }
-
 .all .up {
     background: url(/assets/phone.png) no-repeat 0px 0px;
 }
 .all .down {
     background: url(/assets/phone.png) no-repeat 0px -20px;
 }
+
+
 /*tab提示*/
 .tab_popup.tab_alert { width: 500px;}
 .alert_h { width: 400px; margin: 20px auto; line-height: 24px; font-size: 16px; color:#930205; text-align: center;}

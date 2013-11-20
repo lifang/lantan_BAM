@@ -30,8 +30,9 @@
             <thead>
               <tr class="hbg">
                 <th><span class="sort_u_s" onclick="sort_change(this)">姓名</span></th>
+                <th>部门</th>
                 <th>职务</th>
-                <th>底薪</th>
+                <th>基本工资</th>
                 <th><span class="sort_u" onclick="sort_change(this)">奖励金额</span></th>
                 <th><span class="sort_d" onclick="sort_change(this)">扣款金额</span></th>
                 <th>总额</th>
@@ -42,19 +43,20 @@
               <% @staffs.each do |staff| %>
                 <tr>
                   <td><%= staff.name %></td>
-                  <td><%= Staff::N_COMPANY[staff.type_of_w] %></td>
+                  <td><%= @departs[staff.position] %></td>
+                  <td><%= @departs[staff.department_id] %></td>
                   <td class="base_salary_text"><%= staff.base_salary.to_i %></td>
                   <td>
-                    <span class="reward_num_text"><%= staff.reward_num %></span>
-                    <input name="" type="text" value="<%= staff.reward_num %>" class="data_input_s reward_num_input" style="display: none;"/>
+                    <span class="reward_num_text"><%= @current_month[staff.id].nil? ? 0 : @current_month[staff.id].reward_num %></span>
+                    <input name="" type="text" value="<%= @current_month[staff.id].nil? ? 0 : @current_month[staff.id].reward_num %>" class="data_input_s reward_num_input" style="display: none;"/>
                   </td>
                   <td>
-                    <span class="deduct_num_text"><%= staff.deduct_num %></span>
-                    <input name="" type="text" value="<%= staff.deduct_num %>" class="data_input_s deduct_num_input" style="display: none;"/>
+                    <span class="deduct_num_text"><%= @current_month[staff.id].nil? ? 0 : @current_month[staff.id].deduct_num%></span>
+                    <input name="" type="text" value="<%= @current_month[staff.id].nil? ? 0 : @current_month[staff.id].deduct_num %>" class="data_input_s deduct_num_input" style="display: none;"/>
                   </td>
-                  <td class="total_price_text"><%= staff.total.to_i %></td>
+                  <td class="total_price_text"><%= @current_month[staff.id].nil? ? 0 : @current_month[staff.id].total %></td>
                   <td>
-                    <a href="javascript:void(0)" class="edit_reward_deduct_submit" style="display: none;" id="<%= staff.s_id %>">提交</a>
+                    <a href="javascript:void(0)" class="edit_reward_deduct_submit" style="display: none;" id="<%= staff.id %>">提交</a>
                     <% if permission?(:staffs, :edit_salary) %><a href="javascript:void(0)" class="bz_btn">编辑</a><% end %>
                     <% if permission?(:staffs, :detail_salary) %><%= link_to "详细", store_current_month_salary_path(@store, staff.id)+"?statistics_date=#{@statistics_date}" %><% end %>
                   </td>
