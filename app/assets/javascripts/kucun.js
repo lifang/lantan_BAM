@@ -529,7 +529,7 @@ function confirm_pay(){
     $("#dinghuo_selected_materials .in_mat_selected").find("input").each(function(){
         var count = $(this).val();
         var storage = parseInt($(this).parent().next().next().text());
-        var mat_name = $(this).parent().prev().prev().prev().text();
+        var mat_name = $(this).parent().prev().prev().prev().prev().text();
         if(count.match(reg1)==null || count==0){
             flag = false;
             tishi_alert("请输入有效数字");
