@@ -20,17 +20,19 @@ class Customer < ActiveRecord::Base
   TYPES = {:GOOD => 0, :NORMAL => 1, :STRESS => 2} #1 优质客户  2 一般客户  3 重点客户
   C_TYPES = {0 => "优质客户", 1 => "一般客户", 2 => "重点客户"}
   RETURN_REASON = { 0 => "质量问题", 1 => "服务态度", 2 => "拍错买错",3 => "效果不好，不喜欢",4 => "操作失误", 5 => "其他"}
+  PROPERTY = {:PERSONAL => 0, :GROUP => 1}  #客户属性 0个人 1集团客户
+  ALLOWED_DEBTS = {:NO => 0, :YES => 1}   #是否允许欠账
+  CHECK_TYPE = {:MONTH => 0, :WEEK => 1}  #结算类型 按月/周结算
 
-
-  def self.search_customer(c_types, car_num, started_at, ended_at, name, phone, is_vip, page, store_id)
-    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.mark from customers cu
+  def self.search_customer(c_property, car_num, started_at, ended_at, name, phone, c_sex, is_vip, page, store_id)
+    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.mark, cu.property from customers cu
         left join customer_num_relations cnr on cnr.customer_id = cu.id
         left join car_nums ca on ca.id = cnr.car_num_id "
     condition_sql = "where cu.status = #{STATUS[:NOMAL]} "
     params_arr = [""]
-    unless c_types.nil? or c_types == "-1"
-      condition_sql += " and cu.types = ? "
-      params_arr << c_types.to_i
+    unless c_property.nil? or c_property.to_i == -1
+      condition_sql += " and cu.property = ? "
+      params_arr << c_property.to_i
     end
     unless name.nil? or name.strip.empty?
       condition_sql += " and cu.name like ? "
@@ -39,6 +41,10 @@ class Customer < ActiveRecord::Base
     unless phone.nil? or phone.strip.empty?
       condition_sql += " and cu.mobilephone = ? "
       params_arr << phone.strip
+    end
+    unless c_sex.nil? or c_sex.to_i == -1
+      condition_sql += " and cu.sex = ?"
+      params_arr << c_sex.to_i
     end
     unless is_vip.nil? or is_vip.strip.empty?
       base_sql += " inner join customer_store_relations csr on csr.customer_id = cu.id "
@@ -72,6 +78,7 @@ class Customer < ActiveRecord::Base
     end
     condition_sql += " group by ca.id " if need_group_by
     params_arr[0] = base_sql + condition_sql
+    params_arr[0] += " order by cu.created_at desc"
     return Customer.paginate_by_sql(params_arr, :per_page => 10, :page => page)
   end
 

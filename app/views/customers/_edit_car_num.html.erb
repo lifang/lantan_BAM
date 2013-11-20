@@ -4,8 +4,7 @@
     :id => "d_c_n_f_#{edit_car_num.c_id}", :name => "d_c_n_f_#{edit_car_num.c_id}"} do %>
     <div class="popup_box">
       <h1>编辑车牌号码<a href="javascript:void(0)" class="close">关闭</a></h1>
-      <input type="hidden" name="store_id_<%= edit_car_num.c_id %>" name="store_id_<%= edit_car_num.c_id %>"
-             value="<%= @store.id %>" />
+      <input type="hidden" name="store_id_<%= edit_car_num.c_id %>" value="<%= @store.id %>" />
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item">
@@ -46,8 +45,9 @@
             </select>
           </div>
           <div class="item">
-            <label>行驶里程：</label>
-            <input type="text"/>
+            <label>行驶里程(公里)：</label>
+            <input type="text" name="car_distance_<%= edit_car_num.c_id %>" id="car_distance_<%= edit_car_num.c_id %>"
+                   value="<%= edit_car_num.distance %>"/>
           </div>
         </div>
         <div class="btn_box"><button type="submit" class="confirm_btn">确定</button></div>

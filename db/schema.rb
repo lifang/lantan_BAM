@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131114061840) do
+ActiveRecord::Schema.define(:version => 20131119064244) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -101,6 +101,7 @@ ActiveRecord::Schema.define(:version => 20131114061840) do
     t.integer  "buy_year"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "distance",     :default => 0
   end
 
   add_index "car_nums", ["car_model_id"], :name => "index_car_nums_on_car_model_id"
@@ -219,6 +220,12 @@ ActiveRecord::Schema.define(:version => 20131114061840) do
     t.string   "username"
     t.string   "salt"
     t.integer  "total_point"
+    t.integer  "property",           :default => 0
+    t.string   "group_name"
+    t.integer  "allowed_debts",      :default => 0
+    t.float    "debts_money"
+    t.integer  "check_type"
+    t.integer  "check_time"
   end
 
   add_index "customers", ["birthday"], :name => "index_customers_on_birthday"

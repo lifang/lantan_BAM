@@ -7,6 +7,7 @@
     <span>地址：<%= @customer.address %></span>
 
     <% if permission?(:customers, :edit) %><span><button type="button" class="compile_btn" onclick="javascript:edit_customer()">编辑</button></span><% end %>
+            <button type="button" class="compile_btn" onclick="add_cars()">添加车辆</button>
   </div>
   <ul class="data_body_ul">
     <% @car_nums.each do |car| %>
@@ -27,6 +28,7 @@
       </span>
       <% end %>
       <%= render :partial => "/customers/edit_car_num", :object => car %>
+      <%= render :partial => "/customers/add_car" %>
     </li>
     <% end %>
   </ul>
