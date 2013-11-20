@@ -60,4 +60,5 @@ class Store < ActiveRecord::Base
     end
     return filename
   end
+
 end

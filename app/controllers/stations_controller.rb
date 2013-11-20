@@ -8,23 +8,23 @@ class StationsController < ApplicationController
   #施工现场
   def index
     @stations =Station.where("store_id=#{params[:store_id]} and status !=#{Station::STAT[:DELETED]}")
-    @staff_ids,@times,@staffs,@f_working,@f_waiting = {},{},{},{},{}
     unless @stations.blank?
-      sql=Station.make_data(params[:store_id])
-      work_orders = WorkOrder.find_by_sql(sql).inject(Hash.new) { |hash, a| hash[a.status].nil? ? hash[a.status]=[a] : hash[a.status] << a;hash}
-      waits =work_orders[WorkOrder::STAT[:WAIT_PAY]].nil? ? {} : work_orders[WorkOrder::STAT[:WAIT_PAY]]
-      waits.each { |a| @f_waiting[a.front_staff_id].nil? ? @f_waiting[a.front_staff_id]=[a] : @f_waiting[a.front_staff_id] << a;}
-      servs = work_orders[WorkOrder::STAT[:SERVICING]].nil? ? {} : work_orders[WorkOrder::STAT[:SERVICING]]
-      servs.each { | a| @f_working[a.front_staff_id].nil? ? @f_working[a.front_staff_id]=[a] : @f_working[a.front_staff_id] << a}
-      @nums = servs.inject(Hash.new) { |hash, a| hash.merge(a.station_id=>a.num)}
-      StationStaffRelation.find_by_sql("select staff_id t_id,station_id s_id from station_staff_relations s inner join staffs t on 
-     t.id=s.staff_id where station_id in (#{@stations.map(&:id).join(',')}) and status !=#{Station::STAT[:DELETED]} and current_day='#{Time.now.strftime("%Y%m%d")}' ").each {|staff|
-        @staff_ids[staff.s_id].nil? ? @staff_ids[staff.s_id]=[staff.t_id] : @staff_ids[staff.s_id]<<staff.t_id}
-      Staff.where("id in (#{@staff_ids.values.flatten.uniq.join(',')}) and status !=#{Station::STAT[:DELETED]}").each{|staff|@staffs[staff.id]=staff.name} unless @staff_ids == {}
-      WorkOrder.where("store_id=#{params[:store_id]} and status=#{WorkOrder::STAT[:SERVICING]} and current_day=#{Time.now.strftime('%Y%m%d').to_i}").each{|work_order|
-        @times[work_order.station_id]=work_order.ended_at.nil? ? 0 : (work_order.ended_at- Time.now) }
+      work_orders = WorkOrder.find_by_sql(Station.make_data(params[:store_id])).inject(Hash.new) { |hash, a|
+        hash[a.status].nil? ? hash[a.status]={a.front_staff_id=>[a]} : hash[a.status][a.front_staff_id].nil? ? hash[a.status][a.front_staff_id] =[a] : hash[a.status][a.front_staff_id]<< a;hash}
+      @waiting_pay = work_orders[WorkOrder::STAT[:WAIT_PAY]].nil? ? {} : work_orders[WorkOrder::STAT[:WAIT_PAY]]
+      @nums = work_orders[WorkOrder::STAT[:SERVICING]].nil? ? {} : work_orders[WorkOrder::STAT[:SERVICING]].values.flatten.inject(Hash.new) {
+        |hash, a| hash.merge(a.station_id=>[a.num,a.order_id])}
+      @staff_ids = StationStaffRelation.where(:station_id=>@stations.map(&:id),:current_day=>Time.now.strftime("%Y%m%d").to_i).
+        select("staff_id t_id,station_id s_id").inject(Hash.new) {|hash,staff|
+        hash[staff.s_id].nil? ? hash[staff.s_id]=[staff.t_id] : hash[staff.s_id]<<staff.t_id;hash}
+      @wait_operate = Order.joins(:car_num).select("orders.id,car_nums.num,orders.front_staff_id front_id").where(:status=>Order::STATUS[:NORMAL],:store_id=>params[:store_id]).
+        where("date_format(orders.created_at,'%Y-%m-%d')='#{Time.now.strftime('%Y-%m-%d')}'").inject(Hash.new){|hash,order|
+        hash[order.front_id].nil? ? hash[order.front_id] = [order] : hash[order.front_id] << order;hash}
+      @staffs = Staff.where(:id=>(@staff_ids.values | @waiting_pay.keys | @wait_operate.keys).flatten.uniq).inject(Hash.new){|hash,staff|
+        hash[staff.id]=staff.name;hash}
+      @times = WorkOrder.where(:store_id=>params[:store_id],:status=>WorkOrder::STAT[:SERVICING],:current_day=>Time.now.strftime('%Y%m%d').to_i).inject(Hash.new){|hash,work_order|
+        hash[work_order.station_id]=work_order.ended_at.nil? ? 0 : (work_order.ended_at- Time.now);hash }
     end
-    p @staffs
   end
 
   def show_detail
@@ -85,6 +85,7 @@ class StationsController < ApplicationController
     render :layout => false
   end
 
+  #查询水、汽和施工数量
   def collect_info
     content = "sum(water_num) water,sum(gas_num) gas,count(work_orders.id) num,station_id,is_has_controller"
     conditions = "work_orders.status=#{WorkOrder::STAT[:COMPLETE]} and date_format(work_orders.updated_at,'%Y-%m')='#{Time.now.strftime('%Y-%m')}'
@@ -100,5 +101,74 @@ class StationsController < ApplicationController
     p month_num
     render :json=>{:month_num=>month_num,:day_num=>day_num}
   end
+
+  #取消订单、结束施工、结束付款
+  def handle_order
+    order = Order.find(params[:order_id])
+    if order
+      if params[:types] == "cancel" && order.status == Order::STATUS[:NORMAL]
+        order.return_order_pacard_num
+        order.return_order_materials
+        order.rearrange_station
+        order.update_attribute(:status, Order::STATUS[:DELETED])
+        msg = "成功取消订单！"
+      else
+        work_order = order.work_orders[0]
+        if params[:types] == "complete_pay" && work_order.status == WorkOrder::STAT[:WAIT_PAY]
+          Order.transaction do
+            begin
+              #如果有套餐卡，则更新状态
+              c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
+              c_pcard_relations.each do |cpr|
+                cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
+              end unless c_pcard_relations.blank?
+              #如果有买储值卡，则更新状态
+              csvc_relations = CSvcRelation.where(:order_id => order.id)
+              csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing =>false})}
+              if c_pcard_relations.present? || csvc_relations.present?
+                c_s_r = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id, order.customer_id)
+                c_s_r.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
+              end
+              order.update_attributes({:status=>Order::STATUS[:BEEN_PAYMENT],:is_free=>false})
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:CASH], :price => order.price)
+              wo = WorkOrder.find_by_order_id(order.id)
+              wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
+              #生成积分的记录
+              c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id,order.customer_id)
+              if c_customer && c_customer.is_vip
+                points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
+                  where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
+                  PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
+                Point.create(:customer_id=>c_customer.customer_id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
+                c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
+              end
+              #生成出库记录
+              order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id,
+              m.price m_price FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
+              p.id = opr.product_id inner join prod_mat_relations pmr on pmr.product_id = p.id inner join materials m
+              on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and o.status in (?) and o.id = ?",
+                  [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], order.id])
+              order_mat_infos.each do |omi|
+                MatOutOrder.create({:material_id => omi.m_id, :staff_id => omi.front_staff_id, :material_num => omi.material_num,
+                    :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => order.store_id})
+              end
+              msg = "成功结束付款！"
+            rescue
+              msg = "系统繁忙，请重试！"
+            end
+          end
+        elsif params[:types] == "complete_work" && work_order.status == WorkOrder::STAT[:SERVICING]
+          work_order.arrange_station
+          msg = "成功结束施工！"
+        else
+          msg = "系统繁忙，请重试！"
+        end
+      end
+    else
+      msg = "订单不存在！"
+    end
+    render :json=>{:msg=>msg}
+  end
+
 
 end

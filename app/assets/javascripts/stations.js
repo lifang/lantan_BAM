@@ -19,7 +19,7 @@ function collect_info(store_id,station_id){
                         $($("#num_"+item+" span")[i+1]).html(month_num[item][2]);
                     }
                 }
-                 $("#site_"+station_id).css("display","");
+                $("#site_"+station_id).css("display","");
             }
         })
     }else{
@@ -27,6 +27,39 @@ function collect_info(store_id,station_id){
         $("#site_"+station_id).css("display","");
     }
 
+}
+
+function request_order(order_id){
+    $.ajax({
+        async:true,
+        type:'get',
+        dataType:'script',
+        url:"/orders/"+order_id+"/order_info"
+    })
+}
+
+function handle_order(order_id,types){
+    if (types == "complete_pay" && !confirm("请确认客户已经付款？")){
+        window.location.reload();
+        return false;
+    }
+    $.ajax({
+        async:true,
+        type:'post',
+        dataType:'json',
+        url:"/stations/handle_order",
+        data :{
+            order_id : order_id,
+            types : types
+        },
+        success : function(data){
+            $("#related_order_partial h1 a").trigger("click");
+            tishi_alert(data.msg);
+            setTimeout(function(){
+                window.location.reload();
+            },1000)
+        }
+    })
 }
 
 

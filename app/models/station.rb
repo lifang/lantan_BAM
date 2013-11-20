@@ -167,21 +167,17 @@ class Station < ActiveRecord::Base
   end
 
   def self.make_data(store_id)
-    return  "select c.num,w.station_id,o.front_staff_id,s.name,w.status,w.order_id from work_orders w inner join orders o on w.order_id=o.id inner join car_nums c on c.id=o.car_num_id
-    inner join staffs s on s.id=o.front_staff_id where current_day='#{Time.now.strftime("%Y%m%d")}' and
+    return  "select c.num,w.station_id,o.front_staff_id,w.status,w.order_id from work_orders w inner join orders o on 
+    w.order_id=o.id inner join car_nums c on c.id=o.car_num_id where current_day='#{Time.now.strftime("%Y%m%d")}' and
     w.status in (#{WorkOrder::STAT[:SERVICING]},#{WorkOrder::STAT[:WAIT_PAY]}) and w.store_id=#{store_id}"
   end
 
   def self.ruby_to_js(hashs)
-    user_plan={}
-    hashs.each do |k,v|
-      user_plan["#{k}"]="#{v}"
-    end
-    return "#{user_plan}".gsub("=>",":")
+    return hashs.inect(Hash.new) {|hash,con|con.each{|k,v|  hash["#{k}"]="#{v}" };hash}.gsub("=>",":")
   end
 
+  #获取目录列表
   def self.get_dir_list(path)
-    #获取目录列表
     list = Dir.entries(path)
     list.delete('.')
     list.delete('..')
@@ -315,7 +311,7 @@ class Station < ActiveRecord::Base
   end
   
   def self.turn_old_to_new
-    Store.where(:edition_lv=>Store::EDITION_NAME[:FACTUARL]).each do |store|
+    Store.where(:status=>Store::STATUS[:OPENED]).each do |store|
       today_info = StationStaffRelation.where("current_day=#{Time.now.strftime("%Y%m%d")} and store_id=#{store.id}")
       yesterday_info = StationStaffRelation.where("current_day=#{Time.now.yesterday.strftime("%Y%m%d")} and store_id=#{store.id}")
       if today_info.blank?
@@ -334,7 +330,14 @@ class Station < ActiveRecord::Base
           }
           StationStaffRelation.import total_con, :timestamps=>true
         end
+      end   #自动分配技师
+      #生成员工记录
+      work_records = []
+      store.staffs.not_deleted.each do |staff|
+        parms = {:current_day=>Time.now.strftime("%Y-%m-%d"),:attendance_num=>1,:staff_id=>staff.id,:store_id=>store.id}
+        work_records << WorkRecord.new(parms)
       end
+      WorkRecord.import work_records, :timestamps=>true
     end
   end
 

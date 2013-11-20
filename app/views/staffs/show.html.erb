@@ -1,95 +1,66 @@
 <div class="main">
-    <div class="box">
-         <div class="data_box">
-              <div class="way_menu"><%= link_to "员工一览", store_staffs_path(@store) %> &gt; 员工详情</div>
-              <div class="data_body_title">
-                   <div class="data_body_p">
-                     <span>姓名：<%= @staff.name %></span>
-                     <span>岗位：<%= Staff::N_HEAD[@staff.position] %></span>
-                     <span>等级职称：<%= Staff::LEVELS[@staff.level] %></span>
-                     <span>职务：<%= Staff::N_COMPANY[@staff.type_of_w] %></span>
-                     <% if permission?(:staffs, :edit_show_staff) %><a href="javascript:void(0)" id="staff_detail">详情</a><% end %></div>
-              </div>
-              <div class="clear"></div>
-              <div class="tab_head">
-                   <ul>
-                      <li class="hover">工作记录</li>
-                      <li>绩效记录</li>
-                      <li>培训记录</li>
-                      <li>奖励记录</li>
-                      <li>违规记录</li>
-                      <li>工资记录</li>
-                   </ul>
-              </div>
-              <div class="data_body" id="ajax_paginate">
-                   <div>
-                        <div class="search">
-                             <input type="hidden" id="staff_id" value="<%= @staff.id %>"/>
-                             <input type="hidden" id="store_id" value="<%= @store.id %>"/>
-                             <div><label>时间：</label>
-                               <input name="" type="text" id="start_at" class="Wdate" readonly onClick="WdatePicker();"/> 到
-                               <input name="" type="text" id="end_at" class="Wdate" readonly onClick="WdatePicker();"/>
-                             </div>
-                             <div><label>统计方式：
-                                 <input name="cal_style" class="cal_style" type="radio" value="day" checked/>日&nbsp;&nbsp;
-                                 <input name="cal_style" class="cal_style" type="radio" value="week"/>周&nbsp;&nbsp;
-                                 <input name="cal_style" class="cal_style" type="radio" value="month"/>月</label>
-                             </div>
-                             <div><button class="search_btn" id="search_work_record">查询</button></div>
-                        </div>
-                        <div id="work_record_tab">
-                        <%= render :partial => "work_record_tab" %>
-                        </div>
-                   </div>
+  <div class="box">
+    <div class="data_box">
+      <div class="way_menu"><%= link_to "员工一览", store_staffs_path(@store) %> &gt; 员工详情</div>
+      <div class="data_body_title">
+        <div class="data_body_p">
+          <span>姓名：<%= @staff.name %></span>
+          <span>岗位：<%= Staff::N_HEAD[@staff.position] %></span>
+          <span>等级职称：<%= Staff::LEVELS[@staff.level] %></span>
+          <span>职务：<%= Staff::N_COMPANY[@staff.type_of_w] %></span>
+          <% if permission?(:staffs, :edit_show_staff) %><a href="javascript:void(0)" id="staff_detail">详情</a><% end %></div>
+      </div>
+      <div class="clear"></div>
+      <div class="tab_head">
+        <ul>
+          <li class="hover">绩效记录</li>
+          <li>培训记录</li>
+          <li>奖励记录</li>
+          <li>违规记录</li>
+          <li>工资记录</li>
+        </ul>
+      </div>
+      <div class="data_body" id="ajax_paginate">
+        <div>
+          <div class="search">
+            <input type="hidden" id="staff_id" value="<%= @staff.id %>"/>
+            <input type="hidden" id="store_id" value="<%= @store.id %>"/>
+            <div><label>时间：</label>
+              <input name="" type="text" id="start_at" class="Wdate" readonly onClick="WdatePicker();"/> 到
+              <input name="" type="text" id="end_at" class="Wdate" readonly onClick="WdatePicker();"/>
+            </div>
+            <div><label>统计方式：
+                <input name="cal_style" class="cal_style" type="radio" value="day" checked/>日&nbsp;&nbsp;
+                <input name="cal_style" class="cal_style" type="radio" value="week"/>周&nbsp;&nbsp;
+                <input name="cal_style" class="cal_style" type="radio" value="month"/>月</label>
+            </div>
+            <div><button class="search_btn" id="search_work_record">查询</button></div>
+          </div>
+          <div id="work_record_tab">
+            <%= render :partial => "work_record_tab" %>
+          </div>
+        </div>
 
-                   <div style="display:none;">
-                        <div class="search">
-                             <div>本月评估：
-                               <input id="assess_result" name="" type="text" value="<%= current_month_access_result(@current_month_score) %>" disabled/>
-                             </div>
-                             <div>系统打分：
-                               <span id="sys_score_text"><%= @current_month_score.nil? ? "系统没有上一个月的绩效记录" : @current_month_score.sys_score %></span>
-                               <input name="" type="text" value="<%= @current_month_score.sys_score unless @current_month_score.nil? %>" style="display: none;width:50px !important;" id="sys_score_input"/>
-                             </div>
-                             <% unless @current_month_score.nil? %>
-                               <div>
-                                 <button class="search_btn" id="edit_sys_score_submit" style="display: none;" name="<%= @current_month_score.id unless @current_month_score.nil? %>">提交</button>
-                                 <% if permission?(:staffs, :edit_sys_score) %><button class="search_btn" id="edit_sys_score">编辑</button><% end %>
-                               </div>
-                             <% end %>
-                             <div style="width:150px;">
-                               <% if permission?(:staffs, :manager_score) %>
-                               <% unless @current_month_score.nil? %>
-                                 <span style="float:left" id="month_score_val"><%= @current_month_score.manage_score %></span>
-                               <% end %>
-                                 <button class="search_btn" id="manage_score_btn" style="float:left;margin-left:5px;">店长打分</button>
-                               <% end %>
-                             </div>
-                        </div>
-                     <div id="month_score_tab">
-                        <%= render :partial => "month_score_tab" %>
-                     </div>
-                   </div>
 
-                   <div style="display:none;" id="train_tab">
-                       <%= render :partial => "train_tab" %>
-                   </div>
+        <div style="display:none;" id="train_tab">
+          <%= render :partial => "train_tab" %>
+        </div>
 
-                   <div style="display:none;" id="reward_tab">
-                       <%= render :partial => "reward_tab" %>
-                   </div>
+        <div style="display:none;" id="reward_tab">
+          <%= render :partial => "reward_tab" %>
+        </div>
 
-                   <div style="display:none;" id="violation_tab">
-                       <%= render :partial => "violation_tab" %>
-                   </div>
+        <div style="display:none;" id="violation_tab">
+          <%= render :partial => "violation_tab" %>
+        </div>
 
-                   <div style="display:none;" id="salary_tab">
-                       <%= render :partial => "salary_tab" %>
-                   </div>
+        <div style="display:none;" id="salary_tab">
+          <%= render :partial => "salary_tab" %>
+        </div>
 
-              </div>
-         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
@@ -99,36 +70,36 @@
 <div class="tab_popup" style="display:none;" id="manage_score_area">
   <% if @current_month_score.nil? %>
     <div class="popup_box">
-         <h1>店长打分<a href="javascript:void(0)" class="close">关闭</a></h1>
-         <div class="popup_body">
-              <div class="popup_body_area">
-                  <div class="item">
-                       系统没有上一个月的绩效记录
-                  </div>
-                  <div class="clear"></div>
-              </div>
+      <h1>店长打分<a href="javascript:void(0)" class="close">关闭</a></h1>
+      <div class="popup_body">
+        <div class="popup_body_area">
+          <div class="item">
+            系统没有上一个月的绩效记录
+          </div>
+          <div class="clear"></div>
         </div>
+      </div>
     </div>
   <% else %>
     <%= form_for(@current_month_score, :url => store_month_score_path(@store, @current_month_score), :html => {:method => :put, "data-type" => 'script'}, :remote => true) do |f| %>
       <div class="popup_box">
-           <h1>店长打分<a href="javascript:void(0)" class="close">关闭</a></h1>
-           <div class="popup_body">
-                <div class="popup_body_area">
-                    <div class="item">
-                         <label>分数：</label>
-                         <%= f.text_field :manage_score %>
-                    </div>
-                    <div class="clear"></div>
-                    <div class="item_textarea">
-                        <label>理由：</label>
-                        <%= f.text_area :reason, :cols => "", :rows => "", :class => "width_textarea" %>
-                    </div>
-                    <input type="hidden" name="month_score[is_syss_update]" value="1"/>
-                    <input type="hidden" name="staff_id" value="<%= @staff.id %>"/>
-                    <div class="btn_box"><button class="confirm_btn" id="manage_score_btn_validate">确定</button><button class="cancel_btn">取消</button></div>
-                </div>
+        <h1>店长打分<a href="javascript:void(0)" class="close">关闭</a></h1>
+        <div class="popup_body">
+          <div class="popup_body_area">
+            <div class="item">
+              <label>分数：</label>
+              <%= f.text_field :manage_score %>
+            </div>
+            <div class="clear"></div>
+            <div class="item_textarea">
+              <label>理由：</label>
+              <%= f.text_area :reason, :cols => "", :rows => "", :class => "width_textarea" %>
+            </div>
+            <input type="hidden" name="month_score[is_syss_update]" value="1"/>
+            <input type="hidden" name="staff_id" value="<%= @staff.id %>"/>
+            <div class="btn_box"><button class="confirm_btn" id="manage_score_btn_validate">确定</button><button class="cancel_btn">取消</button></div>
           </div>
+        </div>
       </div>
     <% end %>
   <% end %>
