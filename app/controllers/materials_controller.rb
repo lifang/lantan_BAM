@@ -908,7 +908,7 @@ class MaterialsController < ApplicationController
 
         if material && material.errors.blank?
           smaterial = SharedMaterial.find_by_code(material.code)
-          sm_params = params[:material].except(:price, :sale_price,:ifuse_code,:code_value).merge({:code => material.code})
+          sm_params = params[:material].except(:price, :sale_price,:ifuse_code,:code_value, :category_id).merge({:code => material.code})
           SharedMaterial.create(sm_params) unless smaterial
           @status = 0
           @flash_notice = "物料创建成功!"
