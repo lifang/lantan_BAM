@@ -152,8 +152,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :customers do
       collection do
-        post "search", "customer_mark", "single_send_message"
-        get "search_list"
+        post "search", "customer_mark", "single_send_message", "add_car"
+        get "search_list", "add_car_get_datas"
       end
       member do
         get "order_prods", "revisits", "complaints", "sav_card_records", "pc_card_records"

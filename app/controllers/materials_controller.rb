@@ -274,9 +274,8 @@ class MaterialsController < ApplicationController
 
   #核实
   def check
-    #puts params[:num],"m_id:#{params[:id]}"
+    @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id]])
     @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
-    #current_store = Store.find_by_id(params[:store_id].to_i)
     @pandian_flag = params[:pandian_flag].to_i
     if @material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
       @status = 0
@@ -332,8 +331,7 @@ class MaterialsController < ApplicationController
   #创建订货记录
   def material_order
     status = MaterialOrder.make_order
-    MaterialOrder.transaction do
-      
+    MaterialOrder.transaction do  
       if params[:supplier]
         #向总部订货
         if params[:supplier].to_i == 0
@@ -408,6 +406,8 @@ class MaterialsController < ApplicationController
         @current_store = Store.find_by_id params[:store_id]
         @store_account = @current_store.account if @current_store
         @material_order = material_order
+        types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id]])
+        @a = types.inject(Hash.new){|h, t|h[t.id]=t.name;h}
       end
       #render :json => {:status => status, :mo_id => material_order.id}
     end
@@ -933,11 +933,16 @@ class MaterialsController < ApplicationController
   def edit
     @current_store = Store.find_by_id(params[:store_id])
     @material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
+    @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
   end
 
   def update
-    @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
+    @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id].to_i])
+    @material = Material.find_by_id(params[:id])
     params[:material][:name] = params[:material][:name].strip
+    params[:material][:category_id] = params[:material][:types]
+    params[:material][:types] = nil
+    @cname = Category.find_by_id(params[:material][:category_id].to_i).name
     if @material.update_attributes(params[:material])&& @material.errors.blank?
       @status = 0
       @flash_notice = "物料编辑成功!"

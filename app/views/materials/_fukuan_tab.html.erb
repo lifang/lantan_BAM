@@ -20,7 +20,7 @@
                 <tr>
                   <td><%= moi.material.try(:code) %></td>
                   <td><%= moi.material.try(:name) %></td>
-                  <td><%= Material::TYPES_NAMES[moi.material.try(:types)] %></td>
+                  <td><%= @a[moi.material.try(:category_id)] %></td>
                   <td><%= moi.try(:price) %></td>
                   <td><%= moi.try(:material_num) %></td>
                   <td><%= moi.try(:price) * moi.try(:material_num) %></td>

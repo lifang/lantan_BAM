@@ -14,7 +14,8 @@
       <tr id="material<%= um.id %>tr">
         <td width="15%"><%= um.code %></td>
         <td><%= um.name %></td>
-        <td><%= Material::TYPES_NAMES[um.types.to_i] %></td>
+        <% a = @types.inject(Hash.new){|h,t|h[t.id]=t.name;h} %>
+        <td><%= a[um.category_id.to_i] %></td>
         <% if um.storage>0 %>
         <td>存货</td>
         <% else %>

@@ -8,36 +8,38 @@ class CustomersController < ApplicationController
   before_filter :customer_tips, :except => [:get_car_brands]
 
   def index
-    session[:c_types] = nil
+    session[:c_property] = nil
     session[:car_num] = nil
     session[:started_at] = nil
     session[:ended_at] = nil
     session[:name] = nil
     session[:phone] = nil
+    session[:c_sex] = nil
     session[:is_vip] = nil
 
     @store = Store.find_by_id(params[:store_id]) || not_found
-    @customers = Customer.search_customer(params[:c_types], params[:car_num], params[:started_at], params[:ended_at],
-      params[:name], params[:phone], params[:is_vip], params[:page], params[:store_id].to_i) if @store
+    @customers = Customer.search_customer(params[:c_property], params[:car_num], params[:started_at], params[:ended_at],
+      params[:name], params[:phone], params[:c_sex], params[:is_vip], params[:page], params[:store_id].to_i) if @store
     @car_nums = Customer.customer_car_num(@customers) if @customers
     @is_vips = CustomerStoreRelation.where(["store_id = ? and customer_id in (?)", @store, @customers]).group_by{|i| i.customer_id }
   end
 
   def search
-    session[:c_types] = params[:c_types]
+    session[:c_property] = params[:c_property]
     session[:car_num] = params[:car_num]
     session[:started_at] = params[:started_at]
     session[:ended_at] = params[:ended_at]
     session[:name] = params[:name]
     session[:phone] = params[:phone]
+    session[:c_sex] = params[:c_sex]
     session[:is_vip] = params[:is_vip]
     redirect_to "/stores/#{params[:store_id]}/customers/search_list"
   end
 
   def search_list
     @store = Store.find(params[:store_id].to_i)
-    @customers = Customer.search_customer(session[:c_types], session[:car_num], session[:started_at], session[:ended_at],
-      session[:name], session[:phone], session[:is_vip], params[:page], params[:store_id].to_i) if @store
+    @customers = Customer.search_customer(session[:c_property], session[:car_num], session[:started_at], session[:ended_at],
+      session[:name], session[:phone], session[:c_sex], session[:is_vip], params[:page], params[:store_id].to_i) if @store
     @car_nums = Customer.customer_car_num(@customers) if @customers
     @is_vips = CustomerStoreRelation.where(["store_id = ? and customer_id in (?)", @store, @customers]).group_by{|i| i.customer_id }
     render "index"
@@ -53,29 +55,62 @@ class CustomersController < ApplicationController
   def create
     if params[:new_name] and params[:mobilephone]
       customer = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], params[:mobilephone].strip)
-      car_num = CarNum.find_by_num(params[:new_car_num].strip)
       if customer
         relation = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id].to_i, customer.id)
         if relation
           flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
         else
-          if car_num
-            cnr = CustomerNumRelation.find_by_car_num_id_and_customer_id(car_num.id, customer.id)
-            unless cnr
-              CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
-              CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
+          unless params[:selected_cars].blank?
+            params[:selected_cars].each do |sc|
+              car_num = sc.split("-")[0]
+              car_model = sc.split("-")[1].to_i
+              buy_year = sc.split("-")[2].to_i
+              car_num_record = CarNum.find_by_num(car_num)
+              if car_num_record
+                cnr = CustomerNumRelation.find_by_car_num_id_and_customer_id(car_num_record.id, customer.id)
+                unless cnr
+                  CustomerNumRelation.delete_all(["car_num_id = ?", car_num_record.id])
+                  CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => customer.id)
+                end
+              else
+                car_num_record = CarNum.create(:num => car_num, :buy_year => buy_year, :car_model_id => car_model)
+                CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => customer.id)
+              end
             end
-          else
-            car_num = CarNum.create(:num => params[:new_car_num].strip, :buy_year => params[:buy_year],
-              :car_model_id => params[:car_models])
-            CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer.id)
           end
           CustomerStoreRelation.create(:store_id => params[:store_id].to_i, :customer_id => customer.id, :is_vip => params[:is_vip])
         end
       else
-        Customer.create_single_cus(customer, car_num, params[:mobilephone].strip, params[:new_car_num].strip,
-          params[:new_name].strip, params[:other_way].strip, params[:birthday], 
-          params[:buy_year], params[:car_models], params[:sex], params[:address], params[:is_vip], params[:store_id].to_i)
+        property = params[:property].to_i
+        name = params[:new_name].strip
+        group_name = params[:group_name].nil? ? nil : params[:group_name].strip
+        allowed_debts = params[:allowed_debts].to_i
+        debts_money = params[:debts_money].nil? ? nil : params[:debts_money].to_f
+        check_type = params[:check_type].nil? ? nil : params[:check_type].to_i
+        check_time = params[:check_time_month].nil? ? (params[:check_time_week].nil? ? nil : params[:check_time_week].to_i) : params[:check_time_month].to_i
+        new_customer = Customer.create(:name => name, :mobilephone => params[:mobilephone].strip, :other_way => params[:other_way].strip,
+          :sex => params[:sex], :birthday => params[:birthday].strip, :address => params[:address].strip,
+          :status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL], :username => name, :property => property,
+          :group_name => group_name, :allowed_debts => allowed_debts, :debts_money => debts_money, :check_type => check_type,
+          :check_time => check_time)
+        new_customer.encrypt_password
+        new_customer.save
+        unless params[:selected_cars].blank?
+          params[:selected_cars].each do |sc|
+            car_num = sc.split("-")[0]
+            car_model = sc.split("-")[1].to_i
+            buy_year = sc.split("-")[2].to_i
+            car_num_record = CarNum.find_by_num(car_num)
+            if car_num_record
+              CustomerNumRelation.delete_all(["car_num_id = ?", car_num_record.id])
+              CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => new_customer.id)
+            else
+              car_num_record = CarNum.create(:num => car_num, :buy_year => buy_year, :car_model_id => car_model)
+              CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => new_customer.id)
+            end
+          end
+        end
+        CustomerStoreRelation.create(:store_id => params[:store_id].to_i, :customer_id => new_customer.id, :is_vip => params[:is_vip])
         flash[:notice] = "客户信息创建成功。"
       end
     end
@@ -91,7 +126,12 @@ class CustomersController < ApplicationController
       else
         customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
           :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
-          :address => params[:address])
+          :address => params[:address], :property => params[:edit_property].to_i,
+          :group_name => params[:edit_property].to_i==Customer::PROPERTY[:PERSONAL] ? nil : params[:edit_group_name].strip,
+          :allowed_debts => params[:edit_allowed_debts].to_i,
+          :debts_money => params[:edit_allowed_debts].to_i==Customer::ALLOWED_DEBTS[:NO] ? nil : params[:edit_debts_money].to_f,
+          :check_type => params[:edit_check_type].nil? ? nil : params[:edit_check_type].to_i,
+          :check_time => params[:edit_check_time_month].nil? ? (params[:edit_check_time_week].nil? ? nil : params[:edit_check_time_week].to_i) :  params[:edit_check_time_month].to_i)
         c_store = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id],customer.id)
         if c_store
           c_store.update_attributes( :is_vip => params[:is_vip])
@@ -136,7 +176,7 @@ class CustomersController < ApplicationController
   def show
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @car_nums = CarNum.find_by_sql(["select c.id c_id, c.num, cb.name b_name, cm.name m_name, cb.id b_id, cr.customer_id,
+    @car_nums = CarNum.find_by_sql(["select c.id c_id, c.num, c.distance distance, cb.name b_name, cm.name m_name, cb.id b_id, cr.customer_id,
         cm.id m_id, c.buy_year,cb.capital_id
         from car_nums c left join car_models cm on cm.id = c.car_model_id
         left join car_brands cb on cb.id = cm.car_brand_id
@@ -202,10 +242,12 @@ class CustomersController < ApplicationController
     car_num_id = params[:id].split("_")[1].to_i
     customer_id = params[:id].split("_")[0]
     current_car_num = CarNum.find_by_id(car_num_id)
+    distance = params["car_distance_#{car_num_id}"].to_i
     car_num = CarNum.find_by_num(params["car_num_#{car_num_id}"].strip)
     if car_num.nil? or car_num.id == current_car_num.id
       current_car_num.update_attributes(:num => params["car_num_#{car_num_id}"].strip,
-        :buy_year => params["buy_year_#{car_num_id}"].to_i, :car_model_id => params["car_models_#{car_num_id}"].to_i)      
+        :buy_year => params["buy_year_#{car_num_id}"].to_i, :car_model_id => params["car_models_#{car_num_id}"].to_i,
+        :distance => distance)
     else
       CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
       CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer_id.to_i)
@@ -315,6 +357,39 @@ class CustomersController < ApplicationController
     render :json =>{:msg=>order.code}
   end
 
+  def add_car_get_datas #添加车辆 查找
+    @type = params[:type].to_i
+    id = params[:id].to_i
+    if @type==0
+      @brands = CarBrand.where(["capital_id = ?", id])
+    elsif @type==1
+      @models = CarModel.where(["car_brand_id= ?", id])
+    end
+  end
+
+  def add_car #添加车牌
+    cid = params[:add_car_cus_id].to_i
+    buy_year = params[:add_car_buy_year].to_i
+    car_num = params[:add_car_num].strip
+    car_model = params[:add_car_models].to_i
+    distance = params[:add_car_distance].to_i
+    car_num_record = CarNum.find_by_num(car_num)
+    if car_num_record
+      cnr = CustomerNumRelation.find_by_car_num_id(car_num_record.id)
+      if cnr and cnr.customer_id != cid
+        cnr.update_attribute("customer_id", cid)
+        car_num_record.update_attributes(:car_model_id => car_model, :buy_year => buy_year, :distance => distance)
+        flash[:notice] = "车牌号码为"+car_num+"的车辆已关联到当前客户名下!"
+      elsif cnr and cnr.customer_id == cid
+        flash[:notice] = "添加失败,该客户已关联该车辆!"
+      end
+    else
+      new_num_record = CarNum.create(:num => car_num, :car_model_id => car_model, :buy_year => buy_year, :distance => distance)
+      CustomerNumRelation.create(:customer_id => cid, :car_num_id => new_num_record.id)
+      flash[:notice] = "添加成功!"
+    end
+    redirect_to "/stores/#{params[:store_id]}/customers/#{cid}"
+  end
   private
   
   def svc_card_records_method(customer_id)

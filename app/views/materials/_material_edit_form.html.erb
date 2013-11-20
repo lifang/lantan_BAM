@@ -10,7 +10,11 @@
           </div>
           <div class="item">
             <label><span class='red'>*</span>物料类型：</label>
-            <%= select("material", "types",  Material::TYPES_NAMES.invert, {:prompt => "请选择"}) %>
+            <select id="material_types" name="material[types]">
+              <% @types.each do |t| %>
+              <option value="<%= t.id %>" <% if @material.category_id==t.id%>selected<% end %>><%= t.name %></option>
+              <% end %>
+            </select>
           </div>
           <div class="item">
             <label><span class='red'>*</span>成本价：</label>

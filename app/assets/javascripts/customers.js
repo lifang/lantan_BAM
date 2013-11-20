@@ -1,24 +1,41 @@
 function check_customer() {
-    if ($("#new_car_num").val() != null && $("#new_car_num").val() != undefined && $.trim($("#new_car_num").val()) == "") {
-        tishi_alert("请输入车牌号码");
-        return false;
-    }
-    if ($("#car_models").val() != null && $("#car_models").val() != undefined && $("#car_models").val() == "") {
-        tishi_alert("请选择汽车品牌型号");
-        return false;
-    }
     if ($.trim($("#new_name").val()) == "") {
         tishi_alert("请输入客户姓名");
+        return false;
+    }
+    if($("input[name='property']:checked").val()==1 && $.trim($("#group_name").val())==""){
+        tishi_alert("请输入单位名称!");
+        return false;
+    }
+    if($("input[name='allowed_debts']:checked").val()==1 && $.trim($("#debts_money").val())==""){
+        tishi_alert("请输入挂账额度!");
+        return false;
+    }
+    if($("input[name='allowed_debts']:checked").val()==1 && (isNaN($.trim($("#debts_money").val())) || parseInt($.trim($("#debts_money").val()))<=0)){
+        tishi_alert("请输入正确的挂账额度!");
         return false;
     }
     if ($.trim($("#mobilephone").val()) == "" || $.trim($("#mobilephone").val()).length < 6 || $.trim($("#mobilephone").val()).length > 20) {
         tishi_alert("请输入客户手机号码，且号码长度大于6，小于20");
         return false;
     }
-    if ($("#new_c_form").length > 0) {
-        $("#new_c_form button").attr("disabled", "true");
-    }    
-    return true;
+    var len = $("#selected_cars_div ul").find("li").length;
+    if(len<=0){
+        var flag = confirm("您没有为该客户关联任何车辆，点击'是'将继续创建");
+        if(flag){
+            if ($("#new_c_form").length > 0) {
+                $("#new_c_form button").attr("disabled", "true");
+            }
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        if ($("#new_c_form").length > 0) {
+            $("#new_c_form button").attr("disabled", "true");
+        }
+        return true;
+    }
 }
 
 function customer_mark(customer_id) {
@@ -201,6 +218,10 @@ function edit_car_num(car_num_id) {
     if ($("#car_models_" + car_num_id).val() == "") {
         tishi_alert("请选择汽车品牌型号");
         return false;
+    }
+    if($.trim($("#car_distance_"+car_num_id).val())!="" && (isNaN($.trim($("#car_distance_"+car_num_id).val())) || parseInt($.trim($("#car_distance_"+car_num_id).val()))<0)){
+         tishi_alert("请输入正确的行驶里程");
+         return false;
     }
     return true;
 }

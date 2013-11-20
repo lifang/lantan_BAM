@@ -66,6 +66,7 @@ class MaterialOrder < ActiveRecord::Base
       sql[0] += " and mo.supplier_id=?"
       sql << supplier_id
     end
+    sql[0] += " order by mo.created_at desc"
     records = MaterialOrder.find_by_sql(sql)
     arr = []
     total_money = 0

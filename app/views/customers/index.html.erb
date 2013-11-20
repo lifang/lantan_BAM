@@ -4,12 +4,11 @@
     <% if permission?(controller.controller_name.to_sym, :show) %>
       <div class="search">
         <%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/search", :method => "post" do %>
-          <div><label>客户类型：</label>
-            <select id="c_types" name="c_types">
-              <option value="-1">全部</option>
-              <% Customer::C_TYPES.each do |k, v| %>
-                <option value="<%= k %>" <% if session[:c_types] and k.to_i == session[:c_types].to_i %>selected<% end %>><%= v %></option>
-              <% end %>
+          <div><label>客户属性：</label>
+            <select id="c_property" name="c_property">
+              <option value="-1" <% if session[:c_property].to_i == -1 %>selected<% end %>>全部</option>
+              <option value="0" <% if !session[:c_property].nil? && session[:c_property].to_i == 0 %>selected<% end %>>个人客户</option>
+              <option value="1" <% if !session[:c_property].nil? && session[:c_property].to_i == 1 %>selected<% end %>>集团客户</option>
             </select>
           </div>
           <div><label>客户名称：</label><input type="text" name="name" id="name" value="<%= session[:name] %>"/></div>
@@ -20,6 +19,14 @@
                    class="Wdate" readonly onClick="WdatePicker();"/>&nbsp;到&nbsp;
             <input type="text" name="ended_at" id="ended_at" value="<%= session[:ended_at] %>"
                    class="Wdate" readonly onClick="WdatePicker();"/></div>
+          <div>
+            <label>性别：</label>
+            <select name="c_sex">
+              <option value="-1" <% if session[:c_sex].to_i==-1 %>selected<% end %>>全部</option>
+              <option value="1" <% if !session[:c_sex].nil? && session[:c_sex].to_i==1 %>selected<% end %>>男</option>
+              <option value="0" <% if !session[:c_sex].nil? && session[:c_sex].to_i==0 %>selected<% end %>>女</option>
+            </select>
+          </div>
           <div><input type="checkbox" name="is_vip" id="is_vip" value="1" <% if session[:is_vip] %>checked<% end %>/>会员</div>
           <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
           <div><button type="submit" class="search_btn">查询</button></div>
@@ -46,6 +53,7 @@
             <tr class="hbg">
               <td>车牌号码</td>
               <td>客户姓名</td>
+              <td>客户属性</td>
               <td>手机号码</td>
               <td>是否会员</td>
               <td>操作</td>
@@ -55,13 +63,16 @@
             <% if @customers.any? %>
               <% @customers.each do |customer| %>
                 <tr>
-                  <td width="25%" class="wordBreak">
+                  <td width="20%" class="wordBreak">
                     <% @car_nums[customer.id].each_with_index do |cn, index| %>
                       <span><%= cn.num %><% if index < (@car_nums[customer.id].length - 1) %>，<% end %></span>
                     <% end if @car_nums[customer.id] %>
                   </td>
-                  <td width="25%" class="wordBreak"><%= customer.name %></td>
-                  <td width="20%" class="wordBreak"><%= customer.mobilephone %></td>
+                  <td width="20%" class="wordBreak"><%= customer.name %></td>
+                  <td width="15%" class="wordBreak">
+                    <%= customer.property.to_i==Customer::PROPERTY[:PERSONAL] ? "个人客户" : (customer.property.to_i==Customer::PROPERTY[:GROUP] ? "集团客户" : "未知") %>
+                  </td>
+                  <td width="15%" class="wordBreak"><%= customer.mobilephone %></td>
                   <td width="10%" class="wordBreak">
                     <%= (@is_vips and @is_vips[customer.id] and @is_vips[customer.id][0].is_vip) ? "是" : "否" %>
                   </td>

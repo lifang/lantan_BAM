@@ -1013,6 +1013,14 @@ a.compile_btn { width: 100px;}
 .duty_right li { line-height: 24px;}
 .duty .a_btn { background:#026C93; color: #FFF; font-size: 12px; margin: 0 5px; padding: 0 5px;}
 
+.item .select_ss, .select_ss { width: 62px; float:none; line-height: 24px; height: 24px; border: 1px #CCCCCC solid;}
+.item_car_ul { padding: 0 20px; border: 1px #CCCCCC solid; overflow: auto; height: 100px;}
+.item_car_ul ul { display: block; margin: 10px 0;}
+.item_car_ul li { list-style: disc inside; line-height: 30px; color: #930205;}
+
+.item input[type="text"].input_sss, .input_sss { width: 60px;}
+.input_s80 { width: 80px;}
+
 .item_rbox { padding: 10px; border: 1px #CCCCCC solid; overflow: auto; height: 150px;}
 .item_rbox dl { margin-bottom: 10px; overflow: hidden;}
 .item_rbox dt { color:#930205; line-height: 24px;}
