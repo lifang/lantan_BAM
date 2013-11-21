@@ -34,12 +34,11 @@
                     <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
                     <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
                     <td><%= sc.name %></td>
-                    <td><%= format("%.2f", sc.price) if sc.price %></td>
+                    <td><%= format("%.1f", sc.price) if sc.price %></td>
                     <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
                     <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
                     <td>
                       <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>
-                      <%= link_to "删除", store_discount_card_path(@store, sc), :method => :delete, :confirm => "确定删除该优惠卡?" %>
                     </td>
                   </tr>
                 <% end %>
@@ -66,12 +65,11 @@
                     <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
                     <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
                     <td><%= sc.name %></td>
-                    <td><%= format("%.2f", sc.price) if sc.price %></td>
+                    <td><%= format("%.1f", sc.price) if sc.price %></td>
                     <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
                     <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
                     <td>
-                      <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>
-                      <%= link_to "删除", store_discount_card_path(@store, sc), :method => :delete, :confirm => "确定删除该优惠卡?" %>
+                      <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>           
                     </td>
                   </tr>
                 <% end %>

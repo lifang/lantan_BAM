@@ -32,8 +32,8 @@
           <div class="setobj_name"><span class="red">*</span>发行规则：</div>
           <div class="setobj_box">
             <div class="seto_list">
-              <span>充<input id="edit_scard_started_money" name="edit_scard_started_money" type="text" class="input_s" value="<%= @save_card.bprice %>"/>元</span>&nbsp;&nbsp;
-              <span>送<input id="edit_scard_ended_money" name="edit_scard_ended_money" type="text" class="input_s" value="<%= @save_card.mprice %>"/>元</span>
+              <span>充<input id="edit_scard_started_money" name="edit_scard_started_money" type="text" class="input_s" value="<%= format("%.1f", @save_card.bprice) if @save_card.bprice %>"/>元</span>&nbsp;&nbsp;
+              <span>送<input id="edit_scard_ended_money" name="edit_scard_ended_money" type="text" class="input_s" value="<%= format("%.1f", @save_card.mprice) if @save_card.mprice %>"/>元</span>
             </div>
           </div>
         </div>

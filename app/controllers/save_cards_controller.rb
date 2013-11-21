@@ -95,16 +95,16 @@ class SaveCardsController < ApplicationController   #储值卡
     redirect_to request.referer
   end
 
-  def destroy
-    scard = SvCard.find_by_id(params[:id].to_i)
-    if scard.update_attribute("status", SvCard::STATUS[:DELETED])
-      flash[:notice] = "删除成功!"
-      redirect_to store_save_cards_path
-    else
-      flash[:notice] = "删除失败!"
-      redirect_to request.referer
-    end
-  end
+#  def destroy
+#    scard = SvCard.find_by_id(params[:id].to_i)
+#    if scard.update_attribute("status", SvCard::STATUS[:DELETED])
+#      flash[:notice] = "删除成功!"
+#      redirect_to store_save_cards_path
+#    else
+#      flash[:notice] = "删除失败!"
+#      redirect_to request.referer
+#    end
+#  end
 
   def del_all_scards    #批量删除储值卡
     a = params[:ids]

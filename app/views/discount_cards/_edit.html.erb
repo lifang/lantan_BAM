@@ -17,7 +17,7 @@
         </div>
         <div class="item">
           <label><span class="red">*</span>面值：</label>
-          <input name="edit_dcard_price" id="edit_dcard_price" type="text" value="<%= @dcard.price %>"/>
+          <input name="edit_dcard_price" id="edit_dcard_price" type="text" value="<%= format("%.1f", @dcard.price) if @dcard.price %>"/>
         </div>
         <div class="item_textarea">
           <label><span class="red">*</span>选择项目：</label>
