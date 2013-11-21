@@ -430,7 +430,7 @@ class MaterialsController < ApplicationController
   def back_good_search
     supp = params[:supplier_id]
     good_type = params[:good_type]
-    sql = "select sum(moi.material_num) mnum,moi.material_id mid, mo.supplier_id msuid, m.name mname, m.storage mstorage, m.types mtype
+    sql = "select sum(moi.material_num) mnum,moi.material_id mid, mo.supplier_id msuid, m.name mname, m.storage mstorage, c.name cname
                                            from material_orders mo inner join mat_order_items moi
                                            on mo.id=moi.material_order_id inner join materials m
                                            on moi.material_id=m.id inner join categories c

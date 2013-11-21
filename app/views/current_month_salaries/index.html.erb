@@ -15,7 +15,7 @@
 
         <div>
           <% if permission?(:staffs, :export_salary) %>
-            <%= link_to "导出EXCEL", store_current_month_salaries_path(@store, :format => 'xls') + "?statistics_date=#{@statistics_date}", :class => "search_btn" %>
+            <%= link_to "发放并导出", store_current_month_salaries_path(@store, :format => 'xls') + "?statistics_date=#{@statistics_date}", :class => "search_btn" %>
           <% end %></div>
       </div>
       <div class="collect">
