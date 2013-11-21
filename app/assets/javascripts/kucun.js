@@ -498,9 +498,9 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
                         {
                             if(mo_type==1)
                             {
-                                $("#page_supplier_orders").find("#" + mo_id).find("td:nth-child(8)").text("已付款")
+                                $("#merchant_"+ mo_id+" ul").find("li:nth-child(6) span").text("已付款");
                             }else{
-                                $("#page_head_orders").find("#" + mo_id).find("td:nth-child(8)").text("已付款")
+                                $("#merchant_"+mo_id+" ul").find("li:nth-child(4) span").text("已付款");
                             }
                         }
                         hide_mask("#" + parent_id);
@@ -796,7 +796,7 @@ function select_check_type(obj){
             $("#supplier_check_time").attr("disabled", true);
         }
     }else{
-         if(type==1){
+        if(type==1){
             $("#edit_supplier_check_time").removeAttr("disabled");
         }else{
             $("#edit_supplier_check_time").attr("disabled", true);
@@ -805,7 +805,7 @@ function select_check_type(obj){
 }
 
 function edit_commit_supplier_form(obj){
-      if($.trim($("#edit_supplier_name").val())==""){
+    if($.trim($("#edit_supplier_name").val())==""){
         tishi_alert("请输入名称");
     }else if($.trim($("#edit_supplier_contact").val())==""){
         tishi_alert("请输入联系人");
@@ -892,7 +892,7 @@ function commit_in(obj){
                 barcode: barcode,
                 mo_code: mo_code,
                 num: $("#num").val()
-                },
+            },
             success:function(data){
                 if(data=="1")
                 {
@@ -1049,15 +1049,14 @@ function cancel_order(order_id,type,store_id,mo_type){
             success:function(data,status){
                 tishi_alert(data["content"]);
                 if(mo_type==1){
-                    $("#page_supplier_orders").find("#" + order_id).find("td:nth-child(8)").text("已取消")
+                    $("#merchant_"+order_id+" ul").find("li:nth-child(6) span").text("已取消")
                 }else{
-                    $("#page_head_orders").find("#" + order_id).find("td:nth-child(8)").text("已取消")
-                    }
-              
+                    $("#merchant_"+order_id+" ul").find("li:nth-child(4) span").text("已取消")
+                }
                 hide_mask("#mat_order_detail_tab")
             },
             error:function(){
-            //              alert("error");
+                tishi_alert("数据出错!");
             }
         });
     }
@@ -1084,7 +1083,7 @@ function toggle_notice(obj){
         $(obj).text(" 隐藏");
     }else{
         $(obj).text("点击查看")
-        }
+    }
     $(obj).next().toggle();
 }
 function toggle_low_materials(obj){
@@ -1092,7 +1091,7 @@ function toggle_low_materials(obj){
         $(obj).text(" 隐藏");
     }else{
         $(obj).text("点击查看")
-        };
+    };
     $(obj).next().toggle();
 }
 function close_notice(obj){

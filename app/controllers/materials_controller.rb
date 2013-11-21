@@ -464,6 +464,8 @@ class MaterialsController < ApplicationController
   end
   #付款页面
   def material_order_pay
+    types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id]])
+    @a = types.inject(Hash.new){|h, t|h[t.id]=t.name;h}
     @current_store = Store.find_by_id params[:store_id]
     @store_account = @current_store.account if @current_store
     @material_order = MaterialOrder.find_by_id params[:mo_id]
@@ -641,6 +643,7 @@ class MaterialsController < ApplicationController
   
   #退货
   def tuihuo
+    @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id]])
     @order = MaterialOrder.find_by_id(params[:id].to_i)
     if @order
       if @order.m_status == 3 || @order.m_status == 4
@@ -683,7 +686,7 @@ class MaterialsController < ApplicationController
     if params[:id]
       @order = MaterialOrder.find_by_id params[:id]
       @content = ""
-
+      @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id].to_i])
       if @order #&& @order.m_status == MaterialOrder::M_STATUS[:send]
         @order.update_attribute(:m_status,MaterialOrder::M_STATUS[:received])
         @content = "收货成功"
@@ -733,11 +736,9 @@ class MaterialsController < ApplicationController
         if @mat_order.supplier_id==0
           mat_order_types = @mat_order.m_order_types.to_json
           headoffice_post_api_url = Constant::HEAD_OFFICE_API_PATH + "api/materials/update_status"
-          p headoffice_post_api_url
           result = Net::HTTP.post_form(URI.parse(headoffice_post_api_url), {'mo_code' => @mat_order.code, 'mo_status' => params[:pay_type].to_i == 5 ? 0 :MaterialOrder::STATUS[:pay], 'mo_price' => @mat_order.price, 'sale_id' => @mat_order.sale_id, 'mat_order_types' => mat_order_types})
         end
-        render :json => {:status => 0}
-     
+        render :json => {:status => 0}    
       end
     else
       render :json => {:status => 2}

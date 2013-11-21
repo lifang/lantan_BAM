@@ -29,7 +29,7 @@
     </ul>
   </div>
   <% (@supplier_order_records || []).each do |record| %>
-    <div class="merchant">
+    <div class="merchant" id="merchant_<%= record.id %>">
       <div class="merchantNumber">订货单编号：<%= record.code %>
         <%= link_to "详情", mat_order_detail_store_material_path(params[:store_id],record), remote: :true, "data-type" => "script", :class => "a_btn" %>
         <% if permission?(:materials, :order_mark) %>
@@ -45,8 +45,8 @@
             "每月"+record.supplier.try(:check_time).to_s+"号"%>
         </li>
         <li><strong>本次订货金额：</strong><%= format("%.2f", record.price) if record.price %></li>
-        <li><strong>付款状态：</strong><%= MaterialOrder::S_STATUS[record.status] %></li>
-        <li><strong>物流状态：</strong><%= MaterialOrder::S_M_STATUS[record.m_status] %></li>
+        <li><strong>付款状态：</strong><span><%= MaterialOrder::S_STATUS[record.status] %></span></li>
+        <li><strong>物流状态：</strong><span><%= MaterialOrder::S_M_STATUS[record.m_status] %></span></li>
       </ul>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" name="head_table">
         <thead>

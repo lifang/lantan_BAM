@@ -5,7 +5,7 @@ class SaveCardsController < ApplicationController   #储值卡
   before_filter :get_store
 
   def index
-    @types = Category.where(["store_id = ? and types = ?", @store.id, Category::TYPES[:service]])
+    @types = Category.where(["store_id = ? and types in (?)", @store.id, [Category::TYPES[:good], Category::TYPES[:service]]])
     @sv_cards = SvCard.find_by_sql(["select sc.id sid, sc.name sname, sc.img_url surl, sc.price sprice,
      sc.description sdesc, sc.use_range srange, spr.base_price bprice, spr.more_price mprice, c.name cname
      from sv_cards sc inner join svcard_prod_relations spr on sc.id=spr.sv_card_id inner join categories c
@@ -53,7 +53,7 @@ class SaveCardsController < ApplicationController   #储值卡
   end
 
   def edit
-    @types = Category.where(["store_id = ? and types = ?", @store.id, Category::TYPES[:service]])
+    @types = Category.where(["store_id = ? and types in (?)", @store.id,  [Category::TYPES[:good], Category::TYPES[:service]]])
     @save_card = SvCard.find_by_sql(["select sc.*, spr.base_price bprice, spr.more_price mprice, c.id cid
       from sv_cards sc inner join svcard_prod_relations spr
       on sc.id=spr.sv_card_id inner join categories c on spr.category_id=c.id where sc.id=?", params[:id].to_i])[0]
