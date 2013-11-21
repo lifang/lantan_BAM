@@ -5,7 +5,7 @@ class SaveCardsController < ApplicationController   #储值卡
   before_filter :get_store
 
   def index
-    @types = Category.where(["store_id = ? and types = ?", @store.id, Category::TYPES[:service]])
+    @types = Category.where(["store_id = ? and types in (?)", @store.id, [Category::TYPES[:good], Category::TYPES[:service]]])
     @sv_cards = SvCard.find_by_sql(["select sc.id sid, sc.name sname, sc.img_url surl, sc.price sprice,
      sc.description sdesc, sc.use_range srange, spr.base_price bprice, spr.more_price mprice, c.name cname
      from sv_cards sc inner join svcard_prod_relations spr on sc.id=spr.sv_card_id inner join categories c
@@ -53,7 +53,7 @@ class SaveCardsController < ApplicationController   #储值卡
   end
 
   def edit
-    @types = Category.where(["store_id = ? and types = ?", @store.id, Category::TYPES[:service]])
+    @types = Category.where(["store_id = ? and types in (?)", @store.id,  [Category::TYPES[:good], Category::TYPES[:service]]])
     @save_card = SvCard.find_by_sql(["select sc.*, spr.base_price bprice, spr.more_price mprice, c.id cid
       from sv_cards sc inner join svcard_prod_relations spr
       on sc.id=spr.sv_card_id inner join categories c on spr.category_id=c.id where sc.id=?", params[:id].to_i])[0]
@@ -95,16 +95,16 @@ class SaveCardsController < ApplicationController   #储值卡
     redirect_to request.referer
   end
 
-  def destroy
-    scard = SvCard.find_by_id(params[:id].to_i)
-    if scard.update_attribute("status", SvCard::STATUS[:DELETED])
-      flash[:notice] = "删除成功!"
-      redirect_to store_save_cards_path
-    else
-      flash[:notice] = "删除失败!"
-      redirect_to request.referer
-    end
-  end
+#  def destroy
+#    scard = SvCard.find_by_id(params[:id].to_i)
+#    if scard.update_attribute("status", SvCard::STATUS[:DELETED])
+#      flash[:notice] = "删除成功!"
+#      redirect_to store_save_cards_path
+#    else
+#      flash[:notice] = "删除失败!"
+#      redirect_to request.referer
+#    end
+#  end
 
   def del_all_scards    #批量删除储值卡
     a = params[:ids]

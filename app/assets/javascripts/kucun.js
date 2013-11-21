@@ -498,9 +498,9 @@ function pay_material_order(parent_id, pay_type,store_id, obj){
                         {
                             if(mo_type==1)
                             {
-                                $("#page_supplier_orders").find("#" + mo_id).find("td:nth-child(8)").text("已付款")
+                                $("#merchant_"+ mo_id+" ul").find("li:nth-child(6) span").text("已付款");
                             }else{
-                                $("#page_head_orders").find("#" + mo_id).find("td:nth-child(8)").text("已付款")
+                                $("#merchant_"+mo_id+" ul").find("li:nth-child(4) span").text("已付款");
                             }
                         }
                         hide_mask("#" + parent_id);
@@ -680,7 +680,8 @@ function add_new_material(obj,idx,store_id){
     else if($("#add_count_"+idx).val()==""){
         tishi_alert("请输入订货量");
     }else{
-        var type = $("#add_li_"+idx + " #material_types").val();
+        var type = $("#add_li_"+idx + " #material_category_id").val();
+        var type_name = $("#add_li_"+idx + " #material_category_id").find("option:selected").text();
         var order_count = $("#add_count_"+idx).val();
         $(obj).attr('disabled','disabled');
         $.ajax({
@@ -689,11 +690,9 @@ function add_new_material(obj,idx,store_id){
             type:"POST",
             data:"&material[name]="+$("#add_name_"+idx).val()+
             "&material[price]="+$("#cost_price_"+idx).val()+"&material[ifuse_code]=0"
-            + "&material[sale_price]=" + $("#sale_price_"+idx).val() + "&material[types]="+type,
+            + "&material[sale_price]=" + $("#sale_price_"+idx).val() + "&material[category_id]="+type,
             success:function(data,status){
-                //              alert(data.material.code);
-                var m = data.material;
-                add_material_to_selected(data.material,order_count);
+                add_material_to_selected(data.material,type_name,order_count);
                 $("#add_li_"+idx).remove();
             }
         });
@@ -701,7 +700,7 @@ function add_new_material(obj,idx,store_id){
     return false;
 }
 
-function add_material_to_selected(obj,order_count){
+function add_material_to_selected(obj,type_name,order_count){
     var id = obj.id;
     var each_total_price;
     var toatl_account = 0.0;
@@ -712,8 +711,8 @@ function add_material_to_selected(obj,order_count){
     }
     if(selectedItems.length==0){
         var li = "<tr id='li_mat_"+id+"' class='in_mat_selected'><td>";
-        li += obj.name + "</td><td>" + type_name(obj.types) + "</td><td>" + obj.price +
-        "</td><td>" + obj.sale_price +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='"+ order_count +"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"','"+obj.code+"','"+type_name(obj.types)+"')\" style='width:50px;'/></td><td>" +
+        li += obj.name + "</td><td>" + type_name + "</td><td>" + obj.price +
+        "</td><td>" + obj.sale_price +"</td><td><input type='text' id='out_num_"+$(obj).attr("id")+"' value='"+ order_count +"' onkeyup=\"set_order_num(this,'"+obj.storage+"','"+id+"','"+obj.price+"','"+obj.code+"','"+type_name+"')\" style='width:50px;'/></td><td>" +
         "<span class='per_total' id='total_"+id+"'>" + parseFloat(obj.price * parseInt(order_count)) + "</span></td><td>--</td><td><a href='javascript:void(0);' alt='"+id+"' onclick='del_result(this,\"_dinghuo\")'>删除</a></td></tr>";
 
         $("#dinghuo_selected_materials").append(li);
@@ -765,27 +764,27 @@ function removeChecked(obj){
     $("#final_price").text(parseFloat(final_price).toFixed(2));
 }
 
-function type_name(type){
-    name = "";
-    if(type==0){
-        name = "清洁用品" ;
-    }else if(type == 1){
-        name = "美容用品";
-    }else if(type==2){
-        name = "装饰产品";
-    }else if(type==3){
-        name = "配件产品";
-    }else if(type==4){
-        name = "电子产品";
-    }else if(type==5){
-        name = "其他产品"
-    }else if(type==6){
-        name = "辅助工具"
-    }else if(type==7){
-        name = "劳动保护"
-    }
-    return name;
-}
+//function type_name(type){
+//    name = "";
+//    if(type==0){
+//        name = "清洁用品" ;
+//    }else if(type == 1){
+//        name = "美容用品";
+//    }else if(type==2){
+//        name = "装饰产品";
+//    }else if(type==3){
+//        name = "配件产品";
+//    }else if(type==4){
+//        name = "电子产品";
+//    }else if(type==5){
+//        name = "其他产品"
+//    }else if(type==6){
+//        name = "辅助工具"
+//    }else if(type==7){
+//        name = "劳动保护"
+//    }
+//    return name;
+//}
 
 function select_check_type(obj){
     var name = $(obj).attr("id");
@@ -797,7 +796,7 @@ function select_check_type(obj){
             $("#supplier_check_time").attr("disabled", true);
         }
     }else{
-         if(type==1){
+        if(type==1){
             $("#edit_supplier_check_time").removeAttr("disabled");
         }else{
             $("#edit_supplier_check_time").attr("disabled", true);
@@ -806,7 +805,7 @@ function select_check_type(obj){
 }
 
 function edit_commit_supplier_form(obj){
-      if($.trim($("#edit_supplier_name").val())==""){
+    if($.trim($("#edit_supplier_name").val())==""){
         tishi_alert("请输入名称");
     }else if($.trim($("#edit_supplier_contact").val())==""){
         tishi_alert("请输入联系人");
@@ -893,7 +892,7 @@ function commit_in(obj){
                 barcode: barcode,
                 mo_code: mo_code,
                 num: $("#num").val()
-                },
+            },
             success:function(data){
                 if(data=="1")
                 {
@@ -1050,15 +1049,14 @@ function cancel_order(order_id,type,store_id,mo_type){
             success:function(data,status){
                 tishi_alert(data["content"]);
                 if(mo_type==1){
-                    $("#page_supplier_orders").find("#" + order_id).find("td:nth-child(8)").text("已取消")
+                    $("#merchant_"+order_id+" ul").find("li:nth-child(6) span").text("已取消")
                 }else{
-                    $("#page_head_orders").find("#" + order_id).find("td:nth-child(8)").text("已取消")
-                    }
-              
+                    $("#merchant_"+order_id+" ul").find("li:nth-child(4) span").text("已取消")
+                }
                 hide_mask("#mat_order_detail_tab")
             },
             error:function(){
-            //              alert("error");
+                tishi_alert("数据出错!");
             }
         });
     }
@@ -1085,7 +1083,7 @@ function toggle_notice(obj){
         $(obj).text(" 隐藏");
     }else{
         $(obj).text("点击查看")
-        }
+    }
     $(obj).next().toggle();
 }
 function toggle_low_materials(obj){
@@ -1093,7 +1091,7 @@ function toggle_low_materials(obj){
         $(obj).text(" 隐藏");
     }else{
         $(obj).text("点击查看")
-        };
+    };
     $(obj).next().toggle();
 }
 function close_notice(obj){
@@ -1350,13 +1348,6 @@ function checkMatLossNum(obj){
             msg = msg + "<br/>" + msg2;
             f = false;
         }
-
-    //          if(parseInt(num)>parseInt(storage)){
-    //            var msg3 = "物料名称为'"+ name + "'的报损数量不能大于库存数量！";
-    //            msg = msg + "<br/>" + msg3;
-    //            f = false;
-    //          }
-
     });
 
     if(msg != ""){
@@ -1502,9 +1493,9 @@ function back_good_search(store_id){
 }
 
 function back_good_select(mat,obj){
-    var type = type_name(mat.mtype);
+    var c_name = mat.cname;
     if($(obj).attr("checked")=="checked"){
-        $("#back_good_tbody").append("<tr id=back_good_tr"+mat.mid+"><input type='hidden' name='good_id' value='"+mat.mid+"'/><input type='hidden' name='supp_id' value='"+mat.msuid+"'><td>"+mat.mname+"</td><td>"+type+"</td><td>"+mat.mstorage+
+        $("#back_good_tbody").append("<tr id=back_good_tr"+mat.mid+"><input type='hidden' name='good_id' value='"+mat.mid+"'/><input type='hidden' name='supp_id' value='"+mat.msuid+"'><td>"+mat.mname+"</td><td>"+c_name+"</td><td>"+mat.mstorage+
             "</td><td>"+parseInt(mat.mnum)+"</td><td><input type='text' name='back_good_count' style='width:50px' value='1'></td><td><a href='javascript:void(0)' onclick='back_good_remove_tr("+mat.mid+")'>删除</a></td></tr>")
     }else{
         $("#back_good_tr"+mat.mid).remove();

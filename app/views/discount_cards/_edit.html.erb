@@ -17,7 +17,7 @@
         </div>
         <div class="item">
           <label><span class="red">*</span>面值：</label>
-          <input name="edit_dcard_price" id="edit_dcard_price" type="text" value="<%= @dcard.price %>"/>
+          <input name="edit_dcard_price" id="edit_dcard_price" type="text" value="<%= format("%.1f", @dcard.price) if @dcard.price %>"/>
         </div>
         <div class="item_textarea">
           <label><span class="red">*</span>选择项目：</label>
@@ -25,7 +25,7 @@
           <div class="seeProDiv_rWidth">
             <ul class="srw_ul">
               <% @products.each do |p| %>
-              <li><%= p.pname %><span><%= p.discount %>/折</span><input type="hidden"
+              <li><%= p.pname %>/<span><%= p.discount <10 ? "0"+p.discount.to_s : p.discount %>折</span><input type="hidden"
                    name="edit_dcard_products[]" value="<%= p.pid %>-<%= p.discount %>"/></li>
               <% end %>
             </ul>

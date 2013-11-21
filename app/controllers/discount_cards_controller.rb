@@ -117,17 +117,17 @@ class DiscountCardsController < ApplicationController   #打折卡
     redirect_to request.referer
   end
 
-  def destroy
-    dcard = SvCard.find_by_id(params[:id])
-    if dcard.update_attribute("status", SvCard::STATUS[:DELETED])
-      flash[:notice] = "删除成功!"
-      redirect_to store_discount_cards_path
-    else
-      flash[:notice] = "删除失败!"
-      redirect_to request.referer
-    end
-  end
-  
+#  def destroy
+#    dcard = SvCard.find_by_id(params[:id])
+#    if dcard.update_attribute("status", SvCard::STATUS[:DELETED])
+#      flash[:notice] = "删除成功!"
+#      redirect_to store_discount_cards_path
+#    else
+#      flash[:notice] = "删除失败!"
+#      redirect_to request.referer
+#    end
+#  end
+
   def edit_dcard_add_products #编辑 添加项目
     cid = params[:cid].to_i
     @types = Category.where(["store_id = ? and types in (?)", @store.id, [Category::TYPES[:good], Category::TYPES[:service]]])

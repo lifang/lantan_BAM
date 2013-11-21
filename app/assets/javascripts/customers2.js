@@ -43,7 +43,7 @@ function select_check_type(obj){
     }
 }
 
-function add_cars(){
+function add_new_cars(){
     var pattern = new RegExp("[`~@#$^&*()=:;,\\[\\].<>?~！@#￥……&*（）——|{}。，、？-]");
     var buy_year = $("#buy_year").find("option:selected").text();
     var brand = $("#car_brands").find("option:selected").text();
