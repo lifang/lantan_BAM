@@ -11,7 +11,7 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">选择产品/服务项目：</div>
   <div class="releaseDiv_r rdTop">
-    <%= render :partial=>"/sales/sale_search",:object=>[Product::PRODUCT_TYPES,"load_types"] %>
+    <%= render :partial=>"/sales/sale_search",:object=>[@cats,"load_types"] %>
   </div>
 </div>
 <div class="releaseDiv">

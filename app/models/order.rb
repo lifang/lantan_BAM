@@ -1030,12 +1030,13 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           end
           #更新订单提成
           hash[:front_deduct],hash[:technician_deduct] = 0,0
-          hash[:front_deduct] += PackageCard.select("sum(deduct_price+deduct_percent) sum").where(:id=>c_pcard_relations.map(&:package_card_id)).sum unless c_pcard_relations.blank?
-          deduct_order = Order.joins(:order_prod_relations=>:product).select("sum((deduct_price+deduct_percent)*pro_num) deduct_sum,sum((technician_price+technician_percent)*pro_num) technician_sum").where("orders.id=#{order.id}")
+          hash[:front_deduct] += PackageCard.select("ifnull(sum(deduct_price+deduct_percent),0) sum").where(:id=>c_pcard_relations.map(&:package_card_id)).sum unless c_pcard_relations.blank?
+          deduct_order = Order.joins(:order_prod_relations=>:product).select("ifnull(sum((deduct_price+deduct_percent)*pro_num),0) deduct_sum,
+          ifnull(sum((techin_price+techin_percent)*pro_num),0) technician_sum").where("orders.id=#{order.id}").first
           hash[:front_deduct] += deduct_order.deduct_sum
           hash[:technician_deduct] += deduct_order.technician_sum/2.0
           order.update_attributes hash
-        rescue
+        rescue => error
           status = 2
         end
       end

@@ -23,7 +23,7 @@
                 <td width="15%">代码</td>
                 <td width="20%">活动时间</td>
                 <td width="15%">状态</td>
-                <td width="10%">已报名人数</td>
+                <td width="10%">参加数量</td>
                 <td width="15%">操作</td>
               </tr>
             </thead>
@@ -41,12 +41,12 @@
                     end
                   %></td>
                   <td><%=Sale::STATUS_NAME[sale.status] %></td>
-                  <td><%= sale.reported_num %></td>
+                  <td><%=@orders[sale.id].nil? ? 0 : @orders[sale.id] %></td>
                   <td style="text-align: right;">
                     <%if sale.status==0 %>
                       <% if permission?(:sales, :publish) %><a href="javascript:void(0)" onclick="public_sale('<%= sale.id %>',<%= params[:store_id] %>)">发布</a><% end %>
                     <%end%>
-                    <% if permission?(:sales, :edit_sale) %><a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">修改</a><% end %>
+                    <% if permission?(:sales, :edit_sale) %><a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">编辑</a><% end %>
                     <a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>" target="_blank">预览</a>
                   </td>
                 </tr>
@@ -82,12 +82,12 @@
                       end
                     %></td>
                     <td><%=Sale::STATUS_NAME[sale.status] %></td>
-                    <td><%= sale.reported_num %></td>
+                    <td><%= @orders[sale.id].nil? ? 0 : @orders[sale.id]  %></td>
                     <td style="text-align: right;">
                       <%if sale.status==0 %>
                         <% if permission?(:sales, :publish) %><a href="javascript:void(0)" onclick="public_sale('<%= sale.id %>',<%= params[:store_id] %>)">发布</a><% end %>
                       <%end%>
-                      <% if permission?(:sales, :edit_sale) %><a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">修改</a><% end %>
+                      <% if permission?(:sales, :edit_sale) %><a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">编辑</a><% end %>
                       <a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>" target="_blank">预览</a>
                     </td>
                   </tr>

@@ -40,15 +40,15 @@
            <dd><span>服务销售金额：</span><%= to_total[Product::PROD_TYPES[:SERVICE]] %>元</dd>
          </dl>
          <div class="all">
-          <div class="all_money">合计：<%= total %></div>
+          <div class="all_money">合计：<%= total %>元</div>
            <div class="all_amount">比昨天<span <% if is_up %>class="up"<% else %>class="down"<%end%>>上升</span><%= "#{format("%.1f",up_rate)}%" %></div>
          </div>
       </div>
        <div class="box">
         <div class="week">本周</div>
         <dl>
-           <dd><span>产品销售金额：</span><%= @total_week[Product::PROD_TYPES[:PRODUCT]] %>元</dd>
-           <dd><span>服务销售金额：</span><%= @total_week[Product::PROD_TYPES[:SERVICE]] %>元</dd>
+           <dd><span>产品销售金额：</span><%= @total_week[Product::PROD_TYPES[:PRODUCT]].nil? ? 0 : @total_week[Product::PROD_TYPES[:PRODUCT]]  %>元</dd>
+           <dd><span>服务销售金额：</span><%=  @total_week[Product::PROD_TYPES[:SERVICE]].nil? ? 0 : @total_week[Product::PROD_TYPES[:SERVICE]]  %>元</dd>
          </dl>
          <div class="all">
            <div class="all_money">合计：<%=@total_week.values.inject(0){|num,price| num+price}  %>元</div>
@@ -57,8 +57,8 @@
       <div class="box">
          <div class="month">本月</div>
          <dl>
-           <dd><span>产品销售金额：</span><%= @total_month[Product::PROD_TYPES[:PRODUCT]] %>元</dd>
-           <dd><span>服务销售金额：</span><%= @total_month[Product::PROD_TYPES[:SERVICE]] %>元</dd>
+           <dd><span>产品销售金额：</span><%= @total_month[Product::PROD_TYPES[:PRODUCT]].nil? ? 0 : @total_month[Product::PROD_TYPES[:PRODUCT]] %>元</dd>
+           <dd><span>服务销售金额：</span><%= @total_month[Product::PROD_TYPES[:SERVICE]].nil? ? 0 : @total_month[Product::PROD_TYPES[:SERVICE]] %>元</dd>
          </dl>
          <div class="all">
           <div class="all_money">合计：<%= @total_month.values.inject(0){|num,price| num+price}  %>元</div>

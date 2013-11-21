@@ -70,8 +70,8 @@ class PackageCardsController < ApplicationController
   #添加套餐卡
   def add_pcard
     @pcard=PackageCard.new
-    @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:service],Category::TYPES[:good]]).inject(Hash.new){
-      |hash,cate| hash[cate.id]=cate.name;hash}
+    @cates = Category.where(:store_id=>params[:store_id]).inject(Hash.new){
+      |hash,cate| hash[cate.types].nil? ?  hash[cate.types]={cate.id=>cate.name} :hash[cate.types][cate.id]=cate.name ;hash}
   end
 
   #编辑套餐卡
@@ -81,8 +81,8 @@ class PackageCardsController < ApplicationController
      pcard_prod_relations p on s.id=p.product_id  where p.package_card_id=#{params[:id]}")
     @p_material = PcardMaterialRelation.find_by_package_card_id(@pcard.id)
     @material = Material.find(@p_material.material_id) if @p_material
-    @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:service],Category::TYPES[:good]]).inject(Hash.new){
-      |hash,cate| hash[cate.id]=cate.name;hash}
+    @cates = Category.where(:store_id=>params[:store_id]).inject(Hash.new){
+      |hash,cate| hash[cate.types].nil? ?  hash[cate.types]={cate.id=>cate.name} :hash[cate.types][cate.id]=cate.name ;hash}
   end
 
   #更新套餐卡
@@ -139,7 +139,7 @@ class PackageCardsController < ApplicationController
   end
   
   def request_material
-    materials = Material.select("id,name").where(:store_id=>params[:store_id]).where(:types=>params[:id]).
+    materials = Material.select("id,name").where(:store_id=>params[:store_id],:category_id=>params[:id]).
       where(:status=>Material::STATUS[:NORMAL]).inject(Hash.new){|hash,material|hash[material.id]=material.name;hash}
     render :json=>materials
   end

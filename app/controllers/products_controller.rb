@@ -17,7 +17,7 @@ class ProductsController < ApplicationController
     @product=Product.new
     @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:good],Category::TYPES[:material]]).inject(Hash.new){
       |hash,ca| hash[ca.types].nil? ? hash[ca.types] = {ca.id => ca.name}:hash[ca.types][ca.id]=ca.name;hash}
-    p @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL]).where("category_id is not null").order(:category_id)
+    @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL]).where("category_id is not null").order(:category_id)
     @max_len = check_str(@materials.map(&:name)[0])
     @materials.map(&:name).each{|name| @max_len = check_str(name) if check_str(name) >= @max_len}
   end
@@ -84,11 +84,12 @@ class ProductsController < ApplicationController
   def edit_prod
     @product =Product.find(params[:id])
     @img_urls=@product.image_urls
-    @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL],:types =>Material::PRODUCT_TYPE).order(:types)
+    @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:good],Category::TYPES[:material]]).inject(Hash.new){
+      |hash,ca| hash[ca.types].nil? ? hash[ca.types] = {ca.id => ca.name}:hash[ca.types][ca.id]=ca.name;hash}
+    @materials = Material.where(:store_id=>params[:store_id],:status =>Material::STATUS[:NORMAL]).where("category_id is not null").order(:category_id)
     @max_len = check_str(@materials.map(&:name)[0])
     @materials.map(&:name).each{|name| @max_len = check_str(name) if check_str(name) >= @max_len}
     @material = @product.prod_mat_relations[0]
-    @cates = Category.where(:store_id=>params[:store_id],:types=>Category::TYPES[:good])
   end
 
   def show_prod
@@ -183,7 +184,8 @@ class ProductsController < ApplicationController
   end
 
   def show
-    @prod =Product.find(params[:id])
+    @prod = Product.find(params[:id])
+    @category = Category.find(@prod.category_id).name if @prod.category_id
     @img_urls = @prod.image_urls
   end
 
@@ -233,24 +235,13 @@ class ProductsController < ApplicationController
     parms = {:name=>params[:name],:category_id=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
       :created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"S#{Sale.set_code(3,"product","service_code")}",:is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB],
-      :show_on_pad=>Product::SHOW_ON_IPAD[:NO]}
+      :show_on_ipad=>Product::SHOW_ON_IPAD[:NO]}
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
     parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
     parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
     parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2]})
     Product.create(parms)
-    redirect_to "/stores/#{params[:store_id]}/products/package_service"
-    #    begin
-    #      if params[:img_url] and !params[:img_url].keys.blank?
-    #        params[:img_url].each_with_index {|img,index|
-    #          url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
-    #          ImageUrl.create(:product_id=>product.id,:img_url=>url)
-    #          product.update_attributes({:img_url=>url}) if index == 0
-    #        }
-    #      end
-    #    rescue
-    #      flash[:notice] ="图片上传失败，请重新添加！"
-    #    end
+    redirect_to request.referer
   end
 
   def add_package
