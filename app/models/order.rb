@@ -226,7 +226,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
             prod_num[:selected] = 1
             prod_num[:price] = price
             prod_num[:mat_num] = prod_mat_relation.m_storage if prod_mat_relation
-            prod_num[:useNum] = already_used_count[cpr.id][prod_arr[0].to_i][1] if already_used_count && already_used_count[cpr.id] && already_used_count[cpr.id][prod_arr[0].to_i]
+            prod_num[:useNum] = already_used_count[cpr.cpr_id][prod_arr[0].to_i][1] if already_used_count && already_used_count[cpr.cpr_id] && already_used_count[cpr.cpr_id][prod_arr[0].to_i]
             prod_num[:leftNum] = prod_arr[2]
             pc_record_hash[:products] << prod_num
           end
