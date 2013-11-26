@@ -16,8 +16,8 @@
             <label>奖励方法：</label>
             <%= f.select :process_types, ViolationReward::N_REWARD.invert %>（<%=ViolationReward::N_REWARD.values.join("、")%>）
             <ul>
-              <li>按分值奖励&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
-              <li>按金额奖励&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
+              <li>按分值奖励&nbsp;<input name="violation_reward[score_num]" value="<%=@violation_reward.score_num  %>" type="text"/></li>
+              <li>按金额奖励&nbsp;<input name="violation_reward[salary_num]" value="<%=@violation_reward.salary_num  %>" type="text"/></li>
             </ul>
           </div>
           <div class="item_textarea">

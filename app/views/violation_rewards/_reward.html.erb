@@ -9,16 +9,16 @@
             <%= f.select :belong_types, ViolationReward::VIOLATE_TYPES.invert %>（<%=ViolationReward::VIOLATE_TYPES.values.join("、")%>）
           </div>
           <div class="item_textarea">
-            <label><span class="red">*</span>奖励原因：</label>
-            <%= f.text_area(:situation, :cols => "", :rows => "", :class => "width_textarea") %>
-          </div>
-          <div class="item_textarea">
             <label>奖励方法：</label>
             <%= f.select :process_types, ViolationReward::N_REWARD.invert %>（<%=ViolationReward::N_REWARD.values.join("、")%>）
-            <ul>
-              <li>按分值奖励&nbsp;<input name="violation_reward[score_num]" id="score_num" type="text"/></li>
-              <li>按金额奖励&nbsp;<input name="violation_reward[salary_num]" id="salary_num" type="text"/></li>
-            </ul>
+          </div>
+          <div class="item_textarea">
+            <label>按分值奖励：</label>
+            <input name="violation_reward[score_num]" id="score_num" value="<%=@violation_reward.score_num  %>" type="text"/>
+          </div>
+          <div class="item_textarea">
+            <label>按金额奖励：</label>
+            <input name="violation_reward[salary_num]" id="salary_num" value="<%=@violation_reward.salary_num  %>" type="text"/>
           </div>
           <div class="item_textarea">
             <label><span class="red">*</span>补充说明：</label>
