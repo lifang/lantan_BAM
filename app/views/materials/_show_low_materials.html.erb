@@ -15,7 +15,7 @@
         <td width="15%"><%= lm.code %></td>
         <td><%= lm.name %></td>
         <% a = @types.inject(Hash.new){|h,t|h[t.id]=t.name;h} if @types %>
-        <td><%= a[lm.category_id.to_i] %></td>
+        <td><%= lm.category_id.nil? || a[lm.category_id.to_i].nil? ? "----" : a[lm.category_id.to_i] %></td>
         <td>缺货</td>
         <td id="materialstorage<%= lm.id %>td"><%= lm.storage %></td>
        </tr>

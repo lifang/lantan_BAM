@@ -70,7 +70,8 @@ function submit_search_form(store_id,type,obj){
     var types = $(form).find("#material_category_id").val();
     if(types==""&&name==""){
         tishi_alert("请选择类型或填写名称！");
-    }else{
+    }
+    else{
         var data = "name="+name+"&types="+types+"&type="+type;
         if(type==1){
             data += "&from=" + $("#from").val();
@@ -1091,7 +1092,6 @@ function set_material_low_count_validate(store_id,material_id){ //设置单个�
 }
 
 function set_ignore(m_id, store_id,obj){   //忽略库存预警
-    var obj_td = $(obj).parent();
     $.ajax({
         url: "/stores/"+store_id+"/materials/set_ignore",
         dataType: "json",
@@ -1106,21 +1106,18 @@ function set_ignore(m_id, store_id,obj){   //忽略库存预警
             }else if(data.status==1){
                 tishi_alert("操作成功!");
                 $(obj).parent().parent().find("td:first").removeAttr("class");
-                $(obj).parent().parent().find("td:nth-child(4)").text("存货");
-                obj_td.append("<a href='JavaScript:void(0)' onclick='cancel_ignore("+m_id+","+store_id+","+"this); return false;'>取消忽略</a>");
-                $(obj).remove();
+                $(obj).parent().parent().find("td:nth-child(4)").text("存货");               
+                $(obj).text("取消忽略");
+                $(obj).attr("onclick", "cancel_ignore("+m_id+","+store_id+","+"this);return false;")
                 if(data.material_storage <= data.material_low){         //如果设置忽略,且该物料小于库存预警，则要在缺货信息提示里把相应的物料删除掉
-                    var l = $("#low_materials_tbody").find("#material"+m_id+"tr").length;  //判断该物料是否已经在缺货信息提示里
-                    var low_materials_count = parseInt($("#low_materials_span").text());
-                    if(l>0){          
-                        $("#low_materials_span").text(low_materials_count-1);
-                        $("#material"+m_id+"tr").remove();
-                        $("#low_materials_tbody").find("tr").removeAttr("class");       //重新加上样式
-                        $("#low_materials_tbody").find("tr:odd").attr("class", "tbg");
-                    }
-                    if((low_materials_count-1)==0){
-                        $("#low_materials_span").parent().remove();
-                    }
+                    $.ajax({
+                        url: "/stores/"+store_id+"/materials/reflesh_low_materials",
+                        dataType: "script",
+                        type: "get",
+                        data: {
+                            store_id : store_id
+                        }
+                    })
                 }
             }
         }
@@ -1141,31 +1138,22 @@ function cancel_ignore(m_id,store_id,obj){   //取消忽略库存预警
                 tishi_alert("操作失败!");
             }else if(data.status==1){
                 tishi_alert("操作成功!");
-                if(data.material_storage <= data.material_low){
-                    var message_span = $("span[id='low_materials_span']").length;            //判断是否有缺货提示
-                    if(message_span<=0){              //如果没有缺货提示信息，则要加上缺货提示信息
-                        $("#material_data_box").before("<div class='message'>有<span class='red' id='low_materials_span'>1</span>个物料库存量过低\n\
-                                                            <a href='JavaScript:void(0)' onclick='toggle_low_materials(this)'>点击查看</a>\n\
-                                                            <div style='display:none;'><table width='100%' border='0' cellspacing='0' cellpadding='0' class='data_tab_table'>\n\
-                                                            <thead><tr class='hbg'><td>条形码</td><td>物料名称</td><td>物料类别</td><td>库存状态</td>\n\
-                                                            <td>库存量(个)</td><td>成本价</td></tr></thead><tbody id='low_materials_tbody'><tr id='material"+m_id+"tr'>\n\
-                                                            <td width='15%'>"+data.material_code+"</td><td>"+data.material_name+"</td><td>"+data.material_type+"</td><td>\n\
-                                                            缺货</td><td id='materialstorage"+m_id+"td'>"+data.material_storage+"</td><td>"+
-                            data.material_price+"</td></tr></tbody></table></div></div>")
-                    }else{                //如果已有缺货提示，则只要加上一行记录
-                        var low_materials_count = parseInt($("#low_materials_span").text());
-                        $("#low_materials_span").text(low_materials_count+1);
-                        var class_name = ($("#low_materials_tbody").find("tr:last").attr("class")=="tbg" ? "" : "tbg");
-                        $("#low_materials_tbody").append("<tr id='material"+m_id+"tr' class="+class_name+"><td width='15%'>"+data.material_code+"</td><td>"+
-                            data.material_name+"</td><td>"+data.material_type+"</td><td>缺货</td><td id='materialstorage"+m_id+"td'>"+
-                            data.material_storage+"</td><td>"+data.material_price+"</td></tr>");
-                    }
+                if(data.material_storage <= data.material_low){                    
                     $(obj).parent().parent().find("td:first").removeAttr("class");
-                    $(obj).parent().parent().find("td:first").attr("class", "data_table_error")
+                    $(obj).parent().parent().find("td:first").attr("class", "data_table_error");
                     $(obj).parent().parent().find("td:nth-child(4)").text("缺货");
+                    $.ajax({
+                        url: "/stores/"+store_id+"/materials/reflesh_low_materials",
+                        dataType: "script",
+                        type: "get",
+                        data: {
+                            store_id : store_id
+                        }
+                    })
                 };
-                obj_td.append("<a href='JavaScript:void(0)' onclick='set_ignore("+m_id+","+store_id+","+"this);return false;'>忽略</a>");
-                $(obj).remove();
+                //obj_td.append("<a href='JavaScript:void(0)' onclick='set_ignore("+m_id+","+store_id+","+"this);return false;'>忽略</a>");
+                $(obj).text("忽略");
+                $(obj).attr("onclick", "set_ignore("+m_id+","+store_id+","+"this);return false;")
             }
         }
     })
