@@ -48,14 +48,14 @@ class Api::OrdersController < ApplicationController
   #根据车牌号查询客户
   def search_car
     order = Order.search_by_car_num params[:store_id],params[:car_num], nil
-    result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2], :package_cards => order[3] }.to_json
+    result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2], :package_cards => order[3],:sv_card =>order[4] }.to_json
     render :json => result
   end
 
   #查看订单
   def show_car
     order = Order.search_by_car_num params[:store_id],params[:car_num], params[:car_id]
-    result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2], :package_cards => order[3] }.to_json
+    result = {:status => 1,:customer => order[0],:working => order[1], :old => order[2], :package_cards => order[3],:sv_card =>order[4] }.to_json
     render :json => result
   end
 

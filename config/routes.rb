@@ -310,13 +310,20 @@ LantanBAM::Application.routes.draw do
         post :new_index_list,:make_order, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order
       end
     end
-  
+
+    resources :change do
+      collection do
+        get :sv_records
+        post :change_pwd
+      end
+    end
   end
   resources :return_backs do
     collection do
       get :return_info, :return_msg, :generate_b_code
     end
   end
+
 
 
 end
