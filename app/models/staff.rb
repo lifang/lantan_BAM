@@ -19,7 +19,7 @@ class Staff < ActiveRecord::Base
   validates :phone, :uniqueness => { :message => "联系方式已经存在!", :scope => :status}, :if => :staff_not_deleted?
   validates :username, :uniqueness => { :message => "用户名已经存在!", :scope => :status}, :if => :staff_not_deleted?
   #门店员工职务
-  S_COMPANY = {:BOSS=>0,:CHIC=>2,:FRONT=>3,:TECHNICIAN=>1,:OTHER=>4} #0 老板 2 店长 3接待 1 技师 4其他
+  S_COMPANY = {:BOSS=>0,:CHIC=>2,:FRONT =>3,:TECHNICIAN =>1,:OTHER=>4} #0 老板 2 店长 3接待 1 技师 4其他
   N_COMPANY = {1=>"技师",3=>"接待",0=>"老板",2=>"店长",4=>"其他"}
   LEVELS = {0=>"高级",1=>"中级",2=>"初级"}  #技师等级
   #总部员工职务
@@ -58,12 +58,12 @@ class Staff < ActiveRecord::Base
   after_update :insert_staff_gr_record
 
   def insert_staff_gr_record
-     if (self.level_changed? || self.base_salary_changed? || self.deduct_at_changed? || self.deduct_end_changed? || self.deduct_percent_changed? || self.working_stats_changed?)
-       StaffGrRecord.create(:staff_id => self.id, :base_salary => self.base_salary,
-                :deduct_at => self.deduct_at, :deduct_end => self.deduct_end,
-                :deduct_percent => self.deduct_percent, :working_stats => self.working_stats,
-                :level => self.level)
-     end
+    if (self.level_changed? || self.base_salary_changed? || self.deduct_at_changed? || self.deduct_end_changed? || 
+          self.deduct_percent_changed? || self.working_stats_changed? || self.secure_fee_changed? || self.reward_fee_changed?)
+      StaffGrRecord.create(:staff_id => self.id, :base_salary => self.base_salary,:deduct_at => self.deduct_at,
+        :deduct_end => self.deduct_end,:deduct_percent => self.deduct_percent, :working_stats => self.working_stats,
+        :level => self.level)
+    end
   end
 
   def has_password?(submitted_password)

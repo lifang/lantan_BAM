@@ -79,7 +79,6 @@ class WorkRecord < ActiveRecord::Base
           end
         end
       end
-
     end
   end
 end

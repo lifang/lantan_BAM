@@ -12,10 +12,11 @@ class StaffsController < ApplicationController
     @staffs = @store.staffs.not_deleted.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
     @staff_scores_hash = MonthScore.select("sum(sys_score) sys_score,staff_id").where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")}
    and store_id = ?", @store.id).group("staff_id").inject(Hash.new){|hash,month| hash[month.staff_id] = month;hash}
-    @violations = ViolationReward.joins(:staff).where(:types => false).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name")
+    @violations = ViolationReward.joins(:staff).where(:status => false).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name").group_by{|i| i.types }
     @staff =  Staff.new
-    @departs = Department.where(:store_id=>@store.id,:status=>Department::STATUS[:NORMAL]).inject(Hash.new){
-      |hash,depar| hash[depar.types].nil? ? hash[depar.types]={depar.id=>depar} : hash[depar.types][depar.id]=depar;hash}
+    departs = Department.where(:store_id=>@store.id,:status=>Department::STATUS[:NORMAL])
+    @departs = departs.inject(Hash.new){|hash,depar| hash[depar.types].nil? ? hash[depar.types]={depar.id=>depar} : hash[depar.types][depar.id]=depar;hash}
+    @index_dearts = departs.inject(Hash.new){|hash,depar| hash[depar.id]=depar.name;hash}
     @violation_reward = ViolationReward.new
     @train = Train.new
     @latest_updated_at = Staff.maximum("updated_at").strftime("%Y-%m-%d") unless Staff.maximum("updated_at").blank?
@@ -57,10 +58,8 @@ class StaffsController < ApplicationController
   def show       
     @violations = @staff.violation_rewards.where("types = false").
       paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("violation_tab")
-
     @rewards = @staff.violation_rewards.where("types = true").
       paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("reward_tab")
-              
     @trains = Train.includes(:train_staff_relations).
       where("train_staff_relations.staff_id = #{@staff.id}").
       paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("train_tab")
@@ -68,7 +67,7 @@ class StaffsController < ApplicationController
     @salaries = @staff.salaries.where("status = false").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("salary_tab")
     current_month = Time.now().months_ago(1).strftime("%Y%m")
     @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
-
+    @departs = Department.where(:store_id=>@store.id,:status=>Department::STATUS[:NORMAL]).inject(Hash.new){|hash,depar| hash[depar.id]=depar.name;hash}
     respond_to do |format|
       format.html
       format.js

@@ -955,7 +955,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
     status = 0
     if order
       Order.transaction do
-        begin
+#        begin
           hash = Hash.new
           hash[:is_billing] = billing.to_i == 0 ? false : true
           hash[:is_pleased] = please.to_i
@@ -1030,15 +1030,16 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           end
           #更新订单提成
           hash[:front_deduct],hash[:technician_deduct] = 0,0
-          hash[:front_deduct] += PackageCard.select("ifnull(sum(deduct_price+deduct_percent),0) sum").where(:id=>c_pcard_relations.map(&:package_card_id)).sum unless c_pcard_relations.blank?
+          hash[:front_deduct] += PackageCard.select("ifnull(sum(deduct_price+deduct_percent),0) sum").where(:id=>c_pcard_relations.map(&:package_card_id)).first.sum unless c_pcard_relations.blank?
           deduct_order = Order.joins(:order_prod_relations=>:product).select("ifnull(sum((deduct_price+deduct_percent)*pro_num),0) deduct_sum,
           ifnull(sum((techin_price+techin_percent)*pro_num),0) technician_sum").where("orders.id=#{order.id}").first
           hash[:front_deduct] += deduct_order.deduct_sum
           hash[:technician_deduct] += deduct_order.technician_sum/2.0
           order.update_attributes hash
-        rescue => error
-          status = 2
-        end
+#        rescue => error
+#          p error
+#          status = 2
+#        end
       end
     else
       status = 2

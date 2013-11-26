@@ -11,9 +11,9 @@
           <li><strong>基本工资：</strong><%= @staff.base_salary.to_i %>元</li>
           <li><strong>提成方式：</strong>金额/提成率</li>
           <li><strong>本月订单：</strong><%= @salary_details.length %></li>
-          <li><strong>考核：</strong>90分</li>
-          <li><strong>提成：</strong><%=@salary_details.map(&:total_deduct).compact.inject(0){|sum,t|sum+t}%>元</li>
-          <li><strong>扣款：</strong>300元</li>
+          <li><strong>考核：</strong><%=100-((@score.nil?||@score.sys_score.nil?) ? 0 : @score.sys_score)%>分</li>
+          <li><strong>提成：</strong><%=@salary.deduct_num%>元</li>
+          <li><strong>扣款：</strong><%= @salary.voilate_fee %>元</li>
         </ul>
       </div>
       <div class="search">
@@ -37,7 +37,15 @@
                   <tr>
                     <td><%=salary_detail.created_at.nil? ? "" : salary_detail.created_at.strftime("%Y-%m-%d") %></td>
                     <td><%=salary_detail.code %></td>
-                    <td><%=salary_detail.total_deduct.nil? ? 0 : salary_detail.total_deduct  %>元</td>
+                    <td><%=
+                      if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
+                        salary_detail.t_deduct.nil? ? 0 : salary_detail.t_deduct
+                      elsif @staff.type_of_w == Staff::S_COMPANY[:FRONT]
+                        salary_detail.f_deduct.nil? ? 0 : salary_detail.f_deduct
+                      else
+                        0
+                      end
+                    %>元</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -57,7 +65,15 @@
                   <tr>
                     <td><%=salary_detail.created_at.nil? ? "" : salary_detail.created_at.strftime("%Y-%m-%d") %></td>
                     <td><%=salary_detail.code %></td>
-                    <td><%=salary_detail.total_deduct.nil? ? 0 : salary_detail.total_deduct %>元</td>
+                    <td><%=
+                      if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
+                        salary_detail.t_deduct.nil? ? 0 : salary_detail.t_deduct
+                      elsif @staff.type_of_w == Staff::S_COMPANY[:FRONT]
+                        salary_detail.f_deduct.nil? ? 0 : salary_detail.f_deduct
+                      else
+                        0
+                      end
+                    %>元</td>
                   </tr>
                 <% end %>
               </tbody>

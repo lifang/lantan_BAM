@@ -26,24 +26,24 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="staffs_table">
       <thead>
         <tr class="hbg">
-          <th><span class="sort_u_s" onclick="sort_change(this)">姓名</span></th>
-          <th>工作岗位</th>
-          <th>职务</th>
-          <th><span>管理扣分</span></th>
-          <th><span>得分</span></th>
-          <th>状态</th>
-          <th>本月评估</th>
-          <th>操作</th>
+           <th width="10%">姓名</th>
+          <th width="15%">部门</th>
+          <th width="15%">职务</th>
+          <th width="10%">管理扣分</th>
+          <th width="10%">得分</th>
+          <th width="10%">状态</th>
+          <th width="10%">本月评估</th>
+          <th width="20%">操作</th>
         </tr>
       </thead>
       <tbody>
-        <% unless @staffs.blank? %>
+        <% unless @staffs.blank? || @departs == {} %>
           <% staff = @staffs[0] %>
           <tr>
             <td><%= staff.name %></td>
-            <td><%= Staff::N_HEAD[staff.position] %></td>
-            <td><%= Staff::N_COMPANY[staff.type_of_w] %></td>
-              <% month_score =  @staff_scores_hash[staff.id] %>
+            <td><%= @index_dearts[staff.position] %></td>
+            <td><%= @index_dearts[staff.department_id] %></td>
+            <% month_score =  @staff_scores_hash[staff.id] %>
             <td>
               <label class="sys_score_text"><%= month_score.nil? ? 0 : month_score.try(:sys_score) %></label>
             </td>
@@ -63,22 +63,22 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="staffs_table">
       <thead>
         <tr class="hbg">
-          <th><span class="sort_u_s" onclick="sort_change(this)">姓名</span></th>
-          <th>工作岗位</th>
-          <th>职务</th>
-          <th><span>管理扣分</span></th>
-          <th><span>得分</span></th>
-          <th>状态</th>
-          <th>本月评估</th>
-          <th>操作</th>
+          <th width="10%">姓名</th>
+          <th width="15%">部门</th>
+          <th width="15%">职务</th>
+          <th width="10%">管理扣分</th>
+          <th width="10%">得分</th>
+          <th width="10%">状态</th>
+          <th width="10%">本月评估</th>
+          <th width="20%">操作</th>
         </tr>
       </thead>
       <tbody>
         <% @staffs.each do |staff| %>
           <tr>
             <td><%= staff.name %></td>
-            <td><%= Staff::N_HEAD[staff.position] %></td>
-            <td><%= Staff::N_COMPANY[staff.type_of_w] %></td>
+            <td><%= @index_dearts[staff.position] %></td>
+            <td><%= @index_dearts[staff.department_id] %></td>
             <% month_score =  @staff_scores_hash[staff.id] %>
             <td>
               <label class="sys_score_text"><%= month_score.nil? ? 0 : month_score.try(:sys_score) %></label>
@@ -91,7 +91,7 @@
               <% if permission?(:staffs,:del_staff) %><%= link_to "删除", store_staff_path(@store, staff.id), :method => :delete, :confirm => "确定删除该员工吗？" %><% end %>
             </td>
           </tr>
-        <% end  unless @staffs.blank?%>
+        <% end  unless @staffs.blank? || @departs == {}%>
       </tbody>
     </table>
     <%= will_paginate @staffs, :class => "pageTurn", :previous_label => "上一页",

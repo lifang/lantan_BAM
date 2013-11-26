@@ -16,13 +16,15 @@ class SalariesController < ApplicationController
   end
 
   def update
-    salary = Salary.find_by_id(params[:id])
+    salary = Salary.where(:staff_id=>params[:id],:current_month=>(params[:current_month].delete "-").to_i).first
     staff = salary.staff
-    base_salary = staff.base_salary.nil? ? 0 : staff.base_salary
-    total_price = base_salary + params[:reward_num].to_f - params[:deduct_num].to_f
-    salary.update_attributes(:reward_num => params[:reward_num],
-      :deduct_num => params[:deduct_num], :total => total_price) if salary
-    render :text => "success"
+    pre_total = salary.reward_num - salary.voilate_fee + salary.work_fee + salary.manage_fee - salary.tax_fee
+    total_price = params[:reward_num].to_f - params[:voilate_fee].to_f+params[:work_fee].to_f+params[:manage_fee].to_f - params[:tax_fee].to_f
+    fact_fee = (salary.fact_fee + total_price-pre_total).round(1)
+    total = params[:total].to_f - salary.fact_fee + fact_fee
+    salary.update_attributes(:reward_num => params[:reward_num],:work_fee=>params[:work_fee],:manage_fee=>params[:manage_fee],
+      :tax_fee=>params[:tax_fee],:voilate_fee => params[:voilate_fee],:fact_fee =>fact_fee) if salary
+    render :json =>{:msg=>"success",:name=>staff.name,:salary =>salary,:total=>total}
   end
   
 end

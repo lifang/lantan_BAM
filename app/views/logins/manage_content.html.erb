@@ -9,7 +9,7 @@
   <body class="white_bg">
     <div class="head">
       <h1><%= @store.name %></h1>
-      <p><%= session[:time] %></p>
+      <p><%= session[:time] %>点</p>
     </div>
     <div class="main">
       <div class="box">
@@ -36,8 +36,8 @@
          end
        %>
          <dl>
-           <dd><span>产品销售金额：</span><%= to_total[Product::PROD_TYPES[:PRODUCT]] %>元</dd>
-           <dd><span>服务销售金额：</span><%= to_total[Product::PROD_TYPES[:SERVICE]] %>元</dd>
+           <dd><span>产品销售金额：</span><%= to_total[Product::PROD_TYPES[:PRODUCT]].nil? ? 0 : to_total[Product::PROD_TYPES[:PRODUCT]] %>元</dd>
+           <dd><span>服务销售金额：</span><%= to_total[Product::PROD_TYPES[:SERVICE]].nil? ? 0 :  to_total[Product::PROD_TYPES[:SERVICE]]%>元</dd>
          </dl>
          <div class="all">
           <div class="all_money">合计：<%= total %>元</div>

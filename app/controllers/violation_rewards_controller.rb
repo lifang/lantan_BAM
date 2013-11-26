@@ -8,8 +8,6 @@ class ViolationRewardsController < ApplicationController
   def create
     ViolationReward.transaction do
       begin
-        params[:violation_reward].delete("salary_num") if params[:staff][:num_check] == "0"
-        params[:violation_reward].delete("score_num") if params[:staff][:num_check] == "1"
         params[:violation_reward][:status] = ViolationReward::STATUS[:NOMAL]
         params[:staff][:id].each do |staff_id|
           violation_reward = ViolationReward.new(params[:violation_reward])
@@ -35,13 +33,17 @@ class ViolationRewardsController < ApplicationController
     @violation_reward = ViolationReward.find_by_id(params[:id])
     params[:violation_reward][:process_at] = Time.now
     @violation_reward.update_attributes(params[:violation_reward]) if @violation_reward
-
-    if @violation_reward.types
-      @rewards = @violation_reward.staff.violation_rewards.where("types = true").
-        paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @simple = params[:simple]
+    if @simple
+      @violations = ViolationReward.joins(:staff).where(:status =>false,:types=>@violation_reward.types).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name")
     else
-      @violations = @violation_reward.staff.violation_rewards.where("types = false").
-        paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+      if @violation_reward.types
+        @rewards = @violation_reward.staff.violation_rewards.where("types = true").
+          paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+      else
+        @violations = @violation_reward.staff.violation_rewards.where("types = false").
+          paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+      end
     end
     respond_to do |format|
       format.js
@@ -50,13 +52,14 @@ class ViolationRewardsController < ApplicationController
 
   def operate_voilate
     begin
-      ViolationReward.find(params[:id]).update_attributes(:types=>true,:process_types=>params[:types],:process_at=>Time.now.strftime("%Y-%m-%d"),
-        :mark=>"使用快捷处理方式")
+      @voi = ViolationReward.find(params[:id])
+      @voi.update_attributes(:status=>true,:process_at=>Time.now.strftime("%Y-%m-%d"),
+        :mark=>"使用快捷处理方式,无效违规")
       @msg = "处理成功"
     rescue => error
       @msg = "处理失败"
     end
-    @violations = ViolationReward.joins(:staff).where(:types => false).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name")
+    @violations = ViolationReward.joins(:staff).where(:status =>false,:types=>@voi.types).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name")
   end
 
   private
