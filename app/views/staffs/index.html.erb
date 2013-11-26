@@ -23,7 +23,7 @@
         <div class="search">
           <%= form_for :staff ,:url=>"/stores/#{@store.id}/staffs/search", :method => :post, :html => {:remote => true, 'data-type' => 'script'} do %>
             <div><label>员工姓名：</label><input type="text" name="name" id="name"/></div>
-            <div><label>员工职务：</label>
+            <div><label>类别：</label>
               <select id="s_types" name="types">
                 <option value="-1">全部</option>
                 <% Staff::N_COMPANY.each do |k, v| %>
