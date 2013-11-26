@@ -14,7 +14,6 @@
 
 ActiveRecord::Schema.define(:version => 20131125021741) do
 
-
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
     t.integer  "material_num"
@@ -837,6 +836,14 @@ ActiveRecord::Schema.define(:version => 20131125021741) do
     t.datetime "created_at"
     t.boolean  "status",         :default => false
     t.datetime "updated_at"
+    t.float    "reward_fee",     :default => 0.0
+    t.float    "secure_fee",     :default => 0.0
+    t.float    "voilate_fee",    :default => 0.0
+    t.float    "fact_fee",       :default => 0.0
+    t.float    "work_fee",       :default => 0.0
+    t.float    "manage_fee",     :default => 0.0
+    t.float    "tax_fee",        :default => 0.0
+    t.boolean  "is_edited"
   end
 
   add_index "salaries", ["current_month"], :name => "index_salaries_on_current_month"

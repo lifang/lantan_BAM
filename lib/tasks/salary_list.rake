@@ -6,7 +6,7 @@ namespace :salary_list do
   end
 
   desc "salary of month"
-  task(:salary_of_month => :environment) do
+  task(:month_salary => :environment) do
     Salary.generate_month_salary
   end
 

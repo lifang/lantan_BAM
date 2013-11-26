@@ -1,12 +1,23 @@
 <div class="main">
   <div class="box">
-    <div class="message" id="unsalable_materials_notice">
-      有 <span class="red" id="unsalable_materials_span"><%=  @violations.length %></span>条违规记录等待处理
-      <a href="javascript:void(0)" onclick="toggle_voilation(this)">点击查看</a>
-      <div style="display: none;" id="voilate_pannel">
-        <%= render :partial => 'operate_voilate'%>
+    <% if @violations[false].length >0  %>
+      <div class="message" id="message_voilate">
+        有 <span class="red" id="voilate_span"><%=  @violations[false].length %></span>条违规记录等待处理
+        <a href="javascript:void(0)" onclick="toggle_voilation(this)">点击查看</a>
+        <div style="display: none;" id="voilate_pannel">
+          <%= render :partial => 'operate_voilate',:object=>@violations[false]%>
+        </div>
       </div>
-    </div>
+    <% end %>
+    <% if @violations[true] %>
+      <div class="message" id="message_reward">
+        有 <span class="red" id="reward_span"><%= @violations[true].length %></span>条奖励记录等待处理
+        <a href="javascript:void(0)" onclick="toggle_voilation(this)">点击查看</a>
+        <div style="display: none;" id="reward_pannel">
+          <%= render :partial => 'operate_voilate',:object=>@violations[true]%>
+        </div>
+      </div>
+    <% end %>
     <div class="data_box">
       <% if permission?(:staffs, :search_staff) %>
         <div class="search">
@@ -149,18 +160,6 @@
             <%= f.check_box :is_deduct, :value => 1, :checked => true %>
           </div>
           <div class="item">
-            <label><span class="red">*</span>起始额度：</label>
-            <%= f.text_field :deduct_at %>
-          </div>
-          <div class="item">
-            <label><span class="red">*</span>结束额度：</label>
-            <%= f.text_field :deduct_end %>
-          </div>
-          <div class="item">
-            <label><span class="red">*</span>提成率：</label>
-            <%= f.text_field :deduct_percent %>
-          </div>
-          <div class="item">
             <label>社保扣款：</label>
             <%= f.text_field :secure_fee %>
           </div>
@@ -203,7 +202,7 @@
           </div>
           <div class="item_textarea">
             <label>奖励类别：</label>
-            <%= f.select :types, ViolationReward::VIOLATE_TYPES.invert %>（<%=ViolationReward::VIOLATE_TYPES.values.join("、")%>）
+            <%= f.select :belong_types, ViolationReward::VIOLATE_TYPES.invert %>（<%=ViolationReward::VIOLATE_TYPES.values.join("、")%>）
           </div>
           <div class="item_textarea">
             <label><span class="red">*</span>奖励原因：</label>
@@ -213,8 +212,8 @@
             <label>奖励方法：</label>
             <%= f.select :process_types, ViolationReward::N_REWARD.invert %>（<%=ViolationReward::N_REWARD.values.join("、")%>）
             <ul>
-              <li><input name="staff[num_check]" type="radio" value="0"/>&nbsp;按分值奖励&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
-              <li><input name="staff[num_check]" type="radio" value="1"/>&nbsp;按金额奖励&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
+              <li>按分值奖励&nbsp;<input name="violation_reward[score_num]" id="score_num" type="text"/></li>
+              <li>按金额奖励&nbsp;<input name="violation_reward[salary_num]" id="salary_num" type="text"/></li>
             </ul>
           </div>
           <div class="item_textarea">
@@ -256,8 +255,8 @@
             <label>处罚方法：</label>
             <%= f.select :process_types, ViolationReward::N_VIOLATE.invert %>（<%=ViolationReward::N_VIOLATE.values.join("、")%>）
             <ul>
-              <li><input name="staff[num_check]" type="radio" value="0"/>&nbsp;按分值处罚&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
-              <li><input name="staff[num_check]" type="radio" value="1"/>&nbsp;按金额处罚&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
+              <li>按分值处罚&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
+              <li>按金额处罚&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
             </ul>
           </div>
           <div class="item_textarea">
@@ -312,3 +311,5 @@
     <% end %>
   </div>
 </div>
+<%= render "/violation_rewards/reward" %>
+<%= render "/violation_rewards/voilate" %>

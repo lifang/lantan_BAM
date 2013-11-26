@@ -3,48 +3,45 @@ class Salary < ActiveRecord::Base
   belongs_to :staff
 
   def self.generate_month_salary
-    #说明:员工的工资 = 奖励违规金额 + 基本工资 + 提成金额
-
+    #说明:员工的工资 =  基本工资 + 提成金额 + 奖励金额 - 违规金额 + 补贴金额 - 社保金额
     start_time = Time.now.months_ago(1).at_beginning_of_month
     Salary.destroy_all("current_month = #{start_time.strftime("%Y%m")}") #删除已经生成的月工资，避免重复生成
     end_time = Time.now.months_ago(1).at_end_of_month
-    salary_infos = SalaryDetail.where("current_day >= #{start_time.strftime("%Y%m%d").to_i}").
-      where("current_day <= '#{end_time.strftime("%Y%m%d").to_i}'").group_by{|s|s.staff_id}
-    #奖励违规的金额
-    staff_deduct_reward_hash = get_violation_reward_amount(salary_infos)
+    #统计奖励和违规的金额
+    salary_infos = ViolationReward.select("staff_id,sum(salary_num) num,types").where(:status=>ViolationReward::STATUS[:PROCESSED]).
+      where(:process_types=>[ViolationReward::VIOLATE[:cut],ViolationReward::VIOLATE[:reward]]).
+      where("created_at >= '#{start_time}' and created_at <= '#{end_time}'").group("staff_id,types").inject(Hash.new){
+      |hash,s|hash[s.staff_id].nil? ? hash[s.staff_id]={s.types=>s.num}:hash[s.staff_id][s.types]=s.num;hash }
     #前台提成金额
-    front_deduct_amount = get_front_deduct_amount(start_time, end_time)
+    front_amount = get_front_deduct_amount(start_time, end_time)
     #技师提成金额
-    technician_deduct_amount = get_technician_deduct_amount(start_time, end_time)
-    #平均满意度
-    avg_percent = get_avg_percent(start_time, end_time)
-
-    Staff.all.each do |staff|
-      deduct_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:deduct_num]
-      reward_amount = staff_deduct_reward_hash[staff.id].nil? ? 0 : staff_deduct_reward_hash[staff.id][:reward_num]
-      percent = avg_percent[staff.id].nil? ? 100 : avg_percent[staff.id]
+    technician_amount = get_technician_deduct_amount(start_time, end_time)
+    gr_records = StaffGrRecord.where("created_at >= '#{start_time}' and created_at <= '#{end_time}'").order('created_at asc').inject(Hash.new){
+      |hash,r|hash[r.staff_id]=r;hash}
+    Staff.not_deleted.each do |staff|
+      voilate_amount = salary_infos[staff.id].nil? ? 0 : salary_infos[staff.id][ViolationReward::TYPES[:VIOLATION]].nil? ? 0 : salary_infos[staff.id][ViolationReward::TYPES[:VIOLATION]]
+      reward_amount = salary_infos[staff.id].nil? ? 0 : salary_infos[staff.id][ViolationReward::TYPES[:REWARD]].nil? ? 0 : salary_infos[staff.id][ViolationReward::TYPES[:REWARD]]
       if staff.working_stats == 1
-        staff_gr_record = StaffGrRecord.where("staff_id = #{staff.id} and created_at >= '#{Time.now.months_ago(1).at_beginning_of_month}' and created_at <= '#{Time.now.months_ago(1).at_end_of_month}'").order('created_at desc').first
+        staff_gr_record = gr_records[staff.id]
         base_salary = (!staff_gr_record.nil? && !staff_gr_record.working_stats) ? staff.probation_salary : staff.base_salary
       else
         base_salary = staff.probation_salary
       end
       base_salary = base_salary.nil? ? 0 : base_salary
+      parms = {:reward_num => reward_amount,:voilate_fee=>voilate_amount,:current_month => start_time.strftime("%Y%m"),
+        :staff_id => staff.id, :satisfied_perc => 100,:reward_fee=>staff.reward_fee,:secure_fee=>staff.secure_fee}
       if staff.type_of_w == Staff::S_COMPANY[:FRONT] || staff.type_of_w == Staff::S_COMPANY[:CHIC] #前台或者店长
-        front_amount = staff.is_deduct ? (front_deduct_amount[staff.id].nil? ? 0 : front_deduct_amount[staff.id]) : 0
-        total = base_salary + reward_amount - deduct_amount + front_amount
-        Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,
-          :total => total, :current_month => start_time.strftime("%Y%m"),
-          :staff_id => staff.id, :satisfied_perc => percent)
+        total_deduct = (staff.is_deduct && !front_amount[staff.id].nil?) ?  front_amount[staff.id] : 0
+        total = base_salary + reward_amount - voilate_amount + total_deduct + staff.reward_fee - staff.secure_fee
       elsif staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN] #技师
-        technician_amount = staff.is_deduct ? (technician_deduct_amount[staff.id].nil? ? 0 : technician_deduct_amount[staff.id]) : 0
-        total = base_salary + reward_amount - deduct_amount + technician_amount*(staff.deduct_percent||=0)*0.01
-        Salary.create(:deduct_num => deduct_amount, :reward_num => reward_amount,
-          :total => total, :current_month => start_time.strftime("%Y%m"),
-          :staff_id => staff.id, :satisfied_perc => percent)
+        total_deduct = (staff.is_deduct && !technician_amount[staff.id].nil?) ?  technician_amount[staff.id] : 0
+        total = base_salary + reward_amount - voilate_amount + total_deduct + staff.reward_fee - staff.secure_fee
+      else
+        total_deduct = 0
+        total = base_salary + reward_amount - voilate_amount + staff.reward_fee - staff.secure_fee
       end
+      Salary.create(parms.merge({:total => total,:deduct_num => total_deduct,:fact_fee=>total}))
     end
-
   end
 
   def self.get_violation_reward_amount(salary_infos)

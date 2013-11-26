@@ -129,9 +129,9 @@ class LoginsController < ApplicationController
         session[:time] = (session[:time].nil? || session[:time] != Time.now.strftime("%Y-%m-%d %H")) ?  Time.now.strftime("%Y-%m-%d %H") :  session[:time]
         @orders = Order.joins("inner join order_prod_relations op on op.order_id=orders.id inner join products p on p.id=op.product_id").
           select("sum(op.pro_num*op.price) num,date_format(orders.created_at,'%Y-%m-%d') day,is_service").where(:status=>[Order::STATUS[:BEEN_PAYMENT],Order::STATUS[:FINISHED]]).
-          where("date_format(orders.created_at,'%Y-%m-%d') > '#{Time.now.beginning_of_month.strftime('%Y-%m-%d')}' and date_format(orders.created_at,'%Y-%m-%d %H') <= '#{session[:time]}'").
-          group("date_format(orders.created_at,'%Y-%m-%d'),is_service").inject(Hash.new){|hash,order|
-          hash[order.day].nil? ? hash[order.day]={order.is_service => order.num} : hash[order.day][order.is_service]=order.num;hash}
+          where("date_format(orders.created_at,'%Y-%m-%d') > '#{Time.now.beginning_of_month.strftime('%Y-%m-%d')}' and date_format(orders.created_at,'%Y-%m-%d %H') <= '#{session[:time]}'
+          and orders.store_id=#{@store.id} and orders.is_free !=#{Order::IS_FREE[:YES]} and orders.sale_id is null").group("date_format(orders.created_at,'%Y-%m-%d'),is_service").inject(Hash.new){
+          |hash,order| hash[order.day].nil? ? hash[order.day]={order.is_service => order.num} : hash[order.day][order.is_service]=order.num;hash}
         weeks = @orders.select{|k,v| k>= Time.now.beginning_of_week.strftime('%Y-%m-%d')}
         @total_week = weeks == {} ? {0=>0,1=>0} : weeks.values.inject(Hash.new){|hash,total|total.each{|k,v|
             hash[k].nil? ? hash[k]=v : hash[k] += v};hash}

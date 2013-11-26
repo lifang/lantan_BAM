@@ -1,7 +1,7 @@
-<div class="tab_popup" style="display:none;" id="process_violation_reward">
+<div class="tab_popup" style="display:none;" id="op_reward">
   <div class="popup_box">
     <h1>奖励处理<a href="javascript:void(0)" class="close">关闭</a></h1>
-    <%= form_for(@violation_reward, :url => store_violation_reward_path(@store, @violation_reward), :html => {:method => :put, "data-type" => 'script'}, :remote => true) do |f| %>
+    <%= form_for :violation_reward, :url =>"/stores/#{params[:store_id]}/violation_rewards/", :html => {:method => :put, "data-type" => 'script'}, :remote => true do |f| %>
       <div class="popup_body">
         <div class="popup_body_area">
           <div class="item_textarea">
@@ -16,8 +16,8 @@
             <label>奖励方法：</label>
             <%= f.select :process_types, ViolationReward::N_REWARD.invert %>（<%=ViolationReward::N_REWARD.values.join("、")%>）
             <ul>
-              <li>按分值奖励&nbsp;<input name="violation_reward[score_num]" type="text"/></li>
-              <li>按金额奖励&nbsp;<input name="violation_reward[salary_num]" type="text"/></li>
+              <li>按分值奖励&nbsp;<input name="violation_reward[score_num]" id="score_num" type="text"/></li>
+              <li>按金额奖励&nbsp;<input name="violation_reward[salary_num]" id="salary_num" type="text"/></li>
             </ul>
           </div>
           <div class="item_textarea">
@@ -26,6 +26,8 @@
           </div>
           <%= f.hidden_field :types, :value => 1 %>
           <input type="hidden" name="violation_reward[status]" value="1"/>
+          <input type="hidden" name="id" value="1"/>
+          <input type="hidden" name="simple" value="reward"/>
           <div class="btn_box"><button class="confirm_btn">确定</button><button class="cancel_btn">取消</button></div>
         </div>
       </div>

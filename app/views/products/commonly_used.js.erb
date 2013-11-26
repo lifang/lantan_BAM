@@ -1,4 +1,4 @@
 <% if @status==1 %>
-  $("#<%= @service.id %>").text("<%= (!@service.commonly_used ? "作为常用" : "不作为常用") %>")
+  $("#<%= @service.id %>").text("<%= (!@service.commonly_used ? "常用" : "不常用") %>")
 <% end %>
   tishi_alert("<%= @notice %>")

@@ -9,8 +9,7 @@ class OrderPayType < ActiveRecord::Base
   def self.order_pay_types(orders)
     return OrderPayType.find(:all, :conditions => ["order_id in (?)", orders]).inject(Hash.new){|hash,t|
       hash[t.order_id].nil? ? hash[t.order_id] = [PAY_TYPES_NAME[t.pay_type]] : hash[t.order_id] << PAY_TYPES_NAME[t.pay_type];
-      hash[t.order_id]=hash[t.order_id].uniq;hash
-    }
+      hash[t.order_id]=hash[t.order_id].uniq;hash}
   end
   
 end

@@ -24,12 +24,11 @@
           <div class="item">
             <label>职务：</label>
             <select name="staff[department_id]" id="staff_department_id">
-              <% depart_id = @departs[Department::TYPES[:DEPARTMENT]].first[0] %>
               <option value="" style="display:none">请选择</option>
               <%@departs[Department::TYPES[:POSITION]].each do |pos|%>
-                <option value="<%= pos[0] %>" id="<%=pos[1].dpt_id%>" 
-             <% if depart_id!=pos[1].dpt_id %>style="display:none"<%elsif f.object.department_id==pos[0] %>selected<%end%>><%= pos[1].name %></option>
-              <%end if @departs[Department::TYPES[:POSITION]]%>
+                <option value="<%= pos[0] %>" id="<%=pos[1].dpt_id%>"
+                        <% if f.object.position != pos[1].dpt_id %>style="display:none"<%elsif f.object.department_id==pos[0] %>selected<%end%>><%= pos[1].name %></option>
+                      <%end if @departs[Department::TYPES[:POSITION]]%>
             </select>
           </div>
           <div class="item">
@@ -92,18 +91,6 @@
           <div class="item">
             <label>是否提成：</label>
             <%= f.check_box :is_deduct, :value => 1, :checked => true %>
-          </div>
-          <div class="item">
-            <label><span class="red">*</span>起始额度：</label>
-            <%= f.text_field :deduct_at, :disabled => f.object.is_deduct ? false :true %>
-          </div>
-          <div class="item">
-            <label><span class="red">*</span>结束额度：</label>
-            <%= f.text_field :deduct_end, :disabled => f.object.is_deduct ? false :true %>
-          </div>
-          <div class="item">
-            <label><span class="red">*</span>提成率：</label>
-            <%= f.text_field :deduct_percent, :disabled => f.object.is_deduct ? false :true %>
           </div>
           <div class="item">
             <label>社保扣款：</label>

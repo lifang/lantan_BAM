@@ -29,227 +29,6 @@ function assess_result(sys_score, manage_score){
 }
 
 $(document).ready(function(){
-   
-    $("#work_record_table").tablesorter({
-        headers:
-        {
-
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            },
-            5: {
-                sorter: false
-            },
-            6: {
-                sorter: false
-            },
-            7: {
-                sorter: false
-            },
-            8: {
-                sorter: false
-            },
-            9: {
-                sorter: false
-            }
-
-        }
-    });
-    $("#work_record_table").bind("sortEnd",function() {
-        $("#work_record_table").find('tr').each(function(i){
-            if(i%2==0){
-                $(this).removeClass('tbg');
-            }else{
-                $(this).addClass('tbg');
-            }
-        })
-    });     
-    $("#month_score_table").tablesorter({
-        headers:
-        {
-
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            }
-
-        }
-    });
-    $("#month_score_table").bind("sortEnd",function() {
-        $("#month_score_table").find('tr').each(function(i){
-            if(i%2==0){
-                $(this).removeClass('tbg');
-            }else{
-                $(this).addClass('tbg');
-            }
-        })
-    });
-    $("#reward_table").tablesorter({
-        headers:
-        {
-
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            }
-
-        }
-    });
-    $("#reward_table").bind("sortEnd",function() {
-        $("#reward_table").find('tr').each(function(i){
-            if(i%2==0){
-                $(this).removeClass('tbg');
-            }else{
-                $(this).addClass('tbg');
-            }
-        })
-    });
-    $("#salary_table").tablesorter({
-        headers:
-        {
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            }
-        }
-    });
-    $("#salary_table").bind("sortEnd",function() {
-        $("#salary_table").find('tr').each(function(i){
-            if(i%2==0){
-                $(this).removeClass('tbg');
-            }else{
-                $(this).addClass('tbg');
-            }
-        })
-    });
-    $("#train_table").tablesorter({
-        headers:
-        {
-
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            },
-            5: {
-                sorter: false
-            }
-
-        }
-    });
-    $("#train_table").bind("sortEnd",function() {
-        $("#train_table").find('tr').each(function(i){
-            if(i%2==0){
-                $(this).removeClass('tbg');
-            }else{
-                $(this).addClass('tbg');
-            }
-        })
-    });
-    $("#violation_table").tablesorter({
-        headers:
-        {
-
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            3: {
-                sorter: false
-            },
-            4: {
-                sorter: false
-            }
-
-        }
-    });
-    $("#violation_table").bind("sortEnd",function() {
-        $("#violation_table").find('tr').each(function(i){
-            if(i%2==0){
-                $(this).removeClass('tbg');
-            }else{
-                $(this).addClass('tbg');
-            }
-        })
-    });
-    $("#current_month_salary_table").tablesorter({
-        headers:
-        {
-
-            1: {
-                sorter: false
-            },
-            2: {
-                sorter: false
-            },
-            5: {
-                sorter: false
-            },
-            6: {
-                sorter: false
-            }
-
-        }
-    });
-    $("#current_month_salary_table").bind("sortEnd",function() {
-        $("#current_month_salary_table").find('tr').each(function(i){
-            if(i%2==0){
-                $(this).removeClass('tbg');
-            }else{
-                $(this).addClass('tbg');
-            }
-        })
-    });
-    //    $(".sort_u_s, .sort_d_s").click(function(){
-    //        if($(this).attr("class") == "sort_u_s"){
-    //            $(this).attr("class", "sort_d_s");
-    //        }else{
-    //            $(this).attr("class", "sort_u_s");
-    //        }
-    //    });
-
-    //提示信息居中
-    //popup(".tab_alert");
-
     //创建员工
     $("#new_staff").click(function(){
         popup("#new_staff_area");
@@ -289,20 +68,6 @@ $(document).ready(function(){
             $("#staff_probation_salary").parent().find('span').show();
         }
     });
-    $("#staff_is_deduct").live("click", function(){             //是否参加提成
-        if($(this).attr("checked")=="checked"){
-            $(this).parent().parent().find($("#staff_deduct_at")).removeAttr("disabled");
-            $(this).parent().parent().find($("#staff_deduct_end")).removeAttr("disabled");
-            $(this).parent().parent().find($("#staff_deduct_percent")).removeAttr("disabled");
-        }else{
-            $(this).parent().parent().find($("#staff_deduct_at")).attr("disabled", "disabled");
-            //$(this).parent().parent().find($("#staff_deduct_at")).val("");
-            $(this).parent().parent().find($("#staff_deduct_end")).attr("disabled", "disabled");
-            //$(this).parent().parent().find($("#staff_deduct_end")).val("");
-            $(this).parent().parent().find($("#staff_deduct_percent")).attr("disabled", "disabled");
-        //$(this).parent().parent().find($("#staff_deduct_percent")).val("");
-        }
-    })
     //创建员工信息验证, 编辑员工信息验证
     $("#new_staff_btn, #edit_staff_btn").live("click", function(){
         if($.trim($(this).parents('form').find("#staff_name").val()) == ''){
@@ -347,47 +112,6 @@ $(document).ready(function(){
         }
         if(parseFloat($(this).parents('form').find("#staff_base_salary").val())<0.0){
             tishi_alert("正式薪资标准必须大于等于0!");
-            return false;
-        }
-        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_at").val()) == ''){
-            tishi_alert("提成起始额不能为空!");
-            return false;
-        }
-        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_at").val())){
-            tishi_alert("提成起始额必须为数字!");
-            return false;
-        }
-        if(parseFloat($(this).parents('form').find("#staff_deduct_at").val())<0.0){
-            tishi_alert("提成起始额必须大于等于0!");
-            return false;
-        }
-        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_end").val()) == ''){
-            tishi_alert("结束额度不能为空!");
-            return false;
-        }
-        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_end").val())){
-            tishi_alert("结束额度必须为数字!");
-            return false;
-        }
-        if(parseFloat($(this).parents('form').find("#staff_deduct_end").val())<0.0){
-            tishi_alert("结束额度必须大于等于0!");
-            return false;
-        }
-        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && (parseFloat($(this).parents('form').find("#staff_deduct_at").val()) > parseFloat($(this).parents('form').find("#staff_deduct_end").val()))){
-            tishi_alert("起始额必须不能大于结束额度!");
-            return false;
-        }
-        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && $.trim($(this).parents('form').find("#staff_deduct_percent").val()) == ''){
-            tishi_alert("提成率不能为空!");
-            return false;
-        }
-        if($(this).parents('form').find("#staff_is_deduct").attr("checked")=="checked" && isNaN($(this).parents('form').find("#staff_deduct_percent").val())){
-            tishi_alert("提成率必须为数字!");
-            return false;
-        }
-        var staff_deduct_percent = $(this).parents('form').find("#staff_deduct_percent").val();
-        if(parseFloat(staff_deduct_percent) < 0.0 || parseFloat(staff_deduct_percent) > 100.0){
-            tishi_alert("提成率必须在0-100之间!");
             return false;
         }
         //       if($(this).attr("id") == "new_staff_btn"){
@@ -666,10 +390,8 @@ $(document).ready(function(){
     $("#salary_info .bz_btn").click(function(){
         $(this).hide();
         $(this).prev().show();
-        $(this).parents('tr').find(".reward_num_text").hide();
-        $(this).parents('tr').find(".reward_num_input").show();
-        $(this).parents('tr').find(".deduct_num_text").hide();
-        $(this).parents('tr').find(".deduct_num_input").show();
+        $(this).parents('tr').find("span[id$='show']").hide();
+        $(this).parents('tr').find("input[id$='input']").show();
         return false;
     });
 
@@ -677,44 +399,60 @@ $(document).ready(function(){
     $(".edit_reward_deduct_submit").click(function(){
         var this_obj = $(this);
         var store_id = $("#store_id").val();
-        var reward_num = $(this).parents('tr').find(".reward_num_input").val();
-        var deduct_num = $(this).parents('tr').find(".deduct_num_input").val();
-        if($.trim(reward_num) == ""){
-            tishi_alert("提成金额不能为空！");
+        var reward_num = $(this).parents('tr').find("#reward_input").val();
+        var voilate_fee = $(this).parents('tr').find("#voilate_input").val();
+        var work_fee = $(this).parents('tr').find("#work_input").val();
+        var manage_fee = $(this).parents('tr').find("#manage_input").val();
+        var tax_fee = $(this).parents('tr').find("#tax_input").val();
+        var total_num = $("#total_num").html();
+        if($.trim(reward_num) == "" || isNaN(reward_num) ){
+            tishi_alert("请输入提成金额");
             return false;
         }
-        if(isNaN(reward_num)){
-            tishi_alert("提成金额必须为数字!");
+        if($.trim(voilate_fee) == "" || isNaN(voilate_fee)){
+            tishi_alert("请输入扣款金额");
             return false;
         }
-        if($.trim(deduct_num) == ""){
-            tishi_alert("扣款金额不能为空！");
+        if($.trim(work_fee) == "" || isNaN(work_fee)){
+            tishi_alert("请输入加班金额");
             return false;
         }
-        if(isNaN(deduct_num)){
-            tishi_alert("扣款金额必须为数字!");
+        if($.trim(manage_fee) == "" || isNaN(manage_fee)){
+            tishi_alert("请输入考核金额");
             return false;
         }
-        var base_salary = $(this).parents('tr').find(".base_salary_text").text();
-        var total_price = parseFloat(base_salary) + parseFloat(reward_num) - parseFloat(deduct_num)
-        var salary_id = $(this).attr("id");
+        if($.trim(tax_fee) == "" || isNaN(tax_fee)){
+            tishi_alert("请输入所得税");
+            return false;
+        }
+        var salary_id = this.id;
         $.ajax({
             type : 'put',
+            dataType : "json",
             url : "/stores/"+ store_id+"/salaries/" + salary_id,
             data : {
                 reward_num : reward_num,
-                deduct_num : deduct_num
+                voilate_fee : voilate_fee,
+                work_fee : work_fee,
+                manage_fee : manage_fee,
+                tax_fee : tax_fee,
+                current_month : this.name,
+                total : total_num
             },
             success: function(data){
-                if(data == "success"){
+                if(data.msg == "success"){
                     this_obj.hide();
                     this_obj.next().show();
-                    this_obj.parents('tr').find(".reward_num_input").hide();
-                    this_obj.parents('tr').find(".deduct_num_input").hide();
-                    this_obj.parents('tr').find(".deduct_num_text").text(deduct_num).show();
-                    this_obj.parents('tr').find(".reward_num_text").text(reward_num).show();
-                    this_obj.parents('tr').find(".total_price_text").text(total_price);
-                    tishi_alert("编辑提成金额和扣款金额成功!");
+                    this_obj.parents('tr').find("#reward_show").html(data.salary.reward_num);
+                    this_obj.parents('tr').find("#voilate_show").html(data.salary.voilate_fee);
+                    this_obj.parents('tr').find("#work_show").html(data.salary.work_fee);
+                    this_obj.parents('tr').find("#manage_show").html(data.salary.manage_fee);
+                    this_obj.parents('tr').find("#tax_show").html(data.salary.tax_fee);
+                    this_obj.parents('tr').find("#fact").html(data.salary.fact_fee);
+                    this_obj.parents('tr').find("span[id$='show']").show();
+                    this_obj.parents('tr').find("input[id$='input']").hide();
+                    $("#total_num").html(data.total);
+                    tishi_alert(data.name+"薪资提交成功!");
                 }
             }
         });
@@ -905,22 +643,35 @@ function toggle_voilation(obj){
     $(obj).next().toggle();
 }
 
-function operate_voilate(voi_id,store_id){
+function operate_voilate(voi_id,store_id,vio_types){
     var types = $("#violate_"+voi_id+" option:selected").val();
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+store_id +"/violation_rewards/operate_voilate",
-        data : {
-            id : voi_id,
-            types : types
+    if (types == 0){//0表示无效
+        $.ajax({
+            async:true,
+            type : 'post',
+            dataType :'script',
+            url : "/stores/"+store_id +"/violation_rewards/operate_voilate",
+            data : {
+                id : voi_id,
+                types : types
+            }
+        });
+    }else{
+        if (vio_types){
+            $("#op_reward #id").val(voi_id);
+            $("#op_reward form").attr("action","/stores/"+store_id+"/violation_rewards/"+voi_id);
+            show_center("#op_reward");
+        }else{
+            $("#op_voilate #id").val(voi_id);
+            $("#op_voilate form").attr("action","/stores/"+store_id+"/violation_rewards/"+voi_id);
+            show_center("#op_voilate");
         }
-    });
+    }
 }
 
 function load_work(){
     var depart_id = $("#staff_position option:selected").val();
     $("#staff_department_id option").css("display","none").removeAttr("selected");
     $("#staff_department_id #"+depart_id).css("display","");
+    $("#staff_department_id #"+depart_id).first().attr("selected",true);
 }

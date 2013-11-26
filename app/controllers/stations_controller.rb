@@ -17,9 +17,7 @@ class StationsController < ApplicationController
       @staff_ids = StationStaffRelation.where(:station_id=>@stations.map(&:id),:current_day=>Time.now.strftime("%Y%m%d").to_i).
         select("staff_id t_id,station_id s_id").inject(Hash.new) {|hash,staff|
         hash[staff.s_id].nil? ? hash[staff.s_id]=[staff.t_id] : hash[staff.s_id]<<staff.t_id;hash}
-      @wait_operate = Order.joins(:car_num).select("orders.id,car_nums.num,orders.front_staff_id front_id").where(:status=>Order::STATUS[:NORMAL],:store_id=>params[:store_id]).
-        where("date_format(orders.created_at,'%Y-%m-%d')='#{Time.now.strftime('%Y-%m-%d')}'").inject(Hash.new){|hash,order|
-        hash[order.front_id].nil? ? hash[order.front_id] = [order] : hash[order.front_id] << order;hash}
+      @wait_operate = work_orders[WorkOrder::STAT[:WAIT]].nil? ? {} : work_orders[WorkOrder::STAT[:WAIT]]
       @staffs = Staff.where(:id=>(@staff_ids.values | @waiting_pay.keys | @wait_operate.keys).flatten.uniq).inject(Hash.new){|hash,staff|
         hash[staff.id]=staff.name;hash}
       @times = WorkOrder.where(:store_id=>params[:store_id],:status=>WorkOrder::STAT[:SERVICING],:current_day=>Time.now.strftime('%Y%m%d').to_i).inject(Hash.new){|hash,work_order|

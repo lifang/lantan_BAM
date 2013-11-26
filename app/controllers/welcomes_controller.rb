@@ -1,7 +1,7 @@
 #encoding: utf-8
 class WelcomesController < ApplicationController
   before_filter :sign?
-  before_filter :customer_tips,:material_order_tips, :except => [:edit_store_name, :update_staff_password]
+  before_filter :customer_tips,:material_order_tips,:get_voilate_reward, :except => [:edit_store_name, :update_staff_password]
 
   def index
     store = Store.find_by_id(params[:store_id].to_i)
