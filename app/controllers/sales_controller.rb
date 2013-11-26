@@ -5,14 +5,17 @@ class SalesController < ApplicationController    #营销管理 -- 活动
 
   #活动列表
   def index
-    @sales=Sale.paginate_by_sql("select s.id,name,s.store_id,s.started_at,s.everycar_times,s.disc_time_types,s.ended_at,s.code,s.status,
-    count(o.id) reported_num from sales s left join orders o on s.id=o.sale_id where s.store_id in (#{params[:store_id]},1) and
-    s.status !=#{Sale::STATUS[:DESTROY]}  group by s.id order by s.created_at desc ", :page => params[:page], :per_page => Constant::PER_PAGE)
+    @sales=Sale.paginate_by_sql("select s.id,name,s.store_id,s.started_at,s.everycar_times,s.disc_time_types,s.ended_at,s.code,s.status
+    from sales s where s.store_id=#{params[:store_id]} and s.status !=#{Sale::STATUS[:DESTROY]} order by s.created_at desc ", :page => params[:page], :per_page => Constant::PER_PAGE)
+    @orders = Order.select("sale_id,count(id) num").where(:store_id=>params[:store_id],:status=>[Order::STATUS[:BEEN_PAYMENT],Order::STATUS[:FINISHED]]).
+      where("sale_id is not null").group("sale_id").inject(Hash.new){|hash,s|hash[s.sale_id]=s.num;hash}
   end
 
   #
   def new
     @sale=Sale.new
+    @cats = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:good],Category::TYPES[:service]]).inject(Hash.new){
+      |hash,cate| hash[cate.id]=cate.name;hash}
   end
 
   #创建发布活动
@@ -43,14 +46,16 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   #编辑发布活动
   def edit
     @sale=Sale.find(params[:id])
-    @sale_prods=SaleProdRelation.find_by_sql("select p.name,s.prod_num num,p.id from sale_prod_relations s inner join products p on s.product_id=p.id
-      where s.sale_id=#{params[:id]}")
+    @cats = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:good],Category::TYPES[:service]]).inject(Hash.new){
+      |hash,cate| hash[cate.id]=cate.name;hash}
+    @sale_prods=SaleProdRelation.find_by_sql("select p.name,s.prod_num num,p.id from sale_prod_relations s inner join 
+    products p on s.product_id=p.id where s.sale_id=#{params[:id]}")
   end
 
   #加载产品或服务类别
   def load_types
     sql = "select id,name from products where  store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]}"
-    sql += " and types=#{params[:sale_types]}" if params[:sale_types] != "" || params[:sale_types].length !=0
+    sql += " and category_id=#{params[:sale_types]}" if params[:sale_types] != "" || params[:sale_types].length !=0
     sql += " and name like '%#{params[:sale_name]}%'" if params[:sale_name] != "" || params[:sale_name].length !=0
     @products=Product.find_by_sql(sql)
   end

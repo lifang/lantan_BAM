@@ -5,8 +5,8 @@
     <div>
       <label>物料类别：</label><select  id="pcard_material" name="pcard_material" onchange="request_material(<%= params[:store_id] %>)">
         <option value="">请选择</option>
-        <% Material::TYPES_NAMES.each do |key,value| %>
-          <option value="<%= key %>"  <%if @material && @material.types==key%> selected<%end%> ><%= value %></option>
+        <% @cates[Category::TYPES[:material]].each do |key,value| %>
+          <option value="<%= key %>"  <%if @material && @material.category_id==key%> selected<%end%> ><%= value %></option>
         <% end %>
       </select>
     </div>
@@ -85,7 +85,7 @@
 <input type="hidden" value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>" id="date1" />
 <div class="clear"></div>
 <div class="card_content" id="t_prod">
-  <%= render :partial=>"/sales/sale_search",:object=>[@cates,"pcard_types"] %>
+  <%= render :partial=>"/sales/sale_search",:object=>[@cates[Category::TYPES[:good]].merge(@cates[Category::TYPES[:service]]),"pcard_types"] %>
 </div>
 
 <% if @material %>

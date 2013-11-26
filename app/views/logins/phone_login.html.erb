@@ -1,12 +1,13 @@
 <html>
   <head>
-    <title>管理数据登陆</title>
+    <title>澜泰数据管理系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <%= stylesheet_link_tag    "phone_manage" %>
     <%= javascript_include_tag  "application", "logins", "main" %>
   </head>
   <body>   
     <div class="login">
+      <h1>澜泰数据管理系统</h1>
       <%= form_for :login,:url=>"/logins/login_phone",:method=>:post,:html=>{:id=>"phone_form"} do %>
         <div class="login_item">
           <ul>
