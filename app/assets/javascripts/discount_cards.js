@@ -58,10 +58,8 @@ function selected_product_submit(){     //添加产品或服务中的确定按�
         var h_str = ""
         $("div[name='p_div']").each(function(){
             var name = $(this).find("em").text();
-            var discount = $.trim($(this).find("input[name='p_text']").val());
-            if(parseInt(discount) >=1 && parseInt(discount) <=9){
-                discount = "0"+discount
-            };
+            //var discount = parseInt($.trim($(this).find("input[name='p_text']").val()))*0.1;
+            var discount = Math.round(parseInt($.trim($(this).find("input[name='p_text']").val()))*10)/100;
             var id = $(this).find("input[name='p_hidden']").val();
             h_str += "<li>"+name+"<span>/"+discount+"折</span><input type='hidden' name='dcard_products[]'\n\
             value='"+id+"-"+discount+"'/></li>";
@@ -194,10 +192,8 @@ function edit_selected_product_submit(){     //编辑时添加产品或服务中
         var h_str = ""
         $("div[name='edit_p_div']").each(function(){
             var name = $(this).find("em").text();
-            var discount = $.trim($(this).find("input[name='edit_p_text']").val());
-            if(parseInt(discount) >=1 && parseInt(discount) <=9){
-                discount = "0"+discount
-            };
+            //var discount = parseInt($.trim($(this).find("input[name='edit_p_text']").val()))*0.1;
+            var discount = Math.round(parseInt($.trim($(this).find("input[name='edit_p_text']").val()))*10)/100;
             var id = $(this).find("input[name='edit_p_hidden']").val();
             h_str += "<li>"+name+"<span>/"+discount+"折</span><input type='hidden' name='edit_dcard_products[]'\n\
             value='"+id+"-"+discount+"'/></li>";

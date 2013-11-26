@@ -27,9 +27,9 @@
                 onclick="javascript:if(confirm('您确定要删除当前车牌号码与当前客户的关系吗？')){window.location.href='/customers/<%= car.c_id %>_<%= car.customer_id %>/delete_car_num'}">删除</button>
       </span>
       <% end %>
-      <%= render :partial => "/customers/edit_car_num", :object => car %>
-      <%= render :partial => "/customers/add_car" %>
+      <%= render :partial => "/customers/edit_car_num", :object => car %>     
     </li>
     <% end %>
   </ul>
+   <%= render :partial => "/customers/add_car" %>
 </div>

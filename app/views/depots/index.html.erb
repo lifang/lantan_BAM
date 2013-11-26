@@ -9,27 +9,27 @@
         <div class="station-data">
           <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
             <thead>
-            <tr class="hbg">
-              <td>仓库名称</td>
-              <td>所属门店</td>
-              <td>操作</td>
-            </tr>
+              <tr class="hbg">
+                <td>仓库名称</td>
+                <td>所属门店</td>
+                <td>操作</td>
+              </tr>
             </thead>
             <tbody>
-                <% @depots.each do |depot| if @depots.length != 0  %>
-                <tr>
-                  <td><%= depot.name %></td>
-                  <td><%= depot.store.name %></td>
-                  <td><% if permission?(:base_datas, :edit_depot) %><%= link_to "编辑", remote: :true, "data-type" => 'script' %><% end %>
-                    <% if permission?(:base_datas, :del_depot) %><%= link_to "删除", "/stores/#{@store.id}/depots/#{}", :confirm => "确定需要删除工位吗？", :method => 'delete' %><% end %>
-                  </td>
-                </tr>
-                    <% end %>
+              <% @depots.each do |depot| if @depots.length != 0  %>
+                  <tr>
+                    <td><%= depot.name %></td>
+                    <td><%= depot.store.name %></td>
+                    <td><% if permission?(:base_datas, :edit_depot) %><%= link_to "编辑", remote: :true, "data-type" => 'script' %><% end %>
+                      <% if permission?(:base_datas, :del_depot) %><%= link_to "删除", "/stores/#{@store.id}/depots/#{}", :confirm => "确定需要删除工位吗？", :method => 'delete' %><% end %>
+                    </td>
+                  </tr>
                 <% end %>
+              <% end %>
             </tbody>
           </table>
           <%= will_paginate @depots, :class => "pageTurn", :previous_label => "上一页",
-                            :next_label => "下一页"  unless @depots.empty?%>
+            :next_label => "下一页"  unless @depots.empty?%>
         </div>
       </div>
     </div>

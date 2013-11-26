@@ -26,8 +26,8 @@ class DiscountCardsController < ApplicationController   #打折卡
       if dcard.save
         products.each do |p|
           pid = p.split("-")[0].to_i
-          pdiscount = p.split("-")[1].to_i
-          SvcardProdRelation.create(:product_id => pid, :sv_card_id => dcard.id, :product_discount => pdiscount)
+          pdiscount = p.split("-")[1].to_f
+          SvcardProdRelation.create(:product_id => pid, :sv_card_id => dcard.id, :product_discount => pdiscount*10)
         end
         if img
           begin
@@ -96,8 +96,8 @@ class DiscountCardsController < ApplicationController   #打折卡
         SvcardProdRelation.delete_all(:sv_card_id => dcard.id)
         products.each do |p|
           pid = p.split("-")[0].to_i
-          pdiscount = p.split("-")[1].to_i
-          SvcardProdRelation.create(:product_id => pid, :sv_card_id => dcard.id, :product_discount => pdiscount)
+          pdiscount = p.split("-")[1].to_f
+          SvcardProdRelation.create(:product_id => pid, :sv_card_id => dcard.id, :product_discount => pdiscount*10)
         end
         if img
           begin
