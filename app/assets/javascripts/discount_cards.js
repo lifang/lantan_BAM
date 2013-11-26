@@ -96,6 +96,8 @@ function create_dcard_valid(obj){     //新建打折卡验证
     }
     if(name==""){
         tishi_alert("请输入打折卡名称!");
+    }else if(get_str_len(name)>36){
+        tishi_alert("打折卡名称最多36个字符!");
     }else if(price=="" || isNaN(price) || parseInt(price)<=0){
         tishi_alert("请输入正确的打折卡金额!");
     }else if(len<=0){
@@ -223,6 +225,8 @@ function edit_dcard_valid(obj){     //编辑打折卡验证
     }
     if(name==""){
         tishi_alert("请输入打折卡名称!");
+    }else if(get_str_len(name)>36){
+        tishi_alert("打折卡名称最多36个字符!");
     }else if(price=="" || isNaN(price) || parseInt(price)<=0){
         tishi_alert("请输入正确的打折卡金额!");
     }else if(len<=0){
@@ -277,5 +281,19 @@ function del_all_dcards(store_id){
             })
         }
     }
+}
+
+function get_str_len(str){      //获取名称长度
+    var length = str.length;
+    var a = 0;
+    for(var i=0;i<length;i++){
+        var charCode = str.charCodeAt(i);
+        if(charCode>=0 && charCode<=128){
+            a += 1;
+        }else{
+            a += 2;
+        }
+    }
+    return a;
 }
 

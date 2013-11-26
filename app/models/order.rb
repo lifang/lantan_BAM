@@ -973,7 +973,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           c_pcard_relations.each do |cpr|
             cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
           end unless c_pcard_relations.blank?
-          #如果有买储值卡，则更新状态
+          #如果有储值卡，则更新状态
           csvc_relations = CSvcRelation.where(:order_id => order.id)
           csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing => hash[:is_billing]})}
           if c_pcard_relations.present? || csvc_relations.present?

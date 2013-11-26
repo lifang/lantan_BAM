@@ -1060,3 +1060,127 @@ a.compile_btn { width: 100px;}
 
 .item_radio_b {position: absolute; top: 0px; left: 40px;}
 .popup_body_area h2.item_blockArea_h2 { font-size: 16px; padding: 5px 5px 5px 20px;}
+
+/*财务管理--收银*/
+.afterClear:after {
+	display: block;
+	overflow:hidden;
+	clear: both;
+	height:0;
+	visibility:hidden;
+	content:".";
+}
+.pingj { float: right; font-size: 14px; margin-right: 10px;}
+
+.data_item { margin-bottom: 10px; border: 1px #CCCCCC solid;}
+.data_item_title { 
+    padding-left: 10px; 
+	height: 32px; 
+	line-height: 32px; 
+	background: url("/assets/tab_head_bg.jpg") repeat-x;
+	color: #930205;
+	font-weight:bold;
+}
+.data_item_title li { display: inline-block; margin-right: 20px;}
+.data_item_list { padding-top: 10px; overflow: hidden;}
+
+
+.di_list_l { float: left; width: 50px; text-align: center; padding-top: 6px;}
+.di_list_r { padding: 0 10px 0 50px;}
+
+.accounts { text-align: right; border-top: 1px #CCCCCC solid;}
+.accounts li { display: block;}
+.accounts_btn {
+	height: 24px;
+	line-height: 24px;
+	display: inline-block; 
+	margin-right: 1px; 
+	padding: 0 10px; 
+	background: #F60; 
+	color: #FFF;
+	text-shadow: 1px 1px rgba(51,51,51,0.6);
+}
+
+.accountsTab_top { overflow: hidden; padding-left: 10px;}
+.accountsTab_item_block { width: 420px; float: left;}
+.accountsTab_item { display: inline-block; line-height: 32px; height: 32px; margin: 5px 0;}
+.accountsTab_item label {
+	height: 24px; 
+	line-height: 24px; 
+	display: inline-block; 
+	text-align: right; 
+	float: left;
+	font-weight: bold;
+	color: #930205;
+}
+.accountsTab_item select { width: 300px; float: left; height: 26px; line-height: 26px;}
+.accountsTab_item input { width: 124px; float: left; height: 24px; line-height: 24px;}
+
+.accountsTab_project { float: left; width: 200px; overflow: hidden;}
+.accountsTab_project li { float: left; }
+.accountsTab_project li a {
+	background: #69F; 
+	width: 80px; 
+	height: 30px;
+	display: block;
+	margin: 5px 0 10px 15px;
+	text-align: center;
+	color: #FFF;
+	line-height: 30px;
+}
+.accountsTab_client { margin-bottom: 10px;}
+.at_client_con { border: 1px #CCCCCC solid; padding: 10px; margin: 5px 0;}
+.at_client_con li { display: inline-block; margin: 5px;}
+.at_client_con li span {color: #930205; font-weight:bold;}
+
+.accountsTab_money { margin: 20px 0;}
+.accountsTab_money span { font-size: 24px; color: #930205;}
+.accountsTab_money input { width: 556px; height: 30px; border: 1px #CCCCCC solid; font-size: 24px;}
+
+.accountsTab_pay { border: 1px #CCCCCC solid; padding: 10px; margin: 5px 0; overflow: hidden;}
+.accountsTab_pay_item { float: left; margin: 5px 0; color: #930205; height: 24px; line-height: 24px; margin-left: 10px;}
+.accountsTab_pay_item label {
+	height: 24px; 
+	display: inline-block; 
+	text-align: right; 
+	float: left;
+	font-weight: bold;
+	color: #930205;
+}
+.accountsTab_pay_item input { width: 124px; float: left; height: 24px; line-height: 24px;}
+.accountsTab_pay_item input[type="radio"] { width:inherit; line-height: none; margin: 0px 5px 0 0;}
+.accountsTab_pay .radio span { display: inline-block; float: left;}
+.accountsTab_pay .password input { width: 302px;}
+
+.accountsTab_way { border: 1px #CCCCCC solid; width: 483px; margin: 5px auto; overflow: hidden;}
+.at_way_h { overflow: hidden;}
+.at_way_h li { 
+    float: left; 
+	width: 120px; 
+	height: 40px; 
+	line-height: 40px; 
+	text-align: center;
+	border-right: 1px #CCCCCC solid;
+	border-bottom: 1px #CCCCCC solid;
+	cursor: pointer;
+	color:#930205;
+}
+.at_way_h li.brnone {border-right: none;}
+.at_way_h li.hover { background: #6699FF; color: #FFF;}
+
+.at_way_b { padding: 10px; overflow: hidden;}
+.way_item { float: left; margin: 5px 0; color: #930205; height: 24px; line-height: 24px; margin-left: 10px;}
+.way_item label {
+	width: 100px;
+	height: 24px; 
+	display: inline-block; 
+	text-align: right; 
+	float: left;
+	font-weight: bold;
+	color: #930205;
+}
+.way_item input { width: 200px; float: left; height: 24px; line-height: 24px;}
+.at_way_b input[type="radio"] { width:inherit; line-height: none; margin: 0px 5px 0 0;}
+.at_way_b .radio { display: inline-block; float: left;}
+
+.way_textarea textarea { width: 98%;}

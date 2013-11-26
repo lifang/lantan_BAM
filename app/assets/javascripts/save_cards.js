@@ -22,6 +22,8 @@ function create_save_card_valid(obj){
     }
     if(name==""){
         tishi_alert("请输入储值卡名称!");
+    }else if(get_str_len(name)>36){
+        tishi_alert("储值卡名称最长36个字符!");
     }else if(checked_len<=0){
         tishi_alert("至少选择一个项目!")
     }else if((img!="" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
@@ -70,6 +72,8 @@ function update_save_card_valid(obj){
     }
     if(name==""){
         tishi_alert("请输入储值卡名称");
+    }else if(get_str_len(name)>36){
+        tishi_alert("储值卡名称最多36个字符!");
     }else if((img!="" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
         tishi_alert("请选择正确的图片格式,格式为:"+img_format);
     }else if((img!="" || img.length!=0) && pattern.test(g_name.split(".")[0])){
@@ -128,5 +132,19 @@ function del_all_scards(store_id){
             })
         }
     }
+}
+
+function get_str_len(str){      //获取名称长度
+    var length = str.length;
+    var a = 0;
+    for(var i=0;i<length;i++){
+        var charCode = str.charCodeAt(i);
+        if(charCode>=0 && charCode<=128){
+            a += 1;
+        }else{
+            a += 2;
+        }
+    }
+    return a;
 }
 
