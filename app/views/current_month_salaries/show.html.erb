@@ -12,8 +12,8 @@
           <li><strong>提成方式：</strong>金额/提成率</li>
           <li><strong>本月订单：</strong><%= @salary_details.length %></li>
           <li><strong>考核：</strong><%=100-((@score.nil?||@score.sys_score.nil?) ? 0 : @score.sys_score)%>分</li>
-          <li><strong>提成：</strong><%=@salary.deduct_num%>元</li>
-          <li><strong>扣款：</strong><%= @salary.voilate_fee %>元</li>
+          <li><strong>提成：</strong><%=@salary.nil? ? 0 : @salary.deduct_num%>元</li>
+          <li><strong>扣款：</strong><%= @salary.nil? ? 0 : @salary.voilate_fee %>元</li>
         </ul>
       </div>
       <div class="search">
