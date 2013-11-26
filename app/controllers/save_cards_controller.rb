@@ -7,14 +7,16 @@ class SaveCardsController < ApplicationController   #储值卡
   def index
     @types = Category.where(["store_id = ? and types in (?)", @store.id, [Category::TYPES[:good], Category::TYPES[:service]]])
     @sv_cards = SvCard.find_by_sql(["select sc.id sid, sc.name sname, sc.img_url surl, sc.price sprice,
-     sc.description sdesc, sc.use_range srange, spr.base_price bprice, spr.more_price mprice, c.name cname
-     from sv_cards sc inner join svcard_prod_relations spr on sc.id=spr.sv_card_id inner join categories c
-     on spr.category_id=c.id where sc.store_id=? and sc.status=? and sc.types=? order by sc.created_at desc",
+     sc.description sdesc, sc.use_range srange, spr.base_price bprice, spr.more_price mprice, spr.category_id cid
+     from sv_cards sc inner join svcard_prod_relations spr on sc.id=spr.sv_card_id where sc.store_id=?
+     and sc.status=? and sc.types=? order by sc.created_at desc",
         @store.id, SvCard::STATUS[:NORMAL], SvCard::FAVOR[:SAVE]])
     .paginate(:page => params[:page] ||= 1, :per_page => SvCard::PER_PAGE)
+    @cname = Category.select("id,name").where(:store_id => @store.id).inject(Hash.new) { |hash, c|hash[c.id]=c.name;hash}
   end
 
   def create
+    category_id = params[:scard_category]
     name = params[:scard_name]
     use_range = params[:scard_userange]
     category_id = params[:scard_category]
@@ -28,8 +30,9 @@ class SaveCardsController < ApplicationController   #储值卡
       scard = SvCard.new(:name => name, :types => SvCard::FAVOR[:SAVE], :price => s_money, :description => desc,
         :store_id => @store.id, :use_range => use_range, :status => SvCard::STATUS[:NORMAL])
       if scard.save
+
         SvcardProdRelation.create(:sv_card_id => scard.id, :base_price => s_money, :more_price => e_money,
-          :category_id => category_id)
+          :category_id => category_id.join(","))
         if img
           begin
             url = SvCard.upload_img(img, scard.id, Constant::SVCARD_PICS, @store.id, Constant::SVCARD_PICSIZE)
@@ -54,9 +57,9 @@ class SaveCardsController < ApplicationController   #储值卡
 
   def edit
     @types = Category.where(["store_id = ? and types in (?)", @store.id,  [Category::TYPES[:good], Category::TYPES[:service]]])
-    @save_card = SvCard.find_by_sql(["select sc.*, spr.base_price bprice, spr.more_price mprice, c.id cid
+    @save_card = SvCard.find_by_sql(["select sc.*, spr.base_price bprice, spr.more_price mprice, spr.category_id cid
       from sv_cards sc inner join svcard_prod_relations spr
-      on sc.id=spr.sv_card_id inner join categories c on spr.category_id=c.id where sc.id=?", params[:id].to_i])[0]
+      on sc.id=spr.sv_card_id where sc.id=?", params[:id].to_i])[0]
   end
 
   def update
@@ -74,7 +77,7 @@ class SaveCardsController < ApplicationController   #储值卡
       scard = SvCard.find_by_id(id)
       if scard.update_attributes(:name => name, :price => s_money, :description => desc, :use_range => use_range)
         SvcardProdRelation.delete_all(:sv_card_id => id)
-        SvcardProdRelation.create(:sv_card_id => id, :base_price => s_money, :more_price => e_money, :category_id => category_id)
+        SvcardProdRelation.create(:sv_card_id => id, :base_price => s_money, :more_price => e_money, :category_id => category_id.join(","))
         if img
           begin
             url = SvCard.upload_img(img, scard.id, Constant::SVCARD_PICS, @store.id, Constant::SVCARD_PICSIZE)

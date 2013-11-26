@@ -8,7 +8,7 @@
             <select id="c_property" name="c_property">
               <option value="-1" <% if session[:c_property].to_i == -1 %>selected<% end %>>全部</option>
               <option value="0" <% if !session[:c_property].nil? && session[:c_property].to_i == 0 %>selected<% end %>>个人客户</option>
-              <option value="1" <% if !session[:c_property].nil? && session[:c_property].to_i == 1 %>selected<% end %>>集团客户</option>
+              <option value="1" <% if !session[:c_property].nil? && session[:c_property].to_i == 1 %>selected<% end %>>单位客户</option>
             </select>
           </div>
           <div><label>客户名称：</label><input type="text" name="name" id="name" value="<%= session[:name] %>"/></div>
@@ -70,7 +70,7 @@
                   </td>
                   <td width="20%" class="wordBreak"><%= customer.name %></td>
                   <td width="15%" class="wordBreak">
-                    <%= customer.property.to_i==Customer::PROPERTY[:PERSONAL] ? "个人客户" : (customer.property.to_i==Customer::PROPERTY[:GROUP] ? "集团客户" : "未知") %>
+                    <%= customer.property.to_i==Customer::PROPERTY[:PERSONAL] ? "个人客户" : (customer.property.to_i==Customer::PROPERTY[:GROUP] ? "单位客户" : "未知") %>
                   </td>
                   <td width="15%" class="wordBreak"><%= customer.mobilephone %></td>
                   <td width="10%" class="wordBreak">

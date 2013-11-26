@@ -19,9 +19,9 @@
           <td>
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tbody>
-                    <% @already_used_count[cpr.id].values.each do |v| %>
+                    <% @already_used_count[cpr.cpr_id].values.each do |v| %>
                       <tr><td style="text-align: center"><%= v[0] %>：<%= v[1] %>次&nbsp;&nbsp;</td></tr>
-                    <% end if @already_used_count.present? and @already_used_count[cpr.id].present? %>
+                    <% end if @already_used_count.present? and @already_used_count[cpr.cpr_id].present? %>
 
                   </tbody></table>
               </td>

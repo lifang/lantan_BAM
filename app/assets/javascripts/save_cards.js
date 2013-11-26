@@ -3,6 +3,7 @@ function new_save_card(){   //新建储值卡
 }
 
 function create_save_card_valid(obj){
+    var checked_len = $("input[name='scard_category[]']:checked").length;
     var name = $.trim($("#scard_name").val());
     var img = $.trim($("#scard_img").val());
     var s_money = $.trim($("#scard_started_money").val());
@@ -20,7 +21,9 @@ function create_save_card_valid(obj){
         return -1;
     }
     if(name==""){
-        tishi_alert("请输入储值卡名称");
+        tishi_alert("请输入储值卡名称!");
+    }else if(checked_len<=0){
+        tishi_alert("至少选择一个项目!")
     }else if((img!="" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
         tishi_alert("请选择正确的图片格式,格式为:"+img_format);
     }else if((img!="" || img.length!=0) && pattern.test(g_name.split(".")[0])){

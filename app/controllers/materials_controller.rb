@@ -35,7 +35,6 @@ class MaterialsController < ApplicationController
     @head_total_money = head_order_records[1]
     @head_pay_money = head_order_records[2]
     @head_total_count = head_order_records[3]
-    #@supplier_order_records = MaterialOrder.supplier_order_records params[:page], Constant::PER_PAGE, @current_store.id
     supplier_order_records = MaterialOrder.material_order_list(@current_store.id,nil,nil,nil,nil,nil)
     @supplier_order_records = supplier_order_records[0].paginate(:per_page => 10, :page => params[:page])
     @supp_total_money = supplier_order_records[1]
@@ -70,7 +69,7 @@ class MaterialsController < ApplicationController
     elsif @tab_name == "material_losses_materials"
       @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
       @mat_loss_search_materials = Material.materials_list(@current_store.id, @mat_type.to_i, @mat_name, @mat_code)
-      .paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+      #.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     elsif @tab_name == 'material_losses'
       @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
       @material_losses = MaterialLoss.loss_list(@current_store.id, @mat_type.to_i, @mat_name, @mat_code)
@@ -1016,6 +1015,7 @@ class MaterialsController < ApplicationController
   def mat_loss_add
     count = 0
     success = 0
+    @current_store = Store.find_by_id(params[:store_id].to_i)
     @status = false
     mat_losses = params[:mat_losses]
     unless mat_losses.nil?
@@ -1026,8 +1026,9 @@ class MaterialsController < ApplicationController
           if MaterialLoss.create({:loss_num =>  mat_losses[key][:mat_num].to_i,
                 :material_id => material.id,
                 :staff_id => params[:staff],
-                :store_id => params[:store_id]
+                :store_id => @current_store.id
               })
+            material.update_attribute(:storage, material.storage-mat_losses[key][:mat_num].to_i)
             success += 1
           end
         end
@@ -1036,8 +1037,11 @@ class MaterialsController < ApplicationController
     if count == success
       @status = true
     end
-    @material_losses = MaterialLoss.loss_list(params[:store_id].to_i)
-    .paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
+                                    and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])
+    @material_losses = MaterialLoss.loss_list(@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+    @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id].to_i])
+    @materials_storages = Material.materials_list(@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     respond_to do |f|
       f.js
     end
@@ -1045,12 +1049,22 @@ class MaterialsController < ApplicationController
 
   #删除库存报损
   def mat_loss_delete
+    @current_store = Store.find_by_id(params[:store_id].to_i)
     @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id].to_i])
     @status = false
-    material =  MaterialLoss.find(params[:materials_loss_id].to_i)
-    if material.destroy
+    materialloss =  MaterialLoss.find(params[:materials_loss_id].to_i)
+    m_id = materialloss.material_id
+    m_num = materialloss.loss_num.to_i
+    if materialloss.destroy
       @status = true
-      @material_losses = MaterialLoss.loss_list(params[:store_id].to_i).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+      @material_losses = MaterialLoss.loss_list(@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+      material = Material.find_by_id(m_id)
+      if material
+        material.update_attribute("storage",(material.storage.to_i + m_num))
+      end
+      @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
+                                    and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])
+      @materials_storages = Material.materials_list(@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     end
     respond_to do |f|
       f.js

@@ -39,7 +39,7 @@
         <td><%= @order_pay_type[order.id].nil? ? "" : @order_pay_type[order.id].join(",") %></td>
         <td><%= Order::IS_PLEASED_NAME[order.is_pleased] %></td>
         <td><%= order.is_billing ? "是" : "否" %></td>
-        <td><%= Order::RETURN[@product_hash[order.id][0].return_types]%></td>
+        <td><%= @product_hash[order.id].nil? ? "----" : Order::RETURN[@product_hash[order.id][0].return_types]%></td>
         <td>
           <% if permission?(:customers, :revisit) %>
             <a href="javascript:void(0)"

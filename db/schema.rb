@@ -11,7 +11,8 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131125015721) do
+
+ActiveRecord::Schema.define(:version => 20131125021741) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -1166,7 +1167,7 @@ ActiveRecord::Schema.define(:version => 20131125015721) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "product_discount"
-    t.integer  "category_id"
+    t.string   "category_id"
   end
 
   add_index "svcard_prod_relations", ["created_at"], :name => "index_svcard_prod_relations_on_created_at"

@@ -13,7 +13,10 @@ function new_market_commit(store_id, types){   //营销-新建产品/服务类�
     var name = $.trim($("#market_name").val());
     if(name==""){
         tishi_alert("名字不能为空!")
-    }else{
+    }else if(get_str_len(name)>16){
+         tishi_alert("名字长度不能超过16个字符!")
+    }
+    else{
         $.ajax({
             type: "get",
             url: "/stores/"+store_id+"/set_functions/market_new_commit",
@@ -59,6 +62,8 @@ function edit_market_commit(id, store_id){    //营销-编辑服务/产品 提�
     var name = $.trim($("#market_edit_name").val());
     if(name==""){
         tishi_alert("名字不能为空!");
+    }else if(get_str_len(name)>16){
+        tishi_alert("名字长度不能超过16个字符!");
     }else{
         $.ajax({
             type: "get",
@@ -101,6 +106,8 @@ function new_storage_commit(store_id){  //库存-新建物料类别 提交
     var name = $.trim($("#storage_name").val());
     if(name==""){
         tishi_alert("名字不能为空!");
+    }else if(get_str_len(name)>16){
+        tishi_alert("名字长度不能超过16个字符!");
     }else{
         $.ajax({
             type: "get",
@@ -144,7 +151,9 @@ function edit_storage(id, store_id){    //库存-编辑物料类别
 function edit_storage_commit(id, store_id){      //库存-编辑物料类别 提交
     var name = $.trim($("#storage_edit_name").val());
     if(name==""){
-        tishi_alert("名字不能为空!")
+        tishi_alert("名字不能为空!");
+    }else if(get_str_len(name)>16){
+        tishi_alert("名字长度不能超过16个字符!");
     }else{
         $.ajax({
             type: "get",
@@ -187,6 +196,8 @@ function depart_new_commit(store_id){   //组织架构-新建部门 提交
     var name = $.trim($("#depart_name").val());
     if(name==""){
         tishi_alert("部门名称不能为空!");
+    }else if(get_str_len(name)>14){
+        tishi_alert("部门名称长度不能超过14个字符!");
     }else{
         $.ajax({
             type: "get",
@@ -231,6 +242,8 @@ function sibling_depart_new_commit(store_id, lv){   //组织架构-新建同级�
     var name = $.trim($("#sibling_depart_name").val());
     if(name==""){
         tishi_alert("部门名称不能为空!");
+    }else if(get_str_len(name)>14){
+        tishi_alert("部门名称长度不能超过14个字符!");
     }else{
         $.ajax({
             type: "get",
@@ -287,6 +300,8 @@ function position_new_commit(store_id, dpt_id){         //组织架构-新建职
     var name = $.trim($("#position_name").val());
     if(name==""){
         tishi_alert("职务名称不能为空!");
+    }else if(get_str_len(name)>18){
+        tishi_alert("职务名称长度不能超过18个字符!")
     }else{
         $.ajax({
             type: "get",
@@ -340,6 +355,12 @@ function position_edit_commit(store_id, pid, obj){      //组织架构-编辑职
     var new_name = $.trim($(obj).val());
     var old_name = $(obj).parent("li").find("label").text();
     if(new_name==old_name || new_name==""){
+        $(obj).hide();
+        $(obj).val(old_name);
+        $(obj).parent("li").find("label").show();
+        $(obj).parent("li").find("a").show();
+    }else if(get_str_len(new_name)>18){
+        tishi_alert("职务名称长度不能超过18个字符!");
         $(obj).hide();
         $(obj).val(old_name);
         $(obj).parent("li").find("label").show();
@@ -438,6 +459,8 @@ function depart_edit_commit(store_id, did){     //组织架构-编辑部门 提�
     var name = $.trim($("#depart_edit_name").val());
     if(name==""){
         tishi_alert("部门名称不能为空!");
+    }else if(get_str_len(name)>14){
+        tishi_alert("部门名称长度不能超过14个字符!");
     }else{
         $.ajax({
             type: "get",
@@ -493,4 +516,18 @@ function depart_del(store_id, did){
             }
         })
     }
+}
+
+function get_str_len(str){      //获取名称长度
+    var length = str.length;
+    var a = 0;
+    for(var i=0;i<length;i++){
+        var charCode = str.charCodeAt(i);
+        if(charCode>=0 && charCode<=128){
+            a += 1;
+        }else{
+            a += 2;
+        }
+    }
+    return a;
 }

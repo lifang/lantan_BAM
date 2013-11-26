@@ -33,7 +33,7 @@
                   <tr>
                     <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
                     <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
-                    <td><%= sc.name %></td>
+                    <td width="25%"><%= sc.name %></td>
                     <td><%= format("%.1f", sc.price) if sc.price %></td>
                     <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
                     <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
@@ -64,7 +64,7 @@
                   <tr>
                     <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
                     <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
-                    <td><%= sc.name %></td>
+                    <td width="25%"><%= sc.name %></td>
                     <td><%= format("%.1f", sc.price) if sc.price %></td>
                     <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
                     <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>

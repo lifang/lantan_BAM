@@ -25,7 +25,7 @@
           <div class="seeProDiv_rWidth">
             <ul class="srw_ul">
               <% @products.each do |p| %>
-              <li><%= p.pname %>/<span><%= p.discount <10 ? "0"+p.discount.to_s : p.discount %>折</span><input type="hidden"
+              <li><%= p.pname %>/<span><%=  format("%.1f", p.discount.to_i*0.1) if p.discount %>折</span><input type="hidden"
                    name="edit_dcard_products[]" value="<%= p.pid %>-<%= p.discount %>"/></li>
               <% end %>
             </ul>

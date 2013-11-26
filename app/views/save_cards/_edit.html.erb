@@ -15,14 +15,17 @@
             <% end %>
           </select>
         </div>
-        <div class="item">
-          <label><span class="red">*</span>适用项目：</label>
-          <select name="edit_scard_category">
-            <% @types.each do |t| %>
-              <option value="<%= t.id %>" <% if @save_card.cid == t.id %>selected<% end %>><%= t.name %></option>
-            <% end %>
-          </select>
-        </div>
+        <fieldset class="popup_body_fieldset">
+          <legend class="popup_body_title"><span class="red">*</span>适用项目</legend>
+          <div class="popup_body_result">
+            <ul>
+              <% @types.each do |t| %>
+                <li><input type="checkbox" value="<%= t.id %>" name="edit_scard_category[]"
+                           <% @save_card.cid.split(",").each do |cid| %><% if cid.to_i==t.id %>checked<% end %><% end %>/><%= t.name %></li>
+              <% end %>
+            </ul>
+          </div>
+        </fieldset>
         <div class="item_textarea">
           <label><span class="red">*</span>图片：</label>
           <input type="file" class="file" name="edit_scard_img" id="edit_scard_img"/>

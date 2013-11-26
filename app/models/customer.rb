@@ -159,21 +159,21 @@ class Customer < ActiveRecord::Base
         CPcardRelation::STATUS[:NORMAL], self.id, store_id])
 #    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
     already_used_count = {}
+
     if c_pcard_relations_no_paginate.present?
       c_pcard_relations_no_paginate.each do |r|
+        ppr = PcardProdRelation.joins(:package_card).find(:first, :conditions => ["package_card_id = ? and package_cards.store_id = ?", r.id, store_id])
         service_infos = r.content.split(",")
         single_car_content = {}
         service_infos.each do |s|
           content_arr = s.split("-")
           single_car_content[content_arr[0].to_i] = [content_arr[1], content_arr[2].to_i] if content_arr.length == 3
         end
-        already_used_count[r.id] = single_car_content unless single_car_content.empty?
+        already_used_count[r.cpr_id] = single_car_content unless single_car_content.empty?
+        used_count = ppr.product_num - already_used_count[r.cpr_id][ppr.product_id][1] if !already_used_count.empty? and already_used_count[r.cpr_id].present? and already_used_count[r.cpr_id][ppr.product_id]
+        already_used_count[r.cpr_id][ppr.product_id][1] = used_count ? used_count : 0 unless already_used_count.empty? or already_used_count[r.cpr_id].blank? or already_used_count[r.cpr_id][ppr.product_id].nil? 
       end
-      pcard_prod_relations = PcardProdRelation.joins(:package_card).find(:all, :conditions => ["package_card_id in (?) and package_cards.store_id = ?", c_pcard_relations_no_paginate, store_id])
-      pcard_prod_relations.each do |ppr|
-        used_count = ppr.product_num - already_used_count[ppr.package_card_id][ppr.product_id][1] if !already_used_count.empty? and already_used_count[ppr.package_card_id].present? and already_used_count[ppr.package_card_id][ppr.product_id]
-        already_used_count[ppr.package_card_id][ppr.product_id][1] = used_count ? used_count : 0 unless already_used_count.empty? or already_used_count[ppr.package_card_id].blank? or already_used_count[ppr.package_card_id][ppr.product_id].nil?
-      end
+
       [already_used_count, c_pcard_relations_no_paginate]
     else
       [{}, []]
