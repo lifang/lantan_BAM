@@ -54,7 +54,7 @@ class ViolationRewardsController < ApplicationController
     begin
       @voi = ViolationReward.find(params[:id])
       @voi.update_attributes(:status=>true,:process_at=>Time.now.strftime("%Y-%m-%d"),
-        :mark=>"使用快捷处理方式,无效违规")
+        :mark=>"使用快捷处理方式,无效",:score_num=>0,:salary_num=>0)
       @msg = "处理成功"
     rescue => error
       @msg = "处理失败"

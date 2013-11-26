@@ -1,6 +1,6 @@
 <div class="main">
   <div class="box">
-    <% if @violations[false].length >0  %>
+    <% if @violations[false] && @violations[false].length >0  %>
       <div class="message" id="message_voilate">
         有 <span class="red" id="voilate_span"><%=  @violations[false].length %></span>条违规记录等待处理
         <a href="javascript:void(0)" onclick="toggle_voilation(this)">点击查看</a>
@@ -9,7 +9,7 @@
         </div>
       </div>
     <% end %>
-    <% if @violations[true] %>
+    <% if @violations[true] && @violations[true].length>0 %>
       <div class="message" id="message_reward">
         有 <span class="red" id="reward_span"><%= @violations[true].length %></span>条奖励记录等待处理
         <a href="javascript:void(0)" onclick="toggle_voilation(this)">点击查看</a>
@@ -92,7 +92,7 @@
           <div class="item">
             <label>职务：</label>
             <select name="staff[department_id]" id="staff_department_id">
-              <% depart_id = @departs[Department::TYPES[:DEPARTMENT]].first[0] %>
+              <% depart_id = @departs[Department::TYPES[:DEPARTMENT]].first.nil? ? 0 : @departs[Department::TYPES[:DEPARTMENT]].first[0] %>
               <option value="">请选择</option>
               <%@departs[Department::TYPES[:POSITION]].each do |pos|%>
                 <option value="<%= pos[0] %>" id="<%=pos[1].dpt_id%>" <% if depart_id!=pos[1].dpt_id %>style="display:none"<%end%>><%= pos[1].name %></option>

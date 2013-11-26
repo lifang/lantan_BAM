@@ -3,7 +3,7 @@
     <tr class="hbg">
       <td>时间</td>
       <td>员工</td>
-      <td>原因</td>
+      <td width="40%">原因</td>
       <td>处理方式</td>
       <td>操作</td>
     </tr>
@@ -16,6 +16,7 @@
         <td><%=voi.situation %></td>
         <td><%= select(:process_types,nil,ViolationReward::VALID_STAT.invert) %></td>
         <td><a href="javascript:void(0)" onclick="operate_voilate(<%= voi.id %>,<%= params[:store_id] %>,<%=voi.types %>)">处理</a></td>
+      
       </tr>
     <% end %>
   </tbody>

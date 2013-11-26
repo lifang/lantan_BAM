@@ -29,9 +29,12 @@ class StaffsController < ApplicationController
     types_sql = params[:types]=="-1" ? "1=1" : ["type_of_w = ?", "#{params[:types]}"]
     status_sql = params[:status]=="-1" ? "1=1" : ["status = ?", "#{params[:status]}"]
     type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
-    @staffs = @store.staffs.not_deleted.where(type_of_w_sql).where(name_sql).where(types_sql).where(status_sql).paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
-    staff_scores = MonthScore.where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")} and store_id = ?", @store.id)
-    @staff_scores_hash = staff_scores.group_by{|ms| ms.staff_id}
+    @staffs = @store.staffs.not_deleted.where(type_of_w_sql).where(name_sql).where(types_sql).where(status_sql).paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
+    departs = Department.where(:store_id=>@store.id,:status=>Department::STATUS[:NORMAL])
+    @departs = departs.inject(Hash.new){|hash,depar| hash[depar.types].nil? ? hash[depar.types]={depar.id=>depar} : hash[depar.types][depar.id]=depar;hash}
+    @index_dearts = departs.inject(Hash.new){|hash,depar| hash[depar.id]=depar.name;hash}
+    @staff_scores_hash = MonthScore.select("sum(sys_score) sys_score,staff_id").where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")}
+   and store_id = ?", @store.id).group("staff_id").inject(Hash.new){|hash,month| hash[month.staff_id] = month;hash}
   end
 
   def create
