@@ -233,11 +233,29 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         end
         pcard_records << pc_record_hash
       end
-      sv_cards = SvcardUseRecord.joins(:c_svc_relation=>:sv_card).select("name,content,use_price,svcard_use_records.left_price,
+      sv_cards = SvcardUseRecord.joins(:c_svc_relation=>:sv_card).select("sv_cards.name sname,sv_cards.id sid,
+    svcard_use_records.content,svcard_use_records.use_price,svcard_use_records.left_price,
     date_format(svcard_use_records.created_at,'%Y.%m.%d') created_at").where("sv_cards.store_id=#{store_id} and
-   c_svc_relations.customer_id=#{customer.customer_id}").where(:types=>SvcardUseRecord::TYPES[:OUT]).group_by{|i|i.name}
+   c_svc_relations.customer_id=#{customer.customer_id}").where(:types=>SvcardUseRecord::TYPES[:OUT]).group_by{|sc|sc.sid}
+      svcards_records = []
+      sv_cards.each do |k, v|
+        a = {}
+        b = []
+        a[:id] = k
+        a[:name] = v[0].sname
+        v.each do |obj|
+          c = {}
+          c[:content] = obj.content
+          c[:time] = obj.created_at.nil? || obj.created_at=="" ? "" : obj.created_at.strftime("%Y.%m.%d")
+          c[:u_price] = obj.use_price
+          c[:l_price] = obj.left_price
+          b << c
+        end
+        a[:records] = b
+        svcards_records << a
+      end
     end
-    [customer, working_orders, old_orders, pcard_records,sv_cards]
+    [customer, working_orders, old_orders, pcard_records,svcards_records]
   end
 
   def self.get_brands_products store_id
