@@ -1099,6 +1099,11 @@ class MaterialsController < ApplicationController
     end
   end
 
+  def reflesh_low_materials   #重新加载库存过低的物料
+    @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id].to_i])
+    @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
+                                    and is_ignore = ?", Material::STATUS[:NORMAL],params[:store_id].to_i, Material::IS_IGNORE[:NO]])
+  end
   protected
   
   def make_search_sql

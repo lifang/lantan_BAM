@@ -2,9 +2,19 @@
 class Api::ChangeController < ApplicationController
   def change_pwd
     sv_card = CSvRelation.where(:customer_id=>params[:customer_id],:sv_card_id=>params[:sv_card_id],:status=>CSvcRelation::STATUS[:valid])
-    if sv_card && params[:verify_code] == sv_card.verify_code
-      verify_code = params[:verify_code]
-      n_password = params[:n_password]
+    if sv_card
+      if params[:verify_code] == sv_card.verify_code
+        n_password = params[:n_password]
+        if sv_card.update_attribute(:password, MD5::digest(n_password))
+          render :json => {:msg_type => 0, :msg => "密码修改成功!"}
+        else
+          render :json => {:msg_type => 2, :msg => "修改失败!"}
+        end
+      else
+        render :json => {:msg_type => 1, :msg => "验证码不正确!"}
+      end
+    else
+      render :json => {:msg_type => 2, :msg => "数据错误!"}
     end
   end
 
