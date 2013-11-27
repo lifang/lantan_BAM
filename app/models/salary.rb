@@ -28,17 +28,19 @@ class Salary < ActiveRecord::Base
         base_salary = staff.probation_salary
       end
       base_salary = base_salary.nil? ? 0 : base_salary
+      reward = staff.reward_fee.nil? ? 0 : staff.reward_fee
+      secure = staff.secure_fee.nil? ? 0 : staff.secure_fee
       parms = {:reward_num => reward_amount,:voilate_fee=>voilate_amount,:current_month => start_time.strftime("%Y%m"),
         :staff_id => staff.id, :satisfied_perc => 100,:reward_fee=>staff.reward_fee,:secure_fee=>staff.secure_fee}
       if staff.type_of_w == Staff::S_COMPANY[:FRONT] || staff.type_of_w == Staff::S_COMPANY[:CHIC] #前台或者店长
         total_deduct = (staff.is_deduct && !front_amount[staff.id].nil?) ?  front_amount[staff.id] : 0
-        total = base_salary + reward_amount - voilate_amount + total_deduct + staff.reward_fee - staff.secure_fee
+        total = base_salary + reward_amount - voilate_amount + total_deduct + reward - secure
       elsif staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN] #技师
         total_deduct = (staff.is_deduct && !technician_amount[staff.id].nil?) ?  technician_amount[staff.id] : 0
-        total = base_salary + reward_amount - voilate_amount + total_deduct + staff.reward_fee - staff.secure_fee
+        total = base_salary + reward_amount - voilate_amount + total_deduct + reward - secure
       else
         total_deduct = 0
-        total = base_salary + reward_amount - voilate_amount + staff.reward_fee - staff.secure_fee
+        total = base_salary + reward_amount - voilate_amount + reward - secure
       end
       Salary.create(parms.merge({:total => total,:deduct_num => total_deduct,:fact_fee=>total}))
     end

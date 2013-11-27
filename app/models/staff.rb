@@ -20,7 +20,7 @@ class Staff < ActiveRecord::Base
   validates :username, :uniqueness => { :message => "用户名已经存在!", :scope => :status}, :if => :staff_not_deleted?
   #门店员工职务
   S_COMPANY = {:BOSS=>0,:CHIC=>2,:FRONT =>3,:TECHNICIAN =>1,:OTHER=>4} #0 老板 2 店长 3接待 1 技师 4其他
-  N_COMPANY = {1=>"技师",3=>"接待",0=>"老板",2=>"店长",4=>"其他"}
+  N_COMPANY = {1=>"技师",3=>"接待",2=>"店长",4=>"其他"}
   LEVELS = {0=>"高级",1=>"中级",2=>"初级"}  #技师等级
   #总部员工职务
 

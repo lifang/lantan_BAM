@@ -7,9 +7,8 @@ class StaffsController < ApplicationController
   before_filter :search_work_record, :only => :show
 
   def index
-    type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
-    @staffs_names = @store.staffs.not_deleted.where(type_of_w_sql).select("id, name")
-    @staffs = @store.staffs.not_deleted.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
+    @staffs_names = @store.staffs.not_deleted.select("id, name")
+    @staffs = @store.staffs.not_deleted.paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
     @staff_scores_hash = MonthScore.select("sum(sys_score) sys_score,staff_id").where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")}
    and store_id = ?", @store.id).group("staff_id").inject(Hash.new){|hash,month| hash[month.staff_id] = month;hash}
     @violations = ViolationReward.joins(:staff).where(:status => false).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name").group_by{|i| i.types }
