@@ -98,9 +98,9 @@
               <input value="取消订单" class="confirm_btn" onclick="handle_order(<%=@order.id  %>,'cancel')" type="button"  />
             <% else  %>
               <% work_order = @order.work_orders[0] %>
-              <% if  work_order.status == WorkOrder::STAT[:WAIT_PAY] %>
+              <% if  work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY] %>
                 <input value="结束付款" class="confirm_btn" onclick="handle_order(<%=@order.id  %>,'complete_pay')" type="button"  />
-              <%elsif work_order.status == WorkOrder::STAT[:SERVICING] %>
+              <%elsif work_order && work_order.status == WorkOrder::STAT[:SERVICING] %>
                 <input value="结束施工" class="confirm_btn" onclick="handle_order(<%=@order.id  %>,'complete_work')" type="button"  />
               <% end %>
             <% end %>

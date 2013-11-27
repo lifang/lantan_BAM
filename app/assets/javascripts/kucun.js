@@ -358,7 +358,6 @@ function add_material(store_id){
 function change_supplier(obj){
     var idx = $(obj).find("option:selected").index();
     $("#dinghuo_search_material").html("");
-    //    $("#search_result").hide();
     $("#selected_items_dinghuo").attr("value","");
     $("#total_count").text(0.0);
     if(idx == 0){

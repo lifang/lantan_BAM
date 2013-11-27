@@ -35,6 +35,7 @@
       <div style="display: none;">
         <% Constant::ROLES.each do |k, v| %>
         <% role_model_relation = RoleModelRelation.where(:role_id => @role_id, :model_name => k.to_s).first if @role_id %>
+        <div class="clear">
           <dl>
             <dt><input type="checkbox" onclick="selectAll(this)"/><%= v[:name] %>模块</dt>
             <div>
@@ -43,7 +44,7 @@
             <% end %>
             </div>
           </dl>
-     
+        </div>
         <% end %>
       </div>
     </div>

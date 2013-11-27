@@ -18,6 +18,7 @@ class MaterialsController < ApplicationController
   #库存列表
   def index
     @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
+    #@h_types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], 0])
     @material_losses = MaterialLoss.loss_list(@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @materials_storages = Material.materials_list(@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     out_arr = MatOutOrder.out_list(@current_store.id)
@@ -432,9 +433,9 @@ class MaterialsController < ApplicationController
     sql = "select sum(moi.material_num) mnum,moi.material_id mid, mo.supplier_id msuid, m.name mname, m.storage mstorage, c.name cname
                                            from material_orders mo inner join mat_order_items moi
                                            on mo.id=moi.material_order_id inner join materials m
-                                           on moi.material_id=m.id inner join categories c
-                                           on m.category_id=c.id
-                                           where mo.supplier_id=#{supp} and c.id=#{good_type}"
+                                           on moi.material_id=m.id inner join categories c on m.category_id=c.id
+                                           where mo.supplier_id=#{supp} and mo.m_status=#{MaterialOrder::M_STATUS[:save_in]}
+                                           and c.id=#{good_type}"
     unless params[:good_name].strip.empty? || params[:good_name].strip == ""
       good_name = params[:good_name].strip.gsub(/[%_]/){|x|'\\' + x}
       sql += " and m.name like '%#{good_name}%'"
