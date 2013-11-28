@@ -382,6 +382,10 @@ class CustomersController < ApplicationController
         flash[:notice] = "车牌号码为"+car_num+"的车辆已关联到当前客户名下!"
       elsif cnr and cnr.customer_id == cid
         flash[:notice] = "添加失败,该客户已关联该车辆!"
+      else
+        car_num_record.update_attributes(:car_model_id => car_model, :buy_year => buy_year, :distance => distance)
+        CustomerNumRelation.create(:customer_id => cid, :car_num_id => car_num_record.id)
+        flash[:notice] = "添加成功!"
       end
     else
       new_num_record = CarNum.create(:num => car_num, :car_model_id => car_model, :buy_year => buy_year, :distance => distance)

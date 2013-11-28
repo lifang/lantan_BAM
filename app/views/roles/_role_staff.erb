@@ -7,16 +7,8 @@
     </tr>
   </thead>
   <tbody>
-    <% (@staffs || []).each_with_index do |staff,index| %>
-      <% if index !=0   %>
-        <tr class="<%= cycle('', 'tbg') %>">
-          <td><%= staff.name %></td>
-          <td><%= staff.roles.collect{|role| role.name }.join(", ") %></td>
-          <td>
-            <% if permission?(:base_datas, :role_role_set) %><a href="javascript:void(0);" onclick="set_staff_role('<%= staff.id %>','<%= staff.roles.collect{|role| role.id }.join(",") %>')">角色设定</a><% end %>
-          </td>
-        </tr>
-      <% elsif  cookies[:user_id] == "#{staff.id}" %>
+    <% (@staffs || []).each do |staff| %>
+      <% if staff.type_of_w != Staff::S_COMPANY[:BOSS]   %>
         <tr class="<%= cycle('', 'tbg') %>">
           <td><%= staff.name %></td>
           <td><%= staff.roles.collect{|role| role.name }.join(", ") %></td>

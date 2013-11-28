@@ -114,11 +114,12 @@ function set_staff_role(staff_id,r_ids){
 
 function search_staff(store_id){
     $.ajax({
-        url:encodeURI('/stores/'+store_id+'/roles/staff?name='+ $.trim($("#name").val())),
+        url:"/stores/"+store_id+"/roles/staff",
         dataType:"script",
         type:"GET",
+        data: {name : $.trim($("#name").val())},
         success:function(){
-        //           alert(2);
+                 
         },
         error:function(){
             tishi_alert("error");

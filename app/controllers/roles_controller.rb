@@ -1,5 +1,6 @@
 #encoding: utf-8
 class RolesController < ApplicationController
+  require 'will_paginate/array'
   layout "role"
   before_filter :sign?
   before_filter :find_store
@@ -42,14 +43,15 @@ class RolesController < ApplicationController
 
   #查询员工
   def staff
-    str = ["store_id = ?", params[:store_id]]
-
+    str = ["store_id = ?", params[:store_id].to_i]
     if params[:name]
       str[0] += " and name like ?"
-      str << "%#{params[:name].gsub('%', '\%')}%"
+      str << "%#{params[:name].strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
-    @staffs = Staff.valid.includes(:staff_role_relations => :role).paginate(:conditions => str,
-      :page => params[:page], :per_page => Constant::PER_PAGE)
+#    @staffs = Staff.valid.joins(:staff_role_relations => :role).paginate(:conditions => str,
+#      :page => params[:page], :per_page => Constant::PER_PAGE)
+    @staffs = Staff.valid.where(str).paginate(:page => params[:page], :per_page => Constant::PER_PAGE)
+
     @roles = Role.where(:store_id =>params[:store_id].to_i).where("role_type = (?)",Role::ROLE_TYPE[:NORMAL])
     respond_to do |f|
       f.html
