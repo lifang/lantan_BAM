@@ -976,91 +976,92 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
     status = 0
     if order
       Order.transaction do
-        #        begin
-        hash = Hash.new
-        hash[:is_billing] = billing.to_i == 0 ? false : true
-        hash[:is_pleased] = please.to_i
-        hash[:qfpos_id] = qfpos_id
-        if is_free.to_i == 0
-          hash[:status] = STATUS[:BEEN_PAYMENT]
-          hash[:is_free] = false
-        else
-          hash[:status] = STATUS[:FINISHED]
-          hash[:is_free] = true
-          hash[:price] = 0
-        end
-        #如果有套餐卡，则更新状态
-        c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
-        c_pcard_relations.each do |cpr|
-          cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
-        end unless c_pcard_relations.blank?
-        #如果有买储值卡，则更新状态
-        csvc_relations = CSvcRelation.where(:order_id => order.id)
-        csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing => hash[:is_billing]})}
-        if c_pcard_relations.present? || csvc_relations.present?
-          c_s_r = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id, order.customer_id)
-          c_s_r.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
-        end
-        #如果是选择储值卡支付
-        if pay_type.to_i == OrderPayType::PAY_TYPES[:SV_CARD] && code
-          #c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
-          #if c_svc_relation && c_svc_relation.left_price.to_f >= order.price.to_f
-          content = "订单号为：#{order.code},消费：#{order.price}."
-          #sv_use_record = SvcardUseRecord.create(:c_svc_relation_id => c_svc_relation.id,
-          #                                       :types => SvcardUseRecord::TYPES[:OUT],
-          #                                       :use_price => order.price,
-          #                                       :content => content,
-          #                                       :left_price => (c_svc_relation.left_price - order.price)
-          #)
-          #c_svc_relation.update_attribute(:left_price,sv_use_record.left_price) if sv_use_record
-          svc_return_record = SvcReturnRecord.find_all_by_store_id(store_id,:order => "created_at desc", :limit => 1)
-          if svc_return_record.size > 0
-            total = svc_return_record[0].total_price - order.price
-            SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:OUT],
-              :content => content, :target_id => order.id, :total_price => total)
+        begin
+          hash = Hash.new
+          hash[:is_billing] = billing.to_i == 0 ? false : true
+          hash[:is_pleased] = please.to_i
+          hash[:qfpos_id] = qfpos_id
+          if is_free.to_i == 0
+            hash[:status] = STATUS[:BEEN_PAYMENT]
+            hash[:is_free] = false
           else
-            SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:OUT],
-              :content => content, :target_id => order.id, :total_price => -order.price)
+            hash[:status] = STATUS[:FINISHED]
+            hash[:is_free] = true
+            hash[:price] = 0
           end
+          #如果有套餐卡，则更新状态
+          c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
+          c_pcard_relations.each do |cpr|
+            cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
+          end unless c_pcard_relations.blank?
+          #如果有买储值卡，则更新状态
+          csvc_relations = CSvcRelation.where(:order_id => order.id)
+          csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing => hash[:is_billing]})}
+          if c_pcard_relations.present? || csvc_relations.present?
+            c_s_r = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id, order.customer_id)
+            c_s_r.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
+          end
+          #如果是选择储值卡支付
+          if pay_type.to_i == OrderPayType::PAY_TYPES[:SV_CARD] && code
+            #c_svc_relation = CSvcRelation.find_by_id order.c_svc_relation_id
+            #if c_svc_relation && c_svc_relation.left_price.to_f >= order.price.to_f
+            content = "订单号为：#{order.code},消费：#{order.price}."
+            #sv_use_record = SvcardUseRecord.create(:c_svc_relation_id => c_svc_relation.id,
+            #                                       :types => SvcardUseRecord::TYPES[:OUT],
+            #                                       :use_price => order.price,
+            #                                       :content => content,
+            #                                       :left_price => (c_svc_relation.left_price - order.price)
+            #)
+            #c_svc_relation.update_attribute(:left_price,sv_use_record.left_price) if sv_use_record
+            svc_return_record = SvcReturnRecord.find_all_by_store_id(store_id,:order => "created_at desc", :limit => 1)
+            if svc_return_record.size > 0
+              total = svc_return_record[0].total_price - order.price
+              SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:OUT],
+                :content => content, :target_id => order.id, :total_price => total)
+            else
+              SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:OUT],
+                :content => content, :target_id => order.id, :total_price => -order.price)
+            end
             
-          OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
-          status = 1
-        else
-          OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
-          status = 1
-        end
-        wo = WorkOrder.find_by_order_id(order.id)
-        wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
-        #生成积分的记录
-        c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id,order.customer_id)
-        if c_customer && c_customer.is_vip
-          points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
-            where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
-            PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
-          Point.create(:customer_id=>c_customer.customer_id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
-          c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
-        end
-        #生成出库记录
-        order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id,
+            OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
+            status = 1
+          else
+            OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
+            status = 1
+          end
+          wo = WorkOrder.find_by_order_id(order.id)
+          wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
+          #生成积分的记录
+          c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id,order.customer_id)
+          if c_customer && c_customer.is_vip
+            points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
+              where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
+              PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
+            Point.create(:customer_id=>c_customer.customer_id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
+            c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
+          end
+          #生成出库记录
+          order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id,
           m.price m_price FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
           p.id = opr.product_id inner join prod_mat_relations pmr on pmr.product_id = p.id inner join materials m
            on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and o.status in (?) and o.id = ?", [STATUS[:BEEN_PAYMENT], STATUS[:FINISHED]], order.id])
-        order_mat_infos.each do |omi|
-          MatOutOrder.create({:material_id => omi.m_id, :staff_id => omi.front_staff_id, :material_num => omi.material_num,
-              :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => store_id})
-        end
-        #更新订单提成
-        hash[:front_deduct],hash[:technician_deduct] = 0,0
-        hash[:front_deduct] += PackageCard.select("ifnull(sum(deduct_price+deduct_percent),0) sum").where(:id=>c_pcard_relations.map(&:package_card_id)).first.sum unless c_pcard_relations.blank?
-        deduct_order = Order.joins(:order_prod_relations=>:product).select("ifnull(sum((deduct_price+deduct_percent)*pro_num),0) deduct_sum,
+          order_mat_infos.each do |omi|
+            MatOutOrder.create({:material_id => omi.m_id, :staff_id => omi.front_staff_id, :material_num => omi.material_num,
+                :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => store_id})
+          end
+          #更新订单提成
+          hash[:front_deduct],hash[:technician_deduct] = 0,0
+          hash[:front_deduct] += PackageCard.select("ifnull(sum(deduct_price+deduct_percent),0) sum").where(:id=>c_pcard_relations.map(&:package_card_id)).first.sum unless c_pcard_relations.blank?
+          deduct_order = Order.joins(:order_prod_relations=>:product).select("ifnull(sum((deduct_price+deduct_percent)*pro_num),0) deduct_sum,
           ifnull(sum((techin_price+techin_percent)*pro_num),0) technician_sum").where("orders.id=#{order.id}").first
-        hash[:front_deduct] += deduct_order.deduct_sum
-        hash[:technician_deduct] += deduct_order.technician_sum/2.0
-        order.update_attributes hash
-        #        rescue => error
-        #          p error
-        #          status = 2
-        #        end
+          hash[:front_deduct] += deduct_order.deduct_sum
+          hash[:technician_deduct] += deduct_order.technician_sum/2.0
+          order.update_attributes hash
+          
+        rescue => error
+          p error
+          status = 2
+        end
       end
     else
       status = 2

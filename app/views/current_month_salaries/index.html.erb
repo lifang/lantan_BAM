@@ -52,15 +52,15 @@
                   <td><%= staff.name %></td>
                   <td><%= @departs[staff.position] %></td>
                   <td><%= @departs[staff.department_id] %></td>
-                  <td class="base_salary_text"><%= staff.base_salary.to_i %></td>
                   <% if @current_month[staff.id].nil?
-                    details = [0,0,0,0,0,0,0,0,0,0]
+                    details = [0,0,0,0,0,0,0,0,0,0,0]
                   else
                     salary = @current_month[staff.id]
                     details = [salary.deduct_num,salary.reward_fee,salary.reward_num,salary.voilate_fee,salary.secure_fee,salary.total,
-                      salary.work_fee,salary.manage_fee,salary.tax_fee,salary.fact_fee]
+                      salary.work_fee,salary.manage_fee,salary.tax_fee,salary.fact_fee,salary.base_salary]
                   end
                 %>
+                  <td class="base_salary_text"><%=details[10] %></td>
                   <td><%=  details[0]%></td>
                   <td><%= details[1] %></td>
                   <td><%= details[4] %></td>
@@ -97,8 +97,7 @@
               <% end %>
             </tbody>
           </table>
-          <%= will_paginate @staffs, :class => "pageTurn", :previous_label => "上一页",
-            :next_label => "下一页" %>
+          <%= will_paginate @staffs, :class => "pageTurn", :previous_label => "上一页",:next_label => "下一页" %>
         </div>
       </div>
     </div>

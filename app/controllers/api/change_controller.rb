@@ -14,8 +14,31 @@ class Api::ChangeController < ApplicationController
         render :json => {:msg_type => 1, :msg => "验证码不正确!"}
       end
     else
-      render :json => {:msg_type => 2, :msg => "数据错误!"}
+      render :json => {:msg_type => 2, :msg => "当前卡的余额不足"}
     end
+  end
+
+  def send_code
+    csvc_relaion = CSvcRelation.where(:customer_id=>params[:customer_id],:sv_card_id=>params[:sv_card_id]).first
+    c_phone = csvc_relaion.customer.mobilephone
+    if csvc_relaion && c_phone
+      begin
+        csvc_relaion.update_attribute(:verify_code, proof_code(6).downcase)
+        send_message = "#{csvc_relaion.sv_card.name}的余额为#{csvc_relaion.left_price}，本次验证码：#{csvc_relaion.verify_code}。"
+        message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{c_phone.strip}&Content=#{URI.escape(send_message)}&Exno=0"
+        create_get_http(Constant::MESSAGE_URL, message_route)
+        msg_type = 0
+        msg = "发送成功"
+      rescue
+        msg_type =1
+        msg = "发送失败"
+      end
+    else
+      msg_type =1
+      msg = "用户或储值卡不存在"
+    end
+    render :json=>{:msg_type=>msg_type,:msg=>msg}
+
   end
 
   def sv_records

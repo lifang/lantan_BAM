@@ -40,9 +40,7 @@
                     <td><%= format("%.1f", sc.bprice + sc.mprice) %></td>
                     <td><%= sc.sdesc %></td>
                     <td>
-                      <% a = [] %>
-                      <% sc.cid.split(",").each do |c| %><% a << @cname[c.to_i] %><% end %>
-                      <%= truncate(a.join(","), :length => 15) %>
+                      <%= truncate(sc.cid.nil? ? "" : sc.cid.split(",").inject(Array.new){|arr,c| arr << @cname[c.to_i] if @cname[c.to_i] }.join(","), :length => 15) %>
                     </td>
                     <td><%= SvCard::S_USE_RANGE[sc.srange] %></td>
                     <td>

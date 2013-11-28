@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131126081735) do
+ActiveRecord::Schema.define(:version => 20131127015721) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -711,20 +711,20 @@ ActiveRecord::Schema.define(:version => 20131126081735) do
     t.string   "standard"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.float    "deduct_percent"
+    t.float    "deduct_percent", :default => 0.0
     t.float    "t_price"
     t.boolean  "is_auto_revist"
     t.integer  "auto_time"
     t.text     "revist_content"
     t.integer  "prod_point"
-    t.float    "deduct_price"
+    t.float    "deduct_price",   :default => 0.0
     t.boolean  "show_on_ipad",   :default => true
     t.boolean  "commonly_used",  :default => false
-    t.integer  "category_id"
     t.boolean  "is_added",       :default => false
     t.float    "techin_price",   :default => 0.0
     t.float    "techin_percent", :default => 0.0
-    t.integer  "single_types"
+    t.integer  "single_types",   :default => 0
+    t.integer  "category_id"
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"
@@ -844,6 +844,7 @@ ActiveRecord::Schema.define(:version => 20131126081735) do
     t.float    "manage_fee",     :default => 0.0
     t.float    "tax_fee",        :default => 0.0
     t.boolean  "is_edited"
+    t.float    "base_salary",    :default => 0.0
   end
 
   add_index "salaries", ["current_month"], :name => "index_salaries_on_current_month"

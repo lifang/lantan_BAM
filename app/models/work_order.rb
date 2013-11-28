@@ -65,6 +65,14 @@ class WorkOrder < ActiveRecord::Base
                   :situation => "订单号#{order.code}超时#{sprintf('%.2f',runtime - self.cost_time)}分钟",
                   :status => ViolationReward::STATUS[:NOMAL])
               end
+              w_records = WorkRecord.where(:staffs => (staffs | [order.try(:cons_staff_id_1)]).compact)
+              w_records.each {|w_record|
+                c_num = w_record.construct_num.nil? ? 0 : w_record.construct_num
+                g_num = w_record.gas_num.nil? ? 0 : w_record.gas_num
+                w_num = w_record.water_num.nil? ? 0 : w_record.water_num
+                water_num = water_num.nil? ? 0 : water_num/2.0
+                gas_num =  gas_num.nil? ? 0 : gas_num/2.0
+                w_record.update_attributes(:construct_num=>c_num+1,:water_num=>w_num+water_num,:gas_num=>g_num+gas_num)} unless w_records.blank?
             end
           end
 

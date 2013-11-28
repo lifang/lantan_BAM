@@ -23,7 +23,7 @@
           <span class="site_name"><%= @staffs[key] %></span>
           <ul>
             <%@wait_operate[key].each do |num|%>
-              <li><%= link_to "#{num.num}", "/orders/#{num.id}/order_info" ,
+              <li><%= link_to "#{num.num}", "/orders/#{num.order_id}/order_info" ,
                   :remote => "true", "data-type" => "script", :class => "other_a" %></li>
             <% end unless @wait_operate[key].blank? %>
           </ul>
