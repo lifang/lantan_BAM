@@ -355,43 +355,26 @@ class Api::OrdersController < ApplicationController
   def use_svcard
     record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
       left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
-      where sc.types = 1 and c.mobilephone = ? and csr.verify_code = ? and csr.status = ?",
-        params[:mobilephone].strip, params[:verify_code].strip, CSvcRelation::STATUS[:valid]])[0]
+      where sc.types = 1 and csr.password = ? and csr.status = ? and csr.customer_id = ?",
+        MD5::digest(params[:password].strip), CSvcRelation::STATUS[:valid], params[:customer_id].to_i])[0]
     status = 0
-    message = "支付失败。"
+    message = ""
     price = params[:price].to_f
     SvcardUseRecord.transaction do
       if record
-        if record.left_price >= price
-          left_price = record.left_price - price
-          SvcardUseRecord.create(:c_svc_relation_id => record.id, :types => SvcardUseRecord::TYPES[:OUT],
-            :use_price => price, :left_price => left_price, :content => params[:content].strip)
-          record.update_attribute(:left_price, left_price)
+        if record.left_price.to_f < price
+          status = 0
+          message = "余额不足,请换张卡!"
         else
-          csvc_relaions = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
-      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
- where sc.types = 1 and c.mobilephone = ? and left_price != ? and csr.status = ?
-            and ((sc.use_range = #{SvCard::USE_RANGE[:LOCAL]} and sc.store_id = #{params[:store_id]})
-        or (sc.use_range = #{SvCard::USE_RANGE[:CHAIN_STORE]} and sc.store_id in (?)) or (sc.use_range = #{SvCard::USE_RANGE[:ALL]}))",
-              params[:mobilephone].strip, 0, CSvcRelation::STATUS[:valid], StoreChainsRelation.return_chain_stores(params[:store_id])])
-          csvc_relaions.each do |csv|
-            if price > 0
-              if price - csv.left_price >= 0
-                SvcardUseRecord.create(:c_svc_relation_id => csv.id, :types => SvcardUseRecord::TYPES[:OUT],
-                  :use_price => csv.left_price, :left_price => 0, :content => params[:content].strip)
-                price = price - csv.left_price
-                csv.update_attribute(:left_price, 0)
-              else
-                SvcardUseRecord.create(:c_svc_relation_id => csv.id, :types => SvcardUseRecord::TYPES[:OUT],
-                  :use_price => price, :left_price => csv.left_price - price, :content => params[:content].strip)
-                csv.update_attribute(:left_price, csv.left_price - price)
-                price = 0
-              end
-            end
-          end
+          SvcardUseRecord.create(:c_svc_relation_id => record.id, :types => SvcardUseRecord::TYPES[:OUT],
+            :use_price => price, :left_price => record.left_price - price, :content => params[:content].strip)
+          record.update_attribute(:left_price, (record.left_price - price))
+          status = 1
+          message = "支付成功!"
         end
-        status = 1
-        message = "支付成功。"
+      else
+        status = 0
+        message = "密码错误!"
       end
       render :json => {:content => message, :status => status}
     end

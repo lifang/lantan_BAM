@@ -43,6 +43,5 @@ class Api::ChangeController < ApplicationController
     #        svcards_records << a
     #      end
     #      render :json => svcards_records
-
   end
 end

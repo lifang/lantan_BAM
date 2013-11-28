@@ -284,8 +284,6 @@ inner join orders o on o.id = opr.order_id where p.status = ? and p.is_service =
     orders = Order.working_orders store_id
     orders = combin_orders(orders)
     orders = new_app_order_by_status(orders)
-    p 1111111111111111111
-    p orders
     orders
   end
 end

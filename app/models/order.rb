@@ -672,17 +672,17 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           used_svcard_id = used_cards.flatten[1] #已经使用的打折卡的id
           #2_id_card_type_（is_new）_price 储值卡格式
           arr[2].select{|ele| ele[3].to_i == 1}.each do |uc|
-            if uc[3]=="1" #新储值卡 or 打折卡
+            if uc[3]=="1" #如果是新储值卡 or 打折卡
               sv_card = SvCard.find_by_id uc[1]
               if sv_card
                 if sv_card.types== SvCard::FAVOR[:SAVE]  #储值卡
                   sv_prod_relation = sv_card.svcard_prod_relations[0]
                   if sv_prod_relation
                     total_price = sv_prod_relation.base_price.to_f+sv_prod_relation.more_price.to_f
-                    c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, :status => CSvcRelation::STATUS[:invalid])
+                    c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, 
+                      :status => CSvcRelation::STATUS[:invalid], :password => MD5::digest(uc[5]))
                     SvcardUseRecord.create(:c_svc_relation_id =>c_sv_relation.id,:types=>SvcardUseRecord::TYPES[:IN],:use_price=>total_price,
-                      :left_price=>total_price,:content=>"购买#{sv_card.name}")
-                    
+                      :left_price=>total_price,:content=>"购买#{sv_card.name}")                   
                   end
                 else   #打折卡
                   CSvcRelation.create!(:customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => sv_card.price, :status => CSvcRelation::STATUS[:invalid])
@@ -759,8 +759,6 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           if p_cards.any?            
             p_cards_hash = p_cards.group_by { |p_c| p_c.id }
             arr[3].collect do |a_pc|
-              p 111111111111
-              p a_pc
               prod_nums = a_pc[3].split("-") if a_pc[3]
               if a_pc[2].to_i == 0 #has_p_card是0，表示是新买的套餐卡
                 p_card_id = a_pc[1].to_i
@@ -1021,14 +1019,14 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           else
             SvcReturnRecord.create(:store_id => store_id, :price => order.price, :types => SvcReturnRecord::TYPES[:OUT],
               :content => content, :target_id => order.id, :total_price => -order.price)
-          end
-            
+          end          
           OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
           status = 1
         else
           OrderPayType.create(:order_id => order_id, :pay_type => pay_type.to_i, :price => order.price)
           status = 1
         end
+
         wo = WorkOrder.find_by_order_id(order.id)
         wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
         #生成积分的记录
