@@ -77,7 +77,7 @@ class Api::OrdersController < ApplicationController
       #    elsif order[0] == 3
       #      "没可用的工位了"
     end
-    render :json => {:status => order[0], :content => str, :order => info}
+    render :json => {:status => order[0], :content => str, :order => info, :customer_id => params[:c_id]}
   end
   #付款
   def pay

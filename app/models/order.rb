@@ -359,7 +359,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         h[:price] = price
         h[:description] = description
         h[:img] = c.img_url
-        h[:type] = c.is_a?(PackageCard) ? '0' : '1'
+        h[:type] = c.is_a?(PackageCard) ? '2' : c.types==SvCard::FAVOR[:DISCOUNT] ? '0' : '1'
         h[:point] = c.is_a?(PackageCard) ? c.prod_point : nil
         h
       end
