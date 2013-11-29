@@ -11,6 +11,9 @@ class StationDatasController < ApplicationController
   def new
     @categories = Category.where(["types = ? and store_id = ? ", Category::TYPES[:service], @store.id])
     @services = Product.is_normal.where(:category_id => @categories.map(&:id)).group_by { |p| p.category_id }
+    respond_to do |format|
+      format.js
+    end
   end
 
   def create
@@ -41,6 +44,9 @@ class StationDatasController < ApplicationController
     @station = Station.find_by_id(params[:id].to_i)
     @has_services = @station.products.map(&:id)
     @services = Product.is_normal.where(:category_id => @categories.map(&:id)).group_by { |p| p.category_id }
+    respond_to do |format|
+      format.js
+    end
   end
 
   def update
@@ -61,19 +67,19 @@ class StationDatasController < ApplicationController
         end
         @status = 1
       else
-         @status = 0
+        @status = 0
       end
     else
-       @status = 2
+      @status = 2
     end
   end
 
   def destroy
     station = Station.find_by_id(params[:id])
     if station.update_column(:status, Station::STAT[:DELETED])
-       @status = 1
+      @status = 1
     else
-       @status = 0
+      @status = 0
     end
   end
 

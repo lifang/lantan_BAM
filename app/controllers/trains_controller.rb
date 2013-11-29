@@ -13,9 +13,8 @@ class TrainsController < ApplicationController
           train = Train.new(params[:train])
           train.train_staff_relations.new({:staff_id => staff_id, :status => 1}) #是否通过考核默认为没有，status=1
           train.save
-          work_r = WorkRecord.find_by_staff_id(staff_id)
-          t_num = work_r.train_num.nil? ? 0 : work_r.train_num
-          work_r.update_attributes(:train_num=>t_num +1) if work_r
+          work_r = WorkRecord.where(:staff_id=>staff_id,:current_day=>Time.now.strftime("%Y-%m-%d")).first
+          work_r.update_attributes(:train_num=>work_r.train_num.nil? ? 1 : work_r.train_num+1)  if work_r
         end
         flash[:notice] = "新建培训成功!"
       rescue

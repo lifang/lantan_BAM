@@ -70,7 +70,7 @@ class RevisitsController < ApplicationController
       if is_violation
         vr1 = ViolationReward.find_by_target_id_and_staff_id(complaint.id, staff_id_1)
         vr2 = ViolationReward.find_by_target_id_and_staff_id(complaint.id, staff_id_2)
-        w_records = WorkRecord.where(:staff_id=>([staff_id_1]|[staff_id_2]).compact)
+        w_records = WorkRecord.where(:staff_id=>([staff_id_1]|[staff_id_2]).compact,:current_day=>Time.now.strftime("%Y-%m-%d"))
         w_records.each {|w_record|
           c_num = w_record.complaint_num.nil? ? 0 : w_record.complaint_num
           w_record.update_attributes(:complaint_num=>c_num+1)} unless w_records.blank?

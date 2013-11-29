@@ -29,14 +29,14 @@
     <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
   <label>百分点：</label>
   <input name="deduct_percent" id="deduct_percent" type="text" <%if @pcard.deduct_percent==0.0 && @pcard.deduct_price != 0.0%> disabled<%else%>
-           value="<%= (@pcard.deduct_percent.nil? ? 0 :@pcard.deduct_percent)/(@pcard.price.nil? ? 1 : @pcard.price)*100 %>" <%end%>  class="item_areaInput_s"/>
+           value="<%= (@pcard.deduct_percent.nil? ? 0 :@pcard.deduct_percent)/(@pcard.price.nil? ? 1 : @pcard.price)*100 %>" <%end%>  class="item_areaInput_s"/>（销售提成）
 </div>
 <div class="item_textarea"><span class="item_radio">
     <input name="deduct_type" type="radio" <% if @pcard.deduct_price && @pcard.deduct_price != 0.0 %>checked<%end%>
            onclick="change_input('#deduct_percent','#deduct_price')" /></span>
   <label>金额(元)：</label>
   <input name="deduct_price" id="deduct_price" type="text"
-         <%if @pcard.deduct_price.nil? || @pcard.deduct_price === 0 %> disabled <%else%> value="<%= @pcard.deduct_price %>"<%end%>  class="item_areaInput_s" />
+         <%if @pcard.deduct_price.nil? || @pcard.deduct_price === 0 %> disabled <%else%> value="<%= @pcard.deduct_price %>"<%end%>  class="item_areaInput_s" />（销售提成）
 </div>
 <div class="item">
   <label><span class="red">*</span>积分：</label><input name="prod_point" id="prod_point" type="text" value="<%= @pcard.prod_point.nil? ? 0 : @pcard.prod_point %>" />
@@ -85,7 +85,7 @@
 <input type="hidden" value="<%= PackageCard::TIME_SELCTED[:PERIOD] %>" id="date1" />
 <div class="clear"></div>
 <div class="card_content" id="t_prod">
-  <%= render :partial=>"/sales/sale_search",:object=>[@cates[Category::TYPES[:good]].merge(@cates[Category::TYPES[:service]]),"pcard_types"] %>
+  <%= render :partial=>"/sales/sale_search",:object=>[Product::PACK_SERVIE.merge(@cates[Category::TYPES[:good]]).merge(@cates[Category::TYPES[:service]]),"pcard_types"] %>
 </div>
 
 <% if @material %>
@@ -94,6 +94,7 @@
     $("#material_num").attr("disabled",false);
     $("#m_types").val(<%= @material.id %>);
     $("#sale_types").parent().parent().find(".search_btn").removeAttr("onclick").attr("disabled",true);
+    $("#add_products input").attr("disabled",true).attr("readonly",true);
     $("#add_products a").removeAttr("onclick").attr("disabled",true);
   </script>
 <% end %>

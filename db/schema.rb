@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131127015721) do
+ActiveRecord::Schema.define(:version => 20131128015721) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -843,7 +843,7 @@ ActiveRecord::Schema.define(:version => 20131127015721) do
     t.float    "work_fee",       :default => 0.0
     t.float    "manage_fee",     :default => 0.0
     t.float    "tax_fee",        :default => 0.0
-    t.boolean  "is_edited"
+    t.boolean  "is_edited",      :default => false
     t.float    "base_salary",    :default => 0.0
   end
 

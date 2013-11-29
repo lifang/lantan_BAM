@@ -35,6 +35,9 @@ class Product < ActiveRecord::Base
   scope :is_service, where(:is_service => true)
   scope :is_normal, where(:status => true)
   scope :commonly_used, where(:commonly_used => true)
+  PACK_SERVIE  = {0=>"产品服务套装"}
+  PACK ={:PACK => 0}
+
 
   #根据回访要求发送客户短信，会查询所有的门店信息发送,设置的时间为每天的11:30和8点半左右，每天两次执行
   def self.revist_message()

@@ -314,7 +314,7 @@ LantanBAM::Application.routes.draw do
     resources :change do
       collection do
         get :sv_records
-        post :change_pwd,:send_code
+        post :change_pwd,:send_code,:use_svcard
       end
     end
   end

@@ -222,8 +222,8 @@ class ProductsController < ApplicationController
   end
 
   def package_service
-    @services = Product.paginate_by_sql("select p.id, service_code code,p.store_id,p.name,c.name c_name,show_on_ipad,cost_time,staff_level level1,
-    staff_level_1 level2,commonly_used from products p inner join categories c on c.id=p.category_id where p.store_id=#{params[:store_id]}
+    @services = Product.paginate_by_sql("select p.id, service_code code,p.store_id,p.name,cost_time,staff_level level1,
+    staff_level_1 level2,commonly_used from products p where p.store_id=#{params[:store_id]}
     and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]}
     order by p.created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
     @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
@@ -232,7 +232,7 @@ class ProductsController < ApplicationController
 
   def pack_create
     flash[:notice] = "添加成功"
-    parms = {:name=>params[:name],:category_id=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
+    parms = {:name=>params[:name],:category_id=>Product::PACK[:PACK],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
       :created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"S#{Sale.set_code(3,"product","service_code")}",:is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB],
       :show_on_ipad=>Product::SHOW_ON_IPAD[:NO]}
@@ -256,8 +256,7 @@ class ProductsController < ApplicationController
 
   def pack_update
     flash[:notice] = "更新成功"
-    parms = {:name=>params[:name],:category_id=>params[:prod_types],:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist],:revist_content=>params[:con_revist]}
+    parms = {:name=>params[:name],:is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],:revist_content=>params[:con_revist]}
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
     parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
     parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
