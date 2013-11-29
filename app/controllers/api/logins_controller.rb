@@ -22,8 +22,7 @@ class Api::LoginsController < ApplicationController
     else
       message = "用户不存在或者密码不正确"
       render :json=>{:msg=>message,:d_type=>data_type}
-    end
-    
+    end  
   end
 
 
@@ -73,7 +72,6 @@ class Api::LoginsController < ApplicationController
         t_value << Product.recgnite_pic(path,file)
       end
     }
-    p t_value
     render :json=>{:msg=>t_value.join("")}
   end
  

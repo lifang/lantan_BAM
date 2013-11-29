@@ -77,7 +77,7 @@ class Api::OrdersController < ApplicationController
       #    elsif order[0] == 3
       #      "没可用的工位了"
     end
-    render :json => {:status => order[0], :content => str, :order => info, :customer_id => params[:c_id]}
+    render :json => {:status => order[0], :content => str, :order => info}
   end
   #付款
   def pay
@@ -356,7 +356,7 @@ class Api::OrdersController < ApplicationController
     record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
       left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
       where sc.types = 1 and csr.password = ? and csr.status = ? and csr.customer_id = ?",
-        MD5::digest(params[:password].strip), CSvcRelation::STATUS[:valid], params[:customer_id].to_i])[0]
+        Digest::MD5.hexdigest(params[:password].strip), CSvcRelation::STATUS[:valid], params[:customer_id].to_i])[0]
     status = 0
     message = ""
     price = params[:price].to_f

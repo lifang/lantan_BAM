@@ -452,7 +452,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       prod_ids.split(",").each do |id| #["1_3_1","22_3_0","311_0","226_2"]
         if id.split("_")[1].to_i == 7
           #套餐卡
-          if id.split("_")[2].to_i == 0
+          if id.split("_")[2].to_i == 2
             has_p_card = 0
             p_c = Hash.new
             p_c = PackageCard.find_by_id_and_status_and_store_id id.split("_")[0].to_i,PackageCard::STAT[:NORMAL],store_id
@@ -680,7 +680,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
                   if sv_prod_relation
                     total_price = sv_prod_relation.base_price.to_f+sv_prod_relation.more_price.to_f
                     c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, 
-                      :status => CSvcRelation::STATUS[:invalid], :password => MD5::digest(uc[5]))
+                      :status => CSvcRelation::STATUS[:invalid], :password => Digest::MD5.hexdigest(uc[5]))
                     SvcardUseRecord.create(:c_svc_relation_id =>c_sv_relation.id,:types=>SvcardUseRecord::TYPES[:IN],:use_price=>total_price,
                       :left_price=>total_price,:content=>"购买#{sv_card.name}")                   
                   end
@@ -892,6 +892,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
     car_num = self.car_num
     hash[:car_num] = car_num.num
     hash[:username] = self.customer.name
+    hash[:userid] = self.customer.id
     hash[:start] = self.started_at.strftime("%Y-%m-%d %H:%M") if self.started_at
     hash[:end] = self.ended_at.strftime("%Y-%m-%d %H:%M") if self.ended_at
     hash[:total] = self.price

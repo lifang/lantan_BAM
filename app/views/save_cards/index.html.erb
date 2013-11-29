@@ -37,7 +37,7 @@
                     <td class="data_table_img"><img src="<%= sc.surl.nil? ? "" : sc.surl.gsub("img#{sc.sid}", "img#{sc.sid}_#{Constant::SVCARD_PICSIZE[0]}") %>"/></td>
                     <td><%= sc.sname %></td>
                     <td><%= format("%.1f", sc.sprice) if sc.sprice %></td>
-                    <td><%= format("%.1f", sc.bprice + sc.mprice) %></td>
+                    <td><%= format("%.1f", sc.bprice + sc.mprice) if sc.bprice && sc.mprice%></td>
                     <td><%= sc.sdesc %></td>
                     <td>
                       <%= truncate(sc.cid.nil? ? "" : sc.cid.split(",").inject(Array.new){|arr,c| arr << @cname[c.to_i] if @cname[c.to_i] }.join(","), :length => 15) %>
@@ -74,7 +74,7 @@
                       <td class="data_table_img"><img src="<%= sc.surl.nil? ? "" : sc.surl.gsub("img#{sc.sid}", "img#{sc.sid}_#{Constant::SVCARD_PICSIZE[0]}") %>"/></td>
                       <td><%= sc.sname %></td>
                       <td><%= format("%.1f", sc.sprice) if sc.sprice %></td>
-                      <td><%= format("%.1f", sc.bprice + sc.mprice) %></td>
+                      <td><%= format("%.1f", sc.bprice + sc.mprice) if sc.bprice && sc.mprice %></td>
                       <td><%= sc.sdesc %></td>
                       <td>
                         <%= truncate(sc.cid.nil? ? "" : sc.cid.split(",").inject(Array.new){|arr,c| arr << @cname[c.to_i] if @cname[c.to_i] }.join(","), :length => 15) %>

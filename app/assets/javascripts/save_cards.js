@@ -55,6 +55,7 @@ function edit_save_card(store_id, cid){
 
 function update_save_card_valid(obj){
     var name = $.trim($("#edit_scard_name").val());
+    var checked_len = $("input[name='edit_scard_category[]']:checked").length;
     var s_money = $.trim($("#edit_scard_started_money").val());
     var e_money = $.trim($("#edit_scard_ended_money").val());
     var desc = $.trim($("#edit_scard_desc").val());
@@ -72,6 +73,8 @@ function update_save_card_valid(obj){
     }
     if(name==""){
         tishi_alert("请输入储值卡名称");
+    }else if(checked_len<=0){
+        tishi_alert("至少选择一个项目!");
     }else if(get_str_len(name)>36){
         tishi_alert("储值卡名称最多36个字符!");
     }else if((img!="" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){

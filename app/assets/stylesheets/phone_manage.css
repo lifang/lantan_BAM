@@ -1,4 +1,3 @@
-
 * { padding: 0; margin: 0;}
 body {
     background: #9db79a;
@@ -24,7 +23,7 @@ li { list-style: none;}
 .login_item { margin: 20px 10px; border-radius: 10px;}
 .login_item li { margin-bottom: 20px;}
 .login_item input {
-    width: 90%;
+    width: 100%;
     height: 50px;
     line-height: 50px;
     background: none;
@@ -32,8 +31,8 @@ li { list-style: none;}
     padding-left: 10%;
     font-size: 24px;
 }
-.login_item input.name {background: url(/assets/p_login.png) no-repeat 10px 5px #e9e7e7;}
-.login_item input.pressword {background: url(/assets/p_login.png) no-repeat 10px -77px #e9e7e7;}
+.login_item input.name {background: url(/assets/login.png) no-repeat 10px -10px #e9e7e7;}
+.login_item input.pressword {background: url(/assets/login.png) no-repeat 10px -92px #e9e7e7;}
 .login_btn {margin: 50px 10px;}
 .login_btn button {
     width: 100%;
@@ -84,13 +83,11 @@ li { list-style: none;}
     margin: 0 5px;
 }
 .all .up {
-    background: url(/assets/phone.png) no-repeat 0px 0px;
+    background: url(/assets/icon.png) no-repeat 0px 0px;
 }
 .all .down {
-    background: url(/assets/phone.png) no-repeat 0px -20px;
+    background: url(/assets/icon.png) no-repeat 0px -20px;
 }
-
-
 /*tab提示*/
 .tab_popup.tab_alert { width: 500px;}
 .alert_h { width: 400px; margin: 20px auto; line-height: 24px; font-size: 16px; color:#930205; text-align: center;}
