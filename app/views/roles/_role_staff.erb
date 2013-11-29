@@ -8,7 +8,7 @@
   </thead>
   <tbody>
     <% (@staffs || []).each do |staff| %>
-      <% if staff.type_of_w != Staff::S_COMPANY[:BOSS]   %>
+      <% if staff.type_of_w %>
         <tr class="<%= cycle('', 'tbg') %>">
           <td><%= staff.name %></td>
           <td><%= staff.roles.collect{|role| role.name }.join(", ") %></td>

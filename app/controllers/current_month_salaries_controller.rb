@@ -14,7 +14,7 @@ class CurrentMonthSalariesController < ApplicationController
     @total = salary.map(&:fact_fee).inject(0){|num,s|num+s}
     @departs = Department.where(:id=>(@staffs.map(&:department_id)|@staffs.map(&:position)).compact.uniq).inject(Hash.new){|hash,de|hash[de.id]=de.name;hash}
     respond_to do |format|
-      salary.update_all(:is_edited=>1)
+      salary.update_all(:is_edited=>false)
       format.xls {
         send_data(xls_content_for(@staffs,@current_month,@departs,@statistics_date,@total),
           :type => "text/excel;charset=utf-8; header=present",

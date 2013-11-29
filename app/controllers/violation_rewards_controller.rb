@@ -41,21 +41,18 @@ class ViolationRewardsController < ApplicationController
         @rewards = @violation_reward.staff.violation_rewards.where("types = true").
           paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
       else
-      
         @violations = @violation_reward.staff.violation_rewards.where("types = false").
           paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
       end
     end
     #更新员工考核记录的奖惩部分
     salary_num = params[:violation_reward][:salary_num]
-    if salary_num && salary_num.to_i != 0
-      work_r = WorkRecord.find_by_staff_id(@violation_reward.staff_id)
+    work_r = WorkRecord.where(:staff_id=>@violation_reward.staff_id,:current_day=>Time.now.strftime("%Y-%m-%d")).first
+    if work_r && salary_num && salary_num.to_i != 0
       if @violation_reward.types
-        r_num = work_r.reward_num.nil? ? 0 : work_r.reward_num
-        work_r.update_attributes(:reward_num=>r_num+ salary_num) if work_r
+        work_r.update_attributes(:reward_num=>work_r.reward_num.nil? ? salary_num.to_f : work_r.reward_num + salary_num.to_f)
       else
-        r_num = work_r.voilation_num.nil? ? 0 : work_r.voilation_num
-        work_r.update_attributes(:voilation_num=>r_num + salary_num) if work_r
+        work_r.update_attributes(:violation_num=>work_r.violation_num.nil? ? salary_num.to_f : work_r.violation_num + salary_num.to_f)
       end
     end
     respond_to do |format|

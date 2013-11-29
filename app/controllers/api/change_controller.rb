@@ -5,7 +5,7 @@ class Api::ChangeController < ApplicationController
     if sv_card
       if params[:verify_code] == sv_card.verify_code
         n_password = params[:n_password]
-        if sv_card.update_attribute(:password, MD5::digest(n_password))
+        if sv_card.update_attribute(:password, Digest::MD5.hexdigest(n_password))
           render :json => {:msg_type => 0, :msg => "密码修改成功!"}
         else
           render :json => {:msg_type => 2, :msg => "修改失败!"}
@@ -66,5 +66,33 @@ class Api::ChangeController < ApplicationController
     #        svcards_records << a
     #      end
     #      render :json => svcards_records
+  end
+
+  def use_svcard
+    record = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
+      left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
+      where sc.types = 1 and csr.password = ? and csr.status = ? and csr.customer_id = ?",
+       Digest::MD5.hexdigest(params[:password].strip), CSvcRelation::STATUS[:valid], params[:customer_id].to_i])[0]
+    status = 0
+    message = ""
+    price = params[:price].to_f
+    SvcardUseRecord.transaction do
+      if record
+        if record.left_price.to_f < price
+          status = 0
+          message = "余额不足,请换张卡!"
+        else
+          SvcardUseRecord.create(:c_svc_relation_id => record.id, :types => SvcardUseRecord::TYPES[:OUT],
+            :use_price => price, :left_price => record.left_price - price, :content => params[:content].strip)
+          record.update_attribute(:left_price, (record.left_price - price))
+          status = 1
+          message = "支付成功!"
+        end
+      else
+        status = 0
+        message = "密码错误!"
+      end
+      render :json => {:content => message, :status => status}
+    end
   end
 end

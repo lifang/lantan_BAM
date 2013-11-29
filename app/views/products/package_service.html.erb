@@ -28,7 +28,6 @@
                   <td>服务代码</td>
                   <td>服务名称</td>
                   <td>施工时间(分钟)</td>
-                  <td>类别</td>
                   <td>技师</td>
                   <td>操作</td>
                 </tr>
@@ -41,7 +40,6 @@
                     <td><%= service.code %></td>
                     <td><%= service.name %></td>
                     <td><%= service.cost_time %></td>
-                    <td><%= service.c_name %></td>
                     <td><%= "#{Staff::LEVELS[service.level1]} - #{Staff::LEVELS[service.level2]}" %></td>
                     <td class="operation" style="text-align:center;" >
                       <% if permission?(:sales, :edit_service) %><a href="javascript:void(0)" onclick="edit_pack('<%= params[:store_id] %>','<%=  service.id %>')">编辑</a><% end %>
@@ -59,7 +57,6 @@
                   <td>服务代码</td>
                   <td>服务名称</td>
                   <td>施工时间(分钟)</td>
-                  <td>类别</td>
                   <td>技师</td>
                   <td>操作</td>
                 </tr>
@@ -72,7 +69,6 @@
                       <td><%= service.code %></td>
                       <td><%= service.name %></td>
                       <td><%= service.cost_time %></td>
-                      <td><%= service.c_name %></td>
                       <td><%= "#{Staff::LEVELS[service.level1]} - #{Staff::LEVELS[service.level2]}" %></td>
                       <td class="operation" style="text-align:center;">
                         <% if permission?(:sales, :edit_service) %><a href="javascript:void(0)" onclick="edit_pack('<%= params[:store_id] %>','<%=  service.id %>')">编辑</a><% end %>

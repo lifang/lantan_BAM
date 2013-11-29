@@ -57,25 +57,24 @@ class WorkOrder < ActiveRecord::Base
           runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
           status = (order.status == Order::STATUS[:BEEN_PAYMENT] || order.status == Order::STATUS[:FINISHED]) ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
           self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
+          staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
           if !self.cost_time.nil?
             if runtime > self.cost_time.to_f
-              staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
               staffs.each do |staff_id|
                 ViolationReward.create(:staff_id => staff_id, :types => ViolationReward::TYPES[:VIOLATION],
                   :situation => "订单号#{order.code}超时#{sprintf('%.2f',runtime - self.cost_time)}分钟",
                   :status => ViolationReward::STATUS[:NOMAL])
               end
-              w_records = WorkRecord.where(:staffs => (staffs | [order.try(:cons_staff_id_1)]).compact)
-              w_records.each {|w_record|
-                c_num = w_record.construct_num.nil? ? 0 : w_record.construct_num
-                g_num = w_record.gas_num.nil? ? 0 : w_record.gas_num
-                w_num = w_record.water_num.nil? ? 0 : w_record.water_num
-                water_num = water_num.nil? ? 0 : water_num/2.0
-                gas_num =  gas_num.nil? ? 0 : gas_num/2.0
-                w_record.update_attributes(:construct_num=>c_num+1,:water_num=>w_num+water_num,:gas_num=>g_num+gas_num)} unless w_records.blank?
             end
           end
-
+          w_records = WorkRecord.where(:staff_id => (staffs | [order.try(:cons_staff_id_1)]).compact,:current_day=>Time.now.strftime("%Y-%m-%d"))
+          w_records.each {|w_record|
+            c_num = w_record.construct_num.nil? ? 0 : w_record.construct_num
+            g_num = w_record.gas_num.nil? ? 0 : w_record.gas_num
+            w_num = w_record.water_num.nil? ? 0 : w_record.water_num
+            water_num = water_num.nil? ? 0 : water_num/2.0
+            gas_num =  gas_num.nil? ? 0 : gas_num/2.0
+            w_record.update_attributes(:construct_num=>c_num+1,:water_num=>w_num+water_num,:gas_num=>g_num+gas_num)} unless w_records.blank?
         end
         order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT] && order.status != Order::STATUS[:FINISHED]
       end
@@ -147,7 +146,6 @@ class WorkOrder < ActiveRecord::Base
               same_car_num_id  = another_order.car_num_id
               if_wo_set_station = true
               another_order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2 ) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT] && another_order.status != Order::STATUS[:FINISHED]
-
             end
           end
 
