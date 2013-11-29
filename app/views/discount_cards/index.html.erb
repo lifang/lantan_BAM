@@ -19,12 +19,12 @@
               <thead>
                 <tr class="hbg">
                   <td><input type="checkbox" onclick="get_del_dcards(this)"/></td>
-                  <td>&nbsp;</td>
-                  <td>名称</td>
-                  <td>单价</td>
-                  <td>内容</td>
-                  <td>使用范围</td>
-                  <td>操作</td>
+                  <td width="15%">&nbsp;</td>
+                  <td width="25%">名称</td>
+                  <td width="10%">单价</td>
+                  <td width="25%">内容</td>
+                  <td width="10%">使用范围</td>
+                  <td width="7%">操作</td>
                 </tr>
               </thead>
               <tbody>
@@ -33,9 +33,9 @@
                   <tr>
                     <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
                     <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
-                    <td width="25%"><%= sc.name %></td>
+                    <td><%= sc.name %></td>
                     <td><%= format("%.1f", sc.price) if sc.price %></td>
-                    <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
+                    <td><%= truncate(sc.description, :length => 15) %></td>
                     <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
                     <td>
                       <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>
@@ -50,12 +50,12 @@
               <thead>
                 <tr class="hbg">
                   <td><input type="checkbox" onclick="get_del_dcards(this)"/></td>
-                  <td>&nbsp;</td>
-                  <td>名称</td>
-                  <td>单价</td>
-                  <td>内容</td>
-                  <td>使用范围</td>
-                  <td>操作</td>
+                  <td width="15%">&nbsp;</td>
+                  <td width="25%">名称</td>
+                  <td width="10%">单价</td>
+                  <td width="25%">内容</td>
+                  <td width="10%">使用范围</td>
+                  <td width="7%">操作</td>
                 </tr>
               </thead>
               <tbody>

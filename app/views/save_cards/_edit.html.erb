@@ -21,7 +21,7 @@
             <ul>
               <% @types.each do |t| %>
                 <li><input type="checkbox" value="<%= t.id %>" name="edit_scard_category[]"
-                           <% @save_card.cid.split(",").each do |cid| %><% if cid.to_i==t.id %>checked<% end %><% end %>/><%= t.name %></li>
+                           <% @save_card.cid.split(",").each do |cid| %><% if cid.to_i==t.id %>checked<% end %><% end if @save_card.cid %>/><%= t.name %></li>
               <% end %>
             </ul>
           </div>
