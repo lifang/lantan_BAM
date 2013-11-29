@@ -18,11 +18,10 @@ class ViolationReward < ActiveRecord::Base
 
   STATUS = {:NOMAL => 0, :PROCESSED => 1,:INVALID=>2} #0 未处理  1 已处理
 
-  def self.vio_reward()
-    sql = "select sum(score_num) score,staff_id from violation_rewards v inner join staffs s on v.staff_id=s.id where v.types=?
-    and v.process_types=? and date_format(v.process_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') and
-    s.status!=#{Staff::STATUS[:deleted]} group by staff_id"
-    return ViolationReward.find_by_sql([sql,ViolationReward::TYPES[:VIOLATION],ViolationReward::VIOLATE[:deducate]])
+  def self.vio_reward
+    return ViolationReward.joins(:staff).select("sum(score_num) score,staff_id,types").where("date_format(process_at,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+    and staffs.status !=#{Staff::STATUS[:deleted]} and violation_rewards.status=#{ViolationReward::STATUS[:PROCESSED]}").group("types,staff_id").inject(Hash.new){|hash,v|
+      hash[v.types].nil? ? hash[v.types]={v.staff_id=>v.score} : hash[v.types][v.staff_id]=v.score;hash}
   end
 
 end

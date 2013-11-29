@@ -58,7 +58,7 @@ class RevisitsController < ApplicationController
 
   def process_complaint
     flash[:notice] = "处理失败，请您重新尝试。"
-    if params[:prod_type]
+    if params[:prod_type] 
       staff_ids = params[:c_staff_id].split(",") unless params[:c_staff_id].nil?
       staff_id_1, staff_id_2 = staff_ids[0], staff_ids[1] if staff_ids
       is_violation = params[:prod_type].to_i < Complaint::TYPES[:INVALID] ? true : false
@@ -67,14 +67,19 @@ class RevisitsController < ApplicationController
       complaint.update_attributes(:types => params[:prod_type].to_i, :remark => params[:pro_remark],
         :status => status, :is_violation => is_violation, :process_at => status ? Time.now : nil,
         :staff_id_1 => staff_id_1, :staff_id_2 => staff_id_2, :c_feedback_suggestion => status)
-      vr1 = ViolationReward.find_by_target_id_and_staff_id(complaint.id, staff_id_1)
-      vr2 = ViolationReward.find_by_target_id_and_staff_id(complaint.id, staff_id_2)
-      
-      violation_hash = {:status => ViolationReward::STATUS[:NOMAL],
-        :situation => "订单#{params[:pc_code]}产生投诉，#{Complaint::TYPES_NAMES[params[:prod_type].to_i]}",
-        :types => ViolationReward::TYPES[:VIOLATION], :target_id => complaint.id}
-      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_1})) if staff_id_1 and !vr1
-      ViolationReward.create(violation_hash.merge({:staff_id => staff_id_2})) if staff_id_2 and !vr2
+      if is_violation
+        vr1 = ViolationReward.find_by_target_id_and_staff_id(complaint.id, staff_id_1)
+        vr2 = ViolationReward.find_by_target_id_and_staff_id(complaint.id, staff_id_2)
+        w_records = WorkRecord.where(:staff_id=>([staff_id_1]|[staff_id_2]).compact)
+        w_records.each {|w_record|
+          c_num = w_record.complaint_num.nil? ? 0 : w_record.complaint_num
+          w_record.update_attributes(:complaint_num=>c_num+1)} unless w_records.blank?
+        violation_hash = {:status => ViolationReward::STATUS[:NOMAL],
+          :situation => "订单#{params[:pc_code]}产生投诉，#{Complaint::TYPES_NAMES[params[:prod_type].to_i]}",
+          :types => ViolationReward::TYPES[:VIOLATION], :target_id => complaint.id}
+        ViolationReward.create(violation_hash.merge({:staff_id => staff_id_1})) if staff_id_1 and !vr1
+        ViolationReward.create(violation_hash.merge({:staff_id => staff_id_2})) if staff_id_2 and !vr2
+      end
       flash[:notice] = "处理投诉成功。"
     end
     if params["is_trains_#{params[:pro_compl_id]}"] == "0"

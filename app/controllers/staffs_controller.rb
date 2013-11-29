@@ -7,9 +7,8 @@ class StaffsController < ApplicationController
   before_filter :search_work_record, :only => :show
 
   def index
-    type_of_w_sql = "type_of_w != #{Staff::S_COMPANY[:BOSS]}"
-    @staffs_names = @store.staffs.not_deleted.where(type_of_w_sql).select("id, name")
-    @staffs = @store.staffs.not_deleted.where(type_of_w_sql).paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
+    @staffs_names = @store.staffs.not_deleted.select("id, name")
+    @staffs = @store.staffs.not_deleted.paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
     @staff_scores_hash = MonthScore.select("sum(sys_score) sys_score,staff_id").where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")}
    and store_id = ?", @store.id).group("staff_id").inject(Hash.new){|hash,month| hash[month.staff_id] = month;hash}
     @violations = ViolationReward.joins(:staff).where(:status => false).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name").group_by{|i| i.types }
@@ -63,11 +62,10 @@ class StaffsController < ApplicationController
       paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("violation_tab")
     @rewards = @staff.violation_rewards.where("types = true").
       paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("reward_tab")
-    @trains = Train.includes(:train_staff_relations).
-      where("train_staff_relations.staff_id = #{@staff.id}").
+    @trains = Train.includes(:train_staff_relations).where("train_staff_relations.staff_id = #{@staff.id}").
       paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("train_tab")
     @month_scores = @staff.month_scores.order("current_month desc").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("month_score_tab")
-    @salaries = @staff.salaries.where("status = false").paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("salary_tab")
+    @salaries = @staff.salaries.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage) if @tab.nil? || @tab.eql?("salary_tab")
     current_month = Time.now().months_ago(1).strftime("%Y%m")
     @current_month_score = @staff.month_scores.where("current_month = #{current_month}").first
     @departs = Department.where(:store_id=>@store.id,:status=>Department::STATUS[:NORMAL]).inject(Hash.new){|hash,depar| hash[depar.id]=depar.name;hash}

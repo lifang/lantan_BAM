@@ -34,15 +34,28 @@ class ViolationRewardsController < ApplicationController
     params[:violation_reward][:process_at] = Time.now
     @violation_reward.update_attributes(params[:violation_reward]) if @violation_reward
     @simple = params[:simple]
-    if @simple
+    if @simple   #快捷处理通道
       @violations = ViolationReward.joins(:staff).where(:status =>false,:types=>@violation_reward.types).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name")
-    else
+    else #常规处理
       if @violation_reward.types
         @rewards = @violation_reward.staff.violation_rewards.where("types = true").
           paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
       else
+      
         @violations = @violation_reward.staff.violation_rewards.where("types = false").
           paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+      end
+    end
+    #更新员工考核记录的奖惩部分
+    salary_num = params[:violation_reward][:salary_num]
+    if salary_num && salary_num.to_i != 0
+      work_r = WorkRecord.find_by_staff_id(@violation_reward.staff_id)
+      if @violation_reward.types
+        r_num = work_r.reward_num.nil? ? 0 : work_r.reward_num
+        work_r.update_attributes(:reward_num=>r_num+ salary_num) if work_r
+      else
+        r_num = work_r.voilation_num.nil? ? 0 : work_r.voilation_num
+        work_r.update_attributes(:voilation_num=>r_num + salary_num) if work_r
       end
     end
     respond_to do |format|
