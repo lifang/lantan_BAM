@@ -1152,6 +1152,19 @@ a.compile_btn { width: 100px;}
 .accountsTab_pay .radio span { display: inline-block; float: left;}
 .accountsTab_pay .password input { width: 302px;}
 
+.deal_money { width: 153px; float: left; border: 1px #CCCCCC solid; margin-right: 10px;}
+.deal_money li { border-bottom: 1px #CCCCCC solid; line-height: 30px; height: 30px; padding: 5px;}
+.deal_money li .deal_money_btn { 
+    background: #066; 
+	color: #FFF; 
+	width: 80px; 
+	height: 30px; 
+	text-align: center; 
+	line-height: 30px; 
+	margin: 0 auto; 
+	display: block;
+}
+
 .accountsTab_way { border: 1px #CCCCCC solid; width: 483px; margin: 5px auto; overflow: hidden;}
 .at_way_h { overflow: hidden;}
 .at_way_h li { 

@@ -1,7 +1,7 @@
 #encoding: utf-8
 class Api::ChangeController < ApplicationController
   def change_pwd
-    sv_card = CSvRelation.where(:customer_id=>params[:customer_id],:sv_card_id=>params[:sv_card_id],:status=>CSvcRelation::STATUS[:valid])[0]
+    sv_card = CSvcRelation.where(:customer_id=>params[:customer_id],:sv_card_id=>params[:sv_card_id],:status=>CSvcRelation::STATUS[:valid])[0]
     if sv_card
       if params[:verify_code] == sv_card.verify_code
         n_password = params[:n_password]
@@ -77,7 +77,7 @@ class Api::ChangeController < ApplicationController
     message = ""
     price = params[:price].to_f
     SvcardUseRecord.transaction do
-      if !records.blank?
+      if !records.blank? 
         status = 0
         message = "余额不足!"
         records.each do |r|
