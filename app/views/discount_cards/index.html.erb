@@ -21,7 +21,7 @@
                   <td><input type="checkbox" onclick="get_del_dcards(this)"/></td>
                   <td width="15%">&nbsp;</td>
                   <td width="25%">名称</td>
-                  <td width="10%">单价</td>
+                  <td width="10%">面值</td>
                   <td width="25%">内容</td>
                   <td width="10%">使用范围</td>
                   <td width="7%">操作</td>
@@ -52,35 +52,33 @@
                   <td><input type="checkbox" onclick="get_del_dcards(this)"/></td>
                   <td width="15%">&nbsp;</td>
                   <td width="25%">名称</td>
-                  <td width="10%">单价</td>
+                  <td width="10%">面值</td>
                   <td width="25%">内容</td>
                   <td width="10%">使用范围</td>
                   <td width="7%">操作</td>
                 </tr>
               </thead>
               <tbody>
-              <% unless @sv_cards.blank? %>
-                <% @sv_cards.each do |sc| %>
-                  <tr>
-                    <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
-                    <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
-                    <td width="25%"><%= sc.name %></td>
-                    <td><%= format("%.1f", sc.price) if sc.price %></td>
-                    <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
-                    <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
-                    <td>
-                      <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>           
-                    </td>
-                  </tr>
+                <% unless @sv_cards.blank? %>
+                  <% @sv_cards.each do |sc| %>
+                    <tr>
+                      <td><input type="checkbox" name="del_dcards" value="<%= sc.id %>"/></td>
+                      <td class="data_table_img"><img src="<%= sc.img_url.nil? ? "" : sc.img_url.gsub("img#{sc.id}", "img#{sc.id}_#{Constant::SVCARD_PICSIZE[0]}") %>" /></td>
+                      <td width="25%"><%= sc.name %></td>
+                      <td><%= format("%.1f", sc.price) if sc.price %></td>
+                      <td width="15%"><%= truncate(sc.description, :length => 15) %></td>
+                      <td><%= SvCard::S_USE_RANGE[sc.use_range] %></td>
+                      <td>
+                        <a href="JavaScript:void(0)" onclick="edit_discount_card(<%= sc.id %>, <%= @store.id %>)">编辑</a>
+                      </td>
+                    </tr>
+                  <% end %>
                 <% end %>
-              <% end %>
               </tbody>
             </table>
-          </div>
-          <% if !@sv_cards.blank? %>
             <%= will_paginate  @sv_cards, :class => "pageTurn", :previous_label => "上一页",
-              :next_label=> "下一页" %>
-          <% end %>
+              :next_label=> "下一页"  unless @sv_cards.blank? %>
+          </div>
         </div>
       </div>
     </div>

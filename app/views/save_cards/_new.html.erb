@@ -16,7 +16,7 @@
         </div>
         <fieldset class="popup_body_fieldset">
           <legend class="popup_body_title"><span class="red">*</span>适用项目</legend>
-          <div class="popup_body_result">
+          <div class="popup_body_result" style="height:160px;">
             <ul>
               <% @types.each do |t| %>
                 <li><input type="checkbox" value="<%= t.id %>" name="scard_category[]"/><%= t.name %></li>
