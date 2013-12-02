@@ -94,7 +94,7 @@
     $("#material_num").attr("disabled",false);
     $("#m_types").val(<%= @material.id %>);
     $("#sale_types").parent().parent().find(".search_btn").removeAttr("onclick").attr("disabled",true);
-    $("#add_products input").attr("disabled",true).attr("readonly",true);
+    $("#add_products input").attr("readonly",true);
     $("#add_products a").removeAttr("onclick").attr("disabled",true);
   </script>
 <% end %>
