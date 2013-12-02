@@ -78,7 +78,7 @@ class Api::ChangeController < ApplicationController
     message = ""
     price = params[:price].to_f
     SvcardUseRecord.transaction do
-      if !records.blank?
+      if !records.blank? 
         status = 0
         message = "余额不足!"
         records.each do |r|
