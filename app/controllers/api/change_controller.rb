@@ -1,8 +1,8 @@
 #encoding: utf-8
 class Api::ChangeController < ApplicationController
   def change_pwd
-    sv_card = CSvcRelation.where(:customer_id=>params[:customer_id],:sv_card_id=>params[:sv_card_id],:status=>CSvcRelation::STATUS[:valid])[0]
-    if sv_card
+    sv_card = CSvcRelation.find_by_id(params[:cid].to_i)
+    if sv_card && sv_card.status
       if params[:verify_code] == sv_card.verify_code
         n_password = params[:n_password]
         if sv_card.update_attribute(:password, Digest::MD5.hexdigest(n_password))
@@ -14,12 +14,12 @@ class Api::ChangeController < ApplicationController
         render :json => {:msg_type => 1, :msg => "验证码不正确!"}
       end
     else
-      render :json => {:msg_type => 2, :msg => "当前卡的余额不足"}
+      render :json => {:msg_type => 2, :msg => "数据错误!"}
     end
   end
 
   def send_code
-    csvc_relaion = CSvcRelation.where(:customer_id=>params[:customer_id],:sv_card_id=>params[:sv_card_id]).first
+    csvc_relaion = CSvcRelation.find_by_id(params[:cid].to_i)
     c_phone = csvc_relaion.customer.mobilephone
     if csvc_relaion && c_phone
       begin
@@ -72,7 +72,7 @@ class Api::ChangeController < ApplicationController
     records = CSvcRelation.find_by_sql(["select csr.* from c_svc_relations csr
       left join customers c on c.id = csr.customer_id inner join sv_cards sc on sc.id = csr.sv_card_id
       where sc.types = 1 and csr.password = ? and csr.status = ? and csr.customer_id = ?",
-        Digest::MD5.hexdigest(params[:password].strip), CSvcRelation::STATUS[:valid], params[:customer_id].to_i])[0]
+        Digest::MD5.hexdigest(params[:password].strip), CSvcRelation::STATUS[:valid], params[:customer_id].to_i])
     status = 0
     message = ""
     price = params[:price].to_f
