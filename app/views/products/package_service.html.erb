@@ -83,7 +83,7 @@
               <input type="hidden" value="" name="vals" id="vals"/>
             <% end %>
             <div class="pageTurn">
-              <%= will_paginate @services,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页"  unless @services.blank?%>
+              <%= will_paginate @services,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页"   if @total.num > 0%>
             </div>
           </div>
         </div>

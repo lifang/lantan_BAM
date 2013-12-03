@@ -28,9 +28,19 @@ class WorkOrder < ActiveRecord::Base
           work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
                          current_day = #{current_day} and store_id = #{station.store_id}").first
           if work_order
-            water = parms[:name12].to_f*10**4 + parms[:name2].to_f
-            gas = parms[:name13].to_f*10**4+parms[:name3].to_f
-            work_order.arrange_station(water,gas)
+            water_num = parms[:name12].to_f*10**4 + parms[:name2].to_f
+            gas_num = parms[:name13].to_f*10**4+parms[:name3].to_f
+            order = work_order.order
+            unless self.status ==  WorkOrder::STAT[:CANCELED]
+              staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+              w_records = WorkRecord.where(:staff_id => (staffs | [order.try(:cons_staff_id_1)]).compact,:current_day=>Time.now.strftime("%Y-%m-%d"))
+              w_records.each {|w_record|
+                g_num = w_record.gas_num.nil? ? 0 : w_record.gas_num
+                w_num = w_record.water_num.nil? ? 0 : w_record.water_num
+                water_num = water_num.nil? ? 0 : water_num/2.0
+                gas_num =  gas_num.nil? ? 0 : gas_num/2.0
+                w_record.update_attributes(:water_num=>w_num+water_num,:gas_num=>g_num+gas_num)} unless w_records.blank?
+            end
             message = "ok"
             if equipment_info.nil?
               EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)

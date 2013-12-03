@@ -89,7 +89,7 @@
               </tbody>
             </table>
             <div class="pageTurn">
-              <%= will_paginate @products,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" unless @products.blank?%>
+              <%= will_paginate @products,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" if @total.num >0%>
             </div>
           </div>
         </div>

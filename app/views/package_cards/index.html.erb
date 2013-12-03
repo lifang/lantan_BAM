@@ -22,10 +22,10 @@
               <thead>
                 <tr class="hbg">
                   <td><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
-                  <td>&nbsp;</td>
-                  <td>名称</td>
-                  <td>有效时间</td>
-                  <td>积分</td>
+                  <td width="10%">配图</td>
+                  <td width="12%">名称</td>
+                  <td width="10%">有效时间</td>
+                  <td width="8%">积分</td>
                   <td width="20%">套餐内容</td>
                   <td width="20%">所需物料</td>
                   <td>操作</td>
@@ -94,10 +94,10 @@
               <thead>
                 <tr class="hbg">
                   <td><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
-                  <td>&nbsp;</td>
-                  <td>名称</td>
-                  <td>有效时间</td>
-                  <td>积分</td>
+                  <td width="10%">配图</td>
+                  <td width="12%">名称</td>
+                  <td width="10%">有效时间</td>
+                  <td width="8%">积分</td>
                   <td width="20%">套餐内容</td>
                   <td width="20%">所需物料</td>
                   <td>操作</td>
@@ -162,7 +162,7 @@
               </tbody>
             </table>
             <div class="pageTurn">
-              <%= will_paginate @cards,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" unless @cards.blank? %>
+              <%= will_paginate @cards,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" if @total.num>0 %>
             </div>
           </div>
         </div>
