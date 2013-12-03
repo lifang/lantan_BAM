@@ -1,5 +1,6 @@
 #encoding: utf-8
 class Api::ChangeController < ApplicationController
+
   def change_pwd
     sv_card = CSvcRelation.find_by_id(params[:cid].to_i)
     if sv_card && sv_card.status

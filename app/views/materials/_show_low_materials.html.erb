@@ -10,16 +10,22 @@
       </tr>
     </thead>
     <tbody id="low_materials_tbody">
-        <% low_materials.each do |lm| %>
-      <tr id="material<%= lm.id %>tr">
-        <td width="15%"><%= lm.code %></td>
-        <td><%= lm.name %></td>
-        <% a = @types.inject(Hash.new){|h,t|h[t.id]=t.name;h} if @types %>
-        <td><%= lm.category_id.nil? || a[lm.category_id.to_i].nil? ? "----" : a[lm.category_id.to_i] %></td>
-        <td>缺货</td>
-        <td id="materialstorage<%= lm.id %>td"><%= lm.storage %></td>
-       </tr>
-        <% end %>
+      <% low_materials.each do |lm| %>
+        <tr id="material<%= lm.id %>tr">
+          <td width="15%"><%= lm.code %></td>
+          <td><%= lm.name %></td>
+          <%   %>
+          <td><%= if @types && lm.category_id
+              a = @types.inject(Hash.new){|h,t|h[t.id]=t.name;h}
+              a[lm.category_id.to_i].nil? ? "----" : a[lm.category_id.to_i]
+            else
+              "----"
+            end
+          %></td>
+          <td>缺货</td>
+          <td id="materialstorage<%= lm.id %>td"><%= lm.storage %></td>
+        </tr>
+      <% end %>
     </tbody>
   </table>
 </div>

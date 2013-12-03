@@ -89,6 +89,9 @@
                 <% end %>
               </tbody>
             </table>
+            <div class="pageTurn">
+              <%= will_paginate @sv_cards,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" unless @sv_cards.blank? %>
+            </div>
           </div>
         </div>
       </div>

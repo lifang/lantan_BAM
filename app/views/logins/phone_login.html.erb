@@ -2,6 +2,7 @@
   <head>
     <title>澜泰数据管理系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <%= stylesheet_link_tag "phone_manage" %>
     <style type="text/css">
       * { padding: 0; margin: 0;}
       body {
@@ -36,8 +37,8 @@
         padding-left: 10%;
         font-size: 24px;
       }
-      .login_item input.name {background: url(images/login.png) no-repeat 10px -10px #e9e7e7;}
-      .login_item input.pressword {background: url(images/login.png) no-repeat 10px -92px #e9e7e7;}
+      .login_item input.name {background: url(/assets/login.png) no-repeat 10px -10px #e9e7e7;}
+      .login_item input.pressword {background: url(/assets/login.png) no-repeat 10px -92px #e9e7e7;}
       .login_btn {margin: 50px 10px;}
       .login_btn button {
         width: 100%;
@@ -88,10 +89,10 @@
         margin: 0 5px;
       }
       .all .up {
-        background: url(images/icon.png) no-repeat 0px 0px;
+        background: url(/assets/icon.png) no-repeat 0px 0px;
       }
       .all .down {
-        background: url(images/icon.png) no-repeat 0px -20px;
+        background: url(/assets/icon.png) no-repeat 0px -20px;
       }
     </style>
     <%= javascript_include_tag  "application", "logins", "main" %>

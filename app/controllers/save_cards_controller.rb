@@ -9,9 +9,8 @@ class SaveCardsController < ApplicationController   #储值卡
     @sv_cards = SvCard.find_by_sql(["select sc.id sid, sc.name sname, sc.img_url surl, sc.price sprice,
      sc.description sdesc, sc.use_range srange, spr.base_price bprice, spr.more_price mprice, spr.category_id cid
      from sv_cards sc left join svcard_prod_relations spr on sc.id=spr.sv_card_id where sc.store_id=?
-     and sc.status=? and sc.types=? order by sc.created_at desc",
-        @store.id, SvCard::STATUS[:NORMAL], SvCard::FAVOR[:SAVE]])
-    .paginate(:page => params[:page] ||= 1, :per_page => SvCard::PER_PAGE)
+     and sc.status=? and sc.types=? order by sc.created_at desc",@store.id, SvCard::STATUS[:NORMAL], SvCard::FAVOR[:SAVE]]).
+      paginate(:page => params[:page] ||= 1, :per_page =>Constant::PER_PAGE)
     @cname = Category.select("id,name").where(:store_id => @store.id).inject(Hash.new) { |hash, c|hash[c.id]=c.name;hash}
   end
 
@@ -110,8 +109,7 @@ class SaveCardsController < ApplicationController   #储值卡
 #  end
 
   def del_all_scards    #批量删除储值卡
-    a = params[:ids]
-    SvCard.where(:id=>a).update_all(:status => SvCard::STATUS[:DELETED])
+    SvCard.where(:id=>params[:ids]).update_all(:status => SvCard::STATUS[:DELETED])
     render :json => 0
   end
   private

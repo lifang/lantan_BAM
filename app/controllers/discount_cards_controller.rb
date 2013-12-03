@@ -8,7 +8,7 @@ class DiscountCardsController < ApplicationController   #打折卡
     @types = Category.where(["store_id = ? and types in (?)", @store.id, [Category::TYPES[:good], Category::TYPES[:service]]])
     @sv_cards = SvCard.where(["store_id = ? and status = ? and types = ? ",  @store.id, SvCard::STATUS[:NORMAL],
         SvCard::FAVOR[:DISCOUNT]]).order("created_at desc")
-    .paginate(:page => params[:page] ||= 1, :per_page => SvCard::PER_PAGE)
+    .paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
   end
 
   def create
