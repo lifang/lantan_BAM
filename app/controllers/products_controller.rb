@@ -226,8 +226,7 @@ class ProductsController < ApplicationController
     staff_level_1 level2,commonly_used from products p where p.store_id=#{params[:store_id]}
     and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]}
     order by p.created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
-    @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
-    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:DOUB]}").select("count(*) num").first
+    @total = Product.where(:store_id=>params[:store_id],:status=>Product::IS_VALIDATE[:YES],:single_types=>Product::SINGLE_TYPE[:DOUB]).select("count(*) num").first
   end
 
   def pack_create
