@@ -214,8 +214,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
       p_id, p.sale_price,p.is_service, m.storage m_storage from prod_mat_relations pmr
       inner join materials m on m.id = pmr.material_id inner join products p on p.id = pmr.product_id 
       where m.status = #{Material::STATUS[:NORMAL]} and p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and
-      p.status = #{Product::IS_VALIDATE[:YES]} and p.id = ? and m.storage > 0 and m.store_id = ? group by p_id", prod_arr[0], store_id])[0]
-          
+      p.status = #{Product::IS_VALIDATE[:YES]} and p.id = ? and m.storage > 0 and m.store_id = ? group by p_id", prod_arr[0], store_id])[0]        
           service = Product.where(:status =>Product::IS_VALIDATE[:YES], :is_service => Product::PROD_TYPES[:SERVICE],
             :id => prod_arr[0])[0]
           price = prod_mat_relation.nil? ? service.try(:sale_price) : prod_mat_relation.try(:sale_price)
@@ -233,15 +232,21 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         end
         pcard_records << pc_record_hash
       end
-      sv_cards = SvcardUseRecord.joins(:c_svc_relation=>:sv_card).select("sv_cards.name sname,sv_cards.id sid,
-    svcard_use_records.content,svcard_use_records.use_price,svcard_use_records.left_price,
-    date_format(svcard_use_records.created_at,'%Y.%m.%d') created_at").where("sv_cards.store_id=#{store_id} and
-   c_svc_relations.customer_id=#{customer.customer_id}").where(:types=>SvcardUseRecord::TYPES[:OUT]).group_by{|sc|sc.sid}
+      #      sv_cards = SvcardUseRecord.joins(:c_svc_relation=>:sv_card).select("sv_cards.name sname,sv_cards.id sid,
+      #    svcard_use_records.content,svcard_use_records.use_price,svcard_use_records.left_price,
+      #    date_format(svcard_use_records.created_at,'%Y.%m.%d') created_at#").where("sv_cards.store_id=#{store_id} and
+      #   c_svc_relations.customer_id=#{customer.customer_id}#").where(:types=>SvcardUseRecord::TYPES[:OUT]).group_by{|sc|sc.sid}
+      sv_cards = CSvcRelation.find_by_sql(["select s.name sname, csr.sv_card_id sid, csr.id cid, sur.content, sur.use_price, sur.left_price,
+          date_format(sur.created_at, '%Y.%m.%d') created_at from c_svc_relations csr inner join sv_cards s on
+          csr.sv_card_id=s.id left join svcard_use_records sur on csr.id=sur.c_svc_relation_id and sur.types=? where
+          s.store_id=? and s.types=? and csr.customer_id=? and csr.status=?", SvcardUseRecord::TYPES[:OUT], store_id,
+          SvCard::FAVOR[:SAVE],customer.customer_id, CSvcRelation::STATUS[:valid]]).group_by{|sc|sc.cid}
       svcards_records = []
       sv_cards.each do |k, v|
         a = {}
         b = []
-        a[:id] = k
+        a[:id] = v[0].sid
+        a[:cid] = k
         a[:name] = v[0].sname
         v.each do |obj|
           c = {}
@@ -255,6 +260,8 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         svcards_records << a
       end
     end
+    p "***********************"
+    p svcards_records.inspect
     [customer, working_orders, old_orders, pcard_records,svcards_records]
   end
 
