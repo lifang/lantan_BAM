@@ -7,7 +7,6 @@ class WorkOrder < ActiveRecord::Base
   STAT = {:WAIT => 0,:SERVICING => 1,:WAIT_PAY => 2,:COMPLETE => 3, :CANCELED => 4, :END => 5}
 
   def self.update_work_order(parms)
-    #    begin
     message,dir = "ok","#{Rails.root}/public/logs"
     Dir.mkdir(dir)  unless File.directory?(dir)
     file_path = dir+"/returnBack_#{Time.now.strftime("%Y%m%d")}.log"
@@ -17,43 +16,43 @@ class WorkOrder < ActiveRecord::Base
       file = File.new(file_path, "w")
     end
     file.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')}   #{parms}\r\n"
-    file.close
-    current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i
-    if store
-      station = Station.where(:code=>parms[:work]).where(:store_id=>store.id).first
-      if station && station.is_has_controller
-        equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{station.id}
+    begin
+      current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i
+      if store
+        station = Station.where(:code=>parms[:work]).where(:store_id=>store.id).first
+        if station && station.is_has_controller
+          equipment_info = EquipmentInfo.where("current_day = #{current_day.to_i} and station_id=#{station.id}
                        and store_id=#{store.id}").first
-        if  (equipment_info.nil? || num != equipment_info.num )
-          work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
+          if  (equipment_info.nil? || num != equipment_info.num )
+            work_order = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]} and station_id = #{station.id} and
                          current_day = #{current_day} and store_id = #{station.store_id}").first
-          if work_order
-            water_num = parms[:name12].to_f*10**4 + parms[:name2].to_f
-            gas_num = parms[:name13].to_f*10**4+parms[:name3].to_f
-            order = work_order.order
-            unless self.status ==  WorkOrder::STAT[:CANCELED]
-              staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
-              w_records = WorkRecord.where(:staff_id => (staffs | [order.try(:cons_staff_id_1)]).compact,:current_day=>Time.now.strftime("%Y-%m-%d"))
-              w_records.each {|w_record|
-                g_num = w_record.gas_num.nil? ? 0 : w_record.gas_num
-                w_num = w_record.water_num.nil? ? 0 : w_record.water_num
-                water_num = water_num.nil? ? 0 : water_num/2.0
-                gas_num =  gas_num.nil? ? 0 : gas_num/2.0
-                w_record.update_attributes(:water_num=>w_num+water_num,:gas_num=>g_num+gas_num)} unless w_records.blank?
-            end
-            message = "ok"
-            if equipment_info.nil?
-              EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)
-            else
-              equipment_info.update_attribute(:num,num)
+            if work_order
+              water_num = parms[:name12].to_f*10**4 + parms[:name2].to_f
+              gas_num = parms[:name13].to_f*10**4+parms[:name3].to_f
+              order = work_order.order
+              unless self.status ==  WorkOrder::STAT[:CANCELED]
+                staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+                w_records = WorkRecord.where(:staff_id => (staffs | [order.try(:cons_staff_id_1)]).compact,:current_day=>Time.now.strftime("%Y-%m-%d"))
+                w_records.each {|w_record|
+                  g_num = w_record.gas_num.nil? ? 0 : w_record.gas_num
+                  w_num = w_record.water_num.nil? ? 0 : w_record.water_num
+                  water_num = water_num.nil? ? 0 : water_num/2.0
+                  gas_num =  gas_num.nil? ? 0 : gas_num/2.0
+                  w_record.update_attributes(:water_num=>w_num+water_num,:gas_num=>g_num+gas_num)} unless w_records.blank?
+              end
+              if equipment_info.nil?
+                EquipmentInfo.create(:current_day => current_day.to_i, :num =>num,:store_id=>store.id,:station_id=>station.id)
+              else
+                equipment_info.update_attribute(:num,num)
+              end
             end
           end
         end
       end
+    rescue => error
+      file.puts "#{error}\r\n"
     end
-    #    rescue
-    #      message = "fail"
-    #    end
+    file.close
     return message
   end
 
