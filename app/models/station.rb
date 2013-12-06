@@ -27,7 +27,6 @@ class Station < ActiveRecord::Base
   scope :valid, where("status != 4")
   
   def self.set_stations(store_id)
-    p store_id
     s_levels ={}  #所需技师等级
     l_staffs ={}  #现有等级的技师
     next_turn=[]
@@ -212,7 +211,7 @@ class Station < ActiveRecord::Base
       if station.station_service_relations
         prods = station.station_service_relations.collect{|r| r.product_id }
         station_prod_ids << prods
-        station_arr << station if (prods & prod_ids).sort == prod_ids.sort
+        station_arr << station if (prods & prod_ids).sort == prod_ids.sort  #如果这个工位支持所有需要的服务
       end
     end
     return [station_arr, station_prod_ids]
@@ -224,15 +223,6 @@ class Station < ActiveRecord::Base
     infos = self.return_station_arr(prod_ids, store_id)
     station_arr = infos[0]
     station_prod_ids = infos[1]
-    #    prod_ids = prod_ids.collect{|p| p.to_i }
-    #    stations = Station.includes(:station_service_relations).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
-    #    (stations || []).each do |station|
-    #      if station.station_service_relations
-    #        prods = station.station_service_relations.collect{|r| r.product_id }
-    #        station_prod_ids << prods
-    #        station_arr << station if (prods & prod_ids).sort == prod_ids.sort
-    #      end
-    #    end
     if station_arr.present?
       station_flag = 1 #有对应工位对应
       station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i)

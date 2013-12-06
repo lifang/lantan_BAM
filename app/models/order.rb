@@ -260,8 +260,6 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         svcards_records << a
       end
     end
-    p "***********************"
-    p svcards_records.inspect
     [customer, working_orders, old_orders, pcard_records,svcards_records]
   end
 

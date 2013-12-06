@@ -202,7 +202,7 @@ class Customer < ActiveRecord::Base
     end
     return svcard_arr
   end
-
+  
   private
   def encrypt(string)
     self.salt = make_salt if new_record?
