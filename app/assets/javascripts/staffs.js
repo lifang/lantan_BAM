@@ -440,20 +440,25 @@ $(document).ready(function(){
                 total : total_num
             },
             success: function(data){
-                if(data.msg == "success"){
-                    this_obj.hide();
-                    this_obj.next().show();
-                    this_obj.parents('tr').find("#reward_show").html(data.salary.reward_num);
-                    this_obj.parents('tr').find("#voilate_show").html(data.salary.voilate_fee);
-                    this_obj.parents('tr').find("#work_show").html(data.salary.work_fee);
-                    this_obj.parents('tr').find("#manage_show").html(data.salary.manage_fee);
-                    this_obj.parents('tr').find("#tax_show").html(data.salary.tax_fee);
-                    this_obj.parents('tr').find("#fact").html(data.salary.fact_fee);
-                    this_obj.parents('tr').find("span[id$='show']").show();
-                    this_obj.parents('tr').find("input[id$='input']").hide();
-                    $("#total_num").html(data.total);
-                    tishi_alert(data.name+"薪资提交成功!");
+                this_obj.hide();
+                this_obj.next().show();
+                this_obj.parents('tr').find("#reward_show").html(data.salary.reward_num);
+                this_obj.parents('tr').find("#voilate_show").html(data.salary.voilate_fee);
+                this_obj.parents('tr').find("#work_show").html(data.salary.work_fee);
+                this_obj.parents('tr').find("#manage_show").html(data.salary.manage_fee);
+                this_obj.parents('tr').find("#tax_show").html(data.salary.tax_fee);
+                this_obj.parents('tr').find("#fact").html(data.salary.fact_fee);
+                this_obj.parents('tr').find("span[id$='show']").show();
+                this_obj.parents('tr').find("input[id$='input']").hide();
+                $("#total_num").html(data.total);
+                if(data.msg == 1){
+                    tishi_alert(data.name+"的工资修改成功!");
+                }else{
+                    tishi_alert("数据已导出，编辑失败！");
                 }
+                setTimeout(function(){
+                    window.location.reload();
+                },1000)
             }
         });
         return false;

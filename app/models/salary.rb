@@ -41,7 +41,7 @@ class Salary < ActiveRecord::Base
         total_deduct = 0
         total = base_salary + reward_amount - voilate_amount + reward - secure
       end
-      Salary.create(parms.merge({:total => total,:deduct_num => total_deduct,:fact_fee=>total,:base_salary=>base_salary,:is_edited=>false}))
+      Salary.create(parms.merge({:total => total,:deduct_num => total_deduct,:fact_fee=>total,:base_salary=>base_salary,:is_edited=>1}))
     end
   end
 
