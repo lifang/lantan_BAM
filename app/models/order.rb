@@ -262,8 +262,6 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         svcards_records << a
       end
     end
-    p "***********************"
-    p svcards_records.inspect
     [customer, working_orders, old_orders, pcard_records,svcards_records]
   end
 
@@ -573,6 +571,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
   end
 
   def self.get_sale_by_product(prod, prod_mat_num, total, sale_hash, prod_arr)
+
     prod_arr.each{|p| p[:count] = p[:count]+1 if p[:id]==prod.id }
     product_ids = prod_arr.map{|p| p[:id]}
     unless product_ids.include?(prod.id)
@@ -601,17 +600,16 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
         s[:show_price] = 0.0#"-" + s[:price].to_s
         s[:disc_types] = r.sale.disc_types
         s[:discount] = r.sale.discount
-        s[:sale_products] = []
+        s[:products] = []
         sale_prod_relations = SaleProdRelation.find_by_sql(["select spr.product_id, spr.prod_num, p.name
                     from sale_prod_relations spr inner join products p
                     on p.id = spr.product_id where spr.sale_id = ?", r.sale.id])
         sale_prod_relations.each { |spr|
-          s[:sale_products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
+          s[:products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
         }
         #sale_arr << s
         #total -= s[:price] unless sale_hash[r.sale_id]
         sale_hash[r.sale_id] = s
-
       end
     } if prod.sale_prod_relations
     return [sale_hash, prod_arr, total]
@@ -868,7 +866,7 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
           #创建工位订单
           arrange_time = Station.arrange_time(store_id,prod_ids,order)
           if arrange_time[0]
-            new_station_id = arrange_time[0]
+            new_station_id = arrange_time[0]  #获取所有支持所需的服务的工位
           end
 
           #下单排工位

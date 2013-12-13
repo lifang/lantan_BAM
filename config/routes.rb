@@ -308,7 +308,10 @@ LantanBAM::Application.routes.draw do
     #新的app
     resources :new_app_orders do
       collection do
-        post :new_index_list,:make_order, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order
+        post :make_order2, :complaint, :quickly_make_order
+        post :make_order
+        post :search, :sync_orders_and_customer
+        post :new_index_list, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order, :cancel_order
       end
     end
 
