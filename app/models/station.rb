@@ -209,25 +209,26 @@ class Station < ActiveRecord::Base
     stations = Station.includes(:station_service_relations).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
     (stations || []).each do |station|
       if station.station_service_relations
-        prods = station.station_service_relations.collect{|r| r.product_id }
+        prods = station.station_service_relations.collect{|r| r.product_id }  #找出每个工位支持的服务
         station_prod_ids << prods
         station_arr << station if (prods & prod_ids).sort == prod_ids.sort  #如果这个工位支持所有需要的服务
       end
     end
-    return [station_arr, station_prod_ids]
+    return [station_arr, station_prod_ids]  #返回所有支持所需的服务的工位， 当前所有工位所支持的全部服务
   end
 
 
   def self.arrange_time store_id, prod_ids, order = nil, res_time = nil
     #查询所有满足条件的工位
     infos = self.return_station_arr(prod_ids, store_id)
-    station_arr = infos[0]
-    station_prod_ids = infos[1]
+    station_arr = infos[0]    #所有支持所需服务的工位
+    station_prod_ids = infos[1] #当前所有工位所支持的全部服务
     if station_arr.present?
       station_flag = 1 #有对应工位对应
+      #所有工位当前的技师
       station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i)
       if station_staffs.blank?
-        station_flag = 3
+        station_flag = 3      #没有技师
       end
     else
       if((station_prod_ids.flatten & prod_ids).sort == prod_ids.sort) && (!station_prod_ids.include?(prod_ids))
@@ -237,8 +238,6 @@ class Station < ActiveRecord::Base
       end
     end
     
-
-
     station_id = 0
     has_start_end_time = false
     #如果用户连续多次下单并且购买的服务可以在原工位上施工，则排在原来工位上。
@@ -253,8 +252,7 @@ class Station < ActiveRecord::Base
       end
     end
     if station_id == 0
-      #按照工位的忙闲获取预计时间
-      # wkor_times = WkOrTime.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"))
+      #按照工位的忙闲获取预计时间     
       busy_stations = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),      
         :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
       
@@ -271,31 +269,6 @@ class Station < ActiveRecord::Base
       else
         station_id = nil
       end
-      # if busy_stations.blank?
-      # if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
-      # station_id = nil
-      # else
-      # #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
-      # station_id = station_arr[0].try(:id) || 0
-      # has_start_end_time = true
-      # end
-      #
-      # else
-      # stations = Station.where(:id => busy_stations.map(&:station_id))
-      # no_order_stations = station_arr - stations #获得工位上没订单的工位
-      # if no_order_stations.present?
-      # if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
-      # station_id = nil
-      # else
-      # #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
-      # station_id = no_order_stations[0].id
-      # has_start_end_time = true
-      # end
-      # else
-      # #如果没有空闲工位的话， 则不置station_id和开始结束时间
-      # station_id = nil
-      # end
-      # end
     end
     [station_id, station_flag, has_start_end_time]
   end

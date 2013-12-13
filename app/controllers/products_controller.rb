@@ -6,10 +6,10 @@ class ProductsController < ApplicationController
 
   def index
     @products = Product.paginate_by_sql("select service_code code,p.name,sale_price,t_price,base_price,p.id,p.store_id,prod_point,c.name c_name
-    from products p inner join categories c on p.category_id=c.id where  p.store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]}
-    and is_service=#{Product::PROD_TYPES[:PRODUCT]} order by p.created_at desc", :page => params[:page], :per_page =>Constant::PER_PAGE)
-    @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]} and 
-    is_service=#{Product::PROD_TYPES[:PRODUCT]}").select("count(*) num").first
+    from products p inner join categories c on p.category_id=c.id where c.store_id=#{params[:store_id]} and p.status=#{Product::IS_VALIDATE[:YES]}
+    and c.types=#{Category::TYPES[:good]} order by p.created_at desc", :page => params[:page], :per_page =>Constant::PER_PAGE)
+    @total = Product.joins(:category).where("categories.store_id=#{params[:store_id]} and products.status=#{Product::IS_VALIDATE[:YES]} and
+    categories.types=#{Category::TYPES[:good]}").select("count(*) num").first
   end  #产品列表页
 
   #新建产品
@@ -30,11 +30,11 @@ class ProductsController < ApplicationController
 
   def prod_services
     @services = Product.paginate_by_sql("select p.id, service_code code,prod_point,p.store_id,p.name,base_price,show_on_ipad,cost_time,t_price,sale_price,
-    staff_level level1,staff_level_1 level2,commonly_used,c.name c_name from products p inner join categories c on c.id=p.category_id where p.store_id=#{params[:store_id]}
-    and is_service=#{Product::PROD_TYPES[:SERVICE]} and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:SIN]}
+    staff_level level1,staff_level_1 level2,commonly_used,c.name c_name from products p inner join categories c on c.id=p.category_id where c.store_id=#{params[:store_id]}
+    and c.types=#{Category::TYPES[:service]} and p.status=#{Product::IS_VALIDATE[:YES]} and p.single_types=#{Product::SINGLE_TYPE[:SIN]}
     order by p.created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
-    @total = Product.joins(:category).where("products.store_id=#{params[:store_id]} and is_service=#{Product::PROD_TYPES[:SERVICE]}
-    and status=#{Product::IS_VALIDATE[:YES]} and single_types=#{Product::SINGLE_TYPE[:SIN]}").select("count(*) num").first
+    @total = Product.joins(:category).where("categories.store_id=#{params[:store_id]} and categories.types=#{Category::TYPES[:service]}
+    and  products.status=#{Product::IS_VALIDATE[:YES]} and  products.single_types=#{Product::SINGLE_TYPE[:SIN]}").select("count(*) num").first
     @materials = @services.blank? ? {} : Material.find_by_sql("select name,code,p.material_num num,product_id from materials m inner join
     prod_mat_relations p on  p.material_id=m.id  where p.product_id in (#{@services.map(&:id).join(',')})").inject(Hash.new){|hash,mat|
       hash[mat.product_id].nil? ? hash[mat.product_id] = [mat] : hash[mat.product_id] << mat;hash}

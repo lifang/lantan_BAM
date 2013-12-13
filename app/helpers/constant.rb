@@ -156,10 +156,10 @@ module Constant
 
   #上传图片的比例,如需更改请追加，部分已按index引用
   SALE_PICSIZE =[300,230,663,50]
-  P_PICSIZE = [50,154,246,300,356]
-  C_PICSIZE = [148,154,50]
+  P_PICSIZE = [50,154,246,300,356,800]
+  C_PICSIZE = [148,154,50,800]
   STAFF_PICSIZE = [100]
-  SVCARD_PICSIZE = [148,154,50]
+  SVCARD_PICSIZE = [148,154,50,800]
   #角色
   SYS_ADMIN = "100001"  #系统管理员
   BOSS = "100002" #老板

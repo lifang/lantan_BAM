@@ -4,8 +4,8 @@ class Capital < ActiveRecord::Base
 
   #获取所有的车品牌/型号
   def self.get_all_brands_and_models
-    capitals = Capital.select("id,name").all
-    brands = CarBrand.select("id,name,capital_id").all.group_by { |cb| cb.capital_id }
+    capitals = Capital.select("id,name").all  #A--Z
+    brands = CarBrand.select("id,name,capital_id").all.group_by { |cb| cb.capital_id }  #{A => [<>,<>]}
     capital_arr = []
     car_models = CarModel.select("id,name,car_brand_id").all.group_by { |cm| cm.car_brand_id  }
     (capitals || []).each do |capital|

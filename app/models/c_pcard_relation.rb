@@ -74,26 +74,33 @@ class CPcardRelation < ActiveRecord::Base
 
   #该用户已经所购买的套餐卡及其所支持的产品或服务
   def self.get_customer_package_cards customer_id, store_id
-     pc = CPcardRelation.find_by_sql(["select cpr.content, p.id pid, p.name pname, p.price pprice from c_pcard_relations cpr
+     pc = CPcardRelation.find_by_sql(["select cpr.content,cpr.id cprid, p.id pid, p.name pname, p.price pprice from c_pcard_relations cpr
           inner join package_cards p on cpr.package_card_id=p.id where NOW()<=cpr.ended_at and cpr.customer_id=?
           and cpr.status=? and p.status=? and p.store_id=?", customer_id, CPcardRelation::STATUS[:NORMAL],
           PackageCard::STAT[:NORMAL], store_id])
       p_cards = pc.inject([]){|a, p|
         ha = {}
+        ha[:cprid] = p.cprid
         ha[:pid] = p.pid
         ha[:pname] = p.pname
         ha[:pprice] = p.pprice
+        ha[:ptype] = 2
         ha[:is_new] = 0
-        ha[:pproducts] = []
+        ha[:show_price] = 0
+        ha[:products] = []
         items = p.content.split(",")    #447-0927mat1-2,448-0927mat2-2
         items.each do |i|           #i=447-0927mat1-2
           hash = {}
-          hash[:pid] = i.split("-")[0]
-          hash[:pname] = i.split("-")[1]
-          hash[:left_count] = i.split("-")[2]
-          ha[:pproducts] << hash
-        end if items;
-        ha
+          hash[:proid] = i.split("-")[0]
+          hash[:proname] = i.split("-")[1]
+          hash[:pro_left_count] = i.split("-")[2]
+          hash[:selected] = 1
+          pprod = Product.find_by_id(i.split("-")[0].to_i)
+          hash[:pprice] = pprod.nil? ? nil : pprod.sale_price
+          ha[:products] << hash
+        end if items
+        a << ha;
+        a
       }
       p_cards
   end
