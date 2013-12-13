@@ -8,8 +8,7 @@
       <div class="di_list_r">
         <div class="register">
           <div class="orderGoods" >
-            <div class="di_downUp" id="<%=k[:c_id]%>" onclick="$('#c_<%=k[:c_id]%>').slideToggle(1000,function(){
-              $('#'+this.id.split('_')[1]).find('span').toggleClass('highlight');})">
+            <div class="di_downUp" id="<%="#{k[:c_id]}_#{k[:n_id]}"%>" onclick="$('#c_<%= "#{k[:c_id]}_#{k[:n_id]}"%>').slideToggle(1000,show_hihglight(this))">
               <span class="highlight">&darr;</span><span>&uarr;</span></div>
             <ul>
               <li>客户姓名：<%= k[:c_name] %></li>
@@ -18,7 +17,7 @@
               <li><%if k[:g_name] %>单位：<%=k[:g_name]%><%else%>客户属性：个人客户<%end%></li>
             </ul>
           </div>
-          <div class="merchant" id="c_<%= k[:c_id] %>" style="display:none">
+          <div class="merchant" id="c_<%= "#{k[:c_id]}_#{k[:n_id]}" %>" style="display:none">
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
@@ -50,13 +49,12 @@
                       <td><%=  num %></td>
                       <% price = o_prod.price.nil? ? 0 : o_prod.price %>
                       <td><%=  price %></td>
-                      <td><%= price * num  %></td>
                     <% else %>
                       <td><%= "--"%></td>
                       <td><%= "--"%></td>
                       <td><%= "--" %></td>
-                      <td><%= "--" %></td>
                     <%end%>
+                    <td><%= order.price %></td>
                   </tr>
                 <% end %>
               </tbody>
@@ -65,7 +63,7 @@
               <ul>
                 <li>总计：<%=  v.map(&:price).inject(0){|num,p|num+p}%></li>
                 <li>客户签名：李四</li>
-                <li><a href="javascript:void(0)" class="accounts_btn" onclick="pay_this_order(<%=params[:store_id]  %>,<%=k[:c_id]  %>)">结账</a></li>
+                <li><a href="javascript:void(0)" class="accounts_btn" onclick="pay_this_order(<%=params[:store_id]  %>,<%=k[:c_id]  %>,<%=k[:n_id]  %>)">结账</a></li>
               </ul>
             </div>
           </div>

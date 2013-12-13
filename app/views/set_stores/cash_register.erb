@@ -58,7 +58,7 @@
               <label>车牌：</label>
               <select name="" id="customer_orders">
                 <% @orders.each do |k,v| %>
-                  <option id="<%= k[:c_id] %>"><%= k[:c_num] %></option>
+                  <option id="<%= "#{k[:c_id]}_#{k[:n_id]}" %>"><%= k[:c_num] %></option>
                 <% end %>
               </select>
             </div>

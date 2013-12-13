@@ -3,6 +3,7 @@
     <ul>
       <li><span>客户姓名：</span><%=@customer.name%></li>
       <li><span>手机号码：</span><%=@customer.mobilephone%></li>
+      <li><span>车牌：</span><%=@car_num.num%></li>
       <li>
         <%if @customer.group_name %>
           <span>单位：</span><%=@customer.group_name%>
@@ -11,68 +12,56 @@
         <%end%>
       </li>
     </ul>
-  </div>
-  <div class="at_client_con">
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
       <thead>
         <tr class="hbg">
-          <td>车牌</td>
           <td>订单号</td>
           <td>项目</td>
           <td>数量</td>
           <td>单价</td>
-          <td>优惠</td>
           <td>小计</td>
         </tr>
       </thead>
       <tbody>
         <% @orders.each do |order| %>
           <tr>
-            <td><%= order.c_num %></td>
             <td><%= order.code %></td>
-            <td><%= order.c_num %></td>
-            <td>30</td>
-            <td>0</td>
-            <td>30</td>
+            <% if @order_prods[order.id] %>
+              <% prod = @order_prods[order.id][0] %>
+              <td><%= prod.name %></td>
+              <td><%= prod.pro_num %></td>
+              <td><%= prod.price %></td>
+            <%else%>
+              <td><%= "--" %></td>
+              <td><%= "--" %></td>
+              <td><%= "--" %></td>
+            <%end%>
+            <td><%=  order.price %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
 </div>
-<div class="accountsTab_pay">
-  <div class="accountsTab_pay_title"><h3>储值卡</h3><span>充1000送200</span></div>
-  <div class="accountsTab_pay_item">
-    <label>储值卡余额：</label><input name="" type="text" />
+<% @sv_card.each do |card| %>
+  <div class="accountsTab_pay">
+    <div class="accountsTab_pay_title"><h3>储值卡</h3><span class="pay_span"><%=card.name%></span>
+      <div class="radio">
+        <input name="radio_<%= card.id %>" type="checkbox"  onclick="check_sum(<%= card.id %>,this)" class="pay_check" /><span>使用此卡支付</span></div></div>
+    <div class="accountsTab_pay_item">
+      <label>储值卡余额：<span id="left_<%= card.id %>"><%= card.left_price %></span></label>
+    </div>
+    <div class="accountsTab_pay_item">
+      <label>本单：</label><input onblur="check_num(<%= card.id %>,this.value)" type="text" id="order_<%=card.id%>" disabled />
+    </div>
+    <div class="accountsTab_pay_item">
+      <label>储值卡密码：</label><input  onblur="check_post(<%= card.id %>)" type="password" id="pwd_<%=card.id%>"  disabled/>
+    </div>
   </div>
-  <div class="accountsTab_pay_item">
-    <label>本单：</label><input name="" type="text" />
-  </div>
-  <div class="accountsTab_pay_item radio">
-    <input name="" type="radio" value="" /><span>通过储值卡支付</span>
-  </div>
-  <div class="accountsTab_pay_item password">
-    <label>储值卡密码：</label><input name="" type="text" />
-  </div>
-</div>
-<div class="accountsTab_pay">
-  <div class="accountsTab_pay_title"><h3>储值卡</h3><span>充1000送200</span></div>
-  <div class="accountsTab_pay_item">
-    <label>储值卡余额：</label><input name="" type="text" />
-  </div>
-  <div class="accountsTab_pay_item">
-    <label>本单：</label><input name="" type="text" />
-  </div>
-  <div class="accountsTab_pay_item radio">
-    <input name="" type="radio" value="" /><span>通过储值卡支付</span>
-  </div>
-  <div class="accountsTab_pay_item password">
-    <label>储值卡密码：</label><input name="" type="text" />
-  </div>
-</div>
+<% end %>
 <div class="deal_money">
   <ul>
-    <li>应付金额：1400.00</li>
+    <li>应付金额：<span id="due_pay"><%=@orders.map(&:price).inject(0){|sum,num|sum+num}%></span></li>
     <li>付款总计：1400.00</li>
     <li>待付金额：1400.00</li>
     <li><a href="#" class="deal_money_btn">可以结账</a></li>

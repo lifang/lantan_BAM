@@ -67,10 +67,10 @@ class SetStoresController < ApplicationController
 
   def about_cash(store_id)
     orders = Order.joins([:car_num,:customer]).joins("left join work_orders w on w.order_id=orders.id").select("orders.*,customers.mobilephone,
-   customers.name c_name,customers.group_name,car_nums.num c_num,w.station_id s_id,customers.id c_id").where(:status=>Order::CASH,
+   customers.name c_name,customers.group_name,car_nums.num c_num,car_nums.id n_id,w.station_id s_id,customers.id c_id").where(:status=>Order::CASH,
       :store_id=>store_id).order("orders.created_at desc")
     @order_prods = OrderProdRelation.order_products(orders.map(&:id))
-    @orders = orders.group_by{|i|{:c_name=>i.c_name,:c_num=>i.c_num,:tel=>i.mobilephone,:g_name=>i.group_name,:c_id=>i.c_id} }
+    @orders = orders.group_by{|i|{:c_name=>i.c_name,:c_num=>i.c_num,:tel=>i.mobilephone,:g_name=>i.group_name,:c_id=>i.c_id,:n_id=>i.n_id} }
     @staffs = Staff.find((orders.map(&:cons_staff_id_1)|orders.map(&:cons_staff_id_2)|orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
       hash[staff.id]=staff.name;hash}
     @stations =Station.find(orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
@@ -78,10 +78,13 @@ class SetStoresController < ApplicationController
 
   def load_order
     @customer = Customer.find params[:customer_id]
-    @orders = Order.joins([:car_num]).joins("left join work_orders w on w.order_id=orders.id").select("orders.*,car_nums.num c_num,
-    w.station_id s_id").where(:status=>Order::CASH,
-      :store_id=>params[:store_id],:customer_id=>params[:customer_id]).order("orders.created_at desc")
+    @car_num = CarNum.find params[:car_num_id]
+    @orders = Order.joins("left join work_orders w on w.order_id=orders.id").select("orders.*,w.station_id s_id").
+      where(:status=>Order::CASH,:store_id=>params[:store_id],:customer_id=>params[:customer_id],:car_num_id=>@car_num.id).
+      order("orders.created_at desc")
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
+    @sv_card = CSvcRelation.joins(:sv_card).where(:customer_id=>@customer.id,:status=>CSvcRelation::STATUS[:valid]).select("c_svc_relations.*,
+      sv_cards.name,sv_cards.store_id").where("sv_cards.store_id=#{params[:store_id]}")
   end
 
 end

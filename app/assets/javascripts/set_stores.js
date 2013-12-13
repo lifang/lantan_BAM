@@ -83,7 +83,8 @@ function load_search(store_id){
         dataType: "script",
         data:{
             first : c_time,
-            last : s_time
+            last : s_time,
+            url : "http://www.baidu.com?aa=123&bb=124"
         }
     })
 }
@@ -98,16 +99,39 @@ function show_current(e){
     $(e).replaceWith(b_em);
 }
 
-function pay_this_order(store_id,c_id){
+function pay_this_order(store_id,c_id,n_id){
     var url = "/stores/"+store_id+"/set_stores/load_order"
     $.ajax({
         type:"post",
         url: url,
         dataType: "script",
         data:{
-            customer_id : c_id
+            customer_id : c_id,
+            car_num_id : n_id
         }
     })
 }
 
 
+function show_hihglight(e){
+    $('#'+e.id).find('span').toggleClass('highlight');
+}
+
+
+function check_sum(card_id,e){
+    $("#order_"+card_id+",#pwd_"+card_id).attr("disabled",!e.checked);
+}
+
+function check_num(card_id,value){
+    var left_price = parseFloat($.trim($("#left_"+card_id).html()));
+    if (isNaN(parseFloat($.trim(value))) || left_price < $.trim(parseFloat($.trim(value)))){
+        tishi_alert("使用额度超过本卡额度！");
+        return false;
+    }
+    
+}
+
+function check_post(card_id){
+    var order_price = parseFloat($.trim($("#order_"+card_id).val()));
+    check_num(card_id,order_price);
+}
