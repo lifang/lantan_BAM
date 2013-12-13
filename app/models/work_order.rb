@@ -30,7 +30,7 @@ class WorkOrder < ActiveRecord::Base
               water_num = parms[:name12].to_f*10**4 + parms[:name2].to_f
               gas_num = parms[:name13].to_f*10**4+parms[:name3].to_f
               order = work_order.order
-              unless self.status ==  WorkOrder::STAT[:CANCELED]
+              unless work_order.status ==  WorkOrder::STAT[:CANCELED]
                 staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
                 w_records = WorkRecord.where(:staff_id => (staffs | [order.try(:cons_staff_id_1)]).compact,:current_day=>Time.now.strftime("%Y-%m-%d"))
                 w_records.each {|w_record|

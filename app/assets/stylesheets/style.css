@@ -1071,7 +1071,8 @@ a.compile_btn { width: 100px;}
 	content:".";
 }
 .pingj { float: right; font-size: 14px; margin-right: 10px;}
-
+.di_downUp { cursor: pointer; float: right; font-size: 14px; margin-right: 10px; color: #999;}
+.di_downUp .highlight { color: #930205; font-size: 16px;}
 .data_item { margin-bottom: 10px; border: 1px #CCCCCC solid;}
 .data_item_title { 
     padding-left: 10px; 
