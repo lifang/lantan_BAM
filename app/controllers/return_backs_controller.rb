@@ -49,11 +49,16 @@ class ReturnBacksController < ApplicationController
               if order_products[s_w_os[s.id].order_id][num]
                 pro = order_products[s_w_os[s.id].order_id][num]
                 msg = " "*4 + s_w_os[s.id].car_num + " "*4 + "\n"
-                char_array = pro.name.unpack("U*")
                 name_length = 0
-                char_array.each { |ca| name_length += ca<127 ? 1 : 2 }
+                n = 0
+                pro.name.unpack("U*").each { |ca| 
+                  if name_length <=14
+                    name_length += ca<127 ? 1 : 2
+                    n += 1
+                  end
+                }
                 space_length = (16 - name_length)/2
-                msg += " " * space_length + pro.name + " " * (16 - name_length - space_length) + "\n"
+                msg += " " * space_length + pro.name[0..n] + " " * (16 - name_length - space_length) + "\n"
                 min = ((s_w_os[s.id].time_left.to_i/60).to_i >= 10) ? (s_w_os[s.id].time_left.to_i/60).to_i.to_s : "0#{(s_w_os[s.id].time_left.to_i/60).to_i.to_s}"
                 sec = ((s_w_os[s.id].time_left.to_i%60).to_i >= 10) ? (s_w_os[s.id].time_left.to_i%60).to_i.to_s : "0#{(s_w_os[s.id].time_left.to_i%60).to_i.to_s}"
                 time_left = s_w_os[s.id].time_left<0 ? "00:00" : "#{min}:#{sec}"

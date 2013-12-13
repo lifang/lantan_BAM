@@ -17,7 +17,7 @@ class WorkOrder < ActiveRecord::Base
     end
     file.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')}   #{parms}\r\n"
     begin
-      current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i
+      current_day,store,num = Time.now.strftime("%Y%m%d"),Store.find_by_code(parms[:shop]),parms[:id].to_i 
       if store
         station = Station.where(:code=>parms[:work]).where(:store_id=>store.id).first
         if station && station.is_has_controller

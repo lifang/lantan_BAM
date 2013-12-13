@@ -16,7 +16,7 @@
   <body>
     <div class="head">
       <div class="box position_re">
-        <div class="logo1"><span>V2.1</span></div>
+        <div class="logo1"><span>V2.1.1</span></div>
         <div class="login">你好：<%= cookies[:user_name] %> | <a href="javascript:void(0)" id="edit_password">修改密码</a> | <a href="/logout">退出</a></div>
         <div class="name">
           <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= params[:store_id] %>)"/></span>
@@ -41,7 +41,7 @@
           <% if permissions_on_menus?(:staffs)%><li><a href="/stores/<%= params[:store_id] %>/staffs" class="m_six">员工管理</a>
             <% if @violations.length > 0 %><a href="#" class="message"><%= @violations.length%></a><% end %></li><% end %>
           <% if permissions_on_menus?(:base_datas) %>
-            <li><a href="/stores/<%= params[:store_id] %>/station_datas" class="m_seven">基础数据</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/station_datas" class="m_seven">设置</a></li>
           <% end %>
         </ul>
         <div class="clear"></div>
@@ -75,7 +75,7 @@
     <!--浮动QQ客服代码开始 -->
     <div class="online_qq">
       <div></div>
-      <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=2468820988&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:2568830556:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
+      <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=294220952&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:2568830556:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
       <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=910189861&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:1942918740:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
       <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=603252795&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:2822148527:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
     </div>

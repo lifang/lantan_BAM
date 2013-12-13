@@ -90,7 +90,7 @@
                   </td>
                   <td>
                     <a href="javascript:void(0)" class="edit_reward_deduct_submit" name="<%=@statistics_date%>" style="display: none;" id="<%= staff.id %>">提交</a>
-                    <% if permission?(:staffs, :edit_salary) && @current_month[staff.id] && !@current_month[staff.id].is_edited %><a href="javascript:void(0)" class="bz_btn">编辑</a><% end %>
+                    <% if permission?(:staffs, :edit_salary) && @current_month[staff.id] && @current_month[staff.id].is_edited %><a href="javascript:void(0)" class="bz_btn">编辑</a><% end %>
                     <% if permission?(:staffs, :detail_salary) %><%= link_to "详细", store_current_month_salary_path(@store, staff.id)+"?statistics_date=#{@statistics_date}" %><% end %>
                   </td>
                 </tr>

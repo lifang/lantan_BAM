@@ -92,11 +92,13 @@
           <div class="item">
             <label>职务：</label>
             <select name="staff[department_id]" id="staff_department_id">
-              <% depart_id = @departs[Department::TYPES[:DEPARTMENT]].first.nil? ? 0 : @departs[Department::TYPES[:DEPARTMENT]].first[0] %>
               <option value="">请选择</option>
-              <%@departs[Department::TYPES[:POSITION]].each do |pos|%>
-                <option value="<%= pos[0] %>" id="<%=pos[1].dpt_id%>" <% if depart_id!=pos[1].dpt_id %>style="display:none"<%end%>><%= pos[1].name %></option>
-              <%end if @departs[Department::TYPES[:POSITION]]%>
+              <% if @departs[Department::TYPES[:POSITION]] %>
+                <% depart_id = @departs[Department::TYPES[:DEPARTMENT]].first.nil? ? 0 : @departs[Department::TYPES[:DEPARTMENT]].first[0] %>
+                <%@departs[Department::TYPES[:POSITION]].each do |pos|%>
+                  <option value="<%= pos[0] %>" id="<%=pos[1].dpt_id%>" <% if depart_id!=pos[1].dpt_id %>style="display:none"<%end%>><%= pos[1].name %></option>
+                <%end%>
+              <%end%>
             </select>
           </div>
           <div class="item">

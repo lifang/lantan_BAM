@@ -14,11 +14,10 @@ class CurrentMonthSalariesController < ApplicationController
     @total = salary.map(&:fact_fee).inject(0){|num,s|num+s}
     @departs = Department.where(:id=>(@staffs.map(&:department_id)|@staffs.map(&:position)).compact.uniq).inject(Hash.new){|hash,de|hash[de.id]=de.name;hash}
     respond_to do |format|
-      salary.update_all(:is_edited=>false)
       format.xls {
-        send_data(xls_content_for(@staffs,@current_month,@departs,@statistics_date,@total),
+        send_data(xls_content_for(@staffs,@current_month,@departs,@statistics_date,@total,salary),
           :type => "text/excel;charset=utf-8; header=present",
-          :filename => "员工#{@statistics_date}工资明细.xls")
+          :filename => "#{@store.name}员工#{@statistics_date}工资明细.xls")
       }
       format.html{
         @staffs = @staffs.paginate(:per_page => Constant::PER_PAGE, :page => params[:page] ||= 1)
@@ -42,21 +41,28 @@ class CurrentMonthSalariesController < ApplicationController
     @store = Store.find_by_id(params[:store_id])
   end
 
-  def xls_content_for(objs,salary,depart,month,total_fee)
+  def xls_content_for(objs,salary,depart,month,total_fee,sals)
+    sals.update_all is_edited: 0
     xls_report = StringIO.new
     Spreadsheet.client_encoding = "UTF-8"
     book = Spreadsheet::Workbook.new
     sheet1 = book.create_worksheet :name => "员工#{month}工资明细"
-    sheet1.row(0).concat %w{姓名 部门 职务 底薪 提成金额 扣款金额 总额 实付款}
+    sheet1.row(0).concat %w{姓名 部门 职务 底薪 提成 奖励 扣款  总额 社保 补贴 加班 考核 所得税 实付款}
     objs.each_with_index do |obj,index|
-      deduct = salary[obj.id].nil? ? 0 : salary[obj.id].deduct_num 
-      voilate = salary[obj.id].nil? ? 0 : salary[obj.id].voilate_fee
-      total = salary[obj.id].nil? ? 0 : salary[obj.id].total
-      fact = salary[obj.id].nil? ? 0 : salary[obj.id].fact_fee
+      deduct = (salary[obj.id] && salary[obj.id].deduct_num) ? salary[obj.id].deduct_num : 0
+      d_reward = (salary[obj.id] && salary[obj.id].reward_num) ?  salary[obj.id].reward_num : 0
+      voilate = (salary[obj.id] && salary[obj.id].voilate_fee) ?  salary[obj.id].voilate_fee : 0
+      total = (salary[obj.id] && salary[obj.id].total) ? salary[obj.id].total : 0
+      secure = (salary[obj.id] && salary[obj.id].secure_fee) ? salary[obj.id].secure_fee : 0
+      reward = (salary[obj.id] && salary[obj.id].reward_fee) ?  salary[obj.id].reward_fee : 0
+      work = (salary[obj.id] && salary[obj.id].work_fee) ?  salary[obj.id].work_fee : 0
+      manage = (salary[obj.id] && salary[obj.id].manage_fee) ?  salary[obj.id].manage_fee : 0
+      tax = (salary[obj.id] && salary[obj.id].tax_fee) ? salary[obj.id].tax_fee : 0
+      fact = (salary[obj.id] && salary[obj.id].fact_fee) ?  salary[obj.id].fact_fee : 0
       sheet1.row(index+1).concat ["#{obj.name}","#{depart[obj.position]}", "#{depart[obj.department_id]}","#{obj.base_salary}",
-        "#{deduct}","#{voilate}","#{total}","#{fact}"]
+        "#{deduct}","#{d_reward}","#{voilate}","#{total}","#{secure}","#{reward}","#{work}","#{manage}","#{tax}","#{fact}"]
     end
-    sheet1.row(objs.length+1).concat ["支付金额总计", "#{total_fee}"]
+    sheet1.row(objs.length+1).concat ["支付金额总计", "#{total_fee}","领取工资人数","#{objs.length}"]
     book.write xls_report
     xls_report.string
   end
