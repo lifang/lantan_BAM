@@ -191,7 +191,7 @@ LantanBAM::Application.routes.draw do
     resources :set_stores do
       collection do
         get "select_cities","cash_register","complete_pay"
-        post "load_order"
+        post "load_order","pay_order"
       end
     end
     resources :station_datas do

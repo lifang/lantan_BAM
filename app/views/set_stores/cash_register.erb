@@ -1,8 +1,8 @@
 <%= javascript_include_tag "set_stores" %>
 <div class="data_box">
   <div class="second_menu">
-    <a href="/stores/<%=params[:store_id] %>/set_functions">功能设置</a>
     <a href="/stores/<%=params[:store_id] %>/set_stores">门店信息</a>
+    <a href="/stores/<%=params[:store_id] %>/set_functions">功能设置</a>
     <a href="/stores/<%=params[:store_id] %>/set_stores/cash_register"  class="hover">收银</a>
   </div>
   <div class="clear"></div>
@@ -54,37 +54,19 @@
       <div class="popup_body_area">
         <div class="accountsTab_top">
           <div class="accountsTab_item_block">
-            <div class="accountsTab_item">
-              <label>车牌：</label>
-              <select name="" id="customer_orders">
-                <% @orders.each do |k,v| %>
-                  <option id="<%= "#{k[:c_id]}_#{k[:n_id]}" %>"><%= k[:c_num] %></option>
-                <% end %>
-              </select>
-            </div>
-            <div class="accountsTab_item">
-              <label>总计：</label>
-              <input name="" type="text" />
-            </div>
-            <div class="accountsTab_item">
-              <label>优惠：</label>
-              <input name="" type="text" />
+            <div class="accountsTab_item" id="car_nums">
+              <%= render "car_num" %>
             </div>
           </div>
           <div class="accountsTab_project">
             <ul>
-              <li><a href="#">打折</a></li>
-              <li><a href="#">赠送</a></li>
-              <li><a href="#">单价</a></li>
-              <li><a href="#">删项</a></li>
+              <li><a href="javascript:void(0)" onclick="show_loss('input')">优惠</a></li>
+              <li><a href="javascript:void(0)" onclick="show_loss('return_order')">退单</a></li>
             </ul>
           </div>
         </div>
-        <div  id="cash_pay">
-
-        </div>
+        <div  id="cash_pay"></div>
       </div>
-      <div class="btn_box"><button class="cancel_btn">小票打印</button><button class="confirm_btn">确定</button></div>
     </div>
   </div>
 </div>

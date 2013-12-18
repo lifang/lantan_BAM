@@ -79,12 +79,42 @@ class SetStoresController < ApplicationController
   def load_order
     @customer = Customer.find params[:customer_id]
     @car_num = CarNum.find params[:car_num_id]
-    @orders = Order.joins("left join work_orders w on w.order_id=orders.id").select("orders.*,w.station_id s_id").
-      where(:status=>Order::CASH,:store_id=>params[:store_id],:customer_id=>params[:customer_id],:car_num_id=>@car_num.id).
-      order("orders.created_at desc")
+    @orders = Order.select("orders.*").where(:status=>Order::CASH,:store_id=>params[:store_id],:customer_id=>params[:customer_id],
+      :car_num_id=>@car_num.id).order("orders.created_at desc")
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
     @sv_card = CSvcRelation.joins(:sv_card).where(:customer_id=>@customer.id,:status=>CSvcRelation::STATUS[:valid]).select("c_svc_relations.*,
       sv_cards.name,sv_cards.store_id").where("sv_cards.store_id=#{params[:store_id]}")
+    @order_pays = OrderPayType.search_pay_order(@orders.map(&:id))
   end
+
+  def pay_order
+    if params[:pay_type].nil?
+      @may_pay = OrderPayType.deal_order(request.parameters,Order::STATUS[:BEEN_PAYMENT])
+      about_cash(params[:store_id]) if @may_pay
+    else
+      if params[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
+        orders = Order.where(:status=>Order::CASH,:store_id=>param[:store_id],:customer_id=>param[:customer_id],
+          :car_num_id=>param[:car_num_id])
+        OrderPayType.create(:order_id=>orders,:price=>params[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:CASH])
+        @may_pay = OrderPayType.deal_order(request.parameters,Order::STATUS[:BEEN_PAYMENT])
+        about_cash(params[:store_id]) if @may_pay
+      elsif params[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
+        orders = Order.where(:status=>Order::CASH,:store_id=>param[:store_id],:customer_id=>param[:customer_id],
+          :car_num_id=>param[:car_num_id])
+        OrderPayType.create(:order_id=>orders,:price=>params[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:CREDIT_CARD])
+        @may_pay = OrderPayType.deal_order(request.parameters,Order::STATUS[:BEEN_PAYMENT])
+        about_cash(params[:store_id]) if @may_pay
+      elsif params[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
+
+
+      elsif params[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
+        OrderPayType.create(:order_id=>orders,:price=>params[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:HANG])
+        @may_pay = OrderPayType.deal_order(request.parameters,Order::STATUS[:BEEN_PAYMENT])
+        about_cash(params[:store_id]) if @may_pay
+      end
+
+    end
+  end
+
 
 end

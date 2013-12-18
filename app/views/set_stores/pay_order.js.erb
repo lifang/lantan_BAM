@@ -1,0 +1,7 @@
+<%if @may_pay%>
+  $("#cash_reload").html('<%= j(render :partial => "cash") %>');
+  $("#car_nums").html('<%= j(render :partial => "car_num") %>');
+  change_order(<%= params[:store_id] %>);
+<%else%>
+  tishi_alert("密码不正确或者余额不足！");
+<%end%>
