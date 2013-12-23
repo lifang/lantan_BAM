@@ -1108,11 +1108,8 @@ ActiveRecord::Schema.define(:version => 20131223090733) do
     t.integer  "material_low"
     t.string   "code"
     t.integer  "edition_lv"
-<<<<<<< HEAD
     t.integer  "cash_auth",    :default => 0
-=======
     t.string   "limited_password"
->>>>>>> 8ae34d9c0204f04c13ddceb14232a47b642afe5d
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"
