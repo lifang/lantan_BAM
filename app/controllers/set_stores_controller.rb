@@ -13,7 +13,8 @@ class SetStoresController < ApplicationController
     store = Store.find_by_id(params[:id].to_i)
     update_sql = {:name => params[:store_name].strip, :address => params[:store_address].strip, :phone => params[:store_phone].strip,
                   :contact => params[:store_contact].strip, :position => params[:store_position_x]+","+params[:store_position_y],
-                  :opened_at => params[:store_opened_at], :status => params[:store_status].to_i, :city_id => params[:store_city].to_i }
+                  :opened_at => params[:store_opened_at], :status => params[:store_status].to_i, :city_id => params[:store_city].to_i,
+                :cash_auth => params[:store_cash_auth].to_i}
     if store.update_attributes(update_sql)
       if !params[:store_img].nil?
           begin

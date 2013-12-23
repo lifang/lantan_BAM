@@ -255,9 +255,7 @@ class Station < ActiveRecord::Base
       #按照工位的忙闲获取预计时间     
       busy_stations = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),      
         :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
-      
       availbale_stations = station_arr.map(&:id) - busy_stations
-
       if availbale_stations.present?
         if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
           station_id = nil

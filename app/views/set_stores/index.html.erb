@@ -54,6 +54,11 @@
           <span>Y:</span><input id="store_position_y" name="store_position_y" type="text" class="xyAxis" value="<%= @store.position.split(',')[1] if @store.position %>"/>
           <a href="http://api.map.baidu.com/lbsapi/getpoint/index.html" target="_blank" class="mapIcon"><img src="/assets/mapIcon.png"  alt="点击获取地图坐标" title="点击获取地图坐标"/></a>
         </div>
+      <div class="item">
+        <label>收银权限：</label>
+        <input type="radio" name="store_cash_auth" value="0" <% if @store.cash_auth.to_i==0 %>checked<% end %>/>否&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="radio" name="store_cash_auth" value="1" <% if @store.cash_auth.to_i==1 %>checked<% end %>/>是
+      </div>
         <div class="item_textarea">
           <label><span class="red">*</span>门店照片：</label>
           <input type="file" class="file" name="store_img"/>

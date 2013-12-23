@@ -23,7 +23,9 @@ class Api::OrdersController < ApplicationController
   end
 
   def login
-    staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:user_name], Staff::VALID_STATUS])
+    staff = Staff.find_by_sql(["select s.*,d.name dname,b.name bname from staffs s left join departments d on s.department_id=d.id
+            left join departments b on d.dpt_id=b.id
+            where s.username = ? and s.status in (?)", params[:user_name], Staff::VALID_STATUS]).first   
     info = ""
     if  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
@@ -33,15 +35,11 @@ class Api::OrdersController < ApplicationController
       cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
       cookies[:user_name]={:value =>staff.name, :path => "/", :secure  => false}
       session_role(cookies[:user_id])
-      #if has_authority?
       info = ""
-      #else
-      #cookies.delete(:user_id)
-      #cookies.delete(:user_name)
-      #cookies.delete(:user_roles)
-      #cookies.delete(:model_role)
-      #info = "抱歉，您没有访问权限"
-      #end
+      store = Store.find_by_id(staff.store_id)
+      staff = {:user_id => staff.id, :store_id => staff.store_id, :position => staff.dname,
+      :department => staff.bname, :username => staff.username, :name => staff.name, 
+      :photo => staff.photo.nil? ? nil : staff.photo, :cash_auth => store.cash_auth}
     end
     render :json => {:staff => staff, :info => info}.to_json
   end
