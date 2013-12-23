@@ -388,7 +388,7 @@ function confirm_pay(store_id,c_id,n_id){
         }
         if(parseInt(pay_type) == 5){
             var pay_cash =$.trim($("#cash_"+pay_type).val());
-            if (pay_cash == "" || pay_cash.length ==0 || pay_cash.length <6){
+            if (pay_cash == "" || pay_cash.length ==0 || pay_cash.length <0){
                 tishi_alert("请求验证权限！");
                 return false;
             }
@@ -430,4 +430,9 @@ function set_confirm(store_id,c_id,n_id,t_data){
         dataType: "script",
         data: t_data
     })
+}
+
+function single_order_print(){
+    var print_nums = $(".di_list_l input[id*='print_']:checkbox:checked");
+    alert(print_nums.length);
 }

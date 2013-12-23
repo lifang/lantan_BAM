@@ -92,6 +92,7 @@ module UserRoleHelper
     role_flag = nil
     if cookies[:user_id]
       session_role(cookies[:user_id]) unless cookies[:model_role]
+      cookies[:model_role]
       if cookies[:model_role]
         model_roles = cookies[:model_role].split(",")
         for j in (0..model_roles.length)

@@ -1,6 +1,6 @@
 #encoding: utf-8
 class SetStoresController < ApplicationController
-  layout "role"
+  layout "role" ,:except =>["print_paper"]
   before_filter :sign?, :except => [:update]
   require 'will_paginate/array'
   
@@ -13,9 +13,11 @@ class SetStoresController < ApplicationController
 
   def update
     store = Store.find_by_id(params[:id].to_i)
+
     update_sql = {:name => params[:store_name].strip, :address => params[:store_address].strip, :phone => params[:store_phone].strip,
       :contact => params[:store_contact].strip, :position => params[:store_position_x]+","+params[:store_position_y],
       :opened_at => params[:store_opened_at], :status => params[:store_status].to_i, :city_id => params[:store_city].to_i }
+    update_sql.merge!(:limited_password=>Digest::MD5.hexdigest(params[:limited_password])) if permission?(:pay_cash, :can_pay) && params[:limited_password]!=""
     if store.update_attributes(update_sql)
       if !params[:store_img].nil?
         begin
@@ -59,7 +61,7 @@ class SetStoresController < ApplicationController
       |hash,pay|hash[pay.pay_type] = pay.total_price;hash}
     @orders = orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
-    @pay_types = OrderPayType.order_pay_types(@orders.map(&:id))
+    @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
     @staffs = Staff.find((@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
       hash[staff.id]=staff.name;hash}
     @stations = Station.find(@orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
@@ -71,6 +73,7 @@ class SetStoresController < ApplicationController
       :store_id=>store_id).order("orders.created_at desc")
     @order_prods = OrderProdRelation.order_products(orders.map(&:id))
     @orders = orders.group_by{|i|{:c_name=>i.c_name,:c_num=>i.c_num,:tel=>i.mobilephone,:g_name=>i.group_name,:c_id=>i.c_id,:n_id=>i.n_id} }
+    @order_pays = OrderPayType.search_pay_order(orders.map(&:id))
     @staffs = Staff.find((orders.map(&:cons_staff_id_1)|orders.map(&:cons_staff_id_2)|orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
       hash[staff.id]=staff.name;hash}
     @stations =Station.find(orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
@@ -82,39 +85,42 @@ class SetStoresController < ApplicationController
     @orders = Order.select("orders.*").where(:status=>Order::CASH,:store_id=>params[:store_id],:customer_id=>params[:customer_id],
       :car_num_id=>@car_num.id).order("orders.created_at desc")
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
-    @sv_card = CSvcRelation.joins(:sv_card).where(:customer_id=>@customer.id,:status=>CSvcRelation::STATUS[:valid]).select("c_svc_relations.*,
-      sv_cards.name,sv_cards.store_id").where("sv_cards.store_id=#{params[:store_id]}")
+    prod_ids = OrderProdRelation.joins(:product).where(:order_id=>@orders.map(&:id)).select("products.category_id").map(&:category_id)
+    @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:good], Category::TYPES[:service]]).inject(Hash.new){|hash,c|
+      hash[c.id]=c.name;hash}
+    if prod_ids
+      @sv_card = []
+      sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:customer_id=>@customer.id,:status=>CSvcRelation::STATUS[:valid]).
+        select("c_svc_relations.*,sv_cards.name,sv_cards.store_id,svcard_prod_relations.category_id ci").where("sv_cards.store_id=#{params[:store_id]}")
+      sv_cards.each do |sv|
+        prod_ids.each do |ca|
+          if sv.ci  and sv.ci.split(",").include? "#{ca}"
+            @sv_card  << sv
+            break
+          end
+        end
+      end
+    end
     @order_pays = OrderPayType.search_pay_order(@orders.map(&:id))
   end
 
   def pay_order
-    if params[:pay_type].nil?
-      @may_pay = OrderPayType.deal_order(request.parameters,Order::STATUS[:BEEN_PAYMENT])
-      about_cash(params[:store_id]) if @may_pay
-    else
-      if params[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
-        orders = Order.where(:status=>Order::CASH,:store_id=>param[:store_id],:customer_id=>param[:customer_id],
-          :car_num_id=>param[:car_num_id])
-        OrderPayType.create(:order_id=>orders,:price=>params[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:CASH])
-        @may_pay = OrderPayType.deal_order(request.parameters,Order::STATUS[:BEEN_PAYMENT])
-        about_cash(params[:store_id]) if @may_pay
-      elsif params[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
-        orders = Order.where(:status=>Order::CASH,:store_id=>param[:store_id],:customer_id=>param[:customer_id],
-          :car_num_id=>param[:car_num_id])
-        OrderPayType.create(:order_id=>orders,:price=>params[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:CREDIT_CARD])
-        @may_pay = OrderPayType.deal_order(request.parameters,Order::STATUS[:BEEN_PAYMENT])
-        about_cash(params[:store_id]) if @may_pay
-      elsif params[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
-
-
-      elsif params[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
-        OrderPayType.create(:order_id=>orders,:price=>params[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:HANG])
-        @may_pay = OrderPayType.deal_order(request.parameters,Order::STATUS[:BEEN_PAYMENT])
-        about_cash(params[:store_id]) if @may_pay
-      end
-
-    end
+    @may_pay = OrderPayType.deal_order(request.parameters)
+    about_cash(params[:store_id]) if @may_pay
   end
 
+  def print_paper
+    if params[:c_id] && params[:n_id] && params[:store_id]
+      @store = Store.find params[:store_id]
+      @customer = Customer.find params[:c_id]
+      @car_num = CarNum.find params[:n_id]
+      @orders = Order.select("orders.*").where(:store_id=>params[:store_id],:customer_id=>@customer.id,
+        :car_num_id=>@car_num.id).order("orders.created_at desc").where("date_format(orders.created_at,'%Y-%m-%d')='#{Time.now.strftime("%Y-%m-%d")}'")
+      @staffs = Staff.find((@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
+        hash[staff.id]=staff.name;hash}
+      @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
+      @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
+    end
+  end
 
 end

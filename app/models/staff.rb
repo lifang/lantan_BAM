@@ -23,6 +23,17 @@ class Staff < ActiveRecord::Base
   N_COMPANY = {1=>"技师",3=>"接待",2=>"店长",4=>"其他"}
   LEVELS = {0=>"高级",1=>"中级",2=>"初级"}  #技师等级
   #总部员工职务
+  STAFF_MENUS_AND_ROLES = {           #创建门店时创建的管理员将获取前台的所有权限
+    :customers => 32767,
+    :materials => 2147483647,
+    :staffs => 65535,
+    :datas => 524287,
+    :stations => 3,
+    :sales => 4194303,
+    :base_datas => 16383,
+    :pay_cash => 1,
+    :finances => 1
+  }
 
   STATUS = {:normal => 0, :afl => 1, :vacation => 2, :resigned => 3, :deleted => 4}
   VALID_STATUS = [STATUS[:normal], STATUS[:afl], STATUS[:vacation]]

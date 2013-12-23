@@ -62,8 +62,11 @@
     <div class="accountsTab_pay">
       <div class="accountsTab_pay_title"><h3>储值卡</h3><span class="pay_span"><%=card.name%></span>
         <div>
-          <span style="float: right;margin-right: 150px;">
-            <input id="radio_<%= card.id %>" type="checkbox"  onclick="check_sum(<%= card.id %>,this)" class="pay_check" />使用此卡支付</span>&nbsp;&nbsp;
+          <span style="float: left;margin-left: 60px;">
+            <input id="radio_<%= card.id %>" type="checkbox"  onclick="check_sum(<%= card.id %>,this)" class="pay_check" />使用此卡支付</span>
+            <span style="float: right;">
+              <%  cas = card.ci.split(',').inject(Array.new){|arr,c|arr << @cates[c.to_i]}%>
+              <label title="<%=cas.join("、")%>">使用范围：<%=cas[0..1].join('、')%>..</label></span>
         </div>
       </div>
       <div class="accountsTab_pay_item">
@@ -82,13 +85,13 @@
   <ul>
     <%total = @orders.map(&:price).inject(0){|sum,num|sum+num} %>
     <%reward = @order_pays.select{|k,v| @orders.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
-    <li>应付金额：<span id="due_pay"><%= total - reward%></span>
-      <span id="hidden_pay" style="display:none"><%= total - reward%></span>
+    <li>应付金额：<span id="due_pay"><%= (total - reward).to_i%></span>
+      <span id="hidden_pay" style="display:none"><%=(total - reward).to_i%></span>
       <span style="float: right"><input id="clear_per" type="checkbox"  onclick="change_pay(this)" />抹零</span>
       <input type="hidden" value="0" id="clear_value" />
     </li>
     <li>付款总计：<span id="total_pay"><%=0%></span></li>
-    <li>待付金额：<span id="left_pay"><%=total - reward%></span></li>
+    <li>待付金额：<span id="left_pay"><%=(total - reward).to_i%></span></li>
     <li><a href="javascript:void(0)" class="deal_money_btn" id="due_over" onclick="check_post(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)" style="display: none">可以结账</a></li>
   </ul>
 </div>
@@ -126,11 +129,10 @@
     <div style="display: none">
       <div class="way_item">
         <label>输入权限密码：</label>
-        <input id="cash_<%=OrderPayType::PAY_TYPES[:IS_FREE]%>" type="password" /></div>
+        <input id="cash_<%=OrderPayType::PAY_TYPES[:IS_FREE]%>" type="password" value=" " /></div>
     </div>
   </div>
   <div class="btn_box">
-    <button class="cancel_btn">小票打印</button>
     <button class="confirm_btn" id="confirm_order" onclick="confirm_pay(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)">确定</button></div>
 </div>
 <script type="text/javascript">

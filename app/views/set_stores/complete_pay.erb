@@ -14,7 +14,7 @@
           minDate:'04:00',maxDate:'24:00',qsEnabled:false,quickSel:['10:00:00','12:00:00','14:00','16:00:00','18:00:00']})" readonly class="Wdate"
            value="<%=params[:last]%>" /></div>
         <div><button class="search_btn" onclick="load_search(<%=params[:store_id]%>)">查询</button></div>
-        <div class="data_menu afterClear"><a href="#">打印</a></div>
+        <div class="data_menu afterClear"><a href="javascript:void(0)" onclick="single_order_print(<%=params[:store_id]%>)">打印</a></div>
       </div>
       <div class="data_item" id="cash_over">
        <%=  render "cash_over"%>

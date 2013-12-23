@@ -15,6 +15,7 @@ Menu.create(:id => num+4,:controller => "datas",:name => "统计管理")
 Menu.create(:id => num+5,:controller => "stations",:name => "现场管理")
 Menu.create(:id => num+6,:controller => "sales",:name => "营销管理")
 Menu.create(:id => num+7,:controller => "base_datas",:name => "基础数据")
+Menu.create(:id => num+7,:controller => "base_datas",:name => "收银")
 #角色
 Role.create(:id => num+1,:name => "系统管理员")
 Role.create(:id => num+2,:name => "老板")

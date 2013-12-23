@@ -1,22 +1,21 @@
 <div class="data_item_title">
   <ul>
-    <li>现金：<%= @pays[OrderPayType::PAY_TYPES[:CASH]].nil? ? 0 : @pays[OrderPayType::PAY_TYPES[:CASH]] %></li>
-    <li>储值卡：<%= @pays[OrderPayType::PAY_TYPES[:SV_CARD]].nil? ? 0 : @pays[OrderPayType::PAY_TYPES[:SV_CARD]] %></li>
-    <li>刷卡：<%= @pays[OrderPayType::PAY_TYPES[:CREDIT_CARD]].nil? ? 0 : @pays[OrderPayType::PAY_TYPES[:CREDIT_CARD]] %></li>
-    <li>免单：<%= @pays[OrderPayType::PAY_TYPES[:IS_FREE]].nil? ? 0 : @pays[OrderPayType::PAY_TYPES[:IS_FREE]] %></li>
+    <% @pays.each do |k,v| %>
+      <li><%=OrderPayType::PAY_TYPES_NAME[k]%>：<%= v.to_i %></li>
+    <%end%>
   </ul>
 </div>
 <% @orders.each do|order| %>
   <div class="data_item_list">
-    <div class="di_list_l"><input name="" type="checkbox" value="" /></div>
+    <div class="di_list_l"><input id="print_<%=order.id%>" type="checkbox" value="<%=order.id%>" /></div>
     <div class="di_list_r">
       <div class="register">
         <div class="orderGoods">
-          <div class="pingj">评价：<%= Order::IS_PLEASED_NAME[order.is_pleased] %></div>
+          <div class="pingj">评价：<%= order.is_pleased.nil? ? "--" : Order::IS_PLEASED_NAME[order.is_pleased] %></div>
           <ul>
             <li>单号：<%= order.code %></li>
-            <li>付款方式：<%=@pay_types[order.id].nil? ? "--"  : @pay_types[order.id].join("、") %></li>
-            <li>流水帐号：123654789</li>
+            <li>付款方式：<%=  @pay_types[order.id].nil? ? "--"  :
+                @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v}"}.join(" ")  %></li>
           </ul>
         </div>
         <div class="merchant">

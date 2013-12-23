@@ -3,7 +3,6 @@
   <div class="second_menu">
     <a href="/stores/<%= @store.id %>/set_stores" class="hover">门店信息</a>
     <a href="/stores/<%= @store.id %>/set_functions">功能设置</a>
-    <a href="/stores/<%= @store.id %>/set_stores/cash_register">收银</a>
   </div>
   <div class="clear"></div>
   <div class="data_body">
@@ -55,6 +54,12 @@
           <span>Y:</span><input id="store_position_y" name="store_position_y" type="text" class="xyAxis" value="<%= @store.position.split(',')[1] if @store.position %>"/>
           <a href="http://api.map.baidu.com/lbsapi/getpoint/index.html" target="_blank" class="mapIcon"><img src="/assets/mapIcon.png"  alt="点击获取地图坐标" title="点击获取地图坐标"/></a>
         </div>
+        <% if permission?(:pay_cash, :can_pay) %>
+          <div class="item">
+            <label><span class="red">*</span>免单密码：</label>
+            <input type="text" id="limited_password"  name="limited_password" />
+          </div>
+        <%end%>
         <div class="item_textarea">
           <label><span class="red">*</span>门店照片：</label>
           <input type="file" class="file" name="store_img"/>

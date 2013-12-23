@@ -163,6 +163,14 @@ textarea {
 
 .module li a.m_seven { background: #930205 url(/assets/module.png) no-repeat 0px -310px;}
 .module li a.m_seven:hover { background: #a60205 url(/assets/module.png) no-repeat 0px -310px;}
+
+.module li a.m_eight { background: #930205 url(/assets/module.png) no-repeat -152px -310px;}
+.module li a.m_eight:hover { background: #a60205 url(/assets/module.png) no-repeat -152px -310px;}
+
+.module li a.m_nine { background: #930205 url(/assets/module.png) no-repeat -312px -310px;}
+.module li a.m_nine:hover { background: #a60205 url(/assets/module.png) no-repeat -312px -310px;}
+
+
 /*登录首页信息*/
 .module li a.message {
     width: 31px;
@@ -1149,7 +1157,7 @@ a.compile_btn { width: 100px;}
     margin-bottom: 10px;
 }
 .accountsTab_pay_title h3 { padding-left: 10px; font-size: 16px; float: left;}
-.pay_span { float: left; margin-left: 100px;}
+.pay_span { float: left; margin-left: 60px;}
 .accountsTab_pay_item { float: left; margin: 5px 0; color: #930205; height: 24px; line-height: 24px; margin-left: 10px;}
 .accountsTab_pay_item label {
     height: 24px;

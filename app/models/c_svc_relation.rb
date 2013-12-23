@@ -51,8 +51,7 @@ class CSvcRelation < ActiveRecord::Base
     category_id = Product.find_by_id(p_id).category_id.to_i
     sc.each do |s|
       spr = SvcardProdRelation.find_by_sv_card_id(s.sid)
-      categories = spr.category_id.split(",").inject([]){|h, c| h << c.to_i;h }
-      if categories.include?(category_id)
+      if spr.category_id && spr.category_id.split(",").inject([]){|h, c| h << c.to_i;h }.include?(category_id)
         h = {}
         h[:csrid] = s.csrid
         h[:l_price] = s.l_price

@@ -46,5 +46,23 @@ task(:change_types => :environment) do
   end
 end
 
+task(:new_menu => :environment) do
+  menu1 = Menu.create(:controller=>"pay_cash",:name=>"收银")
+  menu2 = Menu.create(:controller=>"finances",:name=>"财务管理")
+  Store.where(:status=>Store::STATUS[:OPENED]).each do |store|
+    roles = Role.where(:store_id=>store.id,:name=>["门店管理员","老板","店长"])
+    roles.each do |role|
+      [menu1,menu2].each do |m|
+        RoleMenuRelation.delete_all(:role_id=>role.id, :menu_id => m.id)
+        RoleModelRelation.delete_all(:role_id => role.id, :num => Staff::STAFF_MENUS_AND_ROLES[m.controller.to_sym],
+          :model_name => m.controller)
+        RoleMenuRelation.create(:role_id => role.id, :menu_id => m.id)
+        RoleModelRelation.create(:role_id => role.id, :num => Staff::STAFF_MENUS_AND_ROLES[m.controller.to_sym],
+          :model_name => m.controller)
+      end
+    end
+  end
+end
+
 
 
