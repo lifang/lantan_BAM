@@ -1,8 +1,8 @@
 <%= javascript_include_tag "set_stores" %>
 <div class="data_box">
   <div class="second_menu">
-    <a href="/stores/<%= @store.id %>/set_functions">功能设置</a>
     <a href="/stores/<%= @store.id %>/set_stores" class="hover">门店信息</a>
+    <a href="/stores/<%= @store.id %>/set_functions">功能设置</a>
   </div>
   <div class="clear"></div>
   <div class="data_body">
@@ -54,11 +54,20 @@
           <span>Y:</span><input id="store_position_y" name="store_position_y" type="text" class="xyAxis" value="<%= @store.position.split(',')[1] if @store.position %>"/>
           <a href="http://api.map.baidu.com/lbsapi/getpoint/index.html" target="_blank" class="mapIcon"><img src="/assets/mapIcon.png"  alt="点击获取地图坐标" title="点击获取地图坐标"/></a>
         </div>
+<<<<<<< HEAD
       <div class="item">
         <label>收银权限：</label>
         <input type="radio" name="store_cash_auth" value="0" <% if @store.cash_auth.to_i==0 %>checked<% end %>/>否&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="radio" name="store_cash_auth" value="1" <% if @store.cash_auth.to_i==1 %>checked<% end %>/>是
       </div>
+=======
+        <% if permission?(:pay_cash, :can_pay) %>
+          <div class="item">
+            <label><span class="red">*</span>免单密码：</label>
+            <input type="text" id="limited_password"  name="limited_password" />
+          </div>
+        <%end%>
+>>>>>>> 8ae34d9c0204f04c13ddceb14232a47b642afe5d
         <div class="item_textarea">
           <label><span class="red">*</span>门店照片：</label>
           <input type="file" class="file" name="store_img"/>

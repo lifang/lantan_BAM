@@ -14,9 +14,13 @@ class Order < ActiveRecord::Base
   has_many :complaints
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
-  STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6,:RETURN => 7}
-  STATUS_NAME = {0 => "等待中", 1 => "服务中", 2 => "等待付款", 3 => "已经付款", 4 => "免单", 5 => "已删除" , 6 => "未分配工位",7 =>"退单"}
+  STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6,
+    :RETURN => 7}
+  STATUS_NAME = {0 => "等待中", 1 => "服务中", 2 => "等待付款", 3 => "已经付款", 4 => "免单", 5 => "已删除" , 6 => "未分配工位",
+    7 =>"退单"}
   #0 正常未进行  1 服务中  2 等待付款  3 已经付款  4 已结束  5已删除  6未分配工位 7 退单
+  CASH =[STATUS[:NORMAL],STATUS[:SERVICING],STATUS[:WAIT_PAYMENT]]
+  OVER_CASH = [STATUS[:BEEN_PAYMENT],STATUS[:FINISHED],STATUS[:RETURN]]
   IS_FREE = {:YES=>1,:NO=>0} # 1免单 0 不免单
   TYPES = {:SERVICE => 0, :PRODUCT => 1} #0 服务  1 产品
   FREE_TYPE = {:ORDER_FREE =>"免单",:PCARD =>"套餐卡使用"}
@@ -643,6 +647,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
     arr = []
     status = 0
     order = nil
+    send_sv_card = {}
     Order.transaction do
       #begin
       arr = self.get_prod_sale_card prods
@@ -678,14 +683,18 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
             if uc[3]=="1" #如果是新储值卡 or 打折卡
               sv_card = SvCard.find_by_id uc[1]
               if sv_card
-                if sv_card.types== SvCard::FAVOR[:SAVE]  #储值卡
+                if sv_card.types == SvCard::FAVOR[:SAVE]  #储值卡
                   sv_prod_relation = sv_card.svcard_prod_relations[0]
                   if sv_prod_relation
                     total_price = sv_prod_relation.base_price.to_f+sv_prod_relation.more_price.to_f
                     c_sv_relation = CSvcRelation.create!( :customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => total_price,:left_price =>total_price, 
                       :status => CSvcRelation::STATUS[:invalid], :password => Digest::MD5.hexdigest(uc[5]))
                     SvcardUseRecord.create(:c_svc_relation_id =>c_sv_relation.id,:types=>SvcardUseRecord::TYPES[:IN],:use_price=>total_price,
-                      :left_price=>total_price,:content=>"购买#{sv_card.name}")                   
+                      :left_price=>total_price,:content=>"购买#{sv_card.name}")
+                    c_phone = c_sv_relation.customer.mobilephone
+                    send_message = "#{sv_card.name}的余额为#{total_price}，您设置的密码为：#{uc[5]}，付款后可以使用。"
+                    message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{c_phone.strip}&Content=#{URI.escape(send_message)}&Exno=0"
+                    send_sv_card.merge!(message_route=>Constant::MESSAGE_URL)
                   end
                 else   #打折卡
                   CSvcRelation.create!(:customer_id => c_id, :sv_card_id => uc[1], :order_id => order.id, :total_price => sv_card.price, :status => CSvcRelation::STATUS[:invalid])
@@ -884,6 +893,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
     end
     arr[0] = status
     arr[1] = order
+    arr[2] = send_sv_card
     arr
   end
 

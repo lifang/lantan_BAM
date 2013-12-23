@@ -150,9 +150,19 @@ module Constant
       #:new_depot => ["新建仓库",1024],
       #:edit_depot => ["编辑仓库",2048],
       #:del_depot => ["删除仓库",4096],
-      :edit_store_datas => ["设置门店信息", 8192]
+      :edit_store_datas => ["设置门店信息", 8192],
+      :edit_limited_pwd =>["设置免单权限",8192*2]
+    },
+    :pay_cash => {
+      :name=> "收银",
+      :can_pay =>["收银",1]
+    },
+    :finances => {
+      :name=>"财务管理",
+      :lookup =>["浏览",1]
     }
   }
+
 
   #上传图片的比例,如需更改请追加，部分已按index引用
   SALE_PICSIZE =[300,230,663,50]

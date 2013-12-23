@@ -4,7 +4,7 @@
     <%= stylesheet_link_tag    "application" %>
     <%= javascript_include_tag "application","role","depot","DD_belatedPNG_0.0.8a-min" %>
     <script type="text/javascript" src="/assets/My97DatePicker/WdatePicker.js" ></script>
-    <title><%= @title.nil? ? "基础数据" : @title %></title>
+    <title><%= @title.nil? ? "系统设置" : @title %></title>
     <%= csrf_meta_tags %>
     <!--[if IE 6]>
     <script>
@@ -17,12 +17,21 @@
     <div class="head">
       <div class="box">
         <%= render :partial => "/common/login_header" %>
-        <%= render :partial => "/roles/role_nav" %>
+        <% if  ["cash_register",'complete_pay'].include? controller.action_name %>
+          <div class="nav">
+            <ul>
+              <li><%= link_to "收银", store_station_datas_url(params[:store_id]), :class => cover_div("set_stores") %></li>
+            </ul>
+          </div>
+          <div class="back"><a href="/stores/<%= params[:store_id] %>/welcomes" title="返回">Back</a>收银</div>
+        <%else%>
+          <%= render :partial => "/roles/role_nav" %>
+        <%end%>
       </div>
     </div>
     <div class="main">
       <div class="box">
-          <%= yield %>
+        <%= yield %>
       </div>
     </div>
     <%= render :partial => "/common/footer" %>

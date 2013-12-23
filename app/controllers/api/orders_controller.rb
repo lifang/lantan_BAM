@@ -75,6 +75,11 @@ class Api::OrdersController < ApplicationController
       #    elsif order[0] == 3
       #      "没可用的工位了"
     end
+    if order[2] != {}
+      order[2].each do |k,v|
+        create_get_http(v,k)
+      end
+    end
     render :json => {:status => order[0], :content => str, :order => info}
   end
   #付款
