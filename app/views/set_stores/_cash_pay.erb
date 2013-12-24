@@ -64,9 +64,9 @@
         <div>
           <span style="float: left;margin-left: 60px;">
             <input id="radio_<%= card.id %>" type="checkbox"  onclick="check_sum(<%= card.id %>,this)" class="pay_check" />使用此卡支付</span>
-            <span style="float: right;">
-              <%  cas = card.ci.split(',').inject(Array.new){|arr,c|arr << @cates[c.to_i]}%>
-              <label title="<%=cas.join("、")%>">使用范围：<%=cas[0..1].join('、')%>..</label></span>
+          <span style="float: right;">
+            <%  cas = card.ci.split(',').inject(Array.new){|arr,c|arr << @cates[c.to_i]}%>
+            <label title="<%=cas.join("、")%>">使用范围：<%=cas[0..1].join('、')%>..</label></span>
         </div>
       </div>
       <div class="accountsTab_pay_item">
@@ -87,7 +87,8 @@
     <%reward = @order_pays.select{|k,v| @orders.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
     <li>应付金额：<span id="due_pay"><%= (total - reward).to_i%></span>
       <span id="hidden_pay" style="display:none"><%=(total - reward).to_i%></span>
-      <span style="float: right"><input id="clear_per" type="checkbox"  onclick="change_pay(this)" />抹零</span>
+      <span style="float: right"><input id="clear_per" type="checkbox"  onclick="change_pay(this)"
+                                        <%if (total - reward).to_i <=10 %> disabled <%end%> />抹零</span>
       <input type="hidden" value="0" id="clear_value" />
     </li>
     <li>付款总计：<span id="total_pay"><%=0%></span></li>

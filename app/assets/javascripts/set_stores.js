@@ -336,7 +336,7 @@ function set_change(pay_type){
     var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
     var left_pay = parseInt($.trim($("#left_pay").html()));
     $("#change_"+pay_type).val(0);
-    if (isNaN(pay_cash) || pay_cash <=0){
+    if (isNaN(pay_cash) || pay_cash <0){
         $("#cash_"+pay_type).val(0);
         return false;
     }else{

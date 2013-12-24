@@ -113,39 +113,46 @@ class OrderPayType < ActiveRecord::Base
             end
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : param[:pay_cash].to_i - param[:second_parm].to_i
             orders.each do |o|
-              if o_price[o.id] <= total_card
-                OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id],:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
-                total_card -= o_price[o.id]
-                total_card=0 if total_card <0
+              if o_price[o.id] <= 0
+                OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]- total_card-clear_value,:pay_type=>param[:pay_type].to_i)
+                o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
               else
-                if o_price[o.id] <= (total_card+clear_value)
-                  OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
-                  OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                if o_price[o.id] <= total_card
+                  OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id],:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
                   total_card -= o_price[o.id]
-                  clear_value = 0
                   total_card=0 if total_card <0
+                  o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
                 else
-                  if clear_value>0
+                  if o_price[o.id] <= (total_card+clear_value)
                     OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
+                    OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                    total_card -= o_price[o.id]
                     clear_value = 0
-                  end
-                  if total_card >0
-                    OrderPayType.create(:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
-                    total_card =0
-                  end
-                  if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
-                    OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]- total_card-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CASH])
-                    o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
-                    cash_price -= (o_price[o.id]-total_card-clear_value)
-                  elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
-                    o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
-                    OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CREDIT_CARD],:second_parm=>param[:second_parm])
-                  elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
-                    o.update_attributes(:status=>Order::STATUS[:FINISHED])
-                    OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:IS_FREE])
-                  elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
-                    o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
-                    OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:HANG])
+                    total_card=0 if total_card <0
+                  else
+                    if clear_value>0
+                      OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
+                    end
+                    if total_card >0
+                      OrderPayType.create(:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                    end
+                    if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
+                      OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]- total_card-clear_value,:pay_type=>param[:pay_type].to_i,
+                        :pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
+                      cash_price -= (o_price[o.id]-total_card-clear_value)
+                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
+                      OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>param[:pay_type].to_i,:second_parm=>param[:second_parm])
+                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
+                      o.update_attributes(:status=>Order::STATUS[:FINISHED])
+                      OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>param[:pay_type].to_i)
+                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
+                      OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>param[:pay_type].to_i)
+                    end
+                    clear_value = 0 if clear_value>0
+                    total_card =0 if total_card >0
                   end
                 end
               end
@@ -154,7 +161,7 @@ class OrderPayType < ActiveRecord::Base
         end
       end
     end
-    return  [may_pay,msg,orders]
+    return  [may_pay,msg,orders.map(&:id)]
   end
 
 
