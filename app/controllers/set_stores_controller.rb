@@ -1,6 +1,6 @@
 #encoding: utf-8
 class SetStoresController < ApplicationController
-  layout "role" ,:except =>["print_paper"]
+  layout "role" ,:except =>["print_paper","single_print"]
   before_filter :sign?, :except => [:update]
   require 'will_paginate/array'
   
@@ -51,6 +51,7 @@ class SetStoresController < ApplicationController
   end
 
   def complete_pay
+
     start_time = params[:first].nil? || params[:first] == "" ? Time.now.at_beginning_of_day.strftime("%Y-%m-%d %H:%M") : Time.now.strftime("%Y-%m-%d")+" #{params[:first]}"
     end_time = params[:last].nil? || params[:last] == "" ? Time.now.end_of_day.strftime("%Y-%m-%d %H:%M") : Time.now.strftime("%Y-%m-%d")+" #{params[:last]}"
     orders = Order.joins([:car_num,:customer]).joins("left join work_orders w on w.order_id=orders.id").select("orders.*,
@@ -106,21 +107,31 @@ class SetStoresController < ApplicationController
 
   def pay_order
     @may_pay = OrderPayType.deal_order(request.parameters)
-    about_cash(params[:store_id]) if @may_pay
+    about_cash(params[:store_id])  if @may_pay[0]
   end
 
   def print_paper
-    if params[:c_id] && params[:n_id] && params[:store_id]
-      @store = Store.find params[:store_id]
-      @customer = Customer.find params[:c_id]
-      @car_num = CarNum.find params[:n_id]
-      @orders = Order.select("orders.*").where(:store_id=>params[:store_id],:customer_id=>@customer.id,
-        :car_num_id=>@car_num.id).order("orders.created_at desc").where("date_format(orders.created_at,'%Y-%m-%d')='#{Time.now.strftime("%Y-%m-%d")}'")
-      @staffs = Staff.find((@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
-        hash[staff.id]=staff.name;hash}
-      @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
-      @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
-    end
+    @store = Store.find params[:store_id]
+    @customer = Customer.find params[:c_id]
+    @car_num = CarNum.find params[:n_id]
+    @orders = Order.select("orders.*").where(:status=>Order::PRINT_CASH,:store_id=>params[:store_id],:customer_id=>@customer.id,
+      :car_num_id=>@car_num.id).order("orders.created_at desc").where("date_format(orders.created_at,'%Y-%m-%d')='#{Time.now.strftime("%Y-%m-%d")}'")
+    @staffs = Staff.find((@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
+      hash[staff.id]=staff.name;hash}
+    @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
+    @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
+  end
+
+  def single_print
+    @store = Store.find params[:store_id]
+    @orders = Order.where(:store_id=>params[:store_id],:id=>params[:order_id])
+    order = @orders.first
+    @customer = Customer.find order.customer_id
+    @car_num = CarNum.find order.car_num_id
+    @staffs = Staff.find([order.cons_staff_id_1,order.cons_staff_id_2,order.front_staff_id]).inject(Hash.new){|hash,staff|
+      hash[staff.id]=staff.name;hash}
+    @order_prods = OrderProdRelation.order_products(order.id)
+    @order_pays = OrderPayType.search_pay_types(order.id)
   end
 
 end

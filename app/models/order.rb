@@ -21,6 +21,7 @@ class Order < ActiveRecord::Base
   #0 正常未进行  1 服务中  2 等待付款  3 已经付款  4 已结束  5已删除  6未分配工位 7 退单
   CASH =[STATUS[:NORMAL],STATUS[:SERVICING],STATUS[:WAIT_PAYMENT]]
   OVER_CASH = [STATUS[:BEEN_PAYMENT],STATUS[:FINISHED],STATUS[:RETURN]]
+  PRINT_CASH = [STATUS[:BEEN_PAYMENT],STATUS[:FINISHED]]
   IS_FREE = {:YES=>1,:NO=>0} # 1免单 0 不免单
   TYPES = {:SERVICE => 0, :PRODUCT => 1} #0 服务  1 产品
   FREE_TYPE = {:ORDER_FREE =>"免单",:PCARD =>"套餐卡使用"}

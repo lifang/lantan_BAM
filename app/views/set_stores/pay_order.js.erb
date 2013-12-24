@@ -1,8 +1,12 @@
 <%if @may_pay[0]%>
-  $("#cash_reload").html('<%= j(render :partial => "cash") %>');
-  $("#car_nums").html('<%= j(render :partial => "car_num") %>');
-  change_order(<%= params[:store_id] %>);
-  window.open('/stores/'+<%=params[:store_id]%>+'/set_stores/print_paper?c_id=<%=params[:customer_id]%>&n_id=<%=params[:car_num_id]%>','_blank', 'height=400,width=400,left=300,top=150');
+  <%if @orders.length > 0 %>
+    $("#cash_reload").html('<%= j(render :partial => "cash") %>');
+    $("#car_nums").html('<%= j(render :partial => "car_num") %>');
+    change_order(<%= params[:store_id] %>);
+  <%else%>
+    $("#tab_pay .close").trigger("onclick");
+  <%end%>
+  window.open('/stores/'+<%=params[:store_id]%>+'/set_stores/print_paper?c_id=<%=params[:customer_id]%>&n_id=<%=params[:car_num_id]%>','_blank','height=520,width=625,left=10,top=100');
 <%else%>
   tishi_alert("<%=@may_pay[1]%>");
 <%end%>
