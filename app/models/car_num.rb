@@ -5,8 +5,8 @@ class CarNum < ActiveRecord::Base
   has_many :reservations
 
   def self.get_customer_info_by_carnum(store_id, car_num)
-    sql = ["select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,c.sex,cn.buy_year year,
-      cn.distance distance, cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
+    sql = ["select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,c.property property,
+      c.sex,cn.buy_year year,cn.distance distance, cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
       from customer_num_relations cnr
       inner join car_nums cn on cn.id=cnr.car_num_id and cn.num= ?
       inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}

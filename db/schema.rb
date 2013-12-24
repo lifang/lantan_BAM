@@ -11,7 +11,8 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131218074907) do
+ActiveRecord::Schema.define(:version => 20131223090733) do
+
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -582,7 +583,7 @@ ActiveRecord::Schema.define(:version => 20131218074907) do
     t.integer  "cons_staff_id_1"
     t.integer  "cons_staff_id_2"
     t.integer  "station_id"
-    t.string   "sale_id"
+    t.integer  "sale_id"
     t.string   "c_pcard_relation_id"
     t.string   "c_svc_relation_id"
     t.boolean  "is_free"
@@ -1107,6 +1108,7 @@ ActiveRecord::Schema.define(:version => 20131218074907) do
     t.integer  "material_low"
     t.string   "code"
     t.integer  "edition_lv"
+    t.integer  "cash_auth",    :default => 0
     t.string   "limited_password"
   end
 

@@ -94,7 +94,8 @@ class OrderProdRelation < ActiveRecord::Base
                 :total_price => product.sale_price*p_num,
                 :t_price => product.t_price*p_num
               })
-            hash = Station.create_work_order(check_station[0], store_id,order, {}, check_station[2], product.cost_time*p_num)
+            arrange_time = Station.arrange_time(store_id,[p_id],order)          
+            hash = Station.create_work_order(arrange_time[0], store_id,order, {}, arrange_time[2], product.cost_time*p_num)
             order.update_attributes(hash)
             if !pmrs.blank?   #如果选择的服务是需要消耗物料的，则要将对应的物料库存减去
               pmrs.each do |p|
@@ -113,7 +114,7 @@ class OrderProdRelation < ActiveRecord::Base
       elsif product && !product.is_service   #如果是产品
         pmr = ProdMatRelation.find_by_product_id(product.id)
         m = Material.find_by_id(pmr.material_id) if pmr
-        if m && m.storage > p_num * pmr.material_num
+        if m && m.storage >= p_num * pmr.material_num
           m.update_attribute("storage", m.storage - p_num * pmr.material_num)
           order = Order.create({
               :code => MaterialOrder.material_order_code(store_id),

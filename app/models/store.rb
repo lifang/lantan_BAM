@@ -44,6 +44,7 @@ class Store < ActiveRecord::Base
   }
   EDITION_NAME = {:FACTUARL => 0} # 使用版  0
 
+  CASH_AUTH = {:NO => 0, :YES => 1} #是否有在pad上收银的权限
   def self.upload_img(img_url,store_id,pic_types,pics_size,img_code=nil)
     path = Constant::LOCAL_DIR
     dirs=["/#{pic_types}","/#{store_id}"]

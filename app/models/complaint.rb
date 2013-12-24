@@ -172,13 +172,14 @@ class Complaint < ActiveRecord::Base
     return Complaint.find_by_sql(sql)
   end
 
-  def self.mk_record store_id ,order_id,reason,request
-
-    #puts store_id ,order_id,reason,request
-    order  = Order.find_by_id order_id
-    complaint = Complaint.create(:order_id => order_id, :customer_id => order.customer_id, :reason => reason,
-      :suggestion => request, :status => STATUS[:UNTREATED], :store_id => store_id) if order
-    complaint
+  def self.mk_record(store_id ,order_id,reason,request,is_pleased)
+    Order.transaction do
+      order = Order.find_by_id order_id
+      order.update_attribute("is_pleased", is_pleased)
+      complaint = Complaint.create(:order_id => order_id, :customer_id => order.customer_id, :reason => reason,
+        :suggestion => request, :status => STATUS[:UNTREATED], :store_id => store_id) if order
+      complaint
+    end
   end
 
   def self.write_img(url,store_id,types,object_id)  #上传图片

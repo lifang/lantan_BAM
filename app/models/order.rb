@@ -140,7 +140,7 @@ class Order < ActiveRecord::Base
     #wo_status不在（2,3,4,5）o.status 在（0,1,2,3,4）
     return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status from orders o inner join car_nums c on c.id=o.car_num_id
       inner join customers cu on cu.id=o.customer_id left join work_orders wo on wo.order_id = o.id
-and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
+and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
       where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]})
       and DATE_FORMAT(o.created_at, '%Y%m%d')=DATE_FORMAT(NOW(), '%Y%m%d') and cu.status=? and o.store_id = ? order by o.status", Customer::STATUS[:NOMAL], store_id])
   end
@@ -573,49 +573,47 @@ and wo.status not in (#{WorkOrder::STAT[:WAIT_PAY]},#{WorkOrder::STAT[:COMPLETE]
     arr
   end
 
-  def self.get_sale_by_product(prod, prod_mat_num, total, sale_hash, prod_arr)
-
-    prod_arr.each{|p| p[:count] = p[:count]+1 if p[:id]==prod.id }
-    product_ids = prod_arr.map{|p| p[:id]}
-    unless product_ids.include?(prod.id)
-      product = Hash.new
-      product[:id] = prod.id
-      product[:name] = prod.name
-      product[:price] = prod.sale_price
-      product[:count] = 1
-      product[:num] = prod_mat_num if prod.is_service == false
-      prod_arr << product
-      total += product[:price]
-    end
-
-    #产品相关的活动
-    prod.sale_prod_relations.each{|r|
-      if r.sale and r.sale.status == Sale::STATUS[:RELEASE] and (r.sale.disc_time_types != Sale::DISC_TIME[:TIME] || (r.sale.disc_time_types == Sale::DISC_TIME[:TIME] and r.sale.ended_at > Time.now))
-        s = sale_hash[r.sale_id] ? sale_hash[r.sale_id] : Hash.new
-        s[:sale_id] = r.sale_id
-        s[:sale_name] =r.sale.name
-        if r.sale.disc_types == Sale::DISC_TYPES[:FEE]
-          s[:price] = r.sale.discount
-        elsif r.sale.disc_types == Sale::DISC_TYPES[:DIS]
-          s[:price] = sale_hash[r.sale_id] ? (s[:price].to_i + (prod.sale_price * (10 - r.sale.discount) / 10)) : (prod.sale_price * (10 - r.sale.discount) / 10)
+  def self.get_sale_by_product product, car_num_id
+    sales = []
+    sale_ids = SaleProdRelation.where(["product_id=?", product.id]).map(&:sale_id).uniq
+    sale_ids.each do |sid|
+      sale = Sale.find_by_id_and_status(sid, Sale::STATUS[:RELEASE])
+      flag = 0
+      if sale
+        #如果该活动的时间已经过了，则忽略
+        if sale.disc_time_types==Sale::DISC_TIME[:TIME] && !sale.ended_at.nil? && sale.ended_at.strftime("%Y-%m-%d") < Time.now.strftime("%Y-%m-%d")
+          flag = 1
+        else
+          #如果该活动的参加总次数满了或者这个车牌参加的次数也满了，则也忽略
+          all_len = Order.where(["status = ? and sale_id = ? and car_num_id != ?", Order::STATUS[:BEEN_PAYMENT], sale.id, car_num_id]).map(&:car_num_id).uniq.length
+          everycar_len = Order.where(["status = ? and car_num_id = ? and sale_id =?", Order::STATUS[:BEEN_PAYMENT], car_num_id, sale.id]).length
+          if all_len >= sale.car_num
+            flag = 1
+          elsif everycar_len >= sale.everycar_times
+            flag = 1
+          end
         end
-        s[:selected] = 1
-        s[:show_price] = 0.0#"-" + s[:price].to_s
-        s[:disc_types] = r.sale.disc_types
-        s[:discount] = r.sale.discount
-        s[:products] = []
-        sale_prod_relations = SaleProdRelation.find_by_sql(["select spr.product_id, spr.prod_num, p.name
+        if flag == 0
+          ha = {}
+          ha[:disc_types] = sale.disc_types
+          ha[:discount] = sale.disc_types == Sale::DISC_TYPES[:FEE] ? nil : sale.discount
+          ha[:price] = sale.disc_types == Sale::DISC_TYPES[:FEE] ? sale.discount : nil
+          ha[:sale_id] = sale.id
+          ha[:sale_name] = sale.name
+          ha[:selected] = 1
+          ha[:show_price] = 0
+          ha[:products] = []
+          sale_prod_relations = SaleProdRelation.find_by_sql(["select spr.product_id, spr.prod_num, p.name
                     from sale_prod_relations spr inner join products p
-                    on p.id = spr.product_id where spr.sale_id = ?", r.sale.id])
-        sale_prod_relations.each { |spr|
-          s[:products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
-        }
-        #sale_arr << s
-        #total -= s[:price] unless sale_hash[r.sale_id]
-        sale_hash[r.sale_id] = s
+                    on p.id = spr.product_id where spr.sale_id = ?", sale.id])
+          sale_prod_relations.each { |spr|
+            ha[:products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
+          }
+         sales << ha
+        end
       end
-    } if prod.sale_prod_relations
-    return [sale_hash, prod_arr, total]
+    end if sale_ids
+    return sales
   end
   
   #获取产品相关的活动，打折卡，套餐卡
