@@ -432,7 +432,15 @@ function set_confirm(store_id,c_id,n_id,t_data){
     })
 }
 
-function single_order_print(){
+function single_order_print(store_id){
     var print_nums = $(".di_list_l input[id*='print_']:checkbox:checked");
-    alert(print_nums.length);
+    if (print_nums.length <= 0){
+        tishi_alert("请选择打印订单");
+        return false;
+    }
+    if (print_nums.length >1){
+        tishi_alert("订单只能选择一个");
+        return false;
+    }
+   window.open("/stores/"+store_id+"/set_stores/single_print?order_id="+print_nums.val(),'_blank', 'height=520,width=625,left=10,top=100');
 }

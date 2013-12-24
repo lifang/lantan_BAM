@@ -14,8 +14,12 @@
           <div class="pingj">评价：<%= order.is_pleased.nil? ? "--" : Order::IS_PLEASED_NAME[order.is_pleased] %></div>
           <ul>
             <li>单号：<%= order.code %></li>
-            <li>付款方式：<%=  @pay_types[order.id].nil? ? "--"  :
-                @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v}"}.join(" ")  %></li>
+            <li>付款方式：<%=  if order.status == Order::STATUS[:RETURN]
+                "已退单"
+              else
+                @pay_types[order.id].nil? ? "--"  :
+                  @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v}"}.join("&nbsp&nbsp&nbsp").html_safe
+              end%></li>
           </ul>
         </div>
         <div class="merchant">
@@ -48,7 +52,7 @@
                   <td>0</td>
                   <td><%= prod.pro_num*prod.price %></td>
                 </tr>
-              <% end if @order_prods[order.id].any? %>
+              <% end if @order_prods[order.id] %>
             </tbody>
           </table>
           <div class="accounts">
