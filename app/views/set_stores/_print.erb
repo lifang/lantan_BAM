@@ -50,10 +50,14 @@
         <%@order_pays.each do |k,v|%>
           <p><span class="span1"><%=OrderPayType::PAY_TYPES_NAME[k]%>：</span><span class="prod_span3"><%=v%></span></p>
         <%end%>
+        <% if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH] %>
+          <p><span class="span1">实收：</span><span class="prod_span3"><%=@cash_pay.pay_cash.to_f%></span></p>
+          <p><span class="span1">找零：</span><span class="prod_span3"><%=@cash_pay.second_parm.to_f%></span></p>
+        <%end%>
       </div>
       <div class="solid"></div>
       <span class="time"><%=Time.now.strftime("%Y.%m.%d")%></span>
-      <button onclick="$(this).css('display','none');window.print()" style="float: right;">打印</button>
+      <button onclick="$(this).css('display','none');window.print();" style="float: right;">打印</button>
     </div>
   </body>
 

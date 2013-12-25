@@ -51,7 +51,6 @@ class SetStoresController < ApplicationController
   end
 
   def complete_pay
-
     start_time = params[:first].nil? || params[:first] == "" ? Time.now.at_beginning_of_day.strftime("%Y-%m-%d %H:%M") : Time.now.strftime("%Y-%m-%d")+" #{params[:first]}"
     end_time = params[:last].nil? || params[:last] == "" ? Time.now.end_of_day.strftime("%Y-%m-%d %H:%M") : Time.now.strftime("%Y-%m-%d")+" #{params[:last]}"
     orders = Order.joins([:car_num,:customer]).joins("left join work_orders w on w.order_id=orders.id").select("orders.*,
@@ -63,8 +62,9 @@ class SetStoresController < ApplicationController
     @orders = orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
     @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
-    @staffs = Staff.find((@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
-      hash[staff.id]=staff.name;hash}
+    staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
+    staff_ids.delete 0
+    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @stations = Station.find(@orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
   end
 
@@ -75,9 +75,10 @@ class SetStoresController < ApplicationController
     @order_prods = OrderProdRelation.order_products(orders.map(&:id))
     @orders = orders.group_by{|i|{:c_name=>i.c_name,:c_num=>i.c_num,:tel=>i.mobilephone,:g_name=>i.group_name,:c_id=>i.c_id,:n_id=>i.n_id} }
     @order_pays = OrderPayType.search_pay_order(orders.map(&:id))
-    @staffs = Staff.find((orders.map(&:cons_staff_id_1)|orders.map(&:cons_staff_id_2)|orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
-      hash[staff.id]=staff.name;hash}
-    @stations =Station.find(orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
+    staff_ids = (orders.map(&:cons_staff_id_1)|orders.map(&:cons_staff_id_2)|orders.map(&:front_staff_id)).compact.uniq
+    staff_ids.delete 0
+    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @stations = Station.find(orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
   end
 
   def load_order
@@ -114,12 +115,15 @@ class SetStoresController < ApplicationController
     @store = Store.find params[:store_id]
     @customer = Customer.find params[:c_id]
     @car_num = CarNum.find params[:n_id]
-    @orders = Order.select("orders.*").where(:status=>Order::PRINT_CASH,:store_id=>params[:store_id],:customer_id=>@customer.id,
-      :car_num_id=>@car_num.id).order("orders.created_at desc").where("date_format(orders.created_at,'%Y-%m-%d')='#{Time.now.strftime("%Y-%m-%d")}'")
-    @staffs = Staff.find((@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id))).inject(Hash.new){|hash,staff|
-      hash[staff.id]=staff.name;hash}
+    @orders = Order.where(:id=>params[:o_id].split(','))
+    staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
+    staff_ids.delete 0
+    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
     @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
+    if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH]
+      @cash_pay =OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
+    end
   end
 
   def single_print
@@ -128,8 +132,9 @@ class SetStoresController < ApplicationController
     order = @orders.first
     @customer = Customer.find order.customer_id
     @car_num = CarNum.find order.car_num_id
-    @staffs = Staff.find([order.cons_staff_id_1,order.cons_staff_id_2,order.front_staff_id]).inject(Hash.new){|hash,staff|
-      hash[staff.id]=staff.name;hash}
+    staff_ids = [order.cons_staff_id_1,order.cons_staff_id_2,order.front_staff_id].compact.uniq
+    staff_ids.delete 0
+    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(order.id)
     @order_pays = OrderPayType.search_pay_types(order.id)
   end
