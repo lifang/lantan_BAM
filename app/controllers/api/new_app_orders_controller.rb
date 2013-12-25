@@ -210,6 +210,7 @@ class Api::NewAppOrdersController < ApplicationController
     Customer.transaction do
       customer = CarNum.get_customer_info_by_carnum(params[:store_id], params[:num])
       is_new_cus = 0
+      prod_type = 0
       if customer.nil?
         #如果是新的车牌，则要创建一个空白的客户和车牌，以及客户-门店、客户-车牌关联记录
         customer = Customer.create(:status => Customer::STATUS[:NOMAL], :property => Customer::PROPERTY[:PERSONAL],
@@ -238,6 +239,9 @@ class Api::NewAppOrdersController < ApplicationController
         msg = create_result[1]
         product = create_result[2]
         order = create_result[3]
+        if product.is_service
+          prod_type = 1
+        end
         #获取所有该产品相关的活动
         s = Order.get_sale_by_product(product, order.car_num_id) if product and order
         sales = s
@@ -279,6 +283,7 @@ class Api::NewAppOrdersController < ApplicationController
               sv_cards << {:svid => card.id, :svname => card.name, :svprice => card.price, :svtype => card.types, :is_new => 1,
                 :show_price => card.price, :products => arr}
             elsif pram_str[3].to_i ==1  #如果是储值卡
+              prod_type = 2
               money = card.svcard_prod_relations.first
               CSvcRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id,
                 :sv_card_id => card.id, :order_id => order.id, :status => CSvcRelation::STATUS[:invalid],
@@ -350,7 +355,8 @@ class Api::NewAppOrdersController < ApplicationController
       end
       work_orders = working_orders params[:store_id]
       render :json => {:status => status, :order_infos => order_infos, :orders => work_orders, :msg => msg, :product => p, :sales => sales,
-        :sv_cards => sv_cards, :p_cards => p_cards, :save_cards => save_cards.nil? ? [] : save_cards, :car_info => capital_arr}
+        :sv_cards => sv_cards, :p_cards => p_cards, :save_cards => save_cards.nil? ? [] : save_cards, :car_info => capital_arr,
+        :prod_type => prod_type}
     end
   end
 
@@ -409,7 +415,7 @@ class Api::NewAppOrdersController < ApplicationController
           customer = Customer.find_by_id(o["customer_id"].to_i)
           customer.update_attributes(:name => o["userName"].nil? ? nil : o["userName"].strip, :mobilephone => o["phone"].nil? ? nil : o["phone"].strip,
             :birthday => o["birth"].nil? ||o["birth"].strip=="" ? nil :o["birth"], :sex => o["sex"].to_i,
-          :property => o["cproperty"].to_i, :group_name => o["cproperty"].to_i==0 ? nil : o["cgroup_name"])
+            :property => o["cproperty"].to_i, :group_name => o["cproperty"].to_i==0 ? nil : o["cgroup_name"])
           car_num = CarNum.find_by_id(o["car_num_id"].to_i)
           car_num.update_attributes(:car_model_id => o["brand"].nil? || o["brand"].split("_")[1].nil? ? nil : o["brand"].split("_")[1].to_i,
             :buy_year => o["year"], :distance => o["cdistance"].nil? ? nil : o["cdistance"].to_i)
@@ -714,6 +720,7 @@ class Api::NewAppOrdersController < ApplicationController
         sales = []
         opname = []
         p = []
+        prod_type = 0
         if oprs.any? #如果该订单购买的是产品或者服务
           #该用户所购买的打折卡及其所支持的产品或服务
           sv_cards = CSvcRelation.get_customer_discount_cards(customer.id,store_id)
@@ -724,6 +731,9 @@ class Api::NewAppOrdersController < ApplicationController
             sc = CSvcRelation.get_customer_supposed_save_cards(customer.id, store_id,opr.product_id)
             save_cards << sc
             product = Product.find_by_id(opr.product_id)
+            if product.is_service
+              prod_type = 1
+            end
             unless product.nil?
               p << {:id => product.id, :name => product.name, :count => opr.pro_num,
                 :price => product.sale_price, :show_price => product.sale_price* opr.pro_num}
@@ -753,6 +763,7 @@ class Api::NewAppOrdersController < ApplicationController
             sv_cards << {:csrid => opcsvc.id, :svid => card.id, :svname => card.name, :svprice => card.price, :svtype => card.types, :is_new => 1,
               :show_price => card.price, :products => a}
           elsif  card && card.types == SvCard::FAVOR[:SAVE]
+            prod_type = 2
             item = SvcardProdRelation.where(["sv_card_id = ? ", card.id]).first
             arr = []
             item.category_id.split(",").each do |i|
@@ -796,7 +807,7 @@ class Api::NewAppOrdersController < ApplicationController
           :oplease => order.nil? ? nil : order.is_pleased,
           :opname => opname.join(",")
         }
-        render :json => {:status => status, :msg => msg, :order_infos => order_infos,  :product => p,
+        render :json => {:status => status, :msg => msg, :order_infos => order_infos,  :product => p, :prod_type => prod_type,
           :sales => sales, :sv_cards => sv_cards, :p_cards => p_cards, :save_cards => save_cards, :car_info => capital_arr}
       end
     end
@@ -836,7 +847,7 @@ class Api::NewAppOrdersController < ApplicationController
       else
         customer.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip,
           :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
-        :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
+          :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
       end
       order = Order.find_by_id(params[:order_id].to_i)
       order.update_attribute("customer_id", customer.id)
@@ -984,6 +995,8 @@ class Api::NewAppOrdersController < ApplicationController
               deduct_price = deduct_price + (pcard.deduct_price+pcard.deduct_percent)
               cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", customer.id,
                   pid, CPcardRelation::STATUS[:INVALID], order.id]).first
+                  p "****************"
+              p cpr
               cpr_content = cpr.content.split(",")
               a = []
               (cpr_content ||[]).each do |cc|
@@ -1020,6 +1033,30 @@ class Api::NewAppOrdersController < ApplicationController
     end
   end
 
+  #当购买储值卡，但pad没有收银权限的时候，调用该接口设置储值卡密码
+  def no_auth_set_pwd
+    CSvcRelation.transaction do
+      status = 1
+      msg = ""
+      oid = params[:order_id].to_i
+      cid = params[:customer_id].to_i
+      sid = params[:svid].to_i
+      csr = CSvcRelation.find_by_customer_id_and_sv_card_id_and_order_id(cid, sid, oid)
+      if csr.nil?
+        status = 0
+        msg = "数据错误!"
+      else
+        password = params[:password]
+        if password.nil? || password.strip == ""
+          status = 0
+          msg = "请输入正确的密码!"
+        else
+          csr.update_attribute("password",  Digest::MD5.hexdigest(password.strip))
+        end
+      end
+      render :json => {:status => status, :msg => msg}
+    end
+  end
   #取消订单
   def cancel_order
     Order.transaction do
