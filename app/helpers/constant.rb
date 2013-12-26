@@ -199,6 +199,10 @@ module Constant
   
   SERVER_PATH = "http://192.168.0.250:3001"
   HEAD_OFFICE_API_PATH = "http://192.168.0.250:3002"
+  #   SERVER_PATH = "http://bam.gankao.co"
+  #  #  SERVER_PATH = "http://192.168.1.100:3001"
+  #  HEAD_OFFICE_API_PATH = "http://116.255.135.175:3005/"
+  #  #  HEAD_OFFICE_API_PATH = "http://192.168.1.100:3002/"
 
   HEAD_OFFICE = HEAD_OFFICE_API_PATH + "syncs/upload_file"
   HEAD_OFFICE_REQUEST_ZIP = HEAD_OFFICE_API_PATH + "syncs/is_generate_zip"

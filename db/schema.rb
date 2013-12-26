@@ -13,7 +13,6 @@
 
 ActiveRecord::Schema.define(:version => 20131223090733) do
 
-
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
     t.integer  "material_num"
@@ -1108,8 +1107,8 @@ ActiveRecord::Schema.define(:version => 20131223090733) do
     t.integer  "material_low"
     t.string   "code"
     t.integer  "edition_lv"
-    t.integer  "cash_auth",    :default => 0
     t.string   "limited_password"
+    t.integer  "cash_auth",        :default => 0
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"
