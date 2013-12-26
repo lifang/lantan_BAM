@@ -911,8 +911,8 @@ class Api::NewAppOrdersController < ApplicationController
           if prod.split("_")[0].to_i==0 #如果有产品
             arr = prod.split("_")
             product = Product.find_by_id(arr[1].to_i)
-            deduct_price = deduct_price + (product.deduct_price+product.deduct_percent) * arr[2].to_i
-            techin_price = techin_price + (product.techin_price+product.techin_percent) * arr[2].to_i
+            deduct_price = deduct_price + (product.deduct_price.to_f + product.deduct_percent.to_f) * arr[2].to_i
+            techin_price = techin_price + (product.techin_price.to_f + product.techin_percent.to_f) * arr[2].to_i
           elsif prod.split("_")[0].to_i==1 #如果有活动   [1,47,255=20]
             arr = prod.split("_")
             sale_id = arr[1].to_i  #[1,47,255=20]
@@ -993,7 +993,7 @@ class Api::NewAppOrdersController < ApplicationController
               pmr = PcardMaterialRelation.find_by_package_card_id(pid)
               material = Material.find_by_id(pmr.material_id) if pmr
               material.update_attribute("storage", material.storage - pmr.material_num) if material
-              deduct_price = deduct_price + (pcard.deduct_price+pcard.deduct_percent)
+              deduct_price = deduct_price + (pcard.deduct_price.to_f + pcard.deduct_percent.to_f)
               cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", ocid,
                   pid, CPcardRelation::STATUS[:INVALID], order.id]).first
               cpr_content = cpr.content.split(",")
