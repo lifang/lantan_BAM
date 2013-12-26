@@ -173,7 +173,7 @@ class OrderPayType < ActiveRecord::Base
               end
             end
             SvcardUseRecord.import sv_used, :timestamps=>true unless sv_used.blank?
-            CPcardRelation.where(:customer_id=>params[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID])
+            CPcardRelation.where(:customer_id=>params[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]
           end
         end
       end
