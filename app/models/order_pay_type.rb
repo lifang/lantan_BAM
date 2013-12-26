@@ -164,7 +164,7 @@ class OrderPayType < ActiveRecord::Base
               end
             end
             #新买储值卡但是未使用  新买打折卡  更新状态
-            csvs = CSvcRelation.joins(:sv_card).select("*").where([:customer_id=>params[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid]])
+            csvs = CSvcRelation.joins(:sv_card).select("*").where(:customer_id=>params[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid])
             csvs.update_all :status => CSvcRelation::STATUS[:valid], :is_billing => is_billing
             sv_used = []
             csvs.each do |csr|   #如果是新买储值卡则生成使用记录
@@ -173,6 +173,7 @@ class OrderPayType < ActiveRecord::Base
               end
             end
             SvcardUseRecord.import sv_used, :timestamps=>true unless sv_used.blank?
+            CPcardRelation.where(:customer_id=>params[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID])
           end
         end
       end
