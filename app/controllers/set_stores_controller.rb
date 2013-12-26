@@ -94,7 +94,7 @@ class SetStoresController < ApplicationController
       hash[c.id]=c.name;hash}
     @sv_card = []
     unless prod_ids.blank?
-     sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:customer_id=>@customer.id,:"sv_cards.types" => SvCard::FAVOR[:SAVE]).where("
+      sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:customer_id=>@customer.id,:"sv_cards.types" => SvCard::FAVOR[:SAVE]).where("
       c_svc_relations.status=#{CSvcRelation::STATUS[:valid]} or order_id in (#{@orders.map(&:id).join(',')})").select("c_svc_relations.*,sv_cards.name,
       sv_cards.store_id,svcard_prod_relations.category_id ci,c_svc_relations.status sa,order_id o_id").where("sv_cards.store_id=#{params[:store_id]}")
       sv_cards.each do |sv|
@@ -123,7 +123,7 @@ class SetStoresController < ApplicationController
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
-    @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
+    p @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
     if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH]
       @cash_pay =OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
     end
