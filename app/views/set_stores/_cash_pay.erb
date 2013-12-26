@@ -11,6 +11,7 @@
           <span>客户属性：</span>个人客户
         <%end%>
       </li>
+      <li><input type="checkbox" id="is_biling">发票</input></li>
     </ul>
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
       <thead>
@@ -30,8 +31,9 @@
         <% @orders.each do |order| %>
           <tr>
             <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id]  %>
+            <%  fact = order.price>loss ? order.price-loss : 0%>
             <td style="display: none" id="return_order_<%=order.id%>">
-              <input type="hidden" value="<%=  order.price-loss %>" id="loss_<%= order.id %>" />
+              <input type="hidden" value="<%= fact  %>" id="loss_<%= order.id %>" />
               <input type="checkbox" id="l_<%=order.id%>" onclick="return_check(this)" />
             </td>
             <td><%= order.code %></td>
@@ -45,9 +47,9 @@
               <td><%= "--" %></td>
               <td><%= "--" %></td>
             <%end%>
-            <td><%=  order.price %></td>
+            <td><%= order.price %></td>
             <td><%= loss %></td>
-            <td><%= order.price-loss %></td>
+            <td><%= fact %></td>
             <td style="display: none" id="input_<%= order.id %>">
               <input type="text" value="0" id="in_<%= order.id %>" size="5px" onblur="set_reward(this)"/>
               <input type="hidden" value="0" id="hipay_<%=order.id%>" /></td>
@@ -59,10 +61,10 @@
 </div>
 <div id="sv_card_used">
   <% @sv_card.each do |card| %>
-    <div class="accountsTab_pay">
+    <div class="accountsTab_pay" >
       <div class="accountsTab_pay_title"><h3>储值卡</h3><span class="pay_span"><%=card.name%></span>
         <div>
-          <span style="float: left;margin-left: 60px;">
+          <span style="float: left;margin-left: 60px;"  id="<%=card.order_id%>_<%=card.id%>">
             <input id="radio_<%= card.id %>" type="checkbox"  onclick="check_sum(<%= card.id %>,this)" class="pay_check" />使用此卡支付</span>
           <span style="float: right;">
             <%  cas = card.ci.split(',').inject(Array.new){|arr,c|arr << @cates[c.to_i]}%>
@@ -85,14 +87,15 @@
   <ul>
     <%total = @orders.map(&:price).inject(0){|sum,num|sum+num} %>
     <%reward = @order_pays.select{|k,v| @orders.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
-    <li>应付金额：<span id="due_pay"><%= (total - reward).to_i%></span>
-      <span id="hidden_pay" style="display:none"><%=(total - reward).to_i%></span>
+    <% fact_fee = total > reward ? (total-reward).to_i : 0 %>
+    <li>应付金额：<span id="due_pay"><%= fact_fee%></span>
+      <span id="hidden_pay" style="display:none"><%=fact_fee%></span>
       <span style="float: right"><input id="clear_per" type="checkbox"  onclick="change_pay(this)"
-                                        <%if (total - reward).to_i <=10 %> disabled <%end%> />抹零</span>
+                                        <%if fact_fee <=10 %> disabled <%end%> />抹零</span>
       <input type="hidden" value="0" id="clear_value" />
     </li>
     <li>付款总计：<span id="total_pay"><%=0%></span></li>
-    <li>待付金额：<span id="left_pay"><%=(total - reward).to_i%></span></li>
+    <li>待付金额：<span id="left_pay"><%=fact_fee%></span></li>
     <li><a href="javascript:void(0)" class="deal_money_btn" id="due_over" onclick="check_post(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)" style="display: none">可以结账</a></li>
   </ul>
 </div>

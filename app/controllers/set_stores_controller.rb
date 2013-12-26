@@ -94,9 +94,9 @@ class SetStoresController < ApplicationController
       hash[c.id]=c.name;hash}
     @sv_card = []
     unless prod_ids.blank?
-     sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:customer_id=>@customer.id).where("sc_card.types = #{SvCard::FAVOR[:SAVE]}").where("
+     sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:customer_id=>@customer.id,:"sv_cards.types" => SvCard::FAVOR[:SAVE]).where("
       c_svc_relations.status=#{CSvcRelation::STATUS[:valid]} or order_id in (#{@orders.map(&:id).join(',')})").select("c_svc_relations.*,sv_cards.name,
-      sv_cards.store_id,svcard_prod_relations.category_id ci,c_svc_relations.status sa").where("sv_cards.store_id=#{params[:store_id]}")
+      sv_cards.store_id,svcard_prod_relations.category_id ci,c_svc_relations.status sa,order_id o_id").where("sv_cards.store_id=#{params[:store_id]}")
       sv_cards.each do |sv|
         prod_ids.each do |ca|
           if sv.ci  and sv.ci.split(",").include? "#{ca}"
