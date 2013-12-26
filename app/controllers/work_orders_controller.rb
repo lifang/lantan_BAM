@@ -103,7 +103,26 @@ class WorkOrdersController < ApplicationController
     else
       current_info[:station_infos] = nil
     end
+    #查出所有总部的有效的活动
+#    hs = Sale.find_by_sql(["SELECT s.img_url from lantan_store.sales s where s.status=? and
+#       ((s.disc_time_types in (?)) or (s.disc_time_types=? and DATE_FORMAT(s.ended_at,'%Y-%m-%d')>=DATE_FORMAT(NOW(),'%Y-%m-%d')))#",
+#        Sale::STATUS[:RELEASE],[Sale::DISC_TIME[:DAY], Sale::DISC_TIME[:MONTH], Sale::DISC_TIME[:YEAR], Sale::DISC_TIME[:WEEK]],
+#        Sale::DISC_TIME[:TIME]])
+#    head_sales = hs.inject([]){|h, s|
+#      h << Constant::HEAD_OFFICE_API_PATH + s.img_url if s.img_url and s.img_url.strip != "";
+#      h
+#    }
+    ls = Sale.find_by_sql(["SELECT s.img_url from sales s where s.status=? and s.store_id=? and
+       ((s.disc_time_types in (?)) or (s.disc_time_types=? and DATE_FORMAT(s.ended_at,'%Y-%m-%d')>=DATE_FORMAT(NOW(),'%Y-%m-%d')))",
+        Sale::STATUS[:RELEASE],params[:store_id].to_i,[Sale::DISC_TIME[:DAY], Sale::DISC_TIME[:MONTH], Sale::DISC_TIME[:YEAR], Sale::DISC_TIME[:WEEK]],
+        Sale::DISC_TIME[:TIME]])
+    local_sales = ls.inject([]){|h, s|
+      h << Constant::SERVER_PATH + s.img_url if s.img_url and s.img_url.strip != "";
+      h
+    }
     current_info[:no_station_wos] = Order.joins(:work_orders).where("work_orders.current_day =? and work_orders.store_id = ? and work_orders.status != ? and work_orders.station_id is null", now_date, params[:store_id], WorkOrder::STAT[:CANCELED]).map(&:car_num).map(&:num).uniq
+    #current_info[:head_sales] = head_sales
+    current_info[:local_sales] = local_sales
     render :json => current_info
   end# work_orders_status 方法结束标记
 
