@@ -246,12 +246,22 @@ class Api::NewAppOrdersController < ApplicationController
         s = Order.get_sale_by_product(product, order.car_num_id) if product and order
         sales = s
       else  #如果选的是卡类
+        prod_type = 2
         if pram_str[3].to_i == 0 || pram_str[3].to_i == 1    #如果选的是打折卡或储值卡
           card = SvCard.find_by_id(pram_str[0].to_i)
         else
           card = PackageCard.find_by_id(pram_str[0].to_i)
+          pmrs = PcardMaterialRelation.find_by_sql(["select pmr.material_num mnum, m.storage storage from pcard_material_relations
+                 pmr inner join materials m on pmr.material_id=m.id where pmr.package_card_id=?", card.id])
+          pmrs.each do |pmr|
+            if pmr.mnum > pmr.storage
+              status = 0
+              msg = "您购买的套餐卡所需的物料库存不足!"
+              break
+            end
+          end if pmrs
         end
-        if card
+        if card && status == 1
           order = Order.create({
               :code => MaterialOrder.material_order_code(params[:store_id].to_i),
               :car_num_id => is_new_cus==0 ? customer.car_num_id : car_num.id,
@@ -283,7 +293,6 @@ class Api::NewAppOrdersController < ApplicationController
               sv_cards << {:svid => card.id, :svname => card.name, :svprice => card.price, :svtype => card.types, :is_new => 1,
                 :show_price => card.price, :products => arr}
             elsif pram_str[3].to_i ==1  #如果是储值卡
-              prod_type = 2
               money = card.svcard_prod_relations.first
               CSvcRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id,
                 :sv_card_id => card.id, :order_id => order.id, :status => CSvcRelation::STATUS[:invalid],
@@ -300,7 +309,7 @@ class Api::NewAppOrdersController < ApplicationController
               sv_cards << {:svid => card.id, :svname => card.name, :svprice => card.price, :svtype => card.types, :is_new => 1,
                 :show_price => card.price, :products => arr}
             end
-          elsif pram_str[3].to_i == 2 #如果是选的套餐卡，则要把这个套餐卡加到该客户p_cards中
+          elsif pram_str[3].to_i == 2 #如果是选的套餐卡，则要把这个套餐卡加到该客户p_cards中,并且扣除该套餐卡对应的物料(如果有的话)
             pitems = PcardProdRelation.find_by_sql(["select ppr.product_num num, p.name name,p.id id, p.sale_price sale_price
              from pcard_prod_relations ppr inner join products p on ppr.product_id=p.id where ppr.package_card_id=?", card.id])
             pstr = ""
@@ -312,9 +321,12 @@ class Api::NewAppOrdersController < ApplicationController
             end
             pstr = b.join(",")
             ended_at = card.date_types==PackageCard::TIME_SELCTED[:PERIOD] ? card.ended_at : Time.now + card.date_month.to_i.days
-            CPcardRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id, 
+            CPcardRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id,
               :package_card_id => card.id, :ended_at => ended_at, :status => CPcardRelation::STATUS[:INVALID], :content => pstr,
               :price => card.price, :order_id => order.id)
+            pmr = PcardMaterialRelation.find_by_package_card_id(card.id)
+            material = Material.find_by_id(pmr.material_id) if pmr
+            material.update_attribute("storage", material.storage - pmr.material_num) if material
             p_cards << {:pid => card.id, :pname => card.name, :pprice => card.price, :ptype => 2, :is_new => 1,
               :show_price => card.price, :products => c}
           end
@@ -327,7 +339,6 @@ class Api::NewAppOrdersController < ApplicationController
       if status==1
         #获取所有的车品牌/型号
         capital_arr = status==0 ? [] : Capital.get_all_brands_and_models
-
         order_infos = {
           :cid => is_new_cus==0 ? customer.customer_id : customer.id,
           :cname => is_new_cus==0 ? customer.name : nil,
@@ -544,87 +555,6 @@ class Api::NewAppOrdersController < ApplicationController
     end
   end
 
-  #以前的make_order接口
-  def make_order
-    #参数num(car_num||phone), is_car_num(标志是否是车牌号)，service_id, store_id, user_id
-    hash = {}
-    status = 1
-    car_num = nil
-    customer = nil
-    phone_flag = false
-    if params[:is_car_num]=="1"
-      customer = CarNum.get_customer_info_by_carnum(params[:store_id], params[:num])
-    else
-      customers = Customer.find_by_sql(["select distinct cu.id customer_id, cu.name name, cn.num car_num from customers cu
-        inner join customer_num_relations cnr on cu.id=cnr.customer_id inner join customer_store_relations csr on csr.customer_id = cu.id
-        inner join car_nums cn on cn.id=cnr.car_num_id where csr.store_id in (?) and cu.mobilephone = ? and cu.status= ? ",
-          StoreChainsRelation.return_chain_stores(params[:store_id]), params[:num].strip,Customer::STATUS[:NOMAL] ])
-      customer = customers[0]
-      if customers.length == 1
-        phone_flag = true
-      end
-      status = customers.length > 1 ? 5 : 1
-    end
-
-    if status == 5 #多个车牌
-      render :json => {:status => status, :car_nums => customers.map(&:car_num)}
-    else
-      if customer.blank?
-        Customer.transaction do
-          customer = Customer.create({:name => params[:num], :mobilephone => params[:num]})
-          car_num = CarNum.create(:num => params[:num])
-          customer.customer_num_relations.create({:customer_id => customer.id, :car_num_id => car_num.id})
-          relation = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id], customer.id)
-          customer.customer_store_relations.create({:customer_id => customer.id, :store_id => params[:store_id]}) unless relation
-          customer.save
-        end
-      else
-        if phone_flag
-          car_num = CarNum.find_by_sql("select cn.id from car_nums cn inner join customer_num_relations cnr on cnr.car_num_id=cn.id where cnr.customer_id = #{customer.customer_id}")[0]
-        else
-          car_num = CarNum.find_by_num(params[:num])
-        end
-      end
-
-      Order.transaction do
-        service = Product.find_by_id_and_status(params[:service_id], Product::IS_VALIDATE[:YES])
-
-        order = Order.create({
-            :code => MaterialOrder.material_order_code(params[:store_id].to_i),
-            :car_num_id => car_num.try(:id),
-            :status => Order::STATUS[:NORMAL],
-            :price => service.try(:sale_price),
-            :is_billing => false,
-            :front_staff_id => params[:user_id],
-            :customer_id => customer.id || customer.customer_id,
-            :store_id => params[:store_id],
-            :is_visited => Order::IS_VISITED[:NO],
-            :types => Order::TYPES[:SERVICE]
-          })
-
-        status = Product.return_station_status([service.id], params[:store_id], nil, order)[0] # 1 有符合工位 2 没工位 3 多个工位 4 工位上暂无技师
-
-        if status != 1
-          order.destroy
-        else
-          station_id = Product.return_station_status([service.id], params[:store_id], nil, order)[2]
-
-          work_order_status = Product.return_station_status([service.id], params[:store_id], nil, order)[3]
-          hash = Station.create_work_order(station_id, params[:store_id],order, hash, work_order_status,service.cost_time.to_i)
-          if order.update_attributes hash
-            status = 1
-            OrderProdRelation.create(:order_id => order.id, :product_id => service.id,
-              :pro_num => 1, :price => service.sale_price, :t_price => service.t_price, :total_price => service.sale_price.to_f)
-          end
-        end
-
-        #再次返回orders
-        work_orders = working_orders params[:store_id]
-        render :json => {:status => status, :orders => work_orders}
-      end
-    end
-
-  end
   #根据实际情况调换工位
   def change_station
     #参数 "(work_order_id)_(station_id),(work_order_id)_(station_id)", store_id
@@ -864,13 +794,14 @@ class Api::NewAppOrdersController < ApplicationController
         customer_savecard = CSvcRelation.find_by_id(params[:csrid].to_i)
         if customer_savecard
           if customer_savecard.password==Digest::MD5.hexdigest(params[:password].strip)
-            if customer_savecard.left_price > total_price
+            if customer_savecard.left_price >= total_price
               SvcardUseRecord.create(:c_svc_relation_id => customer_savecard.id, :types => SvcardUseRecord::TYPES[:OUT],
                 :use_price => total_price, :left_price => customer_savecard.left_price - total_price)
               customer_savecard.update_attribute("left_price", customer_savecard.left_price - total_price)
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD], :price => total_price)
             else
               status = 0
+              msg = "余额不足!"
             end
           else
             status = 0
@@ -884,23 +815,7 @@ class Api::NewAppOrdersController < ApplicationController
         OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:IS_FREE], :price => total_price)
       end
       prods = params[:prods].split(",") #[0_255_2_200, 1_47_255=20, 2_322_0_0_16=200_128, 3_111_0_16=2_147]
-      prods.each do |prod|
-        if prod.split("_")[0].to_i==3
-          arr = prod.split("_")
-          if arr[2].to_i==1  #如果用户买了新的套餐卡，则要判断该卡需不需要消耗物料，并且该物料库存是否足够
-            pid = arr[1].to_i
-            pmrs = PcardMaterialRelation.find_by_sql(["select pmr.material_num mnum, m.storage storage from pcard_material_relations
-                 pmr inner join materials m on pmr.material_id=m.id where pmr.package_card_id=?", pid])
-            pmrs.each do |pmr|
-              if pmr.mnum > pmr.storage
-                status = 0
-                msg = "您购买的套餐卡所需的物料库存不足!"
-                break
-              end
-            end if pmrs
-          end
-        end
-      end
+      
       if status==1
         c_pcard_relation_id = []
         c_svc_relation_id = []
@@ -988,11 +903,8 @@ class Api::NewAppOrdersController < ApplicationController
               end
               cpr.update_attribute("content", a.join(","))
               c_pcard_relation_id << cpr.id
-            elsif arr[2].to_i==1  #如果是用户刚买的套餐卡，则要扣掉刚买的产品，并且生成客户-套餐卡关系,且扣除该套餐卡对应的物料数量(如果有对应的物料的话)
-              pcard = PackageCard.find_by_id(pid)
-              pmr = PcardMaterialRelation.find_by_package_card_id(pid)
-              material = Material.find_by_id(pmr.material_id) if pmr
-              material.update_attribute("storage", material.storage - pmr.material_num) if material
+            elsif arr[2].to_i==1  #如果是用户刚买的套餐卡，则要扣掉刚买的产品，并且更新客户-套餐卡关系
+              pcard = PackageCard.find_by_id(pid)              
               deduct_price = deduct_price + (pcard.deduct_price.to_f + pcard.deduct_percent.to_f)
               cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", ocid,
                   pid, CPcardRelation::STATUS[:INVALID], order.id]).first
@@ -1032,30 +944,188 @@ class Api::NewAppOrdersController < ApplicationController
     end
   end
 
-  #当购买储值卡，但pad没有收银权限的时候，调用该接口设置储值卡密码
-  def no_auth_set_pwd
-    CSvcRelation.transaction do
-      status = 1
-      msg = ""
-      oid = params[:order_id].to_i
-      cid = params[:customer_id].to_i
-      sid = params[:svid].to_i
-      csr = CSvcRelation.find_by_customer_id_and_sv_card_id_and_order_id(cid, sid, oid)
-      if csr.nil?
-        status = 0
-        msg = "数据错误!"
+  #当pad没有权限付款时，点击确定按钮到此action
+  def pay_order_no_auth
+    Customer.transaction do
+      customer = Customer.find_by_id(params[:customer_id].to_i)
+      ocid = customer.id
+      car_num = CarNum.find_by_id(params[:car_num_id].to_i)
+      car_num.update_attributes(:car_model_id => params[:brand].nil? || params[:brand].split("_")[1].nil? ? nil : params[:brand].split("_")[1].to_i,
+        :buy_year => params[:year], :distance => params[:cdistance].nil? ? nil : params[:cdistance].to_i)
+      if customer.mobilephone != params[:phone] #如果输入的电话号码不是该客户的电话号码
+        customer2 = Customer.find_by_mobilephone_and_status(params[:phone], Customer::STATUS[:NOMAL])
+        if customer2.nil? #如果该电话号码没有被用过,则更新该客户信息
+          customer.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip, :mobilephone => params[:phone].nil? ? nil : params[:phone].strip,
+            :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
+            :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
+        else  #如果该电话号码已被用，则查出这个客户，并且把这个车牌关联到这个客户下，并且删除原来的客户
+          customer2.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip,
+            :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
+            :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
+          cnr2 = CustomerNumRelation.find_by_customer_id_and_car_num_id(customer2.id, car_num.id)
+          if cnr2.nil?
+            CustomerNumRelation.create(:customer_id => customer2.id, :car_num_id => car_num.id)
+          end
+          CustomerNumRelation.delete_all(:customer_id => customer.id, :car_num_id => car_num.id)
+          customer.destroy
+          customer = customer2
+        end
       else
-        password = params[:password]
-        if password.nil? || password.strip == ""
-          status = 0
-          msg = "请输入正确的密码!"
-        else
-          csr.update_attribute("password",  Digest::MD5.hexdigest(password.strip))
+        customer.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip,
+          :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
+          :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
+      end
+      order = Order.find_by_id(params[:order_id].to_i)
+      order.update_attribute("customer_id", customer.id)
+      total_price = params[:total_price].to_f
+      is_billing = 1
+      is_pleased = params[:is_please].to_i
+      status = 1
+      msg = "付款成功!"
+      prods = params[:prods].split(",") #[0_255_2_200, 1_47_255=20, 2_322_0_0_16=200_128, 3_111_0_16=2_147]
+      prods.each do |prod|
+        if prod.split("_")[0].to_i==3
+          arr = prod.split("_")
+          if arr[2].to_i==1  #如果用户买了新的套餐卡，则要判断该卡需不需要消耗物料，并且该物料库存是否足够
+            pid = arr[1].to_i
+            pmrs = PcardMaterialRelation.find_by_sql(["select pmr.material_num mnum, m.storage storage from pcard_material_relations
+                 pmr inner join materials m on pmr.material_id=m.id where pmr.package_card_id=?", pid])
+            pmrs.each do |pmr|
+              if pmr.mnum > pmr.storage
+                status = 0
+                msg = "您购买的套餐卡所需的物料库存不足!"
+                break
+              end
+            end if pmrs
+          end
         end
       end
-      render :json => {:status => status, :msg => msg}
+      if status==1
+        c_pcard_relation_id = []
+        c_svc_relation_id = []
+        deduct_price = 0
+        techin_price = 0
+        sale_id = 0
+        prods.each do |prod|  #1_47_255=20
+          if prod.split("_")[0].to_i==0 #如果有产品
+            arr = prod.split("_")
+            product = Product.find_by_id(arr[1].to_i)
+            deduct_price = deduct_price + (product.deduct_price.to_f + product.deduct_percent.to_f) * arr[2].to_i
+            techin_price = techin_price + (product.techin_price.to_f + product.techin_percent.to_f) * arr[2].to_i
+          elsif prod.split("_")[0].to_i==1 #如果有活动   [1,47,255=20]
+            arr = prod.split("_")
+            sale_id = arr[1].to_i  #[1,47,255=20]
+            arr.each do |a|  #[1,47,255=20]
+              if !a.split("=")[1].nil? && !a.split("=")[2].nil?
+                OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SALE], :price => a.split("=")[1].to_f,
+                  :product_id => a.split("=")[0].to_i, :product_num => a.split("=")[2].to_i)
+              end
+            end
+          elsif prod.split("_")[0].to_i==2  #如果有优惠卡 2_322_0_0_16=200_128
+            arr = prod.split("_")
+            sid = arr[1].to_i
+            if arr[2].to_i==0 #如果是打折卡
+              arr.each do |a|
+                if !a.split("=")[1].nil? && !a.split("=")[2].nil?
+                  OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:DISCOUNT_CARD],
+                    :price => a.split("=")[1].to_f, :product_id => a.split("=")[0].to_i, :product_num => a.split("=")[2].to_i)
+                end
+              end
+              if arr[3].to_i==0 #如果是用户已有的打折卡
+                csrid = arr[-1].to_i  #用户-打折卡关联id
+                c_svc_relation_id << csrid
+              elsif arr[3].to_i==1  #如果是用户刚买的打折卡，则要更新客户-打折卡关系记录
+                csr = CSvcRelation.where(["customer_id=? and sv_card_id=? and order_id=? and status=?", ocid,
+                    sid, order.id, CSvcRelation::STATUS[:invalid]]).first
+                if csr.nil?
+                  status = 0
+                  msg = "数据错误!"
+                else
+                  csr.update_attributes(:customer_id => customer.id)
+                  c_svc_relation_id << csr.id
+                end
+              end
+            elsif  arr[2].to_i==1 && arr[3].to_i==1 #如果是新买的储值卡，则更新储值卡-用户关联关系
+              save_c = SvCard.find_by_id(sid)
+              csr = CSvcRelation.where(["customer_id=? and sv_card_id=? and order_id=? and status=?", ocid, sid,
+                  order.id, CSvcRelation::STATUS[:invalid]]).first
+              if csr.nil?
+                status = 0
+                msg = "数据错误!"
+              else
+                csr.update_attributes(:customer_id => customer.id, :password => Digest::MD5.hexdigest(arr[-1].strip))
+                SvcardUseRecord.create(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,
+                  :left_price => csr.left_price, :content => "购买"+"#{save_c.name}")
+              end
+            end
+          elsif prod.split("_")[0].to_i==3  #如果是套餐卡
+            arr = prod.split("_")
+            pid = arr[1].to_i
+            selected_prods = arr.inject({}){|a, s|   #[2-5,56-1]
+              if !s.split("=")[1].nil?
+                apid = s.split("=")[0].to_i
+                apcount = s.split("=")[1].to_i
+                a[apid] = apcount
+              end;
+              a
+            }
+            if arr[2].to_i==0 #如果是用户已有的套餐卡,则要扣除购买的产品对应的数量
+              cprid = arr[-1].to_i
+              cpr = CPcardRelation.find_by_id(cprid)
+              cpr_content = cpr.content.split(",") #[2-产品1-22,56-服务2-3, 17-产品2-3]
+              a = []
+              (cpr_content ||[]).each do |cc|
+                ccid = cc.split("-")[0].to_i
+                ccname = cc.split("-")[1]
+                cccount = cc.split("-")[2].to_i
+                if selected_prods[ccid]
+                  a << "#{ccid}-#{ccname}-#{cccount - selected_prods[ccid]}"
+                else
+                  a << "#{ccid}-#{ccname}-#{cccount}"
+                end
+              end
+              cpr.update_attribute("content", a.join(","))
+              c_pcard_relation_id << cpr.id
+            elsif arr[2].to_i==1  #如果是用户刚买的套餐卡，则要扣掉刚买的产品，并且生成客户-套餐卡关系,且扣除该套餐卡对应的物料数量(如果有对应的物料的话)
+              pcard = PackageCard.find_by_id(pid)
+              pmr = PcardMaterialRelation.find_by_package_card_id(pid)
+              material = Material.find_by_id(pmr.material_id) if pmr
+              material.update_attribute("storage", material.storage - pmr.material_num) if material
+              deduct_price = deduct_price + (pcard.deduct_price.to_f + pcard.deduct_percent.to_f)
+              cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", ocid,
+                  pid, CPcardRelation::STATUS[:INVALID], order.id]).first
+              cpr_content = cpr.content.split(",")
+              a = []
+              (cpr_content ||[]).each do |cc|
+                ccid = cc.split("-")[0].to_i
+                ccname = cc.split("-")[1]
+                cccount = cc.split("-")[2].to_i
+                if selected_prods[ccid]
+                  a << "#{ccid}-#{ccname}-#{cccount - selected_prods[ccid]}"
+                else
+                  a << "#{ccid}-#{ccname}-#{cccount}"
+                end
+              end
+              cpr.update_attributes(:content => a.join(","), :customer_id => customer.id)
+            end
+            (selected_prods).each do |k, v|
+              OPcardRelation.create(:order_id => order.id, :c_pcard_relation_id => cpr.id, :product_id => k, :product_num => v)
+              product = Product.find_by_id(k)
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
+                :price => product.sale_price * v, :product_id => k, :product_num => v)
+            end if selected_prods.length > 0
+          end
+        end if prods
+        order.update_attributes(:is_pleased => is_pleased, :is_billing => is_billing, :is_free => 0,
+          :sale_id => sale_id.nil? || sale_id == 0 ? nil : sale_id, :c_pcard_relation_id => c_pcard_relation_id.blank? ? nil : c_pcard_relation_id.join(","),
+          :c_svc_relation_id => c_svc_relation_id.blank? ? nil : c_svc_relation_id.join(","), :status => Order::STATUS[:COMMIT],
+          :front_deduct => deduct_price, :technician_deduct => techin_price * 0.5, :customer_id => customer.id)
+        work_orders = status==0 ? nil : working_orders(params[:store_id])
+        render :json => {:status => status, :msg => msg, :orders => work_orders}
+      end
     end
   end
+
   #取消订单
   def cancel_order
     Order.transaction do
@@ -1072,6 +1142,12 @@ class Api::NewAppOrdersController < ApplicationController
       #          mater.update_attribute("storage", mater.storage+(pnum * mnum))
       #        end
       #      end if opr
+      cpr = CPcardRelation.find_by_status_and_order_id(CPcardRelation::STATUS[:INVALID], order.id)
+      if cpr
+        pmr = PcardMaterialRelation.find_by_package_card_id(cpr.package_card_id)
+        m = Material.find_by_id(pmr.material_id) if pmr
+        m.update_attribute("storage", m.storage + pmr.material_num) if m
+      end
       if order.update_attribute("status", Order::STATUS[:DELETED])
         order.work_orders.inject([]){|h,wo| wo.update_attribute("status", WorkOrder::STAT[:CANCELED])}
         work_orders = working_orders params[:store_id]
