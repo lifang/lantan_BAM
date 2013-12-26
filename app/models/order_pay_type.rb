@@ -29,7 +29,7 @@ class OrderPayType < ActiveRecord::Base
   end
 
   def self.deal_order(param)
-    may_pay,card_price,msg,orders = true,{},"",[]
+    may_pay,card_price,msg,orders,is_billing = true,{},"",[],param[:billing].to_i
     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
       store = Store.find param[:store_id]
       if store.limited_password.nil?  or store.limited_password == Digest::MD5.hexdigest(param[:pay_cash])
@@ -100,12 +100,18 @@ class OrderPayType < ActiveRecord::Base
                 OrderPayType.create(:order_id=>k,:price=>v,:pay_type=>OrderPayType::PAY_TYPES[:FAVOUR])
               end unless loss.empty?
             end
-            if param[:pay_order] && param[:pay_order][:text]
+            if param[:pay_order] && param[:pay_order][:text]   #使用储值卡更新储值卡余额，并将更新新买储值卡的状态
               CSvcRelation.find(param[:pay_order][:text].keys).each do |c_relation|
                 use_price = param[:pay_order][:text][:"#{c_relation.id}"].to_i
                 only_price = c_relation.left_price - use_price
                 pars = {:left_price=>only_price}
-                pars.merge!(:status=>CSvcRelation::STATUS[:invalid]) if (only_price <= 0)
+                if c_relation.sv_card.status == SvCard::STATUS[:DELETED]
+                  if only_price > 0
+                    pars.merge!(:status=>CSvcRelation::STATUS[:valid])
+                  end
+                else
+                  pars.merge!(:status=>CSvcRelation::STATUS[:invalid]) if only_price <= 0
+                end
                 c_relation.update_attributes(pars)
                 SvcardUseRecord.create(:c_svc_relation_id=>c_relation.id,:types=>SvcardUseRecord::TYPES[:OUT],:use_price=>use_price,
                   :left_price=>only_price,:content=>OrderProdRelation.order_products(order_ids).values.flatten.map(&:name).join("、"))
@@ -157,6 +163,16 @@ class OrderPayType < ActiveRecord::Base
                 end
               end
             end
+            #新买储值卡但是未使用  新买打折卡  更新状态
+            csvs = CSvcRelation.joins(:sv_card).select("*").where([:customer_id=>params[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid]])
+            csvs.update_all :status => CSvcRelation::STATUS[:valid], :is_billing => is_billing
+            sv_used = []
+            csvs.each do |csr|   #如果是新买储值卡则生成使用记录
+              if csr.types == SvCard::FAVOR[:SAVE]
+                sv_used << SvcardUseRecord.new(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,:left_price => csr.left_price, :content => "购买"+"#{csr.name}")
+              end
+            end
+            SvcardUseRecord.import sv_used, :timestamps=>true unless sv_used.blank?
           end
         end
       end

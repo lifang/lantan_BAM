@@ -129,7 +129,9 @@ function check_num(){
     var total = 0;
     var due_pay = parseInt($.trim($("#due_pay").html()));
     $("#due_over").css("display","none");
-    $('div.at_way_b > div').find("input[id*='cash_'],input[id*='change_']").val(0);//当调动其他选项则清零付款方式的输入框，也可以选择重新计算
+    //    $('div.at_way_b > div').find("input[id*='cash_'],input[id*='change_']").val(0);//当调动其他选项则清零付款方式的输入框，也可以选择重新计算
+    var pay_type = $("#pay_type li[class='hover']").attr("id");
+    calulate_v(pay_type);
     $("input[id*='order_']").each(function(){
         var left_price = parseInt($.trim($("#left_"+this.id.split("_")[1]).html()));
         var price = parseInt($.trim(this.value))
@@ -174,7 +176,8 @@ function check_post(store_id,c_id,n_id){
     var pay_order = set_pay_order();
     if (pay_order[0]){
         tishi_alert("储值卡密码不能为空");
-    }else{
+    }
+    else{
         $.ajax({
             type:"post",
             url:url,
@@ -442,5 +445,13 @@ function single_order_print(store_id){
         tishi_alert("订单只能选择一个");
         return false;
     }
-   window.open("/stores/"+store_id+"/set_stores/single_print?order_id="+print_nums.val(),'_blank', 'height=520,width=625,left=10,top=100');
+    window.open("/stores/"+store_id+"/set_stores/single_print?order_id="+print_nums.val(),'_blank', 'height=520,width=625,left=10,top=100');
+}
+
+
+function calulate_v(pay_type){
+    var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
+    var left_pay = parseInt($.trim($("#left_pay").html()));
+    var  v = (pay_cash-left_pay) >0 ? pay_cash-left_pay : 0
+    $("#change_"+pay_type).val(v);
 }

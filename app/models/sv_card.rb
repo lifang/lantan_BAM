@@ -4,7 +4,7 @@ class SvCard < ActiveRecord::Base
   has_many :svcard_prod_relations
   has_many :c_svc_relations
   belongs_to :store
-  FAVOR = {:SAVE =>1,:DISCOUNT=>0} #1 储值卡 0 打折卡
+  FAVOR = {:SAVE =>1,:DISCOUNT =>0} #1 储值卡 0 打折卡
   S_FAVOR = {1 => "储值卡", 0 => "打折卡"}
   STATUS = {:NORMAL => 1, :DELETED => 0} #状态 1正常 0删除
   

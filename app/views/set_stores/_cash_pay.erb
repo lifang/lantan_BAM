@@ -76,7 +76,7 @@
         <label>本单：</label><input onblur="check_num()" value="0" type="text" id="order_<%=card.id%>" disabled />
       </div>
       <div class="accountsTab_pay_item">
-        <label>储值卡密码：</label><input  type="password" id="pwd_<%=card.id%>" disabled value=""/>
+        <label>储值卡密码：</label><input  type="password" id="pwd_<%=card.id%>" disabled value=""/><% if card.sa %>(新增卡)<%end%>
       </div>
     </div>
   <% end %>
@@ -109,7 +109,7 @@
     <div>
       <div class="way_item">
         <label>现金实收：</label>
-        <input id="cash_<%=OrderPayType::PAY_TYPES[:CASH]%>" onblur="set_change(<%=OrderPayType::PAY_TYPES[:CASH]%>)" type="text" value="0" />元
+        <input id="cash_<%=OrderPayType::PAY_TYPES[:CASH]%>" onblur="calulate_v(<%=OrderPayType::PAY_TYPES[:CASH]%>)" type="text" value="0" />元
       </div>
       <div class="way_item">
         <label>找零：</label>
@@ -121,7 +121,7 @@
         <input id="cash_<%=OrderPayType::PAY_TYPES[:CREDIT_CARD]%>"  type="text" value="0" />元</div>
       <div class="way_item">
         <label>流水账号：</label>
-        <input id="c_set_<%=OrderPayType::PAY_TYPES[:CREDIT_CARD]%>" type="text" value="<%=Time.now.strftime("%Y%m%d%H%M%L")[0..-1]+@customer.id.to_s%>" readonly /></div>
+        <input id="c_set_<%=OrderPayType::PAY_TYPES[:CREDIT_CARD]%>" type="text" value="" /></div>
     </div>
     <div style="display: none">
       <div class="way_textarea">
@@ -130,7 +130,7 @@
     <div style="display: none">
       <div class="way_item">
         <label>输入权限密码：</label>
-        <input id="cash_<%=OrderPayType::PAY_TYPES[:IS_FREE]%>" type="password" value=" " /></div>
+        <input id="cash_<%=OrderPayType::PAY_TYPES[:IS_FREE]%>" type="password" value="" /></div>
     </div>
   </div>
   <div class="btn_box">
@@ -142,7 +142,7 @@
     $('div.at_way_h li').bind('click',function(){
       $(this).addClass('hover').siblings().removeClass('hover');
       var index = $('div.at_way_h li').index(this);
-      $('div.at_way_b > div').eq(index).show().siblings().hide().find("input[id*='cash_'],input[id*='change_']").val(0);
+      $('div.at_way_b > div').eq(index).show().siblings().hide();
       $('div.at_way_b > div').eq(index).find("input").first().focus();
     });
   })

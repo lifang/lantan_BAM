@@ -43,6 +43,7 @@ class SetStoresController < ApplicationController
 
 
   def cash_register
+    @title = "收银"
     about_cash(params[:store_id])
     respond_to do |format|
       format.html
@@ -51,12 +52,13 @@ class SetStoresController < ApplicationController
   end
 
   def complete_pay
+    @title = "收银"
     start_time = params[:first].nil? || params[:first] == "" ? Time.now.at_beginning_of_day.strftime("%Y-%m-%d %H:%M") : Time.now.strftime("%Y-%m-%d")+" #{params[:first]}"
     end_time = params[:last].nil? || params[:last] == "" ? Time.now.end_of_day.strftime("%Y-%m-%d %H:%M") : Time.now.strftime("%Y-%m-%d")+" #{params[:last]}"
     orders = Order.joins([:car_num,:customer]).joins("left join work_orders w on w.order_id=orders.id").select("orders.*,
       customers.mobilephone phone,customers.name c_name,customers.group_name,car_nums.num c_num,w.station_id s_id,customers.id c_id").
-      where(:status=>Order::OVER_CASH,:store_id=>params[:store_id]).where("date_format(orders.created_at,'%Y-%m-%d %H:%i')>='#{start_time}' and
-      date_format(orders.created_at,'%Y-%m-%d %H:%i')<='#{end_time}'").order("orders.created_at desc")
+      where(:status=>Order::OVER_CASH,:store_id=>params[:store_id]).where("date_format(orders.updated_at,'%Y-%m-%d %H:%i')>='#{start_time}' and
+      date_format(orders.updated_at,'%Y-%m-%d %H:%i')<='#{end_time}'").order("orders.updated_at desc")
     @pays = OrderPayType.where(:order_id=>orders.map(&:id)).select("sum(price) total_price,pay_type").group("pay_type").inject(Hash.new){
       |hash,pay|hash[pay.pay_type] = pay.total_price;hash}
     @orders = orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
@@ -90,10 +92,11 @@ class SetStoresController < ApplicationController
     prod_ids = OrderProdRelation.joins(:product).where(:order_id=>@orders.map(&:id)).select("products.category_id").map(&:category_id)
     @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:good], Category::TYPES[:service]]).inject(Hash.new){|hash,c|
       hash[c.id]=c.name;hash}
-    if prod_ids
-      @sv_card = []
-      sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:customer_id=>@customer.id,:status=>CSvcRelation::STATUS[:valid]).
-        select("c_svc_relations.*,sv_cards.name,sv_cards.store_id,svcard_prod_relations.category_id ci").where("sv_cards.store_id=#{params[:store_id]}")
+    @sv_card = []
+    unless prod_ids.blank?
+     sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:customer_id=>@customer.id).where("sc_card.types = #{SvCard::FAVOR[:SAVE]}").where("
+      c_svc_relations.status=#{CSvcRelation::STATUS[:valid]} or order_id in (#{@orders.map(&:id).join(',')})").select("c_svc_relations.*,sv_cards.name,
+      sv_cards.store_id,svcard_prod_relations.category_id ci,c_svc_relations.status sa").where("sv_cards.store_id=#{params[:store_id]}")
       sv_cards.each do |sv|
         prod_ids.each do |ca|
           if sv.ci  and sv.ci.split(",").include? "#{ca}"
@@ -137,6 +140,9 @@ class SetStoresController < ApplicationController
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(order.id)
     @order_pays = OrderPayType.search_pay_types(order.id)
+    if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH]
+      @cash_pay =OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
+    end
   end
 
 end
