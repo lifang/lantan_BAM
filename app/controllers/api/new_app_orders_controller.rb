@@ -823,6 +823,7 @@ class Api::NewAppOrdersController < ApplicationController
     #brand: 1_2 brand的id_model的id, userName 客户的name
     Customer.transaction do
       customer = Customer.find_by_id(params[:customer_id].to_i)
+      ocid = customer.id
       car_num = CarNum.find_by_id(params[:car_num_id].to_i)
       car_num.update_attributes(:car_model_id => params[:brand].nil? || params[:brand].split("_")[1].nil? ? nil : params[:brand].split("_")[1].to_i,
         :buy_year => params[:year], :distance => params[:cdistance].nil? ? nil : params[:cdistance].to_i)
@@ -935,25 +936,25 @@ class Api::NewAppOrdersController < ApplicationController
                 csrid = arr[-1].to_i  #用户-打折卡关联id
                 c_svc_relation_id << csrid
               elsif arr[3].to_i==1  #如果是用户刚买的打折卡，则要更新客户-打折卡关系记录
-                csr = CSvcRelation.where(["customer_id=? and sv_card_id=? and order_id=? and status=?", customer.id,
+                csr = CSvcRelation.where(["customer_id=? and sv_card_id=? and order_id=? and status=?", ocid,
                     sid, order.id, CSvcRelation::STATUS[:invalid]]).first
                 if csr.nil?
                   status = 0
                   msg = "数据错误!"
                 else
-                  csr.update_attributes(:status => CSvcRelation::STATUS[:valid], :is_billing => is_billing)
+                  csr.update_attributes(:status => CSvcRelation::STATUS[:valid], :is_billing => is_billing, :customer_id => customer.id)
                   c_svc_relation_id << csr.id
                 end
               end
             elsif  arr[2].to_i==1 && arr[3].to_i==1 #如果是新买的储值卡，则更新储值卡-用户关联关系
               save_c = SvCard.find_by_id(sid)
-              csr = CSvcRelation.where(["customer_id=? and sv_card_id=? and order_id=? and status=?", customer.id, sid,
+              csr = CSvcRelation.where(["customer_id=? and sv_card_id=? and order_id=? and status=?", ocid, sid,
                   order.id, CSvcRelation::STATUS[:invalid]]).first
               if csr.nil?
                 status = 0
                 msg = "数据错误!"
               else
-                csr.update_attributes(:status => CSvcRelation::STATUS[:valid], :is_billing => is_billing,
+                csr.update_attributes(:status => CSvcRelation::STATUS[:valid], :is_billing => is_billing,:customer_id => customer.id,
                   :password => Digest::MD5.hexdigest(arr[-1].strip))
                 SvcardUseRecord.create(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,
                   :left_price => csr.left_price, :content => "购买"+"#{save_c.name}")
@@ -993,10 +994,8 @@ class Api::NewAppOrdersController < ApplicationController
               material = Material.find_by_id(pmr.material_id) if pmr
               material.update_attribute("storage", material.storage - pmr.material_num) if material
               deduct_price = deduct_price + (pcard.deduct_price+pcard.deduct_percent)
-              cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", customer.id,
+              cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", ocid,
                   pid, CPcardRelation::STATUS[:INVALID], order.id]).first
-                  p "****************"
-              p cpr
               cpr_content = cpr.content.split(",")
               a = []
               (cpr_content ||[]).each do |cc|
@@ -1009,7 +1008,7 @@ class Api::NewAppOrdersController < ApplicationController
                   a << "#{ccid}-#{ccname}-#{cccount}"
                 end
               end
-              cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL], :content => a.join(","))
+              cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL], :content => a.join(","), :customer_id => customer.id)
             end
             (selected_prods).each do |k, v|
               OPcardRelation.create(:order_id => order.id, :c_pcard_relation_id => cpr.id, :product_id => k, :product_num => v)
@@ -1022,7 +1021,7 @@ class Api::NewAppOrdersController < ApplicationController
         order.update_attributes(:is_pleased => is_pleased, :is_billing => is_billing, :is_free => pay_type==5 ? 1 : 0,
           :sale_id => sale_id.nil? || sale_id == 0 ? nil : sale_id, :c_pcard_relation_id => c_pcard_relation_id.blank? ? nil : c_pcard_relation_id.join(","),
           :c_svc_relation_id => c_svc_relation_id.blank? ? nil : c_svc_relation_id.join(","), :status => Order::STATUS[:BEEN_PAYMENT],
-          :front_deduct => deduct_price, :technician_deduct => techin_price * 0.5)
+          :front_deduct => deduct_price, :technician_deduct => techin_price * 0.5, :customer_id => customer.id)
         work_order = WorkOrder.find_by_order_id(order.id)
         if work_order
           work_order.update_attribute("status", WorkOrder::STAT[:COMPLETE])
