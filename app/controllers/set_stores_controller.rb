@@ -62,7 +62,7 @@ class SetStoresController < ApplicationController
     @pays = OrderPayType.where(:order_id=>orders.map(&:id)).select("sum(price) total_price,pay_type").group("pay_type").inject(Hash.new){
       |hash,pay|hash[pay.pay_type] = pay.total_price;hash}
     @orders = orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
+    p @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
     @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
     staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
     staff_ids.delete 0

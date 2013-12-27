@@ -194,7 +194,7 @@ class CustomersController < ApplicationController
     svc_card_records_method(@customer.id)  #储值卡记录
     p_card = @customer.pcard_records(params[:store_id])
     @c_pcard_relations = p_card[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if p_card[1] #套餐卡记录
-    p @already_used_count = p_card[0]
+    @already_used_count = p_card[0]
   end
   
   def order_prods
