@@ -118,7 +118,7 @@ class SetStoresController < ApplicationController
     @store = Store.find params[:store_id]
     @customer = Customer.find params[:c_id]
     @car_num = CarNum.find params[:n_id]
-    @orders = Order.where(:id=>params[:o_id].split(','))
+    @orders = Order.where(:id=>params[:o_id].split(',').compact.uniq)
     staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}

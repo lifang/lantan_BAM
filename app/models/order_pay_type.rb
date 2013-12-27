@@ -156,9 +156,9 @@ class OrderPayType < ActiveRecord::Base
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                     end
                     OrderPayType.create(parms)
-                    work_order = o.work_order
+                    work_order = o.work_orders[0]
                     if work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY]
-                      work_order.update_attibutes(:status=>WorkOrder::STAT[:COMPLETE])
+                      work_order.update_attributes(:status=>WorkOrder::STAT[:COMPLETE])
                     end
                     clear_value = 0 if clear_value>0
                     total_card =0 if total_card >0

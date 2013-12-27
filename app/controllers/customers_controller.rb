@@ -192,8 +192,9 @@ class CustomersController < ApplicationController
     comp_page = params[:comp_page] ? params[:comp_page] : 1
     @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, comp_page)
     svc_card_records_method(@customer.id)  #储值卡记录
-    @c_pcard_relations = @customer.pc_card_records_method(params[:store_id])[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if @customer.pc_card_records_method(params[:store_id])[1] #套餐卡记录
-    @already_used_count = @customer.pc_card_records_method(params[:store_id])[0]
+    p_card = @customer.pcard_records(params[:store_id])
+    @c_pcard_relations = p_card[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if p_card[1] #套餐卡记录
+    p @already_used_count = p_card[0]
   end
   
   def order_prods
