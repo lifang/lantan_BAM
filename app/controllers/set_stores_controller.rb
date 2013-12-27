@@ -118,12 +118,12 @@ class SetStoresController < ApplicationController
     @store = Store.find params[:store_id]
     @customer = Customer.find params[:c_id]
     @car_num = CarNum.find params[:n_id]
-    @orders = Order.where(:id=>params[:o_id].split(','))
+    @orders = Order.where(:id=>params[:o_id].split(',').compact.uniq)
     staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
-    p @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
+    @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
     if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH]
       @cash_pay =OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
     end

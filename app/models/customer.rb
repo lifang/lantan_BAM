@@ -152,14 +152,13 @@ class Customer < ActiveRecord::Base
   #客户使用套餐卡记录，门店后台跟api共用
   def pc_card_records_method(store_id)
     #套餐卡记录
-    c_pcard_relations_no_paginate = CPcardRelation.find_by_sql(["select cpr.id cpr_id, p.id, p.name, cpr.content, cpr.ended_at
+    c_pcard_relations_no_paginate = CPcardRelation.find_by_sql(["select cpr.id  , p.id, p.name, cpr.content, cpr.ended_at
         from c_pcard_relations cpr
         inner join package_cards p on p.id = cpr.package_card_id
         where cpr.status = ? and cpr.customer_id = ? and p.store_id = ?",
         CPcardRelation::STATUS[:NORMAL], self.id, store_id])
-#    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
+    #    c_pcard_relations = c_pcard_relations_no_paginate.paginate(:page => page || 1, :per_page => Constant::PER_PAGE) if page
     already_used_count = {}
-
     if c_pcard_relations_no_paginate.present?
       c_pcard_relations_no_paginate.each do |r|
         ppr = PcardProdRelation.joins(:package_card).find(:first, :conditions => ["package_card_id = ? and package_cards.store_id = ?", r.id, store_id])
@@ -202,6 +201,37 @@ class Customer < ActiveRecord::Base
     end
     return svcard_arr
   end
+
+  #客户使用套餐卡记录
+  def pcard_records(store_id)
+    #当前客户的套餐卡
+    c_pcards  = CPcardRelation.joins(:package_card).select("c_pcard_relations.id c_id,package_cards.id k_id,package_cards.name,
+    c_pcard_relations.content, c_pcard_relations.ended_at").where(:"c_pcard_relations.status"=>CPcardRelation::STATUS[:NORMAL],
+      :customer_id=>self.id,:"package_cards.store_id"=>store_id)
+    already_used_count = {}
+    p_pcards = PcardProdRelation.joins(:package_card).select("package_cards.id p_id,product_id,product_num").
+      where(:"package_cards.store_id" =>store_id).inject({}){|hash,i|
+      hash[i.p_id].nil? ? hash[i.p_id]={i.product_id=>i.product_num} : hash[i.p_id][i.product_id]=i.product_num;hash}
+    if c_pcards.present?
+      c_pcards.each do |r|
+        service_infos = r.content.split(",")
+        single_car_content = {}
+        service_infos.each do |s|
+          content_arr = s.split("-")
+          if content_arr.length == 3
+            p_pcards[r.k_id].each do |k,v|
+              single_car_content[content_arr[0].to_i] = [content_arr[1],v-content_arr[2].to_i] if v > content_arr[2].to_i
+            end
+          end
+        end
+        already_used_count[r.c_id] = single_car_content unless single_car_content.empty?
+      end
+      [already_used_count, c_pcards]
+    else
+      [{}, []]
+    end
+  end
+
   
   private
   def encrypt(string)

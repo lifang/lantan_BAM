@@ -29,7 +29,7 @@ class OrderPayType < ActiveRecord::Base
   end
 
   def self.deal_order(param)
-    may_pay,card_price,msg,orders,is_billing = true,{},"",[],param[:pay_order][:billing].to_i
+    may_pay,card_price,msg,orders,is_billing = true,{},"",[],param[:pay_order][:is_billing].to_i
     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
       store = Store.find param[:store_id]
       if store.limited_password.nil?  or store.limited_password == Digest::MD5.hexdigest(param[:pay_cash])
@@ -119,19 +119,20 @@ class OrderPayType < ActiveRecord::Base
             end
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : param[:pay_cash].to_i - param[:second_parm].to_i
             orders.each do |o|
-              if o_price[o.id] < 0
+              price = o_price[o.id].to_i
+              if price < 0
                 o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
               else
-                if o_price[o.id] <= total_card
-                  OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id],:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
-                  total_card -= o_price[o.id]
+                if price <= total_card
+                  OrderPayType.create(:order_id=>o.id,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                  total_card -= price
                   total_card=0 if total_card <0
                   o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                 else
-                  if o_price[o.id] <= (total_card+clear_value)
+                  if price <= (total_card+clear_value)
                     OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
-                    OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
-                    total_card -= o_price[o.id]
+                    OrderPayType.create(:order_id=>o.id,:price=>price-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                    total_card -= price
                     clear_value = 0
                     total_card=0 if total_card <0
                   else
@@ -141,11 +142,11 @@ class OrderPayType < ActiveRecord::Base
                     if total_card >0
                       OrderPayType.create(:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
                     end
-                    parms = {:order_id=>o.id,:price=>o_price[o.id]- total_card-clear_value,:pay_type=>param[:pay_type].to_i}
+                    parms = {:order_id=>o.id,:price=>(price- total_card-clear_value).to_i,:pay_type=>param[:pay_type].to_i}
                     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
-                      p parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
+                      parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
-                      cash_price -= (o_price[o.id]-total_card-clear_value)
+                      cash_price -= (price-total_card-clear_value)
                     elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                       parms.merge!(:second_parm=>param[:second_parm])
@@ -155,6 +156,10 @@ class OrderPayType < ActiveRecord::Base
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                     end
                     OrderPayType.create(parms)
+                    work_order = o.work_orders[0]
+                    if work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY]
+                      work_order.update_attributes(:status=>WorkOrder::STAT[:COMPLETE])
+                    end
                     clear_value = 0 if clear_value>0
                     total_card =0 if total_card >0
                   end
