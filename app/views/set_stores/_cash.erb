@@ -37,7 +37,7 @@
               <tbody>
                 <%v.each do |order|%>
                   <tr>
-                    <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id]  %>
+                    <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_i  %>
                     <td><%= order.created_at.strftime("%Y-%m-%d %H:%M") %></td>
                     <td><%= order.code %></td>
                     <td><%= @stations[order.s_id].nil? ? "--" : @stations[order.s_id] %></td>
@@ -59,7 +59,8 @@
                     <%end%>
                     <td><%= order.price %></td>
                     <td><%= loss %></td>
-                    <td><%= order.price-loss %></td>
+                    <% fact = order.price > loss ? order.price.to_i-loss : 0 %>
+                    <td><%= fact %></td>
                   </tr>
                 <% end %>
               </tbody>
@@ -68,7 +69,8 @@
               <ul>
                 <%total = v.map(&:price).inject(0){|sum,num|sum+num} %>
                 <%reward = @order_pays.select{|k,i| v.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
-                <li>总计：<%=  (total - reward).to_i%></li>
+                <%  fa = total > reward ? (total-reward).to_i : 0%>
+                <li>总计：<%=  fa %></li>
                 <li><a href="javascript:void(0)" class="accounts_btn" onclick="pay_this_order(<%=params[:store_id]  %>,<%=k[:c_id]  %>,<%=k[:n_id]  %>)">结账</a></li>
               </ul>
             </div>

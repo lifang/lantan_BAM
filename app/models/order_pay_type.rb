@@ -29,7 +29,7 @@ class OrderPayType < ActiveRecord::Base
   end
 
   def self.deal_order(param)
-    may_pay,card_price,msg,orders,is_billing = true,{},"",[],param[:billing].to_i
+    may_pay,card_price,msg,orders,is_billing = true,{},"",[],param[:pay_order][:billing].to_i
     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
       store = Store.find param[:store_id]
       if store.limited_password.nil?  or store.limited_password == Digest::MD5.hexdigest(param[:pay_cash])
@@ -119,15 +119,14 @@ class OrderPayType < ActiveRecord::Base
             end
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : param[:pay_cash].to_i - param[:second_parm].to_i
             orders.each do |o|
-              if o_price[o.id] <= 0
-                OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]- total_card-clear_value,:pay_type=>param[:pay_type].to_i)
-                o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
+              if o_price[o.id] < 0
+                o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
               else
                 if o_price[o.id] <= total_card
                   OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id],:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
                   total_card -= o_price[o.id]
                   total_card=0 if total_card <0
-                  o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
+                  o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                 else
                   if o_price[o.id] <= (total_card+clear_value)
                     OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
@@ -142,21 +141,20 @@ class OrderPayType < ActiveRecord::Base
                     if total_card >0
                       OrderPayType.create(:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
                     end
+                    parms = {:order_id=>o.id,:price=>o_price[o.id]- total_card-clear_value,:pay_type=>param[:pay_type].to_i}
                     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
-                      OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]- total_card-clear_value,:pay_type=>param[:pay_type].to_i,
-                        :pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
-                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
+                      p parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                       cash_price -= (o_price[o.id]-total_card-clear_value)
                     elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
-                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
-                      OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>param[:pay_type].to_i,:second_parm=>param[:second_parm])
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
+                      parms.merge!(:second_parm=>param[:second_parm])
                     elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
-                      o.update_attributes(:status=>Order::STATUS[:FINISHED])
-                      OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>param[:pay_type].to_i)
+                      o.update_attributes(:status=>Order::STATUS[:FINISHED], :is_billing => is_billing)
                     elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
-                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT])
-                      OrderPayType.create(:order_id=>o.id,:price=>o_price[o.id]-total_card-clear_value,:pay_type=>param[:pay_type].to_i)
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                     end
+                    OrderPayType.create(parms)
                     clear_value = 0 if clear_value>0
                     total_card =0 if total_card >0
                   end
@@ -164,8 +162,8 @@ class OrderPayType < ActiveRecord::Base
               end
             end
             #新买储值卡但是未使用  新买打折卡  更新状态
-            csvs = CSvcRelation.joins(:sv_card).select("*").where(:customer_id=>params[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid])
-            csvs.update_all :status => CSvcRelation::STATUS[:valid], :is_billing => is_billing
+            csvs = CSvcRelation.joins(:sv_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid])
+            CSvcRelation.select("*").where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid]).update_all :status => CSvcRelation::STATUS[:valid], :is_billing => is_billing
             sv_used = []
             csvs.each do |csr|   #如果是新买储值卡则生成使用记录
               if csr.types == SvCard::FAVOR[:SAVE]
@@ -173,32 +171,44 @@ class OrderPayType < ActiveRecord::Base
               end
             end
             SvcardUseRecord.import sv_used, :timestamps=>true unless sv_used.blank?
-            CPcardRelation.where(:customer_id=>params[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID])
+            cprs = CPcardRelation.joins(:package_card).where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID])
+            CPcardRelation.where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]
+            #生成积分的记录
+            c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(param[:store_id],param[:customer_id])
+            if c_customer && c_customer.is_vip
+              #产品积分
+              order_point = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point,
+             order_prod_relations.order_id o_id").where(:"orders.id"=>order_ids).inject({}){|hash,p|hash[p.o_id] = p.point if p.point;hash}
+              pcard_point = cprs.inject({}){|hash,p|hash[p.order_id] = p.prod_point if p.prod_point;hash} #套餐卡积分
+              points =(order_point.values | pcard_point.values).compact.inject(0){|sum,n|sum+n}
+              c_customer.update_attributes(:total_point=>points+(c_customer.total_point.nil? ? 0 : c_customer.total_point))
+              #生成积分记录
+              t_point = order_point.merge(pcard_point).inject([]){|arr,p| arr << Point.create(:customer_id=>param[:customer_id],
+                  :target_id=>p[0],:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>p[1],:types=>Point::TYPES[:INCOME]) }
+              Point.import t_point  unless t_point.blank?
+            end
+            #生成出库记录
+            order_mat_infos = Order.joins(:order_prod_relations=>{:product=>{:prod_mat_relations=>:material}}).select("material_id m_id,
+            front_staff_id f_id,material_num m_num,materials.price m_price").where(:"products.is_service"=>Product::PROD_TYPES[:PRODUCT],
+              :"orders.id"=>order_ids)
+            mat_outs = order_mat_infos.inject([]){|arr,m| arr << MatOutOrder.new({:material_id =>m.m_id, :staff_id =>m.f_id,
+                  :material_num => m.m_num,:price => m.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id =>param[:store_id]})}
+            MatOutOrder.import mat_outs unless mat_outs.blank?
+            #更新订单提成
+            pacrd_deduct = cprs.inject({}){|hash,c|hash[c.order_id] =(c.deduct_price ? c.deduct_price : 0)+(c.deduct_percent ? c.deduct_percent : 0);hash}
+            order_deduct = Order.joins(:order_prod_relations=>:product).select("ifnull(sum((deduct_price+deduct_percent)*pro_num),0) d_sum,
+            ifnull(sum((techin_price+techin_percent)*pro_num),0) t_sum,orders.id o_id").where(:"orders.id"=>order_ids).inject({}){|hash,o|
+              hash["deduct"].nil? ? hash["deduct"]={o.o_id=>o.d_sum} : hash["deduct"][o.o_id]=o.d_sum;
+              hash["techin"].nil? ? hash["techin"]={o.o_id=>o.t_sum} : hash["techin"][o.o_id]=o.t_sum;hash}
+            orders.each {|order|
+              deduct = {:front_deduct => (pacrd_deduct[order.id].nil? ? 0 : pacrd_deduct[order.id]) + ((order_deduct["deduct"] && order_deduct["deduct"][order.id]) ?  order_deduct["deduct"][order.id] : 0),
+                :technician_deduct => order_deduct["techin"] && order_deduct["techin"][order.id]  ?  order_deduct["techin"][order.id]/2.0 : 0}
+              order.update_attributes(deduct)
+            }
           end
         end
       end
     end
     return  [may_pay,msg,orders.map(&:id)]
   end
-
-
-  def check_pay_type(param)
-    if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
-      price = param[:pay_cash].to_i - param[:second_parm].to_i
-      OrderPayType.create(:order_id=>orders,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:CASH],:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
-    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
-      OrderPayType.create(:order_id=>orders,:price=>param[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:CREDIT_CARD],:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
-    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
-      @free = true
-      if Store.find(param[:store_id]).limited_password == Digest::MD5.hexdigest(param[:pay_cash])
-        @free = false
-        orders = Order.where(:status=>Order::CASH,:store_id=>param[:store_id],:customer_id=>param[:customer_id],
-          :car_num_id=>param[:car_num_id]).map(&:id)[0]
-        OrderPayType.create(:order_id=>orders,:price=>param[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:IS_FREE])
-      end
-    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
-      OrderPayType.create(:order_id=>orders,:price=>param[:pay_cash],:pay_type=>OrderPayType::PAY_TYPES[:HANG])
-    end
-  end
-  
 end

@@ -240,6 +240,7 @@ function set_pay_order(){
     if (clear_value > 0){
         pay_order["clear_value"] = clear_value;
     }
+    pay_order["is_billing"] = $("#is_biling")[0].checked ? 1 : 0
     return [is_password,pay_order]
 }
 
@@ -283,6 +284,7 @@ function return_check(e){
     var clear_per = $("#clear_per")[0];
     var hidden_pay = parseInt($.trim($("#hidden_pay").html()));
     var total = parseInt($.trim( $("#loss_"+e.id.split("_")[1]).val()));
+    var cards = $("#sv_card_used span[id*='"+e.id.split("_")[1] +"_']").find(":checkbox");
     clear_per.checked = false;
     if (e.checked){
         $(e).parent().siblings().css("background","#ebebe3");
@@ -294,6 +296,14 @@ function return_check(e){
         $("#hidden_pay").html(hidden_pay-total);
         var  this_value = $("#in_"+e.id.split("_")[1]).val(0).attr("disabled",true);
         set_reward(this_value[0])
+        if (cards.length >0){
+            var card_check = cards[0];
+            var card_id = card_check.id.split("_")[1];
+            card_check.checked = false
+            card_check.disabled = true
+            $("#order_"+card_id+",#pwd_"+card_id).attr("disabled",e.checked);
+            check_num();
+        }
     }else{
         $(e).parent().siblings().css("background","");
         $("#due_pay").html(hidden_pay+total);
@@ -302,6 +312,9 @@ function return_check(e){
         $("#in_"+e.id.split("_")[1]).attr("disabled",false);
         if ((hidden_pay+total)>0){
             clear_per.disabled = false;
+        }
+        if (cards.length >0){
+            cards[0].disabled = false;
         }
     }
     change_pay(clear_per);
@@ -319,7 +332,7 @@ function set_reward(e){
     }
     e.value = this_value;
     clear_per.checked = false;
-    if (this_value> loss){
+    if (this_value > loss){
         tishi_alert("优惠金额超过本单金额！")
     }else{
         $("#hipay_"+e.id.split("_")[1]).val(this_value);
