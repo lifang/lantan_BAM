@@ -724,6 +724,8 @@ class Api::NewAppOrdersController < ApplicationController
           :cname =>customer.name,
           :csex => customer.sex,
           :cmoilephone =>customer.mobilephone,
+          :cproperty => customer.property,
+          :cgroup_name => customer.property.to_i == 0 ? nil : customer.group_name,
           :cnum => car_num.num,
           :cnum_id => car_num.id,
           :cmodel => car_model.nil? ? nil : car_model.name,
