@@ -120,7 +120,7 @@ class OrderPayType < ActiveRecord::Base
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : param[:pay_cash].to_i - param[:second_parm].to_i
             orders.each do |o|
               price = o_price[o.id].to_i
-              if price < 0
+              if price <=0
                 o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
               else
                 if price <= total_card

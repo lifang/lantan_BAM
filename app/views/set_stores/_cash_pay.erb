@@ -29,7 +29,7 @@
       <tbody>
         <% @orders.each do |order| %>
           <tr>
-            <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id]  %>
+            <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_i  %>
             <%  fact = order.price>loss ? order.price-loss : 0%>
             <td style="display: none" id="return_order_<%=order.id%>">
               <input type="hidden" value="<%= fact  %>" id="loss_<%= order.id %>" />
