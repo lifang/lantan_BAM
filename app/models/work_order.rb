@@ -100,7 +100,8 @@ class WorkOrder < ActiveRecord::Base
         where("current_day = #{self.current_day}").first
       if next_work_order
         #同一个人的下单，直接紧接着排单
-        ended_at = current_time + next_work_order.cost_time*60
+        time = next_work_order.cost_time.nil? ? 0 : next_work_order.cost_time
+        ended_at = current_time + time*60
         next_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
           :started_at => current_time, :ended_at => ended_at )
         wo_time = WkOrTime.find_by_station_id_and_current_day next_work_order.station_id, ended_at

@@ -123,7 +123,7 @@ class SetStoresController < ApplicationController
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
-    p @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
+    @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
     if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH]
       @cash_pay =OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
     end
