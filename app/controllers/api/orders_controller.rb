@@ -39,7 +39,7 @@ class Api::OrdersController < ApplicationController
       store = Store.find_by_id(staff.store_id)
       staff = {:user_id => staff.id, :store_id => staff.store_id, :position => staff.dname,
       :department => staff.bname, :username => staff.username, :name => staff.name, 
-      :photo => staff.photo.nil? ? nil : staff.photo, :cash_auth => store.cash_auth}
+      :photo => staff.photo.nil? ? nil : staff.photo, :cash_auth => store.cash_auth, :store_name => store.name}
     end
     render :json => {:staff => staff, :info => info}.to_json
   end

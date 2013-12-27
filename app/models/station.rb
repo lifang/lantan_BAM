@@ -262,7 +262,17 @@ class Station < ActiveRecord::Base
         else
           #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
           station_id = availbale_stations[0] || 0
-          has_start_end_time = true
+          #此处要判断该工位对应的技师是否也被分配到其他工位上，并且是否正在其他工位上工作，如果正在其他工位上工作，则要等待
+          ssr = StationStaffRelation.where(["station_id=? and current_day=?", station_id, Time.now.strftime("%Y%m%d").to_i]).map(&:staff_id)
+          ossr = StationStaffRelation.where(["station_id != ? and staff_id in (?) and current_day=?", station_id, ssr,
+              Time.now.strftime("%Y%m%d").to_i]).map(&:station_id) if ssr
+          wos = WorkOrder.where(["station_id in (?) and status = ? and current_day = ?", ossr,
+              WorkOrder::STAT[:SERVICING], Time.now.strftime("%Y%m%d").to_i]) if ossr
+          if wos.any?
+            has_start_end_time = false
+          else
+            has_start_end_time = true
+          end
         end
       else
         station_id = nil

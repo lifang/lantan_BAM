@@ -72,7 +72,7 @@ class WorkOrdersController < ApplicationController
                   station[:s_name] = opr.inject([]){|a, o| a << o.name;a}.join(",")
                 end
 
-                ##等待施工的车牌号
+                #等待施工的车牌号
                 #if work_order.work_order_status == WorkOrder::STAT[:WAIT]
                 #  station[:waiting_car_num] << work_order.car_num
                 #end
@@ -81,6 +81,7 @@ class WorkOrdersController < ApplicationController
             #如果没有正在施工的车辆，则正在施工的车牌、剩余时间为空
             station[:dealing_car_num] = nil unless station[:dealing_car_num]
             station[:dealing_time_left] = nil unless station[:dealing_time_left]
+            station[:s_name] = nil unless station[:s_name]
             #station[:waiting_car_num] = nil if station[:waiting_car_num].length == 0
 
           else  #工位正常，但没有工单时：等待付款、正在施工的车牌、剩余时间、等待施工的车牌均为空
@@ -104,22 +105,21 @@ class WorkOrdersController < ApplicationController
       current_info[:station_infos] = nil
     end
     #查出所有总部的有效的活动
-#    hs = Sale.find_by_sql(["SELECT s.img_url from lantan_store.sales s where s.status=? and
-#       ((s.disc_time_types in (?)) or (s.disc_time_types=? and DATE_FORMAT(s.ended_at,'%Y-%m-%d')>=DATE_FORMAT(NOW(),'%Y-%m-%d')))#",
-#        Sale::STATUS[:RELEASE],[Sale::DISC_TIME[:DAY], Sale::DISC_TIME[:MONTH], Sale::DISC_TIME[:YEAR], Sale::DISC_TIME[:WEEK]],
-#        Sale::DISC_TIME[:TIME]])
-#    head_sales = hs.inject([]){|h, s|
-#      h << Constant::HEAD_OFFICE_API_PATH + s.img_url if s.img_url and s.img_url.strip != "";
-#      h
-#    }
-    ls = Sale.find_by_sql(["SELECT s.name, s.img_url from sales s where s.status=? and s.store_id=? and
+    #    hs = Sale.find_by_sql(["SELECT s.img_url from lantan_store.sales s where s.status=? and
+    #       ((s.disc_time_types in (?)) or (s.disc_time_types=? and DATE_FORMAT(s.ended_at,'%Y-%m-%d')>=DATE_FORMAT(NOW(),'%Y-%m-%d')))#",
+    #        Sale::STATUS[:RELEASE],[Sale::DISC_TIME[:DAY], Sale::DISC_TIME[:MONTH], Sale::DISC_TIME[:YEAR], Sale::DISC_TIME[:WEEK]],
+    #        Sale::DISC_TIME[:TIME]])
+    #    head_sales = hs.inject([]){|h, s|
+    #      h << Constant::HEAD_OFFICE_API_PATH + s.img_url if s.img_url and s.img_url.strip != "";
+    #      h
+    #    }
+    ls = Sale.find_by_sql(["SELECT s.img_url from sales s where s.status=? and s.store_id=? and
        ((s.disc_time_types in (?)) or (s.disc_time_types=? and DATE_FORMAT(s.ended_at,'%Y-%m-%d')>=DATE_FORMAT(NOW(),'%Y-%m-%d')))",
         Sale::STATUS[:RELEASE],params[:store_id].to_i,[Sale::DISC_TIME[:DAY], Sale::DISC_TIME[:MONTH], Sale::DISC_TIME[:YEAR], Sale::DISC_TIME[:WEEK]],
         Sale::DISC_TIME[:TIME]])
-    local_sales = ls.inject({}){|h, s|
+    local_sales = ls.inject([]){|h, s|
       #h << Constant::SERVER_PATH + s.img_url if s.img_url and s.img_url.strip != "";
-      h[:s_name] = s.name
-      h[:s_url] = s.img_url.nil? || s.img_url.strip == "" ? nil : s.img_url;
+      h << Constant::SERVER_PATH + s.img_url unless s.img_url.nil? || s.img_url.strip == "";
       h
     }
     current_info[:no_station_wos] = Order.joins(:work_orders).where("work_orders.current_day =? and work_orders.store_id = ? and work_orders.status != ? and work_orders.station_id is null", now_date, params[:store_id], WorkOrder::STAT[:CANCELED]).map(&:car_num).map(&:num).uniq
