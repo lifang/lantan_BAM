@@ -104,14 +104,12 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   end
   
   def upload_stream(img_url,dirs,img_code=nil)
-    dirs << "#{dirs[2]}img."+ img_url.original_filename.split(".").reverse[0]
-    p File.join(["1","2","3"])
-    p File.split(File.join([1,2,3])+"/1.jpg")
-    path = Constant::LOCAL_DIR + File.join(dirs)
+    path = Constant::LOCAL_DIR + dirs.join("/")
     FileUtils.remove_dir path
     FileUtils.mkdir_p  path
-ll
+    dirs << "#{dirs[2]}img."+ img_url.original_filename.split(".").reverse[0]
+    path = Constant::LOCAL_DIR + dirs.join("/")
     File.open(path, "wb")  {|f|f.write(img_url.read);}
-    return dirs.join("/")
+    return "/"+dirs.join("/")
   end
 end

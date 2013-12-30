@@ -14,7 +14,7 @@
         <div class="item">
           <label>是否有工控机：</label>
           <input type="checkbox" id="station_has_controller" name="station_has_controller" value="1"
-                  onclick="handleController(this)"/>
+                 onclick="handleController(this)"/>
         </div>
         <div class="controller_input">
           <div class="item">
@@ -25,14 +25,14 @@
         <div class="item_textarea">
           <label><span class='red'>*</span>服务：</label>
           <div class="item_rbox">
-            <% @categories.each do |c| %>
-              <dl>
-                <dt>o<%= c.name %></dt>
-                <% @services[c.id].each do |p| %>
-                <dd><input type="checkbox" name="product_ids[]" value="<%= p.id %>"/><%= p.name %></dd>&nbsp;&nbsp;
-                <% end if @services[c.id] %>
-              </dl>
-            <% end %>
+            <dl>
+              <% @services.each do |k,v| %>
+                <dt><%=  @categories[k] %></dt>
+                <%v.each do |p|%>
+                  <dd><input type="checkbox" name="product_ids[]" value="<%= p.id %>"/><%= p.name %></dd>&nbsp;&nbsp;
+                <%end%>
+              <% end unless @services.blank?  %>
+            </dl>
           </div>
         </div>
       </div>
