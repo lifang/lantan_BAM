@@ -12,6 +12,7 @@ gem 'gchartrb', '0.8'
 gem 'multipart-post','1.1.5'
 gem 'rubyzip', '0.9.9'
 gem 'activerecord-import', '~>0.2.8'
+gem "toPinyin"
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
