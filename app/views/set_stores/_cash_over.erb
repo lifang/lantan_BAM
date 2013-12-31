@@ -1,7 +1,7 @@
 <div class="data_item_title">
   <ul>
     <% @pays.each do |k,v| %>
-      <li><%=OrderPayType::PAY_TYPES_NAME[k]%>：<%= v.to_i %></li>
+      <li><%=OrderPayType::PAY_TYPES_NAME[k]%>：<%= v.to_f.round(1) %></li>
     <%end%>
   </ul>
 </div>
@@ -18,7 +18,7 @@
                 "已退单"
               else
                 @pay_types[order.id].nil? ? "--"  :
-                  @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v}"}.join("&nbsp&nbsp&nbsp").html_safe
+                  @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(1)}"}.join("&nbsp&nbsp&nbsp").html_safe
               end%></li>
           </ul>
         </div>
@@ -50,7 +50,7 @@
                   <td><%= prod.pro_num %></td>
                   <td><%= prod.price %></td>
                   <td>0</td>
-                  <td><%= prod.pro_num*prod.price %></td>
+                  <td><%= prod.pro_num*(prod.price.nil? ? 0  : prod.price) %></td>
                 </tr>
               <% end if @order_prods[order.id] %>
             </tbody>

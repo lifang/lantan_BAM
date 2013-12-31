@@ -5,7 +5,7 @@ class OrderProdRelation < ActiveRecord::Base
   
   def self.order_products(orders)
     products = OrderProdRelation.find_by_sql(["select opr.order_id, opr.pro_num, opr.price, opr.return_types,
-   p.name,'产品/服务' p_types,0 s_types from order_prod_relations opr left join products p on p.id = opr.product_id
+   p.name,'产品/服务' p_types,0 s_types from order_prod_relations opr inner join products p on p.id = opr.product_id
         where opr.order_id in (?)", orders])
     @product_hash = {}
     products.each { |p| 

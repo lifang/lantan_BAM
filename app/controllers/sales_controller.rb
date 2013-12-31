@@ -29,14 +29,14 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]
     sale=Sale.create!(pams)
     flash[:notice] = "活动添加成功"
-    begin
-      if params[:img_url]
-        filename=Sale.upload_img(params[:img_url],sale.id,Constant::SALE_PICS,sale.store_id,Constant::SALE_PICSIZE)
-        sale.update_attributes(:img_url=>filename)
-      end
-    rescue
-      flash[:notice] ="图片上传失败，请重新添加！"
+    #    begin
+    if params[:img_url]
+      filename = upload_stream(params[:img_url],[Constant::SALE_PICS,sale.store_id,sale.id],Constant::SALE_PICSIZE)
+      sale.update_attributes(:img_url=>filename)
     end
+    #    rescue
+    #      flash[:notice] ="图片上传失败，请重新添加！"
+    #    end
     params[:sale_prod].each do |key,value|
       SaleProdRelation.create({:sale_id=>sale.id,:product_id=>key,:prod_num=>value})
     end
@@ -73,11 +73,11 @@ class SalesController < ApplicationController    #营销管理 -- 活动
       :discount=>params["disc_"+params[:discount]],:is_subsidy =>params[:subsidy], :disc_types=>params[:discount],:disc_time_types=>params[:disc_time]
     }
     flash[:notice] = "活动更新成功"
-    begin
-      pams.merge!({:img_url=>Sale.upload_img(params[:img_url],@sale.id,Constant::SALE_PICS,@sale.store_id,Constant::SALE_PICSIZE)}) if params[:img_url]
-    rescue
-      flash[:notice] ="图片上传失败，请重新添加！"
-    end
+    #    begin
+    pams.merge!({:img_url=>upload_stream(params[:img_url],[Constant::SALE_PICS,@sale.store_id,@sale.id],Constant::SALE_PICSIZE)}) if params[:img_url]
+    #    rescue
+    #      flash[:notice] ="图片上传失败，请重新添加！"
+    #    end
     pams.merge!({:started_at=>params[:started_at],:ended_at=>params[:ended_at]})  if params[:disc_time].to_i == Sale::DISC_TIME[:TIME]
     pams.merge!({:sub_content=>params[:sub_content]}) if params[:subsidy].to_i == Sale::SUBSIDY[:YES]
     @sale.update_attributes(pams)
@@ -101,5 +101,15 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   #活动详细页
   def show
     @sale=Sale.find(params[:id])
+  end
+  
+  def upload_stream(img_url,dirs,img_code=nil)
+    path = Constant::LOCAL_DIR + dirs.join("/")
+    FileUtils.remove_dir path
+    FileUtils.mkdir_p  path
+    dirs << "#{dirs[2]}img."+ img_url.original_filename.split(".").reverse[0]
+    path = Constant::LOCAL_DIR + dirs.join("/")
+    File.open(path, "wb")  {|f|f.write(img_url.read);}
+    return "/"+dirs.join("/")
   end
 end

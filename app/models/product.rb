@@ -35,7 +35,7 @@ class Product < ActiveRecord::Base
   scope :is_service, where(:is_service => true)
   scope :is_normal, where(:status => true)
   scope :commonly_used, where(:commonly_used => true)
-  PACK_SERVIE  = {0=>"产品服务套装"}
+  PACK_SERVIE  = {0=>"产品套装服务"}
   PACK ={:PACK => 0}
 
 

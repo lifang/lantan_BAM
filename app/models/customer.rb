@@ -218,10 +218,8 @@ class Customer < ActiveRecord::Base
         single_car_content = {}
         service_infos.each do |s|
           content_arr = s.split("-")
-          if content_arr.length == 3
-            p_pcards[r.k_id].each do |k,v|
-              single_car_content[content_arr[0].to_i] = [content_arr[1],v-content_arr[2].to_i] if v > content_arr[2].to_i
-            end
+          if content_arr.length == 3 && p_pcards[r.k_id][content_arr[0].to_i] > content_arr[2].to_i
+            single_car_content[content_arr[0].to_i] = [content_arr[1],p_pcards[r.k_id][content_arr[0].to_i]-content_arr[2].to_i]
           end
         end
         already_used_count[r.c_id] = single_car_content unless single_car_content.empty?

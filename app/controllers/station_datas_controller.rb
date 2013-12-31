@@ -9,8 +9,13 @@ class StationDatasController < ApplicationController
   end
 
   def new
-    @categories = Category.where(["types = ? and store_id = ? ", Category::TYPES[:service], @store.id])
-    @services = Product.is_normal.where(:category_id => @categories.map(&:id)).group_by { |p| p.category_id }
+    @categories = Category.where(["types = ? and store_id = ? ", Category::TYPES[:service], @store.id]).inject({}){|hash,c|hash[c.id]=c.name;hash};
+    @services = @categories.empty? ? {} : Product.is_normal.where(:category_id => @categories.keys).group_by { |p| p.category_id }
+    pack_serv = Product.is_normal.where(:category_id => Product::PACK[:PACK],:store_id=>@store.id)
+    unless pack_serv.blank?
+      @categories.merge!(Product::PACK_SERVIE)
+      @services.merge!(Product::PACK[:PACK]=>pack_serv)
+    end
     respond_to do |format|
       format.js
     end
@@ -40,10 +45,16 @@ class StationDatasController < ApplicationController
   end
 
   def edit
-    @categories = Category.where(["types = ? and store_id = ? ", Category::TYPES[:service], @store.id])
     @station = Station.find_by_id(params[:id].to_i)
     @has_services = @station.products.map(&:id)
-    @services = Product.is_normal.where(:category_id => @categories.map(&:id)).group_by { |p| p.category_id }
+    @categories = Category.where(["types = ? and store_id = ? ", Category::TYPES[:service], @store.id]).inject({}){|hash,c|hash[c.id]=c.name;hash};
+    @services = @categories.empty? ? {}:Product.is_normal.where(:category_id => @categories.keys).group_by { |p| p.category_id }
+    pack_serv = Product.is_normal.where(:category_id => Product::PACK[:PACK],:store_id=>@store.id)
+    unless pack_serv.blank?
+      @categories.merge!(Product::PACK_SERVIE)
+      @services.merge!(Product::PACK[:PACK]=>pack_serv)
+    end
+
     respond_to do |format|
       format.js
     end

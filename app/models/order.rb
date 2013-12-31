@@ -609,7 +609,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
           sale_prod_relations.each { |spr|
             ha[:products] << {:product_id => spr.product_id, :prod_num => spr.prod_num, :name => spr.name}
           }
-         sales << ha
+          sales << ha
         end
       end
     end if sale_ids
@@ -1146,7 +1146,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
 
   def return_order_materials # 取消订单后，退回产品或者服务相关物料数量
     order_products = self.order_prod_relations.group_by { |opr| opr.product_id }
-    if order_products  #如果是产品,则减掉要加回来
+    unless order_products.empty?  #如果是产品,则减掉要加回来
       materials = Material.find_by_sql(["select m.id, pmr.product_id from materials m inner join prod_mat_relations pmr
                 on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
                 where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])

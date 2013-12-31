@@ -27,18 +27,15 @@
         <div class="item_textarea">
           <label><span class='red'>*</span>服务：</label>
           <div class="item_rbox">
-            <% @categories.each do |c| %>
-              <dl>
-                <dt>o<%= c.name %></dt>
-                <% @services[c.id].each do |p| %>
-                <dd>
-                  <input type="checkbox" name="edit_product_ids[]" <% if @has_services.include?(p.id) %>checked<% end %>
-                         value="<%= p.id %>"/>
-                   <%= p.name %>
-                </dd>&nbsp;&nbsp;
-                <% end if @services[c.id] %>
-              </dl>
-            <% end %>
+            <dl>
+              <% @services.each do |k,v| %>
+                <dt><%=@categories[k] %></dt>
+                <%v.each do |p|%>
+                  <dd><input type="checkbox" name="edit_product_ids[]" value="<%= p.id %>"
+                             <% if @has_services.include?(p.id) %>checked<% end %> /><%= p.name %></dd>&nbsp;&nbsp;
+                  <%end%>
+                <% end unless @services.blank? %>
+            </dl>
           </div>
         </div>
       </div>

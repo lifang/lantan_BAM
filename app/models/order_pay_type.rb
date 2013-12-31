@@ -52,7 +52,7 @@ class OrderPayType < ActiveRecord::Base
         if param[:pay_order] && param[:pay_order][:return_ids]
           sql += " and id not in (#{param[:pay_order][:return_ids].join(',')})"
           return_orders = Order.where(:id=>param[:pay_order][:return_ids])
-          return_orders.update_all(:status=>Order::STATUS[:RETURN])
+          p return_orders.update_all(:status=>Order::STATUS[:RETURN])
           return_orders.each do|order|
             #如果是套餐卡退回使用次数
             order.return_order_pacard_num
@@ -120,7 +120,7 @@ class OrderPayType < ActiveRecord::Base
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : param[:pay_cash].to_i - param[:second_parm].to_i
             orders.each do |o|
               price = o_price[o.id].to_i
-              if price < 0
+              if price <=0
                 o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
               else
                 if price <= total_card
@@ -176,8 +176,8 @@ class OrderPayType < ActiveRecord::Base
               end
             end
             SvcardUseRecord.import sv_used, :timestamps=>true unless sv_used.blank?
-            cprs = CPcardRelation.joins(:package_card).where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID])
-            CPcardRelation.where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]
+            p cprs = CPcardRelation.joins(:package_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),
+              :status=>CPcardRelation::STATUS[:INVALID])
             #生成积分的记录
             c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(param[:store_id],param[:customer_id])
             if c_customer && c_customer.is_vip
@@ -201,8 +201,8 @@ class OrderPayType < ActiveRecord::Base
             MatOutOrder.import mat_outs unless mat_outs.blank?
             #更新订单提成
             pacrd_deduct = cprs.inject({}){|hash,c|hash[c.order_id] =(c.deduct_price ? c.deduct_price : 0)+(c.deduct_percent ? c.deduct_percent : 0);hash}
-            order_deduct = Order.joins(:order_prod_relations=>:product).select("ifnull(sum((deduct_price+deduct_percent)*pro_num),0) d_sum,
-            ifnull(sum((techin_price+techin_percent)*pro_num),0) t_sum,orders.id o_id").where(:"orders.id"=>order_ids).inject({}){|hash,o|
+            p order_deduct = Order.joins(:order_prod_relations=>:product).select("ifnull(sum((deduct_price+deduct_percent)*pro_num),0) d_sum,
+            ifnull(sum((techin_price+techin_percent)*pro_num),0) t_sum,orders.id o_id").where(:"orders.id"=>order_ids).group('orders.id').inject({}){|hash,o|
               hash["deduct"].nil? ? hash["deduct"]={o.o_id=>o.d_sum} : hash["deduct"][o.o_id]=o.d_sum;
               hash["techin"].nil? ? hash["techin"]={o.o_id=>o.t_sum} : hash["techin"][o.o_id]=o.t_sum;hash}
             orders.each {|order|
@@ -210,6 +210,7 @@ class OrderPayType < ActiveRecord::Base
                 :technician_deduct => order_deduct["techin"] && order_deduct["techin"][order.id]  ?  order_deduct["techin"][order.id]/2.0 : 0}
               order.update_attributes(deduct)
             }
+            CPcardRelation.where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]
           end
         end
       end

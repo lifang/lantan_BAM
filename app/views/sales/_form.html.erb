@@ -54,10 +54,8 @@
 <div class="releaseDiv">
   <div class="releaseDiv_l">活动图片：</div>
   <div class="releaseDiv_r">
-    <input type="file" name="img_url" id="img_url"   size="50px"/>
-    <span class="show_pic" >
-      <img src="<%=  @sale.img_url.nil? ? "" : @sale.img_url.gsub("img#{@sale.id}","img#{@sale.id}_#{Constant::SALE_PICSIZE[3]}") %>" />
-    </span>
+    <input type="hidden" value=""  name="file_size" id="file_size" />
+    <input type="file" name="img_url" id="img_url" onchange="$('#file_size').val(this.files[0].size.toFixed(2))"  size="50px"/>
   </div>
 </div>
 <div class="releaseDiv">
