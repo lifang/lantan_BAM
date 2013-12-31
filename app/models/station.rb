@@ -206,7 +206,9 @@ class Station < ActiveRecord::Base
     station_arr = []
     station_prod_ids = []
     prod_ids = prod_ids.collect{|p| p.to_i }
-    stations = Station.includes(:station_service_relations).where(:store_id => store_id, :status => Station::STAT[:NORMAL])
+    ssrs = StationStaffRelation.select("count(*) s_id,station_id").where(:current_day => Time.now.strftime("%Y%m%d").to_i, :store_id => store_id).group("station_id")
+    station_id = ssrs.inject([]){|h, s|h << s.station_id if s.s_id == 2;h}
+    stations = Station.includes(:station_service_relations).where(:"stations.store_id" => store_id, :"stations.status" => Station::STAT[:NORMAL], :"station_service_relations.station_id" => station_id)
     (stations || []).each do |station|
       if station.station_service_relations
         prods = station.station_service_relations.collect{|r| r.product_id }  #找出每个工位支持的服务

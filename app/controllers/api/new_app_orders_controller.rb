@@ -363,7 +363,8 @@ class Api::NewAppOrdersController < ApplicationController
         p = []
         unless product.nil?
           p << {:id => product.id, :name => product.name, :count => pram_str[1].to_i,
-            :price => product.sale_price, :show_price => product.sale_price * pram_str[1].to_i}
+            :price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f : 0,
+            :show_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f * pram_str[1].to_i : 0}
         end
       end
       work_orders = working_orders params[:store_id]
@@ -673,7 +674,8 @@ class Api::NewAppOrdersController < ApplicationController
             end
             unless product.nil?
               p << {:id => product.id, :name => product.name, :count => opr.pro_num,
-                :price => product.sale_price, :show_price => product.sale_price* opr.pro_num}
+                :price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : product.sale_price,
+                :show_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : product.sale_price* opr.pro_num}
             end
             #获取支持该产品的活动
             opname << product.name
@@ -713,7 +715,7 @@ class Api::NewAppOrdersController < ApplicationController
             sv_cards << {:svid => card.id, :svname => card.name, :svprice => card.price, :svtype => card.types, :is_new => 1,
               :show_price => card.price, :products => arr}
           end
-        elsif opcpc
+        elsif opcpc #如果是套餐卡
           card = PackageCard.find_by_id(opcpc.package_card_id)
           pitems = PcardProdRelation.find_by_sql(["select ppr.product_num num, p.name name,p.id id, p.sale_price sale_price
              from pcard_prod_relations ppr inner join products p on ppr.product_id=p.id where ppr.package_card_id=?", card.id])
@@ -808,9 +810,13 @@ class Api::NewAppOrdersController < ApplicationController
           if customer_savecard.password==Digest::MD5.hexdigest(params[:password].strip)
             if customer_savecard.left_price >= total_price
               SvcardUseRecord.create(:c_svc_relation_id => customer_savecard.id, :types => SvcardUseRecord::TYPES[:OUT],
-                :use_price => total_price, :left_price => customer_savecard.left_price - total_price)
+                :use_price => total_price, :left_price => customer_savecard.left_price - total_price,
+                :content => "#{total_price}产品付费")
               customer_savecard.update_attribute("left_price", customer_savecard.left_price - total_price)
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD], :price => total_price)
+              if customer_savecard.left_price <=0
+                customer_savecard.update_attribute("status", CSvcRelation::STATUS[:invalid])
+              end
             else
               status = 0
               msg = "余额不足!"
@@ -902,37 +908,56 @@ class Api::NewAppOrdersController < ApplicationController
               cprid = arr[-1].to_i
               cpr = CPcardRelation.find_by_id(cprid)
               cpr_content = cpr.content.split(",") #[2-产品1-22,56-服务2-3, 17-产品2-3]
-              a = []
+              acontent = []
               (cpr_content ||[]).each do |cc|
                 ccid = cc.split("-")[0].to_i
                 ccname = cc.split("-")[1]
                 cccount = cc.split("-")[2].to_i
                 if selected_prods[ccid]
-                  a << "#{ccid}-#{ccname}-#{cccount - selected_prods[ccid]}"
+                  acontent << "#{ccid}-#{ccname}-#{cccount - selected_prods[ccid]}"
                 else
-                  a << "#{ccid}-#{ccname}-#{cccount}"
+                  acontent << "#{ccid}-#{ccname}-#{cccount}"
                 end
               end
-              cpr.update_attribute("content", a.join(","))
+              cpr.update_attribute("content", acontent.join(","))
               c_pcard_relation_id << cpr.id
+              acount = 0
+              acontent.each do |a|
+                if a.split("-")[2].to_i != 0
+                  acount = 1
+                  break
+                end
+              end
+              if acount == 0
+                cpr.update_attribute("status", CPcardRelation::STATUS[:NOTIME])
+              end
             elsif arr[2].to_i==1  #如果是用户刚买的套餐卡，则要扣掉刚买的产品，并且更新客户-套餐卡关系
               pcard = PackageCard.find_by_id(pid)              
               deduct_price = deduct_price + (pcard.deduct_price.to_f + pcard.deduct_percent.to_f)
               cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", ocid,
                   pid, CPcardRelation::STATUS[:INVALID], order.id]).first
               cpr_content = cpr.content.split(",")
-              a = []
+              acontent = []
               (cpr_content ||[]).each do |cc|
                 ccid = cc.split("-")[0].to_i
                 ccname = cc.split("-")[1]
                 cccount = cc.split("-")[2].to_i
                 if selected_prods[ccid]
-                  a << "#{ccid}-#{ccname}-#{cccount - selected_prods[ccid]}"
+                  acontent << "#{ccid}-#{ccname}-#{cccount - selected_prods[ccid]}"
                 else
-                  a << "#{ccid}-#{ccname}-#{cccount}"
+                  acontent << "#{ccid}-#{ccname}-#{cccount}"
                 end
               end
-              cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL], :content => a.join(","), :customer_id => customer.id)
+              cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL], :content => acontent.join(","), :customer_id => customer.id)
+              acontent.each do |a|
+                if a.split("-")[2].to_i != 0
+                  acount = 1
+                  break
+                end
+              end
+              if acount == 0
+                cpr.update_attribute("status", CPcardRelation::STATUS[:NOTIME])
+              end
             end
             (selected_prods).each do |k, v|
               OPcardRelation.create(:order_id => order.id, :c_pcard_relation_id => cpr.id, :product_id => k, :product_num => v)
@@ -1155,10 +1180,17 @@ class Api::NewAppOrdersController < ApplicationController
       #        end
       #      end if opr
       cpr = CPcardRelation.find_by_status_and_order_id(CPcardRelation::STATUS[:INVALID], order.id)
+      oprs = OrderProdRelation.where(["order_id=?", order.id])
       if cpr
         pmr = PcardMaterialRelation.find_by_package_card_id(cpr.package_card_id)
         m = Material.find_by_id(pmr.material_id) if pmr
         m.update_attribute("storage", m.storage + pmr.material_num) if m
+      elsif oprs.any?
+        oprs.each do |opr|         
+          pmr = ProdMatRelation.find_by_product_id(opr.product_id)
+          m = Material.find_by_id(pmr.material_id) if pmr
+          m.update_attribute("storage", m.storage.to_i + pmr.material_num.to_i) if m
+        end
       end
       if order.update_attribute("status", Order::STATUS[:DELETED])
         order.work_orders.inject([]){|h,wo| wo.update_attribute("status", WorkOrder::STAT[:CANCELED])}

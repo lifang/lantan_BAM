@@ -78,7 +78,7 @@ class OrderProdRelation < ActiveRecord::Base
                 :code => MaterialOrder.material_order_code(store_id),
                 :car_num_id => car_num_id,
                 :status => Order::STATUS[:WAIT_PAYMENT],
-                :price => product.sale_price*p_num,
+                :price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f*p_num : 0,
                 :is_billing => false,
                 :front_staff_id =>staff_id,
                 :customer_id => cus_id,
@@ -90,9 +90,9 @@ class OrderProdRelation < ActiveRecord::Base
                 :order_id => order.id,
                 :product_id => p_id,
                 :pro_num => p_num,
-                :price => product.sale_price,
-                :total_price => product.sale_price*p_num,
-                :t_price => product.t_price*p_num
+                :price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price : 0,
+                :total_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f*p_num : 0,
+                :t_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.t_price.to_f*p_num : 0
               })
             arrange_time = Station.arrange_time(store_id,[p_id],order)          
             hash = Station.create_work_order(arrange_time[0], store_id,order, {}, arrange_time[2], product.cost_time*p_num)
