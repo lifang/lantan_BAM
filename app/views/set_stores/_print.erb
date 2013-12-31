@@ -52,7 +52,7 @@
         <%@order_pays.each do |k,v|%>
           <p><span class="span1"><%=OrderPayType::PAY_TYPES_NAME[k]%>：</span><span class="prod_span3"><%=v.to_f.round(1)%></span></p>
         <%end%>
-        <% if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH] %>
+        <% if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH] && controller.action_name == "print_paper"%>
           <p><span class="span1">实收：</span><span class="prod_span3"><%=@cash_pay.pay_cash.to_f.round(1)%></span></p>
           <p><span class="span1">找零：</span><span class="prod_span3"><%=@cash_pay.second_parm.to_f.round(1)%></span></p>
         <%end%>

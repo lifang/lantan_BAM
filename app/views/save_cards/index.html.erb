@@ -39,8 +39,16 @@
                     <td><%= format("%.1f", sc.sprice) if sc.sprice %></td>
                     <td><%= format("%.1f", sc.bprice + sc.mprice) if sc.bprice && sc.mprice%></td>
                     <td><%= sc.sdesc %></td>
-                    <td>
-                      <%= truncate(sc.cid.nil? ? "" : sc.cid.split(",").inject(Array.new){|arr,c| arr << @cname[c.to_i] if @cname[c.to_i] }.join(","), :length => 15) %>
+                    <% t_names = []
+                    if sc.cid
+                      sc.cid.split(",").each {|c| t_names << @cname[c.to_i] if @cname[c.to_i] }
+                    end
+                    if sc.p_id
+                      sc.p_id.split(",").each{|c| t_names << @pname[c.to_i] if @pname[c.to_i] }
+                    end
+                  %>
+                    <td><%= sc.p_id%>
+                      <%= truncate(t_names.join(","), :length => 15) %>
                     </td>
                     <td><%= SvCard::S_USE_RANGE[sc.srange] %></td>
                     <td>
@@ -76,8 +84,16 @@
                       <td><%= format("%.1f", sc.sprice) if sc.sprice %></td>
                       <td><%= format("%.1f", sc.bprice + sc.mprice) if sc.bprice && sc.mprice %></td>
                       <td><%= sc.sdesc %></td>
+                      <% t_names = []
+                      if sc.cid
+                        sc.cid.split(",").each {|c| t_names << @cname[c.to_i] if @cname[c.to_i] }
+                      end
+                      if sc.p_id
+                        sc.p_id.split(",").each{|c| t_names << @pname[c.to_i] if @pname[c.to_i] }
+                      end
+                    %>
                       <td>
-                        <%= truncate(sc.cid.nil? ? "" : sc.cid.split(",").inject(Array.new){|arr,c| arr << @cname[c.to_i] if @cname[c.to_i] }.join(","), :length => 15) %>
+                        <%= truncate(t_names.join(","), :length => 15) %>
                       </td>
                       <td><%= SvCard::S_USE_RANGE[sc.srange] %>
                       </td>

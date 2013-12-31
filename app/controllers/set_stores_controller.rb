@@ -78,7 +78,7 @@ class SetStoresController < ApplicationController
     @orders = orders.group_by{|i|{:c_name=>i.c_name,:c_num=>i.c_num,:tel=>i.mobilephone,:g_name=>i.group_name,:c_id=>i.c_id,:n_id=>i.n_id} }
     @order_pays = OrderPayType.search_pay_order(orders.map(&:id))
     staff_ids = (orders.map(&:cons_staff_id_1)|orders.map(&:cons_staff_id_2)|orders.map(&:front_staff_id)).compact.uniq
-    staff_ids.delete 0
+    staff_ids.delete 0  #莫名其妙多出来staff_id为0的数据 没找到原因  目前只能排除掉
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @stations = Station.find(orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
   end
@@ -92,14 +92,22 @@ class SetStoresController < ApplicationController
     prod_ids = OrderProdRelation.joins(:product).where(:order_id=>@orders.map(&:id)).select("products.category_id").map(&:category_id)
     @cates = Category.where(:store_id=>params[:store_id],:types=>[Category::TYPES[:good], Category::TYPES[:service]]).inject(Hash.new){|hash,c|
       hash[c.id]=c.name;hash}
+    sv_pcard = CPcardRelation.joins(:package_card).select("package_card_id p_id").where(:customer_id=>params[:customer_id],:order_id=>@orders.map(&:id),
+      :status=>CPcardRelation::STATUS[:INVALID]).map(&:p_id)
     @sv_card = []
-    unless prod_ids.blank?
+    unless prod_ids.blank? && sv_pcard.blank?
       sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:customer_id=>@customer.id,:"sv_cards.types" => SvCard::FAVOR[:SAVE]).where("
       c_svc_relations.status=#{CSvcRelation::STATUS[:valid]} or order_id in (#{@orders.map(&:id).join(',')})").select("c_svc_relations.*,sv_cards.name,
-      sv_cards.store_id,svcard_prod_relations.category_id ci,c_svc_relations.status sa,order_id o_id").where("sv_cards.store_id=#{params[:store_id]}")
+      sv_cards.store_id,svcard_prod_relations.category_id ci,svcard_prod_relations.pcard_ids pid,c_svc_relations.status sa,order_id o_id").where("sv_cards.store_id=#{params[:store_id]}")
       sv_cards.each do |sv|
         prod_ids.each do |ca|
           if sv.ci  and sv.ci.split(",").include? "#{ca}"
+            @sv_card  << sv
+            break
+          end
+        end
+        sv_pcard.each do |p_id|
+          if sv.pid  and sv.pid.split(",").include? "#{p_id}"
             @sv_card  << sv
             break
           end
@@ -110,7 +118,7 @@ class SetStoresController < ApplicationController
   end
 
   def pay_order
-    @may_pay = OrderPayType.deal_order(request.parameters)
+    p @may_pay = OrderPayType.deal_order(request.parameters)
     about_cash(params[:store_id])  if @may_pay[0]
   end
 
@@ -140,9 +148,6 @@ class SetStoresController < ApplicationController
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(order.id)
     @order_pays = OrderPayType.search_pay_types(order.id)
-    if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH]
-      @cash_pay =OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
-    end
   end
 
 end

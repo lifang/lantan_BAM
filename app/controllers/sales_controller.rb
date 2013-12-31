@@ -112,7 +112,7 @@ class SalesController < ApplicationController    #营销管理 -- 活动
     filename = img_url.original_filename.split(".")
     dirs << "#{filename[0].pinyin.push(dirs[2]).join("")}."+ filename.reverse[0]
     path = Constant::LOCAL_DIR + dirs.join("/")
-    File.open(path, "wb")  {|f|f.write(img_url.read);}
+    File.open(path, "wb")  {|f|f.write(img_url.read)}
     return "/"+dirs.join("/")
   end
 end

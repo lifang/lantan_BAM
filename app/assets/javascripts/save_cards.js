@@ -3,7 +3,7 @@ function new_save_card(){   //新建储值卡
 }
 
 function create_save_card_valid(obj){
-    var checked_len = $("input[name='scard_category[]']:checked").length;
+    var checked_len = $("input[id*='sv_card_']:checked").length;
     var name = $.trim($("#scard_name").val());
     var img = $.trim($("#scard_img").val());
     var s_money = $.trim($("#scard_started_money").val());
@@ -55,7 +55,7 @@ function edit_save_card(store_id, cid){
 
 function update_save_card_valid(obj){
     var name = $.trim($("#edit_scard_name").val());
-    var checked_len = $("input[name='edit_scard_category[]']:checked").length;
+    var checked_len = $("input[id*='sv_card_']:checked").length;
     var s_money = $.trim($("#edit_scard_started_money").val());
     var e_money = $.trim($("#edit_scard_ended_money").val());
     var desc = $.trim($("#edit_scard_desc").val());

@@ -1084,7 +1084,7 @@ a.compile_btn { width: 100px;}
 .data_item { margin-bottom: 10px; border: 1px #CCCCCC solid;}
 .data_item_title { 
     padding-left: 10px; 
-    height: 32px;
+    height: 64px;
     line-height: 32px;
     background: url("/assets/tab_head_bg.jpg") repeat-x;
     color: #930205;
