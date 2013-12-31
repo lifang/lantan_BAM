@@ -363,7 +363,8 @@ class Api::NewAppOrdersController < ApplicationController
         p = []
         unless product.nil?
           p << {:id => product.id, :name => product.name, :count => pram_str[1].to_i,
-            :price => product.sale_price, :show_price => product.sale_price * pram_str[1].to_i}
+            :price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f : 0,
+            :show_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f * pram_str[1].to_i : 0}
         end
       end
       work_orders = working_orders params[:store_id]
@@ -673,7 +674,8 @@ class Api::NewAppOrdersController < ApplicationController
             end
             unless product.nil?
               p << {:id => product.id, :name => product.name, :count => opr.pro_num,
-                :price => product.sale_price, :show_price => product.sale_price* opr.pro_num}
+                :price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : product.sale_price,
+                :show_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : product.sale_price* opr.pro_num}
             end
             #获取支持该产品的活动
             opname << product.name
