@@ -15,17 +15,27 @@
             <% end %>
           </select>
         </div>
-        <fieldset class="popup_body_fieldset">
-          <legend class="popup_body_title"><span class="red">*</span>适用项目</legend>
-          <div class="popup_body_result" style="height:160px;">
-            <ul>
+        <div class="item_textarea">
+          <label><span class='red'>*</span>适用项目：</label>
+          <div class="item_rbox">
+            <dl>
+              <dt><%= "产品/服务:" %></dt>
               <% @types.each do |t| %>
-                <li><input type="checkbox" value="<%= t.id %>" name="edit_scard_category[]"
-                           <% @save_card.cid.split(",").each do |cid| %><% if cid.to_i==t.id %>checked<% end %><% end if @save_card.cid %>/><%= t.name %></li>
-              <% end %>
-            </ul>
+                <dd><input type="checkbox" value="<%= t.id %>" name="edit_scard_category[]" id="sv_card_<%=t.id%>"
+                   <% if !@save_card.cid.nil? and  @save_card.cid.split(",").include? "#{t.id}" %> checked <%end%>         />
+                  <%= t.name %></dd>&nbsp;&nbsp;
+              <%end unless @types.blank?%>
+            </dl>
+            <dl>
+              <dt><%= "套餐卡:" %></dt>
+              <% @pcard.each do |p| %>
+                <dd><input type="checkbox" value="<%= p.id %>" name="edit_pcard_category[]" id="sv_card_<%=p.id%>"
+                           <% if  !@save_card.p_id.nil? and @save_card.p_id.split(",").include? "#{p.id}" %>checked<%end%>/>
+                  <%= p.name %></dd>&nbsp;&nbsp;
+              <%end unless @pcard.blank?%>
+            </dl>
           </div>
-        </fieldset>
+        </div>
         <div class="item_textarea">
           <label><span class="red">*</span>图片：</label>
           <input type="file" class="file" name="edit_scard_img" id="edit_scard_img"/>

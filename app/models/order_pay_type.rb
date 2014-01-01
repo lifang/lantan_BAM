@@ -4,7 +4,7 @@ class OrderPayType < ActiveRecord::Base
 
   PAY_TYPES = {:CASH => 0, :CREDIT_CARD => 1, :SV_CARD => 2, 
     :PACJAGE_CARD => 3, :SALE => 4, :IS_FREE => 5, :DISCOUNT_CARD => 6,:FAVOUR =>7,:CLEAR =>8,:HANG =>9} #0 现金  1 刷卡  2 储值卡   3 套餐卡  4  活动优惠  5免单
-  PAY_TYPES_NAME = {0 => "现金", 1 => "刷卡", 2 => "储值卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单", 6 => "打折卡",7=>"付款优惠",8=>"清零",9=>"挂账"}
+  PAY_TYPES_NAME = {0 => "现金", 1 => "刷卡", 2 => "储值卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单", 6 => "打折卡",7=>"付款优惠",8=>"抹零",9=>"挂账"}
   LOSS = [PAY_TYPES[:PACJAGE_CARD],PAY_TYPES[:SALE],PAY_TYPES[:DISCOUNT_CARD],PAY_TYPES[:FAVOUR],PAY_TYPES[:CLEAR]]
   
   def self.order_pay_types(orders)
@@ -32,7 +32,7 @@ class OrderPayType < ActiveRecord::Base
     may_pay,card_price,msg,orders,is_billing = true,{},"",[],param[:pay_order][:is_billing].to_i
     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
       store = Store.find param[:store_id]
-      if store.limited_password.nil?  or store.limited_password == Digest::MD5.hexdigest(param[:pay_cash])
+      if store.limited_password.nil?  or store.limited_password != Digest::MD5.hexdigest(param[:pay_cash])
         may_pay,msg = false,"免单密码有误！"
       end
     end
@@ -65,6 +65,8 @@ class OrderPayType < ActiveRecord::Base
           :car_num_id=>param[:car_num_id]).where(sql)
         unless orders.blank?
           order_ids,total_card = orders.map(&:id),0
+          cprs = CPcardRelation.joins(:package_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>order_ids,
+            :status=>CPcardRelation::STATUS[:INVALID])
           loss_orders = param[:pay_order] && param[:pay_order][:loss_ids] ?  param[:pay_order][:loss_ids] : {}
           clear_value = param[:pay_order] && param[:pay_order][:clear_value] ? param[:pay_order][:clear_value].to_i : 0
           order_pays = OrderPayType.search_pay_order(order_ids)
@@ -73,15 +75,18 @@ class OrderPayType < ActiveRecord::Base
           o_price = orders.inject(Hash.new){|hash,o|hash[o.id]= o.price-(loss_orders["#{o.id}"].nil? ? 0 : loss_orders["#{o.id}"].to_i)-(order_pays[o.id] ?  order_pays[o.id] : 0);hash}
           if param[:pay_order] && param[:pay_order][:text]   #如果使用储值卡
             sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:id=>param[:pay_order][:text].keys).
-              select("c_svc_relations.*,sv_cards.name,sv_cards.store_id,svcard_prod_relations.category_id ci,sv_cards.id s_id").where("sv_cards.store_id=#{param[:store_id]}")
+              select("c_svc_relations.*,sv_cards.name,sv_cards.store_id,svcard_prod_relations.category_id ci,svcard_prod_relations.pcard_ids pid,
+              sv_cards.id s_id").where("sv_cards.store_id=#{param[:store_id]}")
             is_suit = false
+            sv_pcard = cprs.inject({}){|h,p|h[p.order_id]=p.package_card_id;h}
             sv_cards.each do |ca|
               t_price = 0
               orders.each do |o|
-                t_price += o_price[o.id] if ca.ci.split(',').include? "#{prod_ids[o.id]}"
+                t_price += o_price[o.id] if ca.ci.split(',').include? "#{prod_ids[o.id]}" or ca.pid.split(',').include? "#{sv_pcard[o.id]}"
               end
               if card_price[ca.s_id] > t_price
                 is_suit = true
+                break 
               end
               total_card += card_price[ca.s_id]
             end
@@ -144,6 +149,7 @@ class OrderPayType < ActiveRecord::Base
                     end
                     parms = {:order_id=>o.id,:price=>(price- total_card-clear_value).to_i,:pay_type=>param[:pay_type].to_i}
                     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
+                      p "999"
                       parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                       cash_price -= (price-total_card-clear_value)
@@ -176,8 +182,7 @@ class OrderPayType < ActiveRecord::Base
               end
             end
             SvcardUseRecord.import sv_used, :timestamps=>true unless sv_used.blank?
-            p cprs = CPcardRelation.joins(:package_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),
-              :status=>CPcardRelation::STATUS[:INVALID])
+          
             #生成积分的记录
             c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(param[:store_id],param[:customer_id])
             if c_customer && c_customer.is_vip

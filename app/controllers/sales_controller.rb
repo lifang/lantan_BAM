@@ -2,7 +2,8 @@
 class SalesController < ApplicationController    #营销管理 -- 活动
   before_filter :sign?
   layout 'sale'
-
+  require "toPinyin"
+  
   #活动列表
   def index
     @sales=Sale.paginate_by_sql("select s.id,name,s.store_id,s.started_at,s.everycar_times,s.disc_time_types,s.ended_at,s.code,s.status
@@ -105,11 +106,12 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   
   def upload_stream(img_url,dirs,img_code=nil)
     path = Constant::LOCAL_DIR + dirs.join("/")
-    FileUtils.remove_dir path
-    FileUtils.mkdir_p  path
-    dirs << "#{dirs[2]}img."+ img_url.original_filename.split(".").reverse[0]
+    FileUtils.remove_dir path if  File.directory? path
+    FileUtils.mkdir_p  path unless  File.directory? path
+    filename = img_url.original_filename.split(".")
+    dirs << "#{filename[0].pinyin.push(dirs[2]).join("")}."+ filename.reverse[0]
     path = Constant::LOCAL_DIR + dirs.join("/")
-    File.open(path, "wb")  {|f|f.write(img_url.read);}
+    File.open(path, "wb")  {|f|f.write(img_url.read)}
     return "/"+dirs.join("/")
   end
 end

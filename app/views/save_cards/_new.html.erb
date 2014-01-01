@@ -14,16 +14,23 @@
             <% end %>
           </select>
         </div>
-        <fieldset class="popup_body_fieldset">
-          <legend class="popup_body_title"><span class="red">*</span>适用项目</legend>
-          <div class="popup_body_result" style="height:160px;">
-            <ul>
+        <div class="item_textarea">
+          <label><span class='red'>*</span>适用项目：</label>
+          <div class="item_rbox">
+            <dl>
+              <dt><%= "产品/服务:" %></dt>
               <% @types.each do |t| %>
-                <li><input type="checkbox" value="<%= t.id %>" name="scard_category[]"/><%= t.name %></li>
-              <% end %>
-            </ul>
+                <dd><input type="checkbox" value="<%= t.id %>" name="scard_category[]" id="sv_card_<%=t.id%>"/><%= t.name %></dd>&nbsp;&nbsp;
+              <%end unless @types.blank?%>
+            </dl>
+            <dl>
+              <dt><%= "套餐卡:" %></dt>
+              <% @pcard.each do |p| %>
+                <dd><input type="checkbox" value="<%= p.id %>" name="pcard_category[]" id="sv_card_<%=p.id%>"/><%= p.name %></dd>&nbsp;&nbsp;
+              <%end unless @pcard.blank?%>
+            </dl>
           </div>
-        </fieldset>
+        </div>
         <div class="item_textarea">
           <label><span class="red">*</span>图片：</label>
           <input type="file" name="scard_img" id="scard_img"/>
