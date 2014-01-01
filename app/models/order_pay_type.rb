@@ -70,7 +70,7 @@ class OrderPayType < ActiveRecord::Base
         if param[:pay_order] && param[:pay_order][:return_ids]
           sql += " and id not in (#{param[:pay_order][:return_ids].join(',')})"
           return_orders = Order.where(:id=>param[:pay_order][:return_ids])
-          p return_orders.update_all(:status=>Order::STATUS[:RETURN])
+          p return_orders.update_all(:status=>Order::STATUS[:RETURN],:return_types=>Order::IS_RETURN[:YES])
           return_orders.each do|order|
             #如果是套餐卡退回使用次数
             order.return_order_pacard_num
@@ -100,7 +100,9 @@ class OrderPayType < ActiveRecord::Base
             sv_cards.each do |ca|
               t_price = 0
               orders.each do |o|
-                t_price += o_price[o.id] if ca.ci.split(',').include? "#{prod_ids[o.id]}" or ca.pid.split(',').include? "#{sv_pcard[o.id]}"
+                if (ca.ci and ca.ci.split(',').include? "#{prod_ids[o.id]}") or (ca.pid and ca.pid.split(',').include? "#{sv_pcard[o.id]}")
+                  t_price += o_price[o.id]
+                end
               end
               if card_price[ca.s_id] > t_price
                 is_suit = true

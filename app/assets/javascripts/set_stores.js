@@ -408,9 +408,9 @@ function confirm_pay(store_id,c_id,n_id){
                 tishi_alert("请求验证权限！");
                 return false;
             }
-            if(parseInt(pay_type) == 9){   //如果使用挂账支付
-                pay_cash = left_pay;
-            }
+        }
+        if(parseInt(pay_type) == 9){   //如果使用挂账支付
+            pay_cash = left_pay;
         }
         var pay_order = set_pay_order();
         if (pay_order[0]){
@@ -463,8 +463,11 @@ function single_order_print(store_id){
 
 
 function calulate_v(pay_type){
-    var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
-    var left_pay = parseInt($.trim($("#left_pay").html()));
-    var  v = (pay_cash-left_pay) >0 ? pay_cash-left_pay : 0
-    $("#change_"+pay_type).val(v);
+    if (parseInt(pay_type) == 0){
+        var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
+        var left_pay = parseInt($.trim($("#left_pay").html()));
+        var  v = (pay_cash-left_pay) >0 ? pay_cash-left_pay : 0
+        $("#change_"+pay_type).val(v);
+    }
+ 
 }

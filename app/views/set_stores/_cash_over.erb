@@ -44,21 +44,21 @@
               </tr>
             </thead>
             <tbody>
+              <% loss = @pay_types[order.id].nil? ? 0 : @pay_types[order.id].select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n} %>
+              <%  fact = order.price>loss ? order.price-loss : 0%>
               <%@order_prods[order.id].each do |prod|%>
                 <tr>
                   <td><%= prod.name %></td>
                   <td><%= prod.pro_num %></td>
                   <td><%= prod.price %></td>
-                  <% loss = @pay_types[order.id].nil? ? 0 : @pay_types[order.id].select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n} %>
                   <td><%=  loss  %></td>
-                  <%  fact = order.price>loss ? order.price-loss : 0%>
                   <td><%= fact %></td>
                 </tr>
               <% end if @order_prods[order.id] %>
             </tbody>
           </table>
           <div class="accounts">
-            <ul><li>总计：<%= order.price %></li></ul>
+            <ul><li>总计：<%= fact %></li></ul>
           </div>
         </div>
       </div>
