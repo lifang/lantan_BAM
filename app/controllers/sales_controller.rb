@@ -6,7 +6,6 @@ class SalesController < ApplicationController    #营销管理 -- 活动
   
   #活动列表
   def index
-    p " 活动列表".pinyin
     @sales=Sale.paginate_by_sql("select s.id,name,s.store_id,s.started_at,s.everycar_times,s.disc_time_types,s.ended_at,s.code,s.status
     from sales s where s.store_id=#{params[:store_id]} and s.status !=#{Sale::STATUS[:DESTROY]} order by s.created_at desc ", :page => params[:page], :per_page => Constant::PER_PAGE)
     @orders = Order.select("sale_id,count(id) num").where(:store_id=>params[:store_id],:status=>[Order::STATUS[:BEEN_PAYMENT],Order::STATUS[:FINISHED]]).

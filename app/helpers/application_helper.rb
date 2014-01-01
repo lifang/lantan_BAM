@@ -130,8 +130,9 @@ module ApplicationHelper
 
   def satisfy
     orders = Order.find(:all, :select => "is_pleased", 
-      :conditions => [" store_id = ? and status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and created_at > ? and created_at < ?",
-        params[:store_id].to_i, Time.mktime(Time.now.year, Time.now.mon-1, 1), Time.mktime(Time.now.year, Time.now.mon, 1)])
+      :conditions => [" store_id = ? and status in (#{Order::STATUS[:BEEN_PAYMENT]}, #{Order::STATUS[:FINISHED]}) and 
+       date_format(created_at,'%Y-%m-%d') >= ? and date_format(created_at,'%Y-%m-%d') <= ?",
+        params[:store_id].to_i,Time.now.months_ago(1).beginning_of_month.strftime("%Y-%m-%d"), Time.now.months_ago(1).end_of_month.strftime("%Y-%m-%d")])
     un_pleased_size = 0
     orders.collect { |o| un_pleased_size += 1 if o.is_pleased == Order::IS_PLEASED[:BAD] }
     pleased = orders.size == 0 ? 0 : (orders.size - un_pleased_size)*100/orders.size

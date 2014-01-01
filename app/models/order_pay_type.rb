@@ -65,7 +65,7 @@ class OrderPayType < ActiveRecord::Base
           :car_num_id=>param[:car_num_id]).where(sql)
         unless orders.blank?
           order_ids,total_card = orders.map(&:id),0
-          p cprs = CPcardRelation.joins(:package_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>order_ids,
+          cprs = CPcardRelation.joins(:package_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>order_ids,
             :status=>CPcardRelation::STATUS[:INVALID])
           loss_orders = param[:pay_order] && param[:pay_order][:loss_ids] ?  param[:pay_order][:loss_ids] : {}
           clear_value = param[:pay_order] && param[:pay_order][:clear_value] ? param[:pay_order][:clear_value].to_i : 0
@@ -78,7 +78,7 @@ class OrderPayType < ActiveRecord::Base
               select("c_svc_relations.*,sv_cards.name,sv_cards.store_id,svcard_prod_relations.category_id ci,svcard_prod_relations.pcard_ids pid,
               sv_cards.id s_id").where("sv_cards.store_id=#{param[:store_id]}")
             is_suit = false
-            sv_pcard = cprs.each({}){|h,p|h[p.order_id]=p.package_card_id;h}
+            sv_pcard = cprs.inject({}){|h,p|h[p.order_id]=p.package_card_id;h}
             sv_cards.each do |ca|
               t_price = 0
               orders.each do |o|
@@ -86,7 +86,7 @@ class OrderPayType < ActiveRecord::Base
               end
               if card_price[ca.s_id] > t_price
                 is_suit = true
-                break
+                break 
               end
               total_card += card_price[ca.s_id]
             end
@@ -149,6 +149,7 @@ class OrderPayType < ActiveRecord::Base
                     end
                     parms = {:order_id=>o.id,:price=>(price- total_card-clear_value).to_i,:pay_type=>param[:pay_type].to_i}
                     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
+                      p "999"
                       parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                       cash_price -= (price-total_card-clear_value)

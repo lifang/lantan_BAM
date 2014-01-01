@@ -30,7 +30,7 @@
       <%@orders.each do |order|%>
         <% if @order_prods[order.id] %>
           <div class="dashed"></div>
-          <p><label>ID：</label><span><%=order.code%></span></p>
+          <p><label>ID:</label><span><%=order.code%></span></p>
           <p><label>开单员：</label><span><%=@staffs[order.front_staff_id]%></span></p>
           <% tech = [@staffs[order.cons_staff_id_1],@staffs[order.cons_staff_id_2]].compact.uniq %>
           <%unless tech.blank? %>
@@ -52,7 +52,7 @@
         <%@order_pays.each do |k,v|%>
           <p><span class="span1"><%=OrderPayType::PAY_TYPES_NAME[k]%>：</span><span class="prod_span3"><%=v.to_f.round(1)%></span></p>
         <%end%>
-        <% if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH] && controller.action_name == "print_paper"%>
+        <% if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH] and controller.action_name == "print_paper"%>
           <p><span class="span1">实收：</span><span class="prod_span3"><%=@cash_pay.pay_cash.to_f.round(1)%></span></p>
           <p><span class="span1">找零：</span><span class="prod_span3"><%=@cash_pay.second_parm.to_f.round(1)%></span></p>
         <%end%>
