@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131231054227) do
+ActiveRecord::Schema.define(:version => 20140101032711) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -544,6 +544,7 @@ ActiveRecord::Schema.define(:version => 20131231054227) do
     t.integer  "product_num"
     t.integer  "pay_cash",    :default => 0
     t.string   "second_parm", :default => "0"
+    t.integer  "pay_status",  :default => 0
   end
 
   add_index "order_pay_types", ["created_at"], :name => "index_order_pay_types_on_created_at"

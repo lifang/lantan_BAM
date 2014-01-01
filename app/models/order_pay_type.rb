@@ -6,6 +6,7 @@ class OrderPayType < ActiveRecord::Base
     :PACJAGE_CARD => 3, :SALE => 4, :IS_FREE => 5, :DISCOUNT_CARD => 6,:FAVOUR =>7,:CLEAR =>8,:HANG =>9} #0 现金  1 刷卡  2 储值卡   3 套餐卡  4  活动优惠  5免单
   PAY_TYPES_NAME = {0 => "现金", 1 => "刷卡", 2 => "储值卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单", 6 => "打折卡",7=>"付款优惠",8=>"抹零",9=>"挂账"}
   LOSS = [PAY_TYPES[:PACJAGE_CARD],PAY_TYPES[:SALE],PAY_TYPES[:DISCOUNT_CARD],PAY_TYPES[:FAVOUR],PAY_TYPES[:CLEAR]]
+  PAY_STATUS = {:UNCOMPLETE =>0,:COMPLETE =>1} #0 挂账未结账  1  已结账
   
   def self.order_pay_types(orders)
     return OrderPayType.find(:all, :conditions => ["order_id in (?)", orders]).inject(Hash.new){|hash,t|
@@ -34,6 +35,23 @@ class OrderPayType < ActiveRecord::Base
       store = Store.find param[:store_id]
       if store.limited_password.nil?  or store.limited_password != Digest::MD5.hexdigest(param[:pay_cash])
         may_pay,msg = false,"免单密码有误！"
+      end
+    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]
+      customer = Customer.find param[:customer_id]
+      if customer.allowed_debts == Customer::ALLOWED_DEBTS[:NO]
+        may_pay,msg = false,"该客户不允许挂账！"
+      else
+        pay_type = OrderPayType.joins(:order=>:customer).select("ifnull(sum(order_pay_types.price),0) total_price,
+        ifnull(min(date_format(order_pay_types.created_at,'%Y-%m-%d')),date_format(now(),'%Y-%m-%d')) min_time").where(
+          :pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
+          :"orders.customer_id"=>param[:customer_id],:"orders.store_id"=>param[:store_id]).first
+        time = customer.check_type == Customer::CHECK_TYPE[:MONTH] ? pay_type.min_time.to_date+customer.check_time.months : pay_type.min_time.to_date+customer.check_time.weeks
+        if Time.now > time
+          may_pay,msg = false,"上一个周期未付款，不能挂账！"
+        end
+        if customer.debts_money < (param[:pay_cash].to_i +pay_type.total_price.to_i)
+          may_pay,msg = false,"挂账额度余额为#{customer.debts_money-pay_type.total_price.to_i}！"
+        end
       end
     end
     if may_pay && param[:pay_order] && param[:pay_order][:text]   #验证密码
@@ -86,7 +104,7 @@ class OrderPayType < ActiveRecord::Base
               end
               if card_price[ca.s_id] > t_price
                 is_suit = true
-                break 
+                break
               end
               total_card += card_price[ca.s_id]
             end
@@ -149,7 +167,6 @@ class OrderPayType < ActiveRecord::Base
                     end
                     parms = {:order_id=>o.id,:price=>(price- total_card-clear_value).to_i,:pay_type=>param[:pay_type].to_i}
                     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
-                      p "999"
                       parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                       cash_price -= (price-total_card-clear_value)

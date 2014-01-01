@@ -39,7 +39,7 @@
                 <td>项目</td>
                 <td>数量</td>
                 <td>单价</td>
-                <td>折扣</td>
+                <td>优惠</td>
                 <td>合计</td>
               </tr>
             </thead>
@@ -49,16 +49,16 @@
                   <td><%= prod.name %></td>
                   <td><%= prod.pro_num %></td>
                   <td><%= prod.price %></td>
-                  <td>0</td>
-                  <td><%= prod.pro_num*(prod.price.nil? ? 0  : prod.price) %></td>
+                  <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_i  %>
+                  <td><%=  loss  %></td>
+                  <%  fact = order.price>loss ? order.price-loss : 0%>
+                  <td><%= fact %></td>
                 </tr>
               <% end if @order_prods[order.id] %>
             </tbody>
           </table>
           <div class="accounts">
-            <ul>
-              <li>总计：<%= order.price %></li>
-            </ul>
+            <ul><li>总计：<%= order.price %></li></ul>
           </div>
         </div>
       </div>
