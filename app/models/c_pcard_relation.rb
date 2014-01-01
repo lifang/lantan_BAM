@@ -87,6 +87,7 @@ class CPcardRelation < ActiveRecord::Base
         ha[:ptype] = 2
         ha[:is_new] = 0
         ha[:show_price] = 0
+        ha[:status] = 0
         ha[:products] = []
         items = p.content.split(",")    #447-0927mat1-2,448-0927mat2-2
         items.each do |i|           #i=447-0927mat1-2

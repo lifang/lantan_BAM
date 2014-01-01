@@ -308,7 +308,7 @@ LantanBAM::Application.routes.draw do
     #新的app
     resources :new_app_orders do
       collection do
-        post :customer_pcards, :package_make_order, :pcard_make_order_commit
+        post :customer_pcards, :package_make_order, :pcard_make_order_commit, :pcard_order_info
         post :make_order2, :complaint, :quickly_make_order, :pay_order_no_auth
         post :make_order
         post :search, :sync_orders_and_customer
