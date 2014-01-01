@@ -85,7 +85,11 @@ class WorkOrder < ActiveRecord::Base
             gas_num =  gas_num.nil? ? 0 : gas_num/2.0
             w_record.update_attributes(:construct_num=>c_num+1,:water_num=>w_num+water_num,:gas_num=>g_num+gas_num)} unless w_records.blank?
         end
-        order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order && order.status != Order::STATUS[:BEEN_PAYMENT] && order.status != Order::STATUS[:FINISHED]
+        if order && order.c_pcard_relation_id.nil?
+          order.update_attribute(:status, Order::STATUS[:WAIT_PAYMENT]) if order.status != Order::STATUS[:BEEN_PAYMENT] && order.status != Order::STATUS[:FINISHED]
+        elsif order && !order.c_pcard_relation_id.nil?
+          order.update_attribute(:status, Order::STATUS[:PCARD_PAY]) if order.status != Order::STATUS[:BEEN_PAYMENT] && order.status != Order::STATUS[:FINISHED]
+        end
       end
 
       orders = Order.includes(:work_orders).where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").

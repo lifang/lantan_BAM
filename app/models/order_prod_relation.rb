@@ -95,7 +95,7 @@ class OrderProdRelation < ActiveRecord::Base
                 :t_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.t_price.to_f*p_num : 0
               })
             arrange_time = Station.arrange_time(store_id,[p_id],order)          
-            hash = Station.create_work_order(arrange_time[0], store_id,order, {}, arrange_time[2], product.cost_time*p_num)
+            hash = Station.create_work_order(arrange_time[0], store_id,order, {}, arrange_time[2], product.cost_time.to_i*p_num)
             order.update_attributes(hash)
             if !pmrs.blank?   #如果选择的服务是需要消耗物料的，则要将对应的物料库存减去
               pmrs.each do |p|
@@ -120,7 +120,7 @@ class OrderProdRelation < ActiveRecord::Base
               :code => MaterialOrder.material_order_code(store_id),
               :car_num_id => car_num_id,
               :status => Order::STATUS[:WAIT_PAYMENT],
-              :price => product.sale_price*p_num,
+              :price => product.sale_price.to_f*p_num,
               :is_billing => false,
               :front_staff_id =>staff_id,
               :customer_id => cus_id,
@@ -133,8 +133,8 @@ class OrderProdRelation < ActiveRecord::Base
               :product_id => p_id,
               :pro_num => p_num,
               :price => product.sale_price,
-              :total_price => product.sale_price*p_num,
-              :t_price => product.t_price*p_num
+              :total_price => product.sale_price.to_f*p_num,
+              :t_price => product.t_price.to_f*p_num
             })
         else
           status=0

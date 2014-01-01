@@ -18,5 +18,15 @@ class CarNum < ActiveRecord::Base
     customer.birth = customer.birth.strftime("%Y-%m-%d")  if customer && customer.birth
     customer
   end
-  
+
+  def self.get_customer_info_by_phone(store_id, phone)
+    sql = ["select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,c.property property,c.group_name group_name,
+      c.sex
+      from customers c inner join customer_store_relations csr on csr.customer_id = c.id where c.mobilephone = ?
+      and c.status=#{Customer::STATUS[:NOMAL]} and csr.store_id in (?)", phone, StoreChainsRelation.return_chain_stores(store_id)]
+    customer = CustomerNumRelation.find_by_sql sql
+    customer = customer[0]
+    customer.birth = customer.birth.strftime("%Y-%m-%d")  if customer && customer.birth
+    customer
+  end
 end

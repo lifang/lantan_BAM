@@ -963,7 +963,7 @@ class Api::NewAppOrdersController < ApplicationController
               OPcardRelation.create(:order_id => order.id, :c_pcard_relation_id => cpr.id, :product_id => k, :product_num => v)
               product = Product.find_by_id(k)
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-                :price => product.sale_price * v, :product_id => k, :product_num => v)
+                :price => product.sale_price.to_f * v, :product_id => k, :product_num => v)
             end if selected_prods.length > 0
           end
         end if prods
@@ -1167,18 +1167,6 @@ class Api::NewAppOrdersController < ApplicationController
   def cancel_order
     Order.transaction do
       order = Order.find_by_id(params[:order_id].to_i)
-      #      opr = order.order_prod_relations
-      #      opr.each do |o|
-      #        pid = o.product_id
-      #        pnum = o.pro_num
-      #        pmrs = ProdMatRelation.where(["product_id = ?", pid])
-      #        pmrs.each do |pmr|
-      #          mnum = pmr.material_num
-      #          mid = pmr.material_id
-      #          mater = Material.find_by_id(mid)
-      #          mater.update_attribute("storage", mater.storage+(pnum * mnum))
-      #        end
-      #      end if opr
       cpr = CPcardRelation.find_by_status_and_order_id(CPcardRelation::STATUS[:INVALID], order.id)
       oprs = OrderProdRelation.where(["order_id=?", order.id])
       if cpr
@@ -1186,13 +1174,16 @@ class Api::NewAppOrdersController < ApplicationController
         m = Material.find_by_id(pmr.material_id) if pmr
         m.update_attribute("storage", m.storage + pmr.material_num) if m
       elsif oprs.any?
-        oprs.each do |opr|         
-          pmr = ProdMatRelation.find_by_product_id(opr.product_id)
-          m = Material.find_by_id(pmr.material_id) if pmr
-          m.update_attribute("storage", m.storage.to_i + pmr.material_num.to_i) if m
+        oprs.each do |opr|
+          product = Product.find_by_id(opr.product_id)
+          if product.is_service == Product::PROD_TYPES[:PRODUCT]
+            pmr = ProdMatRelation.find_by_product_id(product.id)
+            m = Material.find_by_id(pmr.material_id) if pmr
+            m.update_attribute("storage", m.storage.to_i + (pmr.material_num.to_i * opr.pro_num.to_i)) if m
+          end
         end
       end
-      if order.update_attribute("status", Order::STATUS[:DELETED])
+      if order.update_attribute("status", Order::STATUS[:RETURN])
         order.work_orders.inject([]){|h,wo| wo.update_attribute("status", WorkOrder::STAT[:CANCELED])}
         work_orders = working_orders params[:store_id]
         render :json => {:status => 1, :msg => "退单成功!", :orders => work_orders}
@@ -1205,8 +1196,206 @@ class Api::NewAppOrdersController < ApplicationController
     complaint = Complaint.mk_record(params[:store_id],params[:order_id],params[:reason],params[:request],0)
     render :json => {:status => (complaint.nil? ? 0 : 1)}
   end
+  
+  #输入车牌或者电话号码查看客户的套餐卡列表
+  def customer_pcards
+    status = 1
+    msg = ""
+    num_phone = params[:num].nil? ? nil : params[:num].strip
+    #phone = params[:phone].nil? ? nil : params[:phone].strip
+    store_id = params[:store_id].to_i
+    type = params[:type].to_i
+    package_cards = []
+    if type == 0
+      customer = CarNum.get_customer_info_by_carnum(store_id, num_phone) if num_phone
+      if customer.nil?
+        status = 0
+        msg = "没有找到对应的客户!"
+      else
+        cpcards = CPcardRelation.where(["customer_id =? and DATE_FORMAT(ended_at, '%Y%m%d') >= ? and status =?", customer.customer_id,
+            Time.now.strftime("%Y%m%d"), CPcardRelation::STATUS[:NORMAL]])
+        if cpcards.blank?
+          status = 2
+          msg = "该客户没有有效的套餐卡!"        
+        end
+      end
+    elsif type == 1
+      customer = CarNum.get_customer_info_by_phone(store_id, num_phone) if num_phone
+      if customer.nil?
+        status = 0
+        msg = "没有找到对应的客户!"
+      else
+        cpcards = CPcardRelation.where(["customer_id =? and DATE_FORMAT(ended_at, '%Y%m%d') >= ? and status =?", customer.customer_id,
+            Time.now.strftime("%Y%m%d"), CPcardRelation::STATUS[:NORMAL]])
+        if cpcards.blank?
+          status = 2
+          msg = "该客户没有有效的套餐卡!"
+        end
+      end
+    end
+    if status == 1 || status == 2
+      if status == 1
+        opr = OPcardRelation.select("ifnull(sum(product_num),0) num,c_pcard_relation_id,product_id").where(:c_pcard_relation_id => cpcards.map(&:id) ).
+          group('c_pcard_relation_id,product_id').inject([]){|a,o| a << "#{o.c_pcard_relation_id}-#{o.product_id}-#{o.num}" if o.num != 0;a}
+        cpcards.each do |cpcard|
+          p = {}
+          p_array = []
+          card = PackageCard.find_by_id(cpcard.package_card_id)
+          cpcard.content.split(",").each do |c|
+            product = Product.find_by_id(c.split("-")[0].to_i)
+            pmr = ProdMatRelation.find_by_sql(["select pmr.material_num num,m.storage from prod_mat_relations pmr left join materials m on
+            pmr.material_id=m.id and m.storage>0 where pmr.product_id=?", c.split("-")[0].to_i])
+            array = []
+            pmr.each do |pm|
+              array << pm.storage.to_i / pm.num
+            end if pmr
+            hash = {}
+            hash[:mat_num] = array.min.nil? ? nil : array.min
+            hash[:name] = product.name
+            hash[:id] = product.id
+            hash[:leftNum] = c.split("-")[2].to_i
+            opr.each do |op|
+              if op.split("-")[1].to_i == c.split("-")[0].to_i
+                hash[:useNum] = op.split("-")[2].to_i
+              end
+            end
+            hash[:selected] = 1
+            p_array << hash
+          end
+          p[:products] = p_array
+          p[:cpard_relation_id] = cpcard.id
+          p[:ended_at] = cpcard.ended_at.nil? ? nil : cpcard.ended_at.strftime("%Y-%m-%d")
+          p[:id] = card.id
+          p[:name] = card.name
+          package_cards << p
+        end
+      end
+      user = {
+        :cid => customer.customer_id,
+        :cname => customer.name ,
+        :cmoilephone =>customer.mobilephone,
+        :cproperty => customer.property.to_i,
+        :cgroup_name => customer.property.to_i==0 ? nil : customer.group_name,
+        :cmodel => type == 0 ? customer.model_name : nil,
+        :cbrand => type == 0 ? customer.brand_name : nil
+      }
+    end
+    render :json => {:status => status, :msg => msg, :package_cards => package_cards, :user => user}
+  end
 
-  def working_orders(store_id)
+  #通过套餐卡直接下单
+  def package_make_order
+    cprid = params[:cprid].to_i
+    store_id = params[:store_id].to_i
+    cid = params[:customer_id].to_i
+    num = params[:num].nil? ? nil : params[:num].strip
+    product_id = params[:product_id].to_i
+    staff_id = params[:staff_id].to_i
+    Order.transaction do
+      cn = CarNum.find_by_num(num) if num
+      if cn.nil?  #如果没有该车牌的记录，则新建记录并且将该车牌关联到这个客户名下
+        cn = CarNum.create(:num => num)
+        CustomerNumRelation.create(:customer_id => cid, :car_num_id => cn.id)
+        relation = CustomerStoreRelation.find_by_store_id_and_customer_id(store_id, cid)
+        CustomerStoreRelations.create(:customer_id => cid, :store_id => store_id) unless relation
+      end
+      create_result = OrderProdRelation.make_record(product_id, 1, staff_id, cid, cn.id, store_id)
+      status = create_result[0]
+      msg = create_result[1]
+      product = create_result[2]
+      order = create_result[3]
+      if status == 1
+        if product.is_service
+          order.update_attributes(:is_free => 0, :c_pcard_relation_id => "#{cprid}",:customer_id => cid)
+        else
+          order.update_attributes(:is_free => 0, :c_pcard_relation_id => "#{cprid}",
+            :status => Order::STATUS[:PCARD_PAY], :customer_id => cid)
+        end
+      end
+      work_orders = status==0 ? nil : working_orders(store_id)
+      render :json => {:status => status, :msg => msg, :orders => work_orders}
+    end
+  end
+
+  #套餐卡消费,确定付款或退单
+  def pcard_make_order_commit
+    type = params[:type].to_i
+    status = 1
+    msg = ""
+    Order.transaction do
+      order = Order.find_by_id(params[:order_id].to_i)
+      if type ==0 #退单
+       
+        if order && (order.c_pcard_relation_id.nil? || order.c_pcard_relation_id.to_i == 0 || order.c_pcard_relation_id.split(",").length > 1)
+          status = 0
+          msg = "数据错误!"
+        else
+          order.update_attribute("status", Order::STATUS[:RETURN])
+          order.work_orders.inject([]){|h,wo| wo.update_attribute("status", WorkOrder::STAT[:CANCELED])}
+          oprs = OrderProdRelation.where(["order_id=?", order.id])
+          oprs.each do |opr|
+            product = Product.find_by_id(opr.product_id)
+            if product.is_service == Product::PROD_TYPES[:PRODUCT]
+              pmr = ProdMatRelation.find_by_product_id(product.id)
+              m = Material.find_by_id(pmr.material_id) if pmr
+              m.update_attribute("storage", m.storage.to_i + (pmr.material_num.to_i * opr.pro_num.to_i)) if m
+            end
+          end if oprs
+        end
+      elsif type == 1 #付款
+        if order && (order.c_pcard_relation_id.nil? || order.c_pcard_relation_id.to_i == 0 || order.c_pcard_relation_id.split(",").length > 1)
+          status = 0
+          msg = "数据错误!"
+        else
+          
+          cpcard = CPcardRelation.find_by_id(order.c_pcard_relation_id.split(",")[0].to_i)
+          if cpcard.nil?
+            status = 0
+            msg = "数据错误!"
+          else
+            array = []
+            opr = OrderProdRelation.find_by_order_id(order.id)  #获取该订单所包含的products，并判断该套餐卡是否有能力支付这些products
+            product = Product.find_by_id(opr.product_id)
+            cpcard.content.split(",").each do |c|
+              if c.split("-")[0].to_i == opr.product_id
+                if c.split("-")[2].to_i < opr.pro_num
+                  status = 0
+                  msg = "该套餐卡剩余次数不足以支付该订单所包含的产品!"
+                else
+                  array << "#{c.split("-")[0].to_i}-#{c.split("-")[1].to_i}-#{c.split("-")[2].to_i - opr.pro_num}"
+                end
+              else
+                array << c
+              end
+            end
+            if status == 1
+              order.update_attributes(:status => Order::STATUS[:FINISHED],
+                :front_deduct => (product.deduct_percent.to_f + product.deduct_price.to_f) * opr.pro_num,
+                :technician_deduct => (product.techin_price.to_f + product.techin_percent.to_f) * opr.pro_num * 0.5)
+              cpcard.update_attribute("content", array.join(","))
+              OPcardRelation.create(:order_id => order.id, :c_pcard_relation_id => cpcard.id, :product_id => opr.product_id,
+                :product_num => opr.pro_num)
+              flag = true
+              array.each do |a|
+                if a.split("-")[2].to_i != 0
+                  flag = false
+                  break
+                end
+              end
+              if flag #如果这个套餐卡次数全用光了，则把他的status设为已用完
+                cpcard.update_attribute("status", CPcardRelation::STATUS[:NOTIME])
+              end
+
+            end
+          end
+        end
+      end
+      work_orders = working_orders params[:store_id]
+      render :json => {:status => status, :msg => msg, :orders => work_orders}
+    end
+  end
+
+  def working_orders (store_id)
     orders = Order.working_orders store_id.to_i
     orders = combin_orders(orders)
     orders = new_app_order_by_status(orders)

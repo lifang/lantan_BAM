@@ -15,9 +15,9 @@ class Order < ActiveRecord::Base
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
   STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6,
-    :RETURN => 7, :COMMIT => 8}
+    :RETURN => 7, :COMMIT => 8, :PCARD_PAY => 9}
   STATUS_NAME = {0 => "等待中", 1 => "服务中", 2 => "等待付款", 3 => "已经付款", 4 => "免单", 5 => "已删除" , 6 => "未分配工位",
-    7 =>"退单", 8 => "已确认，未付款(后台付款)"}
+    7 =>"退单", 8 => "已确认，未付款(后台付款)", 9 => "套餐卡下单,等待付款"}
   #0 正常未进行  1 服务中  2 等待付款  3 已经付款  4 已结束  5已删除  6未分配工位 7 退单
   CASH =[STATUS[:NORMAL],STATUS[:SERVICING],STATUS[:WAIT_PAYMENT],STATUS[:COMMIT]]
   OVER_CASH = [STATUS[:BEEN_PAYMENT],STATUS[:FINISHED],STATUS[:RETURN]]
@@ -141,7 +141,7 @@ class Order < ActiveRecord::Base
     return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status from orders o inner join car_nums c on c.id=o.car_num_id
       inner join customers cu on cu.id=o.customer_id left join work_orders wo on wo.order_id = o.id
 and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
-      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}, #{STATUS[:COMMIT]})
+      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}, #{STATUS[:COMMIT]}, #{STATUS[:PCARD_PAY]})
       and DATE_FORMAT(o.created_at, '%Y%m%d')=DATE_FORMAT(NOW(), '%Y%m%d') and cu.status=? and o.store_id = ? order by o.status", Customer::STATUS[:NOMAL], store_id])
   end
 
