@@ -64,6 +64,7 @@ class SetStoresController < ApplicationController
     @orders = orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     p @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
     @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
+    @order_pays = OrderPayType.search_pay_order(orders.map(&:id))
     staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
