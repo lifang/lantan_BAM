@@ -1,8 +1,8 @@
 <div class="data_item_title">
-  <ul>
-    <% @pays.each do |k,v| %>
-      <li><%=OrderPayType::PAY_TYPES_NAME[k]%>：<%= v.to_f.round(1) %></li>
-    <%end%>
+  <ul title="<%=  @pays.map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}：#{v.to_f.round(1)}"}.join("&nbsp&nbsp&nbsp").html_safe%>">
+    <% li_arr = [];
+    @pays.map{|k,v|li_arr << "<li>#{OrderPayType::PAY_TYPES_NAME[k]}：#{v.to_f.round(1)}</li>"}%>
+    <%= li_arr[0..6].join("&nbsp&nbsp&nbsp").html_safe %>
   </ul>
 </div>
 <% @orders.each do|order| %>
@@ -49,7 +49,7 @@
                   <td><%= prod.name %></td>
                   <td><%= prod.pro_num %></td>
                   <td><%= prod.price %></td>
-                  <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_i  %>
+                  <% loss = @pay_types[order.id].nil? ? 0 : @pay_types[order.id].select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n} %>
                   <td><%=  loss  %></td>
                   <%  fact = order.price>loss ? order.price-loss : 0%>
                   <td><%= fact %></td>
