@@ -1324,8 +1324,7 @@ class Api::NewAppOrdersController < ApplicationController
     msg = ""
     Order.transaction do
       order = Order.find_by_id(params[:order_id].to_i)
-      if type ==0 #退单
-       
+      if type ==0 #退单      
         if order && (order.c_pcard_relation_id.nil? || order.c_pcard_relation_id.to_i == 0 || order.c_pcard_relation_id.split(",").length > 1)
           status = 0
           msg = "数据错误!"
@@ -1346,8 +1345,7 @@ class Api::NewAppOrdersController < ApplicationController
         if order && (order.c_pcard_relation_id.nil? || order.c_pcard_relation_id.to_i == 0 || order.c_pcard_relation_id.split(",").length > 1)
           status = 0
           msg = "数据错误!"
-        else
-          
+        else          
           cpcard = CPcardRelation.find_by_id(order.c_pcard_relation_id.split(",")[0].to_i)
           if cpcard.nil?
             status = 0
@@ -1362,16 +1360,21 @@ class Api::NewAppOrdersController < ApplicationController
                   status = 0
                   msg = "该套餐卡剩余次数不足以支付该订单所包含的产品!"
                 else
-                  array << "#{c.split("-")[0].to_i}-#{c.split("-")[1].to_i}-#{c.split("-")[2].to_i - opr.pro_num}"
+                  array << "#{c.split("-")[0].to_i}-#{c.split("-")[1]}-#{c.split("-")[2].to_i - opr.pro_num}"
                 end
               else
                 array << c
               end
             end
             if status == 1
-              order.update_attributes(:status => Order::STATUS[:FINISHED],
+              order.update_attributes(:status => Order::STATUS[:BEEN_PAYMENT],
                 :front_deduct => (product.deduct_percent.to_f + product.deduct_price.to_f) * opr.pro_num,
                 :technician_deduct => (product.techin_price.to_f + product.techin_percent.to_f) * opr.pro_num * 0.5)
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD], :price => order.price)
+              work_order = WorkOrder.find_by_order_id(order.id)
+              if work_order
+                work_order.update_attribute("status", WorkOrder::STAT[:COMPLETE])
+              end
               cpcard.update_attribute("content", array.join(","))
               OPcardRelation.create(:order_id => order.id, :c_pcard_relation_id => cpcard.id, :product_id => opr.product_id,
                 :product_num => opr.pro_num)
