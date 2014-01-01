@@ -468,7 +468,6 @@ function calulate_v(pay_type){
         var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
         var left_pay = parseInt($.trim($("#left_pay").html()));
         var  v = pay_cash>left_pay ? pay_cash-left_pay : 0;
-        alert(v);
         $("#change_"+pay_type).val(v);
     }
 }

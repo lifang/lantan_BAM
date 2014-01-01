@@ -48,8 +48,7 @@ class OrderPayType < ActiveRecord::Base
         time = customer.check_type == Customer::CHECK_TYPE[:MONTH] ? pay_type.min_time.to_date+customer.check_time.months : pay_type.min_time.to_date+customer.check_time.weeks
         if Time.now > time
           may_pay,msg = false,"上一个周期未付款，不能挂账！"
-        end
-        if customer.debts_money < (param[:pay_cash].to_i +pay_type.total_price.to_i)
+        elsif customer.debts_money < (param[:pay_cash].to_i + pay_type.total_price.to_i)
           may_pay,msg = false,"挂账额度余额为#{customer.debts_money-pay_type.total_price.to_i}！"
         end
       end

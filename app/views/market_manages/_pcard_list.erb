@@ -15,14 +15,14 @@
               <tr class="fws">
                 <td width="320px">商品名称</td>
                 <td>商品编号</td>
-                <td>免费性质</td>
+                <td>付款方式</td>
                 <td>数量</td>
                 <td>合计（元）</td>
               </tr>
               <%prod[1].each_with_index do |pro,index|%>
                 <tr>
-                  <td><%= @products[pro.product_id].name %></td>
-                  <td><%= @products[pro.product_id].service_code %></td>
+                  <td><%= @products[pro.product_id].nil? ? "--" : @products[pro.product_id].name %></td>
+                  <td><%= @products[pro.product_id].nil? ? "--" : @products[pro.product_id].service_code %></td>
                   <td><%= OrderPayType::PAY_TYPES_NAME[pro.pay_type] %></td>
                   <td><%= pro.prod_num.nil? ? "--" : pro.prod_num %></td>
                   <td><%= format("%.2f",pro.sum) %></td>
