@@ -843,19 +843,18 @@ class Api::NewAppOrdersController < ApplicationController
           customer.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip, :mobilephone => params[:phone].nil? ? nil : params[:phone].strip,
             :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
             :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
-        else  #如果该电话号码已被用，则查出这个客户，并且把这个车牌关联到这个客户下，并且删除原来的客户
+        else  #如果该电话号码已被用，则查出这个客户，并且把原来客户的所有车牌关联到这个客户下，并且删除原来的客户
           customer2.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip,
             :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
             :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
-          cnr2 = CustomerNumRelation.find_by_customer_id_and_car_num_id(customer2.id, car_num.id)
+          #cnr2 = CustomerNumRelation.find_by_customer_id_and_car_num_id(customer2.id, car_num.id)
           ncsr = CustomerStoreRelation.find_by_customer_id_and_store_id(customer2.id, params[:store_id].to_i)
-          CustomerNumRelation.create(:customer_id => customer2.id, :car_num_id => car_num.id) unless cnr2
+          #CustomerNumRelation.create(:customer_id => customer2.id, :car_num_id => car_num.id) unless cnr2
           CustomerStoreRelation.create(:customer_id => customer2.id, :store_id => params[:store_id].to_i) unless ncsr
-
-          CustomerNumRelation.delete_all(:customer_id => customer.id, :car_num_id => car_num.id)
-          ocsr = customer.customer_store_relations
+          customer.customer_num_relations.inject([]){|h, cnr| cnr.update_attribute("customer_id", customer2.id)}
+          #CustomerNumRelation.delete_all(:customer_id => customer.id, :car_num_id => car_num.id)
+          CustomerStoreRelation.delete_all(:customer_id => customer.id)
           customer.destroy
-          ocsr.delete_all if ocsr
           customer = customer2
         end
       else
@@ -946,6 +945,10 @@ class Api::NewAppOrdersController < ApplicationController
                 else
                   csr.update_attributes(:status => CSvcRelation::STATUS[:valid], :is_billing => is_billing, :customer_id => customer.id)
                   c_svc_relation_id << csr.id
+                  csr = CustomerStoreRelation.find_by_customer_id_and_store_id(customer.id, params[:store_id].to_i)
+                  if csr && !csr.is_vip
+                    csr.update_attribute("is_vip", CustomerStoreRelation::IS_VIP[:YES])
+                  end
                 end
               end
             elsif  arr[2].to_i==1 && arr[3].to_i==1 #如果是新买的储值卡，则更新储值卡-用户关联关系
@@ -960,6 +963,10 @@ class Api::NewAppOrdersController < ApplicationController
                   :password => Digest::MD5.hexdigest(arr[-1].strip))
                 SvcardUseRecord.create(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,
                   :left_price => csr.left_price, :content => "购买"+"#{save_c.name}")
+                csr = CustomerStoreRelation.find_by_customer_id_and_store_id(customer.id, params[:store_id].to_i)
+                if csr && !csr.is_vip
+                  csr.update_attribute("is_vip", CustomerStoreRelation::IS_VIP[:YES])
+                end
               end
             end
           elsif prod.split("_")[0].to_i==3  #如果是套餐卡
@@ -1018,13 +1025,18 @@ class Api::NewAppOrdersController < ApplicationController
                 end
               end
               cpr.update_attributes(:status => CPcardRelation::STATUS[:NORMAL], :content => acontent.join(","), :customer_id => customer.id)
+              csr = CustomerStoreRelation.find_by_customer_id_and_store_id(customer.id, params[:store_id].to_i)
+              if csr && !csr.is_vip
+                csr.update_attribute("is_vip", CustomerStoreRelation::IS_VIP[:YES])
+              end
+              acount = 0
               acontent.each do |a|
                 if a.split("-")[2].to_i != 0
                   acount = 1
                   break
                 end
               end
-              if acount == 0
+              if acount == 0    #如果客户的这个套餐卡次数用光了，则将这个套餐卡关闭
                 cpr.update_attribute("status", CPcardRelation::STATUS[:NOTIME])
               end
             end
@@ -1089,23 +1101,23 @@ class Api::NewAppOrdersController < ApplicationController
       status = 1
       msg = "付款成功!"
       prods = params[:prods].split(",") #[0_255_2_200, 1_47_255=20, 2_322_0_0_16=200_128, 3_111_0_16=2_147]
-#      prods.each do |prod|
-#        if prod.split("_")[0].to_i==3
-#          arr = prod.split("_")
-#          if arr[2].to_i==1  #如果用户买了新的套餐卡，则要判断该卡需不需要消耗物料，并且该物料库存是否足够
-#            pid = arr[1].to_i
-#            pmrs = PcardMaterialRelation.find_by_sql(["select pmr.material_num mnum, m.storage storage from pcard_material_relations
-#                 pmr inner join materials m on pmr.material_id=m.id where pmr.package_card_id=?#", pid])
-#            pmrs.each do |pmr|
-#              if pmr.mnum > pmr.storage
-#                status = 0
-#                msg = "您购买的套餐卡所需的物料库存不足!"
-#                break
-#              end
-#            end if pmrs
-#          end
-#        end
-#      end
+      #      prods.each do |prod|
+      #        if prod.split("_")[0].to_i==3
+      #          arr = prod.split("_")
+      #          if arr[2].to_i==1  #如果用户买了新的套餐卡，则要判断该卡需不需要消耗物料，并且该物料库存是否足够
+      #            pid = arr[1].to_i
+      #            pmrs = PcardMaterialRelation.find_by_sql(["select pmr.material_num mnum, m.storage storage from pcard_material_relations
+      #                 pmr inner join materials m on pmr.material_id=m.id where pmr.package_card_id=?#", pid])
+      #            pmrs.each do |pmr|
+      #              if pmr.mnum > pmr.storage
+      #                status = 0
+      #                msg = "您购买的套餐卡所需的物料库存不足!"
+      #                break
+      #              end
+      #            end if pmrs
+      #          end
+      #        end
+      #      end
       if status==1
         c_pcard_relation_id = []
         c_svc_relation_id = []
@@ -1195,8 +1207,8 @@ class Api::NewAppOrdersController < ApplicationController
             elsif arr[2].to_i==1  #如果是用户刚买的套餐卡，则要扣掉刚买的产品，并且生成客户-套餐卡关系
               pcard = PackageCard.find_by_id(pid)
               pmr = PcardMaterialRelation.find_by_package_card_id(pid)
-#              material = Material.find_by_id(pmr.material_id) if pmr
-#              material.update_attribute("storage", material.storage - pmr.material_num) if material
+              #              material = Material.find_by_id(pmr.material_id) if pmr
+              #              material.update_attribute("storage", material.storage - pmr.material_num) if material
               deduct_price = deduct_price + (pcard.deduct_price.to_f + pcard.deduct_percent.to_f)
               cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", ocid,
                   pid, CPcardRelation::STATUS[:INVALID], order.id]).first
