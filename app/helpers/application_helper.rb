@@ -226,4 +226,9 @@ module ApplicationHelper
     @violations = ViolationReward.joins(:staff).where(:status => false).where("staffs.store_id=#{params[:store_id]}")
   end
 
+  #保留金额的两位小数
+  def limit_float(num)
+    return (num*100).to_i/100.0
+  end
+  
 end

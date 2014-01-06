@@ -42,19 +42,19 @@
             <p class="tit"><span class="prod_span">品名</span><span class="prod_span1">数量</span>&nbsp;<span class="prod_span2">金额</span></p>
             <% num = o_prod.pro_num.nil? ? 0 : o_prod.pro_num %>
             <% price = o_prod.price.nil? ? 0 : o_prod.price %>
-            <p><span class="prod_span"><%=o_prod.name%></span><span class="prod_span1"><%=num%></span>&nbsp;<span class="prod_span2"><%=(num*price).to_f.round(1)%></span></p>
+            <p><span class="prod_span"><%=o_prod.name%></span><span class="prod_span1"><%=num.to_f.round(2)%></span>&nbsp;<span class="prod_span2"><%=(num*price).to_f.round(2)%></span></p>
           </div>
         <%end%>
       <%end%>
       <div class="dashed"><span class="lineTxt">综合</span></div>
       <div class="detail">
-        <p class="tit"><span class="span1">合计：</span><span class="prod_span3"><%=@orders.map(&:price).inject(0){|sum,num|sum+num}.to_f.round(1)%></span></p>
+        <p class="tit"><span class="span1">合计：</span><span class="prod_span3"><%=@orders.map(&:price).inject(0){|sum,num|sum+num}.to_f.round(2)%></span></p>
         <%@order_pays.each do |k,v|%>
-          <p><span class="span1"><%=OrderPayType::PAY_TYPES_NAME[k]%>：</span><span class="prod_span3"><%=v.to_f.round(1)%></span></p>
+          <p><span class="span1"><%=OrderPayType::PAY_TYPES_NAME[k]%>：</span><span class="prod_span3"><%=v.to_f.round(2)%></span></p>
         <%end%>
         <% if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH] and controller.action_name == "print_paper"%>
-          <p><span class="span1">实收：</span><span class="prod_span3"><%=@cash_pay.pay_cash.to_f.round(1)%></span></p>
-          <p><span class="span1">找零：</span><span class="prod_span3"><%=@cash_pay.second_parm.to_f.round(1)%></span></p>
+          <p><span class="span1">实收：</span><span class="prod_span3"><%=@cash_pay.pay_cash.to_f.round(2)%></span></p>
+          <p><span class="span1">找零：</span><span class="prod_span3"><%=@cash_pay.second_parm.to_f.round(2)%></span></p>
         <%end%>
       </div>
       <div class="solid"></div>

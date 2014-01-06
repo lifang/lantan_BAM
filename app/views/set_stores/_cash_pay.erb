@@ -29,8 +29,8 @@
       <tbody>
         <% @orders.each do |order| %>
           <tr>
-            <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_i  %>
-            <%  fact = order.price>loss ? order.price-loss : 0%>
+            <% loss =limit_float(@order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_f)  %>
+            <%  fact = limit_float(order.price>loss ? order.price-loss : 0)%>
             <td style="display: none" id="return_order_<%=order.id%>">
               <input type="hidden" value="<%= fact  %>" id="loss_<%= order.id %>" />
               <input type="checkbox" id="l_<%=order.id%>" onclick="return_check(this)" />
@@ -40,13 +40,13 @@
               <% prod = @order_prods[order.id][0] %>
               <td><%= prod.name %></td>
               <td><%= prod.pro_num %></td>
-              <td><%= prod.price %></td>
+              <td><%= limit_float(prod.price) %></td>
             <%else%>
               <td><%= "--" %></td>
               <td><%= "--" %></td>
               <td><%= "--" %></td>
             <%end%>
-            <td><%= order.price %></td>
+            <td><%= limit_float(order.price) %></td>
             <td><%= loss %></td>
             <td><%= fact %></td>
             <td style="display: none" id="input_<%= order.id %>">
@@ -71,7 +71,7 @@
         </div>
       </div>
       <div class="accountsTab_pay_item">
-        <label>可用余额：<span id="left_<%= card.id %>"><%= card.left_price %></span></label>
+        <label>可用余额：<span id="left_<%= card.id %>"><%= limit_float(card.left_price) %></span></label>
       </div>
       <div class="accountsTab_pay_item">
         <label>本单：</label><input onblur="check_num()" value="0" type="text" id="order_<%=card.id%>" disabled />
@@ -86,10 +86,10 @@
   <ul>
     <%total = @orders.map(&:price).inject(0){|sum,num|sum+num} %>
     <%reward = @order_pays.select{|k,v| @orders.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
-    <% fact_fee = total > reward ? (total-reward).to_i : 0 %>
+    <% fact_fee = limit_float(total > reward ? (total-reward) : 0) %>
     <li>应付金额：<span id="due_pay"><%= fact_fee%></span>
       <span id="hidden_pay" style="display:none"><%=fact_fee%></span>
-      <span style="float: right"><input id="clear_per" type="checkbox"  onclick="change_pay(this)"
+      <span style="float: right;display: none;"><input id="clear_per" type="checkbox"  onclick="change_pay(this)"
                                         <%if fact_fee <=10 %> disabled <%end%> />抹零</span>
       <input type="hidden" value="0" id="clear_value" />
     </li>
@@ -136,7 +136,7 @@
     </div>
   </div>
   <div class="btn_box">
-    <button class="confirm_btn" id="confirm_order" onclick="confirm_pay(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)">确定</button>
+    <button class="confirm_btn" id="confirm_order" onclick="confirm_pay_order(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)">确定</button>
     <input type="checkbox" id="is_biling">发票</input></div>
 </div>
 

@@ -151,7 +151,7 @@ module Constant
       #:edit_depot => ["编辑仓库",2048],
       #:del_depot => ["删除仓库",4096],
       :edit_store_datas => ["设置门店信息", 8192],
-      :edit_limited_pwd =>["设置免单权限",8192*2]
+      :edit_limited_pwd =>["设置免单密码",8192*2]
     },
     :pay_cash => {
       :name=> "收银",
