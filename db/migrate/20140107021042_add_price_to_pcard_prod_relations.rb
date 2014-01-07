@@ -1,5 +1,5 @@
 class AddPriceToPcardProdRelations < ActiveRecord::Migration
   def change
-    add_column :pcard_prod_relations, :price, :"float(20,2)",:default=>0
+    add_column :package_cards, :sale_percent, :"decimal(20,16)",:default=>1
   end
 end

@@ -90,7 +90,6 @@ class Station < ActiveRecord::Base
 
   #工位安排技师 h_staff 员工id h_level 技师等级
   def self.set_station(store_id,h_staff,h_level)
-    p "start------StoreId-#{store_id} StaffId-#{h_staff} StaffLevel-#{h_level}"
     s_levels ={}  #所需技师等级
     o_staffs = {}  #已分配技师的工位
     o_tech =[] #已分配工位的技师
@@ -162,7 +161,6 @@ class Station < ActiveRecord::Base
         end
       end
     end
-    p "end--------"
   end
 
   def self.make_data(store_id)

@@ -34,7 +34,10 @@ class PackageCardsController < ApplicationController
       else
         parms.merge!(:date_month =>params[:end_time])
       end
-      pcard =PackageCard.create(parms)
+      prods = Product.where(:id=>params[:sale_prod].keys)
+      total_price = prods.inject(0){|sum,p|sum+((p.sale_price.nil? ? 0 : p.sale_price)*params[:sale_prod]["#{p.id}"].to_i)}
+      sale_percent  = total_price > params[:price].to_f ? params[:price].to_f/total_price : 1
+      pcard =PackageCard.create( parms.merge!(:sale_percent=>sale_percent))
       flash[:notice] = "套餐卡添加成功"
       if params[:material_types] && params[:material_types] != ""  && params[:material_types].length != 0
         PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
@@ -44,14 +47,8 @@ class PackageCardsController < ApplicationController
       rescue
         flash[:notice] ="图片上传失败，请重新添加！"
       end
-      prods = Product.where(:id=>params[:sale_prod].keys)
-      prod_price = prods.inject({}){|h,p|h[p.id] = p.sale_price.nil? ? 0 : p.sale_price;h}
-      total_price = prods.inject(0){|sum,p|sum+(prod_price[p.id]*params[:sale_prod]["#{p.id}"].to_i)}
-      num = params[:sale_prod].values.inject(0){|sum,n|sum+n.to_i}
       params[:sale_prod].each do |key,value|
-        relation = {:package_card_id=>pcard.id,:product_id=>key,:product_num=>value}
-        price = total_price > params[:price].to_f ? prod_price[key.to_i]-(total_price-params[:price].to_f)/num : prod_price[key.to_i]
-        PcardProdRelation.create(relation.merge!({:price =>price }))
+        PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
       end
     end
     redirect_to request.referer
@@ -97,7 +94,7 @@ class PackageCardsController < ApplicationController
   def update_pcard
     pcard=PackageCard.find(params[:id])
     parms = {:name=>params[:name],:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],:price=>params[:price],
+      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],
       :description=>params[:desc]
     }
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price])

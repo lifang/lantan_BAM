@@ -33,7 +33,9 @@ namespace :daily do
 
   #为实用版自动分配工位
   task(:setfor_station => :environment) do
+    time = Time.now.to_i
     Station.turn_old_to_new  #自动分配技师 并且生成员工的工作记录
+    p "technician and work records gernaerate #{(Time.now.to_i - time)/3600.0}"
   end
 
 end
