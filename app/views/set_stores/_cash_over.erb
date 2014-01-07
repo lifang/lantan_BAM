@@ -18,18 +18,18 @@
                 "已退单"
               else
                 @pay_types[order.id].nil? ? "--"  :
-                  @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(1)}"}.join("&nbsp&nbsp&nbsp").html_safe
+                  @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe
               end%></li>
           </ul>
         </div>
         <div class="merchant">
           <ul>
-            <li><strong>开单时间：</strong><%=order.created_at.nil? ? "--" : order.created_at.strftime("%Y-%m-%d %H:%M")%></li>
+            <li><strong>开单时间：</strong><%=  order.created_at.nil? ? "--" : order.created_at.strftime("%Y-%m-%d %H:%M")%></li>
             <li><strong>接待员：</strong><%= @staffs[order.front_staff_id] %></li>
             <li><strong>技师：</strong><%=[@staffs[order.cons_staff_id_1],@staffs[order.cons_staff_id_2]].compact.uniq.join("、")%></li>
             <li><strong>工位：</strong><%= @stations[order.s_id].nil? ? "--":@stations[order.s_id] %></li>
             <li><strong>车牌：</strong><%=  order.c_num  %></li>
-            <li><strong>客户姓名：</strong><%=order.c_name  %></li>
+            <li><strong>客户姓名：</strong><%=  order.c_name  %></li>
             <li><strong>手机号码：</strong><%= order.phone %></li>
             <li><strong>单位：</strong><%= order.group_name.nil? ? "--" : order.group_name %></li>
           </ul>

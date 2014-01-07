@@ -197,8 +197,8 @@ module Constant
   USERNAME = "XCRJ"
   PASSWORD = "123456"
   
-  SERVER_PATH = "http://192.168.0.250:3001"
-  HEAD_OFFICE_API_PATH = "http://192.168.0.250:3002"
+  SERVER_PATH = "http://192.168.1.250:3001"
+  HEAD_OFFICE_API_PATH = "http://192.168.1.250:3002"
   #   SERVER_PATH = "http://bam.gankao.co"
   #  #  SERVER_PATH = "http://192.168.1.100:3001"
   #  HEAD_OFFICE_API_PATH = "http://116.255.135.175:3005/"

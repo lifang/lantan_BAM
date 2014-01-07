@@ -22,29 +22,37 @@ class PackageCardsController < ApplicationController
   end #套餐卡列表
   
   def create
-    parms = {:name=>params[:name], :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL], :price=>params[:price],
-      :created_at=>Time.now.strftime("%Y-%M-%d"),:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],
-      :description=>params[:desc]}
-    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price])
-    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:price].to_f/100)
-    if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
-      parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at].to_datetime.end_of_day.strftime("%Y-%m-%d %H:%M:%S"))
-    else
-      parms.merge!(:date_month =>params[:end_time])
-    end
-    pcard =PackageCard.create(parms)
-    flash[:notice] = "套餐卡添加成功"
-    if params[:material_types] && params[:material_types] != ""  && params[:material_types].length != 0
-      PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
-    end
-    begin
-      pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
-    rescue
-      flash[:notice] ="图片上传失败，请重新添加！"
-    end
-    params[:sale_prod].each do |key,value|
-      PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
+    PackageCard.transaction do
+      parms = {:name=>params[:name], :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL], :price=>params[:price],
+        :created_at=>Time.now.strftime("%Y-%M-%d"),:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
+        :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],
+        :description=>params[:desc]}
+      parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price])
+      parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:price].to_f/100)
+      if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
+        parms.merge!(:started_at=>params[:started_at],:ended_at=>params[:ended_at].to_datetime.end_of_day.strftime("%Y-%m-%d %H:%M:%S"))
+      else
+        parms.merge!(:date_month =>params[:end_time])
+      end
+      pcard =PackageCard.create(parms)
+      flash[:notice] = "套餐卡添加成功"
+      if params[:material_types] && params[:material_types] != ""  && params[:material_types].length != 0
+        PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
+      end
+      begin
+        pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+      rescue
+        flash[:notice] ="图片上传失败，请重新添加！"
+      end
+      prods = Product.where(:id=>params[:sale_prod].keys)
+      prod_price = prods.inject({}){|h,p|h[p.id] = p.sale_price.nil? ? 0 : p.sale_price;h}
+      total_price = prods.inject(0){|sum,p|sum+(prod_price[p.id]*params[:sale_prod]["#{p.id}"].to_i)}
+      num = params[:sale_prod].values.inject(0){|sum,n|sum+n.to_i}
+      params[:sale_prod].each do |key,value|
+        relation = {:package_card_id=>pcard.id,:product_id=>key,:product_num=>value}
+        price = total_price > params[:price].to_f ? prod_price[key.to_i]-(total_price-params[:price].to_f)/num : prod_price[key.to_i]
+        PcardProdRelation.create(relation.merge!({:price =>price }))
+      end
     end
     redirect_to request.referer
   end #添加套餐卡
@@ -110,10 +118,10 @@ class PackageCardsController < ApplicationController
     if params[:material_types] && params[:material_types] != ""  && params[:material_types].length != 0
       PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
     end
-    pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
-    params[:sale_prod].each do |key,value|
-      PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
-    end
+    #    pcard.pcard_prod_relations.inject(Array.new) {|arr,sale_prod| sale_prod.destroy}
+    #    params[:sale_prod].each do |key,value|
+    #      PcardProdRelation.create(:package_card_id=>pcard.id,:product_id=>key,:product_num=>value)
+    #    end
     redirect_to request.referer
   end
 
