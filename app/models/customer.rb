@@ -218,7 +218,7 @@ class Customer < ActiveRecord::Base
         single_car_content = {}
         service_infos.each do |s|
           content_arr = s.split("-")
-          if content_arr.length == 3 && p_pcards[r.k_id][content_arr[0].to_i] > content_arr[2].to_i
+          if content_arr.length == 3 && p_pcards[r.k_id][content_arr[0].to_i].to_i > content_arr[2].to_i
             single_car_content[content_arr[0].to_i] = [content_arr[1],p_pcards[r.k_id][content_arr[0].to_i]-content_arr[2].to_i]
           end
         end

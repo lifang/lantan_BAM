@@ -229,7 +229,7 @@ class Api::NewAppOrdersController < ApplicationController
           #该用户所购买的打折卡及其所支持的产品或服务
           sv_cards = CSvcRelation.get_customer_discount_cards(customer.customer_id,params[:store_id].to_i)
           #该用户所购买的套餐卡及其所支持的产品或服务
-          p_cards = CPcardRelation.get_customer_package_cards(customer.customer_id, params[:store_id].to_i)
+          #p_cards = CPcardRelation.get_customer_package_cards(customer.customer_id, params[:store_id].to_i)
           #该用户所购买的储值卡及其所支持的产品或服务类型
           save_cards = CSvcRelation.get_customer_supposed_save_cards(customer.customer_id, params[:store_id].to_i, pram_str[0].to_i)
         end
@@ -663,7 +663,7 @@ class Api::NewAppOrdersController < ApplicationController
           #该用户所购买的打折卡及其所支持的产品或服务
           sv_cards = CSvcRelation.get_customer_discount_cards(customer.id,store_id)
           #该用户所购买的套餐卡及其所支持的产品或服务
-          p_cards = CPcardRelation.get_customer_package_cards(customer.id, store_id)
+          #p_cards = CPcardRelation.get_customer_package_cards(customer.id, store_id)
           #该用户所购买的储值卡及其所支持的产品或服务类型
           oprs.each do |opr|
             sc = CSvcRelation.get_customer_supposed_save_cards(customer.id, store_id,opr.product_id)
@@ -686,6 +686,7 @@ class Api::NewAppOrdersController < ApplicationController
           save_cards = save_cards.flatten.uniq
         elsif opcsvc  #如果购买的是储值卡或者打折卡
           card = SvCard.find_by_id(opcsvc.sv_card_id)
+          prod_type = 2
           if card && card.types == SvCard::FAVOR[:DISCOUNT]
             items = SvcardProdRelation.find_by_sql(["select spr.product_discount, p.name, p.id, p.sale_price from svcard_prod_relations spr
             inner join products p on spr.product_id=p.id where spr.sv_card_id=?", card.id])
@@ -702,7 +703,6 @@ class Api::NewAppOrdersController < ApplicationController
             sv_cards << {:csrid => opcsvc.id, :svid => card.id, :svname => card.name, :svprice => card.price, :svtype => card.types, :is_new => 1,
               :show_price => card.price, :products => a}
           elsif  card && card.types == SvCard::FAVOR[:SAVE]
-            prod_type = 2
             item = SvcardProdRelation.where(["sv_card_id = ? ", card.id]).first
             arr = []
             item.category_id.split(",").each do |i|
@@ -717,6 +717,7 @@ class Api::NewAppOrdersController < ApplicationController
           end
         elsif opcpc #如果是套餐卡
           card = PackageCard.find_by_id(opcpc.package_card_id)
+          prod_type = 2
           pitems = PcardProdRelation.find_by_sql(["select ppr.product_num num, p.name name,p.id id, p.sale_price sale_price
              from pcard_prod_relations ppr inner join products p on ppr.product_id=p.id where ppr.package_card_id=?", card.id])
           c = []
@@ -1206,7 +1207,7 @@ class Api::NewAppOrdersController < ApplicationController
               c_pcard_relation_id << cpr.id
             elsif arr[2].to_i==1  #如果是用户刚买的套餐卡，则要扣掉刚买的产品，并且生成客户-套餐卡关系
               pcard = PackageCard.find_by_id(pid)
-              pmr = PcardMaterialRelation.find_by_package_card_id(pid)
+              #pmr = PcardMaterialRelation.find_by_package_card_id(pid)
               #              material = Material.find_by_id(pmr.material_id) if pmr
               #              material.update_attribute("storage", material.storage - pmr.material_num) if material
               deduct_price = deduct_price + (pcard.deduct_price.to_f + pcard.deduct_percent.to_f)
