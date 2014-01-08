@@ -92,8 +92,8 @@ class OrderPayType < ActiveRecord::Base
           loss_orders = param[:pay_order] && param[:pay_order][:loss_ids] ?  param[:pay_order][:loss_ids] : {}
           clear_value = param[:pay_order] && param[:pay_order][:clear_value] ? param[:pay_order][:clear_value].to_f : 0
           order_pays = OrderPayType.search_pay_order(order_ids)
-          prod_ids = OrderProdRelation.joins(:product).where(:order_id=>orders.map(&:id)).select("products.category_id c_id,order_id o_id").inject(Hash.new){
-            |hash,o|hash[o.o_id]=o.c_id;hash}
+          prods = OrderProdRelation.joins(:product).where(:order_id=>orders.map(&:id)).select("products.category_id c_id,order_id o_id,product_id p_id")
+          prod_ids = prods.inject(Hash.new){|hash,o|hash[o.o_id]=o.c_id;hash}
           o_price = orders.inject(Hash.new){|hash,o|hash[o.id]= limit_float(o.price-(loss_orders["#{o.id}"].nil? ? 0 : loss_orders["#{o.id}"].to_f)-(order_pays[o.id] ?  order_pays[o.id] : 0));hash}
           if param[:pay_order] && param[:pay_order][:text]   #如果使用储值卡
             sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:id=>param[:pay_order][:text].keys).
@@ -147,29 +147,30 @@ class OrderPayType < ActiveRecord::Base
               end
             end
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : limit_float(param[:pay_cash].to_f - param[:second_parm].to_f)
+            order_prod_ids = prods.inject({}){|h,p|h[p.o_id]=p.p_id;h}
             orders.each do |o|
               price = limit_float(o_price[o.id].to_f)
               if price <=0
                 o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
               else
                 if price <= total_card
-                  OrderPayType.create(:order_id=>o.id,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                  OrderPayType.create(:order_id=>o.id,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD],:product_id=>order_prod_ids[o.id])
                   total_card = limit_float(total_card-price)
                   total_card=0 if total_card <0
                   o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                 else
                   if price <= (total_card+clear_value)
-                    OrderPayType.create(:order_id=>o.id,:price=>limit_float(clear_value),:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
-                    OrderPayType.create(:order_id=>o.id,:price=>limit_float(price-clear_value),:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                    OrderPayType.create(:order_id=>o.id,:price=>limit_float(clear_value),:pay_type=>OrderPayType::PAY_TYPES[:CLEAR],:product_id=>order_prod_ids[o.id])
+                    OrderPayType.create(:order_id=>o.id,:price=>limit_float(price-clear_value),:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD],:product_id=>order_prod_ids[o.id])
                     total_card = limit_float(total_card-price)
                     clear_value = 0
                     total_card=0 if total_card <0
                   else
                     if clear_value>0
-                      OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
+                      OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR],:product_id=>order_prod_ids[o.id])
                     end
                     if total_card >0
-                      OrderPayType.create(:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                      OrderPayType.create(:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD],:product_id=>order_prod_ids[o.id])
                     end
                     parms = {:order_id=>o.id,:price=>limit_float(price-total_card-clear_value),:pay_type=>param[:pay_type].to_i}
                     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
@@ -180,6 +181,7 @@ class OrderPayType < ActiveRecord::Base
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                       parms.merge!(:second_parm=>param[:second_parm])
                     elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
+                       parms.merge!(:product_id=>order_prod_ids[o.id])
                       o.update_attributes(:status=>Order::STATUS[:FINISHED], :is_billing => is_billing)
                     elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
