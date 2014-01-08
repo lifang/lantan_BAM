@@ -3,7 +3,7 @@ class WorkOrdersController < ApplicationController
   def work_orders_status
     #store = Store.find_by_id(params[:store_id])
     date = Time.now.to_s  #获取当前日期时间
-    now_date = (date.slice(0,4) + date.slice(5,2) + date.slice(8,2)).to_i #截取当前年月日转换成int型的数据
+    p now_date = (date.slice(0,4) + date.slice(5,2) + date.slice(8,2)).to_i #截取当前年月日转换成int型的数据
 
     current_info = {} #哈希：一个门店的数据（等待付款、工位信息（工位名称、状态、技师、正在施工车牌、剩余时间、等待施工车牌、剩余时间））
     wait_pay_car_nums = [] #定义数组存放所有待付款车牌
