@@ -73,5 +73,20 @@ class MonthScore < ActiveRecord::Base
     sql +=" group by product_id,date_format(op.created_at,'%X-%m'),pay_type"  if time.to_i==Sale::DISC_TIME[:MONTH]
     return OrderPayType.find_by_sql(sql) 
   end
+
+  def self.prod_serv_pay_types()
+    sql ="select op.product_id,sum(op.price) sum,op.order_id,sum(op.product_num) prod_num,pay_type,"
+    sql += "date_format(op.created_at,'%Y-%m-%d') day" if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
+    sql += "date_format(op.created_at,'%X-%V') day" if time.to_i==Sale::DISC_TIME[:WEEK]
+    sql += "date_format(op.created_at,'%X-%m') day"  if time.to_i==Sale::DISC_TIME[:MONTH]
+    sql +=" from order_pay_types op inner  join orders o on o.id=op.order_id  where o.store_id=#{store_id} and
+       pay_type in (#{OrderPayType::LOSS.join(',')}) and o.status in (#{Order::PRINT_CASH.join(',')}) "
+    sql += " and date_format(op.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
+    sql += " and date_format(op.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
+    sql +=" group by date_format(op.created_at,'%Y-%m-%d'),product_id,pay_type"  if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
+    sql +=" group by product_id,date_format(op.created_at,'%X-%V'),pay_type"  if time.to_i==Sale::DISC_TIME[:WEEK]
+    sql +=" group by product_id,date_format(op.created_at,'%X-%m'),pay_type"  if time.to_i==Sale::DISC_TIME[:MONTH]
+    return OrderPayType.find_by_sql(sql)
+  end
   
 end

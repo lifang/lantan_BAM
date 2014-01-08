@@ -32,7 +32,7 @@ class Order < ActiveRecord::Base
   O_RETURN = {:WASTE => 0, :REUSE => 1}  #  退单时 0 为报损 1 为回库
   DIRECT = {0=>"报损", 1=>"回库"}
   IS_RETURN = {:YES=>1,:NO=>0} #0  成功交易  1退货
-  RETURN = {0 =>"成功交易" , 1 => "退货"}
+  RETURN = {0 =>"成功交易" , 1 => "已退单"}
 
   #组装查询order的sql语句
   def self.generate_order_sql(started_at, ended_at, is_visited)

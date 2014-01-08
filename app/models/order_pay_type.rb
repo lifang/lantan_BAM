@@ -29,6 +29,11 @@ class OrderPayType < ActiveRecord::Base
       |hash,o| hash[o.order_id].nil? ? hash[o.order_id]={o.pay_type=>o.sum} : hash[o.order_id][o.pay_type]=o.sum;hash}
   end
 
+  #保留金额的两位小数
+  def self.limit_float(num)
+    return ((num.to_f*100).to_i/100.0).round(2)
+  end
+
   def self.deal_order(param)
     may_pay,card_price,msg,orders,is_billing = true,{},"",[],param[:pay_order][:is_billing].to_i
     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
@@ -48,17 +53,17 @@ class OrderPayType < ActiveRecord::Base
         time = customer.check_type == Customer::CHECK_TYPE[:MONTH] ? pay_type.min_time.to_date+customer.check_time.months : pay_type.min_time.to_date+customer.check_time.weeks
         if Time.now > time
           may_pay,msg = false,"上一个周期未付款，不能挂账！"
-        elsif customer.debts_money < (param[:pay_cash].to_i + pay_type.total_price.to_i)
-          may_pay,msg = false,"挂账额度余额为#{customer.debts_money-pay_type.total_price.to_i}！"
+        elsif customer.debts_money < limit_float(param[:pay_cash].to_f + pay_type.total_price.to_f)
+          may_pay,msg = false,"挂账额度余额为#{limit_float(customer.debts_money-pay_type.total_price.to_f)}！"
         end
       end
     end
     if may_pay && param[:pay_order] && param[:pay_order][:text]   #验证密码
       CSvcRelation.find(param[:pay_order][:text].keys).each do |c_relation|
-        if c_relation.password != Digest::MD5.hexdigest(param[:pay_order][:"#{c_relation.id}"]) || c_relation.left_price < param[:pay_order][:text][:"#{c_relation.id}"].to_i
+        if c_relation.password != Digest::MD5.hexdigest(param[:pay_order][:"#{c_relation.id}"]) || c_relation.left_price < param[:pay_order][:text][:"#{c_relation.id}"].to_f
           may_pay,msg = false,"储值卡密码错误！"
         end
-        use_price = param[:pay_order][:text][:"#{c_relation.id}"].to_i
+        use_price = limit_float(param[:pay_order][:text][:"#{c_relation.id}"].to_f)
         card_price[c_relation.sv_card_id].nil? ?  card_price[c_relation.sv_card_id]=use_price : card_price[c_relation.sv_card_id] += use_price
       end
     end
@@ -85,11 +90,11 @@ class OrderPayType < ActiveRecord::Base
           cprs = CPcardRelation.joins(:package_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>order_ids,
             :status=>CPcardRelation::STATUS[:INVALID])
           loss_orders = param[:pay_order] && param[:pay_order][:loss_ids] ?  param[:pay_order][:loss_ids] : {}
-          clear_value = param[:pay_order] && param[:pay_order][:clear_value] ? param[:pay_order][:clear_value].to_i : 0
+          clear_value = param[:pay_order] && param[:pay_order][:clear_value] ? param[:pay_order][:clear_value].to_f : 0
           order_pays = OrderPayType.search_pay_order(order_ids)
           prod_ids = OrderProdRelation.joins(:product).where(:order_id=>orders.map(&:id)).select("products.category_id c_id,order_id o_id").inject(Hash.new){
             |hash,o|hash[o.o_id]=o.c_id;hash}
-          o_price = orders.inject(Hash.new){|hash,o|hash[o.id]= o.price-(loss_orders["#{o.id}"].nil? ? 0 : loss_orders["#{o.id}"].to_i)-(order_pays[o.id] ?  order_pays[o.id] : 0);hash}
+          o_price = orders.inject(Hash.new){|hash,o|hash[o.id]= limit_float(o.price-(loss_orders["#{o.id}"].nil? ? 0 : loss_orders["#{o.id}"].to_f)-(order_pays[o.id] ?  order_pays[o.id] : 0));hash}
           if param[:pay_order] && param[:pay_order][:text]   #如果使用储值卡
             sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:id=>param[:pay_order][:text].keys).
               select("c_svc_relations.*,sv_cards.name,sv_cards.store_id,svcard_prod_relations.category_id ci,svcard_prod_relations.pcard_ids pid,
@@ -107,9 +112,9 @@ class OrderPayType < ActiveRecord::Base
                 is_suit = true
                 break
               end
-              total_card += card_price[ca.s_id]
+              total_card = limit_float(total_card+card_price[ca.s_id])
             end
-            if is_suit or (total_card+clear_value) > o_price.values.inject(0){|num,p|num+p}
+            if is_suit or limit_float(total_card+clear_value) > limit_float(o_price.values.inject(0){|num,p|num+p})
               may_pay,msg = false,"储值卡付款超过可付额度！"
             end
           end
@@ -121,13 +126,13 @@ class OrderPayType < ActiveRecord::Base
                 loss = param[:pay_order][:loss_ids].select{|k,v| !param[:pay_order][:return_ids].include? k}
               end
               loss.each do |k,v|
-                OrderPayType.create(:order_id=>k,:price=>v,:pay_type=>OrderPayType::PAY_TYPES[:FAVOUR])
+                OrderPayType.create(:order_id=>k,:price=>limit_float(v),:pay_type=>OrderPayType::PAY_TYPES[:FAVOUR])
               end unless loss.empty?
             end
             if param[:pay_order] && param[:pay_order][:text]   #使用储值卡更新储值卡余额，并将更新新买储值卡的状态
               CSvcRelation.find(param[:pay_order][:text].keys).each do |c_relation|
-                use_price = param[:pay_order][:text][:"#{c_relation.id}"].to_i
-                only_price = c_relation.left_price - use_price
+                use_price = limit_float(param[:pay_order][:text][:"#{c_relation.id}"].to_f)
+                only_price = limit_float(c_relation.left_price - use_price)
                 pars = {:left_price=>only_price}
                 if c_relation.sv_card.status == SvCard::STATUS[:DELETED]
                   if only_price > 0
@@ -141,22 +146,22 @@ class OrderPayType < ActiveRecord::Base
                   :left_price=>only_price,:content=>OrderProdRelation.order_products(order_ids).values.flatten.map(&:name).join("、"))
               end
             end
-            cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : param[:pay_cash].to_i - param[:second_parm].to_i
+            cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : limit_float(param[:pay_cash].to_f - param[:second_parm].to_f)
             orders.each do |o|
-              price = o_price[o.id].to_i
+              price = limit_float(o_price[o.id].to_f)
               if price <=0
                 o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
               else
                 if price <= total_card
                   OrderPayType.create(:order_id=>o.id,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
-                  total_card -= price
+                  total_card = limit_float(total_card-price)
                   total_card=0 if total_card <0
                   o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                 else
                   if price <= (total_card+clear_value)
-                    OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
-                    OrderPayType.create(:order_id=>o.id,:price=>price-clear_value,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
-                    total_card -= price
+                    OrderPayType.create(:order_id=>o.id,:price=>limit_float(clear_value),:pay_type=>OrderPayType::PAY_TYPES[:CLEAR])
+                    OrderPayType.create(:order_id=>o.id,:price=>limit_float(price-clear_value),:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
+                    total_card = limit_float(total_card-price)
                     clear_value = 0
                     total_card=0 if total_card <0
                   else
@@ -166,11 +171,11 @@ class OrderPayType < ActiveRecord::Base
                     if total_card >0
                       OrderPayType.create(:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD])
                     end
-                    parms = {:order_id=>o.id,:price=>(price- total_card-clear_value).to_i,:pay_type=>param[:pay_type].to_i}
+                    parms = {:order_id=>o.id,:price=>limit_float(price-total_card-clear_value),:pay_type=>param[:pay_type].to_i}
                     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
                       parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
-                      cash_price -= (price-total_card-clear_value)
+                      cash_price = limit_float(cash_price-(price-total_card-clear_value))
                     elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                       parms.merge!(:second_parm=>param[:second_parm])
@@ -180,14 +185,14 @@ class OrderPayType < ActiveRecord::Base
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
                     end
                     OrderPayType.create(parms)
-                    work_order = o.work_orders[0]
-                    if work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY]
-                      work_order.update_attributes(:status=>WorkOrder::STAT[:COMPLETE])
-                    end
                     clear_value = 0 if clear_value>0
                     total_card =0 if total_card >0
                   end
                 end
+              end
+              work_order = o.work_orders[0]
+              if work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY]
+                work_order.update_attributes(:status=>WorkOrder::STAT[:COMPLETE])
               end
             end
             #新买储值卡但是未使用  新买打折卡  更新状态
@@ -196,7 +201,7 @@ class OrderPayType < ActiveRecord::Base
             sv_used = []
             csvs.each do |csr|   #如果是新买储值卡则生成使用记录
               if csr.types == SvCard::FAVOR[:SAVE]
-                sv_used << SvcardUseRecord.new(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,:left_price => csr.left_price, :content => "购买"+"#{csr.name}")
+                sv_used << SvcardUseRecord.new(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,:left_price => limit_float(csr.left_price), :content => "购买"+"#{csr.name}")
               end
             end
             SvcardUseRecord.import sv_used, :timestamps=>true unless sv_used.blank?
@@ -229,8 +234,8 @@ class OrderPayType < ActiveRecord::Base
               hash["deduct"].nil? ? hash["deduct"]={o.o_id=>o.d_sum} : hash["deduct"][o.o_id]=o.d_sum;
               hash["techin"].nil? ? hash["techin"]={o.o_id=>o.t_sum} : hash["techin"][o.o_id]=o.t_sum;hash}
             orders.each {|order|
-              deduct = {:front_deduct => (pacrd_deduct[order.id].nil? ? 0 : pacrd_deduct[order.id]) + ((order_deduct["deduct"] && order_deduct["deduct"][order.id]) ?  order_deduct["deduct"][order.id] : 0),
-                :technician_deduct => order_deduct["techin"] && order_deduct["techin"][order.id]  ?  order_deduct["techin"][order.id]/2.0 : 0}
+              deduct = {:front_deduct => limit_float((pacrd_deduct[order.id].nil? ? 0 : pacrd_deduct[order.id]) + ((order_deduct["deduct"] && order_deduct["deduct"][order.id]) ?  order_deduct["deduct"][order.id] : 0)),
+                :technician_deduct => limit_float(order_deduct["techin"] && order_deduct["techin"][order.id]  ?  order_deduct["techin"][order.id]/2.0 : 0)}
               order.update_attributes(deduct)
             }
             CPcardRelation.where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]

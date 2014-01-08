@@ -21,6 +21,8 @@ namespace :monthly do
   end
 end
 
+
+#2.3新版初始化执行程序
 task(:change_types => :environment) do
   Store.where(:status=>Store::STATUS[:OPENED]).each do |store|
     #需要先把预存数据加进去
@@ -46,6 +48,7 @@ task(:change_types => :environment) do
   end
 end
 
+#更新收银和财务管理
 task(:new_menu => :environment) do
   Menu.delete_all(:controller=>["pay_cash","finances"])
   menu1 = Menu.create(:controller=>"pay_cash",:name=>"收银")
@@ -64,6 +67,21 @@ task(:new_menu => :environment) do
     end
   end
 end
+
+#更新套餐卡内价格
+task(:pcard_percent => :environment) do
+  pcards = PackageCard.where(:status=>PackageCard::STAT[:NORMAL])
+  pcardProd = PcardProdRelation.where(:package_card_id=>pcards.map(&:id)).group_by{|i|i.package_card_id}
+  prods = Product.find(pcardProd.values.flatten.map(&:product_id)).inject({}){|h,p|h[p.id]=p.sale_price.nil? ? 0 : p.sale_price;h}
+  pcards.each do |pcard|
+    total_price = pcardProd[pcard.id].inject(0){|sum,v|sum + (prods[v.product_id]*v.product_num)}
+    if total_price > pcard.price.to_f
+      pcard.update_attributes(:sale_percent=>pcard.price.to_f/total_price)
+    end
+  end
+end
+
+
 
 
 

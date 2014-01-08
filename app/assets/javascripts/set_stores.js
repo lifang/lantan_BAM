@@ -125,17 +125,29 @@ function check_sum(card_id,e){
     }
 }
 
+function limit_float(num){
+    var t_num = parseInt(parseFloat(num)*1000);
+    return  round((t_num%10 == 0 ? t_num : t_num-5)/1000.0,2);
+
+}
+function round(v,e){
+    var t=1;
+    for(;e>0;t*=10,e--);
+    for(;e<0;t/=10,e++);
+    return Math.round(v*t)/t;
+}
+
 function check_num(){
     var total = 0;
-    var due_pay = parseInt($.trim($("#due_pay").html()));
+    var due_pay = limit_float($.trim($("#due_pay").html()));
     $("#due_over").css("display","none");
     //    $('div.at_way_b > div').find("input[id*='cash_'],input[id*='change_']").val(0);//当调动其他选项则清零付款方式的输入框，也可以选择重新计算
 
     $("input[id*='order_']").each(function(){
-        var left_price = parseInt($.trim($("#left_"+this.id.split("_")[1]).html()));
-        var price = parseInt($.trim(this.value))
+        var left_price = limit_float($.trim($("#left_"+this.id.split("_")[1]).html()));
+        var price = limit_float($.trim(this.value))
         var this_value = 0;
-        if (!isNaN(price) && price > 0){
+        if (!isNaN($.trim(this.value)) && price > 0){
             if (left_price < price){
                 this_value = left_price;
             }else{
@@ -143,7 +155,7 @@ function check_num(){
             }
         }
         this.value = this_value;
-        total += this_value;
+        total = limit_float(total+this_value);
     })
     if ( due_pay < total){
         tishi_alert("付款额度超过应付金额额度！");
@@ -152,17 +164,21 @@ function check_num(){
         $("#due_over").css("display","none");
         return false;
     }else{
-        $("#total_pay").html(total);
-        $("#left_pay").html(due_pay-total);
+        $("#total_pay").html(limit_float(total));
+        $("#left_pay").html(limit_float(due_pay-total));
         if (due_pay == total){
             $("#due_over").css("display","block");
         }
     }
     var pay_type = $("#pay_type li[class='hover']").attr("id");
     calulate_v(pay_type);
+    return true;
 }
 
 function check_post(store_id,c_id,n_id){
+    if (!check_num()){ //判断储值卡的金额是否符合
+        return false;
+    }
     $("#due_over").attr("onclick","").html("可以付款(3)");
     var url = "/stores/"+store_id+"/set_stores/pay_order"
     var n = 3;
@@ -177,8 +193,8 @@ function check_post(store_id,c_id,n_id){
     var pay_order = set_pay_order();
     if (pay_order[0]){
         tishi_alert("储值卡密码不能为空");
-    }
-    else{
+        return false;
+    }else{
         $.ajax({
             type:"post",
             url:url,
@@ -192,7 +208,7 @@ function check_post(store_id,c_id,n_id){
     }
 }
 
-
+//获取退单，优惠，储值卡和抹零和打印发票的数据
 function set_pay_order(){
     var pay_order = {};
     var loss = $("#input_loss").css("display");
@@ -211,8 +227,11 @@ function set_pay_order(){
     if (loss == "block"){
         var loss_ids = {}
         $(".at_client_con  td input[id*='in_']").each(function(){
-            if (parseInt($.trim(this.value))>0){
-                loss_ids[this.id.split("_")[1]]= parseInt($.trim(this.value));
+            if (limit_float($.trim(this.value))>0){
+                loss_ids[this.id.split("_")[1]]= limit_float($.trim(this.value));
+            }
+            if (!set_reward(this)){ //判断优惠额度是否符合
+                return false;
             }
         })
         if(loss_ids != {}){
@@ -227,8 +246,8 @@ function set_pay_order(){
             if(pwd == "" || pwd.length ==0){
                 is_password = true;
             }else{
-                if (parseInt($.trim(this.value)) > 0 ){
-                    text[this.id.split("_")[1]] = parseInt($.trim(this.value));
+                if (limit_float($.trim(this.value)) > 0 ){
+                    text[this.id.split("_")[1]] = limit_float($.trim(this.value));
                     pay_order[this.id.split("_")[1]] = pwd;
                 }
             }
@@ -237,7 +256,7 @@ function set_pay_order(){
             pay_order["text"] = text;
         }
     }
-    var clear_value = parseInt($.trim($("#clear_value").val()));
+    var clear_value = limit_float($.trim($("#clear_value").val()));
     if (clear_value > 0){
         pay_order["clear_value"] = clear_value;
     }
@@ -253,9 +272,8 @@ function change_order(store_id){
 }
 
 function change_pay(e){
-    var due_pay = parseInt($.trim($("#hidden_pay").html()));
-    var left_pay = parseInt($.trim($("#left_pay").html()));
-    check_num();
+    var due_pay = limit_float($.trim($("#hidden_pay").html()));
+    var left_pay = limit_float($.trim($("#left_pay").html()));
     if(e.checked){
         $("#due_pay").html(due_pay-due_pay%10);
         $("#left_pay").html(left_pay-due_pay%10);
@@ -264,7 +282,7 @@ function change_pay(e){
         }
     }else{
         $("#due_pay").html(due_pay);
-        $("#left_pay").html(left_pay+parseInt($.trim($("#hidden_pay").html()))%10);
+        $("#left_pay").html(left_pay+limit_float($.trim($("#hidden_pay").html()))%10);
         $("#clear_value").val(0);
     }
     check_num();
@@ -283,18 +301,18 @@ function show_loss(obj_id){
 
 function return_check(e){
     var clear_per = $("#clear_per")[0];
-    var hidden_pay = parseInt($.trim($("#hidden_pay").html()));
-    var total = parseInt($.trim( $("#loss_"+e.id.split("_")[1]).val()));
+    var hidden_pay = limit_float($.trim($("#hidden_pay").html()));
+    var total = limit_float($.trim( $("#loss_"+e.id.split("_")[1]).val()));
     var cards = $("#sv_card_used span[id*='"+e.id.split("_")[1] +"_']").find(":checkbox");
     clear_per.checked = false;
     if (e.checked){
         $(e).parent().siblings().css("background","#ebebe3");
-        $("#due_pay").html(hidden_pay-total);
-        $("#left_pay").html(hidden_pay-total);
+        $("#due_pay").html(limit_float(hidden_pay-total));
+        $("#left_pay").html(limit_float(hidden_pay-total));
         if (hidden_pay==total){
             clear_per.disabled = true;
         }
-        $("#hidden_pay").html(hidden_pay-total);
+        $("#hidden_pay").html(limit_float(hidden_pay-total));
         var  this_value = $("#in_"+e.id.split("_")[1]).val(0).attr("disabled",true);
         set_reward(this_value[0])
         if (cards.length >0){
@@ -307,9 +325,9 @@ function return_check(e){
         }
     }else{
         $(e).parent().siblings().css("background","");
-        $("#due_pay").html(hidden_pay+total);
-        $("#left_pay").html(hidden_pay+total);
-        $("#hidden_pay").html(hidden_pay+total);
+        $("#due_pay").html(limit_float(hidden_pay+total));
+        $("#left_pay").html(limit_float(hidden_pay+total));
+        $("#hidden_pay").html(limit_float(hidden_pay+total));
         $("#in_"+e.id.split("_")[1]).attr("disabled",false);
         if ((hidden_pay+total)>0){
             clear_per.disabled = false;
@@ -318,40 +336,43 @@ function return_check(e){
             cards[0].disabled = false;
         }
     }
-    change_pay(clear_per);
+//    change_pay(clear_per);
 }
 
 function set_reward(e){
     var clear_per = $("#clear_per")[0];
-    var hidden_pay = parseInt($.trim($("#hidden_pay").html()));
-    var still_pay = parseInt($.trim($("#hipay_"+e.id.split("_")[1]).val()));
-    var loss =  parseInt($.trim($("#loss_"+e.id.split("_")[1]).val()));
+    var hidden_pay = limit_float($.trim($("#hidden_pay").html()));
+    var still_pay = limit_float($.trim($("#hipay_"+e.id.split("_")[1]).val()));
+    var loss = limit_float($.trim($("#loss_"+e.id.split("_")[1]).val()));
     var this_value = 0 ;
-    var  price = parseInt($.trim(e.value));
+    var  price = limit_float($.trim(e.value));
     if (!isNaN(price) && price > 0){
         this_value = price;
     }
     e.value = this_value;
     clear_per.checked = false;
     if (this_value > loss){
-        tishi_alert("优惠金额超过本单金额！")
+        tishi_alert("优惠金额超过本单金额！");
+        return false;
     }else{
-        $("#hipay_"+e.id.split("_")[1]).val(this_value);
-        $("#due_pay").html(hidden_pay+still_pay-this_value);
-        $("#left_pay").html(hidden_pay+still_pay-this_value);
-        $("#hidden_pay").html(hidden_pay+still_pay-this_value);
+        $("#hipay_"+e.id.split("_")[1]).val(limit_float(this_value));
+        $("#due_pay").html(limit_float(hidden_pay+still_pay-this_value));
+        $("#left_pay").html(limit_float(hidden_pay+still_pay-this_value));
+        $("#hidden_pay").html(limit_float(hidden_pay+still_pay-this_value));
         if ((hidden_pay+still_pay-this_value)<= 10){
             clear_per.disabled = true;
         }else{
             clear_per.disabled = false;
         }
-        change_pay(clear_per);
+        check_num();
+        return true;
+    //        change_pay(clear_per);
     }
 }
 
 function set_change(pay_type){
-    var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
-    var left_pay = parseInt($.trim($("#left_pay").html()));
+    var pay_cash = limit_float($.trim($("#cash_"+pay_type).val()));
+    var left_pay = limit_float($.trim($("#left_pay").html()));
     $("#change_"+pay_type).val(0);
     if (isNaN(pay_cash) || pay_cash <0){
         $("#cash_"+pay_type).val(0);
@@ -362,15 +383,15 @@ function set_change(pay_type){
             tishi_alert("实收金额不足！");
             return false;
         }else{
-            $("#change_"+pay_type).val(pay_cash-left_pay);
+            $("#change_"+pay_type).val(limit_float(pay_cash-left_pay));
             return true;
         }
     }
 }
 
 function set_card(pay_type){
-    var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
-    var left_pay = parseInt($.trim($("#left_pay").html()));
+    var pay_cash = limit_float($.trim($("#cash_"+pay_type).val()));
+    var left_pay = limit_float($.trim($("#left_pay").html()));
     if (isNaN(pay_cash) || pay_cash < 0){
         pay_cash = 0;
     }
@@ -383,25 +404,29 @@ function set_card(pay_type){
     }
 }
 
-function confirm_pay(store_id,c_id,n_id){
-    var left_pay = parseInt($.trim($("#left_pay").html()));
+function confirm_pay_order(store_id,c_id,n_id){
+    var left_pay = limit_float($.trim($("#left_pay").html()));
+    var pay_order = set_pay_order();
+    if (!check_num()){ //判断储值卡的金额是否符合
+        return false;
+    }
     if (left_pay == 0 && $("#due_over").css("display")=="block"){
         tishi_alert("快捷支付可用");
         return false;
     }else{
         var pay_type = $("#pay_type li[class='hover']").attr("id");
         var second_parm = "";
-        var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
+        var pay_cash = limit_float($.trim($("#cash_"+pay_type).val()));
         if(parseInt(pay_type) == 0){   //如果使用现金支付
             if (!set_change(pay_type)){
                 tishi_alert("实收金额不足！");
                 return false;
             }
-            second_parm = parseInt($.trim($("#change_"+pay_type).val()));
+            second_parm = limit_float($.trim($("#change_"+pay_type).val()));
         }
         if(parseInt(pay_type) == 1){   //如果使用刷卡支付
             set_card(pay_type);
-            second_parm = parseInt($.trim($("#c_set_"+pay_type).val()));
+            second_parm = $.trim($("#c_set_"+pay_type).val());
         }
         if(parseInt(pay_type) == 5){
             var pay_cash =$.trim($("#cash_"+pay_type).val());
@@ -413,9 +438,9 @@ function confirm_pay(store_id,c_id,n_id){
         if(parseInt(pay_type) == 9){   //如果使用挂账支付
             pay_cash = left_pay;
         }
-        var pay_order = set_pay_order();
         if (pay_order[0]){
             tishi_alert("储值卡密码不能为空");
+            return false;
         }else{
             var t_data ={
                 customer_id : c_id,
@@ -438,7 +463,7 @@ function set_confirm(store_id,c_id,n_id,t_data){
         $("#confirm_order").html("确定("+n +")");
         if (n <=0){
             window.clearInterval(local_timer);
-            $("#confirm_order").html("确定").attr("onclick","confirm_pay("+store_id+","+c_id+","+n_id+")");
+            $("#confirm_order").html("确定").attr("onclick","confirm_pay_order("+store_id+","+c_id+","+n_id+")");
         }
     },1000)
     $.ajax({
@@ -465,9 +490,10 @@ function single_order_print(store_id){
 
 function calulate_v(pay_type){
     if (parseInt(pay_type) == 0){
-        var pay_cash = parseInt($.trim($("#cash_"+pay_type).val()));
-        var left_pay = parseInt($.trim($("#left_pay").html()));
-        var  v = pay_cash>left_pay ? pay_cash-left_pay : 0;
+        var pay_cash = limit_float($.trim($("#cash_"+pay_type).val()));
+        var left_pay = limit_float($.trim($("#left_pay").html()));
+        var  v = limit_float(pay_cash>left_pay ? pay_cash-left_pay : 0);
+        $("#cash_"+pay_type).val(pay_cash)
         $("#change_"+pay_type).val(v);
     }
 }

@@ -55,11 +55,11 @@
           <a href="http://api.map.baidu.com/lbsapi/getpoint/index.html" target="_blank" class="mapIcon"><img src="/assets/mapIcon.png"  alt="点击获取地图坐标" title="点击获取地图坐标"/></a>
         </div>
       <div class="item">
-        <label>收银权限：</label>
+        <label>pad收银权限：</label>
         <input type="radio" name="store_cash_auth" value="0" <% if @store.cash_auth.to_i==0 %>checked<% end %>/>否&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="radio" name="store_cash_auth" value="1" <% if @store.cash_auth.to_i==1 %>checked<% end %>/>是
       </div>
-        <% if permission?(:pay_cash, :can_pay) %>
+        <% if permission?(:base_datas, :edit_limited_pwd) %>
           <div class="item">
             <label><span class="red">*</span>免单密码：</label>
             <input type="text" id="limited_password"  name="limited_password" />

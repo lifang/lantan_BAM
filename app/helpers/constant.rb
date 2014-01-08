@@ -151,7 +151,7 @@ module Constant
       #:edit_depot => ["编辑仓库",2048],
       #:del_depot => ["删除仓库",4096],
       :edit_store_datas => ["设置门店信息", 8192],
-      :edit_limited_pwd =>["设置免单权限",8192*2]
+      :edit_limited_pwd =>["设置免单密码",8192*2]
     },
     :pay_cash => {
       :name=> "收银",
@@ -197,8 +197,8 @@ module Constant
   USERNAME = "XCRJ"
   PASSWORD = "123456"
   
-  SERVER_PATH = "http://192.168.0.250:3001"
-  HEAD_OFFICE_API_PATH = "http://192.168.0.250:3002"
+  SERVER_PATH = "http://192.168.1.250:3001"
+  HEAD_OFFICE_API_PATH = "http://192.168.1.250:3002"
   #   SERVER_PATH = "http://bam.gankao.co"
   #  #  SERVER_PATH = "http://192.168.1.100:3001"
   #  HEAD_OFFICE_API_PATH = "http://116.255.135.175:3005/"

@@ -11,9 +11,9 @@
             <div class="di_downUp" id="<%="#{k[:c_id]}_#{k[:n_id]}"%>" onclick="$('#c_<%= "#{k[:c_id]}_#{k[:n_id]}"%>').slideToggle(1000,show_hihglight(this))">
               <span class="highlight">&darr;</span><span>&uarr;</span></div>
             <ul>
-              <li>客户姓名：<%= k[:c_name] %></li>
+              <li>客户姓名：<%= k[:c_name].nil? ? "--" : k[:c_name] %></li>
               <li>车牌：<%= k[:c_num] %></li>
-              <li>手机号码：<%=k[:tel]%></li>
+              <li>手机号码：<%=k[:tel].nil? ? "--" :k[:tel] %></li>
               <li><%if k[:g_name] %>单位：<%=k[:g_name]%><%else%>客户属性：个人客户<%end%></li>
             </ul>
           </div>
@@ -37,29 +37,29 @@
               <tbody>
                 <%v.each do |order|%>
                   <tr>
-                    <% loss = @order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_i  %>
+                    <% loss = limit_float(@order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_f)  %>
                     <td><%= order.created_at.strftime("%Y-%m-%d %H:%M") %></td>
                     <td><%= order.code %></td>
                     <td><%= @stations[order.s_id].nil? ? "--" : @stations[order.s_id] %></td>
                     <td><%= @staffs[order.front_staff_id] %></td>
                     <% tech = [@staffs[order.cons_staff_id_1],@staffs[order.cons_staff_id_2]].compact.uniq %>
-                    <td><%=tech.blank? ? "--" : tech.join("、")%></td>
+                    <td><%=  tech.blank? ? "--" : tech.join("、")%></td>
                     <% prod = @order_prods[order.id] && @order_prods[order.id][0] %>
                     <% if prod %>
                       <%  o_prod = @order_prods[order.id][0]%>
                       <td><%= o_prod.name %></td>
-                      <% num = o_prod.pro_num.nil? ? 0 : o_prod.pro_num %>
+                      <% num = limit_float(o_prod.pro_num.nil? ? 0 : o_prod.pro_num) %>
                       <td><%=  num %></td>
-                      <% price = o_prod.price.nil? ? 0 : o_prod.price %>
+                      <% price = limit_float(o_prod.price.nil? ? 0 : o_prod.price) %>
                       <td><%=  price %></td>
                     <% else %>
                       <td><%= "--"%></td>
                       <td><%= "--"%></td>
                       <td><%= "--" %></td>
                     <%end%>
-                    <td><%= order.price %></td>
+                    <td><%= limit_float(order.price) %></td>
                     <td><%= loss %></td>
-                    <% fact = order.price > loss ? order.price.to_i-loss : 0 %>
+                    <% fact = limit_float(order.price > loss ? order.price.to_f-loss : 0) %>
                     <td><%= fact %></td>
                   </tr>
                 <% end %>
@@ -69,7 +69,7 @@
               <ul>
                 <%total = v.map(&:price).inject(0){|sum,num|sum+num} %>
                 <%reward = @order_pays.select{|k,i| v.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
-                <%  fa = total > reward ? (total-reward).to_i : 0%>
+                <%  fa = limit_float(total > reward ? (total-reward) : 0)%>
                 <li>总计：<%=  fa %></li>
                 <li><a href="javascript:void(0)" class="accounts_btn" onclick="pay_this_order(<%=params[:store_id]  %>,<%=k[:c_id]  %>,<%=k[:n_id]  %>)">结账</a></li>
               </ul>

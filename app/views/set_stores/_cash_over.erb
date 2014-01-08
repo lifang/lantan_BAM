@@ -1,7 +1,7 @@
 <div class="data_item_title">
-  <ul title="<%=  @pays.map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}：#{v.to_f.round(1)}"}.join("&nbsp&nbsp&nbsp").html_safe%>">
+  <ul title="<%=  @pays.map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{limit_float(v.to_f)}"}.join("&nbsp&nbsp&nbsp").html_safe%>">
     <% li_arr = [];
-    @pays.map{|k,v|li_arr << "<li>#{OrderPayType::PAY_TYPES_NAME[k]}：#{v.to_f.round(1)}</li>"}%>
+    @pays.map{|k,v|li_arr << "<li>#{OrderPayType::PAY_TYPES_NAME[k]}:#{limit_float(v.to_f)}</li>"}%>
     <%= li_arr[0..6].join("&nbsp&nbsp&nbsp").html_safe %>
   </ul>
 </div>
@@ -18,18 +18,18 @@
                 "已退单"
               else
                 @pay_types[order.id].nil? ? "--"  :
-                  @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(1)}"}.join("&nbsp&nbsp&nbsp").html_safe
+                  @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe
               end%></li>
           </ul>
         </div>
         <div class="merchant">
           <ul>
-            <li><strong>开单时间：</strong><%=order.created_at.nil? ? "--" : order.created_at.strftime("%Y-%m-%d %H:%M")%></li>
+            <li><strong>开单时间：</strong><%=  order.created_at.nil? ? "--" : order.created_at.strftime("%Y-%m-%d %H:%M")%></li>
             <li><strong>接待员：</strong><%= @staffs[order.front_staff_id] %></li>
             <li><strong>技师：</strong><%=[@staffs[order.cons_staff_id_1],@staffs[order.cons_staff_id_2]].compact.uniq.join("、")%></li>
             <li><strong>工位：</strong><%= @stations[order.s_id].nil? ? "--":@stations[order.s_id] %></li>
             <li><strong>车牌：</strong><%=  order.c_num  %></li>
-            <li><strong>客户姓名：</strong><%=order.c_name  %></li>
+            <li><strong>客户姓名：</strong><%=  order.c_name  %></li>
             <li><strong>手机号码：</strong><%= order.phone %></li>
             <li><strong>单位：</strong><%= order.group_name.nil? ? "--" : order.group_name %></li>
           </ul>
@@ -44,13 +44,13 @@
               </tr>
             </thead>
             <tbody>
-              <% loss = @pay_types[order.id].nil? ? 0 : @pay_types[order.id].select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n} %>
-              <%  fact = order.price>loss ? order.price-loss : 0%>
+              <% loss = limit_float(@pay_types[order.id].nil? ? 0 : @pay_types[order.id].select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n}) %>
+              <%  fact = limit_float(order.price>loss ? order.price-loss : 0)%>
               <%@order_prods[order.id].each do |prod|%>
                 <tr>
                   <td><%= prod.name %></td>
                   <td><%= prod.pro_num %></td>
-                  <td><%= prod.price %></td>
+                  <td><%= limit_float(prod.price) %></td>
                   <td><%=  loss  %></td>
                   <td><%= fact %></td>
                 </tr>
