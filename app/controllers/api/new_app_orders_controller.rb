@@ -872,9 +872,16 @@ class Api::NewAppOrdersController < ApplicationController
       is_pleased = params[:is_please].to_i
       status = 1
       msg = "付款成功!"
+      prods = params[:prods].split(",") #[0_255_2_200, 1_47_255=20, 2_322_0_0_16=200_128, 3_111_0_16=2_147]
+      p_count = 0
+      prods.each do |p|
+        if p.split("_")[0].to_i==0
+          p_count += p.split("_")[2].to_i
+        end
+      end
       if pay_type == 0 #现金
         OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:CASH], :price => total_price,
-        :product_id => oprs.blank? ? nil : oprs[0].product_id)
+          :product_id => oprs.blank? ? nil : oprs[0].product_id, :product_num => oprs.blank? ? nil : p_count)
       elsif pay_type==1 #储值卡
         customer_savecard = CSvcRelation.find_by_id(params[:csrid].to_i)
         if customer_savecard
@@ -885,7 +892,7 @@ class Api::NewAppOrdersController < ApplicationController
                 :content => "#{total_price}产品付费")
               customer_savecard.update_attribute("left_price", customer_savecard.left_price - total_price)
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD], :price => total_price,
-              :product_id => oprs.blank? ? nil : oprs[0].product_id)
+                :product_id => oprs.blank? ? nil : oprs[0].product_id, :product_num => oprs.blank? ? nil : p_count)
               if customer_savecard.left_price <=0
                 customer_savecard.update_attribute("status", CSvcRelation::STATUS[:invalid])
               end
@@ -903,10 +910,9 @@ class Api::NewAppOrdersController < ApplicationController
         end
       elsif pay_type==5 #免单
         OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:IS_FREE], :price => total_price,
-        :product_id => oprs.blank? ? nil : oprs[0].product_id)
+          :product_id => oprs.blank? ? nil : oprs[0].product_id)
       end
-      prods = params[:prods].split(",") #[0_255_2_200, 1_47_255=20, 2_322_0_0_16=200_128, 3_111_0_16=2_147]
-      
+           
       if status==1
         c_pcard_relation_id = []
         c_svc_relation_id = []
