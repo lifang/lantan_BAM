@@ -229,7 +229,7 @@ class Api::NewAppOrdersController < ApplicationController
           #该用户所购买的打折卡及其所支持的产品或服务
           sv_cards = CSvcRelation.get_customer_discount_cards(customer.customer_id,params[:store_id].to_i)
           #该用户所购买的套餐卡及其所支持的产品或服务
-          #p_cards = CPcardRelation.get_customer_package_cards(customer.customer_id, params[:store_id].to_i)
+          p_cards = CPcardRelation.get_customer_package_cards(customer.customer_id, params[:store_id].to_i, pram_str[0].to_i)
           #该用户所购买的储值卡及其所支持的产品或服务类型
           save_cards = CSvcRelation.get_customer_supposed_save_cards(customer.customer_id, params[:store_id].to_i, pram_str[0].to_i)
         end
@@ -663,7 +663,7 @@ class Api::NewAppOrdersController < ApplicationController
           #该用户所购买的打折卡及其所支持的产品或服务
           sv_cards = CSvcRelation.get_customer_discount_cards(customer.id,store_id)
           #该用户所购买的套餐卡及其所支持的产品或服务
-          #p_cards = CPcardRelation.get_customer_package_cards(customer.id, store_id)
+          p_cards = CPcardRelation.get_customer_package_cards(customer.id, store_id, oprs[0].product_id)
           #该用户所购买的储值卡及其所支持的产品或服务类型
           oprs.each do |opr|
             sc = CSvcRelation.get_customer_supposed_save_cards(customer.id, store_id,opr.product_id)
@@ -864,6 +864,7 @@ class Api::NewAppOrdersController < ApplicationController
           :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
       end
       order = Order.find_by_id(params[:order_id].to_i)
+      oprs = order.order_prod_relations
       order.update_attribute("customer_id", customer.id)
       total_price = params[:total_price].to_f
       is_billing = params[:billing].to_i
@@ -872,7 +873,8 @@ class Api::NewAppOrdersController < ApplicationController
       status = 1
       msg = "付款成功!"
       if pay_type == 0 #现金
-        OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:CASH], :price => total_price)
+        OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:CASH], :price => total_price,
+        :product_id => oprs.blank? ? nil : oprs[0].product_id)
       elsif pay_type==1 #储值卡
         customer_savecard = CSvcRelation.find_by_id(params[:csrid].to_i)
         if customer_savecard
@@ -882,7 +884,8 @@ class Api::NewAppOrdersController < ApplicationController
                 :use_price => total_price, :left_price => customer_savecard.left_price - total_price,
                 :content => "#{total_price}产品付费")
               customer_savecard.update_attribute("left_price", customer_savecard.left_price - total_price)
-              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD], :price => total_price)
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:SV_CARD], :price => total_price,
+              :product_id => oprs.blank? ? nil : oprs[0].product_id)
               if customer_savecard.left_price <=0
                 customer_savecard.update_attribute("status", CSvcRelation::STATUS[:invalid])
               end
@@ -899,7 +902,8 @@ class Api::NewAppOrdersController < ApplicationController
           msg = "数据错误!"
         end
       elsif pay_type==5 #免单
-        OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:IS_FREE], :price => total_price)
+        OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:IS_FREE], :price => total_price,
+        :product_id => oprs.blank? ? nil : oprs[0].product_id)
       end
       prods = params[:prods].split(",") #[0_255_2_200, 1_47_255=20, 2_322_0_0_16=200_128, 3_111_0_16=2_147]
       

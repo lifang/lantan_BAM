@@ -3,7 +3,7 @@ class CPcardRelation < ActiveRecord::Base
   belongs_to :package_card
   belongs_to :customer
   belongs_to :order
-#  has_many :orders
+  #  has_many :orders
   STATUS = {:INVALID => 0,:NORMAL => 1,:NOTIME =>2} #0 为无效 1 为正常卡 2 为过期/使用完
   STATUS_NAME = {2 => "过期/使用完", 1 => "正常使用"}
 
@@ -73,12 +73,21 @@ class CPcardRelation < ActiveRecord::Base
   end
 
   #该用户已经所购买的套餐卡及其所支持的产品或服务
-  def self.get_customer_package_cards customer_id, store_id
-     pc = CPcardRelation.find_by_sql(["select cpr.content,cpr.id cprid, p.id pid, p.name pname, p.price pprice from c_pcard_relations cpr
+  def self.get_customer_package_cards customer_id, store_id,p_id
+    pc = CPcardRelation.find_by_sql(["select cpr.content,cpr.id cprid, p.id pid, p.name pname, p.price pprice from c_pcard_relations cpr
           inner join package_cards p on cpr.package_card_id=p.id where NOW()<=cpr.ended_at and cpr.customer_id=?
           and cpr.status=? and p.status=? and p.store_id=?", customer_id, CPcardRelation::STATUS[:NORMAL],
-          PackageCard::STAT[:NORMAL], store_id])
-      p_cards = pc.inject([]){|a, p|
+        PackageCard::STAT[:NORMAL], store_id])
+    p_cards = pc.inject([]){|a, p|
+      items = p.content.split(",")    #447-0927mat1-2,448-0927mat2-2
+      flag = false
+      items.each do |i|           #i=447-0927mat1-2
+        if i.split("-")[2].to_i > 0 && i.split("-")[0].to_i == p_id
+          flag = true
+          break
+        end
+      end if items
+      if flag
         ha = {}
         ha[:cprid] = p.cprid
         ha[:pid] = p.pid
@@ -88,9 +97,11 @@ class CPcardRelation < ActiveRecord::Base
         ha[:is_new] = 0
         ha[:show_price] = 0
         ha[:status] = 0
-        ha[:products] = []
-        items = p.content.split(",")    #447-0927mat1-2,448-0927mat2-2
+        ha[:products] = []     
         items.each do |i|           #i=447-0927mat1-2
+          if i.split("-")[0].to_i == p_id
+            flag = true
+          end
           hash = {}
           hash[:proid] = i.split("-")[0]
           hash[:proname] = i.split("-")[1]
@@ -100,10 +111,11 @@ class CPcardRelation < ActiveRecord::Base
           hash[:pprice] = pprod.nil? ? nil : pprod.sale_price
           ha[:products] << hash
         end if items
-        a << ha;
-        a
-      }
-      p_cards
+        a << ha
+      end;
+      a
+    }
+    p_cards
   end
 
 end

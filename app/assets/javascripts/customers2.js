@@ -1,3 +1,4 @@
+
 function select_property(obj){
     if($(obj).val()==1){
         var len = $("#group_name").parents("div .item").find("font").length;
@@ -168,7 +169,10 @@ function add_car_get_datas(type,obj, store_id){
             url: "/stores/"+store_id+"/customers/add_car_get_datas",
             type: "get",
             dataType: "script",
-            data:{type : type, id : ob}
+            data:{
+                type : type,
+                id : ob
+            }
         })
     }
 }
@@ -185,3 +189,97 @@ function add_car_valid(obj){
         $(obj).attr("disabled", "disabled");
     }
 }
+
+function change_pcard_pwd(csrid, p_name){
+    popup("#change_pcard_pwd_div");
+    $("#change_pcard_pwd_name").text(p_name);
+    $("#change_pcard_pwd_name").append("<input type='hidden' name='change_pcard_pwd_cprid' value='"+csrid+"'/>");
+}
+
+function change_pcard_pwd_get_valid_code(){
+    var csrid = $("input[name='change_pcard_pwd_cprid']").val();
+    if ($.trim(csrid)=="" || parseInt(csrid)==0){
+        tishi_alert("数据错误!");
+    }else{
+        $.ajax({
+            url: "/api/change/send_code",
+            type: "post",
+            dataType: "json",
+            data: {
+                cid : csrid
+            },
+            success: function(data){
+//                if(data.msg_type==1){
+                    tishi_alert(data.msg);
+//                }else{
+//                    tishi_alert(data.msg);
+//                    $("#change_pcard_pwd_a").attr("href", "jsvsscript:viod(0)");
+//                    setTimeout(function(){
+//                        $("#change_pcard_pwd_a").attr("href", "javascript:change_pcard_pwd_get_valid_code()");
+//                    }, 121000);
+//                    set_repeat_msg(120,"#change_pcard_pwd_daoshu");
+//                }
+            }
+        })
+    }
+}
+
+function change_pcard_pwd_commit(){
+    var t =/^\+?[0-9][0-9]{5,5}$/
+    var csrid = $("input[name='change_pcard_pwd_cprid']").val();
+    var vcode = $.trim($("#change_pcard_pwd_valid_code").val());
+    var npwd = $.trim($("#change_pcard_pwd_new_pwd").val());
+    var rpwd = $.trim($("#change_pcard_pwd_repeat_pwd").val());
+    if(csrid=="" || parseInt(csrid)==0){
+        tishi_alert("数据错误!");
+    }else if(vcode==""){
+        tishi_alert("请输入验证码!");
+    }else if(npwd==""){
+        tishi_alert("请输入新密码!");
+    }else if(t.test(npwd)==false){
+        tishi_alert("密码长度必须为6位,且必须为0~9的整数!");
+    }else if(rpwd==""){
+        tishi_alert("请输入确认密码!");
+    }else if(t.test(rpwd)==false){
+        tishi_alert("密码长度必须为6位,且必须为0~9的整数!");
+    }else if(npwd != rpwd){
+        tishi_alert("两次密码输入不一致!");
+    }else{
+        $.ajax({
+            url: "/api/change/change_pwd",
+            type: "post",
+            dataType: "json",
+            data: {
+                cid : csrid,
+                verify_code : vcode,
+                n_password : npwd
+            },
+            success: function(data){
+                if(data.msg_type==0){
+                    tishi_alert(data.msg);
+                    $("#change_pcard_pwd_valid_code").val("");
+                    $("#change_pcard_pwd_new_pwd").val("");
+                    $("#change_pcard_pwd_repeat_pwd").val("");
+                    $("#change_pcard_pwd_div").hide();
+                    $(".mask").hide();
+                }else{
+                    tishi_alert(data.msg);
+                }
+            }
+        })
+    }
+}
+
+
+//function set_repeat_msg(time,t){
+//    var time = time;
+//    var local_timer=setInterval(function(){
+//        if(time > 0){
+//            $(t).text("*"+time+"秒后可重新获取验证码!");
+//        }else{
+//            $(t).text("");
+//            window.clearInterval(local_timer);
+//        };
+//        time -= 1;
+//    },1000);
+//}

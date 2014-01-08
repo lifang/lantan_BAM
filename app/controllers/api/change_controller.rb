@@ -3,19 +3,28 @@ class Api::ChangeController < ApplicationController
 
   def change_pwd
     sv_card = CSvcRelation.find_by_id(params[:cid].to_i)
-    if sv_card && sv_card.status
-      if params[:verify_code] == sv_card.verify_code
-        n_password = params[:n_password]
-        if sv_card.update_attribute(:password, Digest::MD5.hexdigest(n_password))
-          render :json => {:msg_type => 0, :msg => "密码修改成功!"}
+    SvCard.transaction do
+      status = 0
+      msg = ""
+      if sv_card && sv_card.status
+        if params[:verify_code] == sv_card.verify_code
+          n_password = params[:n_password]
+          if sv_card.update_attribute(:password, Digest::MD5.hexdigest(n_password))
+            status = 0
+            msg = "密码修改成功!"
+          else
+            status = 2
+            msg = "修改失败!"
+          end
         else
-          render :json => {:msg_type => 2, :msg => "修改失败!"}
+          status = 1
+          msg = "验证码不正确!"
         end
       else
-        render :json => {:msg_type => 1, :msg => "验证码不正确!"}
+        status = 2
+        msg = "数据错误!"
       end
-    else
-      render :json => {:msg_type => 2, :msg => "数据错误!"}
+      render :json => {:msg_type => status, :msg => msg}
     end
   end
 
