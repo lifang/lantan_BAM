@@ -403,6 +403,7 @@ class CustomersController < ApplicationController
       inner join c_svc_relations csr on csr.id = sur.c_svc_relation_id inner join sv_cards sc on csr.sv_card_id = sc.id
     where csr.customer_id = ? and csr.status = 1 order by sur.created_at desc", customer_id], :page => params[:page],
       :per_page => Constant::PER_PAGE)
+    @srs = @svcard_records.group_by{|sr|sr.c_svc_relation_id} if @svcard_records
   end
 
   
