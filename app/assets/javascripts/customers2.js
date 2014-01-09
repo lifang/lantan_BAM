@@ -38,7 +38,8 @@ function select_check_type(obj){
     if($(obj).val()==0){
         $("#check_time_month").removeAttr("disabled");
         $("#check_time_week").attr("disabled", true);
-    }else{
+    }
+    else{
         $("#check_time_week").removeAttr("disabled");
         $("#check_time_month").attr("disabled", true);
     }
@@ -209,16 +210,10 @@ function change_pcard_pwd_get_valid_code(){
                 cid : csrid
             },
             success: function(data){
-//                if(data.msg_type==1){
-                    tishi_alert(data.msg);
-//                }else{
-//                    tishi_alert(data.msg);
-//                    $("#change_pcard_pwd_a").attr("href", "jsvsscript:viod(0)");
-//                    setTimeout(function(){
-//                        $("#change_pcard_pwd_a").attr("href", "javascript:change_pcard_pwd_get_valid_code()");
-//                    }, 121000);
-//                    set_repeat_msg(120,"#change_pcard_pwd_daoshu");
-//                }
+                tishi_alert(data.msg);
+            },
+            error: function(data){
+                tishi_alert("数据错误!");
             }
         })
     }
@@ -265,11 +260,19 @@ function change_pcard_pwd_commit(){
                 }else{
                     tishi_alert(data.msg);
                 }
+            },
+            error : function(data){
+                tishi_alert("数据错误!");
             }
         })
     }
 }
 
+function change_pcard_pwd_close(){
+    $("#change_pcard_pwd_valid_code").val("");
+    $("#change_pcard_pwd_new_pwd").val("");
+    $("#change_pcard_pwd_repeat_pwd").val("");
+}
 
 //function set_repeat_msg(time,t){
 //    var time = time;
