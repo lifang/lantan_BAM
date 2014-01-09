@@ -5,11 +5,20 @@ class ProductsController < ApplicationController
   layout 'sale'
 
   def index
-    @products = Product.paginate_by_sql("select service_code code,p.name,sale_price,t_price,base_price,p.id,p.store_id,prod_point,c.name c_name
+    sql = ["select service_code code,p.name,sale_price,t_price,base_price,p.id,p.store_id,prod_point,c.name c_name
     from products p inner join categories c on p.category_id=c.id where c.store_id=#{params[:store_id]} and p.status=#{Product::IS_VALIDATE[:YES]}
-    and c.types=#{Category::TYPES[:good]} order by p.created_at desc", :page => params[:page], :per_page =>Constant::PER_PAGE)
-    @total = Product.joins(:category).where("categories.store_id=#{params[:store_id]} and products.status=#{Product::IS_VALIDATE[:YES]} and
-    categories.types=#{Category::TYPES[:good]}").select("count(*) num").first
+    and c.types=#{Category::TYPES[:good]}"]
+    count_sql = "categories.store_id=#{params[:store_id]} and products.status=#{Product::IS_VALIDATE[:YES]} and
+    categories.types=#{Category::TYPES[:good]}"
+    unless params[:p_name].nil? || params[:p_name].strip == ""
+      p_name =  "%#{params[:p_name].strip.gsub(/[%_]/){|x|'\\' + x}}%"
+      sql[0] += " and p.name like ?"
+      sql << p_name
+      count_sql += " and products.name like '#{p_name}'"
+    end
+    sql[0] += "  order by p.created_at desc"
+    @products = Product.paginate_by_sql(sql, :page => params[:page], :per_page =>Constant::PER_PAGE)
+    @total = Product.joins(:category).where(count_sql).select("count(*) num").first
   end  #产品列表页
 
   #新建产品

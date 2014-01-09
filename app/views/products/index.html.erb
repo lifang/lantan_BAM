@@ -14,6 +14,17 @@
       <div class="clear"></div>
       <div class="data_body">
         <div>
+          <div class="search">
+            <form url="/stores/<%= params[:store_id] %>/products" method="get">
+            <div>
+              <label>物料名称：</label>
+              <input type="text" name="p_name" value="<%= params[:p_name].nil? ? "" : params[:p_name] %>"/>
+            </div>
+            <div>
+              <button class="search_btn" >查询</button>
+            </div>
+            </form>
+          </div>
           <div class="table_box_h">
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
@@ -59,7 +70,7 @@
                   <td width="8%">产品编号</td>
                   <td width="15%">产品名称</td>
                   <td width="10%">成本价</td>
-                  <td wdth="10%">零售价格</td>
+                  <td width="10%">零售价格</td>
                   <td width="10%">促销价</td>
                   <td width="10%">积分</td>
                   <td width="10%">类别</td>
