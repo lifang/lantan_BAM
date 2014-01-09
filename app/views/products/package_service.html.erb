@@ -8,9 +8,9 @@
         <a href="/stores/<%=params[:store_id]%>/products/package_service" class="hover">产品套装服务</a></div>
       <div class="data_menu">
         <% if permission?(:sales, :add_service) %>
-          <a href="javascript:void(0)" class="add_btn" onclick="add_package('<%= params[:store_id] %>')">添加套装</a> <% end %>
+          <a href="javascript:void(0)" class="add_btn" onclick="add_package('<%= params[:store_id] %>')">添加套装服务</a> <% end %>
         <% if permission?(:sales, :delete_service) && @total.num > 0 %>
-          <a href="javascript:void(0)" class="add_btn" onclick="delete_prods(<%= params[:store_id] %>)">删除套装</a><%end%>
+          <a href="javascript:void(0)" class="add_btn" onclick="delete_prods(<%= params[:store_id] %>)">删除套装服务</a><%end%>
       </div>
       <div class="collect">
         <ul>
