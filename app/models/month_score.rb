@@ -23,12 +23,9 @@ class MonthScore < ActiveRecord::Base
   end   
 
   def self.search_kind_order(created,ended,time,store_id,is_service)
-    sql ="select p.id,p.name,p.is_service,p.service_code,op.price,sum(op.pro_num) prod_num,sum(op.total_price) sum,"
-    sql += "date_format(op.created_at,'%Y-%m-%d') day" if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
-    sql += "date_format(op.created_at,'%X-%V') day" if time.to_i==Sale::DISC_TIME[:WEEK]
-    sql += "date_format(op.created_at,'%X-%m') day"  if time.to_i==Sale::DISC_TIME[:MONTH]
-    sql +=" from products p inner join order_prod_relations op on p.id=op.product_id inner join orders o on o.id=op.order_id
-     where o.store_id=#{store_id} and o.status in (#{Order::PRINT_CASH.join(',')}) and is_service=#{is_service} "
+    sql ="select p.id,p.name,p.is_service,p.service_code,op.price,sum(op.pro_num) prod_num,sum(op.total_price) sum,
+     date_format(op.created_at,'%Y-%m-%d') day from products p inner join order_prod_relations op on p.id=op.product_id inner 
+     join orders o on o.id=op.order_id where o.store_id=#{store_id} and o.status in (#{Order::PRINT_CASH.join(',')}) and is_service=#{is_service} "
     sql += " and date_format(op.created_at,'%Y-%m-%d')>='#{created}'" unless created.nil? || created =="" || created.length==0
     sql += " and date_format(op.created_at,'%Y-%m-%d')<='#{ended}'" unless ended.nil? || ended =="" || ended.length==0
     sql +=" group by p.id,date_format(op.created_at,'%Y-%m-%d')"  if time.nil? || time.to_i==Sale::DISC_TIME[:DAY]
