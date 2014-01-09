@@ -9,7 +9,7 @@ class WorkOrdersController < ApplicationController
     wait_pay_car_nums = [] #定义数组存放所有待付款车牌
     #查询所有未删除的工位信息
     stations = Station.find_by_sql(["select s.id, s.status, s.name
-      from stations s where s.status not in (?) and s.store_id = #{params[:store_id]} order by s.id", [Station::STAT[:WRONG], Station::STAT[:DELETED]]])
+      from stations s where s.status=? and s.store_id = #{params[:store_id]} order by s.id", Station::STAT[:NORMAL]])
 
     #查询所有当天的技师信息
     cons_staffs = Station.find_by_sql("select s.id as station_id, staffs.name as staff_name
@@ -123,7 +123,6 @@ class WorkOrdersController < ApplicationController
     }
     local_sales << head_sales if head_sales.any?
     current_info[:no_station_wos] = Order.joins(:work_orders).where("work_orders.current_day =? and work_orders.store_id = ? and work_orders.status != ? and work_orders.station_id is null", now_date, params[:store_id], WorkOrder::STAT[:CANCELED]).map(&:car_num).map(&:num).uniq
-    #current_info[:head_sales] = head_sales
     current_info[:local_sales] = local_sales.flatten
     render :json => current_info
   end
