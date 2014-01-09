@@ -129,6 +129,59 @@ class OrderPayType < ActiveRecord::Base
                 OrderPayType.create(:order_id=>k,:price=>limit_float(v),:pay_type=>OrderPayType::PAY_TYPES[:FAVOUR])
               end unless loss.empty?
             end
+            cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : limit_float(param[:pay_cash].to_f - param[:second_parm].to_f)
+            p order_prod_ids = prods.inject({}){|h,p|h[p.o_id]=p;h}
+            orders.each do |o|
+              p pp = {:product_id => order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].p_id,
+                :product_num => order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].pro_num}
+              price = limit_float(o_price[o.id].to_f)
+              if price <=0
+                o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
+              else
+                if price <= total_card
+                  OrderPayType.create({:order_id=>o.id,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
+                  total_card = limit_float(total_card-price)
+                  total_card=0 if total_card <0
+                  o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
+                else
+                  if price <= (total_card+clear_value)
+                    OrderPayType.create({:order_id=>o.id,:price=>limit_float(clear_value),:pay_type=>OrderPayType::PAY_TYPES[:CLEAR]}.merge(pp))
+                    OrderPayType.create({:order_id=>o.id,:price=>limit_float(price-clear_value),:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
+                    total_card = limit_float(total_card-price)
+                    clear_value = 0
+                    total_card=0 if total_card <0
+                  else
+                    if clear_value>0
+                      OrderPayType.create({:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR]}.merge(pp))
+                    end
+                    if total_card >0
+                      OrderPayType.create({:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
+                    end
+                    parms = {:order_id=>o.id,:price=>limit_float(price-total_card-clear_value),:pay_type=>param[:pay_type].to_i}
+                    if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
+                      parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
+                      cash_price = limit_float(cash_price-(price-total_card-clear_value))
+                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
+                      parms.merge!(:second_parm=>param[:second_parm])
+                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
+                      parms.merge!(pp)
+                      o.update_attributes(:status=>Order::STATUS[:FINISHED], :is_billing => is_billing)
+                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
+                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
+                    end
+                    OrderPayType.create(parms)
+                    clear_value = 0 if clear_value>0
+                    total_card =0 if total_card >0
+                  end
+                end
+              end
+              work_order = o.work_orders[0]
+              if work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY]
+                work_order.update_attributes(:status=>WorkOrder::STAT[:COMPLETE])
+              end
+            end
             if param[:pay_order] && param[:pay_order][:text]   #使用储值卡更新储值卡余额，并将更新新买储值卡的状态
               CSvcRelation.find(param[:pay_order][:text].keys).each do |c_relation|
                 use_price = limit_float(param[:pay_order][:text][:"#{c_relation.id}"].to_f)
@@ -144,57 +197,6 @@ class OrderPayType < ActiveRecord::Base
                 c_relation.update_attributes(pars)
                 SvcardUseRecord.create(:c_svc_relation_id=>c_relation.id,:types=>SvcardUseRecord::TYPES[:OUT],:use_price=>use_price,
                   :left_price=>only_price,:content=>OrderProdRelation.order_products(order_ids).values.flatten.map(&:name).join("、"))
-              end
-            end
-            cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : limit_float(param[:pay_cash].to_f - param[:second_parm].to_f)
-            p order_prod_ids = prods.inject({}){|h,p|h[p.o_id]=p.p_id;h}
-            orders.each do |o|
-              price = limit_float(o_price[o.id].to_f)
-              if price <=0
-                o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
-              else
-                if price <= total_card
-                  OrderPayType.create(:order_id=>o.id,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD],:product_id=>order_prod_ids[o.id])
-                  total_card = limit_float(total_card-price)
-                  total_card=0 if total_card <0
-                  o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
-                else
-                  if price <= (total_card+clear_value)
-                    OrderPayType.create(:order_id=>o.id,:price=>limit_float(clear_value),:pay_type=>OrderPayType::PAY_TYPES[:CLEAR],:product_id=>order_prod_ids[o.id])
-                    OrderPayType.create(:order_id=>o.id,:price=>limit_float(price-clear_value),:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD],:product_id=>order_prod_ids[o.id])
-                    total_card = limit_float(total_card-price)
-                    clear_value = 0
-                    total_card=0 if total_card <0
-                  else
-                    if clear_value>0
-                      OrderPayType.create(:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR],:product_id=>order_prod_ids[o.id])
-                    end
-                    if total_card >0
-                      OrderPayType.create(:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD],:product_id=>order_prod_ids[o.id])
-                    end
-                    parms = {:order_id=>o.id,:price=>limit_float(price-total_card-clear_value),:pay_type=>param[:pay_type].to_i}
-                    if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
-                      parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
-                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
-                      cash_price = limit_float(cash_price-(price-total_card-clear_value))
-                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
-                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
-                      parms.merge!(:second_parm=>param[:second_parm])
-                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
-                      parms.merge!(:product_id=>order_prod_ids[o.id])
-                      o.update_attributes(:status=>Order::STATUS[:FINISHED], :is_billing => is_billing)
-                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
-                      o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
-                    end
-                    OrderPayType.create(parms)
-                    clear_value = 0 if clear_value>0
-                    total_card =0 if total_card >0
-                  end
-                end
-              end
-              work_order = o.work_orders[0]
-              if work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY]
-                work_order.update_attributes(:status=>WorkOrder::STAT[:COMPLETE])
               end
             end
             #新买储值卡但是未使用  新买打折卡  更新状态
