@@ -36,7 +36,7 @@ function create_save_card_valid(obj){
         tishi_alert("请输入正确的充值金额!");
     }else if(e_money==""){
         tishi_alert("请输入赠送金额!");
-    }else if(isNaN(e_money) || parseInt(e_money)<=0){
+    }else if(isNaN(e_money) || parseInt(e_money)<0){
         tishi_alert("请输入正确的赠送金额!");
     }else if(desc==""){
         tishi_alert("请输入储值卡说明!");
@@ -87,7 +87,7 @@ function update_save_card_valid(obj){
         tishi_alert("请输入正确的充值金额!");
     }else if(e_money==""){
         tishi_alert("请输入赠送金额!");
-    }else if(isNaN(e_money) || parseInt(e_money)<=0){
+    }else if(isNaN(e_money) || parseInt(e_money)<0){
         tishi_alert("请输入正确的赠送金额!");
     }else if(desc==""){
         tishi_alert("请输入储值卡说明!");

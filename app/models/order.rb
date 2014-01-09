@@ -131,7 +131,7 @@ class Order < ActiveRecord::Base
   end
 
   def self.one_customer_orders(status, store_id, customer_id, pre_page, page)
-    @orders = Order.paginate_by_sql(["select * from orders where status != ? and store_id = ? and customer_id = ?
+    @orders = Order.paginate_by_sql(["select * from orders where status in (?) and store_id = ? and customer_id = ?
         order by created_at desc", status, store_id, customer_id], :per_page => pre_page, :page => page)
   end
 

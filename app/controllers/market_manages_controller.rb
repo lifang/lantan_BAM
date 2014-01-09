@@ -83,7 +83,7 @@ class MarketManagesController < ApplicationController
   def load_pcard
     @total_product,@total_fee,pcards,@pcards = {},0,[],[]
     session[:r_created],session[:r_ended],session[:time]=params[:created],params[:ended],params[:time].to_i
-    pays = MonthScore.sort_pay_types(params[:store_id],session[:time],session[:r_created],session[:r_ended])
+    p pays = MonthScore.sort_pay_types(params[:store_id],session[:time],session[:r_created],session[:r_ended])
     unless pays.blank?
       pays.inject(Hash.new){ |hash,prod|
         @total_fee += prod.sum; hash[prod.day].nil? ? hash[prod.day]= [prod] : hash[prod.day] << prod ;hash
