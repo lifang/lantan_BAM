@@ -1054,8 +1054,20 @@ class Api::NewAppOrdersController < ApplicationController
             (selected_prods).each do |k, v|
               OPcardRelation.create(:order_id => order.id, :c_pcard_relation_id => cpr.id, :product_id => k, :product_num => v)
               product = Product.find_by_id(k)
-              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-                :price => product.sale_price.to_f * v, :product_id => k, :product_num => v)
+              pcard = PackageCard.find_by_id(cpr.package_card_id)
+              sale_percent = pcard.nil? ? nil :  pcard.sale_percent.round(2)
+              sale_price = product.sale_price * v * sale_percent if sale_percent
+              pay_price = (product.sale_price * v) - sale_price if sale_price
+              p sale_percent
+              p sale_price
+              p pay_price
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:FAVOUR], :price => sale_price.to_f,
+                :product_id => k, :product_num => v)
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD], :price => pay_price.to_f,
+                :product_id => k, :product_num => v)
+
+#              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
+#                :price => product.sale_price.to_f * v, :product_id => k, :product_num => v)
             end if selected_prods.length > 0
           end
         end if prods
@@ -1463,7 +1475,14 @@ class Api::NewAppOrdersController < ApplicationController
               order.update_attributes(:status => Order::STATUS[:BEEN_PAYMENT], :is_pleased => is_pleased, 
                 :front_deduct => (product.deduct_percent.to_f + product.deduct_price.to_f) * opr.pro_num,
                 :technician_deduct => (product.techin_price.to_f + product.techin_percent.to_f) * opr.pro_num * 0.5)
-              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD], :price => order.price)
+              pcard = PackageCard.find_by_id(cpcard.package_card_id)
+              sale_percent = pcard.nil? ? nil :  pcard.sale_percent.round(2)
+              sale_price = order.price * sale_percent if sale_percent
+              pay_price = order.price - sale_price if sale_price
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:FAVOUR], :price => sale_price.to_f,
+                :product_id => opr.nil? ? nil : opr.product_id, :product_num => opr.nil? ? nil : opr.pro_num)
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD], :price => pay_price.to_f,
+                :product_id => opr.nil? ? nil : opr.product_id, :product_num => opr.nil? ? nil : opr.pro_num)             
               work_order = WorkOrder.find_by_order_id(order.id)
               if work_order
                 work_order.update_attribute("status", WorkOrder::STAT[:COMPLETE])
