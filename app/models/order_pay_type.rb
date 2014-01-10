@@ -95,6 +95,7 @@ class OrderPayType < ActiveRecord::Base
           prods = OrderProdRelation.joins(:product).where(:order_id=>orders.map(&:id)).select("products.category_id c_id,order_id o_id,product_id p_id,pro_num,name")
           prod_ids = prods.inject(Hash.new){|hash,o|hash[o.o_id]=o.c_id;hash}
           p order_prod_ids = prods.inject({}){|h,p|h[p.o_id]=p;h}
+          pcard_name = cprs.inject({}){|hash,p|hash[p.order_id] = p.name;hash} #套餐卡名称
           o_price = orders.inject(Hash.new){|hash,o|hash[o.id]= limit_float(o.price-(loss_orders["#{o.id}"].nil? ? 0 : loss_orders["#{o.id}"].to_f)-(order_pays[o.id] ?  order_pays[o.id] : 0));hash}
           sort_orders = []
           sv_prod = {}
@@ -110,8 +111,7 @@ class OrderPayType < ActiveRecord::Base
                 if (ca.ci and ca.ci.split(',').include? "#{prod_ids[o.id]}") or (ca.pid and ca.pid.split(',').include? "#{sv_pcard[o.id]}")
                   t_price += o_price[o.id]
                   sort_orders << o
-                  name = order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name
-                  sv_prod[ca.id].nil? ? sv_prod[ca.id] = [name] : sv_prod[ca.id] << name
+                  sv_prod[o.id].nil? ? sv_prod[o.id] = [ca.id] : sv_prod[o.id] << ca.id
                 end
               end
               if card_price[ca.s_id] > t_price
@@ -136,8 +136,7 @@ class OrderPayType < ActiveRecord::Base
               end unless loss.empty?
             end
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : limit_float(param[:pay_cash].to_f - param[:second_parm].to_f)
-            total_name = []
-            pcard_name = cprs.inject({}){|hash,p|hash[p.order_id] = p.name;hash} #套餐卡名称
+            total_name = {}
             orders = sort_orders | (orders - sort_orders)
             orders.each do |o|
               p pp = {:product_id => order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].p_id,
@@ -148,8 +147,11 @@ class OrderPayType < ActiveRecord::Base
               else
                 if price <= total_card
                   OrderPayType.create({:order_id=>o.id,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
-                  total_name << (order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name)
-                  total_name << pcard_name[o.id]
+                  sv_prod[o.id].each do |ca|
+                    name = order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name
+                    total_name[ca].nil? ? total_name[ca] =[name] : total_name[ca] << name
+                    total_name[ca].nil? ? total_name[ca] =[pcard_name[o.id]] : total_name[ca] << pcard_name[o.id]
+                  end unless sv_prod[o.id].nil?
                   total_card = limit_float(total_card-price)
                   total_card=0 if total_card <0
                   o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
@@ -157,8 +159,11 @@ class OrderPayType < ActiveRecord::Base
                   if price <= (total_card+clear_value)
                     OrderPayType.create({:order_id=>o.id,:price=>limit_float(clear_value),:pay_type=>OrderPayType::PAY_TYPES[:CLEAR]}.merge(pp))
                     OrderPayType.create({:order_id=>o.id,:price=>limit_float(price-clear_value),:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
-                    total_name << (order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name)
-                    total_name << pcard_name[o.id]
+                    sv_prod[o.id].each do |ca|
+                      name = order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name
+                      total_name[ca].nil? ? total_name[ca] =[name] : total_name[ca] << name
+                      total_name[ca].nil? ? total_name[ca] =[pcard_name[o.id]] : total_name[ca] << pcard_name[o.id]
+                    end unless sv_prod[o.id].nil?
                     total_card = limit_float(total_card-price)
                     clear_value = 0
                     total_card=0 if total_card <0
@@ -168,8 +173,11 @@ class OrderPayType < ActiveRecord::Base
                     end
                     if total_card >0
                       OrderPayType.create({:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
-                      total_name << (order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name)
-                      total_name << pcard_name[o.id]
+                      sv_prod[o.id].each do |ca|
+                        name = order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name
+                        total_name[ca].nil? ? total_name[ca] =[name] : total_name[ca] << name
+                        total_name[ca].nil? ? total_name[ca] =[pcard_name[o.id]] : total_name[ca] << pcard_name[o.id]
+                      end unless sv_prod[o.id].nil?
                     end
                     parms = {:order_id=>o.id,:price=>limit_float(price-total_card-clear_value),:pay_type=>param[:pay_type].to_i}
                     if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
@@ -210,7 +218,7 @@ class OrderPayType < ActiveRecord::Base
                 end
                 c_relation.update_attributes(pars)
                 SvcardUseRecord.create(:c_svc_relation_id=>c_relation.id,:types=>SvcardUseRecord::TYPES[:OUT],:use_price=>use_price,
-                  :left_price=>only_price,:content=>total_name.compact.uniq.join("、"))
+                  :left_price=>only_price,:content=>total_name[c_relation.id].nil? ? "" : total_name[c_relation.id].compact.uniq.join("、"))
               end
             end
             #新买储值卡但是未使用  新买打折卡  更新状态
