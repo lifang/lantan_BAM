@@ -1056,18 +1056,15 @@ class Api::NewAppOrdersController < ApplicationController
               product = Product.find_by_id(k)
               pcard = PackageCard.find_by_id(cpr.package_card_id)
               sale_percent = pcard.nil? ? nil :  pcard.sale_percent.round(2)
-              sale_price = product.sale_price * v * sale_percent if sale_percent
-              pay_price = (product.sale_price * v) - sale_price if sale_price
-              p sale_percent
-              p sale_price
-              p pay_price
+              pay_price = product.sale_price * v * sale_percent if sale_percent
+              sale_price= (product.sale_price * v) - pay_price if pay_price
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:FAVOUR], :price => sale_price.to_f,
                 :product_id => k, :product_num => v)
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD], :price => pay_price.to_f,
                 :product_id => k, :product_num => v)
 
-#              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-#                :price => product.sale_price.to_f * v, :product_id => k, :product_num => v)
+              #              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
+              #                :price => product.sale_price.to_f * v, :product_id => k, :product_num => v)
             end if selected_prods.length > 0
           end
         end if prods
@@ -1477,8 +1474,8 @@ class Api::NewAppOrdersController < ApplicationController
                 :technician_deduct => (product.techin_price.to_f + product.techin_percent.to_f) * opr.pro_num * 0.5)
               pcard = PackageCard.find_by_id(cpcard.package_card_id)
               sale_percent = pcard.nil? ? nil :  pcard.sale_percent.round(2)
-              sale_price = order.price * sale_percent if sale_percent
-              pay_price = order.price - sale_price if sale_price
+              pay_price = order.price * sale_percent if sale_percent
+              sale_price = order.price - pay_price if pay_price
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:FAVOUR], :price => sale_price.to_f,
                 :product_id => opr.nil? ? nil : opr.product_id, :product_num => opr.nil? ? nil : opr.pro_num)
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD], :price => pay_price.to_f,
