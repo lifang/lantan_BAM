@@ -1,5 +1,7 @@
 LantanBAM::Application.routes.draw do
 
+  get "data_manages/index"
+
   get "data_managements/index"
 
   resources :syncs do
@@ -33,6 +35,12 @@ LantanBAM::Application.routes.draw do
   match "phone_login" => "logins#phone_login"
   match "manage_content" => "logins#manage_content"
   resources :stores do
+    resources :data_manages do
+      collection do
+
+
+      end
+    end
     #resources :depots
     resources :market_manages do
       collection do

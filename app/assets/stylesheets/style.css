@@ -292,6 +292,12 @@ textarea {
     text-shadow: 1px 1px rgba(255,255,255,1);
 }
 .tab_head li.hover { height: 30px; background: #FFF; font-weight: bolder; color: #930205;}
+.tab_head .data {
+    padding: 0 20px;
+    float: left;
+    color: #999;
+    text-shadow: 1px 1px rgba(255,255,255,1);
+}
 
 
 .sort_u, .sort_asc, .sort_d, .sort_u_s, .sort_d_s, .sort_desc { padding: 0 15px; cursor: pointer; background: url(/assets/sort.png) no-repeat}

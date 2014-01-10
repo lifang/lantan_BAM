@@ -1,0 +1,13 @@
+<%#=  render 'second_menu'%>
+<input type="hidden" value="<%= params[:store_id] %>" id="store_id" />
+<div class="search">
+  <div><label>时间：</label>
+    <input name="created" type="text" id="created" onclick="WdatePicker({preLoad:true,dateFmt:'yyyy-MM',maxDate:'<%=Time.now.strftime("%Y-%m")%>'})" readonly value="<%= session[:date] %>"  class="Wdate"/></div>
+  <div><button class="search_btn" onclick="search_first()">查询</button></div>
+</div>
+<div class="clear"></div>
+<div class="tab_head">
+  <ul>
+    <span class="data">服务类</span>
+  </ul>
+</div>
