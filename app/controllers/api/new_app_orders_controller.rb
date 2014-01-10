@@ -1062,9 +1062,6 @@ class Api::NewAppOrdersController < ApplicationController
                 :product_id => k, :product_num => v)
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD], :price => pay_price.to_f,
                 :product_id => k, :product_num => v)
-
-              #              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-              #                :price => product.sale_price.to_f * v, :product_id => k, :product_num => v)
             end if selected_prods.length > 0
           end
         end if prods
@@ -1249,8 +1246,14 @@ class Api::NewAppOrdersController < ApplicationController
             (selected_prods).each do |k, v|
               OPcardRelation.create(:order_id => order.id, :c_pcard_relation_id => cpr.id, :product_id => k, :product_num => v)
               product = Product.find_by_id(k)
-              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD],
-                :price => product.sale_price * v, :product_id => k, :product_num => v)
+              pcard = PackageCard.find_by_id(cpr.package_card_id)
+              sale_percent = pcard.nil? ? nil :  pcard.sale_percent.round(2)
+              pay_price = product.sale_price * v * sale_percent if sale_percent
+              sale_price= (product.sale_price * v) - pay_price if pay_price
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:FAVOUR], :price => sale_price.to_f,
+                :product_id => k, :product_num => v)
+              OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:PACJAGE_CARD], :price => pay_price.to_f,
+                :product_id => k, :product_num => v)
             end if selected_prods.length > 0
           end
         end if prods
