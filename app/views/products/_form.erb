@@ -59,7 +59,7 @@
       <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
     <label>百分点：</label>
     <input name="deduct_percent" id="deduct_percent" type="text" <%if @product.deduct_percent==0.0 && @product.deduct_price != 0.0%> disabled<%else%>
-             value="<%= (@product.deduct_percent.nil? ? 0 :@product.deduct_percent)/(@product.sale_price.nil? ? 1 : @product.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>
+             value="<%= ((@product.deduct_percent.nil? ? 0 :@product.deduct_percent)/(@product.sale_price.nil? ? 1 : @product.sale_price)*100).round(1) %>" <%end%>  class="item_areaInput_s"/>
   </div>
   <div class="item item_w"><span class="item_radio_b">
       <input name="deduct_type" type="radio" <% if @product.deduct_price && @product.deduct_price != 0.0 %>checked<%end%>
@@ -79,7 +79,7 @@
     <label>百分点：</label>
     <input name="techin_percent" id="techin_percent" type="text"
            <% if @product.techin_percent==0.0 && @product.techin_price != 0.0 %> disabled <%else%>
-             value="<%= (@product.techin_percent.nil? ? 0 :@product.techin_percent)/(@product.sale_price.nil? ? 1 : @product.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>
+             value="<%= ((@product.techin_percent.nil? ? 0 :@product.techin_percent)/(@product.sale_price.nil? ? 1 : @product.sale_price)*100).round(1)  %>" <%end%>  class="item_areaInput_s"/>
   </div>
   <div class="item item_w" id="techin_t" <% if !@product.is_added %>style="display: none"<%end%>><span class="item_radio_b">
       <input name="techin_type" type="radio" <% if @product.techin_price && @product.techin_price != 0.0 %>checked<%end%>

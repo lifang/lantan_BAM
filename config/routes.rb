@@ -1,5 +1,7 @@
 LantanBAM::Application.routes.draw do
 
+  get "data_managements/index"
+
   resources :syncs do
     get "upload_file"
     collection do
