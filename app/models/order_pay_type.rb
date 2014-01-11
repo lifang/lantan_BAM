@@ -7,6 +7,7 @@ class OrderPayType < ActiveRecord::Base
   PAY_TYPES_NAME = {0 => "现金", 1 => "刷卡", 2 => "储值卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单", 6 => "打折卡",7=>"付款优惠",8=>"抹零",9=>"挂账"}
   LOSS = [PAY_TYPES[:PACJAGE_CARD],PAY_TYPES[:SALE],PAY_TYPES[:DISCOUNT_CARD],PAY_TYPES[:FAVOUR],PAY_TYPES[:CLEAR]]
   PAY_STATUS = {:UNCOMPLETE =>0,:COMPLETE =>1} #0 挂账未结账  1  已结账
+  FAVOUR = [PAY_TYPES[:SALE],PAY_TYPES[:IS_FREE],PAY_TYPES[:DISCOUNT_CARD],PAY_TYPES[:FAVOUR],PAY_TYPES[:CLEAR]]
   
   def self.order_pay_types(orders)
     return OrderPayType.find(:all, :conditions => ["order_id in (?)", orders]).inject(Hash.new){|hash,t|
