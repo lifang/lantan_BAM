@@ -1,4 +1,5 @@
 <%#=  render 'second_menu'%>
+<%= javascript_include_tag "data_manages" %>
 <input type="hidden" value="<%= params[:store_id] %>" id="store_id" />
 <div class="search">
   <div><label>时间：</label>
@@ -8,89 +9,73 @@
 <div class="clear"></div>
 <div class="tab_head">
   <ul>
-    <span class="data">服务类</span>
+    <span class="data">销售单：<%=@t_orders.compact.uniq.length%>&nbsp;&nbsp;笔</span>
+    <span class="data">成本：<%= @total_t_price%>&nbsp;&nbsp;元</span>
+    <span class="data">毛利：<%= (@total_price-@total_t_price).round(2)%>&nbsp;&nbsp;元</span>
   </ul>
 </div>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
   <thead>
     <tr class="hbg">
-      <td>时间</td>
-      <td>详细</td>
+      <td>类型</td>
+      <td>项目类别</td>
+      <td>金额</td>
+      <td>成本</td>
+      <td>毛利</td>
+      <td>操作</td>
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td><%=  Category::TYPES_NAME[Category::TYPES[:service]]%></td>
-      <td>
-        <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-          <tr class="fws">
-            <td width="320px">类别</td>
-            <td>商品编号</td>
-            <td>付款方式</td>
-            <td>数量</td>
-            <td>合计（元）</td>
-          </tr>
-          <%  @prod_service[Category::TYPES[:service]].each do |k,service|%>
-            <tr>
-              <td><%=  @category[k]  %></td>
-              <td><%=  service.round(2)  %></td>
-              <td><%=  %></td>
-              <td><%=  %></td>
-              <td><%= 4 %></td>
-            </tr>
-          <% end %>
-        </table>
-      </td>
-    </tr>
-    <tr>
-      <td>总计</td>
-      <td>
-        <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-          <tr class="fws">
-            <td width="320px">类别</td>
-            <td>商品编号</td>
-            <td>付款方式</td>
-            <td>数量</td>
-            <td>合计（元）</td>
-          </tr>
-          <%  @prod_service[Category::TYPES[:service]].each do |k,service|%>
-            <tr>
-              <td><%=  @category[k]  %></td>
-              <td><%=  service.round(2)  %></td>
-              <td><%=  %></td>
-              <td><%=  %></td>
-              <td><%= 4 %></td>
-            </tr>
-          <% end %>
-        </table>
-      </td>
-    </tr>
-    <% unless @prod_service[Category::TYPES[:good]].nil? %>
-      <tr>
-        <td><%=  Category::TYPES_NAME[Category::TYPES[:good]]%></td>
-        <td>
-          <table width="100%" border="0" cellspacing="1" cellpadding="0" class="s_table">
-            <tr class="fws">
-              <td width="320px">类别</td>
-              <td>商品编号</td>
-              <td>付款方式</td>
-              <td>数量</td>
-              <td>合计（元）</td>
-            </tr>
-            <%  @prod_service[Category::TYPES[:good]].each do |k,service|%>
-              <tr>
-                <td><%=  @category[k]  %></td>
-                <td><%=  service.round(2)  %></td>
-                <td><%=  %></td>
-                <td><%=  %></td>
-                <td><%= 4 %></td>
-              </tr>
-            <% end %>
-          </table>
-        </td>
+    <%@category.each do |k,v|%>
+      <% m=0%>
+      <%v.each do |c_id,c_name|%>
+        <tr>
+          <% m += 1;if m==1 %>
+            <td rowspan="<%=@category[k].keys.length%>"><strong><%=  Category::TYPES_NAME[k]%></strong></td>
+          <%end%>
+          <td><%=c_name%></td>
+          <%price = @prod_service[k] && @prod_service[k][c_id] ? @prod_service[k][c_id].round(2) : 0.round(2) %>
+          <td><%=  price %></td>
+          <%  t_price = @t_price[k] && @t_price[k][c_id] ? @t_price[k][c_id].round(2) : 0.round(2)%>
+          <td><%= t_price  %></td>
+          <td><%=(price-t_price).round(2)%></td>
+          <td><a href="javascript:void(0)" onclick="show_category(<%=  params[:store_id]%>,<%=c_id%>,'<%=session[:date]%>',0)">详情</a></td>
+        </tr>
+      <%end%>
+      <tr >
+        <td style="color:Red"><strong>总计</strong></td>
+        <td></td>
+        <%total_price = @prod_service[k].nil? ? 0.round(2) : @prod_service[k].values.compact.inject(0){|sum,t|sum+t}.round(2)%>
+        <td><%=total_price%></td>
+        <% sum_t_price = @t_price[k].nil? ? 0.round(2) : @t_price[k].values.compact.inject(0){|sum,t|sum+t}.round(2) %>
+        <td><%=sum_t_price%></td>
+        <td><%=(total_price-sum_t_price).round(2)%></td>
+        <td><a href="javascript:void(0)" onclick="show_category(<%=  params[:store_id]%>,<%=k%>,'<%=session[:date]%>',<%=k%>)">详情</a></td>
       </tr>
     <%end%>
+    <% n =0 %>
+    <%@favour_cat.each do |c_id,c_name|%>
+      <tr>
+        <% n += 1;if n==1 %>
+          <td rowspan="<%=@favour_cat.length%>"><strong>优惠</strong></td>
+        <%end%>
+        <td><%=c_name%></td>
+        <%f_price =  @favour[c_id] ? @favour[c_id].round(2) : 0.round(2) %>
+        <td><%=  f_price %></td>
+        <td><%=  0.round(2)  %></td>
+        <td><%=  f_price%></td>
+        <td><a href="javascript:void(0)" onclick="show_category()">详情</a></td>
+      </tr>
+    <%end%>
+    <tr >
+      <td style="color:Red"><strong>总计</strong></td>
+      <td></td>
+      <%f_total = @favour.empty? ? 0.round(2) : @favour.values.compact.inject(0){|sum,t|sum+t}.round(2)%>
+      <td><%=  f_total%></td>
+      <td><%=  0.round(2) %></td>
+      <td><%=  f_total%></td>
+      <td><a href="javascript:void(0)" onclick="show_category()">详情</a></td>
+    </tr>
   </tbody>
 </table>
-<%#= will_paginate_remote(@pcards ,"" ,{:url =>"/stores/#{params[:store_id]}/market_manages/load_pcard"}) %>
-<%#*<div class="amount">总计：<%= format("%.1f",@total_fee) %></div>%>
+<div class="tab_popup show_prod_serv"></div>

@@ -9,6 +9,5 @@
   <%unless @may_pay[2].blank? %>
     window.open('/stores/'+<%=params[:store_id]%>+'/set_stores/print_paper?c_id=<%=params[:customer_id]%>&n_id=<%=params[:car_num_id]%>&o_id=<%=@may_pay[2].join(',')  %>','_blank','height=520,width=625,left=10,top=100');
   <%end%>
-<%else%>
-  tishi_alert("<%=@may_pay[1]%>");
 <%end%>
+tishi_alert("<%=@may_pay[1]%>");

@@ -17,7 +17,8 @@ class Salary < ActiveRecord::Base
     technician_amount = get_technician_deduct_amount(start_time, end_time)
     gr_records = StaffGrRecord.where("created_at >= '#{start_time}' and created_at <= '#{end_time}'").order('created_at asc').inject(Hash.new){
       |hash,r|hash[r.staff_id]=r;hash}
-    Staff.not_deleted.each do |staff|
+    staffs = Staff.not_deleted
+    staffs.each do |staff|
       voilate_amount = salary_infos[staff.id].nil? ? 0 : salary_infos[staff.id][false].nil? ? 0 : salary_infos[staff.id][false]
       reward_amount = salary_infos[staff.id].nil? ? 0 : salary_infos[staff.id][true].nil? ? 0 : salary_infos[staff.id][true]
       if staff.working_stats == 1
@@ -43,6 +44,7 @@ class Salary < ActiveRecord::Base
       end
       Salary.create(parms.merge({:total => total,:deduct_num => total_deduct,:fact_fee=>total,:base_salary=>base_salary,:is_edited=>1}))
     end
+    return staffs.length
   end
 
   def self.get_violation_reward_amount(salary_infos)

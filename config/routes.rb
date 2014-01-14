@@ -1,5 +1,7 @@
 LantanBAM::Application.routes.draw do
 
+  get "finance_reports/index"
+
   get "data_manages/index"
 
   get "data_managements/index"
@@ -37,8 +39,7 @@ LantanBAM::Application.routes.draw do
   resources :stores do
     resources :data_manages do
       collection do
-
-
+        post "ajax_prod_serv"
       end
     end
     #resources :depots

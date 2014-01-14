@@ -1128,7 +1128,7 @@ a.compile_btn { width: 100px;}
     font-weight: bold;
     color: #930205;
 }
-.accountsTab_item select { width: 150px; float: left; height: 26px; line-height: 26px;}
+.accountsTab_item select { width: 150px; float: left; height: 26px; line-height: 26px;font-size: 16px;}
 .accountsTab_item input { width: 124px; float: left; height: 24px; line-height: 24px;}
 
 .accountsTab_project { float: left; width: 200px; overflow: hidden;}
@@ -1152,7 +1152,8 @@ a.compile_btn { width: 100px;}
 .accountsTab_money span { font-size: 24px; color: #930205;}
 .accountsTab_money input { width: 556px; height: 30px; border: 1px #CCCCCC solid; font-size: 24px;}
 
-
+.due_pay_money { margin: 20px 0;}
+.due_pay_money span { font-size: 24px; color: #930205;}
 .accountsTab_pay { border: 1px #CCCCCC solid; padding: 10px; margin: 10px 0; overflow: hidden;}
 .accountsTab_pay_title {
     height: 30px;
@@ -1181,7 +1182,7 @@ a.compile_btn { width: 100px;}
 
 
 .deal_money { width: 213px; float: left; border: 1px #CCCCCC solid; margin-right: 10px;}
-.deal_money li { border-bottom: 1px #CCCCCC solid; line-height: 35px; height: 31px; padding: 5px;}
+.deal_money li { border-bottom: 1px #CCCCCC solid; line-height: 35px; height: 31px; padding: 5px;font-size:16px;}
 .deal_money li .deal_money_btn { 
     background: #066; 
     color: #FFF;
@@ -1208,6 +1209,7 @@ a.compile_btn { width: 100px;}
     border-bottom: 1px #CCCCCC solid;
     cursor: pointer;
     color:#930205;
+    font-size: 18px;
 }
 .at_way_h li.brnone {border-right: none;}
 .at_way_h li.hover { background: #6699FF; color: #FFF;}
@@ -1216,13 +1218,14 @@ a.compile_btn { width: 100px;}
 .at_way_b { padding: 10px; overflow: hidden;height: 70px;}
 .way_item { float: left; margin: 5px 0; color: #930205; height: 24px; line-height: 24px; margin-left: 10px;}
 .way_item label {
-    width: 100px;
+    width: 112px;
     height: 24px;
     display: inline-block;
     text-align: right;
     float: left;
     font-weight: bold;
     color: #930205;
+    font-size: 16px;
 }
 .way_item input { width: 157px; float: left; height: 24px; line-height: 24px;}
 .at_way_b input[type="radio"] { width:inherit; line-height: none; margin: 0px 5px 0 0;}

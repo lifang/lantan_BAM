@@ -74,11 +74,21 @@ task(:pcard_percent => :environment) do
   pcardProd = PcardProdRelation.where(:package_card_id=>pcards.map(&:id)).group_by{|i|i.package_card_id}
   prods = Product.find(pcardProd.values.flatten.map(&:product_id)).inject({}){|h,p|h[p.id]=p.sale_price.nil? ? 0 : p.sale_price;h}
   pcards.each do |pcard|
-    total_price = pcardProd[pcard.id].inject(0){|sum,v|sum + (prods[v.product_id]*v.product_num)}
-    if total_price > pcard.price.to_f
-      pcard.update_attributes(:sale_percent=>pcard.price.to_f/total_price)
+    if pcardProd[pcard.id]
+      total_price = pcardProd[pcard.id].inject(0){|sum,v|sum + (prods[v.product_id]*v.product_num)}
+      if total_price > pcard.price.to_f
+        pcard.update_attributes(:sale_percent=>pcard.price.to_f/total_price)
+      end
     end
   end
+end
+
+#更新储值卡密码
+task(:sv_pwd => :environment) do
+  time = Time.now.to_i
+  count = CSvcRelation.where(:status=>CSvcRelation::STATUS[:valid]).where("password is null").select("count(*) count").count
+  CSvcRelation.where(:status=>CSvcRelation::STATUS[:valid]).where("password is null").update_all :password=>Digest::MD5.hexdigest("123456")
+  p "update who has bought sv_cards,the bought_records count is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
 end
 
 
