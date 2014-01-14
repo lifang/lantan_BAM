@@ -1,4 +1,4 @@
-class PayReceipts < ActiveRecord::Migration
+class CreatePayReceipts < ActiveRecord::Migration
   def change  #收款/付款单
     create_table :pay_receipts do |t|
       t.integer :types #类别
@@ -7,7 +7,7 @@ class PayReceipts < ActiveRecord::Migration
       t.integer :payment_type #支付类型
       t.timestamps
     end
-    add_column :pay_receipts, :amount, :"decimal(12,2)" #总金额
+    add_column :pay_receipts, :amount, :"decimal(12,2)",:default=>0 #总金额
     add_index :pay_receipts, :types
     add_index :pay_receipts, :payment_type
   end

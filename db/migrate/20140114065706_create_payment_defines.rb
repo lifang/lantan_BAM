@@ -8,6 +8,5 @@ class CreatePaymentDefines < ActiveRecord::Migration
       t.timestamps
     end
 
-#    add_index :payment_defines, :num
   end
 end

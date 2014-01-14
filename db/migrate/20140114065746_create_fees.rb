@@ -1,5 +1,5 @@
-class Fees < ActiveRecord::Migration
-  def change  #费用
+class CreateFees < ActiveRecord::Migration
+ def change  #费用
     create_table :fees do |t|
       t.string :code  #订单号
       t.string :name  #费用名称
@@ -14,7 +14,7 @@ class Fees < ActiveRecord::Migration
       t.integer :create_staffid  #创建人
       t.timestamps
     end
-    add_column :fees, :amount, :"decimal(12,2)" #金额
+    add_column :fees, :amount, :"decimal(12,2)",:default=>0 #金额
     add_index :fees, :types
   end
 end

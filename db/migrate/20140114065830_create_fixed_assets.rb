@@ -1,5 +1,5 @@
-class FixedAssets < ActiveRecord::Migration
-  def change  #固定资产表
+class CreateFixedAssets < ActiveRecord::Migration
+def change  #固定资产表
     create_table :fixed_assets do |t|
       t.string :code  #订单号
       t.string :name  #资产名称
@@ -15,9 +15,9 @@ class FixedAssets < ActiveRecord::Migration
       t.integer :create_staffid  #创建人
       t.timestamps
     end
-    add_column :fixed_assets, :price, :"decimal(12,2)" #单价
-    add_column :fixed_assets, :amount, :"decimal(12,2)" #总金额
-    add_column :fixed_assets, :pay_amount, :"decimal(12,2)" #总金额
+    add_column :fixed_assets, :price, :"decimal(12,2)",:default=>0 #单价
+    add_column :fixed_assets, :amount, :"decimal(12,2)",:default=>0 #总金额
+    add_column :fixed_assets, :pay_amount, :"decimal(12,2)",:default=>0 #总金额
     add_index :fixed_assets, :types
      add_index :fixed_assets, :status
   end
