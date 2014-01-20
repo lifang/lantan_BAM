@@ -1,56 +1,67 @@
 <div class="second_menu">
-  <% if permission?(:datas, :chengben) %><%= link_to "成本统计", store_material_order_manages_path(@store), :class => "hover" %><% end %>
-  <% if permission?(:datas, :ruchuku) %><%= link_to "入/出库查询", mat_in_or_out_query_store_material_order_manages_path(@store), :class=> "" %><% end %>
-  <% if permission?(:datas, :zhixiao) %><%= link_to "滞销统计", unsalable_materials_store_material_order_manages_path(@store), :class=> "" %><% end %>
+  <a href="/stores/<%= @store_id %>/material_order_manages" class="hover">订货分析</a>
+  <a href="/stores/<%= @store_id %>/material_order_manages/flow_analysis">流量分析</a>
+  <a href="/stores/<%= @store_id %>/material_order_manages/storage_analysis">库存结构分析</a>
 </div>
-<form action="/stores/<%= @store.id %>/material_order_manages" method="get">
-<div class="search">
-      <div>统计月份：<%= @statistics_month %></div>
-      <div><label>时间：</label>
-        <select name="statistics_month">
-         <% get_last_twelve_months.each do |month| %>
-         <option value="<%= month %>" <%= @statistics_month.eql?(month) ? "selected" : "" %>><%= month %></option>
-         <% end %>
-        </select>
-      </div>
-      <div><button class="search_btn" type="submit">查询</button></div>
-</div>
-</form>
-<div class="clear"></div>
-
-<div class="data_body">
-     <div>
-         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-             <thead>
-                  <tr class="hbg">
-                    <td>时间</td>
-                    <td>订货编号</td>
-                    <td>金额（元）</td>
-                  </tr>
-              </thead>
-              <tbody>
-                <% @material_orders.each do |material_order| %>
-                  <tr>
-                    <td><%= material_order.arrival_at.strftime("%Y-%m-%d") %></td>
-                    <td><%= link_to material_order.code, store_material_order_manage_path(@store, material_order), :class => "other_a", :remote => true, "data-type" => "script" %></td>
-                    <td><%= material_order.price %></td>
-                  </tr>
-                <% end %>
-              </tbody>
-        </table>
-       <%= will_paginate @material_orders, :class => "pageTurn", :previous_label => "上一页",
-    :next_label => "下一页" %>
-        <div class="amount">总计：<%= sprintf('%.2f', @total_price) %>（元）</div>
-     </div>
-</div>
-<div class="mask"></div>
-<div id="material_order_div">
-  <div class="tab_popup" id="material_order_detail">
-    <div class="popup_box">
-      <h1>订货编号<a href="javascript:void(0)" class="close">关闭</a></h1>
-      <div class="popup_body">
-        <div class="popup_body_area"></div>
-      </div>
+<form action="/stores/<%=@store_id %>/material_order_manages" method="get">
+  <div class="search">
+    <div><label>统计月份：</label>
+      <select name="statistics_month">
+        <% get_last_twelve_months.each do |month| %>
+          <option value="<%= month %>" <%= @statistics_month.eql?(month) ? "selected" : "" %>><%= month %></option>
+        <% end %>
+      </select>
     </div>
+    <div>
+      <label>订货渠道：</label>
+      <select name="supplier_id">
+        <option value="0">总部</option>
+        <% @suppliers.each do |s| %>
+          <option value="<%= s.id %>" <% if !@supplier_id.nil? && @supplier_id.to_i==s.id %>selected<% end %>><%= s.name %></option>
+        <% end %>
+      </select>
+    </div>
+    <div><button class="search_btn" type="submit">查询</button></div>
   </div>
+</form>
+<div class="tab_head">
+  <span>订货总金额：<%= sprintf("%.2f", (@has_pay + @no_pay)) %></span>&nbsp;&nbsp;&nbsp;
+  <span>未付款金额： <%= sprintf("%.2f", @no_pay) %></span>&nbsp;&nbsp;&nbsp;
+  <span>未付款比例：<%= @no_pay <= 0 ? "0%" : (@has_pay <= 0 ? "100%" : "#{sprintf("%.2f", (@no_pay * 100)/(@has_pay + @no_pay))}%") %></span>
+</div>
+<div class="data_body">
+  <div class="data_body_h">类别汇总</div>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+    <thead>
+      <tr class="hbg">
+        <td>库存类别</td>
+        <td>金额</td>
+        <td>金额占比</td>
+        <td>数量</td>
+        <td>数量占比</td>
+      </tr>
+    </thead>
+    <tbody>
+      <% @mat_orders[0..2].each do |mo| %>
+      <tr>
+        <td><strong><%= mo.name %></strong></td>
+        <td><%= mo.price.to_i %></td>
+        <td><%= @t_price.nil? || @t_price.to_i==0 ? "0%" : "#{sprintf("%.2f",(mo.price.to_f * 100)/@t_price.to_i)}%" %></td>
+        <td><%= mo.count.to_i %></td>
+        <td><%= @t_count.nil? || @t_count <= 0 ? "0%" : "#{sprintf("%.2f",(mo.count.to_f * 100)/@t_count)}%" %></td>
+      </tr>
+      <% end %>
+      <% if @mat_orders.length > 3 %>
+      <% t_price = @mat_orders[3..@mat_orders.length-1].inject(0){|i,m|i += m.price.to_f;i} %>
+      <% t_count = @mat_orders[3..@mat_orders.length-1].inject(0){|i,m|i += m.count.to_i;i} %>
+      <tr>
+        <td><strong>其他</strong></td>
+        <td><%= t_price.to_i %></td>
+        <td><%= @t_price.nil? || @t_price.to_i==0 ? "0%" : "#{sprintf("%.2f",(t_price.to_f * 100)/@t_price.to_i)}%" %></td>
+        <td><%= t_count.to_i %></td>
+        <td><%= @t_count.nil? || @t_count <= 0 ? "0%" : "#{sprintf("%.2f",(t_count.to_f * 100)/@t_count)}%" %></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
 </div>

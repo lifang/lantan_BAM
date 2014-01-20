@@ -11,7 +11,12 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema.define(:version => 20140117061924) do
+=======
+
+ActiveRecord::Schema.define(:version => 20140114070142) do
+>>>>>>> 38f471ffdf69ba792ccf8b3e9c5f59be62c19bf8
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -184,6 +189,8 @@ ActiveRecord::Schema.define(:version => 20140117061924) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "c_feedback_suggestion"
+    t.string   "img_url"
+    t.string   "code"
   end
 
   add_index "complaints", ["customer_id"], :name => "index_complaints_on_customer_id"

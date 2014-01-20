@@ -59,9 +59,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :complaints do
       collection do
-        post "search","search_degree","detail_s","search_time","degree_time","consumer_search"
-        get "search_list","show_detail","satisfy_degree","degree_list","detail_list","date_list","time_list","consumer_list"
-        get "con_list","cost_price"
+        post "consumer_search"
+        get "consumer_list", "con_list", "meta_analysis"
       end
       member do
         get "complaint_detail"
@@ -140,9 +139,7 @@ LantanBAM::Application.routes.draw do
     resources :current_month_salaries
     resources :material_order_manages do
       collection do
-        get "mat_in_or_out_query", "search_mat_in_or_out","page_ins","page_outs",
-          "unsalable_materials","search_unsalable_materials","page_unsalable_materials",
-          "page_unsalable_materials"
+        get "flow_analysis", "storage_analysis"
       end
     end
     resources :staff_manages do

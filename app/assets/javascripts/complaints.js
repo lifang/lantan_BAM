@@ -78,3 +78,117 @@ function load_sale(url){
     return false;
 }
 
+function complaint_type(comp_type, store_id, comp_month, div_name){
+    $.ajax({
+        type: "get",
+        url: "/stores/"+store_id+"/complaints",
+        dataType: "script",
+        data: {
+            comp_type : comp_type,
+            comp_month : comp_month,
+            div_name : div_name
+        },
+        error: function(data){
+            tishi_alert("数据错误!")
+        }
+    })
+}
+
+function pleased_type(plea_type, store_id, plea_start, plea_end, div_name){
+    $.ajax({
+        type: "get",
+        url: "/stores/"+store_id+"/complaints",
+        dataType: "script",
+        data: {
+            plea_type : plea_type,
+            plea_start : plea_start,
+            plea_end : plea_end,
+            div_name : div_name
+        },
+        error: function(data){
+            tishi_alert("数据错误!")
+        }
+    })
+}
+
+function meta_analysis_search(store_id){
+    var t = /^[1-9]*[1-9][0-9]*$/;
+    var amount_con_start = $.trim($("#amount_con_start").val());
+    var amount_con_end = $.trim($("#amount_con_end").val());
+    var amount_date_start = $.trim($("#amount_date_start").val());
+    var amount_date_end = $.trim($("#amount_date_end").val());
+    if(amount_con_start != "" && t.test(amount_con_start)==false){
+        tishi_alert("起始金额必须为大于零的整数!");
+    }else if(amount_con_end != "" && t.test(amount_con_end)==false){
+        tishi_alert("结束金额必须为大于零的整数!");
+    }else if(parseInt(amount_con_start) > parseInt(amount_con_end)){
+        tishi_alert("结束金额必须大于等于起始金额!");
+    }else{
+        $.ajax({
+            type: "get",
+            url: "/stores/"+store_id+"/complaints/meta_analysis",
+            dataType: "script",
+            data: {
+                amount_con_start : amount_con_start,
+                amount_con_end : amount_con_end,
+                amount_date_start : amount_date_start,
+                amount_date_end : amount_date_end,
+                flag : 1
+            },
+            error: function(data){
+                tishi_alert("数据错误!");
+            }
+        })
+    }
+
+}
+
+$(document).ready(function(){
+    $("#comp_page a").live("click", function(){     //统计管理-客户-投诉 异步分页
+        var url = $(this).attr("href");
+        $.ajax({
+            type : 'get',
+            dataType : 'script',
+            url : url,
+            data: {
+                div_name : "s_div"
+            },
+            error: function(data){
+                tishi_alert("数据错误!")
+            }
+        });
+        return false;
+    });
+
+    $("#plea_page a").live("click", function(){     //统计管理-客户-满意度 异步分页
+        var url = $(this).attr("href");
+        $.ajax({
+            type : 'get',
+            dataType : 'script',
+            url : url,
+            data: {
+                div_name : "p_div"
+            },
+            error: function(data){
+                tishi_alert("数据错误!")
+            }
+        });
+        return false;
+    });
+
+    $("#meta_analysis_page a").live("click", function(){    //统计管理-客户-汇总分析 异步分页
+        var url = $(this).attr("href");
+        $.ajax({
+            type : 'get',
+            dataType : 'script',
+            url : url,
+            data: {
+                flag : 1
+            },
+            error: function(data){
+                tishi_alert("数据错误!")
+            }
+        });
+        return false;
+    })
+})

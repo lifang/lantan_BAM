@@ -6,7 +6,8 @@ module ApplicationHelper
   include Constant
   include UserRoleHelper
   include Oauth2Helper
-
+  include CustomersHelper
+  
   def sign?
     deny_access unless signed_in?
   end

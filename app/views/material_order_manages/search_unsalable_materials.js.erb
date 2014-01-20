@@ -1,4 +1,0 @@
-<% if @status != true%>
-tishi_alert("开始日期不能大于结束日期");
-<% end %>
-$("#unsalable_materials_div").html('<%= escape_javascript(render :partial => '/material_order_manages/unsalable_materials_list') %>');
