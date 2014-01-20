@@ -282,15 +282,15 @@ class Station < ActiveRecord::Base
   end
   
   def self.turn_old_to_new
-    stores = Store.where(:status=>Store::STATUS[:OPENED])
+    work_records,total_con = [],[]
     StationStaffRelation.delete_all(:current_day=>Time.now.strftime("%Y%m%d"))
+    WorkRecord.delete_all(:current_day=>Time.now.strftime("%Y-%m-%d"))
+    stores = Store.where(:status=>Store::STATUS[:OPENED])
     infos = StationStaffRelation.where(:current_day=>[Time.now.strftime("%Y%m%d"),Time.now.yesterday.strftime("%Y%m%d")],:store_id=>stores.map(&:id)).inject({}){
       |h,s|h["#{s.current_day}_#{s.store_id}"].nil? ? h["#{s.current_day}_#{s.store_id}"]=[s] : h["#{s.current_day}_#{s.store_id}"] << s;h}
     staffs = Staff.where(:status=>Staff::STATUS[:normal],:store_id=>stores.map(&:id))
     tech_staffs = staffs.inject({}){|h,s|h[s.store_id].nil? ? h[s.store_id] = [s] : h[s.store_id] << s  if s.type_of_w == Staff::S_COMPANY[:TECHNICIAN];h}
     work_r_staffs = staffs.inject({}){|h,s|h[s.store_id].nil? ? h[s.store_id] = [s] : h[s.store_id] << s ;h}
-    WorkRecord.delete_all(:current_day=>Time.now.strftime("%Y-%m-%d"))
-    work_records,total_con = [],[]
     stores.each do |store|
       today_info = infos["#{Time.now.strftime("%Y%m%d")}_#{store.id}"]
       yesterday_info = infos["#{Time.now.yesterday.strftime("%Y%m%d")}_#{store.id}"]
@@ -300,6 +300,7 @@ class Station < ActiveRecord::Base
             Station.set_station(store.id,staff.id,staff.level)
           end unless tech_staffs[store.id].nil?
         else
+          p "#{store.id}--#{yesterday_info.length}"
           id = yesterday_info.map(&:id).max
           yesterday_info.each {|info|
             id += 1

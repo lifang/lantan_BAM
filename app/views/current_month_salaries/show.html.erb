@@ -14,6 +14,9 @@
           <li><strong>考核：</strong><%=100-((@score.nil?||@score.sys_score.nil?) ? 0 : @score.sys_score)%>分</li>
           <li><strong>提成：</strong><%=@salary.nil? ? 0 : @salary.deduct_num.round(2)%>元</li>
           <li><strong>扣款：</strong><%= @salary.nil? ? 0 : @salary.voilate_fee.round(2) %>元</li>
+          <% if @staff.type_of_w == Staff::S_COMPANY[:FRONT] %>
+            <li><strong>销售总额：</strong><%= @salary_details.map(&:price).compact.inject(0){|sum,n|sum+n}.round(2) %>元</li>
+          <%end%>
         </ul>
       </div>
       <div class="search">
@@ -26,9 +29,12 @@
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
-                  <th>日期</th>
-                  <th>订单号</th>
-                  <th>提成金额</th>
+                  <th width="10%">日期</th>
+                  <th width="25%">订单号</th>
+                  <th width="25%">项目</th>
+                  <th width="10%">数量</th>
+                  <th width="15%">总金额</th>
+                  <th width="15%">提成金额</th>
                 </tr>
               </thead>
               <tbody>
@@ -37,6 +43,10 @@
                   <tr>
                     <td><%=salary_detail.created_at.nil? ? "" : salary_detail.created_at.strftime("%Y-%m-%d") %></td>
                     <td><%=salary_detail.code %></td>
+                    <% prod = @order_prods[salary_detail.id][0] %>
+                    <td><%= prod.name.nil? ? "--" : prod.name %></td>
+                    <td><%= prod.pro_num.nil? ? "--" : prod.pro_num %></td>
+                    <td><%= (salary_detail.price.nil? ? 0 : salary_detail.price).round(2) %></td>
                     <td><%=
                       if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
                         salary_detail.t_deduct.nil? ? 0 : salary_detail.t_deduct
@@ -55,9 +65,12 @@
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>
                 <tr class="hbg">
-                  <th>日期</th>
-                  <th>订单号</th>
-                  <th>提成金额</th>
+                  <th width="10%">日期</th>
+                  <th width="25%">订单号</th>
+                  <th width="25%">项目</th>
+                  <th width="10%">数量</th>
+                  <th width="15%">总金额</th>
+                  <th width="15%">提成金额</th>
                 </tr>
               </thead>
               <tbody>
@@ -65,6 +78,10 @@
                   <tr>
                     <td><%=salary_detail.created_at.nil? ? "" : salary_detail.created_at.strftime("%Y-%m-%d") %></td>
                     <td><%=salary_detail.code %></td>
+                    <% prod = @order_prods[salary_detail.id][0] %>
+                    <td><%= prod.name.nil? ? "--" : prod.name %></td>
+                    <td><%= prod.pro_num.nil? ? "--" : prod.pro_num %></td>
+                    <td><%= (salary_detail.price.nil? ? 0 : salary_detail.price).round(2) %></td>
                     <td><%=
                       if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
                         salary_detail.t_deduct.nil? ? 0 : salary_detail.t_deduct.round(2)

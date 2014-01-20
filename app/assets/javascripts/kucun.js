@@ -6,6 +6,39 @@
  * To change this template use File | Settings | File Templates.
  */
 //保存material remark
+function set_cap(){
+    var s_name = $.trim(("#still_name").val());
+    var c_name = $.trim(("#cap_name").val());
+    if (s_name != c_name){
+        $('#refuse').val(0);
+    }
+}
+
+function get_cap_code(e,store_id){
+    if($.trim(e.value) == "" || $.trim(e.value).length == 0){
+        $("#cap_name").val("");
+    }else{
+        $('refuse').val(0);
+        $.ajax({
+            url:"/stores/"+ store_id+"/suppliers/check",
+            dataType:"json",
+            type: "post",
+            data:{
+                name : $.trim(e.value)
+            },
+            success:function(data){
+                $("#cap_name,#still_name").val(data.cap_name);
+                if (parseInt(data.msg_type) == 1){
+                    $('#refuse').val(1);
+                }else{
+                    $('#refuse').val(0);
+                }
+            }
+        });
+    }
+}
+
+
 var reg1 =  /^\d+$/;
 var reg2 = /^\d+\.{0,1}\d*$/;
 function save_material_remark(mat_id,store_id,obj){
@@ -758,8 +791,12 @@ function edit_commit_supplier_form(obj){
     }else if($.trim($("#edit_supplier_phone").val())==""){
         tishi_alert("请输入联系电话");
     }else{
-        $(obj).parents("form").submit();
-        $(obj).attr('disabled','disabled');
+        if (parseInt($("#refuse").val())== 0){
+            $(obj).parents("form").submit();
+            $(obj).attr('disabled','disabled');
+        }else{
+            tishi_alert("助记码已存在");
+        }
     }
 }
 
@@ -771,8 +808,12 @@ function commit_supplier_form(obj){
     }else if($.trim($("#supplier_phone").val())==""){
         tishi_alert("请输入联系电话");
     }else{
-        $(obj).parents("form").submit();
-        $(obj).attr('disabled','disabled');
+        if (parseInt($("#refuse").val()) == 0){
+            $(obj).parents("form").submit();
+            $(obj).attr('disabled','disabled');
+        }else{
+            tishi_alert("助记码已存在");
+        }   
     }
 }
 

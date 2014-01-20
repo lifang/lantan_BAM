@@ -30,7 +30,8 @@ class CurrentMonthSalariesController < ApplicationController
     @staff = Staff.find_by_id(params[:id])
     @departs = Department.where(:id=>[@staff.department_id,@staff.position].compact).inject(Hash.new){|hash,de|hash[de.id]=de.name;hash}
     @salary_details = Order.where("cons_staff_id_1=#{params[:id]} or cons_staff_id_2=#{params[:id]} or front_staff_id=#{params[:id]}").
-      where("date_format(created_at,'%Y-%m')='#{@statistics_date}'").select("created_at,code,front_deduct f_deduct,technician_deduct t_deduct")
+      where("date_format(created_at,'%Y-%m')='#{@statistics_date}'").select("id,created_at,code,front_deduct f_deduct,technician_deduct t_deduct,price")
+    @order_prods = OrderProdRelation.order_products(@salary_details.map(&:id))
     @score = MonthScore.where(:store_id=>params[:store_id],:current_month=>(@statistics_date.delete "-").to_i,:staff_id=>@staff.id).first
     @salary  = Salary.where(:staff_id=>@staff.id,:current_month=>(@statistics_date.delete "-").to_i).first
   end
