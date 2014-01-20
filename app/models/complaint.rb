@@ -177,7 +177,8 @@ class Complaint < ActiveRecord::Base
       order = Order.find_by_id order_id
       order.update_attribute("is_pleased", is_pleased)
       complaint = Complaint.create(:order_id => order_id, :customer_id => order.customer_id, :reason => reason,
-        :suggestion => request, :status => STATUS[:UNTREATED], :store_id => store_id) if order
+        :suggestion => request, :status => STATUS[:UNTREATED], :store_id => store_id, 
+        :code => Complaint.make_code(store_id)) if order
       complaint
     end
   end

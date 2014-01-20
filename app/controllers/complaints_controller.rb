@@ -13,16 +13,18 @@ class ComplaintsController < ApplicationController
     @plea_type = params[:plea_type].nil? || params[:plea_type].to_i==0 ? 1 : params[:plea_type].to_i
     @plea_start = params[:plea_start].nil? ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:plea_start]
     @plea_end = params[:plea_end].nil? ? Time.now.strftime("%Y-%m-%d") : params[:plea_end]
-    comp_sql = "select c.reason,c.suggestion,c.types,c.status,c.process_at,c.created_at,c.is_violation,c.img_url,
-     c.code ccode,o.id,o.code ocode,o.is_pleased,cus.name cname,cus.mobilephone cphone,cn.num cnum,s1.name sname1, s2.name sname2,
+    comp_sql = "select c.reason,c.remark,c.types,c.status,c.process_at,c.created_at,c.is_violation,c.img_url,c.c_feedback_suggestion,
+     c.code ccode,o.id,o.code ocode,cus.name cname,cus.mobilephone cphone,cn.num cnum,s1.name sname1, s2.name sname2,
      d1.name dname1,d2.name dname2
      from complaints c inner join orders o on c.order_id=o.id
      left join customers cus on o.customer_id=cus.id
      left join car_nums cn on o.car_num_id=cn.id
      left join staffs s1 on c.staff_id_1=s1.id
      left join staffs s2 on c.staff_id_2=s2.id
-     left join departments d1 on s1.department_id=d1.id
-     left join departments d2 on s2.department_id=d2.id
+     left join departments z1 on s1.department_id=z1.id
+     left join departments d1 on z1.dpt_id=d1.id
+     left join departments z2 on s2.department_id=z2.id
+     left join departments d2 on z2.dpt_id=d2.id
      where DATE_FORMAT(c.created_at,'%Y-%m')=? and c.store_id=?"
     case @comp_type
     when 1

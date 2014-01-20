@@ -30,7 +30,7 @@
           <li><strong>责任部门：</strong><%= c.dname1.nil? ? "--" : c.dname1 %>/<%= c.dname2.nil? ? "--" : c.dname2 %></li>
           <li><strong>处理时间：</strong><%= c.status==false || c.process_at.nil? ? "" : c.process_at.strftime("%Y/%m/%d-%H:%M") %></li>
           <li><strong>状态：</strong><%= c.status==true ? "已处理" : "未处理" %></li>
-          <li><strong>结果：</strong><%= Order::IS_PLEASED_NAME[c.is_pleased.to_i] %></li>
+          <li><strong>结果：</strong><%= c.c_feedback_suggestion == true ? "满意" : "不满意" %></li>
           <li><strong>考核：</strong><%= c.is_violation==true ? "已纳入" : "未纳入" %></li>
         </ul>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
@@ -53,7 +53,7 @@
               <td><%= c.types.nil? ? "----" : Complaint::TYPES_NAMES[c.types.to_i] %></td>
               <td><%= c.reason %></td>
               <td><img src="<%= c.img_url.nil? ? "" : c.img_url %>"/></td>
-              <td><%= c.suggestion %></td>
+              <td><%= c.remark %></td>
             </tr>
           </tbody>
         </table>
