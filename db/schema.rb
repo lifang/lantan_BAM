@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140114070142) do
+ActiveRecord::Schema.define(:version => 20140117061924) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -1233,6 +1233,7 @@ ActiveRecord::Schema.define(:version => 20140114070142) do
     t.datetime "updated_at"
     t.integer  "check_type"
     t.integer  "check_time"
+    t.string   "cap_name"
   end
 
   add_index "suppliers", ["created_at"], :name => "index_suppliers_on_created_at"

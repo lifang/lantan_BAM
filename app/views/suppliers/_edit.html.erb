@@ -2,8 +2,14 @@
   <div class="popup_body_area">
     <div class="item">
       <label><span class='red'>*</span>名称：</label>
-      <input type="text" id="edit_supplier_name" name="edit_supplier_name" value="<%= @supplier.name %>"/>
+      <input type="text" id="edit_supplier_name" name="edit_supplier_name" value="<%= @supplier.name %>" onPropertyChange="get_cap_code(this,<%= params[:store_id] %>)" oninput="get_cap_code(this,<%= params[:store_id] %>)"/>
     </div>
+    <div class="item">
+      <label><span class='red'>*</span>助记码：</label>
+      <input type="text" name="cap_name" id="cap_name" onchange="set_cap()" value="<%= @supplier.cap_name %>" /></div>
+    <input type="hidden" value="0" id="refuse" />
+    <input type="hidden" value="0" id="still_name" />
+
     <div class="item">
       <label><span class='red'>*</span>联系人：</label>
       <input type="text" id="edit_supplier_contact" name="edit_supplier_contact" value="<%= @supplier.contact %>"/>

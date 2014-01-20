@@ -43,7 +43,6 @@ class SetStoresController < ApplicationController
 
 
   def cash_register
-    p CSvcRelation.where(:status=>CSvcRelation::STATUS[:invalid]).where("password is null").select("count(*) count").count
     @title = "收银"
     about_cash(params[:store_id])
     respond_to do |format|

@@ -1,9 +1,11 @@
 #encoding:utf-8
 class SuppliersController < ApplicationController
   layout "storage"
+  require "toPinyin"
   before_filter :sign?
   before_filter :find_store
   before_filter :find_supplier, :only => [:edit, :update, :destroy]
+
 
   def index
     @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @store.id])
@@ -40,10 +42,11 @@ class SuppliersController < ApplicationController
     phone = params[:edit_supplier_phone].strip
     email = params[:edit_supplier_email].strip
     addr = params[:edit_supplier_addr].strip
+    cap_name = params[:cap_name].strip
     check_type = params[:edit_supplier_check_type].to_i
     check_time = check_type==1 ? params[:edit_supplier_check_time].to_i : nil
     if @supplier.update_attributes(:name => name, :contact => contact, :phone => phone, :email => email, :address => addr,
-        :check_type => check_type, :check_time => check_time)
+        :check_type => check_type, :check_time => check_time,:cap_name=>cap_name)
       flash[:notice] = "供应商编辑成功"
       render :success
     else
@@ -56,6 +59,16 @@ class SuppliersController < ApplicationController
     @supplier.update_attribute(:status,Supplier::STATUS[:delete]) if @supplier && @supplier.status != Supplier::STATUS[:delete]
     flash[:notice] = "供应商删除成功"
     redirect_to store_suppliers_path @store
+  end
+
+
+  def check
+    suppliers = Supplier.where(:store_id=>params[:store_id]).map(&:cap_name).compact
+    p cap_name = params[:name].split(" ").join("").split("").map{|n|n.pinyin[0][0]}.compact.join("")
+    msg_type = 0
+    msg_type =1   if suppliers.include? cap_name
+    p msg_type
+    render :json=>{:msg_type=>msg_type,:cap_name=>cap_name}
   end
   
   private

@@ -37,6 +37,11 @@ LantanBAM::Application.routes.draw do
   match "phone_login" => "logins#phone_login"
   match "manage_content" => "logins#manage_content"
   resources :stores do
+    resources :finance_reports do
+      collection do
+        get "fee_manage","revenue_report"
+      end
+    end
     resources :data_manages do
       collection do
         post "ajax_prod_serv"
@@ -154,6 +159,7 @@ LantanBAM::Application.routes.draw do
       end
       collection do
         get "page_suppliers"
+        post "check"
       end
     end
     resources :welcomes do

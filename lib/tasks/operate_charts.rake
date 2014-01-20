@@ -91,6 +91,15 @@ task(:sv_pwd => :environment) do
   p "update who has bought sv_cards,the bought_records count is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
 end
 
+#添加供应商助记码
+task(:set_cap_name => :environment) do
+  require "toPinyin"
+  time = Time.now.to_i
+  count = Supplier.count("name is not null")
+  Supplier.where("name is not null").map{|supplier|supplier.update_attributes(:cap_name=>supplier.split(" ").join("").split("").map{|n|n.pinyin[0][0]}.compact.join(""))}
+  p "set the cap_name to suppliers,the  num is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
+end
+
 
 
 

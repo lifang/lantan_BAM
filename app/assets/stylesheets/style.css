@@ -1232,3 +1232,32 @@ a.compile_btn { width: 100px;}
 .at_way_b .radio { display: inline-block; float: left;}
 
 .way_textarea textarea { width: 98%;}
+
+/*财务管理*/
+.finnace_title {
+    padding-left: 10px;
+    height: 64px;
+    line-height: 32px;
+    background: url("/assets/tab_head_bg.jpg") repeat-x;
+    font-weight:bold;
+}
+.finnace_title li { display: inline-block; margin-right: 20px;}
+.finnace_title li span { display: inline-block; margin-right: 20px;color: #930205;font-size: 18px;}
+.finnace_single_title {
+    padding-left: 10px;
+    height: 32px;
+    line-height: 32px;
+    background: url(/assets/tab_head_bg.jpg) repeat-x;
+
+}
+.finnace_single_title li { display: inline-block; margin-right: 20px;}
+.finnace_single_title li span { display: inline-block; margin-right: 20px;color: #930205;font-size: 18px;}
+.h_finnace_title {
+    padding-left: 10px;
+    height: 64px;
+    line-height: 32px;
+    background: url("/assets/tab_head_bg_60.jpg") repeat-x;
+    font-weight:bold;
+}
+.h_finnace_title li { display: inline-block; margin-right: 5px;}
+.h_finnace_title li span { display: inline-block; margin-right: 5px;color: #930205;font-size: 18px;}

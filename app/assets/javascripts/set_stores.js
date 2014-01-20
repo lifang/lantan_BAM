@@ -179,17 +179,8 @@ function check_post(store_id,c_id,n_id){
     if (!check_num()){ //判断储值卡的金额是否符合
         return false;
     }
-    $("#due_over").attr("onclick","").html("可以付款(5)");
+    $("#due_over").attr("onclick","").attr("title","正在处理。。。");
     var url = "/stores/"+store_id+"/set_stores/pay_order"
-    var n = 5;
-    var local_timer = setInterval(function(){
-        n -=1;
-        $("#due_over").html("可以付款("+n +")");
-        if (n <=0){
-            window.clearInterval(local_timer);
-            $("#due_over").html("可以付款").attr("onclick","check_post("+store_id+","+c_id+","+n_id+")");
-        }
-    },1000)
     var pay_order = set_pay_order();
     if (pay_order[0]){
         tishi_alert("储值卡密码不能为空");
@@ -454,18 +445,10 @@ function confirm_pay_order(store_id,c_id,n_id){
         }
     }
 }
+
 function set_confirm(store_id,c_id,n_id,t_data){
-    $("#confirm_order").attr("onclick","").html("确定(5)");
-    var url = "/stores/"+store_id+"/set_stores/pay_order"
-    var n = 5;
-    var local_timer = setInterval(function(){
-        n -=1;
-        $("#confirm_order").html("确定("+n +")");
-        if (n <=0){
-            window.clearInterval(local_timer);
-            $("#confirm_order").html("确定").attr("onclick","confirm_pay_order("+store_id+","+c_id+","+n_id+")");
-        }
-    },1000)
+    $("#confirm_order").attr("onclick","").attr("title","正在处理。。。");
+    var url = "/stores/"+store_id+"/set_stores/pay_order";
     $.ajax({
         type:"post",
         url:url,
