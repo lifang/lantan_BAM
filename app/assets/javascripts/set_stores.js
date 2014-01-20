@@ -160,12 +160,12 @@ function check_num(){
     if ( due_pay < total){
         tishi_alert("付款额度超过应付金额额度！");
         $("#total_pay").html(0);
-        $("#left_pay").html(due_pay);
+        $("#left_pay,#due_money").html(limit_float(due_pay));
         $("#due_over").css("display","none");
         return false;
     }else{
         $("#total_pay").html(limit_float(total));
-        $("#left_pay").html(limit_float(due_pay-total));
+        $("#left_pay,#due_money").html(limit_float(due_pay-total));
         if (due_pay == total){
             $("#due_over").css("display","block");
         }
@@ -179,9 +179,9 @@ function check_post(store_id,c_id,n_id){
     if (!check_num()){ //判断储值卡的金额是否符合
         return false;
     }
-    $("#due_over").attr("onclick","").html("可以付款(3)");
+    $("#due_over").attr("onclick","").html("可以付款(5)");
     var url = "/stores/"+store_id+"/set_stores/pay_order"
-    var n = 3;
+    var n = 5;
     var local_timer = setInterval(function(){
         n -=1;
         $("#due_over").html("可以付款("+n +")");
@@ -276,13 +276,13 @@ function change_pay(e){
     var left_pay = limit_float($.trim($("#left_pay").html()));
     if(e.checked){
         $("#due_pay").html(due_pay-due_pay%10);
-        $("#left_pay").html(left_pay-due_pay%10);
+        $("#left_pay,#due_money").html(limit_float(left_pay-due_pay%10));
         if (due_pay%10 >0){
             $("#clear_value").val(due_pay%10);
         }
     }else{
         $("#due_pay").html(due_pay);
-        $("#left_pay").html(left_pay+limit_float($.trim($("#hidden_pay").html()))%10);
+        $("#left_pay,#due_money").html(limit_float(left_pay+limit_float($.trim($("#hidden_pay").html()))%10));
         $("#clear_value").val(0);
     }
     check_num();
@@ -308,7 +308,7 @@ function return_check(e){
     if (e.checked){
         $(e).parent().siblings().css("background","#ebebe3");
         $("#due_pay").html(limit_float(hidden_pay-total));
-        $("#left_pay").html(limit_float(hidden_pay-total));
+        $("#left_pay,#due_money").html(limit_float(hidden_pay-total));
         if (hidden_pay==total){
             clear_per.disabled = true;
         }
@@ -326,7 +326,7 @@ function return_check(e){
     }else{
         $(e).parent().siblings().css("background","");
         $("#due_pay").html(limit_float(hidden_pay+total));
-        $("#left_pay").html(limit_float(hidden_pay+total));
+        $("#left_pay,#due_money").html(limit_float(hidden_pay+total));
         $("#hidden_pay").html(limit_float(hidden_pay+total));
         $("#in_"+e.id.split("_")[1]).attr("disabled",false);
         if ((hidden_pay+total)>0){
@@ -357,7 +357,7 @@ function set_reward(e){
     }else{
         $("#hipay_"+e.id.split("_")[1]).val(limit_float(this_value));
         $("#due_pay").html(limit_float(hidden_pay+still_pay-this_value));
-        $("#left_pay").html(limit_float(hidden_pay+still_pay-this_value));
+        $("#left_pay,#due_money").html(limit_float(hidden_pay+still_pay-this_value));
         $("#hidden_pay").html(limit_float(hidden_pay+still_pay-this_value));
         if ((hidden_pay+still_pay-this_value)<= 10){
             clear_per.disabled = true;
@@ -455,9 +455,9 @@ function confirm_pay_order(store_id,c_id,n_id){
     }
 }
 function set_confirm(store_id,c_id,n_id,t_data){
-    $("#confirm_order").attr("onclick","").html("确定(3)");
+    $("#confirm_order").attr("onclick","").html("确定(5)");
     var url = "/stores/"+store_id+"/set_stores/pay_order"
-    var n = 3;
+    var n = 5;
     var local_timer = setInterval(function(){
         n -=1;
         $("#confirm_order").html("确定("+n +")");

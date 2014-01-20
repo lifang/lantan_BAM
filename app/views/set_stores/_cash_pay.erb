@@ -58,6 +58,10 @@
     </table>
   </div>
 </div>
+<%total = @orders.map(&:price).inject(0){|sum,num|sum+num} %>
+<%reward = @order_pays.select{|k,v| @orders.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
+<% fact_fee = limit_float(total > reward ? (total-reward) : 0) %>
+<div class="due_pay_money"><span>应收：</span><span id="due_money"><%=fact_fee%></span></div>
 <div id="sv_card_used">
   <% @sv_card.each do |card| %>
     <div class="accountsTab_pay" >
@@ -84,13 +88,10 @@
 </div>
 <div class="deal_money">
   <ul>
-    <%total = @orders.map(&:price).inject(0){|sum,num|sum+num} %>
-    <%reward = @order_pays.select{|k,v| @orders.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
-    <% fact_fee = limit_float(total > reward ? (total-reward) : 0) %>
     <li>应付金额：<span id="due_pay"><%= fact_fee%></span>
       <span id="hidden_pay" style="display:none"><%=fact_fee%></span>
       <span style="float: right;display: none;"><input id="clear_per" type="checkbox"  onclick="change_pay(this)"
-                                        <%if fact_fee <=10 %> disabled <%end%> />抹零</span>
+                                                       <%if fact_fee <=10 %> disabled <%end%> />抹零</span>
       <input type="hidden" value="0" id="clear_value" />
     </li>
     <li>付款总计：<span id="total_pay"><%=0%></span></li>

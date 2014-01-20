@@ -126,7 +126,7 @@ function show_center(t){
     var win_height =  $(window).height();
     $(".mask").css({
         display:'block',
-        height:　(layer_height+mouse_position+100)<doc_height ? doc_height+100 : layer_height+100+50
+        height:　(layer_height+mouse_position+100)<doc_height ? doc_height+100 : layer_height+mouse_position+100+50
     });
     $(t).css('top',mouse_position+100+"px" );
     $(t).css('left',(doc_width-layer_width)/2);
@@ -223,3 +223,8 @@ function hide_mask(t){
 //	var table_w =$(".table_box > .data_table").width();
 //	$(".table_box_h").css("paddingRight",div_w-table_w)
 //})
+
+function odd_even(){
+    $(".data_table > tbody > tr:odd").addClass("tbg");
+    $(".data_tab_table > tbody > tr:odd").addClass("tbg");
+}

@@ -7,7 +7,9 @@ namespace :salary_list do
 
   desc "salary of month"
   task(:month_salary => :environment) do
-    Salary.generate_month_salary
+    time = Time.now.to_i
+    run_time = Salary.generate_month_salary
+    p "gerate staff's salary,current time has #{run_time} staffs,run time: #{(Time.now.to_i - time)/3600.0}"
   end
 
 end

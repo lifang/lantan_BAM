@@ -16,7 +16,7 @@
   <body>
     <div class="head">
       <div class="box position_re">
-        <div class="logo1"><span>V2.1.1</span></div>
+        <div class="logo1"><span>V2.3</span></div>
         <div class="login">你好：<%= cookies[:user_name] %> | <a href="javascript:void(0)" id="edit_password">修改密码</a> | <a href="/logout">退出</a></div>
         <div class="name">
           <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= params[:store_id] %>)"/></span>
@@ -51,7 +51,6 @@
           <% end %>
         </ul>
         <div class="clear"></div>
-
       </div>
     </div>
     <%= render :partial => "/shared/tishi_alert" %>

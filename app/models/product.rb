@@ -59,6 +59,7 @@ class Product < ActiveRecord::Base
         else
           hash[c.store_id][c.id]=c
         end;hash}
+      send_message = []
       Store.find(store_ids).each do |store|
         customers[store.id].values.each { |c|
           strs = []
@@ -68,13 +69,14 @@ class Product < ActiveRecord::Base
               :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
             content ="#{c.name}\t女士/男士,您好,#{store.name}的美容小贴士提醒您:\n" + strs.join("\r\n")
             p content
-            SendMessage.create(:message_record_id => message_record.id, :customer_id => c.id,
+            send_message << SendMessage.new(:message_record_id => message_record.id, :customer_id => c.id,
               :content => content, :phone => c.mobilephone,
               :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
             message_arr << {:content => content.gsub(/([   ])/,"/t"), :msid => "#{c.id}", :mobile => c.mobilephone}
           end
         }
       end
+      SendMessage.import send_message, :timestamps=>true unless send_message.blank?
       msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
       jsondata = JSON msg_hash
       begin
