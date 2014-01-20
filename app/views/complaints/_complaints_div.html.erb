@@ -50,7 +50,7 @@
               <td><%= c.cname %></td>
               <td><%= c.cnum %></td>
               <td><%= c.cphone %></td>
-              <td><%= Complaint::TYPES_NAMES[c.types.to_i] %></td>
+              <td><%= c.types.nil? ? "----" : Complaint::TYPES_NAMES[c.types.to_i] %></td>
               <td><%= c.reason %></td>
               <td><img src="<%= c.img_url.nil? ? "" : c.img_url %>"/></td>
               <td><%= c.suggestion %></td>

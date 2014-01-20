@@ -23,19 +23,23 @@ class ComplaintsController < ApplicationController
      left join staffs s2 on c.staff_id_2=s2.id
      left join departments d1 on s1.department_id=d1.id
      left join departments d2 on s2.department_id=d2.id
-     where DATE_FORMAT(c.created_at,'%Y-%m')=? and c.types in (?)
-     and c.store_id=? order by c.created_at desc"
+     where DATE_FORMAT(c.created_at,'%Y-%m')=? and c.store_id=?"
     case @comp_type
     when 1
+      comp_sql += " and (c.types is null or c.types in (?))"
       cstatus = [0,1,2,3,4,5]
     when 2
+      comp_sql += " and c.types in (?)"
       cstatus = [2]
     when 3
+      comp_sql += " and c.types in (?)"
       cstatus = [1]
     when 4
+      comp_sql += " and c.types in (?)"
       cstatus = [0,3,4,5]
     end
-    @complaints = Complaint.paginate_by_sql([comp_sql, @comp_month, cstatus, @store_id], 
+    comp_sql += " order by c.created_at desc"
+    @complaints = Complaint.paginate_by_sql([comp_sql, @comp_month, @store_id, cstatus],
       :page => params[:page],:per_page => Constant::PER_PAGE) if @div_name.nil? || @div_name.eql?("s_div")
     plea_sql = ["select o.code,o.is_pleased,o.types,o.created_at,cus.name,cn.num
       from orders o left join customers cus on o.customer_id=cus.id
@@ -80,74 +84,74 @@ class ComplaintsController < ApplicationController
     @store_id = params[:store_id].to_i
     flag = params[:flag]
     if flag.nil? || flag.to_i==0
-    #客户数量
-    customers = Customer.find_by_sql(["select c.id,c.sex,c.property,c.allowed_debts from customer_store_relations csr inner join customers c
+      #客户数量
+      customers = Customer.find_by_sql(["select c.id,c.sex,c.property,c.allowed_debts from customer_store_relations csr inner join customers c
       on csr.customer_id=c.id where csr.store_id=? and c.status=?", @store_id, Customer::STATUS[:NOMAL]])
-    @single_cus = 0
-    @group_cus = 0
-    @allowed_debts = 0
-    @unallowed_dents = 0
-    @male = 0
-    @female = 0
-    customers.each do |c|
-      if c.property.to_i == 0
-        @single_cus += 1
-        if !c.sex.nil? && c.sex==true
-          @male += 1
-        elsif !c.sex.nil? && c.sex==false
-          @female += 1
-        end
-      elsif c.property.to_i == 1
-        @group_cus += 1
-        if c.allowed_debts.to_i == Customer::ALLOWED_DEBTS[:NO]
-          @unallowed_dents += 1
-        elsif c.allowed_debts.to_i == Customer::ALLOWED_DEBTS[:YES]
-          @allowed_debts += 1
+      @single_cus = 0
+      @group_cus = 0
+      @allowed_debts = 0
+      @unallowed_dents = 0
+      @male = 0
+      @female = 0
+      customers.each do |c|
+        if c.property.to_i == 0
+          @single_cus += 1
+          if !c.sex.nil? && c.sex==true
+            @male += 1
+          elsif !c.sex.nil? && c.sex==false
+            @female += 1
+          end
+        elsif c.property.to_i == 1
+          @group_cus += 1
+          if c.allowed_debts.to_i == Customer::ALLOWED_DEBTS[:NO]
+            @unallowed_dents += 1
+          elsif c.allowed_debts.to_i == Customer::ALLOWED_DEBTS[:YES]
+            @allowed_debts += 1
+          end
         end
       end
-    end
 
-    #车辆品牌数量
-    @brands = CustomerNumRelation.find_by_sql(["select cb.id,cb.name,sum(cb.id) sum from customer_num_relations cnr
+      #车辆品牌数量
+      @brands = CustomerNumRelation.find_by_sql(["select cb.id,cb.name,sum(cb.id) sum from customer_num_relations cnr
         inner join car_nums cn on cnr.car_num_id=cn.id
         inner join car_models cm on cn.car_model_id=cm.id
         inner join car_brands cb on cm.car_brand_id=cb.id
         where cnr.customer_id in (?) group by cb.id order by sum desc", customers.map(&:id).uniq]) if customers.map(&:id).any?
-    @other = @brands[4..@brands.length-1].inject(0){|i,b| i += b.sum.to_i;i} if @brands && @brands.length > 4
+      @other = @brands[4..@brands.length-1].inject(0){|i,b| i += b.sum.to_i;i} if @brands && @brands.length > 4
 
-    #消费金额
-    orders = Order.find_by_sql(["select sum(o.price) sum from customers c left join orders o on c.id=o.customer_id
+      #消费金额
+      orders = Order.find_by_sql(["select sum(o.price) sum from customers c left join orders o on c.id=o.customer_id
       and o.status in (?) and o.store_id=? where c.id in (?) group by c.id",
-        [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],
-        @store_id, customers.map(&:id).uniq]) if customers.map(&:id).any?
-    @order_lv1, @order_lv2, @order_lv3, @order_lv4, @order_lv5, @order_lv6 = 0, 0, 0, 0, 0, 0
-    orders.each do |o|
-      price = o.sum.to_i
-      if price >=0 and price < 100
-        @order_lv1 += 1
-      elsif price >= 100 and price < 500
-        @order_lv2 += 1
-      elsif price >= 500 and price < 1000
-        @order_lv3 += 1
-      elsif price >= 1000 and price < 2000
-        @order_lv4 += 1
-      elsif price >= 2000 and price < 5000
-        @order_lv5 += 1
-      elsif price >= 5000
-        @order_lv6 += 1
-      end
-    end if orders
+          [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],
+          @store_id, customers.map(&:id).uniq]) if customers.map(&:id).any?
+      @order_lv1, @order_lv2, @order_lv3, @order_lv4, @order_lv5, @order_lv6 = 0, 0, 0, 0, 0, 0
+      orders.each do |o|
+        price = o.sum.to_i
+        if price >=0 and price < 100
+          @order_lv1 += 1
+        elsif price >= 100 and price < 500
+          @order_lv2 += 1
+        elsif price >= 500 and price < 1000
+          @order_lv3 += 1
+        elsif price >= 1000 and price < 2000
+          @order_lv4 += 1
+        elsif price >= 2000 and price < 5000
+          @order_lv5 += 1
+        elsif price >= 5000
+          @order_lv6 += 1
+        end
+      end if orders
 
-    #最近消费
-    @cons_current_day = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
+      #最近消费
+      @cons_current_day = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
         DATE_FORMAT(o.created_at,'%Y-%m-%d')=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id,
-        Time.now.strftime("%Y-%m-%d")]).first
-    @cons_current_week = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
+          Time.now.strftime("%Y-%m-%d")]).first
+      @cons_current_week = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
         YEARWEEK(DATE_FORMAT(o.created_at,'%Y-%m-%d'))=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id,
-        Time.now.strftime("%Y-%m-%d")]).first
-    @cons_current_month = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
+          Time.now.strftime("%Y-%m-%d")]).first
+      @cons_current_month = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
         DATE_FORMAT(o.created_at,'%Y-%m')=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id,
-        Time.now.strftime("%Y-%m")]).first
+          Time.now.strftime("%Y-%m")]).first
     end
 
     amount_con_start = params[:amount_con_start]
