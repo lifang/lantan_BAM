@@ -4,7 +4,7 @@ class CreateCustomers < ActiveRecord::Migration
       t.string :name
       t.string :mobilephone
       t.string :other_way  #其他联系方式
-      t.boolean :sex
+      t.boolean :sex, :default => 1
       t.datetime :birthday
       t.string :address
       t.boolean :is_vip, :default => 0

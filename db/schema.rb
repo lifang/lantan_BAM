@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140107021042) do
+ActiveRecord::Schema.define(:version => 20140113063936) do
 
   create_table "back_good_records", :force => true do |t|
     t.integer  "material_id"
@@ -178,6 +178,8 @@ ActiveRecord::Schema.define(:version => 20140107021042) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "c_feedback_suggestion"
+    t.string   "img_url"
+    t.string   "code"
   end
 
   add_index "complaints", ["customer_id"], :name => "index_complaints_on_customer_id"

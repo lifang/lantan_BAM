@@ -3,144 +3,112 @@ require 'date'
 require 'will_paginate/array'
 class MaterialOrderManagesController < ApplicationController
   before_filter :sign?
-  layout "complaint"
-  respond_to :json, :xml, :html
-  before_filter :make_search_sql, :only => [:mat_in_or_out_query,:search_mat_in_or_out,:page_ins,:page_outs,:search_unsalable_materials,:unsalable_materials,:page_unsalable_materials]
-  before_filter :get_store, :only => [:mat_in_or_out_query,:search_mat_in_or_out,:page_ins,:page_outs,:search_unsalable_materials,:unsalable_materials,:page_unsalable_materials]
+  layout "complaint" 
   def index
-    @store = Store.find_by_id(params[:store_id])
+    @store_id = params[:store_id].to_i
     @statistics_month = (params[:statistics_month] ||= Time.now.months_ago(1).strftime("%Y-%m"))
-    arrival_at_sql = "arrival_at>='#{@statistics_month}-01' and date_format(arrival_at,'%Y-%m-%d')<='#{@statistics_month}-31'"
-    @material_orders = MaterialOrder.where("store_id = #{params[:store_id]}").where(arrival_at_sql)
-    @total_price = @material_orders.sum(:price)
-    @material_orders = @material_orders.paginate(:per_page => Constant::PER_PAGE, :page => params[:page] ||= 1)
-  end
-
-  def show
-    @store = Store.find_by_id(params[:store_id])
-    material_order = MaterialOrder.find_by_id(params[:id])
-    @mat_order_items = material_order.nil? ? [] : material_order.mat_order_items
-    respond_to do |format|
-      format.js
-    end
-  end
-
-  def mat_in_or_out_query
-    @mat_in_orders = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
-    @mat_out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i
-  end
-
-  #入/出库查询
-  def search_mat_in_or_out
-    @mat_in_or_out = mat_in_or_out = params[:mat_in_or_out]
-    start_date = params[:start_date]
-    end_date = params[:end_date]
-    @status = 0
-    if(start_date.empty? || end_date.empty?)
-           @status = 0
+    @suppliers = Supplier.select("id,name").where(["store_id=? and status=?", @store_id, Supplier::STATUS[:normal]])
+    @supplier_id = params[:supplier_id]
+    m_sql = ["select sum(moi.price * moi.material_num) price,sum(moi.material_num) count,c.id,c.name
+      from material_orders mo inner join mat_order_items moi on mo.id=moi.material_order_id
+      inner join materials m on moi.material_id=m.id
+      inner join categories c on m.category_id=c.id
+      where mo.store_id=? and mo.m_status in (?) and mo.status in (?) and m.status=?
+      and date_format(mo.created_at,'%Y-%m')=? and c.types=? and c.store_id=?",
+      @store_id,[MaterialOrder::M_STATUS[:send],MaterialOrder::M_STATUS[:received],MaterialOrder::M_STATUS[:save_in]],
+      [MaterialOrder::STATUS[:no_pay], MaterialOrder::STATUS[:pay]],Material::STATUS[:NORMAL],@statistics_month,
+      Category::TYPES[:material], @store_id]
+    s_sql = ["select mo.status,moi.price,moi.material_num
+      from material_orders mo inner join mat_order_items moi on mo.id=moi.material_order_id
+      inner join materials m on moi.material_id=m.id
+      inner join categories c on m.category_id=c.id
+      where mo.store_id=? and mo.m_status in (?) and mo.status in (?) and m.status=?
+      and date_format(mo.created_at,'%Y-%m')=? and c.types=? and c.store_id=?",
+      @store_id,[MaterialOrder::M_STATUS[:send],MaterialOrder::M_STATUS[:received],MaterialOrder::M_STATUS[:save_in]],
+      [MaterialOrder::STATUS[:no_pay], MaterialOrder::STATUS[:pay]],Material::STATUS[:NORMAL],@statistics_month,
+      Category::TYPES[:material], @store_id]
+    if @supplier_id.nil? || @supplier_id.to_i==0
+      m_sql[0] += " and mo.supplier_id=? and mo.supplier_type=?"
+      m_sql << 0 << 0
+      s_sql[0] += " and mo.supplier_id=? and mo.supplier_type=?"
+      s_sql << 0 << 0
     else
-        if Date.parse(start_date)>Date.parse(end_date)
-           @status = 1
-        end
+      m_sql[0] += " and mo.supplier_id=? and mo.supplier_type=?"
+      m_sql << @supplier_id.to_i << 1
+      s_sql[0] += " and mo.supplier_id=? and mo.supplier_type=?"
+      s_sql << @supplier_id.to_i << 1
     end
+    m_sql[0] += " group by c.id order by sum(moi.price * moi.material_num) desc"
+    @mat_orders = MaterialOrder.find_by_sql(m_sql)
+    @t_price = @mat_orders.inject(0){|i,m|i += m.price.to_f;i} if @mat_orders.any?
+    @t_count = @mat_orders.inject(0){|i,m|i += m.count.to_i;i} if @mat_orders.any?
 
-    if @status == 0
-      if mat_in_or_out == "ruku"
-        @mat_in_orders = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
-      elsif mat_in_or_out == "chuku"
-        @mat_out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
+    s_orders = MaterialOrder.find_by_sql(s_sql)
+    @no_pay = 0
+    @has_pay = 0
+    s_orders.each do |s|
+      if s.status.to_i == MaterialOrder::STATUS[:no_pay]
+        @no_pay += s.price.to_f * s.material_num.to_i
+      elsif s.status.to_i == MaterialOrder::STATUS[:pay]
+        @has_pay += s.price.to_f * s.material_num.to_i
       end
-    else
-       @mat_in_orders = []
-       @mat_out_records = []
-    end
+    end if s_orders.any?
+    
   end
 
-  #滞销物料显示
-  def unsalable_materials
-    @end_date = Time.now.to_s[0..9]
-    @start_date  =  (Time.now - 30.day).to_s[0..9]
-    @all_unsalable_materials  = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{@start_date} 00:00:00' and created_at <= '#{@end_date} 23:59:59'
-      and  types = 3 and store_id = #{@current_store.id} group by material_id having count(material_id) >= 1) and store_id = #{@current_store.id} and status != #{Material::STATUS[:DELETE]} and created_at < '#{@start_date} 00:00:00';")
-    @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
+  def flow_analysis #流量分析
+    @store_id = params[:store_id].to_i
+    @statistics_month = (params[:statistics_month] ||= Time.now.months_ago(1).strftime("%Y-%m"))
+    mat_out_orders = MatOutOrder.find_by_sql(["select moo.material_num num,moo.price price,moo.types type,c.id cid,c.name cname
+        from mat_out_orders moo inner join materials m on moo.material_id=m.id
+        inner join categories c on m.category_id=c.id
+        where moo.store_id=? and date_format(moo.created_at,'%Y-%m')=? and m.status=?",
+        @store_id, @statistics_month, Material::STATUS[:NORMAL]])
+    @total_count = mat_out_orders.length  #出库记录XXX条
+    @total_price = mat_out_orders.inject(0){|i,m| i += m.num.to_i * m.price.to_f;i} if mat_out_orders.any?
+
+    #库存类别表
+    h_a = mat_out_orders.group_by{|m|m.cname} if mat_out_orders.any?
+    arr = []
+    @t_count = 0
+    h_a.each do |k, v|
+      hash = {}
+      hash[:name] = k
+      t_price = v.inject(0){|i,moo|i += moo.num.to_i * moo.price.to_f;i}
+      t_count = v.inject(0){|i,moo|i += moo.num.to_i;i}
+      @t_count += t_count
+      hash[:price] = t_price
+      hash[:count] = t_count
+      arr << hash
+    end if h_a
+    @arr = arr.sort { |a, b| b[:price] <=> a[:price] } if arr.any?
+
+    #出库性质表
+    h_a2 = mat_out_orders.group_by{|m|m.type} if mat_out_orders.any?
+    arr2 = []
+    @t_count2 = 0
+    h_a2.each do |k, v|
+      hash = {}
+      hash[:type] = k
+      t_price = v.inject(0){|i,moo|i += moo.num.to_i * moo.price.to_f;i}
+      t_count = v.inject(0){|i,moo|i += moo.num.to_i;i}
+      @t_count2 += t_count
+      hash[:price] = t_price
+      hash[:count] = t_count
+      arr2 << hash
+    end if h_a2
+    @arr2 = arr2.sort { |a, b| b[:price] <=> a[:price] } if arr2.any?
   end
 
-  def search_unsalable_materials
-      @start_date = params[:start_date]
-      @end_date = params[:end_date]
-      @mat_type = params[:mat_types]
-      @sale_num = params[:sale_num]
-      @u_sql = []
-      @u_sql << @start_date << @end_date << @sale_num << @mat_type
+  #库存结构分析
+  def storage_analysis
+    @store_id = params[:store_id].to_i
+    @mat_list = Material.find_by_sql(["select sum(m.price * m.storage) price,sum(m.storage) count,c.name name
+        from materials m inner join categories c on m.category_id=c.id
+        where m.status=? and m.store_id=? group by c.id order by sum(m.price * m.storage) desc",
+        Material::STATUS[:NORMAL], @store_id])
+    @t_price = @mat_list.inject(0){|i,m| i += m.price.to_f;i} if @mat_list.any?
+    @t_count = @mat_list.inject(0){|i,m| i += m.count.to_i;i} if @mat_list.any?
 
-      @status = false
-      if (@start_date.blank? || @end_date.blank?)
-        @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql
-        @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
-        @status = true
-      else
-        if Date.parse(@start_date)>Date.parse(@end_date)
-          @all_unsalable_materials = []
-          @unsalable_materials = []
-          @status = false
-        else
-          @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql
-          @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
-          @status = true
-        end
-      end
   end
-
-  def page_unsalable_materials
-    @start_date = params[:start_date]
-    @end_date = params[:end_date]
-    @mat_type = params[:mat_types]
-    @sale_num = params[:sale_num]
-    @u_sql = []
-    @u_sql << @start_date << @end_date << @sale_num << @mat_type
-    @all_unsalable_materials = Material.unsalable_list params[:store_id],@u_sql
-    @unsalable_materials = @all_unsalable_materials.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
-    respond_with(@unsalable_materials) do |f|
-      f.html
-      f.js
-    end
-  end
-
-  #入库列表分页
-  def page_ins
-    @mat_in_orders = MatInOrder.in_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
-
-    respond_with(@mat_in_orders) do |f|
-      f.html
-      f.js
-    end
-  end
-
-  #出库列表分页
-  def page_outs
-    @mat_out_records = MatOutOrder.out_list params[:page],Constant::PER_PAGE, params[:store_id].to_i,@sql
-
-    respond_with(@mat_out_records) do |f|
-      f.html
-      f.js
-    end
-  end
-
-  protected
-
-  def make_search_sql
-    start_date = params[:start_date].blank? ? "1 = 1" : ["o.created_at >= '#{params[:start_date]} 00:00:00' "]
-    end_date = params[:end_date].blank? ? "1 = 1" : ["o.created_at <='#{params[:end_date]} 23:59:59' "]
-    mat_types = params[:mat_types].blank? || params[:mat_types] == "-1" ? "1 = 1" : ["materials.types = ?", params[:mat_types].to_i]
-    @sql = []
-    @sql << start_date << end_date << mat_types
-    @start_date = params[:start_date].blank? ? nil : params[:start_date]
-    @end_date = params[:end_date].blank? ? nil : params[:end_date]
-    @mat_type = params[:mat_types].blank? ? nil : params[:mat_types]
-  end
-
-  def get_store
-    @current_store = Store.find_by_id(params[:store_id].to_i)
-  end
-
 end

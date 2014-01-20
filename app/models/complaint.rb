@@ -271,5 +271,16 @@ class Complaint < ActiveRecord::Base
     conditions[0] = sql
     return Order.find_by_sql(conditions)
   end
-  
+
+  def self.make_code store_id
+    store = store_id.to_s
+    if store_id < 10
+      store =   "00" + store_id.to_s
+    elsif store_id < 100
+      store =    "0" + store_id.to_s
+    end
+    code = store + Time.now.strftime("%Y%m%d%H%M%S")
+    return code
+  end
+
 end
