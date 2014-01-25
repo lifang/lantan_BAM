@@ -44,3 +44,14 @@
                                   <%unless @package.is_auto_revist%>disabled <%end%>><%=  @package.is_auto_revist ? @package.revist_content : ""  %></textarea>
   </div>
 </div>
+<div class="item_blockArea">
+  <div class="item">
+    <label>自动提醒：</label><input name="auto_warn" id="auto_warn" alt="warn" type="checkbox" onclick="check_revist(this)" />
+  </div>
+  <div class="item"><label>提醒时间：</label>
+    <input name="time_warn" id="time_warn" disabled  onblur="this.value=isNaN(parseInt(this.value))? 0 : parseInt(this.value);" />天
+  </div>
+  <div class="item_textarea">
+    <label>提醒内容：</label><textarea name="con_warn" id="con_warn" disabled cols="" rows="" class="width_textarea"></textarea>
+  </div>
+</div>

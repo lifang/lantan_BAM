@@ -1,4 +1,4 @@
-<%#=  render 'second_menu'%>
+<%=  render '/market_manages/second_menu'%>
 <%= javascript_include_tag "data_manages" %>
 <input type="hidden" value="<%= params[:store_id] %>" id="store_id" />
 <div class="search">
@@ -64,7 +64,7 @@
         <td><%=  f_price %></td>
         <td><%=  0.round(2)  %></td>
         <td><%=  f_price%></td>
-        <td><a href="javascript:void(0)" onclick="show_category()">详情</a></td>
+        <td><a href="javascript:void(0)" onclick="show_category(<%=  params[:store_id]%>,<%=c_id%>,'<%=session[:date]%>',3)">详情</a></td>
       </tr>
     <%end%>
     <tr >
@@ -74,7 +74,7 @@
       <td><%=  f_total%></td>
       <td><%=  0.round(2) %></td>
       <td><%=  f_total%></td>
-      <td><a href="javascript:void(0)" onclick="show_category()">详情</a></td>
+      <td><a href="javascript:void(0)" onclick="show_category(<%=  params[:store_id]%>,<%=0%>,'<%=session[:date]%>',4)">详情</a></td>
     </tr>
   </tbody>
 </table>

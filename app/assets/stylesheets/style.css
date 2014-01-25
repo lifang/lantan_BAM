@@ -1312,3 +1312,15 @@ a.compile_btn { width: 100px;}
 .chart_one span { height: 40px;  background: #eb5808; display: inline-block;}
 .chart_two span { height: 40px; background: #abcd05; display: inline-block;}
 .crosswiseChart .text { position: absolute; top: -28px; right: 10px; color: #F00; font-size: 26px;}
+
+/*relevance输入联想*/
+.relevance { position: relative;}
+.relevance_box {
+    border: 1px #CCCCCC solid;
+    background: #f5f5f5;
+    position: absolute;
+    left: 0px;
+}
+.relevance_box li { line-height: 30px; color: #333; padding: 0 5px; cursor: pointer;}
+.relevance_box li:hover { background:#eeeeee;}
+

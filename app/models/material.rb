@@ -24,7 +24,7 @@ class Material < ActiveRecord::Base
 
   before_create :generate_barcode
   after_create :generate_barcode_img
-  STATUS = {:NORMAL => 0, :DELETE => 1}
+  STATUS = {:NORMAL => 0, :DELETE => 1}  #物料状态 0为正常 1 为删除 #是否上架  0 为没上架 1 为上架
   TYPES_NAMES = {0 => "清洁用品", 1 => "美容用品", 2 => "装饰产品", 3 => "配件产品", 4 => "电子产品",
     5 =>"其他产品",6 => "辅助工具", 7 => "劳动保护"}
   TYPES = { :CLEAN_PROD =>0, :BEAUTY_PROD =>1,:DECORATE_PROD =>2, :ACCESSORY_PROD =>3, :ELEC_PROD =>4,

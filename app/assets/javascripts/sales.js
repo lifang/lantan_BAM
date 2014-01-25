@@ -66,10 +66,10 @@ function publish_sale(e){
         for(; i < n; i++) if(i in this && this[i] === el) return i;
         return -1;
     }
-//    if ((img != "" || img.length !=0) && pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
-//        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format )
-//        return false;
-//    }
+    //    if ((img != "" || img.length !=0) && pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
+    //        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format )
+    //        return false;
+    //    }
     var img_name = img.substring(img.lastIndexOf("\\")).toLowerCase();
     var g_name = img_name.substring(1,img_name.length);
     if ((img != "" || img.length !=0) && pattern.test(g_name.split(".")[0])){
@@ -258,6 +258,18 @@ function check_add(e){
             return false;
         }
     }
+    if($("#auto_warn")[0].checked){
+        var time_revist =$("#time_warn").val();
+        var con_revist =$("#con_warn").val();
+        if (time_revist =="" || time_revist.length==0 || isNaN(parseFloat(time_revist))){
+            tishi_alert("请输入提醒的天数");
+            return false;
+        }
+        if (con_revist =="" || con_revist.length==0){
+            tishi_alert("请输入提醒的内容");
+            return false;
+        }
+    }
     if($("#add_products").children().length == 0){
         tishi_alert("请选择产品或服务");
         return false;
@@ -384,11 +396,11 @@ function show_pic(){
     })
 }
 
-function check_revist(){
-    $("#con_revist,#time_revist").attr("disabled",!$("#auto_revist")[0].checked);
-    $("#auto_revist").val($("#auto_revist")[0].checked+0);
-    if (!$("#auto_revist")[0].checked){
-        $("#con_revist,#time_revist").val("");
+function check_revist(e){
+    $("#con_"+e.alt+",#time_"+e.alt).attr("disabled",!e.checked);
+    e.value = e.checked+0;
+    if (!e.checked){
+        $("#con_"+e.alt+",#time_"+e.alt).val("");
     }
 }
 

@@ -4,8 +4,18 @@
 <div class="main">
   <div class="box">
     <div class="data_box">
-      <div class="data_menu"> 
-        <% if permission?(:sales, :add_product) %><a href="javascript:void(0)" class="add_btn" onclick="add_prod(<%= params[:store_id] %>)" >添加产品</a><% end %>
+      <div class="search">
+        <form url="/stores/<%= params[:store_id] %>/products" method="get">
+          <div>
+            <label>物料名称：</label>
+            <input type="text" name="p_name" value="<%= params[:p_name].nil? ? "" : params[:p_name] %>"/>
+          </div>
+          <div>
+            <button class="search_btn" >查询</button>
+          </div>
+        </form>
+      </div>
+      <div class="data_menu">
         <% if permission?(:sales, :delete_product) && @total.num > 0 %><a href="javascript:void(0)" class="add_btn" onclick="delete_prods(<%= params[:store_id] %>)">删除产品</a><%end%>
       </div>
       <div class="collect">
@@ -14,17 +24,6 @@
       <div class="clear"></div>
       <div class="data_body">
         <div>
-          <div class="search">
-            <form url="/stores/<%= params[:store_id] %>/products" method="get">
-            <div>
-              <label>物料名称：</label>
-              <input type="text" name="p_name" value="<%= params[:p_name].nil? ? "" : params[:p_name] %>"/>
-            </div>
-            <div>
-              <button class="search_btn" >查询</button>
-            </div>
-            </form>
-          </div>
           <div class="table_box_h">
             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
               <thead>

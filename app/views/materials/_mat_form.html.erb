@@ -5,14 +5,14 @@
 <div class="item">
   <label><span class='red'>*</span>物料类型：</label>
   <select name="material[category_id]" id="material_category_id">
-    <% @types.each do |k, v| %>
-    <option value="<%= k %>"><%= v %></option>
+    <% @cates[Category::TYPES[:material]].each do |k, v| %>
+      <option value="<%= k %>"><%= v %></option>
     <% end %>
   </select>
 </div>
 <div class="item">
-  <label><span class='red'>*</span>成本价：</label>
-  <%= text_field_tag 'material[price]', nil %>
+  <label><span class='red'>*</span>进货价：</label>
+  <%= text_field_tag 'material[import_price]', nil %>
 </div>
 <div class="item">
   <label><span class='red'>*</span>零售价：</label>
@@ -25,6 +25,8 @@
 <div class="item">
   <label><input type="radio" name="material[ifuse_code]" class="new_code" value="0" checked="checked" onclick="enableNextInput(this, false)" />自动生成条码：</label>
 </div>
+<div class="item">
+  <label>是否上架：</label><input name="material[create_prod]" id="create_prod" type="checkbox" value="0" onclick='$("#c_prod").css("display",this.checked ? "block" : "none");this.value=this.checked ? 1 : 0;' /></div>
 <div class="item" style="float: right">
   <label><input type="radio" name="material[ifuse_code]" class="old_code" value="1" onclick="enableNextInput(this, true)"/>使用已有条码：</label>
   <input name="material[code_value]" id="use_existed_code" value="<%= material.try(:code) %>" disabled="true" type="text"/>

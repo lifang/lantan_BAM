@@ -11,12 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-<<<<<<< HEAD
-ActiveRecord::Schema.define(:version => 20140117061924) do
-=======
-
-ActiveRecord::Schema.define(:version => 20140114070142) do
->>>>>>> 38f471ffdf69ba792ccf8b3e9c5f59be62c19bf8
+ActiveRecord::Schema.define(:version => 20140125082126) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -522,10 +517,12 @@ ActiveRecord::Schema.define(:version => 20140114070142) do
     t.integer  "check_num"
     t.float    "sale_price"
     t.string   "unit"
-    t.boolean  "is_ignore",                    :default => false
+    t.boolean  "is_ignore",                                                   :default => false
     t.integer  "material_low"
     t.string   "code_img"
     t.integer  "category_id"
+    t.decimal  "import_price",                 :precision => 20, :scale => 2
+    t.boolean  "create_prod",                                                 :default => false
   end
 
   add_index "materials", ["name"], :name => "index_materials_on_name"
@@ -687,6 +684,7 @@ ActiveRecord::Schema.define(:version => 20140114070142) do
     t.integer  "return_reason"
     t.float    "front_deduct",                     :default => 0.0
     t.float    "technician_deduct",                :default => 0.0
+    t.datetime "warn_time"
   end
 
   add_index "orders", ["c_pcard_relation_id"], :name => "index_orders_on_c_pcard_relation_id"
@@ -726,6 +724,9 @@ ActiveRecord::Schema.define(:version => 20140114070142) do
     t.float    "deduct_price",                                   :default => 0.0
     t.float    "deduct_percent",                                 :default => 0.0
     t.decimal  "sale_percent",   :precision => 20, :scale => 16, :default => 1.0
+    t.boolean  "auto_warn",                                      :default => false
+    t.integer  "time_warn"
+    t.string   "con_warn"
   end
 
   add_index "package_cards", ["created_at"], :name => "index_package_cards_on_created_at"
@@ -838,6 +839,9 @@ ActiveRecord::Schema.define(:version => 20140114070142) do
     t.float    "techin_price",   :default => 0.0
     t.float    "techin_percent", :default => 0.0
     t.integer  "single_types"
+    t.boolean  "auto_warn"
+    t.integer  "time_warn"
+    t.string   "con_warn"
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"
@@ -1024,9 +1028,11 @@ ActiveRecord::Schema.define(:version => 20140114070142) do
     t.integer  "customer_id"
     t.string   "phone"
     t.datetime "send_at"
-    t.boolean  "status"
+    t.integer  "status",            :default => 1
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "car_num_id"
+    t.integer  "types"
   end
 
   add_index "send_messages", ["created_at"], :name => "index_send_messages_on_created_at"

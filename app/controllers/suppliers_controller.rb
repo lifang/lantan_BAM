@@ -5,12 +5,12 @@ class SuppliersController < ApplicationController
   before_filter :sign?
   before_filter :find_store
   before_filter :find_supplier, :only => [:edit, :update, :destroy]
-
+  require 'will_paginate/array'
 
   def index
     @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @store.id])
-    @suppliers = Supplier.paginate(:conditions => "status= #{Supplier::STATUS[:normal]} and store_id=#{params[:store_id]}",
-      :per_page => Constant::PER_PAGE, :page => params[:page])
+    @suppliers = Supplier.all(:select => "*", :from => "suppliers s",:conditions => "s.store_id=#{params[:store_id]} and s.status=#{Supplier::STATUS[:normal]}")
+    @supps = @suppliers.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     respond_to do |f|
       f.html
       f.js

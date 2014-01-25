@@ -63,8 +63,8 @@
 <div class="clear"></div>
 <div class="item_blockArea">
   <div class="item">
-    <label>自动回访：</label> <input name="auto_revist" id="auto_revist" type="checkbox" value="<%= @pcard.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @pcard.is_auto_revist  %>"
-                                onclick="check_revist()" <% if @pcard.is_auto_revist %>checked<%end%>/>
+    <label>自动回访：</label> <input name="auto_revist" id="auto_revist" alt="revist" type="checkbox" value="<%= @pcard.is_auto_revist.nil? ? Product::IS_AUTO[:NO] : @pcard.is_auto_revist  %>"
+                                onclick="check_revist(this)" <% if @pcard.is_auto_revist %>checked<%end%>/>
   </div>
   <div class="item"><label>回访时间：</label>
     <select  id="time_revist" name="time_revist" <%unless @pcard.is_auto_revist%>disabled <%end%>>
@@ -77,6 +77,21 @@
   <div class="item_textarea">
     <label>回访内容：</label><textarea name="con_revist" id="con_revist" cols="" rows="" class="width_textarea"
                                   <%unless @pcard.is_auto_revist%>disabled <%end%>><%=  @pcard.is_auto_revist ? @pcard.revist_content : ""  %></textarea>
+  </div>
+</div>
+<div class="item_blockArea">
+  <div class="item">
+    <label>自动提醒：</label><input name="auto_warn" id="auto_warn" alt="warn" type="checkbox"
+                               value="<%= @pcard.auto_warn ? Product::IS_AUTO[:NO] : @pcard.auto_warn  %>"
+                               onclick="check_revist(this)"               <% if @pcard.auto_warn %>checked<%end%>/>
+  </div>
+  <div class="item"><label>提醒时间：</label>
+    <input name="time_warn" id="time_warn"  <%unless @pcard.auto_warn%>disabled <%end%>
+           onblur="this.value=isNaN(parseInt(this.value))? 0 : parseInt(this.value);" value="<%=@pcard.time_warn.nil? ? 0 : @pcard.time_warn%>" />天
+  </div>
+  <div class="item_textarea">
+    <label>提醒内容：</label><textarea name="con_warn" id="con_warn" <%unless @pcard.auto_warn%>disabled <%end%> 
+                                  cols="" rows="" class="width_textarea"><%=  @pcard.con_warn %></textarea>
   </div>
 </div>
 <div class="item_textarea">

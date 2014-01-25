@@ -153,8 +153,10 @@ class MaterialsInOutsController < ApplicationController
             material_order.m_status = 3
             material_order.save
           end
-          material.storage += mat_in_order.material_num
-          material.save
+          storage_price = material.storage.to_i * material.price
+          p avg_price = (material_order.price + storage_price)*1.0/(material.storage.to_i+mat_in_order.material_num)
+          material.update_attributes(:storage=>material.storage.to_i + mat_in_order.material_num,:price=>avg_price.round(2))
+          Product.find(material.prod_mat_relations[0].product_id).update_attributes(:t_price=>avg_price.round(2))  if material.create_prod
         end
       end 
     
