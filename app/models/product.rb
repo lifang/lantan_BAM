@@ -100,6 +100,7 @@ class Product < ActiveRecord::Base
     return hour.nil? ? nil : Time.now+hour.hours  #修改时间条件，如果不需要回访则订单的回访时间设置为null
   end
 
+
   def self.create_message_http(url,route)
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
