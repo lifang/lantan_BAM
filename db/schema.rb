@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140125082126) do
+ActiveRecord::Schema.define(:version => 20140207044038) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -1226,6 +1226,8 @@ ActiveRecord::Schema.define(:version => 20140125082126) do
     t.integer  "edition_lv"
     t.string   "limited_password"
     t.integer  "cash_auth",        :default => 0
+    t.integer  "auto_send",        :default => 1
+    t.integer  "store_id"
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"

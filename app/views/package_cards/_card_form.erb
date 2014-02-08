@@ -82,7 +82,7 @@
 <div class="item_blockArea">
   <div class="item">
     <label>自动提醒：</label><input name="auto_warn" id="auto_warn" alt="warn" type="checkbox"
-                               value="<%= @pcard.auto_warn ? Product::IS_AUTO[:NO] : @pcard.auto_warn  %>"
+                               value="<%= @pcard.auto_warn ?  Product::IS_AUTO[:YES] : Product::IS_AUTO[:NO]  %>"
                                onclick="check_revist(this)"               <% if @pcard.auto_warn %>checked<%end%>/>
   </div>
   <div class="item"><label>提醒时间：</label>

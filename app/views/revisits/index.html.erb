@@ -1,4 +1,7 @@
 <div class="box">
+  <div id="revist_warn">
+  <%= render :partial => "revist_warn" %>
+  </div>
   <div class="data_box">
     <div class="search">
       <% if permission?(:customers, :revisit_search) %>

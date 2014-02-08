@@ -16,7 +16,7 @@ class SetStoresController < ApplicationController
     update_sql = {:name => params[:store_name].strip, :address => params[:store_address].strip, :phone => params[:store_phone].strip,
       :contact => params[:store_contact].strip, :position => params[:store_position_x]+","+params[:store_position_y],
       :opened_at => params[:store_opened_at], :status => params[:store_status].to_i, :city_id => params[:store_city].to_i,
-      :cash_auth => params[:store_cash_auth].to_i}
+      :cash_auth => params[:store_cash_auth].to_i,:auto_send=>params[:auto_send]}
     update_sql.merge!(:limited_password=>Digest::MD5.hexdigest(params[:limited_password])) if permission?(:base_datas, :edit_limited_pwd) && params[:limited_password]!=""
     if store.update_attributes(update_sql)
       if !params[:store_img].nil?

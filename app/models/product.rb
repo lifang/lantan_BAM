@@ -41,51 +41,32 @@ class Product < ActiveRecord::Base
 
   #根据回访要求发送客户短信，会查询所有的门店信息发送,设置的时间为每天的11:30和8点半左右，每天两次执行
   def self.revist_message()
-    customer_message ={}
-    condition = Time.now.strftime("%H").to_i<12 ? "date_format(orders.auto_time,'%Y-%m-%d %H') between '#{Time.now.beginning_of_day.strftime("%Y-%m-%d %H")}' and '#{Time.now.strftime('%Y-%m-%d')+" 11"}'" :
-      "date_format(orders.auto_time,'%Y-%m-%d %H') between '#{Time.now.strftime('%Y-%m-%d')+" 12"}' and '#{Time.now.end_of_day.strftime("%Y-%m-%d %H")}'"
-    Order.joins(:order_prod_relations=>:product).where(condition+" and products.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,products.revist_content,orders.store_id").each{|mess|
-      customer_message["#{mess.store_id}_#{mess.customer_id}"].nil? ? customer_message["#{mess.store_id}_#{mess.customer_id}"]= [mess] : customer_message["#{mess.store_id}_#{mess.customer_id}"] << mess}
-    Order.joins(:c_pcard_relations =>:package_card).where(condition+" and package_cards.is_auto_revist=#{Product::IS_AUTO[:YES]}").select("orders.customer_id,package_cards.revist_content,orders.store_id").each{|mess|
-      customer_message["#{mess.store_id}_#{mess.customer_id}"].nil? ? customer_message["#{mess.store_id}_#{mess.customer_id}"]= [mess] : customer_message["#{mess.store_id}_#{mess.customer_id}"] << mess}
-    unless customer_message.keys.blank?
-      store_ids = []
-      customer_ids = []
-      message_arr = []
-      customer_message.keys.each {|mess|store_ids << mess.split("_")[0].to_i;customer_ids << mess.split("_")[1].to_i}
-      customers = Customer.joins(:customer_store_relations).select("customers.name,customers.id,mobilephone,customer_store_relations.store_id").where("customers.id in (#{customer_ids.join(',')})").inject(Hash.new){|hash,c|
-        if hash[c.store_id].nil? 
-          hash[c.store_id]={};hash[c.store_id][c.id]=c
-        else
-          hash[c.store_id][c.id]=c
-        end;hash}
-      send_message = []
-      Store.find(store_ids).each do |store|
-        customers[store.id].values.each { |c|
-          strs = []
-          customer_message["#{store.id}_#{c.id}"].each_with_index {|str,index| strs << "#{index+1}.#{str.revist_content}" }
-          MessageRecord.transaction do
-            message_record = MessageRecord.create(:store_id =>store.id, :content =>strs.join(),
-              :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
-            content ="#{c.name}\t女士/男士,您好,#{store.name}的美容小贴士提醒您:\n" + strs.join("\r\n")
-            p content
-            send_message << SendMessage.new(:message_record_id => message_record.id, :customer_id => c.id,
-              :content => content, :phone => c.mobilephone,
-              :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
-            message_arr << {:content => content.gsub(/([   ])/,"/t"), :msid => "#{c.id}", :mobile => c.mobilephone}
-          end
-        }
-      end
-      SendMessage.import send_message, :timestamps=>true unless send_message.blank?
+    store_ids,customer_ids,message_arr = [],[],[]
+    condition = Time.now.strftime("%H").to_i<12 ? "date_format(send_messages.send_at,'%Y-%m-%d %H') between '#{Time.now.beginning_of_day.strftime("%Y-%m-%d %H")}'
+    and '#{Time.now.strftime('%Y-%m-%d')+" 11"}'" : "date_format(send_messages.send_at,'%Y-%m-%d %H') between '#{Time.now.strftime('%Y-%m-%d')+" 12"}' and '#{Time.now.end_of_day.strftime("%Y-%m-%d %H")}'"
+    p send_messages = SendMessage.joins(:store).where(condition+" and auto_send=#{Store::AUTO_SEND[:YES]}").group_by{|i|store_ids << i.store_id;customer_ids << i.customer_id;{:c_id=>i.customer_id,:s_id=>i.store_id}}
+    unless send_messages.empty?
+      customers = Customer.find(customer_ids).inject({}){|h,c|h[c.id]=c;h}
+      stores = Store.find(store_ids).inject({}){|h,s|h[s.id]=s.name;h}
+      send_messages.each { |k,v|
+        strs = []
+        v.each_with_index {|str,index| strs << "#{index+1}.#{str.content}" }
+        if customers[k[:c_id]] && stores[k[:s_id]]
+          content ="#{customers[k[:c_id]].name}\t女士/男士,您好,#{stores[k[:s_id]]}的美容小贴士提醒您:\n" + strs.join("\r\n")
+          message_arr << {:content => content.gsub(/([   ])/,"/t"), :msid => "#{customers[k[:c_id]].id}", :mobile =>customers[k[:c_id]].mobilephone}
+        end
+      } 
       msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
       jsondata = JSON msg_hash
       begin
         message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
         message_route
         create_message_http(Constant::MESSAGE_URL, message_route)
+        SendMessage.where(condition+" and store_id in (#{store_ids.join(',')})").update_all :status=>SendMessage::STATUS[:FINISHED]
         p "success"
       rescue
         p "error"
+        SendMessage.where(condition+" and store_id in (#{store_ids.join(',')})").update_all :status=>SendMessage::STATUS[:FAIL]
       end
     end
   end
@@ -97,7 +78,10 @@ class Product < ActiveRecord::Base
     arr[0].each{|arr| product << arr[1]}
     arr[3].each{|arr| pcard << arr[1]}
     hour = (Product.find(product.uniq).map(&:auto_time)|PackageCard.find(pcard.uniq).map(&:auto_time)).compact.min
-    return hour.nil? ? nil : Time.now+hour.hours  #修改时间条件，如果不需要回访则订单的回访时间设置为null
+    day = PackageCard.find(pcard.uniq).map(&:time_warn)
+    revist = (Product.find(product.uniq).map(&:revist_content)|PackageCard.find(pcard.uniq).map(&:revist_content)).compact
+    warn = PackageCard.find(pcard.uniq).map(&:con_warn).compact
+    return [[hour.nil? ? nil : Time.now+hour.hours,day.nil? ? nil : Time.now+day.days],[revist.join(','),warn.join(',')]]  #修改时间条件，如果不需要回访则订单的回访时间设置为null
   end
 
 
