@@ -7,7 +7,7 @@ module CustomersHelper
         where cnr.customer_id=?", customer_id])
     num_str = nums.inject([]){|a,n| a << n.num;a} if nums.any?
     brand_str = nums.inject([]){|a,n| a << "#{n.bname} #{n.mname}";a} if nums.any?
-    return [num_str.nil? ? "" : num_str.join(","), brand_str.nil? ? "" : brand_str.join(",")]
+    return [num_str.nil? ? "" : num_str.uniq.join(","), brand_str.nil? ? "" : brand_str.uniq.join(",")]
   end
 
 
