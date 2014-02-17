@@ -11,12 +11,8 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-<<<<<<< HEAD
-ActiveRecord::Schema.define(:version => 20140117061924) do
-=======
 
-ActiveRecord::Schema.define(:version => 20140114070142) do
->>>>>>> 38f471ffdf69ba792ccf8b3e9c5f59be62c19bf8
+ActiveRecord::Schema.define(:version => 20140117061924) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
