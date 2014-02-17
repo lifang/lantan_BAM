@@ -236,5 +236,16 @@ module ApplicationHelper
   def limit_float(num)
     return (num*100).to_i/100.0
   end
-  
+
+  def js_hash(hash)
+    return hash.inject({}){|h,v|h["#{v[0]}"]="#{v[1]}";h}
+  end
+
+  #核对门店的客户账单
+  def check_account(c_id,s_id,month)
+    receipt = PayReceipt.where(:month=>month,:types=>Account::TYPES[:CUSTOMER],:supply_id=>c_id,:store_id=>s_id).select("ifnull(sum(amount),0) amount").first.amount
+    p_price = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::FINCANCE_TYPES.keys,:pay_status=>OrderPayType::PAY_STATUS[:COMPLETE],
+      :"orders.store_id"=>s_id,:"orders.customer_id"=>c_id).where("date_format(order_pay_types.updated_at,'%Y-%m')='#{month}'").select("ifnull(sum(order_pay_types.price),0) p_price").first.p_price
+    return [receipt,p_price]
+  end
 end

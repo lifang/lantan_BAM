@@ -1,6 +1,9 @@
 <div class="finnace_title">
   <ul title="<%=  @pays.select{|k,v| OrderPayType::FINCANCE_TYPES.keys.include? k}.map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe%>">本期销售收入&nbsp&nbsp&nbsp
-    <li>优惠：<span><%= @pays.select{|k,v| !OrderPayType::FINCANCE_TYPES.keys.include? k}.values.compact.inject(0){|sum,n|sum+n}.round(2)%></span></li>
+    <% pay_reward = @pays.select{|k,v| !OrderPayType::FINCANCE_TYPES.keys.include? k}.values.compact %>
+    <% unless pay_reward.blank? %>
+      <li>优惠：<span><%= pay_reward.inject(0){|sum,n|sum+n}.round(2)%></span></li>
+    <% end %>
     <% li_arr = [];
     @pays.select{|k,v| OrderPayType::FINCANCE_TYPES.keys.include? k}.map{|k,v|li_arr << "<li>#{OrderPayType::PAY_TYPES_NAME[k]}:<span>#{v.to_f.round(2)}</span></li>"}%>
     <%= li_arr[0..4].join("&nbsp&nbsp").html_safe %>

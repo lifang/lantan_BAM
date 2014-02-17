@@ -23,10 +23,10 @@
                    <%if ["index","revenue_report"].include? controller.action_name%> class="hover"<%end%>>收入管理</a>
             </li>
             <li><a href="/stores/<%=params[:store_id]%>/finance_reports/fee_manage"
-                   <%if ["fee_manage"].include? controller.action_name%> class="hover"<%end%>>费用管理</a>
+                   <%if ["fee_manage","fee_report"].include? controller.action_name%> class="hover"<%end%>>费用管理</a>
             </li>
-            <li><a href="/stores/<%=params[:store_id]%>/market_manages"
-                   <%if controller.action_name =="index1"%> class="hover"<%end%>>往来管理</a>
+            <li><a href="/stores/<%=params[:store_id]%>/finance_reports/pay_account"
+                   <%if ["pay_account","payable_account","manage_account"].include? controller.action_name%> class="hover"<%end%>>往来管理</a>
             </li>
             <li><a href="/stores/<%=params[:store_id]%>/market_manages"
                    <%if controller.action_name =="index1"%> class="hover"<%end%>>成本管理</a>
@@ -42,14 +42,7 @@
         <div class="back"><a href="/stores/<%= params[:store_id] %>/welcomes" title="返回">Back</a>财务管理</div>
       </div>
     </div>
-
-    <div class="main">
-      <div class="box">
-        <div class="data_box">
-          <%= yield %>
-        </div>
-      </div>
-    </div>
+    <%= yield %>
     <div class="foot"><p>Copyright © 2013 杭州鼎洪 版权所有</p></div>
     <div class="mask"></div>
     <div class="maskOne"></div>

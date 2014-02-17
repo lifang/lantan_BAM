@@ -6,7 +6,7 @@ class OrderPayType < ActiveRecord::Base
     :PACJAGE_CARD => 3, :SALE => 4, :IS_FREE => 5, :DISCOUNT_CARD => 6,:FAVOUR =>7,:CLEAR =>8,:HANG =>9} #0 现金  1 刷卡  2 储值卡   3 套餐卡  4  活动优惠  5免单
   PAY_TYPES_NAME = {0 => "现金", 1 => "银行卡", 2 => "储值卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单", 6 => "打折卡",7=>"付款优惠",8=>"抹零",9=>"挂账"}
   LOSS = [PAY_TYPES[:PACJAGE_CARD],PAY_TYPES[:SALE],PAY_TYPES[:DISCOUNT_CARD],PAY_TYPES[:FAVOUR],PAY_TYPES[:CLEAR]]
-  PAY_STATUS = {:UNCOMPLETE =>0,:COMPLETE =>1} #0 挂账未结账  1  已结账
+  PAY_STATUS = {:UNCOMPLETE =>1,:COMPLETE =>0} #1 挂账未结账  0  已结账
   FAVOUR = [PAY_TYPES[:SALE],PAY_TYPES[:IS_FREE],PAY_TYPES[:DISCOUNT_CARD],PAY_TYPES[:FAVOUR],PAY_TYPES[:CLEAR]]
   FINCANCE_TYPES = {0 => "现金", 1 => "银行卡", 2 => "储值卡", 3 => "套餐卡", 5 => "免单", 6 => "打折卡",9=>"挂账"}
   
@@ -193,6 +193,7 @@ class OrderPayType < ActiveRecord::Base
                       o.update_attributes(:status=>Order::STATUS[:FINISHED], :is_billing => is_billing)
                     elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
                       o.update_attributes(:status=>Order::STATUS[:BEEN_PAYMENT], :is_billing => is_billing)
+                      parms.merge!(:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE])
                     end
                     OrderPayType.create(parms)
                     clear_value = 0 if clear_value>0

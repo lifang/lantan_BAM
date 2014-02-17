@@ -44,7 +44,7 @@ class Product < ActiveRecord::Base
     store_ids,customer_ids,message_arr = [],[],[]
     condition = Time.now.strftime("%H").to_i<12 ? "date_format(send_messages.send_at,'%Y-%m-%d %H') between '#{Time.now.beginning_of_day.strftime("%Y-%m-%d %H")}'
     and '#{Time.now.strftime('%Y-%m-%d')+" 11"}'" : "date_format(send_messages.send_at,'%Y-%m-%d %H') between '#{Time.now.strftime('%Y-%m-%d')+" 12"}' and '#{Time.now.end_of_day.strftime("%Y-%m-%d %H")}'"
-    p send_messages = SendMessage.joins(:store).where(condition+" and auto_send=#{Store::AUTO_SEND[:YES]}").group_by{|i|store_ids << i.store_id;customer_ids << i.customer_id;{:c_id=>i.customer_id,:s_id=>i.store_id}}
+    send_messages = SendMessage.joins(:store).where(condition+" and auto_send=#{Store::AUTO_SEND[:YES]}").group_by{|i|store_ids << i.store_id;customer_ids << i.customer_id;{:c_id=>i.customer_id,:s_id=>i.store_id}}
     unless send_messages.empty?
       customers = Customer.find(customer_ids).inject({}){|h,c|h[c.id]=c;h}
       stores = Store.find(store_ids).inject({}){|h,s|h[s.id]=s.name;h}
@@ -53,15 +53,16 @@ class Product < ActiveRecord::Base
         v.each_with_index {|str,index| strs << "#{index+1}.#{str.content}" }
         if customers[k[:c_id]] && stores[k[:s_id]]
           content ="#{customers[k[:c_id]].name}\t女士/男士,您好,#{stores[k[:s_id]]}的美容小贴士提醒您:\n" + strs.join("\r\n")
-          message_arr << {:content => content.gsub(/([   ])/,"/t"), :msid => "#{customers[k[:c_id]].id}", :mobile =>customers[k[:c_id]].mobilephone}
+          message_arr << {:content => content.gsub(/([   ])/,"\t"), :msid => "#{customers[k[:c_id]].id}", :mobile =>customers[k[:c_id]].mobilephone}
         end
-      } 
+      }
+      p message_arr
       msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
       jsondata = JSON msg_hash
       begin
         message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
         message_route
-        create_message_http(Constant::MESSAGE_URL, message_route)
+        p create_message_http(Constant::MESSAGE_URL, message_route)
         SendMessage.where(condition+" and store_id in (#{store_ids.join(',')})").update_all :status=>SendMessage::STATUS[:FINISHED]
         p "success"
       rescue
@@ -79,9 +80,9 @@ class Product < ActiveRecord::Base
     arr[3].each{|arr| pcard << arr[1]}
     hour = (Product.find(product.uniq).map(&:auto_time)|PackageCard.find(pcard.uniq).map(&:auto_time)).compact.min
     day = PackageCard.find(pcard.uniq).map(&:time_warn)
-    revist = (Product.find(product.uniq).map(&:revist_content)|PackageCard.find(pcard.uniq).map(&:revist_content)).compact
-    warn = PackageCard.find(pcard.uniq).map(&:con_warn).compact
-    return [[hour.nil? ? nil : Time.now+hour.hours,day.nil? ? nil : Time.now+day.days],[revist.join(','),warn.join(',')]]  #修改时间条件，如果不需要回访则订单的回访时间设置为null
+#    revist = (Product.find(product.uniq).map(&:revist_content)|PackageCard.find(pcard.uniq).map(&:revist_content)).compact
+#    warn = PackageCard.find(pcard.uniq).map(&:con_warn).compact
+    return [hour.nil? ? nil : Time.now+hour.hours,day.nil? ? nil : Time.now+day.days]  #修改时间条件，如果不需要回访则订单的回访时间设置为null
   end
 
 

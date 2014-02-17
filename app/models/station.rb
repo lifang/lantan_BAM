@@ -286,33 +286,28 @@ class Station < ActiveRecord::Base
     StationStaffRelation.delete_all(:current_day=>Time.now.strftime("%Y%m%d"))
     WorkRecord.delete_all(:current_day=>Time.now.strftime("%Y-%m-%d"))
     stores = Store.where(:status=>Store::STATUS[:OPENED])
-    infos = StationStaffRelation.where(:current_day=>[Time.now.strftime("%Y%m%d"),Time.now.yesterday.strftime("%Y%m%d")],:store_id=>stores.map(&:id)).inject({}){
-      |h,s|h["#{s.current_day}_#{s.store_id}"].nil? ? h["#{s.current_day}_#{s.store_id}"]=[s] : h["#{s.current_day}_#{s.store_id}"] << s;h}
+    infos = StationStaffRelation.where(:current_day=>[Time.now.strftime("%Y%m%d"),Time.now.yesterday.strftime("%Y%m%d")],:store_id=>stores.map(&:id)).group_by{
+      |s| "#{s.current_day}_#{s.store_id}"}
     staffs = Staff.where(:status=>Staff::STATUS[:normal],:store_id=>stores.map(&:id))
-    tech_staffs = staffs.inject({}){|h,s|h[s.store_id].nil? ? h[s.store_id] = [s] : h[s.store_id] << s  if s.type_of_w == Staff::S_COMPANY[:TECHNICIAN];h}
-    work_r_staffs = staffs.inject({}){|h,s|h[s.store_id].nil? ? h[s.store_id] = [s] : h[s.store_id] << s ;h}
+    tech_staffs = staffs.group_by{|i|"#{i.type_of_w}_#{i.store_id}"}
+    work_r_staffs = staffs.group_by{|i|i.store_id}
     stores.each do |store|
       today_info = infos["#{Time.now.strftime("%Y%m%d")}_#{store.id}"]
       yesterday_info = infos["#{Time.now.yesterday.strftime("%Y%m%d")}_#{store.id}"]
       if today_info.nil?
         if yesterday_info.nil?
-          tech_staffs[store.id].each do |staff|
+          tech_staffs["#{Staff::S_COMPANY[:TECHNICIAN]}_#{store.id}"].each do |staff|
             Station.set_station(store.id,staff.id,staff.level)
-          end unless tech_staffs[store.id].nil?
+          end unless tech_staffs["#{Staff::S_COMPANY[:TECHNICIAN]}_#{store.id}"].nil?
         else
           p "#{store.id}--#{yesterday_info.length}"
-          id = yesterday_info.map(&:id).max
           yesterday_info.each {|info|
-            id += 1
-            object = StationStaffRelation.new(info.attributes)
-            object.id,object.current_day = id,Time.now.strftime("%Y%m%d")
-            total_con << object
+            total_con << StationStaffRelation.new({:station_id=>info.station_id,:staff_id=>info.staff_id,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store.id})
           }
         end
       end   #自动分配技师
       work_r_staffs[store.id].each do |staff|   #生成员工记录
-        parms = {:current_day=>Time.now.strftime("%Y-%m-%d"),:attendance_num=>1,:staff_id=>staff.id,:store_id=>store.id}
-        work_records << WorkRecord.new(parms)
+        work_records << WorkRecord.new({:current_day=>Time.now.strftime("%Y-%m-%d"),:attendance_num=>1,:staff_id=>staff.id,:store_id=>store.id})
       end unless work_r_staffs[store.id].nil?
     end
     WorkRecord.import work_records, :timestamps=>true unless work_records.blank?

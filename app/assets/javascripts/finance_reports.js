@@ -2,29 +2,14 @@
 // All this logic will automatically be available in application.js.
 
 function search_finance(e,store_id){
-    $(e).attr("onclick","");
-    var time = 3;
-    var local_timer=setInterval(function(){
-        e.innerHTML="查询("+time+")";
-        if (time <=0){
-            $(e).attr("onclick","search_finance(this,"+store_id+")");
-            window.clearInterval(local_timer);
-            e.innerHTML="查询";
-        }
-        time -= 1;
-    },1000)
     var p_type = [];
     var parm = {};
-    var first_time = $("#c_first").val();
-    var last_time = $("#c_last").val();
     var customer_n =$("#customer_n").val()
     var cate_n = $("#cate_n option:selected").val();
     var pay_type = $("#order_types :checked");
-    var url = "/stores/"+store_id+"/finance_reports/"
     for(var i=0;i < pay_type.length;i++){
         p_type.push(pay_type[i].value);
     }
-  
     if (p_type.length != 0){
         parm["pay_type"]= p_type.join(",");
     }
@@ -34,6 +19,107 @@ function search_finance(e,store_id){
     if (customer_n != "" && customer_n.length != 0){
         parm["customer_name"] = customer_n;
     }
+    set_search(e,store_id,"index",parm)
+}
+
+function g_code(){
+    var types = $("#types option:selected").val();
+    $("#code").val(fee_code[""+types]+$("#code_date").val());
+}
+
+function check_fee(){
+    var name=$("#name").val();
+    //    var code = $("#code").val();
+    var amount =$("#amount").val();
+    var share_btn = $("#share_btn")[0];
+    var share_month = $("#share_month").val();
+    if (name == "" || name.length==0){
+        tishi_alert("请输入费用名称");
+        return false;
+    }
+    //    if (code == "" || code.length ==0){
+    //        tishi_alert("单据编号不能为空");
+    //         return false;
+    //    }
+    if(amount == "" || amount.length==0 || isNaN(parseFloat(amount)) || parseFloat(amount)<0){
+        tishi_alert("请输入支付金额！");
+        return false;
+    }
+    if(share_btn.checked && (share_month == "" || share_month.length==0)){
+        tishi_alert("请输入分摊月份！");
+        return false;
+    }
+    $("#new_fee").submit();
+}
+
+function search_fee(e,store_id){
+    var position = $(".tab_before .hover").attr("id");
+    var parm = {
+        position : position
+    };
+    set_search(e,store_id,"fee_manage",parm)
+}
+
+function change_tab(e,k){
+    $(e).parent().find("li").removeClass("hover");
+    e.className = "hover";
+    $(".nothing,.finnace_title").css("display","none");
+    $("#content_"+k+",#finnace_title_"+k).css("display","block")
+}
+
+function show_fee(fee_id,store_id){
+    var url = "/stores/"+store_id+"/finance_reports/show_fee"
+    var position = $(".tab_before .hover").attr("id");
+    var parm = {
+        store_id:store_id,
+        fee_id:fee_id,
+        position : position
+    }
+    $.ajax({
+        type:"post",
+        url: url,
+        dataType: "script",
+        data: parm
+    })
+}
+
+function fee_report(e,store_id){
+    var parm = {};
+    set_search(e,store_id,"fee_report",parm);
+}
+
+function load_account(c_id,s_id){
+    var url = "/stores/"+s_id+"/finance_reports/load_account";
+    var parm = {
+        customer_id : c_id
+    };
+    $.ajax({
+        type:"post",
+        url: url,
+        dataType: "script",
+        data: parm
+    })
+}
+
+function set_search(e,store_id,action,parm){
+    $(e).attr("onclick","");
+    var time = 3;
+    var local_timer=setInterval(function(){
+        e.innerHTML="查 &nbsp&nbsp&nbsp&nbsp询("+time+")";
+        if (time <=0){
+            $(e).attr("onclick",action+"(this,"+store_id+")");
+            window.clearInterval(local_timer);
+            e.innerHTML="查 &nbsp&nbsp&nbsp&nbsp询";
+        }
+        time -= 1;
+    },1000)
+    send_account(store_id,action,parm);
+}
+
+function send_account(store_id,action,parm){
+    var first_time = $("#c_first").val();
+    var last_time = $("#c_last").val();
+    var url = "/stores/"+store_id+"/finance_reports/"+action
     if (first_time != "" && first_time.length != 0){
         parm["first_time"] = first_time;
     }else{
@@ -45,10 +131,102 @@ function search_finance(e,store_id){
         parm["last_time"] = 0;
     }
     $.ajax({
-        type:"get",
+        type:"post",
         url: url,
         dataType: "script",
         data: parm
     })
+}
 
+
+function complete_account(store_id,c_id){
+    var total_ids = check_account();
+    var due_account = $("#due_account").html();
+    var left_account = $("#left_account").html();
+    var in_account = $("#in_account").val();
+    var pay_type = $("#payment_id option:selected").val();
+    var staff_id = $("#staff_id option:selected").val();
+    var account = 0;
+    var parm = {
+        p_ids : total_ids,
+        customer_id : c_id
+    };
+    var in_a = false;
+    if((in_account != "" || in_account.length!=0)){
+        if  (isNaN(parseFloat(in_account)) || parseFloat(in_account)<0){
+            tishi_alert("充值金额只能是数字！");
+            return false;
+        }else{
+            if(parseFloat(in_account)>0){
+                in_a = true;
+                account = in_account;
+            }
+        }
+    }
+    if ((parseFloat(left_account)+parseFloat(in_account)) >= parseFloat(due_account)){
+        if (total_ids.length == 0){
+            tishi_alert("请选择应付订单！");
+        }else{
+            if(confirm('应付金额：'+due_account+"，余额："+left_account+(in_a ? "，充值金额："+in_account : "")+",确认付款吗？")){
+                parm["pay_type"] = pay_type;
+                parm["staff_id"] = staff_id;
+                parm["pay_recieve"] = account;
+                parm["trade_amt"] = due_account;
+                parm["left_account"] = parseFloat(left_account)+parseFloat(in_account)- parseFloat(due_account);
+                send_account(store_id,"complete_account",parm)
+            }
+        }
+   
+    }else{
+        tishi_alert("金额不足！");
+    }
+    
+}
+
+function check_account(){
+    var t_box = $("#t_account :checkbox");
+    var sum = 0;
+    var total_ids = [];
+    for(var i=0;i <t_box.length;i++){
+        if (t_box[i].checked){
+            sum  += parseFloat($(t_box[i]).parent().parent().find("td").eq(3).find("span").html());
+            total_ids.push(t_box[i].value);
+        }
+    }
+    $("#due_account").html(sum);
+    return total_ids;
+}
+
+function t_account(e){
+    $("#t_account :checkbox").attr("checked",e.checked);
+    var t_box = $("#t_account :checkbox");
+    if (e.checked){
+        for(var i=0;i <t_box.length;i++){
+            var li = $(t_box[i]).parent().parent().find("td");
+            var child = " <li id=\"li_"+t_box[i].value+"\"><span style='color:red'>"+li.eq(3).html()+"</span> 单号："+li.eq(1).html()+"</li>"
+            $("#added_accounts").append(child);
+        }
+    }else{
+        for(var k=0;k <t_box.length;k++){
+            $("#li_"+t_box[k].value).remove();
+        }
+    }
+    check_account();
+}
+
+
+function box_check(e){
+    if (e.checked){
+        var li = $(e).parent().parent().find("td");
+        var child = " <li id=\"li_"+e.value+"\"><span style='color:red'>"+li.eq(3).html()+"</span> 单号："+li.eq(1).html()+"</li>"
+        $("#added_accounts").append(child);
+    }else{
+        $("#li_"+e.value).remove();
+    } 
+    check_account();
+}
+
+function pay_account(e,store_id){
+    var parm = {};
+    set_search(e,store_id,"pay_account",parm)
 }

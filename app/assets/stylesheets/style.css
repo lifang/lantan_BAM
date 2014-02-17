@@ -1263,6 +1263,29 @@ a.compile_btn { width: 100px;}
 .h_finnace_title li { display: inline-block; margin-right: 5px;}
 .h_finnace_title li span { display: inline-block; margin-right: 5px;color: #930205;font-size: 18px;}
 
+.tab_before {
+    border-top: 2px #cfcfcf solid;
+    border-left: 1px #cfcfcf solid;
+    border-right: 1px #cfcfcf solid;
+    height: 30px;
+    line-height: 30px;
+    background: url(/assets/tab_head_bg.jpg) repeat-x;
+    margin-bottom: 1px;
+}
+.tab_before li {
+    padding: 0 20px;
+    float: left;
+    border-right: 1px #cfcfcf solid;
+    color: #999;
+    cursor: pointer;
+    text-shadow: 1px 1px rgba(255,255,255,1);
+}
+.tab_before li.hover { height: 30px; background: #FFF; font-weight: bolder; color: #930205;}
+
+.account_pay { margin: 20px 0;}
+.account_pay span { font-size: 24px; color: #930205;}
+.account_pay input { font-size: 24px; color: #930205;}
+
 /*统计管理-客户-服务-投诉*/
 .ts_category { font-size: 16px; margin: 5px 0 10px 0; padding: 5px 0;}
 .ts_category a { margin-left: 20px; color: #333;}

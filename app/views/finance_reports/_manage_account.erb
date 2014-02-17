@@ -1,0 +1,63 @@
+<div class="finnace_title" id="finnace_title">
+  <ul>
+    <%Account::TYPES_NAMES.each do |k,v|%>
+      <li><%=v%>账户：<span><%= @accounts[k].nil? ? 0 : @accounts[k].length%></span></li>
+    <%end%>
+  </ul>
+</div>
+<div>
+  <div class="table_box_h">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+      <thead>
+        <tr class="hbg">
+          <td width="30%">单位</td>
+          <td width="15%">上期余额</td>
+          <td width="20%">本期消费</td>
+          <td width="20%">本期增加</td>
+          <td width="15%">当前余额</td>
+        </tr>
+      </thead>
+      <tbody>
+        <%unless @accounts.empty?%>
+          <% account = @accounts.values.flatten[0] %>
+          <tr>
+            <td><%= @names[account.types][account.supply_id] %></td>
+            <td><%= account.left_amt%></td>
+            <td><%= account.trade_amt%></td>
+            <td><%= account.pay_recieve%></td>
+            <td><%= account.balance%></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="table_box">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+      <thead>
+        <tr class="hbg">
+          <td width="30%">单位</td>
+          <td width="15%">上期余额</td>
+          <td width="20%">本期消费</td>
+          <td width="20%">本期增加</td>
+          <td width="15%">当前余额</td>
+        </tr>
+      </thead>
+      <tbody>
+        <%unless @accounts.empty? %>
+          <% @accounts.each do |k,v| %>
+            <tr><td colspan="5"><%=Account::TYPES_NAMES[k]%>账户</td></tr>
+            <%v.each do |account|%>
+              <tr>
+                <td><%= @names[k][account.supply_id] %></td>
+                <td><%= account.left_amt%></td>
+                <td><%= account.trade_amt%></td>
+                <td><%= account.pay_recieve%></td>
+                <td><%= account.balance%></td>
+              </tr>
+            <% end %>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

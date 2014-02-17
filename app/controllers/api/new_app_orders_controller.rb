@@ -913,18 +913,16 @@ class Api::NewAppOrdersController < ApplicationController
           :product_id => oprs.blank? ? nil : oprs[0].product_id)
       end
            
-      if status==1
-        c_pcard_relation_id = []
-        c_svc_relation_id = []
-        deduct_price = 0
-        techin_price = 0
-        sale_id = 0        
+      if status ==1
+        c_pcard_relation_id,c_svc_relation_id,warns,revist = [],[],[],[]
+        deduct_price,techin_price,sale_id = 0,0,0
         prods.each do |prod|  #1_47_255=20
           if prod.split("_")[0].to_i==0 #如果有产品
             arr = prod.split("_")
             product = Product.find_by_id(arr[1].to_i)
             deduct_price = deduct_price + (product.deduct_price.to_f + product.deduct_percent.to_f) * arr[2].to_i
             techin_price = techin_price + (product.techin_price.to_f + product.techin_percent.to_f) * arr[2].to_i
+            revist << product.revist_content
           elsif prod.split("_")[0].to_i==1 #如果有活动   [1,47,255=20]
             arr = prod.split("_")
             sale_id = arr[1].to_i  #[1,47,255=20]
@@ -1019,7 +1017,9 @@ class Api::NewAppOrdersController < ApplicationController
                 cpr.update_attribute("status", CPcardRelation::STATUS[:NOTIME])
               end
             elsif arr[2].to_i==1  #如果是用户刚买的套餐卡，则要扣掉刚买的产品，并且更新客户-套餐卡关系
-              pcard = PackageCard.find_by_id(pid)              
+              pcard = PackageCard.find_by_id(pid)
+              revist << pcard.revist_content
+              warns  << pcard.con_warn
               deduct_price = deduct_price + (pcard.deduct_price.to_f + pcard.deduct_percent.to_f)
               cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", ocid,
                   pid, CPcardRelation::STATUS[:INVALID], order.id]).first
@@ -1073,7 +1073,15 @@ class Api::NewAppOrdersController < ApplicationController
         if work_order
           work_order.update_attribute("status", WorkOrder::STAT[:COMPLETE])
         end
+        parms = {:customer_id=>customer.id,:car_num_id=>order.car_num_id,:phone=>customer.mobilephone,:store_id=>order.store_id,:status=>SendMessage::STATUS[:WAITING]}
+        if order.warn_time
+          SendMessage.create(parms.merge({:content=>warns.join("\n"),:types=>SendMessage::TYPES[:WARN],:send_at=>order.warn_time}))
+        end
+        if order.auto_time
+          SendMessage.create(parms.merge({:content=>revist.join("\n"),:types=>SendMessage::TYPES[:REVIST],:send_at=>order.auto_time}))
+        end
       end
+      
       work_orders = status==0 ? nil : working_orders(params[:store_id])
       render :json => {:status => status, :msg => msg, :orders => work_orders}
     end

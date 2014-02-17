@@ -104,7 +104,7 @@ class RevisitsController < ApplicationController
         v.each_with_index {|str,index| strs << "#{index+1}.#{str.content}" }
         if customer
           content ="#{customer.name}\t女士/男士,您好,#{store.name}的美容小贴士提醒您:\n" + strs.join("\r\n")
-          message_arr << {:content => content.gsub(/([   ])/,"/t"), :msid => "#{customer.id}", :mobile =>customer.mobilephone}
+          message_arr << {:content => content.gsub(/([   ])/,"\t"), :msid => "#{customer.id}", :mobile =>customer.mobilephone}
         end
       }
       msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
