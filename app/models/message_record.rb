@@ -3,7 +3,7 @@ class MessageRecord < ActiveRecord::Base
   has_many :send_messages
   belongs_to :store
 
-  STATUS = {:NORMAL => 0, :SENDED => 1} # 0 未发送 1 已发送
+  STATUS = {:NORMAL => 0, :SENDED => 1,:IGNORE => 2} # 0 未发送 1 已发送 2 已忽略
 
   def self.send_code order_id,phone
     order = Order.find_by_id order_id

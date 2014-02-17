@@ -3,10 +3,10 @@ class MaterialsController < ApplicationController
   require 'uri'
   require 'net/http'
   require 'will_paginate/array'
-#  require 'barby'
-#  require 'barby/barcode/ean_13'
-#  require 'barby/outputter/custom_rmagick_outputter'
-#  require 'barby/outputter/rmagick_outputter'
+  #  require 'barby'
+  #  require 'barby/barcode/ean_13'
+  #  require 'barby/outputter/custom_rmagick_outputter'
+  #  require 'barby/outputter/rmagick_outputter'
   layout "storage", :except => [:print]
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
@@ -46,8 +46,7 @@ class MaterialsController < ApplicationController
     @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
                                     and is_ignore = ?", Material::STATUS[:NORMAL],@current_store.id, Material::IS_IGNORE[:NO]])  #查出所有该门店的低于门店物料预警数目的物料
     @back_good_records = BackGoodRecord.back_list(@current_store.id).paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
-    @suppliers = Supplier.all(:select => "s.id,s.name", :from => "suppliers s",
-      :conditions => "s.store_id=#{@current_store.id} and s.status=0")
+    @suppliers = Supplier.all(:select => "s.id,s.name,s.cap_name", :from => "suppliers s",:conditions => "s.store_id=#{@current_store.id} and s.status=0")
     date_now = Time.now.to_s[0..9]
     before_thirty_day =  (Time.now - 30.day).to_s[0..9]
     @unsalable_materials = Material.find_by_sql("select * from materials where id not in (SELECT material_id as id FROM mat_out_orders  where created_at >= '#{before_thirty_day} 00:00:00' and created_at <= '#{date_now} 23:59:59'
@@ -213,13 +212,16 @@ class MaterialsController < ApplicationController
     Material.transaction do
       begin
         if @material
-          @material.update_attribute(:storage, @material.storage.to_i + params[:num].to_i)
+          storage_price = @material.storage.to_i * @material.price
+          p avg_price = (@material_order.price + storage_price)*1.0/(@material.storage.to_i+params[:num].to_i)
+          @material.update_attribute({:storage=>@material.storage.to_i + params[:num].to_i,:price=>avg_price})
+          Product.find(@material.prod_mat_relations[0].product_id).update_attributes(:t_price=>avg_price)  if @material.create_prod
         else
           @material = Material.create({:code => params[:barcode].strip,:name => params[:name].strip,
               :price => params[:price].strip, :storage => params[:num].strip,
               :status => Material::STATUS[:NORMAL],:store_id => params[:store_id],
               :types => params[:material][:types], :is_ignore => Material::IS_IGNORE[:NO],
-              :material_low => Material::DEFAULT_MATERIAL_LOW})
+              :material_low => Material::DEFAULT_MATERIAL_LOW,:import_price => params[:price].strip})
         end
         if @material_order
           MatInOrder.create({:material => @material, :material_order => @material_order, :material_num => params[:num],
@@ -884,18 +886,15 @@ class MaterialsController < ApplicationController
   def new
     @current_store = Store.find_by_id(params[:store_id])
     @material = Material.new
-    categories = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
-    @types = {}
-    categories.each do |c|
-      @types[c.id] = c.name
-    end
+    @cates = Category.where(:types =>[Category::TYPES[:material],Category::TYPES[:good]],:store_id =>@current_store.id).inject({}){
+      |hash,ca| hash[ca.types].nil? ? hash[ca.types] = {ca.id => ca.name}:hash[ca.types][ca.id]=ca.name;hash}
   end
 
   def create
     params[:material][:name] = params[:material][:name].strip
     Material.transaction  do
       if params[:material][:ifuse_code]=="1"
-        code_value = params[:material][:code_value].strip[0..-2]
+        p code_value = params[:material][:code_value].strip[0..-2]
         barcode = Barby::EAN13.new(code_value)
         material_tmp = Material.find_by_code_and_store_id_and_status(code_value+barcode.checksum.to_s, params[:store_id], Material::STATUS[:NORMAL])
         if material_tmp
@@ -905,12 +904,11 @@ class MaterialsController < ApplicationController
       end
       unless material_tmp
         material = Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
-              :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW}))
-
-        if material && material.errors.blank?
+              :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,:price=>params[:material][:import_price]}))
+        if material
           smaterial = SharedMaterial.find_by_code(material.code)
-          sm_params = params[:material].except(:price, :sale_price,:ifuse_code,:code_value, :category_id).merge({:code => material.code})
-          SharedMaterial.create(sm_params) unless smaterial
+          sm_params = params[:material].except(:import_price, :sale_price,:ifuse_code,:code_value, :category_id).merge({:code => material.code})
+          SharedMaterial.create(sm_params) if smaterial.nil?
           @status = 0
           @flash_notice = "物料创建成功!"
         elsif material && material.errors.any?
@@ -920,6 +918,7 @@ class MaterialsController < ApplicationController
           @flash_notice = "物料创建失败!<br/> #{material.errors.messages.values.flatten.join("<br/>")}"
           @status = 2
         end
+        set_product(Constant::PRODUCT,material)  if material.create_prod
       end
       respond_to do |f|
         f.js
@@ -930,10 +929,39 @@ class MaterialsController < ApplicationController
     end
   end
 
+  def set_product(types,material)
+    flash[:notice] = "添加成功"
+    parms = {:name=>params[:prod_name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
+      :category_id=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],:t_price=>material.price,
+      :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product","service_code")}",
+      :is_auto_revist=>params[:auto_revist],:auto_time=>params[:time_revist],:revist_content=>params[:con_revist],:prod_point=>params[:prod_point]=="" ? 0 : params[:prod_point]}
+    parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price],:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
+    parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
+    parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
+    added = params[:is_added].nil? ? 0 : params[:is_added]
+    flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).map(&:name).include? params[:name]
+    parms.merge!({:standard=>params[:standard],:is_added =>added})
+    product =Product.create(parms)
+    ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>material.id)
+    begin
+      if params[:img_url] and !params[:img_url].keys.blank?
+        params[:img_url].each_with_index {|img,index|
+          url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
+          ImageUrl.create(:product_id=>product.id,:img_url=>url)
+          product.update_attributes({:img_url=>url}) if index == 0
+        }
+      end
+    rescue
+      flash[:notice] ="图片上传失败，请重新添加！"
+    end
+  end
+
   #编辑物料
   def edit
     @current_store = Store.find_by_id(params[:store_id])
     @material = Material.where(:id => params[:id], :store_id => params[:store_id]).first
+    @cates = Category.where(:types =>[Category::TYPES[:material],Category::TYPES[:good]],:store_id =>@current_store.id).inject({}){
+      |hash,ca| hash[ca.types].nil? ? hash[ca.types] = {ca.id => ca.name}:hash[ca.types][ca.id]=ca.name;hash}
     @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
   end
 
@@ -944,14 +972,12 @@ class MaterialsController < ApplicationController
     params[:material][:category_id] = params[:material][:types]
     params[:material][:types] = nil
     @cname = Category.find_by_id(params[:material][:category_id].to_i).name
-    if @material.update_attributes(params[:material])&& @material.errors.blank?
+    if @material.update_attributes(params[:material])
       @status = 0
       @flash_notice = "物料编辑成功!"
-    elsif @material.update_attributes(params[:material]) && @material.errors.any?
-      @flash_notice = "物料编辑成功!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
-      @status = 1
+      set_product(Constant::PRODUCT,@material)  if params[:material][:create_prod].to_i == 1
     else
-      @flash_notice = "物料编辑失败!<br/> #{@material.errors.messages.values.flatten.join("<br/>")}"
+      @flash_notice = "物料编辑失败!<br/>"
       @status = 2
     end
   end
@@ -959,16 +985,14 @@ class MaterialsController < ApplicationController
   def destroy
     material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     material.update_attribute(:status, Material::STATUS[:DELETE])
+    Product.where(:id=>ProdMatRelation.find_by_material_id(material.id).product_id).update_all(:status=>Product::IS_VALIDATE[:NO])
     flash[:notice] = "物料删除成功"
     redirect_to "/stores/#{params[:store_id]}/materials"
   end
 
   def search_by_code
-    categories = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id].to_i])
-    @types = {}
-    categories.each do |c|
-      @types[c.id] = c.name
-    end
+    @cates = Category.where(:types =>[Category::TYPES[:material],Category::TYPES[:good]],:store_id =>params[:store_id]).inject({}){
+      |hash,ca| hash[ca.types].nil? ? hash[ca.types] = {ca.id => ca.name}:hash[ca.types][ca.id]=ca.name;hash}
     @material = SharedMaterial.find_by_code(params[:code]) if params[:code]
     @material = Material.new unless @material
   end

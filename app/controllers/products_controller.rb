@@ -199,8 +199,14 @@ class ProductsController < ApplicationController
   end
 
   def destroy_prod
-    Product.find(params[:ids]).each{|prod| prod.update_attribute(:status, Product::IS_VALIDATE[:NO]);
-      prod.alter_level}
+    Product.where(:id=>params[:ids]).update_all(:status=>Product::IS_VALIDATE[:NO])
+    Product.find(params[:ids]).each do |prod|
+      if prod.is_service
+        prod.alter_level
+      else
+        Material.where(:id=>ProdMatRelation.find_by_product_id(prod.id).material_id).update_all(:create_prod=>0)
+      end
+    end
     render :json=>{:msg=>"删除成功"}
   end
 

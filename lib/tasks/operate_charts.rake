@@ -91,13 +91,28 @@ task(:sv_pwd => :environment) do
   p "update who has bought sv_cards,the bought_records count is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
 end
 
+
+#------------未更新
 #添加供应商助记码
 task(:set_cap_name => :environment) do
   require "toPinyin"
   time = Time.now.to_i
   count = Supplier.count("name is not null")
-  Supplier.where("name is not null").map{|supplier|supplier.update_attributes(:cap_name=>supplier.split(" ").join("").split("").map{|n|n.pinyin[0][0]}.compact.join(""))}
-  p "set the cap_name to suppliers,the  num is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
+  Supplier.where("name is not null").map{|supplier|
+    supplier_name = Supplier.where("name is not null").map(&:cap_name)
+    cap_name = supplier.name.split(" ").join("").split("").map{|n|n.pinyin[0][0]}.compact.join("")
+    supplier.update_attributes(:cap_name=>(supplier_name.include? cap_name) ? "#{cap_name}1" : cap_name)}
+  "set the cap_name to suppliers,the  num is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
+end
+
+#添加供应商助记码
+task(:set_create_prod => :environment) do
+  time = Time.now.to_i
+  Material.where(:status=>Material::STATUS[:NORMAL]).update_all(:create_prod=>Material::STATUS[:NORMAL])
+  count = Product.where(:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:PRODUCT]).count
+  prods = Product.where(:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:PRODUCT])
+  Material.where(:id=>ProdMatRelation.where(:product_id=>prods.map(&:id)).map(&:material_id)).update_all(:create_prod=>Material::STATUS[:DELETE])
+  p "set the create prod  to materials,the  num is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
 end
 
 

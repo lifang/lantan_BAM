@@ -224,7 +224,12 @@ module ApplicationHelper
   end
 
   def get_voilate_reward
-    @violations = ViolationReward.joins(:staff).where(:status => false).where("staffs.store_id=#{params[:store_id]}")
+    @violations = ViolationReward.joins(:staff).where(:status => false,:"staffs.store_id"=>params[:store_id])
+    send_msg
+  end
+
+  def send_msg
+    @send_msg = SendMessage.where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]])
   end
 
   #保留金额的两位小数

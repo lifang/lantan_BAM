@@ -65,6 +65,11 @@
             <input type="text" id="limited_password"  name="limited_password" />
           </div>
         <%end%>
+       <div class="item">
+        <label>自动回访、提醒：</label>
+        <input type="radio" name="auto_send" value="0" <% if @store.auto_send.to_i==0 %>checked<% end %>/>否&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="radio" name="auto_send" value="1" <% if @store.auto_send.to_i==1 %>checked<% end %>/>是
+      </div>
         <div class="item_textarea">
           <label><span class="red">*</span>门店照片：</label>
           <input type="file" class="file" name="store_img"/>

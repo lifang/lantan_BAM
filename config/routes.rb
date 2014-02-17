@@ -175,7 +175,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :revisits do
       collection do
-        post "search", "process_complaint"
+        post "search", "process_complaint","send_mess"
         get "search_list"
       end
     end

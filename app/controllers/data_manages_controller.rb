@@ -9,7 +9,7 @@ class DataManagesController < ApplicationController
     @t_orders = []
     session[:date] = params[:date].nil? ? Time.now.strftime("%Y-%m") : params[:date]
     orders = OrderPayType.joins(:order=>{:order_prod_relations=>{:product=>:category}}).select(
-      "ifnull(sum(order_pay_types.price),0) sum_price,pay_type,categories.types,pay_type,products.category_id,orders.id o_id").where(
+      "round(ifnull(sum(order_pay_types.price),0),2) sum_price,pay_type,categories.types,pay_type,products.category_id,orders.id o_id").where(
       :"orders.store_id"=>params[:store_id],:"orders.status"=>Order::PRINT_CASH).where(
       "date_format(orders.created_at,'%Y-%m')='#{session[:date]}'").group("pay_type,products.category_id,o_id").group_by{
       |i|{:pay_type=>i.pay_type,:ca=>i.category_id}}
@@ -28,17 +28,24 @@ class DataManagesController < ApplicationController
 
   def ajax_prod_serv
     category_id = params[:category_id].to_i
-    @c_name = params[:c_types].to_i == 0 ? Category.find(category_id).name : Category::TYPES_NAME[category_id]
     sql = "date_format(orders.created_at,'%Y-%m')='#{params[:c_time]}'"
-    if params[:c_types].to_i == 0
+    if params[:c_types].to_i == 0 or params[:c_types].to_i == 3
       sql += " and category_id=#{category_id}"
-    else
+    elsif params[:c_types].to_i == 1 or params[:c_types].to_i == 2
       sql += " and categories.types=#{category_id}"
     end
-    p @orders = Order.joins(:order_prod_relations=>{:product=>:category}).select("ifnull(sum(order_prod_relations.pro_num),0) pro_num,
-    ifnull(sum(order_prod_relations.total_price),0) total_price,ifnull(sum(order_prod_relations.t_price),0) t_price,products.id p_id,
+    if params[:c_types].to_i < 3
+      @c_name = params[:c_types].to_i == 0 ? Category.find(category_id).name : Category::TYPES_NAME[category_id]
+      p @orders = Order.joins(:order_prod_relations=>{:product=>:category}).select("ifnull(sum(order_prod_relations.pro_num),0) pro_num,
+    ifnull(sum(order_prod_relations.total_price),0) total_price,round(ifnull(sum(order_prod_relations.t_price),0),2) t_price,products.id p_id,
     date_format(orders.created_at,'%Y-%m-%d') day,ifnull(sum(order_prod_relations.total_price-order_prod_relations.t_price),0) earn_price,
     products.service_code,products.name").where(:"orders.store_id"=>params[:store_id],:"orders.status"=>Order::PRINT_CASH).where(sql).group("p_id,day").group_by{|i|i.day}
+    else
+      @c_name = params[:c_types].to_i == 3 ? Category.find(category_id).name : "折扣优惠"
+      p @orders = OrderPayType.joins({:product=>:category},:order).select("'--' pro_num,ifnull(sum(order_pay_types.price),0) total_price,
+    date_format(orders.created_at,'%Y-%m-%d') day,'--' t_price,products.id p_id,ifnull(sum(order_pay_types.price),0) earn_price,
+    products.service_code,products.name").where(:"orders.store_id"=>params[:store_id],:"orders.status"=>Order::PRINT_CASH,
+        :"pay_type"=>OrderPayType::FAVOUR).where(sql).group("p_id,day").group_by{|i|i.day}
+    end
   end
-
 end

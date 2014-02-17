@@ -11,14 +11,14 @@
           <div class="item">
             <label><span class='red'>*</span>物料类型：</label>
             <select id="material_types" name="material[types]">
-              <% @types.each do |t| %>
-              <option value="<%= t.id %>" <% if @material.category_id==t.id%>selected<% end %>><%= t.name %></option>
+              <% @cates[Category::TYPES[:material]].each do |k,v| %>
+                <option value="<%= k%>" <% if @material.category_id== k%>selected<% end %>><%= v%></option>
               <% end %>
             </select>
           </div>
           <div class="item">
-            <label><span class='red'>*</span>成本价：</label>
-            <%= text_field_tag 'material[price]', permission?(:materials, :show_sale) ? @material.price : 0 %>
+            <label><span class='red'>*</span>进货价：</label>
+            <%= text_field_tag 'material[import_price]', permission?(:materials, :show_sale) ? @material.import_price : 0 %>
           </div>
           <div class="item">
             <label><span class='red'>*</span>零售价：</label>
@@ -28,8 +28,12 @@
             <label><span class='red'>*</span>规格：</label>
             <%= text_field_tag 'material[unit]', @material.unit,  :placeholder => "件" %>
           </div>
+          <div class="item">
+            <label>是否上架：</label><input name="material[create_prod]" id="create_prod" type="checkbox" value="0"
+                                       <% if @material.create_prod   %> checked disabled <%end%>
+                                       onclick='$("#c_prod").css("display",this.checked ? "block" : "none");this.value=this.checked ? 1 : 0;' /></div>
+            <%= render "prod_material" %>
         </div>
-
       </div>
       <div class="btn_box"><button type="button" onclick="checkMaterial(this)" id="material_ce_bn" class="confirm_btn">确定</button></div>
       <div class="clear"></div>

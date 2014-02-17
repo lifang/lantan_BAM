@@ -32,7 +32,7 @@
     </tr>
   </thead>
   <tbody>
-    <% (@suppliers || []).each do |s| %>
+    <% (@supps || []).each do |s| %>
       <tr>
         <td><%= s.name %></td>
         <td><%= s.cap_name.nil? ? "--" : s.cap_name  %></td>
@@ -49,4 +49,4 @@
     <% end %>
   </tbody>
 </table>
-<%= will_paginate @suppliers,:class => "pageTurn", :renderer => "RemotePaginateHelper::LinkRenderer", :previous_label => "上一页", :next_label => "下一页" if @suppliers.size > 0  %>
+<%= will_paginate @supps,:class => "pageTurn", :renderer => "RemotePaginateHelper::LinkRenderer", :previous_label => "上一页", :next_label => "下一页" if @supps.size > 0  %>

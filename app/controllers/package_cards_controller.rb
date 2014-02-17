@@ -26,7 +26,7 @@ class PackageCardsController < ApplicationController
       parms = {:name=>params[:name], :store_id=>params[:store_id],:status=>PackageCard::STAT[:NORMAL], :price=>params[:price],
         :created_at=>Time.now.strftime("%Y-%M-%d"),:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
         :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],
-        :description=>params[:desc]}
+        :description=>params[:desc],:auto_warn=>params[:auto_warn],:time_warn=>params[:time_warn],:con_warn=>params[:con_warn]}
       parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price])
       parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:price].to_f/100)
       if params[:time_select].to_i == PackageCard::TIME_SELCTED[:PERIOD]
@@ -95,7 +95,7 @@ class PackageCardsController < ApplicationController
     pcard=PackageCard.find(params[:id])
     parms = {:name=>params[:name],:date_types =>params[:time_select],:is_auto_revist=>params[:auto_revist],
       :auto_time=>params[:time_revist], :revist_content=>params[:con_revist],:prod_point=>params[:prod_point],
-      :description=>params[:desc]
+      :description=>params[:desc],:auto_warn=>params[:auto_warn],:time_warn=>params[:time_warn],:con_warn=>params[:con_warn]
     }
     parms.merge!(:deduct_price=>params[:deduct_price].nil? ? 0 : params[:deduct_price])
     parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:price].to_f/100)

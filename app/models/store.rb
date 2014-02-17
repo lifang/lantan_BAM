@@ -24,6 +24,8 @@ class Store < ActiveRecord::Base
 
   belongs_to :city
   has_many :roles
+
+  AUTO_SEND = {:YES=>1,:NO=>0}  #是否自动发送 1 自动发送 0 不自动发送
   STATUS = {
     :CLOSED => 0,       #0该门店已关闭，1正常营业，2装修中, 3已删除
     :OPENED => 1,

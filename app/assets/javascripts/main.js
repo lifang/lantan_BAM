@@ -44,21 +44,14 @@ function popup(t){
     var win_height = window.height; //窗口高度
     var layer_height = $(t).height(); //弹出层高度
     var layer_width = $(t).width(); //弹出层宽度
+    $(".mask").css({
+        display:'block',
+        height: (layer_height+scolltop+100)<doc_height ? doc_height+100 : layer_height+scolltop+100+50
+    })
     $(t).css('top',scolltop+100);
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
-
-    if((scolltop+100+layer_height)>doc_height){
-        $(".mask").css({
-            display:'block',
-            height: scolltop+100+layer_height
-        })
-    }else{
-        $(".mask").css({
-            display:'block',
-            height: doc_height
-        })
-    }
+  
     $(t+" a.close").live("click",function(){
         $(t).css('display','none');
         $(".mask").css('display','none');

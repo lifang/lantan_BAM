@@ -1,7 +1,7 @@
 #encoding: utf-8
 class OrderPayType < ActiveRecord::Base
   belongs_to :order
-
+  belongs_to :product
   PAY_TYPES = {:CASH => 0, :CREDIT_CARD => 1, :SV_CARD => 2, 
     :PACJAGE_CARD => 3, :SALE => 4, :IS_FREE => 5, :DISCOUNT_CARD => 6,:FAVOUR =>7,:CLEAR =>8,:HANG =>9} #0 现金  1 刷卡  2 储值卡   3 套餐卡  4  活动优惠  5免单
   PAY_TYPES_NAME = {0 => "现金", 1 => "银行卡", 2 => "储值卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单", 6 => "打折卡",7=>"付款优惠",8=>"抹零",9=>"挂账"}
@@ -88,24 +88,24 @@ class OrderPayType < ActiveRecord::Base
         orders = Order.where(:status=>Order::CASH,:store_id=>param[:store_id],:customer_id=>param[:customer_id],
           :car_num_id=>param[:car_num_id]).where(sql)
         unless orders.blank?
-          order_ids,total_card = orders.map(&:id),0
+          order_ids,total_card,sort_orders,is_suit,messages = orders.map(&:id),0,[],false,[]
+          total_name,warn,revist,sv_prod,send_orders,customer_p = {},{},{},{},{},{}
+          send_orders = orders.inject({}){|h,o|h[o.id]=o;h}
           cprs = CPcardRelation.joins(:package_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>order_ids,
             :status=>CPcardRelation::STATUS[:INVALID])
           loss_orders = param[:pay_order] && param[:pay_order][:loss_ids] ?  param[:pay_order][:loss_ids] : {}
           clear_value = param[:pay_order] && param[:pay_order][:clear_value] ? param[:pay_order][:clear_value].to_f : 0
           order_pays = OrderPayType.search_pay_order(order_ids)
-          prods = OrderProdRelation.joins(:product).where(:order_id=>orders.map(&:id)).select("products.category_id c_id,order_id o_id,product_id p_id,pro_num,name")
+          prods = OrderProdRelation.joins(:product).where(:order_id=>orders.map(&:id)).select("products.category_id c_id,order_id o_id,product_id p_id,pro_num,name,revist_content")
           prod_ids = prods.inject(Hash.new){|hash,o|hash[o.o_id]=o.c_id;hash}
-          order_prod_ids = prods.inject({}){|h,p|h[p.o_id]=p;h}
-          pcard_name = cprs.inject({}){|hash,p|hash[p.order_id] = p.name;hash} #套餐卡名称
+          order_prod_ids = prods.inject({}){|h,p|h[p.o_id]=p;revist[p.o_id].nil? ? revist[p.o_id]=[p.revist_content] : revist[p.o_id] <<p.revist_content;h}
+          pcard_name = cprs.inject({}){|hash,p|hash[p.order_id] = p.name;warn[p.order_id].nil? ? warn[p.order_id]=[p.con_warn] : warn[p.order_id] <<p.con_warn;
+            revist[p.order_id].nil? ? revist[p.order_id]=[p.revist_content] : revist[p.order_id] <<p.revist_content;hash} #套餐卡名称
           o_price = orders.inject(Hash.new){|hash,o|hash[o.id]= limit_float(o.price-(loss_orders["#{o.id}"].nil? ? 0 : loss_orders["#{o.id}"].to_f)-(order_pays[o.id] ?  order_pays[o.id] : 0));hash}
-          sort_orders = []
-          sv_prod = {}
           if param[:pay_order] && param[:pay_order][:text]   #如果使用储值卡
             sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:id=>param[:pay_order][:text].keys).
               select("c_svc_relations.*,sv_cards.name,sv_cards.store_id,svcard_prod_relations.category_id ci,svcard_prod_relations.pcard_ids pid,
               sv_cards.id s_id").where("sv_cards.store_id=#{param[:store_id]}")
-            is_suit = false
             sv_pcard = cprs.inject({}){|h,p|h[p.order_id]=p.package_card_id;h}
             sv_cards.each do |ca|
               t_price = 0
@@ -138,7 +138,6 @@ class OrderPayType < ActiveRecord::Base
               end unless loss.empty?
             end
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : limit_float(param[:pay_cash].to_f - param[:second_parm].to_f)
-            total_name = {}
             orders = sort_orders | (orders - sort_orders)
             orders.each do |o|
               pp = {:product_id => order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].p_id,
@@ -231,7 +230,6 @@ class OrderPayType < ActiveRecord::Base
                 SvcardUseRecord.create(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,:left_price =>csr.left_price.round(2), :content => "购买"+"#{csr.name}")
               end
             end
-            #生成积分的记录
             c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(param[:store_id],param[:customer_id])
             if c_customer && c_customer.is_vip
               #产品积分
@@ -264,6 +262,13 @@ class OrderPayType < ActiveRecord::Base
               order.update_attributes(deduct)
             }
             CPcardRelation.where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]
+            #设置订单中的提醒和回访
+            customer_p = Customer.find(orders.map(&:customer_id)).inject({}){|h,c|h[c.id]=c.mobilephone;h}
+            warn.each {|k,v|order =send_orders[k];messages << SendMessage.new({:content=>v,:customer_id=>order.customer_id,:types=>SendMessage::TYPES[:WARN],
+                  :car_num_id=>order.car_num_id,:phone=>customer_p[order.customer_id],:send_at=>order.warn_time,:status=>SendMessage::STATUS[:WAITING],:store_id=>order.store_id})}
+            revist.each {|k,v|order =send_orders[k];messages << SendMessage.new({:content=>v,:customer_id=>order.customer_id,:types=>SendMessage::TYPES[:REVIST],
+                  :car_num_id=>order.car_num_id,:phone=>customer_p[order.customer_id],:send_at=>order.auto_time,:status=>SendMessage::STATUS[:WAITING],:store_id=>order.store_id})}
+            SendMessage.import messages  unless messages.blank?
           end
         end
       end
