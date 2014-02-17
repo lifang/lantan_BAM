@@ -26,10 +26,10 @@
         <td><%= c.name %></td>
         <td><%= c.mobilephone %></td>
         <td><%= str[1] %></td>
-        <td><%= c.property.to_i==Customer::PROPERTY[:PERSONAL] ? "个人客户" : "集团客户" %></td>
+        <td><%= c.property.to_i==Customer::PROPERTY[:PERSONAL] ? "个人客户" : "单位客户" %></td>
         <td><%= c.is_vip==true ? "是" : "否" %></td>
         <td><%= c.oprice.to_i %></td>
-        <td><%= c.last_con_time.nil? ? "" : c.last_con_time.strftime("%Y-%m-%d %H:%M") %></td>
+        <td><%= c.last_con_time.nil? ? "无" : c.last_con_time.strftime("%Y-%m-%d %H:%M") %></td>
         <td><a href="/stores/<%= @store_id %>/customers/<%= c.id %>">详情</a></td>
       </tr>
     <% end %>

@@ -4,7 +4,7 @@
   <a href="/stores/<%= @store_id %>/material_order_manages/storage_analysis"  class="hover">库存结构分析</a>
 </div>
 <div class="data_body">
-  <div class="data_body_h">按类别分析</div>
+  <%#*<div class="data_body_h">按类别分析</div>%>
   <div class="collect">
     <ul>
       <li><span>总金额：<%= @t_price.nil? || @t_price <= 0 ? 0 : sprintf("%.2f", @t_price) %>元</span></li>
@@ -22,7 +22,7 @@
       </tr>
     </thead>
     <tbody>
-      <% @mat_list[0..2].each do |ml| %>
+      <% @mat_list.each do |ml| %>
       <tr>
         <td><strong><%= ml.name %></strong></td>
         <td><p><%= ml.price.nil? ? 0.00 : sprintf("%.2f", ml.price) %></p></td>
@@ -30,18 +30,7 @@
         <td><p><%= ml.count.to_i %></p></td>
         <td><%= @t_count.nil? || @t_count <= 0 ? "0%" : "#{sprintf("%.2f",(ml.count.to_f * 100)/@t_count)}%" %></td>
       </tr>
-       <% end if @mat_list %>
-      <% if @mat_list && @mat_list.length > 3 %>
-      <% l_price = @mat_list[3..@mat_list.length-1].inject(0){|i,m| i += m.price.to_f;i} %>
-      <% l_count = @mat_list[3..@mat_list.length-1].inject(0){|i,m| i += m.count;i} %>
-      <tr>
-        <td><strong>其他</strong></td>
-        <td><%= sprintf("%.2f", l_price) %></td>
-        <td><%= @t_price.nil? || @t_price <= 0 ? "0%" : "#{sprintf("%.2f",(l_price.to_f * 100)/@t_price)}%" %></td>
-        <td><%= l_count.to_i %></td>
-        <td><%= @t_count.nil? || @t_count <= 0 ? "0%" : "#{sprintf("%.2f",(l_count.to_f * 100)/@t_count)}%" %></td>
-      </tr>
-      <% end %>
+       <% end if @mat_list %>      
     </tbody>
   </table>
 </div>

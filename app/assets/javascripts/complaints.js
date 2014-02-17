@@ -112,17 +112,24 @@ function pleased_type(plea_type, store_id, plea_start, plea_end, div_name){
 }
 
 function meta_analysis_search(store_id){
-    var t = /^[1-9]*[1-9][0-9]*$/;
+    //var t = /^[0-9]*[1-9][0-9]*$/;
+    var t = /^\d+$/;
     var amount_con_start = $.trim($("#amount_con_start").val());
     var amount_con_end = $.trim($("#amount_con_end").val());
     var amount_date_start = $.trim($("#amount_date_start").val());
     var amount_date_end = $.trim($("#amount_date_end").val());
-    if(amount_con_start != "" && t.test(amount_con_start)==false){
-        tishi_alert("起始金额必须为大于零的整数!");
+    var js_start_time = new Date(Date.parse(amount_date_start.replace("-","/")));
+    var js_end_time = new Date(Date.parse(amount_date_end.replace("-","/")));
+    if(amount_con_start=="" && amount_con_end=="" && amount_date_start=="" && amount_date_end==""){
+        tishi_alert("请输入查询条件!");
+    }else if(amount_con_start != "" && t.test(amount_con_start)==false){
+        tishi_alert("起始金额必须为大于等于零的整数!");
     }else if(amount_con_end != "" && t.test(amount_con_end)==false){
-        tishi_alert("结束金额必须为大于零的整数!");
+        tishi_alert("结束金额必须为大于等于零的整数!");
     }else if(parseInt(amount_con_start) > parseInt(amount_con_end)){
         tishi_alert("结束金额必须大于等于起始金额!");
+    }else if(amount_date_start!="" && amount_date_end!="" && amount_date_start > amount_date_end){
+        tishi_alert("结束时间必须大于起始时间!");
     }else{
         $.ajax({
             type: "get",

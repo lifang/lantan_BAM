@@ -57,17 +57,16 @@ class ComplaintsController < ApplicationController
     pleaseds = Order.find_by_sql(plea_sql) if  @div_name.nil? || @div_name.eql?("p_div")
     unpleased,normal,good,nice = 0,0,0,0
     plea_hash = pleaseds.inject({}){|h,p|
-      case p.is_pleased.to_i
-      when 0
-        unpleased += 1
-        h[:unpleased] = unpleased
-      when 1
-        normal += 1
-        h[:normal] = normal
-      when 2
+      if p.is_pleased.nil? || p.is_pleased.to_i == 2
         good += 1
         h[:good] = good
-      when 3
+      elsif p.is_pleased.to_i == 0
+        unpleased += 1
+        h[:unpleased] = unpleased
+      elsif p.is_pleased.to_i == 1
+        normal += 1
+        h[:normal] = normal      
+      elsif p.is_pleased.to_i == 3
         nice += 1
         h[:nice] = nice
       end;
@@ -98,9 +97,9 @@ class ComplaintsController < ApplicationController
       customers.each do |c|
         if c.property.to_i == 0
           @single_cus += 1
-          if !c.sex.nil? && c.sex==true
+          if c.sex.nil? || c.sex==true
             @male += 1
-          elsif !c.sex.nil? && c.sex==false
+          else
             @female += 1
           end
         elsif c.property.to_i == 1
@@ -149,8 +148,8 @@ class ComplaintsController < ApplicationController
         DATE_FORMAT(o.created_at,'%Y-%m-%d')=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id,
           Time.now.strftime("%Y-%m-%d")]).first
       @cons_current_week = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
-        YEARWEEK(DATE_FORMAT(o.created_at,'%Y-%m-%d'))=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id,
-          Time.now.strftime("%Y-%m-%d")]).first
+        YEARWEEK(DATE_FORMAT(o.created_at,'%Y-%m-%d'))=YEARWEEK(now())", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id
+          ]).first
       @cons_current_month = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
         DATE_FORMAT(o.created_at,'%Y-%m')=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id,
           Time.now.strftime("%Y-%m")]).first
@@ -163,10 +162,9 @@ class ComplaintsController < ApplicationController
     c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
       sum(o.price) oprice,max(o.created_at) last_con_time
       from customer_store_relations csr inner join customers c on csr.customer_id=c.id
-      inner join orders o on c.id=o.customer_id
-      where csr.store_id=? and c.status=? and o.status in (?)
-      and o.store_id=? ", @store_id, Customer::STATUS[:NOMAL], [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],
-      @store_id]
+      left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
+      where csr.store_id=? and c.status=? ",[Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
+      @store_id, Customer::STATUS[:NOMAL]]
     unless amount_date_start.nil? || amount_date_start.strip == ""
       c_sql[0] += " and DATE_FORMAT(o.created_at,'%Y-%m-%d')>=?"
       c_sql << amount_date_start
@@ -176,12 +174,22 @@ class ComplaintsController < ApplicationController
       c_sql << amount_date_end
     end
     c_sql[0] += " group by c.id having 1=1"
-    unless amount_con_start.nil?
-      c_sql[0] += " and sum(o.price)>=?"
+    if !amount_con_start.nil? && amount_con_start.strip != "" && !amount_con_end.nil? && amount_con_end.strip != ""
+      if amount_con_start.to_i <= 0
+         c_sql[0] += " and (sum(o.price) is null or (sum(o.price)>=? and sum(o.price)<?))"
+      else
+        c_sql[0] += " and sum(o.price)>=? and sum(o.price)<?"
+      end
+      c_sql << amount_con_start.to_i <<  amount_con_end.to_i
+    elsif !amount_con_start.nil? && amount_con_start.strip != ""
+      if amount_con_start.to_i <= 0
+         c_sql[0] += " and (sum(o.price) is null or sum(o.price)>=?)"
+      else
+        c_sql[0] += " and sum(o.price)>=?"
+      end
       c_sql << amount_con_start.to_i
-    end
-    unless amount_con_end.nil?
-      c_sql[0] += " and sum(o.price)<=?"
+    elsif !amount_con_end.nil? && amount_con_end.strip != ""
+      c_sql[0] += " and (sum(o.price) is null or sum(o.price)<?)"
       c_sql << amount_con_end.to_i
     end
 

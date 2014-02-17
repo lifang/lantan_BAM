@@ -19,16 +19,19 @@
   <a href="javascript:void(0)"  onclick="complaint_type(4,<%= @store_id %>, '<%= @comp_month %>', 's_div')" id="comp_a_4">综合问题</a>
 </div>
 <div style="overflow:auto; height: 500px;">
+  <% if @complaints.nil? || @complaints.blank? %>
+  <p4>暂无数据!</p4>
+  <% else %>
   <% @complaints.each do |c| %>
     <div class="ts_list">
       <h1>投诉编号：<%= c.ccode %></h1>
       <div class="merchant">
         <ul>
-          <li><strong>投诉时间：</strong><%= c.created_at.nil? ? "" : c.created_at.strftime("%Y/%m/%d-%H:%M") %></li>
+          <li><strong>投诉时间：</strong><%= c.created_at.nil? ? "" : c.created_at.strftime("%Y-%m-%d %H:%M") %></li>
           <li><strong>订单编号：</strong><a href="/orders/<%= c.id %>/order_info" data-remote="true" data-type="script" ><%= c.ocode %></a></li>
           <li><strong>责任人：</strong><%= c.sname1.nil? ? "--" : c.sname1 %>/<%= c.sname2.nil? ? "--" : c.sname2 %></li>
           <li><strong>责任部门：</strong><%= c.dname1.nil? ? "--" : c.dname1 %>/<%= c.dname2.nil? ? "--" : c.dname2 %></li>
-          <li><strong>处理时间：</strong><%= c.status==false || c.process_at.nil? ? "" : c.process_at.strftime("%Y/%m/%d-%H:%M") %></li>
+          <li><strong>处理时间：</strong><%= c.status==false || c.process_at.nil? ? "" : c.process_at.strftime("%Y-%m-%d %H:%M") %></li>
           <li><strong>状态：</strong><%= c.status==true ? "已处理" : "未处理" %></li>
           <li><strong>结果：</strong><%= c.c_feedback_suggestion == true ? "满意" : "不满意" %></li>
           <li><strong>考核：</strong><%= c.is_violation==true ? "已纳入" : "未纳入" %></li>
@@ -59,7 +62,8 @@
         </table>
       </div>
     </div>
-  <% end if @complaints %>
+  <% end %>
+  <% end %>
 </div>
 <%= will_paginate @complaints, :class => "pageTurn", :previous_label => "上一页", :next_label => "下一页", :id => "comp_page" %>
 <div id="related_order_div"></div>

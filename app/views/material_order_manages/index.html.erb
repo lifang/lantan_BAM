@@ -42,7 +42,7 @@
       </tr>
     </thead>
     <tbody>
-      <% @mat_orders[0..2].each do |mo| %>
+      <% @mat_orders.each do |mo| %>
       <tr>
         <td><strong><%= mo.name %></strong></td>
         <td><%= mo.price.to_i %></td>
@@ -50,18 +50,7 @@
         <td><%= mo.count.to_i %></td>
         <td><%= @t_count.nil? || @t_count <= 0 ? "0%" : "#{sprintf("%.2f",(mo.count.to_f * 100)/@t_count)}%" %></td>
       </tr>
-      <% end %>
-      <% if @mat_orders.length > 3 %>
-      <% t_price = @mat_orders[3..@mat_orders.length-1].inject(0){|i,m|i += m.price.to_f;i} %>
-      <% t_count = @mat_orders[3..@mat_orders.length-1].inject(0){|i,m|i += m.count.to_i;i} %>
-      <tr>
-        <td><strong>其他</strong></td>
-        <td><%= t_price.to_i %></td>
-        <td><%= @t_price.nil? || @t_price.to_i==0 ? "0%" : "#{sprintf("%.2f",(t_price.to_f * 100)/@t_price.to_i)}%" %></td>
-        <td><%= t_count.to_i %></td>
-        <td><%= @t_count.nil? || @t_count <= 0 ? "0%" : "#{sprintf("%.2f",(t_count.to_f * 100)/@t_count)}%" %></td>
-      </tr>
-      <% end %>
+      <% end %>     
     </tbody>
   </table>
 </div>
