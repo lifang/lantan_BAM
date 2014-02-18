@@ -1,9 +1,9 @@
 <div class="popup_box"  id="pop_box">
-  <h1>应收款<a href="javascript:void(0)" class="close">关闭</a></h1>
+  <h1><%=Account::TYPES_NAMES[params[:rend].to_i]%>款<a href="javascript:void(0)" class="close">关闭</a></h1>
   <div class="popup_body">
     <div class="popup_body_area">
       <div class="due_pay_money">
-        <span style="padding-left: 20px;">应收：<span id="due_account"><%=@pay_orders.map(&:p_price).compact.inject(0){|n,p|n+p}.round(2)%></span></span>
+        <span style="padding-left: 20px;"><%=Account::TYPES_NAMES[params[:rend].to_i]%>：<span id="due_account"><%=@pay_orders.map(&:p_price).compact.inject(0){|n,p|n+p}.round(2)%></span></span>
         <span style="float: right;padding-right: 20px;">余额：<span id="left_account"><%=@account.nil? ? 0 :@account.balance %></span></span></div>
       <div class="due_pay_money">
         <div style="padding-left: 20px;">付款类型：<select  id="payment_id">
@@ -18,19 +18,24 @@
           </select></div>
       </div>
       <div class="due_pay_money"><span style="padding-left: 20px;">充值：<input type="text" id="in_account" value="0" style="height:30px;font-size: 25px;width:100px;" />元</span>
-        <span style="float: right;padding-right: 10px;"><button  class="confirm_btn" style="height:40px;width:90px;font-size: 25px;" onclick="complete_account(<%=params[:store_id]%>,<%=@customer.id%>)">确 定</button></span></div>
+        <span style="float: right;padding-right: 10px;"><button  class="confirm_btn" style="height:40px;width:90px;font-size: 25px;" onclick="complete_account(<%=params[:store_id]%>,<%=@customer.id%>,<%=params[:rend]%>)">确 定</button></span></div>
       <div class="accountsTab_client">
         <div class="at_client_con">
           <ul>
-            <li><span>客户姓名：</span><%=  @customer.name%></li>
-            <li><span>手机号码：</span><%=@customer.mobilephone%></li>
-            <li>
-              <%if @customer.group_name %>
-                <span>单位：</span><%=@customer.group_name%>
-              <%else%>
-                <span>客户属性：</span>个人客户
-              <%end%>
-            </li>
+            <% if params[:rend].to_i== Account::TYPES[:CUSTOMER] %>
+              <li><span>客户姓名：</span><%=  @customer.name%></li>
+              <li><span>手机号码：</span><%=@customer.mobilephone%></li>
+              <li>
+                <%if @customer.group_name %>
+                  <span>单位：</span><%=@customer.group_name%>
+                <%else%>
+                  <span>客户属性：</span>个人客户
+                <%end%>
+              </li>
+            <%else%>
+              <li><span>供应商：</span><%=  @customer.name%></li>
+              <li><span>手机号码：</span><%=@customer.phone%></li>
+            <%end%>
           </ul>
           <fieldset class="popup_body_fieldset">
             <legend class="popup_body_title"><span class="red">*</span>已选择</legend>
@@ -50,9 +55,16 @@
                   <tr class="hbg">
                     <td><input  type="checkbox" checked onclick="t_account(this)" /></td>
                     <td>单号</td>
-                    <td>车牌</td>
+                    <% if  params[:rend].to_i== Account::TYPES[:CUSTOMER]  %>
+                      <td>车牌</td>
+                      <td>消费日期</td>
+                    <%else%>
+                      <td>购货日期</td>
+                      <td>预计到货日期</td>
+                      <td>物流商</td>
+                    <%end%>
                     <td>金额(元)</td>
-                    <td>消费日期</td>
+
                   </tr>
                 </thead>
                 <tbody id="t_account">
@@ -60,9 +72,14 @@
                     <tr>
                       <td><input  type="checkbox" value="<%= p_order.p_id  %>" id="box_<%=p_order.p_id %>" checked onclick="box_check(this)" /></td>
                       <td><%= p_order.code %></td>
-                      <td><%= p_order.num %></td>
-                      <td><span style="color:red;"><%= p_order.p_price %></span></td>
                       <td><%= p_order.time %></td>
+                      <% if  params[:rend].to_i== Account::TYPES[:CUSTOMER]  %>
+                        <td><%= p_order.num%></td>
+                      <%else%>
+                        <td><%= p_order.arrival.nil? ? "--" :p_order.arrival %></td>
+                        <td><%= p_order.carrier.nil? ? "--" : p_order.carrier %></td>
+                      <%end%>
+                      <td><span style="color:red;"><%= p_order.p_price %></span></td>
                     </tr>
                   <% end %>
                 </tbody>

@@ -15,8 +15,8 @@
                                           value="<%=@start_time%>"/> 到
               <input id="c_last" type="text" onclick="WdatePicker({preLoad:true,maxDate:'<%=Time.now.strftime("%Y-%m-%d")%>'})" readonly class="Wdate"
                      value="<%=@end_time%>" /></div>
-            <div><button class="search_btn" onclick="search_finance(<%=params[:store_id]%>)">查询</button></div>
-            <div class="data_menu afterClear"><a href="javascript:void(0)" onclick="single_order_print(<%=params[:store_id]%>)">打印</a></div>
+            <div><button class="search_btn" onclick="revenue_report(this,<%=params[:store_id]%>)">查询</button></div>
+            <div class="data_menu afterClear"><a href="javascript:void(0)">打印</a></div>
           </div>
           <div class="data_item" id="cash_over">
             <%= render 'report' %>

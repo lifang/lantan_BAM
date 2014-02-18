@@ -138,9 +138,9 @@ function before_center(t){
     var layer_width = $(t).width();
     $(".maskOne").css({
         display:'block',
-        height:(layer_height+mouse_position+100)<doc_height ? doc_height+100 : layer_height+100+50
+        height:(layer_height+mouse_position+100)<doc_height ? doc_height: layer_height+100+50+mouse_position/2
     });
-    $(t).css('top',mouse_position+100+"px");
+    $(t).css('top',mouse_position/2+100+"px");
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
     $(t + " .close").click(function(){

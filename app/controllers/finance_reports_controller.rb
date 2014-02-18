@@ -158,49 +158,92 @@ class FinanceReportsController < ApplicationController
 
   #加载应收款数据
   def load_account
-    @customer = Customer.find(params[:customer_id])
-    p @pay_orders = OrderPayType.joins(:order=>[:customer,:car_num]).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
-      :"orders.store_id"=>params[:store_id],:"orders.customer_id"=>@customer.id).select("code,order_pay_types.price p_price,num,order_pay_types.id p_id,date_format(order_pay_types.created_at,'%Y-%m-%d %H:%m') time")
-    @account = Account.where(:store_id=>params[:store_id],:supply_id=>@customer.id,:types=>Account::TYPES[:CUSTOMER]).first
+    if params[:rend].to_i == Account::TYPES[:CUSTOMER]
+      @customer = Customer.find(params[:customer_id])
+      p @pay_orders = OrderPayType.joins(:order=>[:customer,:car_num]).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
+        :"orders.store_id"=>params[:store_id],:"orders.customer_id"=>@customer.id).select("code,order_pay_types.price p_price,num,order_pay_types.id p_id,date_format(order_pay_types.created_at,'%Y-%m-%d %H:%m') time")
+    else
+      @customer = Supplier.find(params[:customer_id])
+      p @pay_orders = MaterialOrder.where(:status=>MaterialOrder::STATUS[:no_pay],:store_id=>params[:store_id],:supplier_id=>params[:customer_id]).
+        select("code,price p_price,id p_id,date_format(created_at,'%Y-%m-%d %H:%m') time,date_format(arrival_at,'%Y-%m-%d %H:%m') arrival,carrier")
+    end
+    @account = Account.where(:store_id=>params[:store_id],:supply_id=>@customer.id,:types=>params[:rend].to_i).first
+    @defines = PaymentDefine.where(:store_id=>params[:store_id],:types=>params[:rend].to_i,:status=>PaymentDefine::STATUS[:NORMAL]).inject({}){|h,s|h[s.id]=s.name;h}
     @staffs = Staff.valid.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.name;h}
-    @defines = PaymentDefine.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.description;h}
   end
 
   def complete_account
     OrderPayType.transaction do
-      OrderPayType.where(:id=>params[:p_ids]).update_all(:pay_status=>OrderPayType::PAY_STATUS[:COMPLETE])
+      @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
+      @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
+   
       if params[:pay_recieve].to_f > 0
-        PayReceipt.create({:types=>Account::TYPES[:CUSTOMER],:supply_id=>params[:customer_id],:month=>Time.now.strftime("%Y-%m"),
+        PayReceipt.create({:types=>params[:rend].to_i,:supply_id=>params[:customer_id],:month=>Time.now.strftime("%Y-%m"),
             :amount=>params[:pay_recieve],:store_id=>params[:store_id],:staff_id=>params[:staff_id],:payment_define_id=>params[:pay_type]})
       end
       account = Account.where(:store_id=>params[:store_id],:supply_id=>params[:customer_id]).first
-      account = Account.create({:types=>Account::TYPES[:CUSTOMER],:supply_id=>params[:customer_id],:store_id=>params[:store_id]}) if account.nil?
-      check_result =  check_account(params[:customer_id],params[:store_id],Time.now.strftime("%Y-%m"))
-      price = OrderPayType.where(:id=>params[:p_ids]).map(&:price).inject(0){|n,p|n+p}
-      #    if (params[:pay_recieve].to_f + account.balance - price)  #核对数据库中数据
-      #      params[:left_account].to_f  #付款后计算的余额
-      #  check_result[0] + account.left_amt - check_result[1]  #总的核实结果
+      account = Account.create({:types=>params[:rend].to_i,:supply_id=>params[:customer_id],:store_id=>params[:store_id]}) if account.nil?
+      if params[:rend].to_i == Account::TYPES[:CUSTOMER]
+        sql = "orders.store_id=#{params[:store_id]} "
+        if @start_time != "0"
+          sql += " and date_format(order_pay_types.created_at,'%Y-%m-%d')>='#{@start_time}'"
+        end
+        if @end_time != "0"
+          sql += " and date_format(order_pay_types.created_at,'%Y-%m-%d')<='#{@end_time}'"
+        end
+        OrderPayType.where(:id=>params[:p_ids]).update_all(:pay_status=>OrderPayType::PAY_STATUS[:COMPLETE])
+        check_result =  check_account(params[:customer_id],params[:store_id],Time.now.strftime("%Y-%m"))
+        price = OrderPayType.where(:id=>params[:p_ids]).map(&:price).inject(0){|n,p|n+p}
+        #    if (params[:pay_recieve].to_f + account.balance - price)  #核对数据库中数据
+        #      params[:left_account].to_f  #付款后计算的余额
+        #  check_result[0] + account.left_amt - check_result[1]  #总的核实结果
+        @pay_orders = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE]).
+          where(sql).select("code,order_pay_types.price p_price,customer_id,car_num_id,date_format(order_pay_types.created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.customer_id}
+        @customers = Customer.find(@pay_orders.keys).inject({}){|h,c|h[c.id]=c;h}
+      else
+        sql = "store_id=#{params[:store_id]} "
+        if @start_time != "0"
+          sql += " and date_format(created_at,'%Y-%m-%d')>='#{@start_time}'"
+        end
+        if @end_time != "0"
+          sql += " and date_format(created_at,'%Y-%m-%d')<='#{@end_time}'"
+        end
+        MaterialOrder.where(:id=>params[:p_ids]).update_all(:status=>MaterialOrder::STATUS[:pay])
+        @pay_orders = MaterialOrder.where(:status=>MaterialOrder::STATUS[:no_pay]).where(sql).select("code,price p_price,supplier_id,
+    date_format(created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.supplier_id}
+        suppliers = @pay_orders.keys
+        suppliers.delete 0
+        @customers = Supplier.find(suppliers).inject({0=>Supplier.new(:name=>"总部")}){|h,c|h[c.id]=c;h}
+      end
       parm = {:pay_recieve =>params[:pay_recieve].to_f,:trade_amt=>params[:trade_amt],:balance=>params[:left_account] }
       account.update_attributes(parm)
-      @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
-      @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
-      sql = "orders.store_id=#{params[:store_id]} "
-      if @start_time != "0"
-        sql += " and date_format(order_pay_types.created_at,'%Y-%m-%d')>='#{@start_time}'"
-      end
-      if @end_time != "0"
-        sql += " and date_format(order_pay_types.created_at,'%Y-%m-%d')<='#{@end_time}'"
-      end
-      p @pay_orders = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE]).
-        where(sql).select("code,order_pay_types.price p_price,customer_id,car_num_id").group_by{|i|i.customer_id}
-      @customers = Customer.find(@pay_orders.keys).inject({}){|h,c|h[c.id]=c;h}
-      #    end
+      @account = Account.where(:supply_id=>@pay_orders.keys).inject({}){|h,c|h[c.supply_id]=c;h}
+   
     end
   end
 
   def payable_account
-    
+    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
+    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
+    sql = "store_id=#{params[:store_id]} "
+    if @start_time != "0"
+      sql += " and date_format(created_at,'%Y-%m-%d')>='#{@start_time}'"
+    end
+    if @end_time != "0"
+      sql += " and date_format(created_at,'%Y-%m-%d')<='#{@end_time}'"
+    end
+    p @pay_orders = MaterialOrder.where(:status=>MaterialOrder::STATUS[:no_pay]).where(sql).select("code,price p_price,supplier_id,
+    date_format(created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.supplier_id}
+    suppliers = @pay_orders.keys
+    suppliers.delete 0
+    @customers = Supplier.find(suppliers).inject({0=>Supplier.new(:name=>"总部")}){|h,c|h[c.id]=c;h}
+    @account = Account.where(:supply_id=>suppliers).inject({}){|h,c|h[c.supply_id]=c;h}
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
+
 
   def manage_account
     @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
@@ -218,7 +261,7 @@ class FinanceReportsController < ApplicationController
       @names[Account::TYPES[:CUSTOMER]] = Customer.find(@accounts[Account::TYPES[:CUSTOMER]].map(&:supply_id)).inject({}){|h,c|h[c.id]=c.name;h}
     end
     unless @accounts[Account::TYPES[:SUPPLY]].nil?
-      @names[Account::TYPES[:SUPPLY]] = Supply.find(@accounts[Account::TYPES[:SUPPLY]].map(&:supply_id)).inject({}){|h,c|h[c.id]=c.name;h}
+      @names[Account::TYPES[:SUPPLY]] = Supplier.find(@accounts[Account::TYPES[:SUPPLY]].map(&:supply_id)).inject({}){|h,c|h[c.id]=c.name;h}
     end
   end
 

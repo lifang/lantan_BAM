@@ -19,7 +19,7 @@ function search_finance(e,store_id){
     if (customer_n != "" && customer_n.length != 0){
         parm["customer_name"] = customer_n;
     }
-    set_search(e,store_id,"index",parm)
+    set_search(e,store_id,null,parm)
 }
 
 function g_code(){
@@ -88,10 +88,11 @@ function fee_report(e,store_id){
     set_search(e,store_id,"fee_report",parm);
 }
 
-function load_account(c_id,s_id){
+function load_account(c_id,s_id,rend){
     var url = "/stores/"+s_id+"/finance_reports/load_account";
     var parm = {
-        customer_id : c_id
+        customer_id : c_id,
+        rend : rend
     };
     $.ajax({
         type:"post",
@@ -102,6 +103,9 @@ function load_account(c_id,s_id){
 }
 
 function set_search(e,store_id,action,parm){
+    if (action == null){
+        action = "search_finance"
+    }
     $(e).attr("onclick","");
     var time = 3;
     var local_timer=setInterval(function(){
@@ -119,7 +123,13 @@ function set_search(e,store_id,action,parm){
 function send_account(store_id,action,parm){
     var first_time = $("#c_first").val();
     var last_time = $("#c_last").val();
-    var url = "/stores/"+store_id+"/finance_reports/"+action
+    var url = "/stores/"+store_id+"/finance_reports/";
+    var type = "post";
+    if (action != "search_finance"){
+        url += action;
+    }else{
+        type = "get";
+    }
     if (first_time != "" && first_time.length != 0){
         parm["first_time"] = first_time;
     }else{
@@ -131,7 +141,7 @@ function send_account(store_id,action,parm){
         parm["last_time"] = 0;
     }
     $.ajax({
-        type:"post",
+        type:type,
         url: url,
         dataType: "script",
         data: parm
@@ -139,7 +149,7 @@ function send_account(store_id,action,parm){
 }
 
 
-function complete_account(store_id,c_id){
+function complete_account(store_id,c_id,rend){
     var total_ids = check_account();
     var due_account = $("#due_account").html();
     var left_account = $("#left_account").html();
@@ -149,7 +159,8 @@ function complete_account(store_id,c_id){
     var account = 0;
     var parm = {
         p_ids : total_ids,
-        customer_id : c_id
+        customer_id : c_id,
+        rend : rend
     };
     var in_a = false;
     if((in_account != "" || in_account.length!=0)){
@@ -189,7 +200,7 @@ function check_account(){
     var total_ids = [];
     for(var i=0;i <t_box.length;i++){
         if (t_box[i].checked){
-            sum  += parseFloat($(t_box[i]).parent().parent().find("td").eq(3).find("span").html());
+            sum  += parseFloat($(t_box[i]).parent().parent().find("td").last().find("span").html());
             total_ids.push(t_box[i].value);
         }
     }
@@ -203,7 +214,7 @@ function t_account(e){
     if (e.checked){
         for(var i=0;i <t_box.length;i++){
             var li = $(t_box[i]).parent().parent().find("td");
-            var child = " <li id=\"li_"+t_box[i].value+"\"><span style='color:red'>"+li.eq(3).html()+"</span> 单号："+li.eq(1).html()+"</li>"
+            var child = " <li id=\"li_"+t_box[i].value+"\"><span style='color:red'>"+li.last().html()+"</span> 单号："+li.eq(1).html()+"</li>"
             $("#added_accounts").append(child);
         }
     }else{
@@ -218,7 +229,7 @@ function t_account(e){
 function box_check(e){
     if (e.checked){
         var li = $(e).parent().parent().find("td");
-        var child = " <li id=\"li_"+e.value+"\"><span style='color:red'>"+li.eq(3).html()+"</span> 单号："+li.eq(1).html()+"</li>"
+        var child = " <li id=\"li_"+e.value+"\"><span style='color:red'>"+li.last().html()+"</span> 单号："+li.eq(1).html()+"</li>"
         $("#added_accounts").append(child);
     }else{
         $("#li_"+e.value).remove();
@@ -229,4 +240,14 @@ function box_check(e){
 function pay_account(e,store_id){
     var parm = {};
     set_search(e,store_id,"pay_account",parm)
+}
+
+function payable_account(e,store_id){
+    var parm = {};
+    set_search(e,store_id,"payable_account",parm)
+}
+
+function revenue_report(e,store_id){
+    var parm = {};
+    set_search(e,store_id,"revenue_report",parm)
 }
