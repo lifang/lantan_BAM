@@ -247,6 +247,7 @@ class Api::NewAppOrdersController < ApplicationController
         sales = s
       else  #如果选的是卡类
         prod_type = 2
+        card_type = 0
         if pram_str[3].to_i == 0 || pram_str[3].to_i == 1    #如果选的是打折卡或储值卡
           card = SvCard.find_by_id(pram_str[0].to_i)
         else
@@ -260,6 +261,7 @@ class Api::NewAppOrdersController < ApplicationController
               break
             end
           end if pmrs
+          card_type = 1
         end
         if card
           if status == 1
@@ -273,7 +275,9 @@ class Api::NewAppOrdersController < ApplicationController
                 :customer_id => is_new_cus==0 ? customer.customer_id : customer.id,
                 :store_id => params[:store_id],
                 :is_visited => Order::IS_VISITED[:NO],
-                :types => Order::TYPES[:PRODUCT]
+                :types => Order::TYPES[:PRODUCT],
+                :auto_time => card_type==1 && card.is_auto_revist ? Time.now + card.auto_time.to_i.hours : nil,
+                :warn_time => card_type==1 && card.auto_warn ? Time.now + card.time_warn.to_i.days : nil
               })
             if pram_str[3].to_i == 0 ||  pram_str[3].to_i == 1   #如果是选的打折卡或储值卡，则要把这个卡加到该客户sv_cards中
               if  pram_str[3].to_i == 0   #如果是打折卡
