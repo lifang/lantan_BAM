@@ -84,7 +84,8 @@ class OrderProdRelation < ActiveRecord::Base
                 :customer_id => cus_id,
                 :store_id => store_id,
                 :is_visited => Order::IS_VISITED[:NO],
-                :types => Order::TYPES[:SERVICE]
+                :types => Order::TYPES[:SERVICE],
+                :auto_time => product.is_auto_revist ? Time.now + product.auto_time.to_i.hours : nil
               })
             OrderProdRelation.create({
                 :order_id => order.id,
@@ -126,7 +127,8 @@ class OrderProdRelation < ActiveRecord::Base
               :customer_id => cus_id,
               :store_id => store_id,
               :is_visited => Order::IS_VISITED[:NO],
-              :types => Order::TYPES[:PRODUCT]
+              :types => Order::TYPES[:PRODUCT],
+              :auto_time => product.is_auto_revist ? Time.now + product.auto_time.to_i.hours : nil
             })
           OrderProdRelation.create({
               :order_id => order.id,
