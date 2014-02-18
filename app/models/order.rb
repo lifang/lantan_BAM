@@ -655,7 +655,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
       #2_id_card_type_（is_new）_price 储值卡格式
       #[[["0", "311", "9"], ["0", "310", "2"]], [], [[2,1,0,0,20],...], [["3", "10", "0", "310=2-311=7-"], ["3", "11", "0"], ["3", "10", "1", "311=2-"]]]
       sale_id = arr[1].size > 0 ? arr[1][0][1] : ""  #活动
-      order_time = Product.update_order_time(arr)
+      p order_time = Product.update_order_time(arr)
       order = Order.create({
           :code => MaterialOrder.material_order_code(store_id.to_i),
           :car_num_id => car_num_id,
@@ -666,18 +666,10 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
           :customer_id => c_id,
           :store_id => store_id,
           :is_visited => IS_VISITED[:NO],
-          :auto_time=>order_time[0][0],
-          :warn_time =>order_time[0][1]
+          :auto_time=>order_time[0],
+          :warn_time =>order_time[1]
         })
       if order
-        customer = Customer.find c_id
-        parms = {:customer_id=>c_id,:car_num_id=>car_num_id,:phone=>customer.mobilephone,:store_id=>store_id,:status=>SendMessage::STATUS[:WAITING]}
-        if order.warn_time
-          SendMessage.create(parms.merge({:content=>order_time[1][1],:types=>SendMessage::TYPES[:WARN],:send_at=>order.warn_time}))
-        end
-        if order.auto_time
-          SendMessage.create(parms.merge({:content=>order_time[1][0],:types=>SendMessage::TYPES[:REVIST],:send_at=>order.auto_time}))
-        end
         hash = Hash.new
         x = 0
         cost_time = 0

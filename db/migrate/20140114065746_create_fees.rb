@@ -9,7 +9,7 @@ class CreateFees < ActiveRecord::Migration
       t.integer :payment_type #支付方式
       t.integer :share_month #分摊月数
       t.string :remark
-      t.integer :status
+      t.integer :status,:default=>0
       t.integer :operate_staffid #经办人
       t.integer :create_staffid  #创建人
       t.timestamps
