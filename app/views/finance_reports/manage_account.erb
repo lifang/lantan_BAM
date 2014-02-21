@@ -5,17 +5,20 @@
         <ul>
           <li onclick="window.location.href='/stores/<%=params[:store_id]%>/finance_reports/pay_account'">应收款</li>
           <li onclick="window.location.href='/stores/<%=params[:store_id]%>/finance_reports/payable_account'" >应付款</li>
-          <li class="hover">往来帐户管理</li>
+          <li class="hover" onclick="javascript:void(0)">往来帐户管理</li>
         </ul>
       </div>
       <div class="data_body">
         <div class="search">
-          <div><label>时间：</label>
-            <input id="c_first" type="text"  onclick="WdatePicker({preLoad:true,maxDate:'<%=Time.now.strftime("%Y-%m-%d")%>'})" readonly class="Wdate"
-                   value="<%=@start_time%>"/> 到
-            <input id="c_last" type="text" onclick="WdatePicker({preLoad:true,maxDate:'<%=Time.now.strftime("%Y-%m-%d")%>'})" readonly class="Wdate"
-                   value="<%=@end_time%>" /></div>
+          <div><label>客户/供应商名称：</label><input type="text" id="account_name" /></div>
           <div style="float:right;"><button class="search_btn" style="padding:-1px 0;" onclick="manage_account(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button></div>
+        </div>
+        <div class="tab_before">
+          <ul>
+            <%Account::TYPES_NAMES.each do |k,tab|%>
+              <li onclick="manage_tab(this,<%=k%>)" id="<%=k%>" <%if k == @position%> class="hover"<%end%>><%=tab%></li>
+            <%end%>
+          </ul>
         </div>
         <div class="data_item" id="account" >
           <%=  render 'manage_account'%>

@@ -9,7 +9,6 @@ class Customer < ActiveRecord::Base
   has_many :reservations
   has_many :customer_store_relations
   has_many :stores, :through => :customer_store_relations
-
   attr_accessor :password
   validates :password, :allow_nil => true, :length =>{:within=>6..20, :message => "密码长度必须在6-20位之间"}
 

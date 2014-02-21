@@ -99,7 +99,7 @@ class OrderPayType < ActiveRecord::Base
           prods = OrderProdRelation.joins(:product).where(:order_id=>orders.map(&:id)).select("products.category_id c_id,order_id o_id,product_id p_id,pro_num,name,revist_content")
           prod_ids = prods.inject(Hash.new){|hash,o|hash[o.o_id]=o.c_id;hash}
           order_prod_ids = prods.inject({}){|h,p|h[p.o_id]=p;h}
-          revist = prods.group_by{|i|i.o_id}.each{|k,v|revist[k] = v.map(&:revist_content).compact unless send_orders[k].auto_time.nil?}
+          prods.group_by{|i|i.o_id}.each{|k,v|revist[k] = v.map(&:revist_content).compact unless send_orders[k].auto_time.nil?}
           pcard_name = cprs.inject({}){|hash,p|hash[p.order_id] = p.name;hash} #套餐卡名称
           cprs.group_by{|i|i.order_id}.each{|k,v|revist[k] = v.map(&:revist_content).compact unless send_orders[k].auto_time.nil? ;warn[k]=v.map(&:con_warn).compact unless send_orders[k].warn_time.nil?}
           o_price = orders.inject(Hash.new){|hash,o|hash[o.id]= limit_float(o.price-(loss_orders["#{o.id}"].nil? ? 0 : loss_orders["#{o.id}"].to_f)-(order_pays[o.id] ?  order_pays[o.id] : 0));hash}
@@ -266,9 +266,9 @@ class OrderPayType < ActiveRecord::Base
             CPcardRelation.where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]
             #设置订单中的提醒和回访
             customer_p = Customer.find(orders.map(&:customer_id)).inject({}){|h,c|h[c.id]=c.mobilephone;h}
-            warn.each {|k,v|order =send_orders[k];messages << SendMessage.new({:content=>v,:customer_id=>order.customer_id,:types=>SendMessage::TYPES[:WARN],
+            warn.each {|k,v|order = send_orders[k];messages << SendMessage.new({:content=>v.join('\n'),:customer_id=>order.customer_id,:types=>SendMessage::TYPES[:WARN],
                   :car_num_id=>order.car_num_id,:phone=>customer_p[order.customer_id],:send_at=>order.warn_time,:status=>SendMessage::STATUS[:WAITING],:store_id=>order.store_id})}
-            revist.each {|k,v|order =send_orders[k];messages << SendMessage.new({:content=>v,:customer_id=>order.customer_id,:types=>SendMessage::TYPES[:REVIST],
+            revist.each {|k,v|order = send_orders[k];messages << SendMessage.new({:content=>v.join('\n'),:customer_id=>order.customer_id,:types=>SendMessage::TYPES[:REVIST],
                   :car_num_id=>order.car_num_id,:phone=>customer_p[order.customer_id],:send_at=>order.auto_time,:status=>SendMessage::STATUS[:WAITING],:store_id=>order.store_id})}
             SendMessage.import messages  unless messages.blank?
           end

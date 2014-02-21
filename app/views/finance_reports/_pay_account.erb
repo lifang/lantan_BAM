@@ -3,7 +3,7 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
       <thead>
         <tr class="hbg">
-          <%if pay_account.to_i == Account::TYPES[:SUPPLY]%>
+          <%if pay_account.to_i == Category::TYPES[:PAYMENT]%>
             <td width="30%">名称</td>
           <%else%>
             <td width="10%">名称</td>
@@ -24,7 +24,7 @@
           v = p_order[1]%>
           <tr>
             <td rowspan ="<%= v.length %>"><%=@customers[k].name%></td>
-            <%unless pay_account.to_i == Account::TYPES[:SUPPLY]%>
+            <%unless pay_account.to_i == Category::TYPES[:PAYMENT]%>
               <td rowspan ="<%= v.length %>"><%=@customers[k].group_name.nil? ? "个人客户" : @customers[k].group_name %></td>
             <%end%>
             <% t_v = v.length;v_first = v[0]  %>
@@ -52,7 +52,7 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
       <thead>
         <tr class="hbg">
-          <%if pay_account.to_i == Account::TYPES[:SUPPLY]%>
+          <%if pay_account.to_i == Category::TYPES[:PAYMENT]%>
             <td width="30%">名称</td>
           <%else%>
             <td width="10%">名称</td>
@@ -71,7 +71,7 @@
           <% @pay_orders.each do |k,v| %>
             <tr>
               <td rowspan ="<%= v.length %>"><%=@customers[k].name%></td>
-              <%unless pay_account.to_i == Account::TYPES[:SUPPLY]%>
+              <%unless pay_account.to_i == Category::TYPES[:PAYMENT]%>
                 <td rowspan ="<%= v.length %>"><%=@customers[k].group_name.nil? ? "个人客户" : @customers[k].group_name %></td>
               <%end%>
               <% m_v = v.length;m_first = v.shift  %>

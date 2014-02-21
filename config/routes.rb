@@ -40,7 +40,9 @@ LantanBAM::Application.routes.draw do
     resources :finance_reports do
       collection do
         get "fee_manage","revenue_report","fee_report","pay_account","payable_account","manage_account"
-        post "fee_manage","show_fee","fee_report","load_account","complete_account","pay_account","manage_account","payable_account","revenue_report"
+        post "fee_manage","show_fee","fee_report","load_account","complete_account","pay_account","manage_account"
+        post "payable_account","revenue_report","cost_price","analysis_price"
+        get "cost_price","analysis_price","manage_assets"
       end
     end
     resources :data_manages do

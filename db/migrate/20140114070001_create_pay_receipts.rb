@@ -9,6 +9,6 @@ class CreatePayReceipts < ActiveRecord::Migration
     end
     add_column :pay_receipts, :amount, :"decimal(12,2)",:default=>0 #总金额
     add_index :pay_receipts, :types
-    add_index :pay_receipts, :payment_type
+    add_index :pay_receipts, :payment_define_id
   end
 end

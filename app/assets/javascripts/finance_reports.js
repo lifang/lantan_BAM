@@ -31,7 +31,6 @@ function check_fee(){
     var name=$("#name").val();
     //    var code = $("#code").val();
     var amount =$("#amount").val();
-    var share_btn = $("#share_btn")[0];
     var share_month = $("#share_month").val();
     if (name == "" || name.length==0){
         tishi_alert("请输入费用名称");
@@ -41,11 +40,11 @@ function check_fee(){
     //        tishi_alert("单据编号不能为空");
     //         return false;
     //    }
-    if(amount == "" || amount.length==0 || isNaN(parseFloat(amount)) || parseFloat(amount)<0){
+    if(amount == "" || amount.length==0 || isNaN(parseFloat(amount)) || parseFloat(amount)<=0){
         tishi_alert("请输入支付金额！");
         return false;
     }
-    if(share_btn.checked && (share_month == "" || share_month.length==0)){
+    if(share_month == "" || share_month.length ==0 || isNaN(parseInt(share_month)) || parseInt(share_month)<=0){
         tishi_alert("请输入分摊月份！");
         return false;
     }
@@ -106,19 +105,11 @@ function set_search(e,store_id,action,parm){
     if (action == null){
         action = "search_finance"
     }
-    $(e).attr("onclick","");
-    var time = 3;
-    var local_timer=setInterval(function(){
-        e.innerHTML="查 &nbsp&nbsp&nbsp&nbsp询("+time+")";
-        if (time <=0){
-            $(e).attr("onclick",action+"(this,"+store_id+")");
-            window.clearInterval(local_timer);
-            e.innerHTML="查 &nbsp&nbsp&nbsp&nbsp询";
-        }
-        time -= 1;
-    },1000)
+    set_time(e,store_id,action)
     send_account(store_id,action,parm);
 }
+
+
 
 function send_account(store_id,action,parm){
     var first_time = $("#c_first").val();
@@ -187,11 +178,11 @@ function complete_account(store_id,c_id,rend){
                 send_account(store_id,"complete_account",parm)
             }
         }
-   
+
     }else{
         tishi_alert("金额不足！");
     }
-    
+
 }
 
 function check_account(){
@@ -233,7 +224,7 @@ function box_check(e){
         $("#added_accounts").append(child);
     }else{
         $("#li_"+e.value).remove();
-    } 
+    }
     check_account();
 }
 
@@ -251,3 +242,72 @@ function revenue_report(e,store_id){
     var parm = {};
     set_search(e,store_id,"revenue_report",parm)
 }
+
+function manage_tab(e,types){
+    $(e).parent().find("li").removeClass("hover");
+    e.className = "hover";
+    $("#account div[id*='show_']").css('display','none');
+    $("#show_"+types).css('display','block');
+}
+
+function manage_account(e,store_id){
+    var action = "manage_account";
+    var url = "/stores/"+store_id+"/finance_reports/"+action;
+    var type= "post";
+    var account_name = $("#account_name").val();
+    var position = $(".tab_before .hover").attr("id");
+    var parm = {
+        position : position,
+        account_name : account_name
+    };
+    set_time(e,store_id,action)
+    set_request(url,type,parm)
+}
+
+//设置ajax提交
+function set_request(url,type,parm){
+    $.ajax({
+        type:type,
+        url: url,
+        dataType: "script",
+        data: parm
+    })
+}
+
+//设置提交按钮的倒计时
+function set_time(e,store_id,action){
+    $(e).attr("onclick","");
+    var time = 3;
+    var local_timer=setInterval(function(){
+        e.innerHTML="查 &nbsp&nbsp&nbsp&nbsp询("+time+")";
+        if (time <=0){
+            $(e).attr("onclick",action+"(this,"+store_id+")");
+            window.clearInterval(local_timer);
+            e.innerHTML="查 &nbsp&nbsp&nbsp&nbsp询";
+        }
+        time -= 1;
+    },1000)
+}
+
+function cost_price(e,store_id){
+    var action = "cost_price";
+    var parm = {};
+    var cate_n = $("#cate_n option:selected").val();
+    if (cate_n != "" && cate_n.length !=0){
+        parm["prod_types"] = cate_n;
+    }
+    set_time(e,store_id,action)
+    send_account(store_id,action,parm)
+}
+
+function analysis_price(e,store_id){
+    var action = "analysis_price";
+    var parm = {};
+    var cate_n = $("#cate_n option:selected").val();
+    if (cate_n != "" && cate_n.length !=0){
+        parm["prod_types"] = cate_n;
+    }
+    set_time(e,store_id,action)
+    send_account(store_id,action,parm)
+}
+
