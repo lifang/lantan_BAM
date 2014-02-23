@@ -907,7 +907,7 @@ class MaterialsController < ApplicationController
               :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,:price=>params[:material][:import_price]}))
         if material
           smaterial = SharedMaterial.find_by_code(material.code)
-          sm_params = params[:material].except(:import_price, :sale_price,:ifuse_code,:code_value, :category_id).merge({:code => material.code})
+          sm_params = params[:material].except(:import_price, :sale_price,:ifuse_code,:code_value, :category_id,:create_prod).merge({:code => material.code})
           SharedMaterial.create(sm_params) if smaterial.nil?
           @status = 0
           @flash_notice = "物料创建成功!"

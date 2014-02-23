@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140213091726) do
+ActiveRecord::Schema.define(:version => 20140217070924) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -762,13 +762,14 @@ ActiveRecord::Schema.define(:version => 20140213091726) do
   add_index "pay_receipts", ["types"], :name => "index_pay_receipts_on_types"
 
   create_table "payment_defines", :force => true do |t|
-    t.string   "description"
+    t.string   "name"
     t.string   "status"
     t.string   "remark"
     t.integer  "create_staffid"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "store_id"
+    t.integer  "types"
   end
 
   create_table "pcard_material_relations", :force => true do |t|

@@ -1,14 +1,14 @@
-<div class="h_finnace_title" id="finnace_title">
-  <ul>
-  </ul>
-</div>
 <div>
   <div class="table_box_h">
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
       <thead>
         <tr class="hbg">
-          <td width="10%">名称</td>
-          <td width="20%">单位属性</td>
+          <%if pay_account.to_i == Category::TYPES[:PAYMENT]%>
+            <td width="30%">名称</td>
+          <%else%>
+            <td width="10%">名称</td>
+            <td width="20%">单位属性</td>
+          <%end%>
           <td width="12%">消费日期</td>
           <td width="20%">订单编号</td>
           <td width="10%">金额</td>
@@ -18,28 +18,33 @@
         </tr>
       </thead>
       <tbody>
-        <%unless @pay_orders[0].blank? %>
-          <% @pay_orders[0].each do |k,v| %>
-            <tr>
-              <td rowspan ="<%= v.length %>"><%=@customers[k].name%></td>
+        <%unless @pay_orders.empty? %>
+          <%p_order = @pay_orders.first
+          k = p_order[0]
+          v = p_order[1]%>
+          <tr>
+            <td rowspan ="<%= v.length %>"><%=@customers[k].name%></td>
+            <%unless pay_account.to_i == Category::TYPES[:PAYMENT]%>
               <td rowspan ="<%= v.length %>"><%=@customers[k].group_name.nil? ? "个人客户" : @customers[k].group_name %></td>
-              <% t_v = v.length;v_first = v.shift  %>
-              <td><%= v_first.time %></td>
-              <td><%= v_first.code %></td>
-              <td><%= v_first.p_price %></td>
-              <td rowspan="<%= t_v %>"><%=@account[k].nil? ? "0.0" : @account[k].left_amt  %></td>
-              <td rowspan="<%= t_v %>"><%=@account[k].nil? ? "0.0" : @account[k].balance  %></td>
-              <td rowspan="<%= t_v %>"><a href="javascript:void(0)" onclick="">付款</a></td>
+            <%end%>
+            <% t_v = v.length;v_first = v[0]  %>
+            <td><%= v_first.time %></td>
+            <td><%= v_first.code %></td>
+            <td><%= v_first.p_price %></td>
+            <td rowspan="<%= t_v %>"><%=@account[k].nil? ? "0.0" : @account[k].left_amt  %></td>
+            <td rowspan="<%= t_v %>"><%=@account[k].nil? ? "0.0" : @account[k].balance  %></td>
+            <td rowspan="<%= t_v %>"><a href="javascript:void(0)" onclick="">付款</a></td>
+          </tr>
+
+          <%v[1..v.length-1].each do |pay_order|%>
+            <tr>
+              <td><%= pay_order.time %></td>
+              <td><%= pay_order.code %></td>
+              <td><%= pay_order.p_price %></td>
             </tr>
-            <%v.each do |pay_order|%>
-              <tr>
-                <td><%= pay_order.time %></td>
-                <td><%= pay_order.code %></td>
-                <td><%= pay_order.p_price %></td>
-              </tr>
-            <% end %>
           <% end %>
         <% end %>
+
       </tbody>
     </table>
   </div>
@@ -47,8 +52,12 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
       <thead>
         <tr class="hbg">
-          <td width="10%">名称</td>
-          <td width="20%">单位属性</td>
+          <%if pay_account.to_i == Category::TYPES[:PAYMENT]%>
+            <td width="30%">名称</td>
+          <%else%>
+            <td width="10%">名称</td>
+            <td width="20%">单位属性</td>
+          <%end%>
           <td width="12%">消费日期</td>
           <td width="20%">订单编号</td>
           <td width="10%">金额</td>
@@ -62,14 +71,16 @@
           <% @pay_orders.each do |k,v| %>
             <tr>
               <td rowspan ="<%= v.length %>"><%=@customers[k].name%></td>
-              <td rowspan ="<%= v.length %>"><%=@customers[k].group_name.nil? ? "个人客户" : @customers[k].group_name %></td>
+              <%unless pay_account.to_i == Category::TYPES[:PAYMENT]%>
+                <td rowspan ="<%= v.length %>"><%=@customers[k].group_name.nil? ? "个人客户" : @customers[k].group_name %></td>
+              <%end%>
               <% m_v = v.length;m_first = v.shift  %>
               <td><%= m_first.time %></td>
               <td><%= m_first.code %></td>
               <td><%= m_first.p_price %></td>
               <td rowspan="<%= m_v %>"><%=@account[k].nil? ? "0.0" : @account[k].left_amt  %></td>
               <td rowspan="<%= m_v %>"><%=@account[k].nil? ? "0.0" : @account[k].balance  %></td>
-              <td rowspan="<%= m_v %>"><a href="javascript:void(0)" onclick="load_account(<%=k%>,<%=params[:store_id]%>)">付款</a></td>
+              <td rowspan="<%= m_v %>"><a href="javascript:void(0)" onclick="load_account(<%=k%>,<%=params[:store_id]%>,'<%= pay_account%>')">付款</a></td>
             </tr>
             <%v.each do |pay_order|%>
               <tr>

@@ -5,7 +5,7 @@
       <li>单据：<span><%= fee_types.nil? ? 0 : fee_types.length%></span>笔</li>
       <li>总金额：<span><%= fee_types.nil? ? 0 : fee_types.map(&:amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>
       <li>分摊金额：<span><%= fee_types.nil? ? 0 : fee_types.inject(0){|num,n| unless n.share_month.nil?
-              num+n.amount
+              num+n.amount/n.share_month
             else
               num
             end}%></span></li>
@@ -22,7 +22,7 @@
             <td wdth="8%">入账日期</td>
             <td width="10%">金额</td>
             <td width="10%">经手人</td>
-            <td width="10%">分摊月份（月）</td>
+            <td width="10%">分摊月</td>
             <td width="8%">分摊金额</td>
             <td width="6%">操作</td>
           </tr>

@@ -248,4 +248,11 @@ module ApplicationHelper
       :"orders.store_id"=>s_id,:"orders.customer_id"=>c_id).where("date_format(order_pay_types.updated_at,'%Y-%m')='#{month}'").select("ifnull(sum(order_pay_types.price),0) p_price").first.p_price
     return [receipt,p_price]
   end
+
+  def create_code(len)
+    chars =  (0..9).to_a
+    code_array = []
+    1.upto(len) {code_array << chars[rand(chars.length)]}
+    return code_array.join("")
+  end
 end
