@@ -41,7 +41,7 @@ LantanBAM::Application.routes.draw do
       collection do
         get "fee_manage","revenue_report","fee_report","pay_account","payable_account","manage_account"
         post "fee_manage","show_fee","fee_report","load_account","complete_account","pay_account","manage_account"
-        post "payable_account","revenue_report","cost_price","analysis_price"
+        post "payable_account","revenue_report","cost_price","analysis_price","create_assets","manage_assets"
         get "cost_price","analysis_price","manage_assets"
       end
     end

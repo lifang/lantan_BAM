@@ -51,11 +51,14 @@ class MessagesController < ApplicationController
         customers = Customer.find_all_by_id(params[:customer_ids].split(","))
         message_arr = []
         customers.each do |customer|
-          content = params[:content].strip.gsub("%name%", customer.name).gsub(" ", "")
-          SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id, 
-            :content => content, :phone => customer.mobilephone,
-            :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
-          message_arr << {:content => content, :msid => "#{customer.id}", :mobile => customer.mobilephone}
+          if customer.mobilephone && customer.name
+            c_name = "#{customer.name}先生/小姐"
+            content = params[:content].strip.gsub("%name%",c_name ).gsub(" ", "")
+            SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id,
+              :content => content, :phone => customer.mobilephone,
+              :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
+            message_arr << {:content => content, :msid => "#{customer.id}", :mobile => customer.mobilephone}
+          end
         end        
         msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
         jsondata = JSON msg_hash

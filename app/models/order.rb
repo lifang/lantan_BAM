@@ -117,8 +117,8 @@ class Order < ActiveRecord::Base
       price, is_vip, is_birthday)
     customer_sql = "select DISTINCT(cu.id) cu_id, cu.name from customers cu
       inner join orders o on o.customer_id = cu.id inner join customer_store_relations csr on csr.customer_id = cu.id 
-      where cu.status = #{Customer::STATUS[:NOMAL]} and csr.store_id = #{store_id.to_i} 
-      and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
+      where cu.status = #{Customer::STATUS[:NOMAL]} and csr.store_id = #{store_id.to_i} and cu.name is not null
+     and cu.mobilephone is not null and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
     customer_condition_sql = self.generate_customer_sql(condition_sql, params_arr, store_id, started_at, ended_at, is_visited,
@@ -127,7 +127,6 @@ class Order < ActiveRecord::Base
     condition_sql = customer_condition_sql[1]
     condition_arr[0] = customer_sql + condition_sql
     return customer_condition_sql[2].blank? ? [] : Customer.find_by_sql(condition_arr)
-    
   end
 
   def self.one_customer_orders(status, store_id, customer_id, pre_page, page)

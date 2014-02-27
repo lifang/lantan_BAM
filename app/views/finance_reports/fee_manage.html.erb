@@ -15,7 +15,7 @@
                      value="<%=@start_time%>"/> 到
               <input id="c_last" type="text" onclick="WdatePicker({preLoad:true,maxDate:'<%=Time.now.strftime("%Y-%m-%d")%>'})" readonly class="Wdate"
                      value="<%=@end_time%>" /></div>
-            <div style="float:right;"><button class="search_btn" style="padding:-1px 0;" onclick="search_fee(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button></div>
+            <div style="float:right;"><button class="search_btn" style="padding:-1px 0;" onclick="fee_manage(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button></div>
           </div>
           <div class="tab_before">
             <ul>

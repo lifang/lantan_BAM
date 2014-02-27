@@ -18,7 +18,7 @@
           <div style="float:right;"><button class="search_btn" style="padding:-1px 0;" onclick="payable_account(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button></div>
         </div>
         <div class="data_item" id="account">
-          <%= render :partial=>'pay_account',:object=>Category::TYPES[:PAYMENT]  %>
+          <%= render :partial=>'pay_account',:object=>Account::TYPES[:SUPPLY] %>
         </div>
       </div>
     </div>

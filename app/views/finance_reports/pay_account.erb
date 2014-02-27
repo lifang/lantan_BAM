@@ -17,14 +17,8 @@
                    value="<%=@end_time%>" /></div>
           <div style="float:right;"><button class="search_btn" style="padding:-1px 0;" onclick="pay_account(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button></div>
         </div>
-        <div class="finnace_title" id="finnace_title" style="height:32px;">
-          <ul>
-            <li>应收款：<span><%=@pay_orders.values.flatten.length%></span>笔</li>
-            <li>总金额：<span><%=@pay_orders.values.flatten.map(&:p_price).inject(0){|sum,n|sum+n}.round(2)%></span></li>
-          </ul>
-        </div>
-        <div class="data_item" id="account">
-          <%= render :partial=>'pay_account',:object=>Category::TYPES[:OWNER] %>
+        <div  id="account">
+        <%= render :partial=>'pay_account',:object=>Account::TYPES[:CUSTOMER] %>
         </div>
       </div>
     </div>

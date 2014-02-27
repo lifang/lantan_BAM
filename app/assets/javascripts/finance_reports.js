@@ -51,7 +51,7 @@ function check_fee(){
     $("#new_fee").submit();
 }
 
-function search_fee(e,store_id){
+function fee_manage(e,store_id){
     var position = $(".tab_before .hover").attr("id");
     var parm = {
         position : position
@@ -67,7 +67,7 @@ function change_tab(e,k){
 }
 
 function show_fee(fee_id,store_id){
-    var url = "/stores/"+store_id+"/finance_reports/show_fee"
+    var url = "/stores/"+store_id+"/finance_reports/show_fee";
     var position = $(".tab_before .hover").attr("id");
     var parm = {
         store_id:store_id,
@@ -195,8 +195,13 @@ function check_account(){
             total_ids.push(t_box[i].value);
         }
     }
-    $("#due_account").html(sum);
+    $("#due_account").html(limit_float(sum));
     return total_ids;
+}
+
+function limit_float(num){
+    var t_num = parseInt(parseFloat(num)*100);
+    return  round((t_num%10 == 0 ? t_num : t_num-5)/1000.0,2);
 }
 
 function t_account(e){
@@ -309,5 +314,29 @@ function analysis_price(e,store_id){
     }
     set_time(e,store_id,action)
     send_account(store_id,action,parm)
+}
+
+function check_assets(){
+    var name=$("#name").val();
+    var amount =$("#amount").val();
+    var share_month = $("#share_month").val();
+    if (name == "" || name.length==0){
+        tishi_alert("请输入资产名称");
+        return false;
+    }
+    if(amount == "" || amount.length==0 || isNaN(parseFloat(amount)) || parseFloat(amount)<=0){
+        tishi_alert("请输入支付金额！");
+        return false;
+    }
+    if(share_month == "" || share_month.length ==0 || isNaN(parseInt(share_month)) || parseInt(share_month)<=0){
+        tishi_alert("请输入分摊月份！");
+        return false;
+    }
+    $("#new_assets").submit();
+}
+
+function manage_assets(e,store_id){
+    var parm = {};
+    set_search(e,store_id,"manage_assets",parm);
 }
 

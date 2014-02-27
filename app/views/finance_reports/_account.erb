@@ -1,9 +1,9 @@
 <div class="popup_box"  id="pop_box">
-  <h1><%=Category::TYPES_NAME[params[:rend].to_i]%>款<a href="javascript:void(0)" class="close">关闭</a></h1>
+  <h1><%=Account::TYPES_NAMES[params[:rend].to_i]%>款<a href="javascript:void(0)" class="close">关闭</a></h1>
   <div class="popup_body">
     <div class="popup_body_area">
       <div class="due_pay_money">
-        <span style="padding-left: 20px;"><%=Category::TYPES_NAME[params[:rend].to_i]%>：<span id="due_account"><%=@pay_orders.map(&:p_price).compact.inject(0){|n,p|n+p}.round(2)%></span></span>
+        <span style="padding-left: 20px;"><%=Account::TYPES_NAMES[params[:rend].to_i]%>：<span id="due_account"><%=@pay_orders.map(&:p_price).compact.inject(0){|n,p|n+p}.round(2)%></span></span>
         <span style="float: right;padding-right: 20px;">余额：<span id="left_account"><%=@account.nil? ? 0 :@account.balance %></span></span></div>
       <div class="due_pay_money">
         <div style="padding-left: 20px;">付款类型：<select  id="payment_id">
@@ -22,7 +22,7 @@
       <div class="accountsTab_client">
         <div class="at_client_con">
           <ul>
-            <% if params[:rend].to_i==  Category::TYPES[:OWNER] %>
+            <% if params[:rend].to_i== Account::TYPES[:CUSTOMER] %>
               <li><span>客户姓名：</span><%=  @customer.name%></li>
               <li><span>手机号码：</span><%=@customer.mobilephone%></li>
               <li>
@@ -55,9 +55,9 @@
                   <tr class="hbg">
                     <td><input  type="checkbox" checked onclick="t_account(this)" /></td>
                     <td>单号</td>
-                    <% if  params[:rend].to_i== Category::TYPES[:OWNER]  %>
-                      <td>车牌</td>
+                    <% if  params[:rend].to_i== Account::TYPES[:CUSTOMER]  %>
                       <td>消费日期</td>
+                      <td>车牌</td>
                     <%else%>
                       <td>购货日期</td>
                       <td>预计到货日期</td>
@@ -73,7 +73,7 @@
                       <td><input  type="checkbox" value="<%= p_order.p_id  %>" id="box_<%=p_order.p_id %>" checked onclick="box_check(this)" /></td>
                       <td><%= p_order.code %></td>
                       <td><%= p_order.time %></td>
-                      <% if  params[:rend].to_i== Category::TYPES[:OWNER]  %>
+                      <% if  params[:rend].to_i== Account::TYPES[:CUSTOMER]  %>
                         <td><%= p_order.num%></td>
                       <%else%>
                         <td><%= p_order.arrival.nil? ? "--" :p_order.arrival %></td>

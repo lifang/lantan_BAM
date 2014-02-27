@@ -7,7 +7,7 @@
       <div class="search">
         <form url="/stores/<%= params[:store_id] %>/products" method="get">
           <div>
-            <label>物料名称：</label>
+            <label>产品名称：</label>
             <input type="text" name="p_name" value="<%= params[:p_name].nil? ? "" : params[:p_name] %>"/>
           </div>
           <div>

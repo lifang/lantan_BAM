@@ -5,10 +5,10 @@
       <li>单据：<span><%= fee_types.nil? ? 0 : fee_types.length%></span>笔</li>
       <li>总金额：<span><%= fee_types.nil? ? 0 : fee_types.map(&:amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>
       <li>分摊金额：<span><%= fee_types.nil? ? 0 : fee_types.inject(0){|num,n| unless n.share_month.nil?
-              num+n.amount/n.share_month
+              num+n.m_amount
             else
               num
-            end}%></span></li>
+            end}.round(2)%></span></li>
     </ul>
   </div>
   <div class="nothing" id="content_<%=k%>" <%if @position != k %>style="display: none;" <%end%>>
@@ -37,8 +37,8 @@
               <td><%= fee.fee_date.strftime("%Y-%m-%d") %></td>
               <td><%= fee.amount %></td>
               <td><%= @customers[fee.operate_staffid] %></td>
-              <td><%= fee.share_month.nil? ? "--" :fee.share_month %></td>
-              <td><%= fee.share_month.nil? ? "--" : (fee.amount/fee.share_month).round(2) %></td>
+              <td><%= fee.share_month %></td>
+              <td><%= fee.m_amount %></td>
               <td><a href="javascript:void(0)" onclick="show_fee(<%= fee.id %>,<%= fee.store_id %>)">详情</a></td>
             </tr>
           <% end %>
@@ -70,8 +70,8 @@
                 <td><%= fee.fee_date.strftime("%Y-%m-%d") %></td>
                 <td><%= fee.amount %></td>
                 <td><%= @customers[fee.operate_staffid] %></td>
-                <td><%= fee.share_month.nil? ? "--" :fee.share_month %></td>
-                <td><%= fee.share_month.nil? ? "--" : (fee.amount/fee.share_month).round(2) %></td>
+                <td><%= fee.share_month %></td>
+                <td><%= fee.m_amount %></td>
                 <td><a href="javascript:void(0)" onclick="show_fee(<%= fee.id %>,<%= fee.store_id %>)">详情</a></td>
               </tr>
             <% end %>

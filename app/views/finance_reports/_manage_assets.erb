@@ -1,30 +1,40 @@
-<div class="finnace_title">
+<div class="h_finnace_title">
   <ul>
-   
+
   </ul>
 </div>
 <div class="table_box_h">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
     <thead>
       <tr class="hbg">
-        <td width="15%">条码</td>
-        <td width="15%">名称</td>
-        <td width="15%">类别</td>
-        <td width="15%">数量</td>
-        <td width="15%">平均成本</td>
-        <td width="15%">合计成本</td>
+        <td width="10%">资产编号</td>
+        <td width="15%">资产名称</td>
+        <td width="10%">购入时间</td>
+        <td width="8%">购入数量</td>
+        <td width="8%">购入价</td>
+        <td width="10%">资产总价</td>
+        <td width="8%">经手人</td>
+        <td width="8%">折旧月份</td>
+        <td width="10%">净值</td>
+        <td width="6%">类别</td>
+        <td width="6%">状态</td>
       </tr>
     </thead>
     <tbody>
-      <%unless @t_orders.blank?%>
-        <% t_order = @t_orders[0] %>
+      <%unless @fixed_assets.blank?%>
+        <% asset = @fixed_assets[0] %>
         <tr>
-          <td><%= t_order.p_code%></td>
-          <td><%= t_order.p_name%></td>
-          <td><%= t_order.c_name%></td>
-          <td><%= t_order.t_num%></td>
-          <td><%= (t_order.t_price/t_order.t_num).round(2) %></td>
-          <td><%= t_order.t_price %></td>
+          <td><%= asset.code%></td>
+          <td><%= asset.name%></td>
+          <td><%= asset.pay_date.strftime("%Y-%m-%d")%></td>
+          <td><%= asset.num%></td>
+          <td><%= asset.price %></td>
+          <td><%= asset.amount %></td>
+          <td><%= @n_staffs[asset.operate_staffid].nil? ? "--" : @n_staffs[asset.operate_staffid] %></td>
+          <td><%= asset.share_month%></td>
+          <td><%= "--"%></td>
+          <td><%= @defines[asset.types].nil? ? "--" : @defines[asset.types] %></td>
+          <td><%= FixedAsset::STATUS_NAMES[asset.status] %></td>
         </tr>
       <% end %>
     </tbody>
@@ -34,24 +44,34 @@
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
     <thead>
       <tr class="hbg">
-        <td width="15%">条码</td>
-        <td width="15%">名称</td>
-        <td width="15%">类别</td>
-        <td width="15%">数量</td>
-        <td width="15%">平均成本</td>
-        <td width="15%">合计成本</td>
+        <td width="10%">资产编号</td>
+        <td width="15%">资产名称</td>
+        <td width="10%">购入时间</td>
+        <td width="8%">购入数量</td>
+        <td width="8%">购入价</td>
+        <td width="10%">资产总价</td>
+        <td width="8%">经手人</td>
+        <td width="8%">折旧月份</td>
+        <td width="10%">净值</td>
+        <td width="6%">类别</td>
+        <td width="6%">状态</td>
       </tr>
     </thead>
     <tbody>
-      <%unless @t_orders.blank? %>
-        <% @t_orders.each do |t_order| %>
+      <%unless @fixed_assets.blank? %>
+        <% @fixed_assets.each do |asset| %>
           <tr>
-            <td><%= t_order.p_code%></td>
-            <td><%= t_order.p_name%></td>
-            <td><%= t_order.c_name%></td>
-            <td><%= t_order.t_num%></td>
-            <td><%= (t_order.t_price/t_order.t_num).round(2) %></td>
-            <td><%= t_order.t_price %></td>
+            <td><%= asset.code%></td>
+            <td><%= asset.name%></td>
+            <td><%= asset.pay_date.strftime("%Y-%m-%d")%></td>
+            <td><%= asset.num%></td>
+            <td><%= asset.price %></td>
+            <td><%= asset.amount %></td>
+            <td><%= @n_staffs[asset.operate_staffid].nil? ? "--" : @n_staffs[asset.operate_staffid] %></td>
+            <td><%= asset.share_month%></td>
+            <td><%= "--"%></td>
+            <td><%= @defines[asset.types].nil? ? "--" : @defines[asset.types] %></td>
+            <td><%= FixedAsset::STATUS_NAMES[asset.status] %></td>
           </tr>
         <% end %>
       <% end %>

@@ -115,6 +115,17 @@ task(:set_create_prod => :environment) do
   p "set the create prod  to materials,the  num is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
 end
 
+task(:new_types => :environment) do
+  types = {Category::TYPES[:OWNER]=>["现金","支票","银行卡"],Category::TYPES[:ASSETS]=>["生产设备","办公家具","电子电器","车辆","房产","其他"]}  #收付款方式
+  time = Time.now.to_i
+  c_types = []
+  types.each do |k,v|
+    v.each{|name|  c_types << Category.new(:types=>k,:name=>name)}
+  end
+  Category.import c_types
+  p "set the create prod  to materials,the  num is #{types.values.flatten().length},the run time is #{(Time.now.to_i - time)/3600.0}"
+end
+
 
 
 

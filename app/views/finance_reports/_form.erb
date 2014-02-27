@@ -1,6 +1,5 @@
-<%info = Time.now.strftime("%Y%m%d")+create_code(3)%>
 <div class="item">
-  <label>日期：</label>
+  <label>入账日期：</label>
   <input type="text" name="fee[fee_date]" value="<%=Time.now.strftime("%Y-%m-%d")%>"  onclick="WdatePicker({preLoad:true,maxDate:'<%=Time.now.strftime("%Y-%m-%d")%>',isShowClear:false})" readonly class="Wdate" />
 </div>
 <div class="item">
@@ -8,15 +7,11 @@
   <input type="text" name="fee[name]" id="name" />
 </div>
 <div class="item">
-  <label>费用类别：</label><select  id="types" name="fee[types]" onchange="g_code()">
+  <label>费用类别：</label><select  id="types" name="fee[types]">
     <% Fee::FEE_TAB.each do |k,v| %>
       <option value="<%= k %>"><%= v %></option>
     <% end %>
   </select>
-</div>
-<div class="item">
-  <label><span class="red">*</span>单据编号：</label>
-  <input type="text" id="code" name="fee[code]" value="<%=Fee::FEE_CODE.values.first+info%>" readonly />
 </div>
 <div class="item">
   <label><span class="red">*</span>支付金额：</label>
@@ -39,10 +34,10 @@
   <input type="text" id="share_month" name="fee[share_month]" value="1" />月
 </div>
 <div class="item_textarea">
-  <label>产品简介：</label><textarea name="remark" id="remark" cols="" rows="" class="width_textarea"></textarea>
+  <label>备注：</label><textarea name="fee[remark]" id="remark" cols="" rows="" class="width_textarea"></textarea>
 </div>
 <div class="item_textarea">
-  <label>操作人：</label>
+  <label>经手人：</label>
   <div class="item_rbox">
     <dl>
       <dt>当前登录用户</dt><dd><input type="radio" name="fee[operate_staffid]" checked value="<%= cookies[:user_id] %>"/><%= cookies[:user_name] %></dd>&nbsp;&nbsp;
@@ -70,10 +65,3 @@
     </dl>
   </div>
 </div>
-<input id="code_date" type="hidden" value="<%= info %>" />
-<script type="text/javascript">
-  var fee_code = {};
-<%Fee::FEE_CODE.each do |k,v|%>
-    fee_code[<%=k%>]='<%=v%>';
-<%end%>
-</script>
