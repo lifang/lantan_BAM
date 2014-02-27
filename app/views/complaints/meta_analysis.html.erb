@@ -4,14 +4,37 @@
     <div class="analyze">
       <ul>
         <li>
-          <h1>个人客户数量：<span class="red"><%= @single_cus %></span>位</h1>
-          <div class="analyze_jt"><p>男性客户：<span class="red"><%= @male %></span>位</p>
-            <p>女性客户：<span class="red"><%= @female %></span>位</p></div>
+          <h1>个人客户数量：<span class="red">
+              <a href="/stores/<%= @store_id %>/complaints/meta_analysis?property=0&flag=1" data-type="script" data-remote="true">
+                <%= @single_cus %>
+              </a></span>位</h1>
+          <div class="analyze_jt"><p>男性客户：<span class="red">
+                <a href="/stores/<%= @store_id %>/complaints/meta_analysis?property=0&sex=1&flag=1" data-type="script" data-remote="true">
+                <%= @male %>
+                </a>
+              </span>位</p>
+            <p>女性客户：<span class="red">
+                <a href="/stores/<%= @store_id %>/complaints/meta_analysis?property=0&sex=0&flag=1" data-type="script" data-remote="true">
+              <%= @female %>
+                </a>
+              </span>位</p></div>
         </li>
         <li>
-          <h1>单位客户：<span class="red"><%= @group_cus %></span>位</h1>
-          <div class="analyze_jt"><p>挂账单位：<span class="red"><%= @allowed_debts %></span>位</p>
-            <p>非挂账单位：<span class="red"><%= @unallowed_dents %></span>位</p></div>
+          <h1>单位客户：<span class="red">
+              <a href="/stores/<%= @store_id %>/complaints/meta_analysis?property=1&flag=1" data-type="script" data-remote="true">
+            <%= @group_cus %>
+              </a>
+            </span>位</h1>
+          <div class="analyze_jt"><p>挂账单位：<span class="red">
+                <a href="/stores/<%= @store_id %>/complaints/meta_analysis?property=1&allow_debts=1&flag=1" data-type="script" data-remote="true">
+                <%= @allowed_debts %>
+                </a>
+              </span>位</p>
+            <p>非挂账单位：<span class="red">
+                <a href="/stores/<%= @store_id %>/complaints/meta_analysis?property=1&allow_debts=0&flag=1" data-type="script" data-remote="true">
+                <%= @unallowed_dents %>
+                </a>
+              </span>位</p></div>
         </li>
       </ul>
 
@@ -19,19 +42,19 @@
         <div class="analyze_category_list"><strong>车辆品牌：</strong>
           <div class="analyze_category_list_fx">
             <% @brands[0..3].each do |b| %>
-              &nbsp;<%= b.name %>(<em class="red"><%= b.sum.to_i %></em>)&nbsp;&nbsp;
+              &nbsp;<%= b.name %>(<em class="red"><a href="/stores/<%= @store_id %>/complaints/meta_analysis?brand=<%= b.id %>&flag=1" data-type="script" data-remote="true"><%= b.sum.to_i %></a></em>)&nbsp;&nbsp;
             <% end if @brands %>
-            <% if @other %>其他品牌(<em class="red"><%= @other %></em>)<% end %>
+            <% if @other %>其他品牌(<em class="red"><a href="/stores/<%= @store_id %>/complaints/meta_analysis?brand_arr=<%= @brands[0..3].map(&:id) %>&flag=1" data-type="script" data-remote="true"><%= @other %></a></em>)<% end %>
           </div>
         </div>
         <div class="analyze_category_list"><strong>消费金额：</strong>
           <div class="analyze_category_list_fx">
-            0-100( <em class="red"><%= @order_lv1 %></em> )
-            100-500( <em class="red"><%= @order_lv2 %></em> )
-            500-1000( <em class="red"><%= @order_lv3 %></em> )
-            1000-2000( <em class="red"><%= @order_lv4 %></em> )
-            2000-5000( <em class="red"><%= @order_lv5 %></em> )
-            5000以上( <em class="red"><%= @order_lv6 %></em> )
+            0-100( <em class="red"><a href="/stores/<%= @store_id %>/complaints/meta_analysis?amount_con_start=0&amount_con_end=100&flag=1" data-type="script" data-remote="true"><%= @order_lv1 %></a></em> )
+            100-500( <em class="red"><a href="/stores/<%= @store_id %>/complaints/meta_analysis?amount_con_start=100&amount_con_end=500&flag=1" data-type="script" data-remote="true"><%= @order_lv2 %></a></em> )
+            500-1000( <em class="red"><a href="/stores/<%= @store_id %>/complaints/meta_analysis?amount_con_start=500&amount_con_end=1000&flag=1" data-type="script" data-remote="true"><%= @order_lv3 %></a></em> )
+            1000-2000( <em class="red"><a href="/stores/<%= @store_id %>/complaints/meta_analysis?amount_con_start=1000&amount_con_end=2000&flag=1" data-type="script" data-remote="true"><%= @order_lv4 %></a></em> )
+            2000-5000( <em class="red"><a href="/stores/<%= @store_id %>/complaints/meta_analysis?amount_con_start=2000&amount_con_end=5000&flag=1" data-type="script" data-remote="true"><%= @order_lv5 %></a></em> )
+            5000以上( <em class="red"><a href="/stores/<%= @store_id %>/complaints/meta_analysis?amount_con_start=5000&flag=1" data-type="script" data-remote="true"><%= @order_lv6 %></a></em> )
             <p>
               <input type="radio" checked/>
               <input name="amount_con_start" id="amount_con_start" type="text" class="input_s"/>到
@@ -41,9 +64,9 @@
         </div>
         <div class="analyze_category_list"><strong>最近消费：</strong>
           <div class="analyze_category_list_fx">
-            今天( <em class="red"><%= @cons_current_day.count %></em> )&nbsp;&nbsp;
-            本周( <em class="red"><%= @cons_current_week.count %></em> )&nbsp;&nbsp;
-            本月( <em class="red"><%= @cons_current_month.count %></em> )&nbsp;&nbsp;
+            今天( <em class="red"><%= @cons_current_day %></em> )&nbsp;&nbsp;
+            本周( <em class="red"><%= @cons_current_week %></em> )&nbsp;&nbsp;
+            本月( <em class="red"><%= @cons_current_month %></em> )&nbsp;&nbsp;
             <input type="radio" checked/> 其他
             <input name="amount_date_start" id="amount_date_start" type="text" onclick="WdatePicker()" class="Wdate" readonly/>到
             <input name="amount_date_end" id="amount_date_end" type="text" onclick="WdatePicker()" class="Wdate" readonly/>

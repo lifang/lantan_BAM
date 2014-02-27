@@ -144,27 +144,60 @@ class ComplaintsController < ApplicationController
       end if orders
 
       #最近消费
-      @cons_current_day = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
-        DATE_FORMAT(o.created_at,'%Y-%m-%d')=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id,
-          Time.now.strftime("%Y-%m-%d")]).first
-      @cons_current_week = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
-        YEARWEEK(DATE_FORMAT(o.created_at,'%Y-%m-%d'))=YEARWEEK(now())", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id
-          ]).first
-      @cons_current_month = Order.find_by_sql(["select count(o.id) count from orders o where o.status in (?) and o.store_id=? and
-        DATE_FORMAT(o.created_at,'%Y-%m')=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id,
-          Time.now.strftime("%Y-%m")]).first
+      @cons_current_day = Order.find_by_sql(["select c.id
+        from customer_store_relations csr inner join customers c on csr.customer_id=c.id
+        inner join orders o on c.id=o.customer_id
+        where csr.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
+        DATE_FORMAT(o.created_at,'%Y-%m-%d')=?", @store_id,  Customer::STATUS[:NOMAL],
+          [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id, Time.now.strftime("%Y-%m-%d")]).map(&:id).uniq.length
+      @cons_current_week = Order.find_by_sql(["select c.id
+        from customer_store_relations csr inner join customers c on csr.customer_id=c.id
+        inner join orders o on c.id=o.customer_id
+        where csr.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
+        YEARWEEK(DATE_FORMAT(o.created_at,'%Y-%m-%d'))=YEARWEEK(now())", @store_id, Customer::STATUS[:NOMAL],
+          [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id]).map(&:id).uniq.length
+      @cons_current_month = Order.find_by_sql(["select c.id
+        from customer_store_relations csr inner join customers c on csr.customer_id=c.id
+        inner join orders o on c.id=o.customer_id
+        where csr.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
+        DATE_FORMAT(o.created_at,'%Y-%m')=?", @store_id, Customer::STATUS[:NOMAL],
+          [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id, Time.now.strftime("%Y-%m")]).map(&:id).uniq.length
     end
 
     amount_con_start = params[:amount_con_start]
     amount_con_end = params[:amount_con_end]
     amount_date_start = params[:amount_date_start]
     amount_date_end = params[:amount_date_end]
+    property = params[:property]
+    sex = params[:sex]
+    allow_debts = params[:allow_debts]
+    brand = params[:brand]
+    brand_arr = params[:brand_arr]
     c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
       sum(o.price) oprice,max(o.created_at) last_con_time
       from customer_store_relations csr inner join customers c on csr.customer_id=c.id
       left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
       where csr.store_id=? and c.status=? ",[Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
       @store_id, Customer::STATUS[:NOMAL]]
+    if brand || brand_arr
+      c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
+      sum(o.price) oprice,max(o.created_at) last_con_time
+      from customer_store_relations csr inner join customers c on csr.customer_id=c.id
+      inner join customer_num_relations cnr on c.id=cnr.customer_id
+      inner join car_nums cn on cnr.car_num_id=cn.id
+      inner join car_models cm on cn.car_model_id=cm.id
+      inner join car_brands cb on cm.car_brand_id=cb.id
+      left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
+      where csr.store_id=? and c.status=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
+      @store_id, Customer::STATUS[:NOMAL]]
+      if brand
+        c_sql[0] += " and cb.id=?"
+        c_sql << brand.to_i
+      elsif brand_arr
+        c_sql[0] += " and cb.id not in (?)"
+        c_sql << brand_arr
+      end
+    end
     unless amount_date_start.nil? || amount_date_start.strip == ""
       c_sql[0] += " and DATE_FORMAT(o.created_at,'%Y-%m-%d')>=?"
       c_sql << amount_date_start
@@ -173,17 +206,34 @@ class ComplaintsController < ApplicationController
       c_sql[0] += " and DATE_FORMAT(o.created_at,'%Y-%m-%d')<=?"
       c_sql << amount_date_end
     end
+    unless property.nil?
+      c_sql[0] += " and c.property=?"
+      c_sql << property.to_i
+    end
+    unless sex.nil?
+      if sex.to_i==0
+        c_sql[0] += " and c.sex=?"
+        c_sql << sex.to_i
+      else
+        c_sql[0] += " and (c.sex is null or c.sex=?)"
+        c_sql << sex.to_i
+      end
+    end
+    unless allow_debts.nil?
+      c_sql[0] += " and c.allowed_debts=?"
+        c_sql << allow_debts.to_i
+    end
     c_sql[0] += " group by c.id having 1=1"
     if !amount_con_start.nil? && amount_con_start.strip != "" && !amount_con_end.nil? && amount_con_end.strip != ""
       if amount_con_start.to_i <= 0
-         c_sql[0] += " and (sum(o.price) is null or (sum(o.price)>=? and sum(o.price)<?))"
+        c_sql[0] += " and (sum(o.price) is null or (sum(o.price)>=? and sum(o.price)<?))"
       else
         c_sql[0] += " and sum(o.price)>=? and sum(o.price)<?"
       end
       c_sql << amount_con_start.to_i <<  amount_con_end.to_i
     elsif !amount_con_start.nil? && amount_con_start.strip != ""
       if amount_con_start.to_i <= 0
-         c_sql[0] += " and (sum(o.price) is null or sum(o.price)>=?)"
+        c_sql[0] += " and (sum(o.price) is null or sum(o.price)>=?)"
       else
         c_sql[0] += " and sum(o.price)>=?"
       end
@@ -192,7 +242,8 @@ class ComplaintsController < ApplicationController
       c_sql[0] += " and (sum(o.price) is null or sum(o.price)<?)"
       c_sql << amount_con_end.to_i
     end
-
+    
+    
     @customers = Customer.paginate_by_sql(c_sql,:page => params[:page], :per_page => 10)
 
     respond_to do |f|
