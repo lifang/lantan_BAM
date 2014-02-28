@@ -229,7 +229,10 @@ module ApplicationHelper
   end
 
   def send_msg
-    @send_msg = SendMessage.where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]])
+    from_date  = (Time.now-3.days).strftime("%Y-%m-%d")
+    end_date = (Time.now+3.days).strftime("%Y-%m-%d")
+    @send_msg = SendMessage.where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]]).
+      where("date_format(send_at,'%Y-%m-%d') >= '#{from_date}' and date_format(send_at,'%Y-%m-%d') <='#{end_date}'")
   end
 
   #保留金额的两位小数
@@ -254,5 +257,9 @@ module ApplicationHelper
     code_array = []
     1.upto(len) {code_array << chars[rand(chars.length)]}
     return code_array.join("")
+  end
+
+  def add_string(len,str)
+    return "0"*(len-"#{str}".length)+"#{str}"
   end
 end

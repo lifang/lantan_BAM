@@ -126,10 +126,10 @@ function check_sum(card_id,e){
 }
 
 function limit_float(num){
-    var t_num = parseInt(parseFloat(num)*1000);
-    return  round((t_num%10 == 0 ? t_num : t_num-5)/1000.0,2);
-
+    var t_num = parseInt(parseFloat(num)*100);
+    return  round((t_num%10 == 0 ? t_num : t_num-5)/100.0,2);
 }
+
 function round(v,e){
     var t=1;
     for(;e>0;t*=10,e--);

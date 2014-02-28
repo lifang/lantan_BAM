@@ -1,4 +1,4 @@
-<div class="finnace_title">
+<div class="h_finnace_title">
   <ul title="<%=  @pays.select{|k,v| OrderPayType::FINCANCE_TYPES.keys.include? k}.map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe%>">本期销售收入&nbsp&nbsp&nbsp
     <% pay_reward = @pays.select{|k,v| !OrderPayType::FINCANCE_TYPES.keys.include? k}.values.compact %>
     <% unless pay_reward.blank? %>

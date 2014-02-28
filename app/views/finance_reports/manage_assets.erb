@@ -14,13 +14,8 @@
                      value="<%=@start_time%>"/> 到
               <input id="c_last" type="text" onclick="WdatePicker({preLoad:true,maxDate:'<%=Time.now.strftime("%Y-%m-%d")%>'})" readonly class="Wdate"
                      value="<%=@end_time%>" /></div>
-            <div style="float:right;"><button class="search_btn" style="padding:-1px 0;" onclick="search_fee(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button></div>
-          </div>
-          <div class="tab_before">
-            <ul>
-              <%=  Fee::FEE_TAB.map{|k,tab| @position == k ? "<li id=#{k} class=hover onclick='change_tab(this,#{k})'>#{tab}</li>" : "<li id=#{k} onclick='change_tab(this,#{k})'>#{tab}</li>"}.join("").html_safe%>
-              <li style="float:right;padding:-1px 9px;"><button class="search_btn" onclick="before_center('#add_tab')">新 &nbsp&nbsp&nbsp&nbsp建</button></li>
-            </ul>
+            <div style="float:right;"><button class="search_btn" style="padding:-1px 0;" onclick="manage_assets(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button>
+            <button class="search_btn" onclick="before_center('#add_tab')">新 &nbsp&nbsp&nbsp&nbsp建</button></div>
           </div>
           <div class="data_item" id="manage_assets">
             <%=  render "manage_assets"%>
@@ -32,13 +27,13 @@
 </div>
 <div class="tab_popup add_tab" id="add_tab">
   <div class="popup_box">
-    <h1>新建费用<a href="javascript:void(0)" class="close">关闭</a></h1>
+    <h1>新建资产<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
-      <%= form_for :new_fee,:html=>{:id=>:new_fee},:method=>:post,:url=>"/stores/#{params[:store_id]}/finance_reports" do %>
+      <%= form_for :new_assets,:html=>{:id=>:new_assets},:method=>:post,:url=>"/stores/#{params[:store_id]}/finance_reports/create_assets" do %>
         <div class="popup_body_area">
           <%= render "assets_form" %>
         </div>
-        <div class="btn_box_s"><input value="确定" class="confirm_btn" onclick="check_fee(this)" type="button"  /></div>
+        <div class="btn_box_s"><input value="确定" class="confirm_btn" onclick="check_assets(this)" type="button"  /></div>
       <%end%>
     </div>
   </div>

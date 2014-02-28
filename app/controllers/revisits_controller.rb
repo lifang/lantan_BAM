@@ -12,7 +12,10 @@ class RevisitsController < ApplicationController
     session[:is_price] = "1"
     session[:price] = nil
     @store = Store.find(params[:store_id].to_i)
-    @send_msg = SendMessage.where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]]).order('types,car_num_id,customer_id')
+    from_date  = (Time.now-3.days).strftime("%Y-%m-%d")
+    end_date = (Time.now+3.days).strftime("%Y-%m-%d")
+    @send_msg = SendMessage.where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]]).
+      where("date_format(send_at,'%Y-%m-%d') >= '#{from_date}' and date_format(send_at,'%Y-%m-%d') <='#{end_date}'").order('types,car_num_id,customer_id')
     @car_nums = CarNum.find(@send_msg.map(&:car_num_id)).inject({}){|h,c|h[c.id]=c.num;h}
     @s_custs = Customer.find(@send_msg.map(&:customer_id)).inject({}){|h,c|h[c.id]=c.name;h}
     @customers = Order.get_order_customers(@store.id, (Time.now - 15.days).to_date.to_s, Time.now.to_date.to_s, nil, "1",
@@ -111,7 +114,6 @@ class RevisitsController < ApplicationController
       jsondata = JSON msg_hash
       begin
         message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
-        message_route
         Product.create_message_http(Constant::MESSAGE_URL, message_route)
         SendMessage.where(:id=>params[:send_ids]).update_all(:status=>params[:deal_status])
       rescue

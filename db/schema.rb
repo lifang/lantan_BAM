@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140217070924) do
+ActiveRecord::Schema.define(:version => 20140217081957) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -138,13 +138,6 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "staff_id"
-  end
-
-  create_table "char_images", :force => true do |t|
-    t.integer  "city_id"
-    t.datetime "current_month"
-    t.string   "image_url"
-    t.datetime "created_at"
   end
 
   create_table "chart_images", :force => true do |t|
@@ -533,7 +526,7 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
     t.string   "code_img"
     t.integer  "category_id"
     t.decimal  "import_price",                 :precision => 20, :scale => 2
-    t.boolean  "create_prod"
+    t.boolean  "create_prod",                                                 :default => false
   end
 
   add_index "materials", ["name"], :name => "index_materials_on_name"
@@ -750,15 +743,15 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
     t.integer  "types"
     t.integer  "supply_id"
     t.string   "month"
-    t.integer  "payment_define_id"
+    t.integer  "category_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.decimal  "amount",            :precision => 12, :scale => 2, :default => 0.0
+    t.decimal  "amount",      :precision => 12, :scale => 2, :default => 0.0
     t.integer  "store_id"
     t.integer  "staff_id"
   end
 
-  add_index "pay_receipts", ["payment_define_id"], :name => "index_pay_receipts_on_payment_type"
+  add_index "pay_receipts", ["category_id"], :name => "index_pay_receipts_on_payment_type"
   add_index "pay_receipts", ["types"], :name => "index_pay_receipts_on_types"
 
   create_table "payment_defines", :force => true do |t|
@@ -789,6 +782,7 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
     t.integer  "package_card_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.float    "price",           :limit => 20, :default => 0.0
   end
 
   add_index "pcard_prod_relations", ["created_at"], :name => "index_pcard_prod_relations_on_created_at"
@@ -846,7 +840,7 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
     t.integer  "auto_time"
     t.text     "revist_content"
     t.integer  "prod_point"
-    t.float    "deduct_price"
+    t.float    "deduct_price",   :default => 0.0
     t.boolean  "show_on_ipad",   :default => true
     t.boolean  "commonly_used",  :default => false
     t.integer  "category_id"
@@ -854,6 +848,9 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
     t.float    "techin_price",   :default => 0.0
     t.float    "techin_percent", :default => 0.0
     t.integer  "single_types"
+    t.boolean  "auto_warn"
+    t.integer  "time_warn"
+    t.string   "con_warn"
   end
 
   add_index "products", ["is_service"], :name => "index_products_on_is_service"
@@ -956,24 +953,24 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
   add_index "roles", ["updated_at"], :name => "index_roles_on_updated_at"
 
   create_table "salaries", :force => true do |t|
-    t.float    "deduct_num"
-    t.float    "reward_num"
-    t.float    "total"
+    t.decimal  "deduct_num",                   :precision => 21, :scale => 1
+    t.decimal  "reward_num",                   :precision => 21, :scale => 1
+    t.decimal  "total",                        :precision => 21, :scale => 1
     t.integer  "current_month"
     t.integer  "staff_id"
     t.integer  "satisfied_perc"
     t.datetime "created_at"
-    t.boolean  "status",         :default => false
+    t.boolean  "status",                                                      :default => false
     t.datetime "updated_at"
-    t.float    "reward_fee",     :default => 0.0
-    t.float    "secure_fee",     :default => 0.0
-    t.float    "voilate_fee",    :default => 0.0
-    t.float    "fact_fee",       :default => 0.0
-    t.float    "work_fee",       :default => 0.0
-    t.float    "manage_fee",     :default => 0.0
-    t.float    "tax_fee",        :default => 0.0
-    t.boolean  "is_edited"
-    t.float    "base_salary",    :default => 0.0
+    t.float    "reward_fee",                                                  :default => 0.0
+    t.float    "secure_fee",                                                  :default => 0.0
+    t.float    "voilate_fee",                                                 :default => 0.0
+    t.decimal  "fact_fee",                     :precision => 21, :scale => 1
+    t.decimal  "work_fee",                     :precision => 21, :scale => 1
+    t.float    "manage_fee",                                                  :default => 0.0
+    t.float    "tax_fee",                                                     :default => 0.0
+    t.boolean  "is_edited",                                                   :default => false
+    t.float    "base_salary",    :limit => 20
   end
 
   add_index "salaries", ["current_month"], :name => "index_salaries_on_current_month"
@@ -1044,7 +1041,7 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "car_num_id"
-    t.integer  "types",             :default => 0
+    t.integer  "types"
     t.integer  "store_id"
   end
 
@@ -1237,8 +1234,8 @@ ActiveRecord::Schema.define(:version => 20140217070924) do
     t.integer  "material_low"
     t.string   "code"
     t.integer  "edition_lv"
-    t.integer  "cash_auth",        :default => 0
     t.string   "limited_password"
+    t.integer  "cash_auth",        :default => 0
     t.integer  "auto_send",        :default => 1
   end
 
