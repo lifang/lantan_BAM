@@ -111,42 +111,99 @@ function pleased_type(plea_type, store_id, plea_start, plea_end, div_name){
     })
 }
 
-function meta_analysis_search(store_id){
-    //var t = /^[0-9]*[1-9][0-9]*$/;
-    var t = /^\d+$/;
-    var amount_con_start = $.trim($("#amount_con_start").val());
-    var amount_con_end = $.trim($("#amount_con_end").val());
-    var amount_date_start = $.trim($("#amount_date_start").val());
-    var amount_date_end = $.trim($("#amount_date_end").val());
-    var js_start_time = new Date(Date.parse(amount_date_start.replace("-","/")));
-    var js_end_time = new Date(Date.parse(amount_date_end.replace("-","/")));
-    if(amount_con_start=="" && amount_con_end=="" && amount_date_start=="" && amount_date_end==""){
-        tishi_alert("请输入查询条件!");
-    }else if(amount_con_start != "" && t.test(amount_con_start)==false){
-        tishi_alert("起始金额必须为大于等于零的整数!");
-    }else if(amount_con_end != "" && t.test(amount_con_end)==false){
-        tishi_alert("结束金额必须为大于等于零的整数!");
-    }else if(parseInt(amount_con_start) > parseInt(amount_con_end)){
-        tishi_alert("结束金额必须大于等于起始金额!");
-    }else if(amount_date_start!="" && amount_date_end!="" && amount_date_start > amount_date_end){
-        tishi_alert("结束时间必须大于起始时间!");
-    }else{
-        $.ajax({
-            type: "get",
-            url: "/stores/"+store_id+"/complaints/meta_analysis",
-            dataType: "script",
-            data: {
-                amount_con_start : amount_con_start,
-                amount_con_end : amount_con_end,
-                amount_date_start : amount_date_start,
-                amount_date_end : amount_date_end,
-                flag : 1
-            },
-            error: function(data){
-                tishi_alert("数据错误!");
-            }
-        })
+function meta_analysis_search_checkbox(obj){
+    if($(obj).attr("name")=="amount_con"){
+        if($(obj).attr("checked")=="checked"){
+            $("#amount_con_start").removeAttr("disabled");
+            $("#amount_con_end").removeAttr("disabled");
+        }else{
+            $("#amount_con_start").attr("disabled", "disabled");
+            $("#amount_con_end").attr("disabled", "disabled");
+        }
+    }else if($(obj).attr("name")=="amount_date"){
+        if($(obj).attr("checked")=="checked"){
+            $("#amount_date_start").removeAttr("disabled");
+            $("#amount_date_end").removeAttr("disabled");
+        }else{
+            $("#amount_date_start").attr("disabled", "disabled");
+            $("#amount_date_end").attr("disabled", "disabled");
+        }
     }
+}
+function meta_analysis_search(store_id){
+    //var t = /^[0-9]*[1-9][0-9]*$/;   
+    //var js_start_time = new Date(Date.parse(amount_date_start.replace("-","/")));
+    //var js_end_time = new Date(Date.parse(amount_date_end.replace("-","/")));
+    var amount_con_flag = $("#amount_con").attr("checked")=="checked";
+    var amount_date_flag = $("#amount_date").attr("checked")=="checked";
+    if(amount_con_flag==false && amount_date_flag==false){
+        tishi_alert("请输入查询条件!");
+    }else{
+        var t = /^\d+$/;
+        var amount_con_start = $.trim($("#amount_con_start").val());
+        var amount_con_end = $.trim($("#amount_con_end").val());
+        var amount_date_start = $.trim($("#amount_date_start").val());
+        var amount_date_end = $.trim($("#amount_date_end").val());
+        var flag = true;
+        if(amount_con_flag==true && amount_date_flag==true){
+            if(amount_con_start=="" && amount_con_end=="" && amount_date_start=="" && amount_date_end==""){
+                tishi_alert("至少输入一个查询条件!");
+                flag = false;
+            }else if(amount_con_start != "" && t.test(amount_con_start)==false){
+                tishi_alert("起始金额必须为大于等于零的整数!");
+                flag = false;
+            }else if(amount_con_end != "" && t.test(amount_con_end)==false){
+                tishi_alert("结束金额必须为大于等于零的整数!");
+                flag = false;
+            }else if(parseInt(amount_con_start) > parseInt(amount_con_end)){
+                tishi_alert("结束金额必须大于等于起始金额!");
+                flag = false;
+            }else if(amount_date_start!="" && amount_date_end!="" && amount_date_start > amount_date_end){
+                tishi_alert("结束时间必须大于起始时间!");
+                flag = false;
+            }
+        }else if(amount_con_flag==true && amount_date_flag==false){
+            if(amount_con_start=="" && amount_con_end==""){
+                tishi_alert("请输入起始金额或结束金额!");
+                flag = false;
+            }else if(amount_con_start != "" && t.test(amount_con_start)==false){
+                tishi_alert("起始金额必须为大于等于零的整数!");
+                flag = false;
+            }else if(amount_con_end != "" && t.test(amount_con_end)==false){
+                tishi_alert("结束金额必须为大于等于零的整数!");
+                flag = false;
+            }else if(parseInt(amount_con_start) > parseInt(amount_con_end)){
+                tishi_alert("结束金额必须大于等于起始金额!");
+                flag = false;
+            }
+        }else if(amount_con_flag==false && amount_date_flag==true){
+            if(amount_date_start=="" && amount_date_end==""){
+                tishi_alert("请输入查询时间!")
+                flag = false;
+            }else if(amount_date_start!="" && amount_date_end!="" && amount_date_start > amount_date_end){
+                tishi_alert("结束时间必须大于起始时间!");
+                flag = false;
+            }
+        }
+        if(flag==true){
+            $.ajax({
+                type: "get",
+                url: "/stores/"+store_id+"/complaints/meta_analysis",
+                dataType: "script",
+                data: {
+                    amount_con_start : amount_con_start,
+                    amount_con_end : amount_con_end,
+                    amount_date_start : amount_date_start,
+                    amount_date_end : amount_date_end,
+                    flag : 1
+                },
+                error: function(data){
+                    tishi_alert("数据错误!");
+                }
+            })
+        }
+    }
+    
 
 }
 

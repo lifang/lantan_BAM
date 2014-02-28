@@ -113,12 +113,25 @@ class ComplaintsController < ApplicationController
       end
 
       #车辆品牌数量
-      @brands = CustomerNumRelation.find_by_sql(["select cb.id,cb.name,sum(cb.id) sum from customer_num_relations cnr
+#      @brands = CustomerNumRelation.find_by_sql(["select cb.id,cb.name,sum(cb.id) sum from customer_num_relations cnr
+#        inner join car_nums cn on cnr.car_num_id=cn.id
+#        inner join car_models cm on cn.car_model_id=cm.id
+#        inner join car_brands cb on cm.car_brand_id=cb.id
+#        where cnr.customer_id in (?) group by cb.id order by sum desc", customers.map(&:id).uniq]) if customers.map(&:id).any?
+      brands = CustomerNumRelation.find_by_sql(["select cb.id,cb.name from customer_num_relations cnr
         inner join car_nums cn on cnr.car_num_id=cn.id
         inner join car_models cm on cn.car_model_id=cm.id
         inner join car_brands cb on cm.car_brand_id=cb.id
-        where cnr.customer_id in (?) group by cb.id order by sum desc", customers.map(&:id).uniq]) if customers.map(&:id).any?
-      @other = @brands[4..@brands.length-1].inject(0){|i,b| i += b.sum.to_i;i} if @brands && @brands.length > 4
+        where cnr.customer_id in (?)", customers.map(&:id).uniq]) if customers.map(&:id).any?
+       @brands_hash = brands.inject({}){|h,b|
+        if h[b.id].nil?
+          h[b.id] = 1
+        else
+          h[b.id] += 1
+        end;
+        h
+      }.sort{|a,b|b[1] <=> a[1]} if brands.any?
+      @other = @brands_hash[4..@brands_hash.length-1].inject(0){|i,b| i += b[1];i} if @brands_hash && @brands_hash.length > 4
 
       #消费金额
       orders = Order.find_by_sql(["select sum(o.price) sum from customers c left join orders o on c.id=o.customer_id
@@ -173,11 +186,12 @@ class ComplaintsController < ApplicationController
     allow_debts = params[:allow_debts]
     brand = params[:brand]
     brand_arr = params[:brand_arr]
+    recent_cons = params[:recent_cons]
     c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
       sum(o.price) oprice,max(o.created_at) last_con_time
       from customer_store_relations csr inner join customers c on csr.customer_id=c.id
       left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
-      where csr.store_id=? and c.status=? ",[Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
+      where csr.store_id=? and c.status=?",[Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
       @store_id, Customer::STATUS[:NOMAL]]
     if brand || brand_arr
       c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
@@ -196,6 +210,22 @@ class ComplaintsController < ApplicationController
       elsif brand_arr
         c_sql[0] += " and cb.id not in (?)"
         c_sql << brand_arr
+      end
+    end
+    if recent_cons
+      c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
+      sum(o.price) oprice,max(o.created_at) last_con_time
+      from customer_store_relations csr inner join customers c on csr.customer_id=c.id
+      inner join orders o on c.id=o.customer_id where csr.store_id=? and c.status=?  and o.status in (?)
+      and o.store_id=?", @store_id, Customer::STATUS[:NOMAL], [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id]
+      if recent_cons.to_i == 1  #当天消费的
+        c_sql[0] += " and DATE_FORMAT(o.created_at,'%Y-%m-%d')=?"
+        c_sql << Time.now.strftime("%Y-%m-%d")
+      elsif recent_cons.to_i == 2 #本周消费的
+        c_sql[0] += " and YEARWEEK(DATE_FORMAT(o.created_at,'%Y-%m-%d'))=YEARWEEK(now())"
+      elsif recent_cons.to_i == 3 #本月消费的
+        c_sql[0] += " and DATE_FORMAT(o.created_at,'%Y-%m')=?"
+        c_sql << Time.now.strftime("%Y-%m")
       end
     end
     unless amount_date_start.nil? || amount_date_start.strip == ""
