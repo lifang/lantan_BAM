@@ -1,6 +1,11 @@
 <div class="h_finnace_title">
   <ul>
-
+    <li>资产总值：<span><%=@fixed_assets.map(&:pay_amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>
+    <li>资产净值：<span><%=@fixed_assets.map(&:left_value).inject(0){|sum,n|sum+n}.round(2)%></span></li>
+    <%@fixed_assets.group_by{|i| i.types}.each do |k,v|%>
+      <li><%=@defines[k]%>总值：<span><%=v.map(&:pay_amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>
+      <li><%=@defines[k]%>净值：<span><%=v.map(&:left_value).inject(0){|sum,n|sum+n}.round(2)%></span></li>
+    <%end%>
   </ul>
 </div>
 <div class="table_box_h">
@@ -10,13 +15,14 @@
         <td width="10%">资产编号</td>
         <td width="15%">资产名称</td>
         <td width="10%">购入时间</td>
-        <td width="8%">购入数量</td>
-        <td width="8%">购入价</td>
-        <td width="10%">资产总价</td>
-        <td width="8%">经手人</td>
-        <td width="8%">折旧月份</td>
-        <td width="10%">净值</td>
-        <td width="6%">类别</td>
+        <td width="6%">购入数量</td>
+        <td width="8%">购入总价</td>
+        <td width="8%">资产总价</td>
+        <td width="6%">经手人</td>
+        <td width="6%">折旧月份</td>
+        <td width="9%">净值</td>
+        <td width="8%">类别</td>
+        <td width="6%">状态</td>
         <td width="6%">状态</td>
       </tr>
     </thead>
@@ -28,13 +34,14 @@
           <td><%= asset.name%></td>
           <td><%= asset.pay_date.strftime("%Y-%m-%d")%></td>
           <td><%= asset.num%></td>
-          <td><%= asset.price %></td>
+          <td><%= asset.pay_amount %></td>
           <td><%= asset.amount %></td>
           <td><%= @n_staffs[asset.operate_staffid].nil? ? "--" : @n_staffs[asset.operate_staffid] %></td>
           <td><%= asset.share_month%></td>
-          <td><%= "--"%></td>
+          <td><%= asset.left_value%></td>
           <td><%= @defines[asset.types].nil? ? "--" : @defines[asset.types] %></td>
           <td><%= FixedAsset::STATUS_NAMES[asset.status] %></td>
+          <td><a href="javascript:void(0)" onclick="show_asset(<%= asset.id %>,<%= asset.store_id %>)">详情</a></td>
         </tr>
       <% end %>
     </tbody>
@@ -47,13 +54,14 @@
         <td width="10%">资产编号</td>
         <td width="15%">资产名称</td>
         <td width="10%">购入时间</td>
-        <td width="8%">购入数量</td>
-        <td width="8%">购入价</td>
-        <td width="10%">资产总价</td>
-        <td width="8%">经手人</td>
-        <td width="8%">折旧月份</td>
-        <td width="10%">净值</td>
-        <td width="6%">类别</td>
+        <td width="6%">购入数量</td>
+        <td width="8%">购入总价</td>
+        <td width="8%">资产总价</td>
+        <td width="6%">经手人</td>
+        <td width="6%">折旧月份</td>
+        <td width="9%">净值</td>
+        <td width="8%">类别</td>
+        <td width="6%">状态</td>
         <td width="6%">状态</td>
       </tr>
     </thead>
@@ -65,13 +73,14 @@
             <td><%= asset.name%></td>
             <td><%= asset.pay_date.strftime("%Y-%m-%d")%></td>
             <td><%= asset.num%></td>
-            <td><%= asset.price %></td>
+            <td><%= asset.pay_amount %></td>
             <td><%= asset.amount %></td>
             <td><%= @n_staffs[asset.operate_staffid].nil? ? "--" : @n_staffs[asset.operate_staffid] %></td>
             <td><%= asset.share_month%></td>
-            <td><%= "--"%></td>
+            <td><%= asset.left_value%></td>
             <td><%= @defines[asset.types].nil? ? "--" : @defines[asset.types] %></td>
             <td><%= FixedAsset::STATUS_NAMES[asset.status] %></td>
+            <td><a href="javascript:void(0)" onclick="show_asset(<%= asset.id %>,<%= asset.store_id %>)">详情</a></td>
           </tr>
         <% end %>
       <% end %>

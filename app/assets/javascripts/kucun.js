@@ -142,11 +142,6 @@ function submit_search_form(store_id,type,obj){
     var form = $(obj).parent().parent().find("#select_types");
     var name = $.trim($(obj).parent().parent().find("#name").val());
     var types = $(form).find("#material_category_id").val();
-    var  supplier= $(".fixed").attr("id");
-    if (supplier == undefined){
-        tishi_alert("请选择供应商！");
-        return false;
-    }
     if(types==""&&name==""){
         tishi_alert("请选择类型或填写名称！");
     }

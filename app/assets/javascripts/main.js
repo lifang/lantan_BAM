@@ -221,3 +221,10 @@ function odd_even(){
     $(".data_table > tbody > tr:odd").addClass("tbg");
     $(".data_tab_table > tbody > tr:odd").addClass("tbg");
 }
+
+function round(v,e){
+    var t=1;
+    for(;e>0;t*=10,e--);
+    for(;e<0;t/=10,e++);
+    return Math.round(v*t)/t;
+}

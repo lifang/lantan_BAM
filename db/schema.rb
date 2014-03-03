@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140217081957) do
+ActiveRecord::Schema.define(:version => 20140227025717) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -60,8 +60,8 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
   create_table "c_svc_relations", :force => true do |t|
     t.integer  "customer_id"
     t.integer  "sv_card_id"
-    t.float    "total_price"
-    t.float    "left_price"
+    t.decimal  "total_price",  :precision => 20, :scale => 2
+    t.decimal  "left_price",   :precision => 20, :scale => 2
     t.string   "id_card"
     t.boolean  "is_billing"
     t.datetime "created_at"
@@ -69,7 +69,7 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.string   "verify_code"
     t.integer  "order_id"
     t.boolean  "status"
-    t.integer  "return_types", :default => 0
+    t.integer  "return_types",                                :default => 0
     t.string   "password"
   end
 
@@ -317,7 +317,7 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.integer  "share_month"
     t.integer  "payment_type"
     t.string   "remark"
-    t.integer  "status"
+    t.integer  "status",                                         :default => 0
     t.integer  "operate_staffid"
     t.integer  "create_staffid"
     t.datetime "created_at"
@@ -397,7 +397,7 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
   create_table "m_order_types", :force => true do |t|
     t.integer  "material_order_id"
     t.integer  "pay_types"
-    t.float    "price"
+    t.decimal  "price",             :precision => 20, :scale => 2
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -486,7 +486,7 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.integer  "supplier_type"
     t.integer  "status"
     t.integer  "staff_id"
-    t.float    "price"
+    t.decimal  "price",          :precision => 20, :scale => 2
     t.datetime "arrival_at"
     t.string   "logistics_code"
     t.string   "carrier"
@@ -510,7 +510,7 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
   create_table "materials", :force => true do |t|
     t.string   "name"
     t.string   "code"
-    t.float    "price"
+    t.decimal  "price",                        :precision => 20, :scale => 2
     t.integer  "storage"
     t.integer  "types"
     t.boolean  "status"
@@ -625,14 +625,14 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
   create_table "order_pay_types", :force => true do |t|
     t.integer  "order_id"
     t.integer  "pay_type"
-    t.float    "price"
+    t.decimal  "price",       :precision => 20, :scale => 2
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "product_id"
     t.integer  "product_num"
-    t.integer  "pay_cash",    :default => 0
-    t.string   "second_parm", :default => "0"
-    t.integer  "pay_status",  :default => 0
+    t.integer  "pay_cash",                                   :default => 0
+    t.string   "second_parm",                                :default => "0"
+    t.integer  "pay_status",                                 :default => 0
   end
 
   add_index "order_pay_types", ["created_at"], :name => "index_order_pay_types_on_created_at"
@@ -644,12 +644,12 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.integer  "order_id"
     t.integer  "product_id"
     t.integer  "pro_num"
-    t.float    "price"
+    t.decimal  "price",        :precision => 20, :scale => 2
     t.datetime "created_at"
     t.datetime "updated_at"
     t.float    "total_price"
     t.float    "t_price"
-    t.integer  "return_types", :default => 0
+    t.integer  "return_types",                                :default => 0
   end
 
   add_index "order_prod_relations", ["created_at"], :name => "index_order_prod_relations_on_created_at"
@@ -663,7 +663,7 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.integer  "status",              :limit => 2
     t.datetime "started_at"
     t.datetime "ended_at"
-    t.float    "price"
+    t.decimal  "price",                            :precision => 20, :scale => 2
     t.boolean  "is_visited"
     t.integer  "is_pleased"
     t.boolean  "is_billing"
@@ -682,13 +682,13 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.integer  "customer_id"
     t.string   "qfpos_id"
     t.datetime "auto_time"
-    t.integer  "return_types",                     :default => 0
+    t.integer  "return_types",                                                    :default => 0
     t.integer  "return_direct"
-    t.float    "return_fee",                       :default => 0.0
+    t.float    "return_fee",                                                      :default => 0.0
     t.integer  "return_staff_id"
     t.integer  "return_reason"
-    t.float    "front_deduct",                     :default => 0.0
-    t.float    "technician_deduct",                :default => 0.0
+    t.decimal  "front_deduct",                     :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "technician_deduct",                :precision => 20, :scale => 2, :default => 0.0
     t.datetime "warn_time"
   end
 
@@ -716,7 +716,7 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.datetime "ended_at"
     t.integer  "store_id"
     t.boolean  "status"
-    t.integer  "price"
+    t.decimal  "price",          :precision => 20, :scale => 2
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "date_types"
@@ -726,8 +726,8 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.text     "revist_content"
     t.integer  "prod_point"
     t.string   "description"
-    t.float    "deduct_price",                                   :default => 0.0
-    t.float    "deduct_percent",                                 :default => 0.0
+    t.decimal  "deduct_price",   :precision => 20, :scale => 2,  :default => 0.0
+    t.decimal  "deduct_percent", :precision => 20, :scale => 2,  :default => 0.0
     t.decimal  "sale_percent",   :precision => 20, :scale => 16, :default => 1.0
     t.boolean  "auto_warn",                                      :default => false
     t.integer  "time_warn"
@@ -819,7 +819,7 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
   create_table "products", :force => true do |t|
     t.string   "name"
     t.float    "base_price"
-    t.float    "sale_price"
+    t.decimal  "sale_price",     :precision => 20, :scale => 2
     t.text     "description"
     t.integer  "types"
     t.string   "service_code"
@@ -834,19 +834,19 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.string   "standard"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.float    "deduct_percent"
-    t.float    "t_price"
+    t.decimal  "deduct_percent", :precision => 20, :scale => 2
+    t.decimal  "t_price",        :precision => 20, :scale => 2
     t.boolean  "is_auto_revist"
     t.integer  "auto_time"
     t.text     "revist_content"
     t.integer  "prod_point"
-    t.float    "deduct_price",   :default => 0.0
-    t.boolean  "show_on_ipad",   :default => true
-    t.boolean  "commonly_used",  :default => false
+    t.decimal  "deduct_price",   :precision => 20, :scale => 2, :default => 0.0
+    t.boolean  "show_on_ipad",                                  :default => true
+    t.boolean  "commonly_used",                                 :default => false
     t.integer  "category_id"
-    t.boolean  "is_added",       :default => false
-    t.float    "techin_price",   :default => 0.0
-    t.float    "techin_percent", :default => 0.0
+    t.boolean  "is_added",                                      :default => false
+    t.decimal  "techin_price",   :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "techin_percent", :precision => 20, :scale => 2, :default => 0.0
     t.integer  "single_types"
     t.boolean  "auto_warn"
     t.integer  "time_warn"
@@ -1266,14 +1266,14 @@ ActiveRecord::Schema.define(:version => 20140217081957) do
     t.string   "name"
     t.string   "img_url"
     t.integer  "types"
-    t.float    "price"
+    t.decimal  "price",       :precision => 20, :scale => 2
     t.float    "discount"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "description"
     t.integer  "store_id"
     t.integer  "use_range"
-    t.integer  "status",      :default => 1
+    t.integer  "status",                                     :default => 1
   end
 
   add_index "sv_cards", ["types"], :name => "index_sv_cards_on_types"

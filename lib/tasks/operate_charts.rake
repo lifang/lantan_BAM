@@ -92,7 +92,7 @@ task(:sv_pwd => :environment) do
 end
 
 
-#------------未更新
+
 #添加供应商助记码
 task(:set_cap_name => :environment) do
   require "toPinyin"
@@ -100,12 +100,12 @@ task(:set_cap_name => :environment) do
   count = Supplier.count("name is not null")
   Supplier.where("name is not null").map{|supplier|
     supplier_name = Supplier.where("name is not null").map(&:cap_name)
-    cap_name = supplier.name.split(" ").join("").split("").map{|n|n.pinyin[0][0]}.compact.join("")
+    cap_name = supplier.name.split(" ").join("").split("").compact.map{|n|n.pinyin[0][0] if n.pinyin[0]}.compact.join("")
     supplier.update_attributes(:cap_name=>(supplier_name.include? cap_name) ? "#{cap_name}1" : cap_name)}
   "set the cap_name to suppliers,the  num is #{count},the run time is #{(Time.now.to_i - time)/3600.0}"
 end
 
-#添加供应商助记码
+#更新物料是否添加产品
 task(:set_create_prod => :environment) do
   time = Time.now.to_i
   Material.where(:status=>Material::STATUS[:NORMAL]).update_all(:create_prod=>Material::STATUS[:NORMAL])
@@ -125,6 +125,8 @@ task(:new_types => :environment) do
   Category.import c_types
   p "set the create prod  to materials,the  num is #{types.values.flatten().length},the run time is #{(Time.now.to_i - time)/3600.0}"
 end
+
+#------------3月3号已未更新
 
 
 

@@ -430,7 +430,7 @@ a.compile_btn { width: 100px;}
 
 .popup_body_fieldset { border: 1px #CCCCCC solid;}
 .popup_body_title { font-size: 14px; line-height: 28px; padding: 0 5px; margin-left: 10px; font-weight:bold;}
-.popup_body_result { padding: 10px; height: 80px; overflow:auto;}
+.popup_body_result { padding: 10px; height: 80px;}
 .popup_body_result.resultHeight { border: 1px #CCCCCC solid;}
 .popup_body_result li, .popup_body_result div { padding: 6px 10px; margin: 5px 10px; float: left; background: #f0f0f0;}
 .popup_body_result li input { margin-right: 5px; _margin-right: 0px;}

@@ -6,12 +6,12 @@
         <span style="padding-left: 20px;"><%=Account::TYPES_NAMES[params[:rend].to_i]%>：<span id="due_account"><%=@pay_orders.map(&:p_price).compact.inject(0){|n,p|n+p}.round(2)%></span></span>
         <span style="float: right;padding-right: 20px;">余额：<span id="left_account"><%=@account.nil? ? 0 :@account.balance %></span></span></div>
       <div class="due_pay_money">
-        <div style="padding-left: 20px;">付款类型：<select  id="payment_id">
+        <div style="padding-left: 20px; display: inline-block;">付款类型：<select  id="payment_id">
             <% @defines.each do |k,v| %>
               <option value="<%= k %>"><%= v %></option>
             <% end %>
           </select></div>
-        <div style="float: right;padding-right: 20px;">创建人：<select  id="staff_id">
+        <div style="float: right;padding-right: 20px;display: inline-block;">创建人：<select  id="staff_id">
             <% @staffs.each do |k,v| %>
               <option value="<%= k %>" <% if k == cookies[:user_id] %>selected<%end%>><%= v %></option>
             <% end %>
@@ -39,7 +39,7 @@
           </ul>
           <fieldset class="popup_body_fieldset">
             <legend class="popup_body_title"><span class="red">*</span>已选择</legend>
-            <div class="popup_body_result" id="added_accounts" style="height:<%=@pay_orders.length*20  %>px;">
+            <div class="popup_body_result" id="added_accounts">
               <ul>
                 <%@pay_orders.each do |p_order|%>
                   <li id="li_<%=p_order.p_id%>"><%= "<span style='color:red'>#{p_order.p_price}</span> 单号：#{p_order.code}".html_safe %></li>

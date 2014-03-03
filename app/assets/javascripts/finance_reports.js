@@ -201,8 +201,9 @@ function check_account(){
 
 function limit_float(num){
     var t_num = parseInt(parseFloat(num)*100);
-    return  round((t_num%10 == 0 ? t_num : t_num-5)/1000.0,2);
+    return  round((t_num%10 == 0 ? t_num : t_num-5)/100.0,2);
 }
+
 
 function t_account(e){
     $("#t_account :checkbox").attr("checked",e.checked);
@@ -338,5 +339,30 @@ function check_assets(){
 function manage_assets(e,store_id){
     var parm = {};
     set_search(e,store_id,"manage_assets",parm);
+}
+
+function show_asset(asset_id,store_id){
+    var url = "/stores/"+store_id+"/finance_reports/show_asset";
+    var parm = {
+        store_id:store_id,
+        asset_id:asset_id
+    }
+    $.ajax({
+        type:"post",
+        url: url,
+        dataType: "script",
+        data: parm
+    })
+}
+
+function set_over(asset_id,store_id){
+    var parm = {
+        store_id:store_id,
+        asset_id:asset_id
+    }
+    if(confirm("确认要报废该项资产吗？")){
+        send_account(store_id,"update_asset",parm);
+    }
+  
 }
 

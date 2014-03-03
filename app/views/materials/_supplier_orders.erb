@@ -67,7 +67,7 @@
               <td><%= item.material && item.material.category ? item.material.category.name : "----" %></td>
               <td><%= item.material_num.to_i %></td>
               <td><%= item.material.try(:unit) %></td>
-              <td><%= item.material.try(:price) %></td>
+              <td><%= item.material.try(:import_price) %></td>
             </tr>
           <% end %>
         </tbody>

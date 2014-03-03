@@ -82,15 +82,15 @@ class FinanceReportsController < ApplicationController
     @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
     @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
     @position = params[:position].nil? || params[:position] == "" ? 0 : params[:position].to_i
-    sql = "fees.store_id=#{params[:store_id]} and date_format(fees.fee_date,'%Y-%m')=m.month "
+    sql = "fees.store_id=#{params[:store_id]} "
     if @start_time != "0"
-      sql += " and date_format(fees.fee_date,'%Y-%m-%d')>='#{@start_time}'"
+      sql += " and date_format(m.month,'%Y-%m-%d')>='#{@start_time}'"
     end
     if @end_time != "0"
-      sql += " and date_format(fees.fee_date,'%Y-%m-%d')<='#{@end_time}'"
+      sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
     end
     p @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE]).
-    select("fees.*,m.amount m_amount").group_by{|i|i.types}
+      where(:"m.types"=>MoneyDetail::TYPES[:FEE]).select("fees.*,m.amount m_amount").group_by{|i|i.types}
     @customers = Staff.find(@fees.values.flatten.map(&:operate_staffid)).inject({}){|h,c|h[c.id]=c.name;h}
     respond_to do |format|
       format.html
@@ -106,7 +106,7 @@ class FinanceReportsController < ApplicationController
     date = fee.pay_date.to_date
     (1..params[:fee][:share_month].to_i).each do |i|
       money = fee.amount.to_f/params[:fee][:share_month].to_i
-      money_detail << MoneyDetail.new({:types=>MoneyDetail::TYPES[:FEE],:parent_id=>fee.id,:month=>date.strftime("%Y-%m"),:amount=>money,:created_at=>date})
+      money_detail << MoneyDetail.new({:types=>MoneyDetail::TYPES[:FEE],:parent_id=>fee.id,:month=>date.strftime("%Y-%m-%d"),:amount=>money,:created_at=>date})
       date = date.next_month
     end
     MoneyDetail.import money_detail
@@ -122,15 +122,15 @@ class FinanceReportsController < ApplicationController
   def fee_report
     @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
     @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
-    sql = "fees.store_id=#{params[:store_id]} and date_format(fees.fee_date,'%Y-%m')=m.month "
+    sql = "fees.store_id=#{params[:store_id]}"
     if @start_time != "0"
-      sql += " and date_format(fees.fee_date,'%Y-%m-%d')>='#{@start_time}'"
+      sql += " and date_format(m.month,'%Y-%m-%d')>='#{@start_time}'"
     end
     if @end_time != "0"
-      sql += " and date_format(fees.fee_date,'%Y-%m-%d')<='#{@end_time}'"
+      sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
     end
-    p @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).
-      select("date_format(fees.fee_date,'%Y-%m') date,fees.types,round(ifnull(sum(m.amount),0),2) t_amount").group("fees.types,date_format(fees.fee_date,'%Y-%m-%d')").order("date desc")
+    @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE]).
+      select("date_format(fees.fee_date,'%Y-%m') date,fees.types,round(ifnull(sum(m.amount),0),2) t_amount").group("fees.types,date_format(fees.fee_date,'%Y-%m')").order("date desc")
   end
 
 
@@ -306,14 +306,15 @@ class FinanceReportsController < ApplicationController
     @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
     @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
     @staffs = Staff.valid.where(:store_id=>params[:store_id],:type_of_w=>Staff::N_COMPANY.keys).order('type_of_w').group_by{|i|i.type_of_w}
-    sql = "store_id=#{params[:store_id]} "
+    sql = "fixed_assets.store_id=#{params[:store_id]} "
     if @start_time != "0"
-      sql += " and date_format(created_at,'%Y-%m-%d')>='#{@start_time}'"
+      sql += " and date_format(m.month,'%Y-%m-%d')>='#{@start_time}'"
     end
     if @end_time != "0"
-      sql += " and date_format(created_at,'%Y-%m-%d')<='#{@end_time}'"
+      sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
     end
-    @fixed_assets = FixedAsset.where(sql)
+    @fixed_assets = FixedAsset.joins("inner join money_details m on m.parent_id = fixed_assets.id").where(sql).
+      where(:"m.types"=>MoneyDetail::TYPES[:ASSET]).select("fixed_assets.*,pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*m.amount left_value")
     @defines = Category.where(:types=>Category::TYPES[:ASSETS]).inject({}){|h,s|h[s.id]=s.name;h}
     @n_staffs = Staff.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.name;h}
     respond_to do |format|
@@ -329,13 +330,38 @@ class FinanceReportsController < ApplicationController
     date = asset.pay_date.to_date
     (1..assets[:share_month].to_i).each do |i|
       money = asset.pay_amount.to_f/assets[:share_month].to_i
-      money_detail << MoneyDetail.new({:types=>MoneyDetail::TYPES[:ASSET],:parent_id=>asset.id,:month=>date.strftime("%Y-%m"),:amount=>money})
+      money_detail << MoneyDetail.new({:types=>MoneyDetail::TYPES[:ASSET],:parent_id=>asset.id,:month=>date.strftime("%Y-%m-%d"),:amount=>money,:store_id=>params[:store_id]})
       date = date.next_month
     end
     MoneyDetail.import money_detail
     redirect_to request.referer
   end
 
+
+  def show_asset
+    @asset = FixedAsset.where(:id=>params[:asset_id]).select("fixed_assets.*,round(pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*(pay_amount/share_month),2) left_value").first
+    @n_staffs = Staff.find([@asset.create_staffid,@asset.operate_staffid]).inject({}){|h,c|h[c.id]=c.name;h}
+    @defines = Category.where(:types=>Category::TYPES[:ASSETS]).inject({}){|h,s|h[s.id]=s.name;h}
+  end
+
+  def update_asset
+    FixedAsset.where(:id=>params[:asset_id]).update_all(:status=>FixedAsset::STATUS[:INVALID] )
+    p @asset = FixedAsset.where(:id=>params[:asset_id]).select("fixed_assets.*,round(pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*(pay_amount/share_month),2) left_value").first
+    @n_staffs = Staff.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.name;h}
+    @defines = Category.where(:types=>Category::TYPES[:ASSETS]).inject({}){|h,s|h[s.id]=s.name;h}
+    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
+    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
+    @staffs = Staff.valid.where(:store_id=>params[:store_id],:type_of_w=>Staff::N_COMPANY.keys).order('type_of_w').group_by{|i|i.type_of_w}
+    sql = "fixed_assets.store_id=#{params[:store_id]} "
+    if @start_time != "0"
+      sql += " and date_format(m.month,'%Y-%m-%d')>='#{@start_time}'"
+    end
+    if @end_time != "0"
+      sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
+    end
+    @fixed_assets = FixedAsset.joins("inner join money_details m on m.parent_id = fixed_assets.id").where(sql).
+      where(:"m.types"=>MoneyDetail::TYPES[:ASSET]).select("fixed_assets.*,pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*m.amount left_value")
+  end
 
 
 

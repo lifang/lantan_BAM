@@ -130,12 +130,6 @@ function limit_float(num){
     return  round((t_num%10 == 0 ? t_num : t_num-5)/100.0,2);
 }
 
-function round(v,e){
-    var t=1;
-    for(;e>0;t*=10,e--);
-    for(;e<0;t/=10,e++);
-    return Math.round(v*t)/t;
-}
 
 function check_num(){
     var total = 0;
