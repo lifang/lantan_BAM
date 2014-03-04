@@ -14,3 +14,17 @@ function show_category(store_id,c_id,c_time,c_types){
         }
     })
 }
+
+
+function search_data(store_id){
+    var url = "/stores/"+store_id+"/data_manages/";
+    var date = $("#created").val();
+    $.ajax({
+        type:"get",
+        url:url,
+        dataType: "script",
+        data:{
+            date : date
+        }
+    })
+}

@@ -113,17 +113,17 @@ class ComplaintsController < ApplicationController
       end
 
       #车辆品牌数量
-#      @brands = CustomerNumRelation.find_by_sql(["select cb.id,cb.name,sum(cb.id) sum from customer_num_relations cnr
-#        inner join car_nums cn on cnr.car_num_id=cn.id
-#        inner join car_models cm on cn.car_model_id=cm.id
-#        inner join car_brands cb on cm.car_brand_id=cb.id
-#        where cnr.customer_id in (?) group by cb.id order by sum desc", customers.map(&:id).uniq]) if customers.map(&:id).any?
+      #      @brands = CustomerNumRelation.find_by_sql(["select cb.id,cb.name,sum(cb.id) sum from customer_num_relations cnr
+      #        inner join car_nums cn on cnr.car_num_id=cn.id
+      #        inner join car_models cm on cn.car_model_id=cm.id
+      #        inner join car_brands cb on cm.car_brand_id=cb.id
+      #        where cnr.customer_id in (?) group by cb.id order by sum desc", customers.map(&:id).uniq]) if customers.map(&:id).any?
       brands = CustomerNumRelation.find_by_sql(["select cb.id,cb.name from customer_num_relations cnr
         inner join car_nums cn on cnr.car_num_id=cn.id
         inner join car_models cm on cn.car_model_id=cm.id
         inner join car_brands cb on cm.car_brand_id=cb.id
         where cnr.customer_id in (?)", customers.map(&:id).uniq]) if customers.map(&:id).any?
-       @brands_hash = brands.inject({}){|h,b|
+      @brands_hash = brands.inject({}){|h,b|
         if h[b.id].nil?
           h[b.id] = 1
         else
@@ -203,7 +203,7 @@ class ComplaintsController < ApplicationController
       inner join car_brands cb on cm.car_brand_id=cb.id
       left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
       where csr.store_id=? and c.status=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
-      @store_id, Customer::STATUS[:NOMAL]]
+        @store_id, Customer::STATUS[:NOMAL]]
       if brand
         c_sql[0] += " and cb.id=?"
         c_sql << brand.to_i
@@ -251,7 +251,7 @@ class ComplaintsController < ApplicationController
     end
     unless allow_debts.nil?
       c_sql[0] += " and c.allowed_debts=?"
-        c_sql << allow_debts.to_i
+      c_sql << allow_debts.to_i
     end
     c_sql[0] += " group by c.id having 1=1"
     if !amount_con_start.nil? && amount_con_start.strip != "" && !amount_con_end.nil? && amount_con_end.strip != ""
@@ -368,6 +368,48 @@ class ComplaintsController < ApplicationController
     render "consumer_list"
   end
 
-  
+  def cost_price
+    created,ended,types,store_id,session[:types] = params[:created],params[:ended],params[:types],params[:store_id],params[:types]
+    session[:created]= created.nil? ? (Time.now - Constant::PRE_DAY.days).strftime("%Y-%m-%d") : created
+    session[:ended] = ended.nil? ? Time.now.strftime("%Y-%m-%d") : ended
+    m_condit,order_con = "mat_out_orders.store_id=#{store_id}","orders.store_id=#{store_id}"
+    unless created == ""
+      m_condit += "  and mat_out_orders.created_at >= '#{session[:created]}' "
+      order_con += " and orders.created_at >= '#{session[:created]}'"
+    end
+    unless  ended == ""
+      m_condit += " and mat_out_orders.created_at < '#{session[:ended]}' "
+      order_con += " and orders.created_at < '#{session[:ended]}'"
+    end
+    order_con += " and is_service=#{Product::PROD_TYPES[:SERVICE]} and orders.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]})"
+    order_con += " and products.id = #{types}" unless types.nil? || types == "" || types.length == 0
+    t_orders = Order.joins(:order_prod_relations=>:product).joins("inner join prod_mat_relations p on p.product_id = products.id inner join
+    materials m on m.id = p.material_id").select("sum(order_prod_relations.pro_num*m.price*p.material_num) total_price,
+    orders.id,m.id m_id,orders.cons_staff_id_1,orders.cons_staff_id_2").where(order_con).group("id,m_id")
+    @service = Product.where(:is_service =>Product::PROD_TYPES[:SERVICE],:store_id => store_id).inject(Hash.new){|hash,serv| hash[serv.id]=serv.name;hash}
+    s_price = t_orders.inject(Hash.new){|hash,order|
+      price = order.total_price.nil? ? 0 : order.total_price;hash[order.id].nil? ? hash[order.id]=price : hash[order.id] += price;hash}
+    staff_ids = (t_orders.map(&:cons_staff_id_1) | t_orders.map(&:cons_staff_id_2)).uniq.compact
+    s_orders = {}
+    t_orders.each do |order|
+      s_orders[order.cons_staff_id_1].nil? ? s_orders[order.cons_staff_id_1]=[order.id] : s_orders[order.cons_staff_id_1] << order.id
+      s_orders[order.cons_staff_id_2].nil? ? s_orders[order.cons_staff_id_2]=[order.id] : s_orders[order.cons_staff_id_2] << order.id
+    end
+    staffs = Staff.find staff_ids
+    w_orders = WorkOrder.find_all_by_order_id(t_orders.map(&:id).uniq.compact).inject(Hash.new){|hash,w_order|
+      hash[w_order.order_id]=[w_order.gas_num,w_order.water_num];hash}
+    m_condit += " and material_id in (#{t_orders.map(&:m_id).uniq.compact.join(',')})" unless t_orders.blank? || session[:types].nil?
+    m_price = MatOutOrder.joins(:material).where(m_condit + " and mat_out_orders.types = #{MatOutOrder::TYPES_VALUE[:cost]}").
+      select("staff_id,sum(material_num*mat_out_orders.price) sum").group("staff_id").inject(Hash.new){|hash,s| hash[s.staff_id] = s.sum;hash }
+    infos = []
+    staffs.each {|staff|
+      gas_num,water_num,cost_price =0,0,m_price[staff.id].nil? ? 0 : m_price[staff.id]
+      w_orders.select{|k,v|s_orders[staff.id].include? k}.values.each {|info|
+        gas_num += (info[0].nil? ? 0 : info[0]);water_num += (info[1].nil? ? 0 : info[1])}
+      price = s_price.select{|k,v|s_orders[staff.id].include? k}.values.inject(0){|num,price| num+(price.nil? ? 0 : price)}
+      infos << [staff.name,water_num,gas_num,cost_price,s_orders[staff.id].uniq.compact.length,price]
+    }
+    @s_infos = infos.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+  end
 
 end

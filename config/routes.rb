@@ -4,7 +4,6 @@ LantanBAM::Application.routes.draw do
 
   get "data_manages/index"
 
-  get "data_managements/index"
 
   resources :syncs do
     get "upload_file"
@@ -64,7 +63,7 @@ LantanBAM::Application.routes.draw do
     resources :complaints do
       collection do
         post "consumer_search"
-        get "consumer_list", "con_list", "meta_analysis"
+        get "consumer_list", "con_list", "meta_analysis","cost_price"
       end
       member do
         get "complaint_detail"

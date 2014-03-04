@@ -24,6 +24,10 @@ class DataManagesController < ApplicationController
       :"order_prod_relations.return_types"=>Order::IS_RETURN[:NO]).inject({}){|h,o|h[o.types].nil? ? h[o.types]={o.category_id=>o.sum_t} : h[o.types][o.category_id]=o.sum_t;h} #计算成本价
     @total_t_price = @t_price.values.flatten.inject({}){|h,v|h.merge!(v)}.values.compact.inject(0){|sum,t|sum+t}.round(2)
     @total_price = @prod_service.values.flatten.inject({}){|h,v|h.merge!(v)}.values.compact.inject(0){|sum,t|sum+t}.round(2)
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
 
   def ajax_prod_serv

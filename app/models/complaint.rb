@@ -275,9 +275,9 @@ class Complaint < ActiveRecord::Base
 
   def self.make_code store_id
     store = store_id.to_s
-    if store_id < 10
+    if store_id.to_i < 10
       store =   "00" + store_id.to_s
-    elsif store_id < 100
+    elsif store_id.to_i < 100
       store =    "0" + store_id.to_s
     end
     code = store + Time.now.strftime("%Y%m%d%H%M%S")
