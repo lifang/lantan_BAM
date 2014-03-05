@@ -363,6 +363,35 @@ function set_over(asset_id,store_id){
     if(confirm("确认要报废该项资产吗？")){
         send_account(store_id,"update_asset",parm);
     }
-  
 }
 
+function destroy_fee(action_record,id,store_id,index){
+    var record_name = ["费用","资产"];
+    var url = "/stores/"+store_id+"/finance_reports/";
+    var parm = {
+        store_id:store_id,
+        id:id,
+        action_record : action_record
+    }
+    if(confirm("确认删除这项"+record_name[index] +"吗？")){
+        destroy(url,parm)
+    }
+}
+
+function destroy(url,parm){
+    $.ajax({
+        type:"DELETE",
+        url: url,
+        dataType: "JSON",
+        data: parm,
+        success : function(data){
+            tishi_alert("删除成功！");
+            setTimeout(function(){
+                window.location.reload();
+            },500);
+            
+        }
+    }
+    )
+
+}

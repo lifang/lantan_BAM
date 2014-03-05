@@ -4,18 +4,17 @@
     <div class="popup_body_area">
       <div class="due_pay_money">
         <span style="padding-left: 20px;"><%=Account::TYPES_NAMES[params[:rend].to_i]%>：<span id="due_account"><%=@pay_orders.map(&:p_price).compact.inject(0){|n,p|n+p}.round(2)%></span></span>
-        <span style="float: right;padding-right: 20px;">余额：<span id="left_account"><%=@account.nil? ? 0 :@account.balance %></span></span></div>
-      <div class="due_pay_money">
-        <div style="padding-left: 20px; display: inline-block;">付款类型：<select  id="payment_id">
+        <span style="float: right;padding-right: 20px;">余额：<span id="left_account"><%=@account.nil? ? 0 :@account.balance %></span></span>
+        <span style="padding-left: 20px; display: inline-block;">付款类型：<select  id="payment_id">
             <% @defines.each do |k,v| %>
               <option value="<%= k %>"><%= v %></option>
             <% end %>
-          </select></div>
-        <div style="float: right;padding-right: 20px;display: inline-block;">创建人：<select  id="staff_id">
+          </select></span>
+        <span style="float: right;padding-right: 20px;display: inline-block;">创建人：<select  id="staff_id">
             <% @staffs.each do |k,v| %>
               <option value="<%= k %>" <% if k == cookies[:user_id] %>selected<%end%>><%= v %></option>
             <% end %>
-          </select></div>
+          </select></span>
       </div>
       <div class="due_pay_money"><span style="padding-left: 20px;">充值：<input type="text" id="in_account" value="0" style="height:30px;font-size: 25px;width:100px;" />元</span>
         <span style="float: right;padding-right: 10px;"><button  class="confirm_btn" style="height:40px;width:90px;font-size: 25px;" onclick="complete_account(<%=params[:store_id]%>,<%=@customer.id%>,<%=params[:rend]%>)">确 定</button></span></div>

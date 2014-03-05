@@ -43,6 +43,7 @@ LantanBAM::Application.routes.draw do
         post "payable_account","revenue_report","cost_price","analysis_price","create_assets","manage_assets","show_asset"
         post "update_asset"
         get "cost_price","analysis_price","manage_assets"
+        delete "destroy"
       end
     end
     resources :data_manages do

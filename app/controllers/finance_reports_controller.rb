@@ -89,8 +89,8 @@ class FinanceReportsController < ApplicationController
     if @end_time != "0"
       sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
     end
-    p @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE]).
-      where(:"m.types"=>MoneyDetail::TYPES[:FEE]).select("fees.*,m.amount m_amount").group_by{|i|i.types}
+    p @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE],:status=>Fee::STATUS[:NORMAL]).
+      select("fees.*,m.amount m_amount").group_by{|i|i.types}
     @customers = Staff.find(@fees.values.flatten.map(&:operate_staffid)).inject({}){|h,c|h[c.id]=c.name;h}
     respond_to do |format|
       format.html
@@ -129,7 +129,7 @@ class FinanceReportsController < ApplicationController
     if @end_time != "0"
       sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
     end
-    @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE]).
+    @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE],:status=>Fee::STATUS[:NORMAL]).
       select("date_format(fees.fee_date,'%Y-%m') date,fees.types,round(ifnull(sum(m.amount),0),2) t_amount").group("fees.types,date_format(fees.fee_date,'%Y-%m')").order("date desc")
   end
 
@@ -314,7 +314,7 @@ class FinanceReportsController < ApplicationController
       sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
     end
     @fixed_assets = FixedAsset.joins("inner join money_details m on m.parent_id = fixed_assets.id").where(sql).
-      where(:"m.types"=>MoneyDetail::TYPES[:ASSET]).select("fixed_assets.*,pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*m.amount left_value")
+      where(:"m.types"=>MoneyDetail::TYPES[:ASSET],:status=>FixedAsset::STATUS[:NORMAL]).select("fixed_assets.*,pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*m.amount left_value")
     @defines = Category.where(:types=>Category::TYPES[:ASSETS]).inject({}){|h,s|h[s.id]=s.name;h}
     @n_staffs = Staff.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.name;h}
     respond_to do |format|
@@ -364,7 +364,10 @@ class FinanceReportsController < ApplicationController
   end
 
 
-
+  def destroy
+    eval(params[:action_record].split("_").inject(String.new){|str,name| str + name.capitalize}).where(:id=>params[:id],:store_id=>params[:store_id]).update_all(:status=>ApplicationHelper::MODEL_STATUS[:DELETE])
+    render :json=>{:msg_type=>0}
+  end
   
 
 end

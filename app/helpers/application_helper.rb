@@ -7,7 +7,9 @@ module ApplicationHelper
   include UserRoleHelper
   include Oauth2Helper
   include CustomersHelper
-  
+
+  MODEL_STATUS = {:NORMAL => 0,:DELETE =>1} #0 正常 1 删除
+
   def sign?
     deny_access unless signed_in?
   end

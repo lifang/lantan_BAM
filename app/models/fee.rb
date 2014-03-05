@@ -5,4 +5,6 @@ class Fee < ActiveRecord::Base
   FEE_CODE = {0=>"ZJ",1=>"SF",2=>"BF",3=>"CF",4=>"ZF",5=>"GF",6=>"JB",7=>"DT",8=>"ZC",9=>"QT"}
 
   FEE_TYPES = {0=>"基本结算户",1=>"备用金",2=>"银行卡",3=>"私人垫付"}
+  STATUS = ApplicationHelper::MODEL_STATUS #0 正常 1 删除 2 作废
+  STATUS_NAMES = {0=>"正常",1=>"删除"}
 end

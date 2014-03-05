@@ -1,8 +1,8 @@
 <div class="h_finnace_title" id="finnace_title">
   <ul>
-    <li>总金额：<span><%= @fees.map(&:t_amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>|
+    <li>总金额：<span><%= @fees.map(&:t_amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>
     <%@fees.group_by{|i|i.types}.each do |k,v|%>
-      <li><%=Fee::FEE_TAB[k]%>：<span><%= v.map(&:t_amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>|
+      |<li><%=Fee::FEE_TAB[k]%>：<span><%= v.map(&:t_amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>
     <%end%>
   </ul>
 </div>
