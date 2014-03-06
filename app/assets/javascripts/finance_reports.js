@@ -211,7 +211,7 @@ function t_account(e){
     if (e.checked){
         for(var i=0;i <t_box.length;i++){
             var li = $(t_box[i]).parent().parent().find("td");
-            var child = " <li id=\"li_"+t_box[i].value+"\"><span style='color:red'>"+li.last().html()+"</span> 单号："+li.eq(1).html()+"</li>"
+            var child = " <li id=\"li_"+t_box[i].value+"\">单号："+li.eq(1).html()+" ￥<span style='color:red'>"+li.last().html()+"</span></li>"
             $("#added_accounts").append(child);
         }
     }else{
@@ -226,7 +226,7 @@ function t_account(e){
 function box_check(e){
     if (e.checked){
         var li = $(e).parent().parent().find("td");
-        var child = " <li id=\"li_"+e.value+"\"><span style='color:red'>"+li.last().html()+"</span> 单号："+li.eq(1).html()+"</li>"
+        var child = " <li id=\"li_"+e.value+"\"> 单号："+li.eq(1).html()+" ￥<span style='color:red'>"+li.last().html()+"</span></li>"
         $("#added_accounts").append(child);
     }else{
         $("#li_"+e.value).remove();

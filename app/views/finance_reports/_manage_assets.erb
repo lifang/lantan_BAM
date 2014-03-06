@@ -1,10 +1,12 @@
 <div class="h_finnace_title">
   <ul>
     <li>资产总值：<span><%=@fixed_assets.map(&:pay_amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>
-    <li>资产净值：<span><%=@fixed_assets.map(&:left_value).inject(0){|sum,n|sum+n}.round(2)%></span></li>
+    <% normal = @fixed_assets.group_by{|i| i.status}[FixedAsset::STATUS[:NORMAL]]  %>
+    <li>资产净值：<span><%=(normal.nil? ? 0 : normal.map(&:left_value).inject(0){|sum,n|sum+n}).round(2)%></span></li>
     <%@fixed_assets.group_by{|i| i.types}.each do |k,v|%>
       <li><%=@defines[k]%>总值：<span><%=v.map(&:pay_amount).inject(0){|sum,n|sum+n}.round(2)%></span></li>
-      <li><%=@defines[k]%>净值：<span><%=v.map(&:left_value).inject(0){|sum,n|sum+n}.round(2)%></span></li>
+      <% v_normal =v.group_by{|i| i.status}[FixedAsset::STATUS[:NORMAL]]  %>
+      <li><%=@defines[k]%>净值：<span><%=(v_normal.nil? ? 0 : v_normal.map(&:left_value).inject(0){|sum,n|sum+n}).round(2)%></span></li>
     <%end%>
   </ul>
 </div>
@@ -52,7 +54,7 @@
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
     <thead>
       <tr class="hbg">
-            <td width="10%">资产编号</td>
+        <td width="10%">资产编号</td>
         <td width="15%">资产名称</td>
         <td width="10%">购入时间</td>
         <td width="6%">购入数量</td>

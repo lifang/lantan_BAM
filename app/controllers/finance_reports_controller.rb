@@ -303,18 +303,18 @@ class FinanceReportsController < ApplicationController
   end
 
   def manage_assets
-    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
-    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
+    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month: params[:first_time].to_datetime
+    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now : params[:last_time].to_datetime
     @staffs = Staff.valid.where(:store_id=>params[:store_id],:type_of_w=>Staff::N_COMPANY.keys).order('type_of_w').group_by{|i|i.type_of_w}
-    sql = "fixed_assets.store_id=#{params[:store_id]} "
+    sql = "fixed_assets.store_id=#{params[:store_id]} and fixed_assets.status != #{FixedAsset::STATUS[:DELETE]}"
     if @start_time != "0"
-      sql += " and date_format(m.month,'%Y-%m-%d')>='#{@start_time}'"
+      sql += " and date_format(m.month,'%Y-%m')>='#{@start_time.strftime("%Y-%m")}'"
     end
     if @end_time != "0"
-      sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
+      sql += " and date_format(m.month,'%Y-%m')<='#{@end_time.strftime("%Y-%m")}'"
     end
     @fixed_assets = FixedAsset.joins("inner join money_details m on m.parent_id = fixed_assets.id").where(sql).
-      where(:"m.types"=>MoneyDetail::TYPES[:ASSET],:status=>FixedAsset::STATUS[:NORMAL]).select("fixed_assets.*,pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*m.amount left_value")
+      where(:"m.types"=>MoneyDetail::TYPES[:ASSET]).select("fixed_assets.*,pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*m.amount left_value")
     @defines = Category.where(:types=>Category::TYPES[:ASSETS]).inject({}){|h,s|h[s.id]=s.name;h}
     @n_staffs = Staff.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.name;h}
     respond_to do |format|
@@ -324,7 +324,7 @@ class FinanceReportsController < ApplicationController
   end
 
   def create_assets
-    assets = params[:assets].merge({:code => "ZC#{Time.now.strftime("%Y%m%d")}#{add_string(3,FixedAsset.where(:store_id=>params[:store_id]).count+1)}",:store_id=>params[:store_id]})
+    assets = params[:assets].merge({:code => "ZC#{Time.now.strftime("%Y%m%d")}#{add_string(3,FixedAsset.where(:store_id=>params[:store_id]).count+1)}",:store_id=>params[:store_id],:status=>FixedAsset::STATUS[:NORMAL]})
     asset = FixedAsset.create(assets)
     money_detail = []
     date = asset.pay_date.to_date
@@ -349,15 +349,15 @@ class FinanceReportsController < ApplicationController
     p @asset = FixedAsset.where(:id=>params[:asset_id]).select("fixed_assets.*,round(pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*(pay_amount/share_month),2) left_value").first
     @n_staffs = Staff.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.name;h}
     @defines = Category.where(:types=>Category::TYPES[:ASSETS]).inject({}){|h,s|h[s.id]=s.name;h}
-    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
-    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
+    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month : params[:first_time].to_datetime
+    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now : params[:last_time].to_datetime
     @staffs = Staff.valid.where(:store_id=>params[:store_id],:type_of_w=>Staff::N_COMPANY.keys).order('type_of_w').group_by{|i|i.type_of_w}
-    sql = "fixed_assets.store_id=#{params[:store_id]} "
+    sql = "fixed_assets.store_id=#{params[:store_id]} and fixed_assets.status != #{FixedAsset::STATUS[:DELETE]}"
     if @start_time != "0"
-      sql += " and date_format(m.month,'%Y-%m-%d')>='#{@start_time}'"
+      sql += " and date_format(m.month,'%Y-%m')>='#{@start_time.strftime("%Y-%m") }'"
     end
     if @end_time != "0"
-      sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
+      sql += " and date_format(m.month,'%Y-%m')<='#{@end_time.strftime("%Y-%m") }'"
     end
     @fixed_assets = FixedAsset.joins("inner join money_details m on m.parent_id = fixed_assets.id").where(sql).
       where(:"m.types"=>MoneyDetail::TYPES[:ASSET]).select("fixed_assets.*,pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*m.amount left_value")
