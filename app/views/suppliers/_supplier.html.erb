@@ -1,6 +1,6 @@
 <span class="relevance">
   <% max = @suppliers.map(&:name).inject([]){|arr,s|arr << check_str(s);}.max%>
-  <input name="" type="text" size="<%=max*0.8%>px" id="supplier_n" onPropertyChange="s_supplier()" oninput="s_supplier()" />(名称 or 助记码)
+  <input name="" type="text" size="<%=max.nil? ? 2 : max*0.8%>px" id="supplier_n" onPropertyChange="s_supplier()" oninput="s_supplier()" />(名称 or 助记码)
   <div class="relevance_box" id="supplier_box">
     <ul>
       <li id="<%= 0%>" dir="<%='zb'%>" style="display: none" ><%=  "总部"%></li>

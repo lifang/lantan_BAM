@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140227025717) do
+ActiveRecord::Schema.define(:version => 20140228025719) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -60,8 +60,8 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
   create_table "c_svc_relations", :force => true do |t|
     t.integer  "customer_id"
     t.integer  "sv_card_id"
-    t.decimal  "total_price",  :precision => 20, :scale => 2
-    t.decimal  "left_price",   :precision => 20, :scale => 2
+    t.decimal  "total_price",  :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "left_price",   :precision => 20, :scale => 2, :default => 0.0
     t.string   "id_card"
     t.boolean  "is_billing"
     t.datetime "created_at"
@@ -397,7 +397,7 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
   create_table "m_order_types", :force => true do |t|
     t.integer  "material_order_id"
     t.integer  "pay_types"
-    t.decimal  "price",             :precision => 20, :scale => 2
+    t.decimal  "price",             :precision => 20, :scale => 2, :default => 0.0
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -486,7 +486,7 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
     t.integer  "supplier_type"
     t.integer  "status"
     t.integer  "staff_id"
-    t.decimal  "price",          :precision => 20, :scale => 2
+    t.decimal  "price",          :precision => 20, :scale => 2, :default => 0.0
     t.datetime "arrival_at"
     t.string   "logistics_code"
     t.string   "carrier"
@@ -510,7 +510,7 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
   create_table "materials", :force => true do |t|
     t.string   "name"
     t.string   "code"
-    t.decimal  "price",                        :precision => 20, :scale => 2
+    t.decimal  "price",                        :precision => 20, :scale => 2, :default => 0.0
     t.integer  "storage"
     t.integer  "types"
     t.boolean  "status"
@@ -625,7 +625,7 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
   create_table "order_pay_types", :force => true do |t|
     t.integer  "order_id"
     t.integer  "pay_type"
-    t.decimal  "price",       :precision => 20, :scale => 2
+    t.decimal  "price",       :precision => 20, :scale => 2, :default => 0.0
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "product_id"
@@ -644,11 +644,11 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
     t.integer  "order_id"
     t.integer  "product_id"
     t.integer  "pro_num"
-    t.decimal  "price",        :precision => 20, :scale => 2
+    t.decimal  "price",        :precision => 20, :scale => 2, :default => 0.0
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.float    "total_price"
-    t.float    "t_price"
+    t.decimal  "total_price",  :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "t_price",      :precision => 20, :scale => 2, :default => 0.0
     t.integer  "return_types",                                :default => 0
   end
 
@@ -663,7 +663,7 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
     t.integer  "status",              :limit => 2
     t.datetime "started_at"
     t.datetime "ended_at"
-    t.decimal  "price",                            :precision => 20, :scale => 2
+    t.decimal  "price",                            :precision => 20, :scale => 2, :default => 0.0
     t.boolean  "is_visited"
     t.integer  "is_pleased"
     t.boolean  "is_billing"
@@ -716,7 +716,7 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
     t.datetime "ended_at"
     t.integer  "store_id"
     t.boolean  "status"
-    t.decimal  "price",          :precision => 20, :scale => 2
+    t.decimal  "price",          :precision => 20, :scale => 2,  :default => 0.0
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "date_types"
@@ -818,8 +818,8 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
 
   create_table "products", :force => true do |t|
     t.string   "name"
-    t.float    "base_price"
-    t.decimal  "sale_price",     :precision => 20, :scale => 2
+    t.decimal  "base_price",     :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "sale_price",     :precision => 20, :scale => 2, :default => 0.0
     t.text     "description"
     t.integer  "types"
     t.string   "service_code"
@@ -834,12 +834,12 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
     t.string   "standard"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.decimal  "deduct_percent", :precision => 20, :scale => 2
-    t.decimal  "t_price",        :precision => 20, :scale => 2
+    t.decimal  "deduct_percent", :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "t_price",        :precision => 20, :scale => 2, :default => 0.0
     t.boolean  "is_auto_revist"
     t.integer  "auto_time"
     t.text     "revist_content"
-    t.integer  "prod_point"
+    t.integer  "prod_point",                                    :default => 0
     t.decimal  "deduct_price",   :precision => 20, :scale => 2, :default => 0.0
     t.boolean  "show_on_ipad",                                  :default => true
     t.boolean  "commonly_used",                                 :default => false
@@ -1266,7 +1266,7 @@ ActiveRecord::Schema.define(:version => 20140227025717) do
     t.string   "name"
     t.string   "img_url"
     t.integer  "types"
-    t.decimal  "price",       :precision => 20, :scale => 2
+    t.decimal  "price",       :precision => 20, :scale => 2, :default => 0.0
     t.float    "discount"
     t.datetime "created_at"
     t.datetime "updated_at"

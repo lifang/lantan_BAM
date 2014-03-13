@@ -79,15 +79,15 @@ class FinanceReportsController < ApplicationController
 
   def fee_manage
     @staffs = Staff.valid.where(:store_id=>params[:store_id],:type_of_w=>Staff::N_COMPANY.keys).order('type_of_w').group_by{|i|i.type_of_w}
-    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
-    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
+    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month : params[:first_time].to_datetime
+    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now : params[:last_time].to_datetime
     @position = params[:position].nil? || params[:position] == "" ? 0 : params[:position].to_i
     sql = "fees.store_id=#{params[:store_id]} "
     if @start_time != "0"
-      sql += " and date_format(m.month,'%Y-%m-%d')>='#{@start_time}'"
+      sql += " and date_format(m.month,'%Y-%m')>='#{@start_time.strftime("%Y-%m")}'"
     end
     if @end_time != "0"
-      sql += " and date_format(m.month,'%Y-%m-%d')<='#{@end_time}'"
+      sql += " and date_format(m.month,'%Y-%m')<='#{@end_time.strftime("%Y-%m")}'"
     end
     p @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE],:status=>Fee::STATUS[:NORMAL]).
       select("fees.*,m.amount m_amount").group_by{|i|i.types}
@@ -174,7 +174,6 @@ class FinanceReportsController < ApplicationController
     OrderPayType.transaction do
       @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
       @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
-   
       if params[:pay_recieve].to_f > 0
         PayReceipt.create({:types=>params[:rend].to_i,:supply_id=>params[:customer_id],:month=>Time.now.strftime("%Y-%m"),
             :amount=>params[:pay_recieve],:store_id=>params[:store_id],:staff_id=>params[:staff_id],:category_id=>params[:pay_type]})

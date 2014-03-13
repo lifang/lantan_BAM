@@ -199,7 +199,7 @@ class Api::NewAppOrdersController < ApplicationController
   end
 
   #生成订单
-  def make_order2
+   def make_order2
     #参数params[:content]类型：id_count_search_type_type(选择的商品id_数量_产品/服务/卡_储值卡/打折卡/套餐卡)
     pram_str = params[:content].split("-") if params[:content]
     status = 1
@@ -836,37 +836,9 @@ class Api::NewAppOrdersController < ApplicationController
     #打折卡 2_id_type_is_new_id=price_cid 2开头，打折卡id，类型(0)，是否是新的，打折卡打折的产品(服务)id=打折的价格，客户-打折卡关联的id
     #套餐卡 3_id_is_new_id=price_cid    3开头，套餐卡id,是否是新的，套餐卡使用的产品(服务)id=使用的次数，客户-套餐卡关联的id
     #brand: 1_2 brand的id_model的id, userName 客户的name
-    Customer.transaction do
+    Order.transaction do
       customer = Customer.find_by_id(params[:customer_id].to_i)
       ocid = customer.id
-      car_num = CarNum.find_by_id(params[:car_num_id].to_i)
-      car_num.update_attributes(:car_model_id => params[:brand].nil? || params[:brand].split("_")[1].nil? ? nil : params[:brand].split("_")[1].to_i,
-        :buy_year => params[:year], :distance => params[:cdistance].nil? ? nil : params[:cdistance].to_i)
-      if customer.mobilephone != params[:phone] && !params[:phone].nil? && params[:phone].strip != "" #如果输入的电话号码不是该客户的电话号码
-        customer2 = Customer.find_by_mobilephone_and_status(params[:phone], Customer::STATUS[:NOMAL])
-        if customer2.nil? #如果该电话号码没有被用过,则更新该客户信息
-          customer.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip, :mobilephone => params[:phone].nil? ? nil : params[:phone].strip,
-            :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
-            :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
-        else  #如果该电话号码已被用，则查出这个客户，并且把原来客户的所有车牌关联到这个客户下，并且删除原来的客户
-          customer2.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip,
-            :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
-            :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
-          #cnr2 = CustomerNumRelation.find_by_customer_id_and_car_num_id(customer2.id, car_num.id)
-          ncsr = CustomerStoreRelation.find_by_customer_id_and_store_id(customer2.id, params[:store_id].to_i)
-          #CustomerNumRelation.create(:customer_id => customer2.id, :car_num_id => car_num.id) unless cnr2
-          CustomerStoreRelation.create(:customer_id => customer2.id, :store_id => params[:store_id].to_i) unless ncsr
-          customer.customer_num_relations.inject([]){|h, cnr| cnr.update_attribute("customer_id", customer2.id)}
-          #CustomerNumRelation.delete_all(:customer_id => customer.id, :car_num_id => car_num.id)
-          CustomerStoreRelation.delete_all(:customer_id => customer.id)
-          customer.destroy
-          customer = customer2
-        end
-      else
-        customer.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip,
-          :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
-          :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
-      end
       order = Order.find_by_id(params[:order_id].to_i)
       oprs = order.order_prod_relations
       order.update_attribute("customer_id", customer.id)
@@ -1526,5 +1498,45 @@ class Api::NewAppOrdersController < ApplicationController
     orders = combin_orders(orders)
     orders = new_app_order_by_status(orders)
     orders
+  end
+
+  def update_customer
+    begin
+      Customer.transaction do
+        customer = Customer.find_by_id(params[:customer_id].to_i)
+        car_num = CarNum.find_by_id(params[:car_num_id].to_i)
+        car_num.update_attributes(:car_model_id => params[:brand].nil? || params[:brand].split("_")[1].nil? ? nil : params[:brand].split("_")[1].to_i,
+          :buy_year => params[:year], :distance => params[:cdistance].nil? ? nil : params[:cdistance].to_i)
+        if customer.mobilephone != params[:phone] && !params[:phone].nil? && params[:phone].strip != "" #如果输入的电话号码不是该客户的电话号码
+          customer2 = Customer.find_by_mobilephone_and_status(params[:phone], Customer::STATUS[:NOMAL])
+          if customer2.nil? #如果该电话号码没有被用过,则更新该客户信息
+            customer.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip, :mobilephone => params[:phone].nil? ? nil : params[:phone].strip,
+              :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
+              :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
+          else  #如果该电话号码已被用，则查出这个客户，并且把原来客户的所有车牌关联到这个客户下，并且删除原来的客户
+            customer2.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip,
+              :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
+              :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
+            #cnr2 = CustomerNumRelation.find_by_customer_id_and_car_num_id(customer2.id, car_num.id)
+            ncsr = CustomerStoreRelation.find_by_customer_id_and_store_id(customer2.id, params[:store_id].to_i)
+            #CustomerNumRelation.create(:customer_id => customer2.id, :car_num_id => car_num.id) unless cnr2
+            CustomerStoreRelation.create(:customer_id => customer2.id, :store_id => params[:store_id].to_i) unless ncsr
+            customer.customer_num_relations.inject([]){|h, cnr| cnr.update_attribute("customer_id", customer2.id)}
+            #CustomerNumRelation.delete_all(:customer_id => customer.id, :car_num_id => car_num.id)
+            CustomerStoreRelation.delete_all(:customer_id => customer.id)
+            customer.destroy
+            customer = customer2
+          end
+        else
+          customer.update_attributes(:name => params[:userName].nil? ? nil : params[:userName].strip,
+            :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
+            :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name])
+        end
+      end
+      status = 0
+    rescue
+      status = 1
+    end
+    render :json => {:status => status}
   end
 end

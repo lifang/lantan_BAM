@@ -328,7 +328,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post :customer_pcards, :package_make_order, :pcard_make_order_commit, :pcard_order_info
         post :make_order2, :complaint, :quickly_make_order, :pay_order_no_auth
-        post :make_order
+        post :make_order,:update_customer
         post :search, :sync_orders_and_customer
         post :new_index_list, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order, :cancel_order
       end

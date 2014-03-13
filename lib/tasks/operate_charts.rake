@@ -127,6 +127,10 @@ task(:new_types => :environment) do
 end
 
 #------------3月3号已未更新
+#上海系统数据导入
+task(:import_new_data_sh => :environment) do
+  CarNum.import_d(85)
+end
 
 
 

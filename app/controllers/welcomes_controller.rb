@@ -13,18 +13,18 @@ class WelcomesController < ApplicationController
 
   def edit_store_name
     if Store.where(["id != ? and name = ?", params[:store_id].to_i,params[:name].strip]).blank?
-    store = Store.find_by_id(params[:store_id].to_i)
-    if store.nil?
-      render :json => {:status => 0}
-    else
-      if store.update_attribute("name", params[:name].strip)
-        cookies.delete(:store_name)
-        cookies[:store_name] = {:value => store.name, :path => "/", :secure => false}
-        render :json => {:status => 1, :new_name => store.name}
-      else
+      store = Store.find_by_id(params[:store_id].to_i)
+      if store.nil?
         render :json => {:status => 0}
+      else
+        if store.update_attribute("name", params[:name].strip)
+          cookies.delete(:store_name)
+          cookies[:store_name] = {:value => store.name, :path => "/", :secure => false}
+          render :json => {:status => 1, :new_name => store.name}
+        else
+          render :json => {:status => 0}
+        end
       end
-    end
     else
       render :json => {:status => 2}
     end
@@ -38,14 +38,14 @@ class WelcomesController < ApplicationController
     end
     staff = Staff.find_by_id(cookies[:user_id])
     if staff.has_password?(params[:old_password])
-        staff.password = params[:new_password]
-        staff.encrypt_password
-        if staff.save
-          @notice = "密码修改成功！"
-          @flag = true
-        else
-          @notice = "密码修改失败! #{staff.errors.messages.values.flatten.join("<br/>")}"
-        end
+      staff.password = params[:new_password]
+      staff.encrypt_password
+      if staff.save
+        @notice = "密码修改成功！"
+        @flag = true
+      else
+        @notice = "密码修改失败! #{staff.errors.messages.values.flatten.join("<br/>")}"
+      end
     else
       @notice = "请输入正确的旧密码！"
     end
