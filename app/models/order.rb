@@ -12,6 +12,7 @@ class Order < ActiveRecord::Base
   has_many :revisit_order_relations
   has_many :o_pcard_relations
   has_many :complaints
+  hash_many :tech_orders
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
   STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6,
