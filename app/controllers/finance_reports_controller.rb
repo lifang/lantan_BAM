@@ -70,7 +70,7 @@ class FinanceReportsController < ApplicationController
     @pays = OrderPayType.search_pay_types(@p_orders.map(&:id))
     @pay_types = OrderPayType.pay_order_types(@p_orders.map(&:id))
     @order_price = @p_orders.inject({}){|h,p|h[p.is_service].nil? ? h[p.is_service]={p.id=>p.price} : h[p.is_service][p.id]=p.price;h}
-    @orders = @p_orders.paginate(:page=>params[:page],:per_page=>Constant::LITE_PAGE)
+    @orders = @p_orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     respond_to do |format|
       format.html
       format.js

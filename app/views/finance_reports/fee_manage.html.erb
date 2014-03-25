@@ -20,7 +20,7 @@
           <div class="tab_before">
             <ul>
               <%=  Fee::FEE_TAB.map{|k,tab| @position == k ? "<li id=#{k} class=hover onclick='change_tab(this,#{k})'>#{tab}</li>" : "<li id=#{k} onclick='change_tab(this,#{k})'>#{tab}</li>"}.join("").html_safe%>
-              <li style="float:right;padding:-1px 9px;"><button class="search_btn" onclick="before_center('#add_tab')">新 &nbsp&nbsp&nbsp&nbsp建</button></li>
+              <li style="float:right;padding:-1px 9px;"><button class="search_btn" onclick="show_center('#add_tab')">新 &nbsp&nbsp&nbsp&nbsp建</button></li>
             </ul>
           </div>
           <div class="data_item" id="fee_manage">

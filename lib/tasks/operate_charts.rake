@@ -127,12 +127,104 @@ task(:new_types => :environment) do
 end
 
 #------------3月3号已未更新
-#上海系统数据导入
+#上海系统数据导入  需要删除文件最后一行防止乱码和错误
 task(:import_new_data_sh => :environment) do
-  CarNum.import_d(85)
+  time = Time.now.to_i
+  CarNum.import_d(6)  #参数设置为要导入的门店id
+  p "the run time is #{(Time.now.to_i - time)/3600.0}"
 end
 
+#储值卡增加编号
+task(:add_id_card => :environment) do
+  time = Time.now.to_i
+  CSvcRelation.joins(:customer=>:stores).select("c_svc_relations.id,store_id").inject({}){|h,s|
+    h[s.store_id].nil? ? h[s.store_id] =[s.id] : h[s.store_id] << s.id;h
+  }.each {|c_svc,v|
+    CSvcRelation.find(v).each_with_index do |cs,index|
+      cs.update_attributes(:id_card=>add_length(5,index+1))
+    end
+  }
+  p "the run time is #{(Time.now.to_i - time)/60.0}"
+end
 
+def self.add_length(len,str)
+  return "0"*(len-"#{str}".length)+"#{str}"
+end
 
+task(:update_svc_card_sh => :environment) do
+  require 'spreadsheet'
+  time = Time.now.to_i
+  store_id = 100028
+  sv_card_id = 85
+  path = "#{Constant::LOCAL_DIR}wating_data/"
+  num_customers = CarNum.joins(:customer_num_relation=>{:customer=>:customer_store_relations}).
+    where(:"customer_store_relations.store_id"=>store_id).select("num,customer_num_relations.customer_id c_id").inject({}){|h,c|h[c.num]=c.c_id;h}
+  cm = CarModel.all.inject({}){|h,cm|h[cm.id]=cm.name;h} #车牌数据
+  svcard_use_records,uncompared,vips,c_store_ralation,c_num_relation = [],[],[],[],[]
+  Spreadsheet.open path+"cards.xls" do |book|  #客户表  使用block可以关闭文件
+    sheet = book.worksheet 0
+    sheet.each_with_index do |row,index|
+      if index != 0
+        customer_id = num_customers[row[2]]
+        if num_customers[row[2]].nil?
+          car_model_id = nil
+          out = false
+          car_name = (row[28]|row[27]).strip.split(" ").join("")
+          if car_name.length > 1
+            c_name = car_name.split("")
+            (0..(c_name.length-1)).each do |i|
+              break if out
+              if c_name.length != (i+1)
+                ((i+1)..c_name.length).each do |j|
+                  break if out
+                  cm.each{|k,v|
+                    if v[c_name[i..j].join("")] #匹配到的车牌
+                      car_model_id = k
+                      if v.length == car_name.length #匹配到而且字数一致
+                        out = true
+                        break
+                      end
+                    end
+                  }
+                end
+              end
+            end
+          end
+          #如果客户不存在  则创建新客户
+          car_num = {:num=>row[2],:car_model_id=>car_model_id,:buy_year=>row[25].nil? ? 2013 : row[25].to_datetime.strftime("%Y")}
+          v = {:name=>row[3],:mobilephone=>row[7]|row[8],:address=>row[5],:created_at=>row[37]}
+          cu = Customer.create(v)
+          customer_id = cu.id
+          c_store_ralation << CustomerStoreRelation.new(:store_id=>store_id,:customer_id=>cu.id)
+          cn = CarNum.create(car_num)
+          c_num_relation << CustomerNumRelation.new(:car_num_id=>cn.id,:customer_id=>cu.id)
+          uncompared << row.inject([]){|arr,r|arr << r}
+        end
+        parms = {:customer_id=>customer_id,:sv_card_id=>sv_card_id,:total_price=>row[14],:is_billing=>!row[12].nil?,
+          :left_price=>row[13],:id_card=>row[1],:password=>Digest::MD5.hexdigest("123456"),:status=>CSvcRelation::STATUS[:valid]
+        }
+        vips << customer_id
+        c_svc_relation = CSvcRelation.create(parms)
+        svcard_use_records << SvcardUseRecord.new({:c_svc_relation_id=>c_svc_relation.id,:types=>SvcardUseRecord::TYPES[:IN],:use_price=>0,:left_price=>c_svc_relation.total_price})
+        svcard_use_records << SvcardUseRecord.new({:c_svc_relation_id=>c_svc_relation.id,:types=>SvcardUseRecord::TYPES[:OUT],:use_price=>row[15],:left_price=>c_svc_relation.left_price})
+      end
+    end
+    #如果判定为有卡用户则更改状态为vip客户
+    CustomerStoreRelation.where(:customer_id=>vips,:store_id=>store_id).update_all(:is_vip=>CustomerStoreRelation::IS_VIP[:YES])
+    p uncompared.length
+    #将重复的数据写入excel表格  手机号会换 名字会重复 所以车牌无法判定的会员在这里存在
+    Spreadsheet.client_encoding = "UTF-8"
+    book = Spreadsheet::Workbook.new
+    sheet = book.create_worksheet
+    uncompared.each_with_index do |row,index|
+      sheet.row(index).concat row
+    end
+    book.write path +"same_names.xls"
+    SvcardUseRecord.import svcard_use_records
+    CustomerStoreRelation.import c_store_ralation
+    CustomerNumRelation.import c_num_relation
+  end
+  p "the run time is #{(Time.now.to_i - time)/60.0}"
+end
 
 

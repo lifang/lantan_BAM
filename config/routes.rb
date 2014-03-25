@@ -208,8 +208,8 @@ LantanBAM::Application.routes.draw do
 
     resources :set_stores do
       collection do
-        get "select_cities","cash_register","complete_pay","print_paper","single_print"
-        post "load_order","pay_order"
+        get "select_cities","cash_register","complete_pay","print_paper","single_print","plus_items"
+        post "load_order","pay_order","edit_svcard","search_item","search_info"
       end
     end
     resources :station_datas do

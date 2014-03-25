@@ -1,2 +1,2 @@
 $("#account").html('<%= j(render :partial => "pay_account",:object=>params[:rend]) %>');
-$("#pay_account,.maskOne").css('display','none');
+$("#pay_account .close").trigger('click');

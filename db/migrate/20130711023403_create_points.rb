@@ -1,5 +1,5 @@
 class CreatePoints < ActiveRecord::Migration
-  def change
+  def change  #积分表
     create_table :points do |t|
       t.integer :customer_id
       t.integer :target_id

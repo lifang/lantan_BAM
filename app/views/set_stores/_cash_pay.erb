@@ -65,9 +65,10 @@
 <div id="sv_card_used">
   <% @sv_card.each do |card| %>
     <div class="accountsTab_pay" >
-      <div class="accountsTab_pay_title"><h3>储值卡</h3><span class="pay_span"><%=card.name%></span>
+      <div class="accountsTab_pay_title"><h3>储值卡</h3><span class="pay_span"><%=card.name%>(卡号：<label id="svc_<%=card.id%>"><%=card.id_card%></label>)
+          <a class="" href="javascript:void(0)" onclick="show_edit(<%=params[:store_id]%>,<%=card.id%>)">编辑</a></span>
         <div>
-          <span style="float: left;margin-left: 60px;"  id="<%=card.order_id%>_<%=card.id%>">
+          <span style="float: left;margin-left: 140px;"  id="<%=card.order_id%>_<%=card.id%>">
             <input id="radio_<%= card.id %>" type="checkbox"  onclick="check_sum(<%= card.id %>,this)" class="pay_check" />使用此卡支付</span>
           <span style="float: right;">
             <%  cas = card.ci.split(',').inject(Array.new){|arr,c|arr << @cates[c.to_i]}%>

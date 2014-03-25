@@ -45,6 +45,7 @@ class Store < ActiveRecord::Base
     3 => "旗舰版"
   }
   EDITION_NAME = {:FACTUARL => 0} # 使用版  0
+  IS_CHAIN = {:YES => 1,:NO => 0} #是否有关联的连锁店
 
   CASH_AUTH = {:NO => 0, :YES => 1} #是否有在pad上收银的权限
   def self.upload_img(img_url,store_id,pic_types,pics_size,img_code=nil)

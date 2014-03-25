@@ -2,5 +2,5 @@
 class SvcardUseRecord < ActiveRecord::Base
   belongs_to :c_svc_relation
 
-  TYPES = {:IN => 0, :OUT => 1}
+  TYPES = {:IN => 0, :OUT => 1} 
 end

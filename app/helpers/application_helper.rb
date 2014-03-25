@@ -264,4 +264,11 @@ module ApplicationHelper
   def add_string(len,str)
     return "0"*(len-"#{str}".length)+"#{str}"
   end
+
+  def chain_store(store_id)  #获取本门店的连锁店
+    sql ="select distinct(scr.store_id) from store_chains_relations scr inner join stores s on scr.store_id=s.id where s.status in
+      (#{Store::STATUS[:OPENED]},#{Store::STATUS[:DECORATED]})  and scr.chain_id in (select distinct(scr.chain_id) from store_chains_relations scr
+      inner join chains c on scr.chain_id=c.id where scr.store_id =#{store_id} and c.status=#{Chain::STATUS[:NORMAL]} )"
+    store_ids = StoreChainsRelation.find_by_sql(sql).map(&:store_id) #获取该门店所有的连锁店
+  end
 end

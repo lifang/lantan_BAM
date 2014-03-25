@@ -12,8 +12,12 @@ class Api::NewAppOrdersController < ApplicationController
     work_orders = working_orders params[:store_id]
     #stations_count => 工位数目
     station_ids = Station.where("store_id =? and status not in (?) ",params[:store_id], [Station::STAT[:WRONG], Station::STAT[:DELETED]]).select("id, name")
+    work_records = WorkRecord.where(:current_day=>Time.now.strftime("%Y-%m-%d").to_datetime,:store_id=>params[:store_id]).inject({}){|h,w|h[w.staff_id]=w.attend_types;h}
+    t_staffs = Staff.where(:type_of_w=>Staff::S_COMPANY[:TECHNICIAN],:store_id=>params[:store_id]).valid.select("id,name").inject([]){|arr,s|arr << {:name=>s.name,:id=>s.id,:status=>WorkRecord::ATTEND_YES.include?(work_records[s.id]) ? 1 : 0 }}
+    s_staffs = Staff.joins(:station_staff_relations).select("station_id,name,staff_id").where(:"station_staff_relations.current_day"=>Time.now.strftime('%Y%m%d').to_i,
+      :"staffs.store_id"=>params[:store_id]).group_by{|i|i.station_id}.values
     services = Product.is_service.is_normal.commonly_used.where(:store_id => params[:store_id]).select("id, name, sale_price as price")
-    render :json => {:status => status, :orders => work_orders, :station_ids => station_ids, :services => services}
+    render :json => {:status => status, :orders => work_orders, :station_ids => station_ids, :services => services,:total_staffs=>t_staffs,:used_staffs=>s_staffs}
   end
 
   #产品、服务、卡类搜索
@@ -122,7 +126,7 @@ class Api::NewAppOrdersController < ApplicationController
         if s.types.to_i==SvCard::FAVOR[:SAVE] #如果是储值卡，则把冲xx送XX，可以在XX类下消费加入到描述中
           str = ""
           spr = SvcardProdRelation.find_by_sv_card_id(s.id)
-          if spr
+          if spr && spr.category_id
             ct = Category.find_by_sql(["select name from categories where id in (?)", spr.category_id.split(",")]).map(&:name)
             str += "充"+spr.base_price.to_s+"送"+spr.more_price.to_s+"\n"
             str += "适用类型：\n"
@@ -199,7 +203,7 @@ class Api::NewAppOrdersController < ApplicationController
   end
 
   #生成订单
-   def make_order2
+  def make_order2
     #参数params[:content]类型：id_count_search_type_type(选择的商品id_数量_产品/服务/卡_储值卡/打折卡/套餐卡)
     pram_str = params[:content].split("-") if params[:content]
     status = 1
@@ -301,7 +305,8 @@ class Api::NewAppOrdersController < ApplicationController
                 money = card.svcard_prod_relations.first
                 CSvcRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id,
                   :sv_card_id => card.id, :order_id => order.id, :status => CSvcRelation::STATUS[:invalid],
-                  :total_price => money.base_price+money.more_price, :left_price => money.base_price+money.more_price)
+                  :total_price => money.base_price+money.more_price, :left_price => money.base_price+money.more_price,
+                  :id_card=>add_string(5,CSvcRelation.joins(:customer=>:stores).where(:"customer_store_relations.store_id"=>params[:store_id]).count+1))
                 item = SvcardProdRelation.where(["sv_card_id = ? ", card.id]).first
                 arr = []
                 item.category_id.split(",").each do |i|

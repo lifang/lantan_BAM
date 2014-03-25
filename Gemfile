@@ -20,6 +20,7 @@ group :assets do
   #gem 'coffee-rails', '~> 3.1.1'
   gem 'uglifier', '>= 1.0.3'
 end
+gem "mongrel", "~> 1.2.0.pre2"
 gem 'json', '1.7.6'
 gem 'execjs', '1.4.0'
 #gem 'therubyracer', '0.11.4'

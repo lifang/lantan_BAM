@@ -1,7 +1,7 @@
 <div class="popup_body_area">
   <div class="seeProDiv">
     <div class="seeProDiv_l">投诉时间：</div>
-    <div class="seeProDiv_r"><%= @complaint.created_at ? @complaint.created_at.strftime("%Y-%m-%d %H:%M:%S") : "---" %></div>
+    <div class="seeProDiv_r"><%= @complaint.created_at.nil?  ? "---" : @complaint.created_at.strftime("%Y-%m-%d %H:%M:%S") %></div>
   </div>
   <div class="seeProDiv">
     <div class="seeProDiv_l">投诉理由：</div>

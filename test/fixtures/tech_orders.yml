@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  staff_id: 1
+  order_id: 1
+  own_deduct: 9.99
+
+two:
+  staff_id: 1
+  order_id: 1
+  own_deduct: 9.99

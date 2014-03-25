@@ -474,3 +474,143 @@ function calulate_v(pay_type){
         $("#change_"+pay_type).val(v);
     }
 }
+
+function edit_id_svcard(store_id,card_id){
+    var url = "/stores/"+store_id+"/set_stores/edit_svcard";
+    var number = $("#id_card").val();
+    var pattern = new RegExp("[0-9]")
+    if(number =="" || number.length <4 || !pattern.test(number)){
+        $(".tab_alert").css("z-index",121);
+        tishi_alert("卡号至少为四位数字");
+        return false;
+    }else{
+        $.ajax({
+            type:"post",
+            url:url,
+            dataType: "json",
+            data: {
+                card_id : card_id,
+                number : number
+            },
+            success : function(data){
+                $("#svc_"+data.card_id).html(data.number);
+                $("#edit_card .close").trigger("click");
+                tishi_alert("修改成功！");
+            }
+        })
+    }
+    
+}
+
+function show_edit(store_id,card_id){
+    $("#id_card").val($("#svc_"+card_id).html());
+    $("#confirm_card").attr("onclick","edit_id_svcard("+store_id+","+card_id+")");
+    before_center("#edit_card");
+    $("#id_card").focus();
+}
+
+function auth_car_num(e,store_id){
+    if(e.value !="" || e.length>0){
+        var url = "/stores/"+store_id+"/set_stores/search_info";
+        var data ={
+            car_num : e.value
+        }
+        $.ajax({
+            type:"post",
+            url:url,
+            dataType: "script",
+            data: data
+        })
+    }else{
+        $("#c_id").val("");
+        $("#bill_user_info input").removeAttr("readonly");
+    }
+   
+}
+
+function search_item(store_id){
+    var item_id = $("#search_item .hover")[0].id;
+    var item_name = $("#search_item #item_name").val();
+    var checked_item = $("#checked_item").val();
+    var url = "/stores/"+store_id+"/set_stores/search_item";
+    var data ={
+        item_id : item_id,
+        item_name : item_name,
+        checked_item : checked_item.split(",")
+    }
+    $("#spinner_user,#item_btn").toggle();
+    $.ajax({
+        type:"post",
+        url:url,
+        dataType: "script",
+        data: data
+    })
+}
+
+
+function show_div(e){
+    $(".card").css("display","none");
+    $("#div_"+e.id).css("display","block");
+    $(e).addClass('hover').siblings().removeClass('hover')
+}
+
+function add_cart(e){
+    var price = $(e).parent().find("#price").html();
+    var total_price = $("#total_price").html();
+    if(e.checked){
+        var storage = $(e).parent().find("#storage").html();     
+        $("#checked_item").val($("#checked_item").val()+","+e.id);
+        $("#table_item").append("<tr id='"+ e.id+"' class='"+(storage == undefined ? 1 : storage)+"'><td>"+$(e).parent().find("#name").html() +"</td><td id='price'>"+price+"</td>\n\
+       <td>\n\<a href='javascript:void(0)' class='addre_a' onclick='del_num(this)'>-</a><span style='margin:5px;'><input type='text' class='addre_input' value='1' readonly /></span>\n\
+       <a href='javascript:void(0)' class='addre_a' style='font-size:22px;' onclick='add_num(this)'>+</a></td><td id='t_price'>"+$(e).parent().find("#price").html() +"</td><td><a href='javascript:void(0)'>删除</a></td></tr>");
+        $("#card_position").css("height",($("#card_position").height()+37)+"px");
+        $("#total_price").html(change_dot(round(total_price,2)+round(price,2),2));
+    }else{
+        var checked_item = $("#checked_item").val().split(",");
+        var left_item = [];
+        for(var i=0;i<checked_item.length;i++){
+            if(checked_item[i] != e.id){
+                left_item.push(checked_item[i]);
+            }
+        }
+        $("#checked_item").val(left_item.join(","));
+        var t_price = $("#table_item #"+e.id +" #t_price").html();
+        $("#card_position").css("height",($("#card_position").height()-37)+"px");
+        $("#total_price").html(change_dot(round(total_price,2)-round(t_price,2),2));
+        $("#table_item #"+e.id).remove();
+    }
+}
+
+
+function add_num(e){
+    var max = $(e).parent().parent().eq(0).attr("class");
+    var num = $(e).parent().find("input").val();
+    var single_price = $(e).parent().parent().find("#price").html(); //单价
+    var total_price = $("#total_price").html();
+    if (parseInt(max) > parseInt(num)){
+        $(e).parent().find("input").val(parseInt(num)+1);
+        $(e).parent().parent().find("#t_price").html(change_dot(single_price*(parseInt(num)+1))); //小计价格
+        $("#total_price").html(change_dot(round(total_price,2)+round(single_price,2),2)); //设置总价
+        if (parseInt(max) == (parseInt(num)+1)){
+            e.title = "最大可购买数量";
+        }
+    }else{
+        e.title = "最大可购买数量";
+    }
+}
+
+function del_num(e){
+    var num = $(e).parent().find("input").val();
+    var single_price = $(e).parent().parent().find("#price").html(); //单价
+    var total_price = $("#total_price").html();
+    if (parseInt(num) > 1 ){
+        $(e).parent().find("input").val(parseInt(num)-1);
+        $(e).parent().parent().find("#t_price").html(change_dot(single_price*(parseInt(num)-1))); //小计价格
+        $("#total_price").html(change_dot(round(total_price,2)+round(single_price,2),2)); //设置总价
+        if (parseInt(num)==2){
+            e.title = "最小购买数量：1";
+        }
+    }else{
+        e.title = "最小购买数量：1";
+    }
+}

@@ -17,10 +17,11 @@
     <div class="head">
       <div class="box">
         <%= render :partial => "/common/login_header" %>
-        <% if  ["cash_register",'complete_pay'].include? controller.action_name %>
+        <% if  ["cash_register",'complete_pay','plus_items'].include? controller.action_name %>
           <div class="nav">
             <ul>
-              <li><%= link_to "收银", store_station_datas_url(params[:store_id]), :class => cover_div("set_stores") %></li>
+              <li><a href="/stores/<%= params[:store_id] %>/set_stores/cash_register" <%if ["cash_register","complete_pay"].include? controller.action_name%>class="hover"<%end%>>收银</a></li>
+              <li><a href="/stores/<%= params[:store_id] %>/set_stores/plus_items" <%if ["plus_items"].include? controller.action_name%>class="hover"<%end%>>业务开单</a></li>
             </ul>
           </div>
           <div class="back"  style="width:128px"><a href="/stores/<%= params[:store_id] %>/welcomes" title="返回">Back</a>收银</div>

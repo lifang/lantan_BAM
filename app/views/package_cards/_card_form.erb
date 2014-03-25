@@ -23,7 +23,8 @@
   <label><span class="red">*</span>套餐卡名称：</label><input name="name" id="name" type="text" value="<%= @pcard.name %>" />
 </div>
 <div class="item">
-  <label><span class="red">*</span>套餐价格：</label><input name="price" id="price" type="text" value="<%= @pcard.price %>" />
+  <label><span class="red">*</span>套餐价格：</label>
+  <input name="price" id="price" type="text" value="<%= @pcard.price %>" <%if @pcard.price%> readonly <%end%> />
 </div>
 <div class="item_textarea"><span class="item_radio">
     <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>

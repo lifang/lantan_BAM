@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140228025719) do
+ActiveRecord::Schema.define(:version => 20140324153500) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -49,6 +49,8 @@ ActiveRecord::Schema.define(:version => 20140228025719) do
     t.datetime "updated_at"
     t.integer  "order_id"
     t.integer  "return_types",    :default => 0
+    t.string   "card_id"
+    t.integer  "store_id"
   end
 
   add_index "c_pcard_relations", ["customer_id"], :name => "index_c_pcard_relations_on_customer_id"
@@ -71,6 +73,8 @@ ActiveRecord::Schema.define(:version => 20140228025719) do
     t.boolean  "status"
     t.integer  "return_types",                                :default => 0
     t.string   "password"
+    t.string   "card_id"
+    t.integer  "store_id"
   end
 
   add_index "c_svc_relations", ["customer_id"], :name => "index_c_svc_relations_on_customer_id"
@@ -1237,6 +1241,7 @@ ActiveRecord::Schema.define(:version => 20140228025719) do
     t.string   "limited_password"
     t.integer  "cash_auth",        :default => 0
     t.integer  "auto_send",        :default => 1
+    t.boolean  "is_chain"
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"

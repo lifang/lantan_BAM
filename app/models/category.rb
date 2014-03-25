@@ -6,4 +6,7 @@ class Category < ActiveRecord::Base
   TYPES_NAME = {0=>"物料",1=>"产品",2=>"服务",3=>"收付款",4=>"资产"}
   DATA_TYPES = [TYPES[:good],TYPES[:service]]
 
+  #业务开单查询类别
+  SEARCH_ITEMS = {0=>"卡类",1=>"产品",2=>"服务"}
+  ITEM_NAMES = {:CARD => 0,:PROD => 1,:SERVICE => 2}
 end

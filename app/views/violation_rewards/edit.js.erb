@@ -1,6 +1,6 @@
 <% partial_name = @violation_reward.types ? "process_reward" : "process_violation" %>
 $("#process").html('<%= escape_javascript(render :partial => "/violation_rewards/#{partial_name}") %>');
-before_center("#process_violation_reward");
+show_center("#process_violation_reward");
 $(".cancel_btn").bind('click',function(){
     $(".maskOne").hide();
     $("#process").html('');

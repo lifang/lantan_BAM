@@ -129,6 +129,7 @@ function show_center(t){
         $(".mask").css('display','none');
     });
 }
+//用于在弹出层上面的弹出 层级会比show_center的高
 function before_center(t){
     var mouse_position = document.body.scrollTop+document.documentElement.scrollTop;
     var win_height =  $(window).height();
@@ -140,6 +141,7 @@ function before_center(t){
         display:'block',
         height:(layer_height+mouse_position+100)<doc_height ? doc_height: layer_height+100+50+mouse_position/2
     });
+    $(t).css('z-index',120);
     $(t).css('top',mouse_position/2+100+"px");
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
@@ -226,5 +228,31 @@ function round(v,e){
     var t=1;
     for(;e>0;t*=10,e--);
     for(;e<0;t/=10,e++);
-    return Math.round(v*t)/t;
+    return  Math.round(v*t)/t;
+}
+
+function change_dot(x,e)
+{
+    var f_x = parseFloat(x);
+    if (isNaN(f_x))
+    {
+        alert('function:changeTwoDecimal->parameter error');
+        return false;
+    }
+    var t=1;
+    for(;e>0;t*=10,e--);
+    for(;e<0;t/=10,e++);
+    f_x = Math.round(x*t)/t;
+    var s_x = f_x.toString();
+    var pos_decimal = s_x.indexOf('.');
+    if (pos_decimal < 0)
+    {
+        pos_decimal = s_x.length;
+        s_x += '.';
+    }
+    while (s_x.length <= pos_decimal + 2)
+    {
+        s_x += '0';
+    }
+    return s_x;
 }

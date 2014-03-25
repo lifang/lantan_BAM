@@ -1,0 +1,16 @@
+<p>
+  <label><span class="red">*</span>车牌号码</label>
+  <input type="text" id="car_num" onblur="auth_car_num(this,<%=params[:store_id]%>)"/>
+  <label>客户姓名</label>
+  <input type="text" id="c_name" readonly />
+  <label>手机号</label>
+  <input type="text" id="c_number" readonly />
+  <label>其他联系方式</label>
+  <input type="text" id="other_way" readonly />
+</p>
+<p>
+  <label>单位</label>
+  <input type="text" style="width: 368px;" id="c_group" readonly />
+  <label>通讯地址</label>
+  <input type="text" style="width: 368px;" readonly id="c_address" />
+</p>

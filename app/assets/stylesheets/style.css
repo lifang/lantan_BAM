@@ -77,7 +77,7 @@ textarea {
     height: 100%;
     display: none;
     position: absolute;
-    z-index: 10;
+    z-index: 110;
     top: 0;
     left: 0;
 }
@@ -1164,7 +1164,7 @@ a.compile_btn { width: 100px;}
     margin-bottom: 10px;
 }
 .accountsTab_pay_title h3 { padding-left: 10px; font-size: 16px; float: left;}
-.pay_span { float: left; margin-left: 60px;}
+.pay_span { float: left; margin-left: 20px;}
 .accountsTab_pay_item { float: left; margin: 5px 0; color: #930205; height: 24px; line-height: 24px; margin-left: 10px;}
 .accountsTab_pay_item label {
     height: 24px;
@@ -1347,3 +1347,70 @@ a.compile_btn { width: 100px;}
 .relevance_box li { line-height: 30px; color: #333; padding: 0 5px; cursor: pointer;}
 .relevance_box li:hover { background:#eeeeee;}
 
+/* 业务开单 */
+.billWhole { border: 1px solid #ccc;}
+.billWhole h1 {
+    font-size: 16px; line-height: 30px; text-indent: 20px; font-weight: normal;
+    border-bottom: 3px solid #a90b0b;
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#e2e2e2), to(#ffffff));
+    background: -moz-linear-gradient(top, #e2e2e2,#ffffff);
+    background: -ms-linear-gradient(top,  #e2e2e2 0%,#ffffff 100%);
+    background: linear-gradient(top,  #e2e2e2 0%,#ffffff 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#e2e2e2",endColorstr="#ffffff",GradientType=0);
+}
+.billUserinfo { padding: 5px; border-bottom: 1px solid #ccc;}
+.billUserinfo p { padding: 5px; overflow: hidden; line-height: 27px;}
+.billUserinfo label { float: left; width: 90px; text-align: right; margin-right: 10px;}
+.billUserinfo input { float: left; border: 1px solid #ccc; padding: 3px; width: 130px; color: #8e8e8e;}
+
+.billDtl { position: relative;}
+.billDtlTit { display: block; text-align: center; }
+.billDtl .grey_bg { position: absolute; top: 20px; height:32px; width: 50%; background: #bcadad;}
+.bill_table { width: 49%; margin: 0 auto; border-collapse: collapse; table-layout: fixed; position: relative;}
+.bill_table th,.bill_table td { text-align: center; line-height: 32px;}
+.billDtl th { background: #bcadad; color: #fff;}
+.billDtl tr { border-bottom: 1px solid #ccc;}
+.billDtl tr:first-child { border: 0;}
+
+.billTotal { padding: 10px 25px; text-align: right;}
+.billTotal span { padding: 0 10px;}
+.billTotal .blue_btn { background: #1469c1; padding: 2px 20px; color: #f2f2f2;margin-top: 10px; }
+
+.serviceClassBar { margin-top: 10px; overflow: hidden;}
+.serviceClassBar ul { float: left;}
+.serviceClassBar li {
+    display: inline-block;
+    width: 120px;
+    height: 40px;
+    line-height: 40px;
+    border: 1px solid #950b0b;
+    letter-spacing: 8px;
+    text-align: center;
+    font-size: 18px;
+    background: #950b0b;
+    color: #f2f2f2;
+    cursor: pointer;
+}
+.serviceClassBar li:hover,.serviceClassBar li.hover{ background: #fff; color: #950b0b; }
+.serviceClassBar .searchBox { line-height: 42px; margin-left: 20px; float: left;}
+.searchBox input[type="text"] { padding: 5px; width: 200px; border: 1px solid #ccc;}
+.searchBox button { display: inline-block;}
+
+.cardClass { background: #d9d8d8;}
+.cardClass li { display: inline-block; line-height: 40px; width: 33%; text-align: center; cursor: pointer;}
+.cardClass li:hover span,.cardClass li.hover span { border-bottom: 1px solid;}
+
+.serviceItem { float: left; background: #e9e8e8; line-height: 24px; margin: 5px 0 0 5px; padding: 5px; width: 315px; position: relative;}
+.serviceItem:last-child { margin-bottom: 5px;}
+.serviceItem span { color: #6f6f6f; float: left;}
+.serviceItemInfo { width: 100px;}
+.serviceItemPrise { width: 60px;}
+.serviceItem input { position: absolute; top: 11px; right: 8px;}
+.cardClass3 .title { font-size: 18px;}
+.cardClass3 p { color: #6f6f6f; overflow: hidden; }
+
+.bill_table td .addre_input { width: 30px; text-align: center;}
+
+.bill_table input[type="text"].addre_input { width: 30px; text-align: center;}
+.bill_table .addre_a { font-size: 30px; background:none; color: #333; margin: 0;display: inline-block;}
+.bill_table em { margin-right: 10px;}

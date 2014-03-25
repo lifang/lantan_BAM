@@ -40,13 +40,13 @@ class DataManagesController < ApplicationController
     end
     if params[:c_types].to_i < 3
       @c_name = params[:c_types].to_i == 0 ? Category.find(category_id).name : Category::TYPES_NAME[category_id]
-      p @orders = Order.joins(:order_prod_relations=>{:product=>:category}).select("ifnull(sum(order_prod_relations.pro_num),0) pro_num,
+      @orders = Order.joins(:order_prod_relations=>{:product=>:category}).select("ifnull(sum(order_prod_relations.pro_num),0) pro_num,
     ifnull(sum(order_prod_relations.total_price),0) total_price,round(ifnull(sum(order_prod_relations.t_price),0),2) t_price,products.id p_id,
     date_format(orders.created_at,'%Y-%m-%d') day,ifnull(sum(order_prod_relations.total_price-order_prod_relations.t_price),0) earn_price,
     products.service_code,products.name").where(:"orders.store_id"=>params[:store_id],:"orders.status"=>Order::PRINT_CASH).where(sql).group("p_id,day").group_by{|i|i.day}
     else
       @c_name = params[:c_types].to_i == 3 ? Category.find(category_id).name : "折扣优惠"
-      p @orders = OrderPayType.joins({:product=>:category},:order).select("'--' pro_num,ifnull(sum(order_pay_types.price),0) total_price,
+      @orders = OrderPayType.joins({:product=>:category},:order).select("'--' pro_num,ifnull(sum(order_pay_types.price),0) total_price,
     date_format(orders.created_at,'%Y-%m-%d') day,'--' t_price,products.id p_id,ifnull(sum(order_pay_types.price),0) earn_price,
     products.service_code,products.name").where(:"orders.store_id"=>params[:store_id],:"orders.status"=>Order::PRINT_CASH,
         :"pay_type"=>OrderPayType::FAVOUR).where(sql).group("p_id,day").group_by{|i|i.day}
