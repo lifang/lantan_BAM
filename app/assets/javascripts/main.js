@@ -256,3 +256,7 @@ function change_dot(x,e)
     }
     return s_x;
 }
+
+function set_default_value(e,get_value){
+    $(get_value).val(e.value);
+}

@@ -1,4 +1,4 @@
-<% @suit_cards.each do |card| %>
+<% @pcard.each do |card| %>
   <div class="card_list">
     <div class="card_register">
       <div class="order_card">
@@ -11,20 +11,22 @@
       </div>
       <div id="table_<%=card[:types]%>_<%=card[:c_id]%>">
         <table  width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
-          <tr>
-            <th>项目名称</th>
-            <th>折扣</th>
-            <th>操作</th>
+          <tr class="fws">
+            <td>项目名称</td>
+            <td>剩余次数</td>
+            <td>操作</td>
           </tr>
-          <% card[:content].each do |k,v| %>
-            <tr id="<%=card[:c_id]%>_<%=card[:types]%>_<%=k%>">
-              <td><%= v[1] %></td>
-              <td><%= v[0].to_f/10 %>折</td>
-              <td id="<%= k %>"><input type="checkbox" value="<%=@prod[k]%>_<%=v[2]%>" onclick="add_prod(this)" /></td>
-            </tr>
+          <% card[:content].each do |con| %>
+            <% if @prod[con[0].to_i] %>
+              <tr id="<%=card[:c_id]%>_<%=card[:types]%>_<%=con[0]%>">
+                <td><%=con[1]%></td>
+                <td><%=con[2]%></td>
+                <td id="<%=con[0]%>"><input type="checkbox" value="<%=@prod[con[0].to_i]%>_<%=con[2]%>" onclick="add_prod(this)" /></td>
+              </tr>
+            <%end%>
           <%end%>
         </table>
       </div>
     </div>
   </div>
-<%end unless @suit_cards.blank?%>
+<%end unless @pcard.blank?%>

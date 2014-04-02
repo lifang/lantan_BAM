@@ -14,7 +14,7 @@ class Staff < ActiveRecord::Base
   has_many :month_scores
   has_many :material_losses
   belongs_to :store
-  hash_many  :tech_orders
+  has_many  :tech_orders
 
   
   validates :phone, :uniqueness => { :message => "联系方式已经存在!", :scope => :status}, :if => :staff_not_deleted?

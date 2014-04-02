@@ -342,9 +342,11 @@ class Station < ActiveRecord::Base
     hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? Order::STATUS[:SERVICING] : Order::STATUS[:NORMAL]
     hash[:station_id] = station_id if station_id  #这个可能暂时没有值，一个完成后要更新
     station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id
-    if station_staffs
-      hash[:cons_staff_id_1] = station_staffs[0].staff_id if station_staffs.size > 0
-      hash[:cons_staff_id_2] = station_staffs[1].staff_id if station_staffs.size > 1
+    if station_staffs && work_order.status == WorkOrder::STAT[:SERVICING]
+      order_stations = []
+      order_stations << TechOrder.new(:staff_id=>station_staffs[0].staff_id ,:order_id=>order.id) if station_staffs.size > 0
+      order_stations << TechOrder.new(:staff_id=>station_staffs[1].staff_id,:order_id=>order.id) if station_staffs.size > 1
+      TechOrder.import order_stations unless order_stations.blank?
     end
     hash[:started_at] = work_order_status ? started_at : nil
     hash[:ended_at] = work_order_status ? ended_at : nil

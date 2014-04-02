@@ -8,6 +8,7 @@ class Customer < ActiveRecord::Base
   has_many :c_svc_relations
   has_many :reservations
   has_many :customer_store_relations
+  has_many :orders
   has_many :stores, :through => :customer_store_relations
   attr_accessor :password
   validates :password, :allow_nil => true, :length =>{:within=>6..20, :message => "密码长度必须在6-20位之间"}
@@ -24,7 +25,7 @@ class Customer < ActiveRecord::Base
   CHECK_TYPE = {:MONTH => 0, :WEEK => 1}  #结算类型 按月/周结算
 
   def self.search_customer(c_property, car_num, started_at, ended_at, name, phone, c_sex, is_vip, page, store_id)
-    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.mark, cu.property from customers cu
+    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.mark, cu.property,cu.is_vip from customers cu
         left join customer_num_relations cnr on cnr.customer_id = cu.id
         left join car_nums ca on ca.id = cnr.car_num_id "
     condition_sql = "where cu.status = #{STATUS[:NOMAL]} "
@@ -46,14 +47,12 @@ class Customer < ActiveRecord::Base
       params_arr << c_sex.to_i
     end
     unless is_vip.nil? or is_vip.strip.empty?
-      base_sql += " inner join customer_store_relations csr on csr.customer_id = cu.id "
-      condition_sql += " and csr.store_id = ? "
+      condition_sql += " and cu.store_id = ? "
       params_arr << store_id.to_i
-      condition_sql += " and csr.is_vip = ? "
+      condition_sql += " and cu.is_vip = ? "
       params_arr << is_vip.to_i
     else
-      base_sql += " left join customer_store_relations csr on csr.customer_id = cu.id "
-      condition_sql += " and csr.store_id in(?) "
+      condition_sql += " and cu.store_id in(?) "
       params_arr << StoreChainsRelation.return_chain_stores(store_id)
     end
     unless car_num.nil? or car_num.strip.empty?
@@ -116,12 +115,10 @@ class Customer < ActiveRecord::Base
         customer = Customer.create(:name => user_name, :mobilephone => phone,
           :other_way => other_way, :birthday => birth, :status => Customer::STATUS[:NOMAL],
           :types => Customer::TYPES[:NORMAL], :username => user_name,
-          :password => phone, :sex => sex, :address => address)
+          :password => phone, :sex => sex, :address => address,:is_vip=>is_vip,:store_id=>store_id)
         customer.encrypt_password
         customer.save        
       end
-      relation = CustomerStoreRelation.find_by_store_id_and_customer_id(store_id, customer.id)
-      CustomerStoreRelation.create(:store_id => store_id, :customer_id => customer.id, :is_vip => is_vip) unless relation
       if carnum
         carnum.update_attributes(:buy_year => buy_year, :car_model_id => car_model_id)
       else

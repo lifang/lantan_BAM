@@ -86,8 +86,8 @@ class ComplaintsController < ApplicationController
     flag = params[:flag]
     if flag.nil? || flag.to_i==0
       #客户数量
-      customers = Customer.find_by_sql(["select c.id,c.sex,c.property,c.allowed_debts from customer_store_relations csr inner join customers c
-      on csr.customer_id=c.id where csr.store_id=? and c.status=?", @store_id, Customer::STATUS[:NOMAL]])
+      customers = Customer.find_by_sql(["select c.id,c.sex,c.property,c.allowed_debts from customers c
+       where c.store_id=? and c.status=?", @store_id, Customer::STATUS[:NOMAL]])
       @single_cus = 0
       @group_cus = 0
       @allowed_debts = 0
@@ -157,22 +157,16 @@ class ComplaintsController < ApplicationController
       end if orders
 
       #最近消费
-      @cons_current_day = Order.find_by_sql(["select c.id
-        from customer_store_relations csr inner join customers c on csr.customer_id=c.id
-        inner join orders o on c.id=o.customer_id
-        where csr.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
+      @cons_current_day = Order.find_by_sql(["select c.id from customers c  inner join orders o on c.id=o.customer_id
+        where c.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
         DATE_FORMAT(o.created_at,'%Y-%m-%d')=?", @store_id,  Customer::STATUS[:NOMAL],
           [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id, Time.now.strftime("%Y-%m-%d")]).map(&:id).uniq.length
-      @cons_current_week = Order.find_by_sql(["select c.id
-        from customer_store_relations csr inner join customers c on csr.customer_id=c.id
-        inner join orders o on c.id=o.customer_id
-        where csr.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
+      @cons_current_week = Order.find_by_sql(["select c.id from  customers c  inner join orders o on c.id=o.customer_id
+        where c.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
         YEARWEEK(DATE_FORMAT(o.created_at,'%Y-%m-%d'))=YEARWEEK(now())", @store_id, Customer::STATUS[:NOMAL],
           [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id]).map(&:id).uniq.length
-      @cons_current_month = Order.find_by_sql(["select c.id
-        from customer_store_relations csr inner join customers c on csr.customer_id=c.id
-        inner join orders o on c.id=o.customer_id
-        where csr.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
+      @cons_current_month = Order.find_by_sql(["select c.id from  customers c  inner join orders o on c.id=o.customer_id
+        where c.store_id=? and c.status=? and o.status in (?) and o.store_id=? and
         DATE_FORMAT(o.created_at,'%Y-%m')=?", @store_id, Customer::STATUS[:NOMAL],
           [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id, Time.now.strftime("%Y-%m")]).map(&:id).uniq.length
     end
@@ -187,21 +181,16 @@ class ComplaintsController < ApplicationController
     brand = params[:brand]
     brand_arr = params[:brand_arr]
     recent_cons = params[:recent_cons]
-    c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
-      sum(o.price) oprice,max(o.created_at) last_con_time
-      from customer_store_relations csr inner join customers c on csr.customer_id=c.id
+    c_sql = ["select c.id,c.name,c.mobilephone,c.property,c.is_vip,
+      sum(o.price) oprice,max(o.created_at) last_con_time from  customers c
       left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
-      where csr.store_id=? and c.status=?",[Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
+      where c.store_id=? and c.status=?",[Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
       @store_id, Customer::STATUS[:NOMAL]]
     if brand || brand_arr
-      c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
-      sum(o.price) oprice,max(o.created_at) last_con_time
-      from customer_store_relations csr inner join customers c on csr.customer_id=c.id
-      inner join customer_num_relations cnr on c.id=cnr.customer_id
-      inner join car_nums cn on cnr.car_num_id=cn.id
-      inner join car_models cm on cn.car_model_id=cm.id
-      inner join car_brands cb on cm.car_brand_id=cb.id
-      left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
+      c_sql = ["select c.id,c.name,c.mobilephone,c.property,c.is_vip, sum(o.price) oprice,max(o.created_at) last_con_time
+      from  customers c   inner join customer_num_relations cnr on c.id=cnr.customer_id
+      inner join car_nums cn on cnr.car_num_id=cn.id inner join car_models cm on cn.car_model_id=cm.id
+      inner join car_brands cb on cm.car_brand_id=cb.id left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
       where csr.store_id=? and c.status=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
         @store_id, Customer::STATUS[:NOMAL]]
       if brand
@@ -213,10 +202,8 @@ class ComplaintsController < ApplicationController
       end
     end
     if recent_cons
-      c_sql = ["select c.id,c.name,c.mobilephone,c.property,csr.is_vip,
-      sum(o.price) oprice,max(o.created_at) last_con_time
-      from customer_store_relations csr inner join customers c on csr.customer_id=c.id
-      inner join orders o on c.id=o.customer_id where csr.store_id=? and c.status=?  and o.status in (?)
+      c_sql = ["select c.id,c.name,c.mobilephone,c.property,c.is_vip, sum(o.price) oprice,max(o.created_at) last_con_time
+      from inner join customers c  inner join orders o on c.id=o.customer_id where c.store_id=? and c.status=?  and o.status in (?)
       and o.store_id=?", @store_id, Customer::STATUS[:NOMAL], [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id]
       if recent_cons.to_i == 1  #当天消费的
         c_sql[0] += " and DATE_FORMAT(o.created_at,'%Y-%m-%d')=?"
@@ -280,6 +267,24 @@ class ComplaintsController < ApplicationController
       f.html
       f.js
     end
+  end
+
+  #客户-投诉-点击详细
+  def complaint_detail
+    @store = Store.find_by_id(params[:store_id])
+    @complaint = @store.complaints.includes(:order).find_by_id(params[:id])
+    @staff_names = Staff.where(:id => [@complaint.staff_id_1, @complaint.staff_id_2].compact).map(&:name).join(", ")
+    @violation_rewards = ViolationReward.find_by_sql("select vr.*, s.name name from violation_rewards vr inner join staffs s on vr.staff_id = s.id where target_id = #{ @complaint.id}")
+  end
+
+  #满意度统计页
+  def satisfy_degree
+    @degree = Complaint.count_pleasant(params[:store_id])
+    @degree = Complaint.degree_chart(params[:store_id])  if @degree.blank?
+    @degree = ChartImage.where("store_id=#{params[:store_id]} and types=#{ChartImage::TYPES[:SATIFY]}").order("created_at desc")[0]  if @degree.nil?
+    session[:degree]= @degree.nil? ? nil : @degree.current_day.strftime("%Y-%m")
+    session[:start_degree],session[:end_degree],session[:sex_degree]=Time.now.beginning_of_month.strftime("%Y-%m-%d"),Time.now.strftime("%Y-%m-%d"),Complaint::SEX[:NONE]
+    @total_com = Complaint.degree_day(params[:store_id],session[:start_degree],session[:end_degree],session[:sex_degree])
   end
 
  

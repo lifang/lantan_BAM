@@ -14,7 +14,7 @@
           <div class="item">
             <label><font color="red">*</font>姓名：</label><input type="text" id="new_name" name="new_name" value="<%= @customer.name %>"/>
           </div>
-           <div class="item">
+          <div class="item">
             <label><% if @customer.property==Customer::PROPERTY[:GROUP] %><font class="red">*</font><%  end %>单位名称：</label>
             <input name="edit_group_name" id="edit_group_name" type="text" value="<%= @customer.group_name %>" <% if @customer.property==Customer::PROPERTY[:PERSONAL] %>disabled<% end %>/>
           </div>
@@ -32,16 +32,16 @@
             <input name="edit_check_type" type="radio" value="<%= Customer::CHECK_TYPE[:MONTH] %>" <% if @customer.check_type.to_i==Customer::CHECK_TYPE[:MONTH] %>checked<% end %>
                    <% if @customer.allowed_debts==Customer::ALLOWED_DEBTS[:NO] %>disabled<% end %> onclick="edit_select_check_type(this)"/>
             <select name="edit_check_time_month" id="edit_check_time_month" class="select_ss"
-                <% if @customer.allowed_debts==Customer::ALLOWED_DEBTS[:NO] || @customer.check_type.to_i!=Customer::CHECK_TYPE[:MONTH] %>disabled<% end %>>
-              <% (1..24).to_a.each do |a| %>
+                    <% if @customer.allowed_debts==Customer::ALLOWED_DEBTS[:NO] || @customer.check_type.to_i!=Customer::CHECK_TYPE[:MONTH] %>disabled<% end %>>
+                      <% (1..24).to_a.each do |a| %>
                 <option value="<%= a %>" <% if @customer.check_type.to_i==Customer::CHECK_TYPE[:MONTH] && @customer.check_time.to_i==a %>selected<% end %>><%= a %>月</option>
               <% end %>
             </select>
             <input name="edit_check_type" type="radio" value="<%= Customer::CHECK_TYPE[:WEEK] %>" <% if @customer.check_type.to_i==Customer::CHECK_TYPE[:WEEK] %>checked<% end %>
                    <% if @customer.allowed_debts==Customer::ALLOWED_DEBTS[:NO]%>disabled<% end %> onclick="edit_select_check_type(this)"/>
-            <select name="edit_check_time_week" id="edit_check_time_week" class="select_ss" 
-              <% if @customer.allowed_debts==Customer::ALLOWED_DEBTS[:NO]  || @customer.check_type.to_i!=Customer::CHECK_TYPE[:WEEK] %>disabled<% end %>>
-              <% (1..99).to_a.each do |a| %>
+            <select name="edit_check_time_week" id="edit_check_time_week" class="select_ss"
+                    <% if @customer.allowed_debts==Customer::ALLOWED_DEBTS[:NO]  || @customer.check_type.to_i!=Customer::CHECK_TYPE[:WEEK] %>disabled<% end %>>
+                      <% (1..99).to_a.each do |a| %>
                 <option value="<%= a %>"  <% if @customer.check_type.to_i==Customer::CHECK_TYPE[:WEEK] && @customer.check_time.to_i==a %>selected<% end %>><%= a %>周</option>
               <% end %>
             </select>
@@ -64,8 +64,8 @@
           </div>
           <div class="item">
             <label>是否会员:</label>&nbsp;
-            <input type="radio" name="is_vip" value="<%= Customer::IS_VIP[:VIP] %>" <% if @s_customer && @s_customer.is_vip %>checked<% end %> />&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="radio" name="is_vip" value="<%= Customer::IS_VIP[:NORMAL] %>" <% if @s_customer.nil? || (@s_customer &&!@s_customer.is_vip) %>checked<% end %>/>&nbsp;否
+            <input type="radio" name="is_vip" value="<%= Customer::IS_VIP[:VIP] %>" <% if @customer.is_vip %>checked<% end %> />&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="is_vip" value="<%= Customer::IS_VIP[:NORMAL] %>" <% if !@customer.is_vip %>checked<% end %>/>&nbsp;否
           </div>
           <div class="item_textarea">
             <label>地址：</label><textarea name="address" id="address" cols="" rows="" class="width_textarea"><%= @customer.address %></textarea>

@@ -38,8 +38,8 @@ class Api::OrdersController < ApplicationController
       info = ""
       store = Store.find_by_id(staff.store_id)
       staff = {:user_id => staff.id, :store_id => staff.store_id, :position => staff.dname,
-      :department => staff.bname, :username => staff.username, :name => staff.name, 
-      :photo => staff.photo.nil? ? nil : staff.photo, :cash_auth => store.cash_auth, :store_name => store.name}
+        :department => staff.bname, :username => staff.username, :name => staff.name,
+        :photo => staff.photo.nil? ? nil : staff.photo, :cash_auth => store.cash_auth, :store_name => store.name}
     end
     render :json => {:staff => staff, :info => info}.to_json
   end
@@ -291,8 +291,8 @@ class Api::OrdersController < ApplicationController
             else
               c_sv_relation = CSvcRelation.create(c_svc_r_hash)
             end
-            c_s_r = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id, order.customer_id)
-            c_s_r.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
+            c_s_r = order.customer
+            c_s_r.update_attributes(:is_vip => Customer::IS_VIP[:VIP]) unless c_s_r.is_vip
             #carNum.customer_num_relation.customer.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
           end
         end

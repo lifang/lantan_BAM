@@ -211,6 +211,7 @@ class MarketManagesController < ApplicationController
     @product_hash = OrderProdRelation.order_products(orders)
     @search_total = orders.sum(:price)
     @orders = orders.paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
+    @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
   end
 
   def daily_consumption_receipt_blank

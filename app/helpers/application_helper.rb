@@ -199,6 +199,9 @@ module ApplicationHelper
     order_hash[Order::STATUS[:WAIT_PAYMENT]] = orders.select{|order| order.status == Order::STATUS[:WAIT_PAYMENT] || order.status == Order::STATUS[:PCARD_PAY]}
     order_hash[WorkOrder::STAT[:WAIT]] = orders.select{|order| order.wo_status == WorkOrder::STAT[:WAIT]}
     order_hash[WorkOrder::STAT[:SERVICING]] = orders.select{|order| order.wo_status == WorkOrder::STAT[:SERVICING]}
+    s_staffs = TechOrder.joins(:staff,:order=>:work_orders).select("work_orders.station_id,staffs.name,tech_orders.staff_id").
+      where(:"tech_orders.order_id"=>order_hash[WorkOrder::STAT[:SERVICING]].map(&:order_id),:"staffs.store_id"=>params[:store_id]).group_by{|i|i.station_id}.values
+    order_hash[:used_staffs] = s_staffs
     order_hash
   end
 
@@ -214,6 +217,8 @@ module ApplicationHelper
       order[:service_name] = service_name.join(",")
       order[:cost_time] = work_order.try(:cost_time)
       order[:station_id] = work_order.try(:station_id)
+      order[:order_id] = order.try(:id)
+      order[:c_pcard_relation_id] = order.try(:c_pcard_relation_id)
     }
     orders
   end
@@ -269,6 +274,7 @@ module ApplicationHelper
     sql ="select distinct(scr.store_id) from store_chains_relations scr inner join stores s on scr.store_id=s.id where s.status in
       (#{Store::STATUS[:OPENED]},#{Store::STATUS[:DECORATED]})  and scr.chain_id in (select distinct(scr.chain_id) from store_chains_relations scr
       inner join chains c on scr.chain_id=c.id where scr.store_id =#{store_id} and c.status=#{Chain::STATUS[:NORMAL]} )"
-    store_ids = StoreChainsRelation.find_by_sql(sql).map(&:store_id) #获取该门店所有的连锁店
+    stores = StoreChainsRelation.find_by_sql(sql).map(&:store_id) #获取该门店所有的连锁店
+    stores.any? ? stores : [store_id]
   end
 end

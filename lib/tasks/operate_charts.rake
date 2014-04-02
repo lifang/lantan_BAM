@@ -227,4 +227,30 @@ task(:update_svc_card_sh => :environment) do
   p "the run time is #{(Time.now.to_i - time)/60.0}"
 end
 
+#修改订单对应的技师和提成
+task(:create_tech_orders => :environment) do
+  time = Time.now.to_i
+  order_stations = []
+  Order.where(:status=>Order::PRINT_CASH).each do |order|
+    order_stations << TechOrder.new(:staff_id=>order.cons_staff_id_1,:order_id=>order.id,:own_deduct=>order.technician_deduct) if order.cons_staff_id_1
+    order_stations << TechOrder.new(:staff_id=>order.cons_staff_id_2,:order_id=>order.id,:own_deduct=>order.technician_deduct) if order.cons_staff_id_2
+  end
+  TechOrder.import order_stations unless order_stations.blank?
+  p "the run time is #{(Time.now.to_i - time)/60.0}"
+end
+
+#修改客户对应的门店
+task(:update_store_id_to_customers => :environment) do
+  time = Time.now.to_i
+  customer_relations = CustomerStoreRelation.all.inject({}){|h,c|h[c.customer_id]=[c.store_id,c.total_point,c.is_vip];h}
+  Customer.where(:status=>Customer::STATUS[:NOMAL]).each do |cu|
+    if customer_relations[cu.id]
+      cu.update_attributes({:store_id=>customer_relations[cu.id][0],:total_point=>customer_relations[cu.id][1],:is_vip=>customer_relations[cu.id][2]})
+    else
+      p "#{cu.id} is not a valid customer"
+    end
+  end
+  p "the run time is #{(Time.now.to_i - time)/60.0}"
+end
+
 

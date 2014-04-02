@@ -1,69 +1,54 @@
 <%= javascript_include_tag "set_stores" %>
 <div class="billWhole">
   <div class="billUserinfo" id="bill_user_info">
-    <p>
-      <label><span class="red">*</span>车牌号码</label>
-      <input type="text" id="car_num" onblur="auth_car_num(this,<%=params[:store_id]%>)"/>
-      <label>客户姓名</label>
-      <input type="text" id="c_name" readonly />
-      <label>手机号</label>
-      <input type="text" id="c_number" readonly />
-      <label>其他联系方式</label>
-      <input type="text" id="other_way" readonly />
-    </p>
-    <p>
-      <label>单位</label>
-      <input type="text" style="width: 368px;" id="c_group" readonly />
-      <label>通讯地址</label>
-      <input type="text" style="width: 368px;" readonly id="c_address" />
-    </p>
+    <%= render "customer_info" %>
   </div>
   <div class="billDtl">
     <span class="billDtlTit">订单详情</span>
-    <div class="grey_bg"></div>
-    <table class="bill_table" style="float: left;">
-      <thead>
-        <tr>
-          <th>名称</th>
-          <th>单价</th>
-          <th>数量</th>
-          <th>小计</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="table_item">
-
-      </tbody>
+    <table  width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+      <tr>
+        <th width="20%">名称</th>
+        <th width="12%">单价</th>
+        <th width="30%">数量</th>
+        <th width="12%">小计</th>
+        <th width="16%">类型</th>
+        <th width="10%">操作</th>
+      </tr>
+      <tbody id="table_item"></tbody>
     </table>
-    <div style="height:60px;" id="card_position">
+    <div>
+      <div class="billTotal">
+        <span>金额总计：</span>
+        <span id="total_price"><%= 0.round(2) %></span>
+        <button class="blue_btn"onclick="submit_item(<%=params[:store_id]%>)" id="submit_item" >结算</button>
+        <%= image_tag "ajax-loader.gif", :id => "submit_spinner", :style => "display:none;" %>
+        <button class="blue_btn" title="卡类（套餐卡和打折卡）" onclick="search_card(<%=params[:store_id]%>)">重载卡类</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div>
+  <div class="serviceClassBar" id="search_item">
+    <ul>
+      <%Category::SEARCH_ITEMS.each do |k,v|%>
+        <li <%if k == 0%> class="hover" <%end%> id="<%=k%>"
+                          onclick="$(this).addClass('hover').siblings().removeClass('hover')"><%= v %></li>
+                        <%end%>
+    </ul>
+    <div class="searchBox">
+      <input type="text" id="item_name" />
+      <button class="search_btn" onclick="search_item(<%=params[:store_id]%>)" id="item_btn">查询</button>
+      <%= image_tag "ajax-loader.gif", :id => "spinner_user", :style => "display:none;" %>
+    </div>
+  </div>
+  <div class="cardDtl"></div>
+</div>
 
-      <div>
-        <div class="billTotal">
-          <span>金额总计：</span>
-          <span id="total_price"><%= 0.round(2) %></span>
-          <button class="blue_btn">结算</button>
-          <button class="blue_btn" title="卡类（套餐卡和打折卡）" onclick="search_card(<%=params[:store_id]%>)">查询卡类</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div>
-    <div class="serviceClassBar" id="search_item">
-      <ul>
-        <%Category::SEARCH_ITEMS.each do |k,v|%>
-          <li <%if k == 0%> class="hover" <%end%> id="<%=k%>"
-                            onclick="$(this).addClass('hover').siblings().removeClass('hover')"><%= v %></li>
-                          <%end%>
-      </ul>
-      <div class="searchBox">
-        <input type="text" id="item_name" />
-        <button class="search_btn" onclick="search_item(<%=params[:store_id]%>)" id="item_btn">查询</button>
-        <%= image_tag "ajax-loader.gif", :id => "spinner_user", :style => "display:none;" %>
-      </div>
-    </div>
-    <input type="hidden" id="checked_item" />
-    <div class="cardDtl"></div>
-  </div>
+<div style=" position: fixed; top: 100px; left: 22px; width: 150px; height: 200px;" id="discount_card">
+  <%= render "customer_cards" %>
+</div>
+<div style=" position: fixed; top: 100px; right: 22px; width: 150px; height: 200px;" id="pcard">
+  <%= render "customer_pcard" %>
 </div>
 <script type="text/javascript">
   var shutin = {"c":["川"],"e":["鄂"],"g":["赣","贵","桂","甘"],"h":["沪","黑"],"j":["京","津","冀","晋","吉"],"l":["辽","鲁"],

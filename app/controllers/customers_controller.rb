@@ -21,7 +21,6 @@ class CustomersController < ApplicationController
     @customers = Customer.search_customer(params[:c_property], params[:car_num], params[:started_at], params[:ended_at],
       params[:name], params[:phone], params[:c_sex], params[:is_vip], params[:page], params[:store_id].to_i) if @store
     @car_nums = Customer.customer_car_num(@customers) if @customers
-    @is_vips = CustomerStoreRelation.where(["store_id = ? and customer_id in (?)", @store, @customers]).group_by{|i| i.customer_id }
   end
 
   def search
@@ -41,7 +40,6 @@ class CustomersController < ApplicationController
     @customers = Customer.search_customer(session[:c_property], session[:car_num], session[:started_at], session[:ended_at],
       session[:name], session[:phone], session[:c_sex], session[:is_vip], params[:page], params[:store_id].to_i) if @store
     @car_nums = Customer.customer_car_num(@customers) if @customers
-    @is_vips = CustomerStoreRelation.where(["store_id = ? and customer_id in (?)", @store, @customers]).group_by{|i| i.customer_id }
     render "index"
   end
 
@@ -54,31 +52,27 @@ class CustomersController < ApplicationController
 
   def create
     if params[:new_name] and params[:mobilephone]
-      customer = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], params[:mobilephone].strip)
+      customer = Customer.where(:status=>Customer::STATUS[:NOMAL],:mobilephone=>params[:mobilephone].strip,
+        :store_id=>params[:store_id].to_i).first
       if customer
-        relation = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id].to_i, customer.id)
-        if relation
-          flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
-        else
-          unless params[:selected_cars].blank?
-            params[:selected_cars].each do |sc|
-              car_num = sc.split("-")[0]
-              car_model = sc.split("-")[1].to_i
-              buy_year = sc.split("-")[2].to_i
-              car_num_record = CarNum.find_by_num(car_num)
-              if car_num_record
-                cnr = CustomerNumRelation.find_by_car_num_id_and_customer_id(car_num_record.id, customer.id)
-                unless cnr
-                  CustomerNumRelation.delete_all(["car_num_id = ?", car_num_record.id])
-                  CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => customer.id)
-                end
-              else
-                car_num_record = CarNum.create(:num => car_num, :buy_year => buy_year, :car_model_id => car_model)
+        flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
+        unless params[:selected_cars].blank?
+          params[:selected_cars].each do |sc|
+            car_num = sc.split("-")[0]
+            car_model = sc.split("-")[1].to_i
+            buy_year = sc.split("-")[2].to_i
+            car_num_record = CarNum.find_by_num(car_num)
+            if car_num_record
+              cnr = CustomerNumRelation.find_by_car_num_id_and_customer_id(car_num_record.id, customer.id)
+              unless cnr
+                CustomerNumRelation.delete_all(["car_num_id = ?", car_num_record.id])
                 CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => customer.id)
               end
+            else
+              car_num_record = CarNum.create(:num => car_num, :buy_year => buy_year, :car_model_id => car_model)
+              CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => customer.id)
             end
           end
-          CustomerStoreRelation.create(:store_id => params[:store_id].to_i, :customer_id => customer.id, :is_vip => params[:is_vip])
         end
       else
         property = params[:property].to_i
@@ -92,7 +86,7 @@ class CustomersController < ApplicationController
           :sex => params[:sex], :birthday => params[:birthday].strip, :address => params[:address].strip,
           :status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL], :username => name, :property => property,
           :group_name => group_name, :allowed_debts => allowed_debts, :debts_money => debts_money, :check_type => check_type,
-          :check_time => check_time)
+          :check_time => check_time,:store_id=>params[:store_id],:is_vip => params[:is_vip])
         new_customer.encrypt_password
         new_customer.save
         unless params[:selected_cars].blank?
@@ -110,7 +104,6 @@ class CustomersController < ApplicationController
             end
           end
         end
-        CustomerStoreRelation.create(:store_id => params[:store_id].to_i, :customer_id => new_customer.id, :is_vip => params[:is_vip])
         flash[:notice] = "客户信息创建成功。"
       end
     end
@@ -120,7 +113,8 @@ class CustomersController < ApplicationController
   def update
     if params[:new_name] and params[:mobilephone]
       customer = Customer.find(params[:id].to_i)
-      mobile_c = Customer.find_by_status_and_mobilephone(Customer::STATUS[:NOMAL], params[:mobilephone].strip)
+      mobile_c = Customer.where(:status=>Customer::STATUS[:NOMAL],:mobilephone=>params[:mobilephone].strip,
+        :store_id=>params[:store_id].to_i).first
       if mobile_c and mobile_c.id != customer.id
         flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
       else
@@ -128,16 +122,10 @@ class CustomersController < ApplicationController
           :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
           :address => params[:address], :property => params[:edit_property].to_i,
           :group_name => params[:edit_property].to_i==Customer::PROPERTY[:PERSONAL] ? nil : params[:edit_group_name].strip,
-          :allowed_debts => params[:edit_allowed_debts].to_i,
+          :allowed_debts => params[:edit_allowed_debts].to_i,:is_vip => params[:is_vip],
           :debts_money => params[:edit_allowed_debts].to_i==Customer::ALLOWED_DEBTS[:NO] ? nil : params[:edit_debts_money].to_f,
           :check_type => params[:edit_check_type].nil? ? nil : params[:edit_check_type].to_i,
           :check_time => params[:edit_check_time_month].nil? ? (params[:edit_check_time_week].nil? ? nil : params[:edit_check_time_week].to_i) :  params[:edit_check_time_month].to_i)
-        c_store = CustomerStoreRelation.find_by_store_id_and_customer_id(params[:store_id],customer.id)
-        if c_store
-          c_store.update_attributes( :is_vip => params[:is_vip])
-        else
-          CustomerStoreRelation.create({:store_id => params[:store_id], :customer_id => customer.id, :is_vip => params[:is_vip]}) if params[:is_vip].to_i==1
-        end
         flash[:notice] = "客户信息更新成功。"
       end
     end
@@ -183,11 +171,10 @@ class CustomersController < ApplicationController
         inner join customer_num_relations cr on cr.car_num_id = c.id
         where cr.customer_id = ?", @customer.id])
     order_page = params[:rev_page] ? params[:rev_page] : 1
-    @s_customer = CustomerStoreRelation.find_by_customer_id_and_store_id(@customer.id,params[:store_id])
-    p @orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id, 10, order_page)
+    @orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id, 10, order_page)
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
-    
+    @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
     @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, 1)
     comp_page = params[:comp_page] ? params[:comp_page] : 1
     @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, comp_page)
@@ -203,6 +190,7 @@ class CustomersController < ApplicationController
     @orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id, 10, params[:page])
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
+    @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
     respond_to do |format|
       format.js
     end

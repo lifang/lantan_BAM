@@ -5,7 +5,9 @@
         <td>日期</td>
         <td>相关订单</td>
         <td>服务项目</td>
-        <td>金额（元）</td>
+        <td>订单金额（元）</td>
+        <td>优惠金额（元）</td>
+        <td>成交金额（元）</td>
       </tr>
     </thead>
     <tbody>
@@ -41,7 +43,11 @@
               无服务项目
             <% end %>
           </td>
+          <% loss = limit_float(@pay_types[order.id].nil? ? 0 : @pay_types[order.id].select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n}) %>
+          <%  fact = limit_float(order.price>loss ? order.price-loss : 0)%>
           <td><%= order.price %></td>
+          <td><%= loss %></td>
+          <td><%= fact %></td>
         </tr>
       <% end %>
     </tbody>

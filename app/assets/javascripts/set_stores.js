@@ -510,7 +510,9 @@ function show_edit(store_id,card_id){
 }
 
 function auth_car_num(e,store_id){
-    if(e.value !="" || e.length>0){
+    var old_c = $("#old_customer").val();
+    if(e.value !="" && e.value.length == 7 && old_c != e.value ){
+        $("#submit_item,#submit_spinner").toggle();
         var url = "/stores/"+store_id+"/set_stores/search_info";
         var data ={
             car_num : e.value
@@ -522,10 +524,8 @@ function auth_car_num(e,store_id){
             data: data
         })
     }else{
-        $("#c_id").val("");
         $("#bill_user_info input").removeAttr("readonly");
     }
-   
 }
 
 function search_item(store_id){
@@ -557,28 +557,9 @@ function show_div(e){
 function add_cart(e){
     var price = $(e).parent().find("#price").html();
     var total_price = $("#total_price").html();
-    if(e.checked){
-        var storage = $(e).parent().find("#storage").html();     
-        $("#checked_item").val($("#checked_item").val()+","+e.id);
-        $("#table_item").append("<tr id='"+ e.id+"' class='"+(storage == undefined ? 1 : storage)+"'><td>"+$(e).parent().find("#name").html() +"</td><td id='price'>"+price+"</td>\n\
-       <td>\n\<a href='javascript:void(0)' class='addre_a' onclick='del_num(this)'>-</a><span style='margin:5px;'><input type='text' class='addre_input' value='1' readonly /></span>\n\
-       <a href='javascript:void(0)' class='addre_a' style='font-size:22px;' onclick='add_num(this)'>+</a></td><td id='t_price'>"+$(e).parent().find("#price").html() +"</td><td><a href='javascript:void(0)'>删除</a></td></tr>");
-        $("#card_position").css("height",($("#card_position").height()+37)+"px");
-        $("#total_price").html(change_dot(round(total_price,2)+round(price,2),2));
-    }else{
-        var checked_item = $("#checked_item").val().split(",");
-        var left_item = [];
-        for(var i=0;i<checked_item.length;i++){
-            if(checked_item[i] != e.id){
-                left_item.push(checked_item[i]);
-            }
-        }
-        $("#checked_item").val(left_item.join(","));
-        var t_price = $("#table_item #"+e.id +" #t_price").html();
-        $("#card_position").css("height",($("#card_position").height()-37)+"px");
-        $("#total_price").html(change_dot(round(total_price,2)-round(t_price,2),2));
-        $("#table_item #"+e.id).remove();
-    }
+    var storage = $(e).parent().find("#storage").html();
+    var name = $(e).parent().find("#name").html()
+    put_add(e,e.id,storage,name,total_price,price);
 }
 
 
@@ -606,11 +587,150 @@ function del_num(e){
     if (parseInt(num) > 1 ){
         $(e).parent().find("input").val(parseInt(num)-1);
         $(e).parent().parent().find("#t_price").html(change_dot(single_price*(parseInt(num)-1))); //小计价格
-        $("#total_price").html(change_dot(round(total_price,2)+round(single_price,2),2)); //设置总价
+        $("#total_price").html(change_dot(round(total_price,2)-round(single_price,2),2)); //设置总价
         if (parseInt(num)==2){
             e.title = "最小购买数量：1";
         }
     }else{
         e.title = "最小购买数量：1";
+    }
+}
+
+function add_prod(e){
+    var price_storage = e.value;
+    var price = price_storage.split("_")[0];
+    var storage = price_storage.split("_")[1];
+    var total_price = $("#total_price").html();
+    var e_id = $(e).parent().parent().attr("id");
+    var name = $(e).parent().parent().find("td").eq(0).html();
+    put_add(e,e_id,storage,name,total_price,price);
+}
+
+
+function put_add(e,e_id,storage,name,total_price,price){
+    if(e.checked){
+        var total_item = $("#checked_item").val();
+        var  total = total_item.split(",");
+        if (total_item == "" || total_item.length ==0){
+            $("#checked_item").val(e_id);
+            add_item(e_id,storage,name,total_price,price);
+        }else{
+            var  is_new = true;
+            var same_id = e_id;
+            var pid = e_id.split("_");
+            if ( parseInt(pid[1]) == 4 || parseInt(pid[1]) == 5 || parseInt(pid[1]) == 6){ //当下单为产品，服务和打折卡下单时判断是不是已经存在
+                for(var i=0;  i < total.length;i++){
+                    var d_t = total[i].split("_");
+                    if(pid[2] == d_t[2] && parseInt(d_t[1]) != 3){
+                        is_new = false;
+                        e_id = total[i];
+                    }
+                }
+            }
+            if (is_new){
+                total.push(e_id);
+                $("#checked_item").val(total.join(','));
+                add_item(e_id,storage,name,total_price,price);
+            }else{
+                $("#"+e_id).find("a").eq(1).trigger("onclick"); //如果产品或者服务重复则只增加数量
+                var left_item = [];
+                if (parseInt(pid[1]) == 4){ //当后选择打折卡时默认设置使用打折卡下单
+                    for(var k=0;k< total.length;k++){
+                        if(total[k] != e_id){
+                            left_item.push(total[k]);
+                        }else{
+                            $("#table_item #"+e_id).attr("id",same_id);
+                            $("#"+e_id ).attr("checked",false);
+                        }
+                    }
+                    left_item.push(same_id);
+                    $("#checked_item").val(left_item.join(","));
+                }else{
+                    $("#"+same_id ).attr("checked",false);
+                    tishi_alert("已从打折卡添加！");
+                }
+            }
+        }
+    }else{
+        del_item(e_id,total_price);
+    }
+}
+function add_item(e_id,storage,name,total_price,price){
+    var types_name = "后台下单";
+    if (parseInt(e_id.split("_")[1]) == 3){
+        types_name = "后台套餐卡下单";
+    }else if(parseInt(e_id.split("_")[1]) == 4){
+        types_name = "后台打折卡下单";
+    }
+    $("#table_item").append("<tr id='"+ e_id +"' class='"+(storage == undefined ? 1 : storage)+"'><td>"+ name +"</td>\n\
+       <td id='price'>"+price+"</td><td>\n\<a href='javascript:void(0)' class='addre_a' style='font-size:15px;' onclick='del_num(this)'>-</a>\n\
+       <span style='margin:5px;'><input type='text' class='addre_input' value='1' readonly /></span><a href='javascript:void(0)' \n\
+       class='addre_a' style='font-size:15px;' onclick='add_num(this)'>+</a></td><td id='t_price'>"+price +"</td><td>"+types_name+"</td>\n\
+       <td><a href='javascript:void(0)'>删除</a></td></tr>");
+    $("#total_price").html(change_dot(round(total_price,2)+round(price,2),2));
+}
+
+function del_item(e_id,total_price){
+    var checked_item = $("#checked_item").val().split(",");
+    var left_item = [];
+    var same_id = e_id.split("_");
+    if ( parseInt(same_id[1]) == 4 || parseInt(same_id[1]) == 5 || parseInt(same_id[1]) == 6){
+        for(var m=0;  m < checked_item.length;m++){
+            var del_t = checked_item[m].split("_");
+            if(same_id[2] == del_t[2] && parseInt(del_t[1]) != 3){
+                e_id = checked_item[m];
+            }
+        }
+    }
+    var e_price = $("#table_item #"+e_id+" #t_price").html();
+    $("#total_price").html(change_dot(round(total_price,2)-round(e_price,2),2));
+    $("#table_item #"+e_id).remove();
+    $("#"+e_id +" :checkbox").attr("checked",false);
+    for(var k=0;k<checked_item.length;k++){
+        if(checked_item[k] != e_id){
+            left_item.push(checked_item[k]);
+        }
+    }
+    $("#checked_item").val(left_item.join(","));
+}
+
+function search_card(store_id){
+    var e = $("#car_num")[0];
+    if (e.value !="" && e.value.length == 7){
+        $("#old_customer").val("");
+        auth_car_num(e,store_id);
+    }
+}
+
+function submit_item(store_id){
+    var e = $("#car_num")[0];
+    var checked_item = $("#checked_item").val();
+    if (e.value !="" && e.value.length == 7){
+        if (checked_item != "" && checked_item.length > 4){
+            if(confirm("确认提交订单?")){
+                $("#submit_item,#submit_spinner").toggle();
+                var items = checked_item.split(",");
+                var sub_items = {};
+                var url = "/stores/"+store_id+"/set_stores/submit_item";
+                var data ={
+                    car_num : e.value
+                }
+                for(var i=0; i< items.length;i++){
+                    sub_items[items[i]] = $("#table_item #"+items[i] +" :text").val();
+                }
+                data["sub_items"] = sub_items;
+                $.ajax({
+                    type:"post",
+                    url:url,
+                    dataType: "script",
+                    data: data
+                })
+            }
+        }else{
+            tishi_alert("请选择项目！")
+        }
+        
+    }else{
+        tishi_alert("车牌号码不正确！")
     }
 }

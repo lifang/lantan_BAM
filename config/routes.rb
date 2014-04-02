@@ -64,7 +64,7 @@ LantanBAM::Application.routes.draw do
     resources :complaints do
       collection do
         post "consumer_search"
-        get "consumer_list", "con_list", "meta_analysis","cost_price"
+        get "consumer_list", "con_list", "meta_analysis","cost_price","satisfy_degree"
       end
       member do
         get "complaint_detail"
@@ -209,7 +209,7 @@ LantanBAM::Application.routes.draw do
     resources :set_stores do
       collection do
         get "select_cities","cash_register","complete_pay","print_paper","single_print","plus_items"
-        post "load_order","pay_order","edit_svcard","search_item","search_info"
+        post "load_order","pay_order","edit_svcard","search_item","search_info","submit_item"
       end
     end
     resources :station_datas do
@@ -328,7 +328,7 @@ LantanBAM::Application.routes.draw do
       collection do
         post :customer_pcards, :package_make_order, :pcard_make_order_commit, :pcard_order_info
         post :make_order2, :complaint, :quickly_make_order, :pay_order_no_auth
-        post :make_order,:update_customer
+        post :make_order,:update_customer,:update_tech
         post :search, :sync_orders_and_customer
         post :new_index_list, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order, :cancel_order
       end

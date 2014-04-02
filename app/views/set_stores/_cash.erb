@@ -71,7 +71,9 @@
                 <%reward = @order_pays.select{|k,i| v.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
                 <%  fa = limit_float(total > reward ? (total-reward) : 0)%>
                 <li>总计：<%=  fa %></li>
-                <li><a href="javascript:void(0)" class="accounts_btn" onclick="pay_this_order(<%=params[:store_id]  %>,<%=k[:c_id]  %>,<%=k[:n_id]  %>)">结账</a></li>
+                <li>
+                  <a class="accounts_btn" href="/stores/<%=params[:store_id]%>/set_stores/plus_items?num=<%=k[:c_num]%>" target="_blank">添加订单</a>
+                  <a href="javascript:void(0)" class="accounts_btn" onclick="pay_this_order(<%=params[:store_id]  %>,<%=k[:c_id]  %>,<%=k[:n_id]  %>)">结 账</a></li>
               </ul>
             </div>
           </div>

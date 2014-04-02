@@ -4,13 +4,15 @@
       <td><input type="checkbox" value="全选" onclick='set_value(this)' /></td>
       <td>订单号</td>
       <td>消费日期</td>
-      <td width="25%">消费项目</td>
+      <td width="20%">消费项目</td>
       <td>总价（元）</td>
+      <td>优惠（元）</td>
+      <td>成交（元）</td>
       <td width="8%">付款方式</td>
-      <td>是否满意</td>
-      <td>是否开票</td>
+      <td>满意度</td>
+      <td>开发票</td>
       <td>状态</td>
-      <td>操作</td>
+      <td width="5%">操作</td>
     </tr>
   </thead>
   <tbody>
@@ -35,7 +37,11 @@
             <% end if @product_hash[order.id] %>
           </table>
         </td>
+        <% loss = limit_float(@pay_types[order.id].nil? ? 0 : @pay_types[order.id].select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n}) %>
+        <%  fact = limit_float(order.price>loss ? order.price-loss : 0)%>
         <td><%= order.price %></td>
+        <td><%= loss %></td>
+        <td><%= fact%></td>
         <td><%= @order_pay_type[order.id].nil? ? "" : @order_pay_type[order.id].join(",") %></td>
         <td><%= Order::IS_PLEASED_NAME[order.is_pleased] %></td>
         <td><%= order.is_billing ? "是" : "否" %></td>

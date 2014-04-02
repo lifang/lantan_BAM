@@ -1106,8 +1106,8 @@ a.compile_btn { width: 100px;}
 .accounts { text-align: right; border-top: 1px #CCCCCC solid;}
 .accounts li { display: block;}
 .accounts_btn {
-    height: 24px;
-    line-height: 24px;
+    height: 35px;
+    line-height: 32px;
     display: inline-block;
     margin-right: 1px;
     padding: 0 10px;
@@ -1414,3 +1414,16 @@ a.compile_btn { width: 100px;}
 .bill_table input[type="text"].addre_input { width: 30px; text-align: center;}
 .bill_table .addre_a { font-size: 30px; background:none; color: #333; margin: 0;display: inline-block;}
 .bill_table em { margin-right: 10px;}
+
+.card_list { padding: 0 0px 0 0px;}
+
+.order_card {
+    color:#930205;
+    padding-left: 5px;
+    height: 32px;
+    line-height: 32px;
+    background: url(/assets/tab_head_bg.jpg) repeat-x;
+}
+
+.card_register { font-size: 12px; margin-bottom: 10px;  border: 1px #CCCCCC solid;}
+.order_card li { display: inline-block; margin-right: 4px;}

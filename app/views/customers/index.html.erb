@@ -36,7 +36,7 @@
 
     <div class="data_body_title">
       <h2 class="data_body_h">
-        上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints/satisfy_degree"><%= "#{satisfy[0]}%" %></a>&nbsp;&nbsp;&nbsp;
+        上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints"><%= "#{satisfy[0]}%" %></a>&nbsp;&nbsp;&nbsp;
         上月门店不满意度 ：<a href="/stores/<%= @store.id %>/complaints"><%= "#{satisfy[1]}%" %></a>
       </h2>
       <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries if @customers %></span>位</p>
@@ -74,7 +74,7 @@
                   </td>
                   <td width="15%" class="wordBreak"><%= customer.mobilephone %></td>
                   <td width="10%" class="wordBreak">
-                    <%= (@is_vips and @is_vips[customer.id] and @is_vips[customer.id][0].is_vip) ? "是" : "否" %>
+                    <%=  customer.is_vip ? "是" : "否" %>
                   </td>
                   <td width="20%" class="wordBreak">
                     <% if permission?(controller.controller_name.to_sym, :detail) %><a href="/stores/<%= @store.id %>/customers/<%= customer.id %>">详情</a><% end %>

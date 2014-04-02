@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140324153500) do
+ActiveRecord::Schema.define(:version => 20140325173203) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -205,6 +205,7 @@ ActiveRecord::Schema.define(:version => 20140324153500) do
     t.integer  "car_num_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "store_id"
   end
 
   add_index "customer_num_relations", ["car_num_id"], :name => "index_customer_num_relations_on_car_num_id"
@@ -247,6 +248,7 @@ ActiveRecord::Schema.define(:version => 20140324153500) do
     t.float    "debts_money"
     t.integer  "check_type"
     t.integer  "check_time"
+    t.integer  "store_id"
   end
 
   add_index "customers", ["birthday"], :name => "index_customers_on_birthday"
@@ -1344,6 +1346,14 @@ ActiveRecord::Schema.define(:version => 20140324153500) do
   add_index "syncs", ["created_at"], :name => "index_syncs_on_created_at"
   add_index "syncs", ["sync_at"], :name => "index_syncs_on_sync_at"
   add_index "syncs", ["updated_at"], :name => "index_syncs_on_updated_at"
+
+  create_table "tech_orders", :force => true do |t|
+    t.integer  "staff_id"
+    t.integer  "order_id"
+    t.decimal  "own_deduct", :precision => 20, :scale => 2, :default => 0.0
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "total_msgs", :force => true do |t|
     t.string   "shop"

@@ -1,6 +1,8 @@
 #encoding: utf-8
 require 'date'
 class MaterialOrder < ActiveRecord::Base
+  include ApplicationHelper
+
   has_many :mat_order_items
   has_many :mat_out_orders
   has_many  :mat_in_orders
@@ -21,6 +23,13 @@ class MaterialOrder < ActiveRecord::Base
     status
   end
 
+   def self.set_code(len)
+    chars =  (0..9).to_a
+    code_array = []
+    1.upto(len) {code_array << chars[rand(chars.length)]}
+    return code_array.join("")
+  end
+
   def self.material_order_code(store_id, time=nil)
     store = store_id.to_s
     if store_id < 10
@@ -28,20 +37,20 @@ class MaterialOrder < ActiveRecord::Base
     elsif store_id < 100
       store =    "0" + store_id.to_s
     end
-    store + (time.nil? ? Time.now.strftime("%Y%m%d%H%M%S") : DateTime.parse(time).strftime("%Y%m%d%H%M%S"))
+    store + (time.nil? ? Time.now.strftime("%Y%m%d%H%M%S") : DateTime.parse(time).strftime("%Y%m%d%H%M%S"))+set_code(2)
   end
 
-#  def self.supplier_order_records page, per_page, store_id
-#    self.paginate(:select => "*", :from => "material_orders", :include => [:supplier, {:mat_order_items => :material}], :conditions => "material_orders.supplier_id != 0 and material_orders.store_id = #{store_id}",
-#      :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
-#  end
+  #  def self.supplier_order_records page, per_page, store_id
+  #    self.paginate(:select => "*", :from => "material_orders", :include => [:supplier, {:mat_order_items => :material}], :conditions => "material_orders.supplier_id != 0 and material_orders.store_id = #{store_id}",
+  #      :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
+  #  end
 
-#   def self.head_order_records page, per_page, store_id, status=nil
-#     sql = status.nil? ? "" : "and material_orders.m_status=#{status}"
-#     self.paginate(:select => "*", :from => "material_orders", :include => [:mat_order_items => :material],
-#       :conditions => "material_orders.supplier_id = 0 #{sql} and material_orders.store_id = #{store_id}",
-#       :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
-#   end
+  #   def self.head_order_records page, per_page, store_id, status=nil
+  #     sql = status.nil? ? "" : "and material_orders.m_status=#{status}"
+  #     self.paginate(:select => "*", :from => "material_orders", :include => [:mat_order_items => :material],
+  #       :conditions => "material_orders.supplier_id = 0 #{sql} and material_orders.store_id = #{store_id}",
+  #       :order => "material_orders.created_at desc",:page => page, :per_page => per_page)
+  #   end
   def self.material_order_list store_id, status=nil,m_status=nil,from_date=nil,to_date=nil,supplier_id=nil
     sql = ["select mo.* from material_orders mo where mo.store_id=?", store_id]
     unless status.nil? || status==-1
@@ -81,42 +90,42 @@ class MaterialOrder < ActiveRecord::Base
     arr << records << total_money << pay_money << total_count
     return arr
   end
-#    def self.search_orders store_id,from_date, to_date, status, supplier_id,page,per_page,m_status
-#      str = "mo.store_id = #{store_id} "
-#      if supplier_id == 0
-#       str += " and mo.supplier_id = 0 "
-#     else
-#       str += " and mo.supplier_id != 0 "
-#      end
-#      if status
-#        if status == 0
-#          str += " and mo.status=#{STATUS[:no_pay]} "
-#       elsif status == 1
-#         str += " and mo.status=#{STATUS[:pay]} "
-#       end
-#      end
-#      if m_status
-#        if m_status == 0
-#         str += " and mo.m_status=#{M_STATUS[:no_send]} "
-#       elsif m_status == 1
-#         str += " and mo.m_status=#{M_STATUS[:send]} "
-#       elsif m_status == 2
-#          str += " and mo.m_status=#{M_STATUS[:received]} "
-#       elsif m_status == 3
-#         str += " and mo.m_status=#{M_STATUS[:save_in]} "
-#       end
-#      end
-#      if from_date && from_date.length > 0
-#        str += " and unix_timestamp(date_format(mo.created_at,'%Y-%m-%d')) >= unix_timestamp(date_format('#{from_date}','%Y-%m-%d')) "
-#      end
-#      if to_date && to_date.length > 0
-#        str += " and unix_timestamp(date_format(mo.created_at,'%Y-%m-%d')) <= unix_timestamp(date_format('#{to_date}','%Y-%m-%d')) "
-#     end
-#      orders = self.paginate(:select => "mo.*", :from => "material_orders mo", :conditions => str,
-#        :order => "created_at desc",
-#        :page => page, :per_page => per_page)
-#     orders
-#    end
+  #    def self.search_orders store_id,from_date, to_date, status, supplier_id,page,per_page,m_status
+  #      str = "mo.store_id = #{store_id} "
+  #      if supplier_id == 0
+  #       str += " and mo.supplier_id = 0 "
+  #     else
+  #       str += " and mo.supplier_id != 0 "
+  #      end
+  #      if status
+  #        if status == 0
+  #          str += " and mo.status=#{STATUS[:no_pay]} "
+  #       elsif status == 1
+  #         str += " and mo.status=#{STATUS[:pay]} "
+  #       end
+  #      end
+  #      if m_status
+  #        if m_status == 0
+  #         str += " and mo.m_status=#{M_STATUS[:no_send]} "
+  #       elsif m_status == 1
+  #         str += " and mo.m_status=#{M_STATUS[:send]} "
+  #       elsif m_status == 2
+  #          str += " and mo.m_status=#{M_STATUS[:received]} "
+  #       elsif m_status == 3
+  #         str += " and mo.m_status=#{M_STATUS[:save_in]} "
+  #       end
+  #      end
+  #      if from_date && from_date.length > 0
+  #        str += " and unix_timestamp(date_format(mo.created_at,'%Y-%m-%d')) >= unix_timestamp(date_format('#{from_date}','%Y-%m-%d')) "
+  #      end
+  #      if to_date && to_date.length > 0
+  #        str += " and unix_timestamp(date_format(mo.created_at,'%Y-%m-%d')) <= unix_timestamp(date_format('#{to_date}','%Y-%m-%d')) "
+  #     end
+  #      orders = self.paginate(:select => "mo.*", :from => "material_orders mo", :conditions => str,
+  #        :order => "created_at desc",
+  #        :page => page, :per_page => per_page)
+  #     orders
+  #    end
 
   def check_material_order_status
     mo_status = []

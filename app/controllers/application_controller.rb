@@ -21,8 +21,10 @@ class ApplicationController < ActionController::Base
 
   def not_found
     #    raise ActionController::RoutingError.new('Not Found')
-      render(:file  => "#{Rails.root}/public/404.html",
-             :layout => nil,
-             :status   => "404 Not Found")  
+    render(:file  => "#{Rails.root}/public/404.html",
+      :layout => nil,
+      :status   => "404 Not Found")
   end
+
+
 end

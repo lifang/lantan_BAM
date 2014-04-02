@@ -63,22 +63,9 @@ class Salary < ActiveRecord::Base
   end
 
   def self.get_technician_deduct_amount(start_time, end_time)
-    orders = Order.find_by_sql("select s2.id id_2,s.id id_1,sum(o.technician_deduct) price from orders o left join staffs s on
-    o.cons_staff_id_1 =  s.id  left join staffs s2 on o.cons_staff_id_2 = s2.id where  o.created_at >= '#{start_time}'
-    and o.created_at <='#{end_time}' and (o.status = #{Order::STATUS[:BEEN_PAYMENT]} or o.status = #{Order::STATUS[:FINISHED]}) group by s.id,s2.id")
-    technician_deduct_amount = {}
-    orders.each do |order|
-      if technician_deduct_amount.keys.include?(order.id_1)
-        technician_deduct_amount[order.id_1] += order.price
-      else
-        technician_deduct_amount[order.id_1] = order.price
-      end
-      if technician_deduct_amount.keys.include?(order.id_2)
-        technician_deduct_amount[order.id_2] += order.price
-      else
-        technician_deduct_amount[order.id_2] = order.price
-      end
-    end
+    technician_deduct_amount = Order.joins(:tech_orders).select("sum(tech_orders.own_deduct) deduct_price,tech_orders.staff_id").
+      where("orders.created_at >=  '#{start_time}' and orders.created_at <='#{end_time}'").
+      where(:"orders.status"=>Order::PRINT_CASH).group("tech_orders.staff_id").inject({}){|h,s|h[s.staff_id]=s.deduct_price;h}
     technician_deduct_amount
   end
 

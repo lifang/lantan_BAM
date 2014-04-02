@@ -8,13 +8,13 @@ class OrderProdRelation < ActiveRecord::Base
    p.name,'产品/服务' p_types,0 s_types from order_prod_relations opr inner join products p on p.id = opr.product_id
         where opr.order_id in (?)", orders])
     @product_hash = {}
-    products.each { |p| 
+    products.each { |p|
       @product_hash[p.order_id].nil? ? @product_hash[p.order_id] = [p] : @product_hash[p.order_id] << p
     } if products.any?
     pcar_relations = CPcardRelation.find_by_sql(["select cpr.order_id, 1 pro_num, pc.price, pc.name,return_types,
     '套餐卡' p_types,0 s_types from c_pcard_relations cpr inner join package_cards pc on pc.id = cpr.package_card_id where
     cpr.order_id in (?)", orders])
-    pcar_relations.each { |p| 
+    pcar_relations.each { |p|
       @product_hash[p.order_id].nil? ? @product_hash[p.order_id] = [p] : @product_hash[p.order_id] << p
     } if pcar_relations.any?
     csvc_relations = CSvcRelation.find_by_sql(["select csr.order_id, 1 pro_num, sc.price, sc.name,return_types,
@@ -26,7 +26,7 @@ class OrderProdRelation < ActiveRecord::Base
   end
 
   def self.s_order_products(order_id)
-    products = OrderProdRelation.find_by_sql("select opr.order_id, opr.pro_num, opr.price, p.name,is_service,p.id 
+    products = OrderProdRelation.find_by_sql("select opr.order_id, opr.pro_num, opr.price, p.name,is_service,p.id
         from order_prod_relations opr left join products p on p.id = opr.product_id where opr.order_id = #{order_id}")
     @product_hash = {}
     products.each { |p|
@@ -60,7 +60,7 @@ class OrderProdRelation < ActiveRecord::Base
         case check_station[1]
         when  0
           status = 0
-          msg = "当前无合适的工位!"
+          msg = "#{product.name}无合适的工位!"
         when 1  #创建订单，安排工位
           pmrs = ProdMatRelation.find_by_sql(["select pmr.material_num num,pmr.material_id id,m.storage from prod_mat_relations pmr inner join materials
             m on pmr.material_id=m.id where pmr.product_id=?", product.id])
@@ -68,7 +68,7 @@ class OrderProdRelation < ActiveRecord::Base
             pmrs.each do |p|
               if p.num.to_i * p_num > p.storage
                 status = 0
-                msg = "服务所需的物料库存不足!"
+                msg = "#{product.name}所需的物料库存不足!"
                 break
               end
             end
@@ -95,9 +95,10 @@ class OrderProdRelation < ActiveRecord::Base
                 :total_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f*p_num : 0,
                 :t_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.t_price.to_f*p_num : 0
               })
-            arrange_time = Station.arrange_time(store_id,[p_id],order)          
+            arrange_time = Station.arrange_time(store_id,[p_id],order)
             hash = Station.create_work_order(arrange_time[0], store_id,order, {}, arrange_time[2], product.cost_time.to_i*p_num)
             order.update_attributes(hash)
+
             if !pmrs.blank?   #如果选择的服务是需要消耗物料的，则要将对应的物料库存减去
               pmrs.each do |p|
                 material = Material.find_by_id(p.id)
@@ -140,7 +141,7 @@ class OrderProdRelation < ActiveRecord::Base
             })
         else
           status=0
-          msg = "产品所需的物料库存不足!"
+          msg = "#{product.name}所需的物料库存不足!"
         end
       else
         status = 0

@@ -66,7 +66,7 @@ class WorkOrder < ActiveRecord::Base
           runtime = sprintf('%.2f',(current_time - self.started_at)/60).to_f
           status = (order.status == Order::STATUS[:BEEN_PAYMENT] || order.status == Order::STATUS[:FINISHED]) ? WorkOrder::STAT[:COMPLETE] : WorkOrder::STAT[:WAIT_PAY]
           self.update_attributes(:status => status, :runtime => runtime,:water_num => water_num, :gas_num => gas_num)
-          staffs = [order.try(:cons_staff_id_1), order.try(:cons_staff_id_2)]
+          staffs = TechOrder.where(:order_id=>self.id).map(&:staff_id)
           if !self.cost_time.nil?
             if runtime > self.cost_time.to_f
               staffs.each do |staff_id|
@@ -81,8 +81,8 @@ class WorkOrder < ActiveRecord::Base
             c_num = w_record.construct_num.nil? ? 0 : w_record.construct_num
             g_num = w_record.gas_num.nil? ? 0 : w_record.gas_num
             w_num = w_record.water_num.nil? ? 0 : w_record.water_num
-            water_num = water_num.nil? ? 0 : water_num/2.0
-            gas_num =  gas_num.nil? ? 0 : gas_num/2.0
+            water_num = water_num.nil? ? 0 : water_num*1.0/w_records.length
+            gas_num =  gas_num.nil? ? 0 : gas_num*1.0/w_records.length
             w_record.update_attributes(:construct_num=>c_num+1,:water_num=>w_num+water_num,:gas_num=>g_num+gas_num)} unless w_records.blank?
         end
         if order && order.c_pcard_relation_id.nil?
@@ -96,7 +96,8 @@ class WorkOrder < ActiveRecord::Base
         where("work_orders.current_day = #{Time.now.strftime("%Y%m%d")}").
         where("work_orders.store_id = #{self.store_id}") #[1341,1344,1354,1356,1357,1360]
       car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
-      #
+      t_station_staffs = StationStaffRelation.where(:current_day=>Time.now.strftime("%Y%m%d")).group_by{|i|i.station_id}
+      order_stations = []
       #排下一个单
       next_work_order = WorkOrder.where("status = #{WorkOrder::STAT[:WAIT]}").
         where(:station_id => self.station_id).
@@ -108,6 +109,9 @@ class WorkOrder < ActiveRecord::Base
         ended_at = current_time + time*60
         next_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
           :started_at => current_time, :ended_at => ended_at )
+        t_station_staffs[next_work_order.station_id].map(&:staff_id).each do |staff_id|
+          order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>next_work_order.order_id)
+        end  if next_work_order.station_id
         wo_time = WkOrTime.find_by_station_id_and_current_day next_work_order.station_id, ended_at
         wo_time.update_attribute(:wait_num, wo_time.wait_num - 1) if wo_time and wo_time.wait_num
         next_order = next_work_order.order
@@ -115,15 +119,6 @@ class WorkOrder < ActiveRecord::Base
         message = "has_next_work_order"
       else
         #按照created_at时间来排单
-        #正在施工中的订单
-
-        orders = Order.includes(:work_orders).where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
-          where("work_orders.current_day = #{Time.now.strftime("%Y%m%d")}").
-          where("work_orders.store_id = #{self.store_id}")
-
-        car_num_id_sql = orders.length == 0 ? '1=1' : "orders.car_num_id not in (?)"
-
-
         products = Product.includes(:station_service_relations => :station).
           where(:stations=>{:id => self.station_id}).
           where("products.is_service = #{Product::PROD_TYPES[:SERVICE]}").map(&:id)
@@ -138,6 +133,7 @@ class WorkOrder < ActiveRecord::Base
 
         if_wo_set_station = false
         same_car_num_id = nil
+        order_stations = []
         another_work_orders.each do |another_work_order|
           #      if another_work_orders.length >= 1
           another_order = another_work_order.order
@@ -145,21 +141,21 @@ class WorkOrder < ActiveRecord::Base
             :products => {:is_service => Product::PROD_TYPES[:SERVICE]}).map(&:product_id)
 
           if (products & order_product_ids).sort == order_product_ids.sort
-            station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day self.station_id, Time.now.strftime("%Y%m%d").to_i if self.station_id
-            if station_staffs
-              staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0
-              staff_id_2 = station_staffs[1].staff_id if station_staffs.size > 1
-            end
             if if_wo_set_station
               another_work_order.update_attributes(:station_id => self.station_id) if same_car_num_id == another_work_order.order.car_num_id
-              another_order.update_attributes(:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2 ) if another_order
+              t_station_staffs[self.station_id].map(&:staff_id).each do |staff_id|
+                order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>another_order.id)
+              end  if another_order and self.station_id
             else
               ended_at = current_time + another_work_order.cost_time*60
               another_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING],
                 :started_at => current_time, :ended_at => ended_at, :station_id => self.station_id)
+              t_station_staffs[self.station_id].map(&:staff_id).each do |staff_id|
+                order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>another_order.id)
+              end  if self.station_id and another_order
               same_car_num_id  = another_order.car_num_id
               if_wo_set_station = true
-              another_order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2 ) if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT] && another_order.status != Order::STATUS[:FINISHED]
+              another_order.update_attributes(:status => Order::STATUS[:SERVICING])  if another_order && another_order.status != Order::STATUS[:BEEN_PAYMENT] && another_order.status != Order::STATUS[:FINISHED]
             end
           end
 
@@ -179,17 +175,11 @@ class WorkOrder < ActiveRecord::Base
             infos = Station.return_station_arr(product_ids, same_work_order.store_id)
 
             station_arr = infos[0].map(&:id)
-
             wkor_times = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),
               :store_id =>self.store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id).uniq
 
             if station_arr.any? and (wkor_times.blank? or wkor_times.length < station_arr.length)
               leave_station_id = (station_arr - wkor_times)[0]
-              station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day leave_station_id, Time.now.strftime("%Y%m%d").to_i if leave_station_id
-              if station_staffs
-                staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0
-                staff_id_2 = station_staffs[1].staff_id if station_staffs.size > 1
-              end
               if index == 0
                 s_ended_at = Time.now + same_work_order.cost_time*60
                 first_station_id = leave_station_id
@@ -197,13 +187,20 @@ class WorkOrder < ActiveRecord::Base
                 same_work_order.update_attribute(:station_id, leave_station_id)
                 same_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => leave_station_id,
                   :started_at => Time.now, :ended_at => s_ended_at)
-                same_work_order.order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2) if same_work_orders[0].order && same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT] && same_work_orders[0].order.status != Order::STATUS[:FINISHED]
+                t_station_staffs[leave_station_id].map(&:staff_id).each do |staff_id|
+                  order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>same_work_order.order_id)
+                end  if same_work_order.order and leave_station_id
+                same_work_order.order.update_attributes(:status => Order::STATUS[:SERVICING]) if same_work_orders[0].order && same_work_orders[0].order.status != Order::STATUS[:BEEN_PAYMENT] && same_work_orders[0].order.status != Order::STATUS[:FINISHED]
                 wk_or_time = WkOrTime.find_by_station_id_and_current_day leave_station_id, Time.now.strftime("%Y%m%d").to_i
                 WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id => leave_station_id,
                   :current_times => s_ended_at.strftime("%Y%m%d%H%M")) unless wk_or_time
               else
-                same_work_order.update_attribute(:station_id, first_station_id) if first_station_id and station_arr.include?(first_station_id)
-                same_work_order.order.update_attributes(:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2) if same_work_order and same_work_order.order
+                if first_station_id and station_arr.include?(first_station_id)
+                  same_work_order.update_attribute(:station_id, first_station_id)
+                  t_station_staffs[first_station_id].map(&:staff_id).each do |staff_id|
+                    order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>same_work_order.order_id)
+                  end  if same_work_order.order
+                end
               end
             end
           end
@@ -216,26 +213,29 @@ class WorkOrder < ActiveRecord::Base
         serving_work_orders = WorkOrder.where("status = #{WorkOrder::STAT[:SERVICING]}").
           where("store_id = #{self.store_id}").
           where("current_day = #{self.current_day}")
-
+    
         if next_diff_station_work_order && !if_wo_set_station
+          next_station_id =  next_diff_station_work_order.station_id
+          next_order = next_diff_station_work_order.order
           this_car_num_id = next_diff_station_work_order.order.car_num_id
           if !orders.map(&:car_num_id).compact.include?(this_car_num_id) && !serving_work_orders.map(&:station_id).include?(next_diff_station_work_order.station_id)
-            station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day next_diff_station_work_order.station_id, Time.now.strftime("%Y%m%d").to_i
-            if station_staffs
-              staff_id_1 = station_staffs[0].staff_id if station_staffs.size > 0
-              staff_id_2 = station_staffs[1].staff_id if station_staffs.size > 1
-            end
             s_ended_at = Time.now + next_diff_station_work_order.cost_time*60
-            next_diff_station_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id => next_diff_station_work_order.station_id,
+            next_diff_station_work_order.update_attributes(:status => WorkOrder::STAT[:SERVICING], :station_id =>next_station_id,
               :started_at => Time.now, :ended_at => s_ended_at)
-            next_diff_station_work_order.order.update_attributes(:status => Order::STATUS[:SERVICING],:cons_staff_id_1 =>staff_id_1,:cons_staff_id_2 => staff_id_2) if next_diff_station_work_order.order && next_diff_station_work_order.order.status != Order::STATUS[:BEEN_PAYMENT] && next_diff_station_work_order.order.status != Order::STATUS[:FINISHED]
+            t_station_staffs[next_station_id].map(&:staff_id).each do |staff_id|
+              order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>next_order.id)
+            end  if next_order and next_station_id
+            if next_order && next_order.status != Order::STATUS[:BEEN_PAYMENT] && next_order.status != Order::STATUS[:FINISHED]
+              next_order.update_attributes(:status => Order::STATUS[:SERVICING], :station_id =>next_station_id)
+            end
             wk_or_time = WkOrTime.find_by_station_id_and_current_day next_diff_station_work_order.station_id, Time.now.strftime("%Y%m%d").to_i
-            WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id => next_diff_station_work_order.station_id,
+            WkOrTime.create(:current_day => Time.now.strftime("%Y%m%d").to_i, :station_id =>next_station_id,
               :current_times => s_ended_at.strftime("%Y%m%d%H%M")) unless wk_or_time
           end
         end
-
+      
       end
+      TechOrder.import order_stations unless order_stations.blank?
       message
     end
   end

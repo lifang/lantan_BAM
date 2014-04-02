@@ -47,14 +47,7 @@
                     <td><%= prod.name.nil? ? "--" : prod.name %></td>
                     <td><%= prod.pro_num.nil? ? "--" : prod.pro_num %></td>
                     <td><%= (salary_detail.price.nil? ? 0 : salary_detail.price).round(2) %></td>
-                    <td><%=
-                      if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
-                        salary_detail.t_deduct.nil? ? 0 : salary_detail.t_deduct
-                      elsif @staff.type_of_w == Staff::S_COMPANY[:FRONT]
-                        salary_detail.f_deduct.nil? ? 0 : salary_detail.f_deduct
-                      else
-                        0
-                      end
+                    <td><%=salary_detail.t_deduct.nil? ? 0 : salary_detail.t_deduct.round(2) 
                     %>元</td>
                   </tr>
                 <% end %>
@@ -82,14 +75,7 @@
                     <td><%= prod.name.nil? ? "--" : prod.name %></td>
                     <td><%= prod.pro_num.nil? ? "--" : prod.pro_num %></td>
                     <td><%= (salary_detail.price.nil? ? 0 : salary_detail.price).round(2) %></td>
-                    <td><%=
-                      if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
-                        salary_detail.t_deduct.nil? ? 0 : salary_detail.t_deduct.round(2)
-                      elsif @staff.type_of_w == Staff::S_COMPANY[:FRONT]
-                        salary_detail.f_deduct.nil? ? 0 : salary_detail.f_deduct.round(2)
-                      else
-                        0
-                      end
+                    <td><%= salary_detail.t_deduct.nil? ? 0 : salary_detail.t_deduct.round(2)
                     %>元</td>
                   </tr>
                 <% end %>

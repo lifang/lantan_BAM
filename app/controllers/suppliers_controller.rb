@@ -9,7 +9,11 @@ class SuppliersController < ApplicationController
 
   def index
     @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @store.id])
-    @suppliers = Supplier.all(:select => "*", :from => "suppliers s",:conditions => "s.store_id=#{params[:store_id]} and s.status=#{Supplier::STATUS[:normal]}")
+    sql = "s.store_id=#{params[:store_id]} and s.status=#{Supplier::STATUS[:normal]}"
+    if params[:p_name] and params[:p_name] != "" and params[:p_name].length >0
+      sql += " and s.name like '%#{params[:p_name].strip.gsub(/[%_]/){|x| '\\' + x}}%'"
+    end
+    @suppliers = Supplier.all(:select => "*", :from => "suppliers s",:conditions =>sql )
     @supps = @suppliers.paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     respond_to do |f|
       f.html

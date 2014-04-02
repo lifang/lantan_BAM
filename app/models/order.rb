@@ -12,7 +12,7 @@ class Order < ActiveRecord::Base
   has_many :revisit_order_relations
   has_many :o_pcard_relations
   has_many :complaints
-  hash_many :tech_orders
+  has_many :tech_orders
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
   STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6,
@@ -24,7 +24,7 @@ class Order < ActiveRecord::Base
   OVER_CASH = [STATUS[:BEEN_PAYMENT],STATUS[:FINISHED],STATUS[:RETURN]]
   PRINT_CASH = [STATUS[:BEEN_PAYMENT],STATUS[:FINISHED]]
   IS_FREE = {:YES=>1,:NO=>0} # 1免单 0 不免单
-  TYPES = {:SERVICE => 0, :PRODUCT => 1} #0 服务  1 产品
+  TYPES = {:SERVICE => 0, :PRODUCT => 1,:DISCOUNT =>2,:SAVE =>3} #0 服务  1 产品
   FREE_TYPE = {:ORDER_FREE =>"免单",:PCARD =>"套餐卡使用"}
   #是否满意
   IS_PLEASED = {:BAD => 0, :SOSO => 1, :GOOD => 2, :VERY_GOOD => 3}  #0 不满意  1 一般  2 好  3 很好
@@ -101,8 +101,7 @@ class Order < ActiveRecord::Base
       price, is_vip, is_birthday, page)
     customer_sql = "select cu.id cu_id, cu.name, cu.mobilephone, cn.num, o.code, o.id o_id from customers cu
       inner join orders o on o.customer_id = cu.id left join car_nums cn on cn.id = o.car_num_id
-      inner join customer_store_relations csr on csr.customer_id = cu.id 
-      where cu.status = #{Customer::STATUS[:NOMAL]} and o.store_id = #{store_id.to_i} and csr.store_id = #{store_id.to_i}
+      where cu.status = #{Customer::STATUS[:NOMAL]} and o.store_id = #{store_id.to_i} and cu.store_id = #{store_id.to_i}
       and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
@@ -117,7 +116,7 @@ class Order < ActiveRecord::Base
   def self.get_message_customers(store_id, started_at, ended_at, is_visited, is_time, time, is_price,
       price, is_vip, is_birthday)
     customer_sql = "select DISTINCT(cu.id) cu_id, cu.name from customers cu
-      inner join orders o on o.customer_id = cu.id inner join customer_store_relations csr on csr.customer_id = cu.id 
+      inner join orders o on o.customer_id = cu.id 
       where cu.status = #{Customer::STATUS[:NOMAL]} and csr.store_id = #{store_id.to_i} and cu.name is not null
      and cu.mobilephone is not null and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
@@ -138,7 +137,7 @@ class Order < ActiveRecord::Base
   #正在进行中的订单
   def self.working_orders store_id
     #wo_status不在（2,3,4,5）o.status 在（0,1,2,3,4）
-    return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status from orders o inner join car_nums c on c.id=o.car_num_id
+    return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status,o.c_pcard_relation_id from orders o inner join car_nums c on c.id=o.car_num_id
       inner join customers cu on cu.id=o.customer_id left join work_orders wo on wo.order_id = o.id
 and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
       where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}, #{STATUS[:PCARD_PAY]})
@@ -996,6 +995,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
           hash[:is_billing] = billing.to_i == 0 ? false : true
           hash[:is_pleased] = please.to_i
           hash[:qfpos_id] = qfpos_id
+          hash[:is_vip] = Customer::IS_VIP[:NORMAL]
           if is_free.to_i == 0
             hash[:status] = STATUS[:BEEN_PAYMENT]
             hash[:is_free] = false
@@ -1013,8 +1013,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
           csvc_relations = CSvcRelation.where(:order_id => order.id)
           csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing => hash[:is_billing]})}
           if c_pcard_relations.present? || csvc_relations.present?
-            c_s_r = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id, order.customer_id)
-            c_s_r.update_attributes(:is_vip => Customer::IS_VIP[:VIP])
+            hash[:is_vip] = Customer::IS_VIP[:VIP]
           end
           #如果是选择储值卡支付
           if pay_type.to_i == OrderPayType::PAY_TYPES[:SV_CARD] && code
@@ -1047,7 +1046,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
           wo = WorkOrder.find_by_order_id(order.id)
           wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
           #生成积分的记录
-          c_customer = CustomerStoreRelation.find_by_store_id_and_customer_id(order.store_id,order.customer_id)
+          c_customer = order.customer
           if c_customer && c_customer.is_vip
             points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
               where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
