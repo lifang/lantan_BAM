@@ -20,7 +20,7 @@
         <div class="nav">
           <ul>
             <li><a href="/stores/<%=params[:store_id]%>/finance_reports"
-                   <%if ["index","revenue_report"].include? controller.action_name%> class="hover"<%end%>>收入管理</a>
+                   <%if ["index","revenue_report","other_fee"].include? controller.action_name%> class="hover"<%end%>>收入管理</a>
             </li>
             <li><a href="/stores/<%=params[:store_id]%>/finance_reports/fee_manage"
                    <%if ["fee_manage","fee_report"].include? controller.action_name%> class="hover"<%end%>>费用管理</a>

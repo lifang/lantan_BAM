@@ -55,97 +55,49 @@ class OrderProdRelation < ActiveRecord::Base
       product = Product.find_by_id(p_id)
       status = 1
       msg = ""
-      if product && product.is_service   #如果是服务
-        check_station = Station.arrange_time(store_id, [p_id])
-        case check_station[1]
-        when  0
-          status = 0
-          msg = "#{product.name}无合适的工位!"
-        when 1  #创建订单，安排工位
-          pmrs = ProdMatRelation.find_by_sql(["select pmr.material_num num,pmr.material_id id,m.storage from prod_mat_relations pmr inner join materials
-            m on pmr.material_id=m.id where pmr.product_id=?", product.id])
-          if !pmrs.blank?
-            pmrs.each do |p|
-              if p.num.to_i * p_num > p.storage
-                status = 0
-                msg = "#{product.name}所需的物料库存不足!"
-                break
-              end
-            end
+      if product
+        unless product.is_service
+          pmr = ProdMatRelation.find_by_product_id(product.id)
+          m = Material.find_by_id(pmr.material_id) if pmr
+          if m && m.storage < p_num * pmr.material_num
+            status =0
+            msg = "#{product.name}所需的物料#{m.name}库存不足!"
           end
-          if status==1
-            order = Order.create({
-                :code => MaterialOrder.material_order_code(store_id),
-                :car_num_id => car_num_id,
-                :status => Order::STATUS[:WAIT_PAYMENT],
-                :price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f*p_num : 0,
-                :is_billing => false,
-                :front_staff_id =>staff_id,
-                :customer_id => cus_id,
-                :store_id => store_id,
-                :is_visited => Order::IS_VISITED[:NO],
-                :types => Order::TYPES[:SERVICE],
-                :auto_time => product.is_auto_revist ? Time.now + product.auto_time.to_i.hours : nil
-              })
-            OrderProdRelation.create({
-                :order_id => order.id,
-                :product_id => p_id,
-                :pro_num => p_num,
-                :price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price : 0,
-                :total_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.sale_price.to_f*p_num : 0,
-                :t_price => product.single_types == Product::SINGLE_TYPE[:SIN] ? product.t_price.to_f*p_num : 0
-              })
+        end
+        if status == 1 && (product.is_service || product.is_added)
+          check_station = Station.arrange_time(store_id, [p_id])
+          case check_station[1]
+          when  0
+            status =0
+            msg = "#{product.name}无合适的工位!"
+          when 2
+            status = 0
+            msg = "需要使用多个工位，请分别下单!"
+          when 3
+            status = 0
+            msg = "服务所需的工位没有技师!"
+          end
+        end
+        if status == 1
+          order_parm = {
+            :code => MaterialOrder.material_order_code(store_id),
+            :car_num_id => car_num_id,:status => Order::STATUS[:WAIT_PAYMENT],:store_id => store_id,
+            :price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : product.sale_price.to_f*p_num,
+            :is_billing => false,:front_staff_id =>staff_id,:customer_id => cus_id,:is_visited => Order::IS_VISITED[:NO],
+            :types => Order::TYPES[:SERVICE],:auto_time => product.is_auto_revist ? Time.now + product.auto_time.to_i.hours : nil}
+          order = Order.create(order_parm)
+          relation_parm = {:order_id => order.id,:product_id => p_id,:pro_num => p_num,
+            :price => product.single_types == Product::SINGLE_TYPE[:DOUB] ?  0 : product.sale_price,
+            :total_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : product.sale_price.to_f*p_num,
+            :t_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ?  0 : product.t_price.to_f*p_num}
+          OrderProdRelation.create(relation_parm)
+          m.update_attribute("storage", m.storage - p_num * pmr.material_num) unless product.is_service
+          if product.is_service || product.is_added
             arrange_time = Station.arrange_time(store_id,[p_id],order)
             hash = Station.create_work_order(arrange_time[0], store_id,order, {}, arrange_time[2], product.cost_time.to_i*p_num)
             order.update_attributes(hash)
-
-            if !pmrs.blank?   #如果选择的服务是需要消耗物料的，则要将对应的物料库存减去
-              pmrs.each do |p|
-                material = Material.find_by_id(p.id)
-                material.update_attribute("storage", material.storage - (p.num.to_i * p_num))
-              end
-            end
           end
-        when 2
-          status = 0
-          msg = "需要使用多个工位，请分别下单!"
-        when 3
-          status = 0
-          msg = "服务所需的工位没有技师!"
         end
-      elsif product && !product.is_service   #如果是产品
-        pmr = ProdMatRelation.find_by_product_id(product.id)
-        m = Material.find_by_id(pmr.material_id) if pmr
-        if m && m.storage >= p_num * pmr.material_num
-          m.update_attribute("storage", m.storage - p_num * pmr.material_num)
-          order = Order.create({
-              :code => MaterialOrder.material_order_code(store_id),
-              :car_num_id => car_num_id,
-              :status => Order::STATUS[:WAIT_PAYMENT],
-              :price => product.sale_price.to_f*p_num,
-              :is_billing => false,
-              :front_staff_id =>staff_id,
-              :customer_id => cus_id,
-              :store_id => store_id,
-              :is_visited => Order::IS_VISITED[:NO],
-              :types => Order::TYPES[:PRODUCT],
-              :auto_time => product.is_auto_revist ? Time.now + product.auto_time.to_i.hours : nil
-            })
-          OrderProdRelation.create({
-              :order_id => order.id,
-              :product_id => p_id,
-              :pro_num => p_num,
-              :price => product.sale_price,
-              :total_price => product.sale_price.to_f*p_num,
-              :t_price => product.t_price.to_f*p_num
-            })
-        else
-          status=0
-          msg = "#{product.name}所需的物料库存不足!"
-        end
-      else
-        status = 0
-        msg = "数据错误!"
       end
       return [status, msg, product, order]
     end

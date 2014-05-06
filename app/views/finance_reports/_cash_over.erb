@@ -70,6 +70,12 @@
     </div>
   <% end %>
   <div class="pageTurn">
-    <%= will_paginate @orders,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" unless  @orders.blank?%>
+    <%unless  @orders.blank?%>
+      <%#if params[:method] == "get" %>
+        <%= will_paginate @orders,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+      <%#else%>
+        <%#=  will_paginate_remote(@orders , "first_time=#{@start_time}&last_time=#{@end_time}&customer_name=#{params[:customer_name]}&card_type=#{params[:card_type]}",{:url => "/stores/#{params[:store_id]}/finance_reports/other_fee"}) %>
+      <%#end%>
+    <%end%>
   </div>
 <%end%>

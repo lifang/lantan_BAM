@@ -29,13 +29,15 @@ class Product < ActiveRecord::Base
   SHOW_ON_IPAD ={:NO=>0,:YES=>1} #是否在ipad端显示
   REVIST_TIME = [24,48,72,96,120]
   IS_AUTO = {:YES=>1,:NO=>0}
-  IS_ADDED = {:YES=>1,:NO=>0}
+  IS_ADDED = {:YES =>1,:NO=>0} # 是否需要施工
   SINGLE_TYPE = {:SIN =>0,:DOUB =>1} #单次服务0 套装 1
   #scope :is_service, joins(:categories).where("categories.types = ?", Category::TYPES[:service])
   scope :is_service, where(:is_service => true)
   scope :is_normal, where(:status => true)
   scope :commonly_used, where(:commonly_used => true)
   PACK_SERVIE  = {0=>"产品套装服务"}
+  NEED_WORK = {-1=>"待施工产品"}
+  WORK = {:WORK=>-1}
   PACK ={:PACK => 0}
 
 
@@ -80,8 +82,8 @@ class Product < ActiveRecord::Base
     arr[3].each{|arr| pcard << arr[1]}
     hour = (Product.find(product.uniq).map(&:auto_time)|PackageCard.find(pcard.uniq).map(&:auto_time)).compact.min
     day = PackageCard.find(pcard.uniq).map(&:time_warn)
-#    revist = (Product.find(product.uniq).map(&:revist_content)|PackageCard.find(pcard.uniq).map(&:revist_content)).compact
-#    warn = PackageCard.find(pcard.uniq).map(&:con_warn).compact
+    #    revist = (Product.find(product.uniq).map(&:revist_content)|PackageCard.find(pcard.uniq).map(&:revist_content)).compact
+    #    warn = PackageCard.find(pcard.uniq).map(&:con_warn).compact
     return [hour.nil? ? nil : Time.now+hour.hours,day.nil? ? nil : Time.now+day.days]  #修改时间条件，如果不需要回访则订单的回访时间设置为null
   end
 

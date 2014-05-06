@@ -24,13 +24,13 @@
 </div>
 <div class="item">
   <label><span class="red">*</span>套餐价格：</label>
-  <input name="price" id="price" type="text" value="<%= @pcard.price %>" <%if @pcard.price%> readonly <%end%> />
+  <input name="price" id="price" type="text" value="<%= @pcard.price %>" <%unless @pcard.new_record?%> readonly <%end%> />
 </div>
 <div class="item_textarea"><span class="item_radio">
     <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
   <label>百分点：</label>
   <input name="deduct_percent" id="deduct_percent" type="text" <%if @pcard.deduct_percent==0.0 && @pcard.deduct_price != 0.0%> disabled<%else%>
-           value="<%= (@pcard.deduct_percent.nil? ? 0 :@pcard.deduct_percent)/(@pcard.price.nil? ? 1 : @pcard.price)*100 %>" <%end%>  class="item_areaInput_s"/>（销售提成）
+           value="<%= (@pcard.deduct_percent.nil? ? 0 :@pcard.deduct_percent)/((@pcard.price.nil? or @pcard.price <1)  ? 1 : @pcard.price)*100 %>" <%end%>  class="item_areaInput_s"/>（销售提成）
 </div>
 <div class="item_textarea"><span class="item_radio">
     <input name="deduct_type" type="radio" <% if @pcard.deduct_price && @pcard.deduct_price != 0.0 %>checked<%end%>
@@ -59,7 +59,8 @@
 <div class="item_textarea">
   <label>套餐卡配图：</label>
   <input type="file" name="img_url" id="sale_img"  class="file" size="50px" /><span class="show_pic" >
-    <img src="<%=  @pcard.img_url.nil? ? "" : @pcard.img_url.gsub("img#{@pcard.id}","img#{@pcard.id}_#{Constant::C_PICSIZE[2]}") %>" /></span>
+    <img src="<%=  @pcard.img_url.nil? ? "" : @pcard.img_url.gsub("img#{@pcard.id}","img#{@pcard.id}_#{Constant::C_PICSIZE[2]}") %>" />
+  图片大小不超过200KB。</span>
 </div>
 <div class="clear"></div>
 <div class="item_blockArea">

@@ -59,7 +59,7 @@ function add_new_cars(){
     }else if(car_num==""){
         tishi_alert("请输入车牌号码!");
         return false;
-    }else if(pattern.test(car_num)){
+    }else if(pattern.test(car_num) || car_num.length != 7){
         tishi_alert("车牌号码格式不正确!");
         return false;
     }else{
@@ -179,7 +179,7 @@ function add_car_get_datas(type,obj, store_id){
 }
 
 function add_car_valid(obj){
-    if($.trim($("#add_car_num").val())==""){
+    if($.trim($("#add_car_num").val())=="" || $.trim($("#add_car_num").val()).length != 7){
         tishi_alert("请输入车牌号码!");
     }else if($("#add_car_brands").val()=="" || $("#add_car_models").val()==""){
         tishi_alert("请选择车型!");

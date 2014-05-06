@@ -133,13 +133,13 @@ function limit_float(num){
 
 function check_num(){
     var total = 0;
-    var due_pay = limit_float($.trim($("#due_pay").html()));
+    var due_pay = round($.trim($("#due_pay").html()),4);
     $("#due_over").css("display","none");
     //    $('div.at_way_b > div').find("input[id*='cash_'],input[id*='change_']").val(0);//当调动其他选项则清零付款方式的输入框，也可以选择重新计算
 
     $("input[id*='order_']").each(function(){
-        var left_price = limit_float($.trim($("#left_"+this.id.split("_")[1]).html()));
-        var price = limit_float($.trim(this.value))
+        var left_price = round($.trim($("#left_"+this.id.split("_")[1]).html()),2);
+        var price = round($.trim(this.value),2)
         var this_value = 0;
         if (!isNaN($.trim(this.value)) && price > 0){
             if (left_price < price){
@@ -149,17 +149,17 @@ function check_num(){
             }
         }
         this.value = this_value;
-        total = limit_float(total+this_value);
+        total = round(total+this_value,2);
     })
     if ( due_pay < total){
         tishi_alert("付款额度超过应付金额额度！");
         $("#total_pay").html(0);
-        $("#left_pay,#due_money").html(limit_float(due_pay));
+        $("#left_pay,#due_money").html(round(due_pay,2));
         $("#due_over").css("display","none");
         return false;
     }else{
-        $("#total_pay").html(limit_float(total));
-        $("#left_pay,#due_money").html(limit_float(due_pay-total));
+        $("#total_pay").html(round(total,2));
+        $("#left_pay,#due_money").html(round(due_pay-total,2));
         if (due_pay == total){
             $("#due_over").css("display","block");
         }
@@ -210,10 +210,12 @@ function set_pay_order(){
         }
     }
     if (loss == "block"){
-        var loss_ids = {}
+        var loss_ids = {};
+        var reasons = {};
         $(".at_client_con  td input[id*='in_']").each(function(){
-            if (limit_float($.trim(this.value))>0){
-                loss_ids[this.id.split("_")[1]]= limit_float($.trim(this.value));
+            if (round($.trim(this.value),2)>0){
+                loss_ids[this.id.split("_")[1]]= round($.trim(this.value),2);
+                reasons[this.id.split("_")[1]] = $("#reason_"+this.id.split("_")[1] +" input").val();
             }
             if (!set_reward(this)){ //判断优惠额度是否符合
                 return false;
@@ -221,6 +223,7 @@ function set_pay_order(){
         })
         if(loss_ids != {}){
             pay_order["loss_ids"] = loss_ids;
+            pay_order["loss_reason"] = reasons;
         }
     }
     var is_password = false;
@@ -231,8 +234,8 @@ function set_pay_order(){
             if(pwd == "" || pwd.length ==0){
                 is_password = true;
             }else{
-                if (limit_float($.trim(this.value)) > 0 ){
-                    text[this.id.split("_")[1]] = limit_float($.trim(this.value));
+                if (round($.trim(this.value),2) > 0 ){
+                    text[this.id.split("_")[1]] = round($.trim(this.value),2);
                     pay_order[this.id.split("_")[1]] = pwd;
                 }
             }
@@ -241,11 +244,13 @@ function set_pay_order(){
             pay_order["text"] = text;
         }
     }
-    var clear_value = limit_float($.trim($("#clear_value").val()));
+    var clear_value = round($.trim($("#clear_value").val()),2);
     if (clear_value > 0){
         pay_order["clear_value"] = clear_value;
     }
-    pay_order["is_billing"] = $("#is_biling")[0].checked ? 1 : 0
+    pay_order["is_billing"] = $("#is_biling")[0].checked ? 1 : 0;
+    pay_order["is_print"] = $("#is_print")[0].checked ? 1 : 0;
+    pay_order["is_order"] = $("#is_order")[0].checked ? 1 : 0;
     return [is_password,pay_order]
 }
 
@@ -257,23 +262,27 @@ function change_order(store_id){
 }
 
 function change_pay(e){
-    var due_pay = limit_float($.trim($("#hidden_pay").html()));
-    var left_pay = limit_float($.trim($("#left_pay").html()));
+    var due_pay = round($.trim($("#hidden_pay").html()),4);
+    var left_pay = round($.trim($("#left_pay").html()),4);
     if(e.checked){
         $("#due_pay").html(due_pay-due_pay%10);
-        $("#left_pay,#due_money").html(limit_float(left_pay-due_pay%10));
+        $("#left_pay,#due_money").html(round(left_pay-due_pay%10),2);
         if (due_pay%10 >0){
             $("#clear_value").val(due_pay%10);
         }
     }else{
         $("#due_pay").html(due_pay);
-        $("#left_pay,#due_money").html(limit_float(left_pay+limit_float($.trim($("#hidden_pay").html()))%10));
+        $("#left_pay,#due_money").html(round(left_pay+round($.trim($("#hidden_pay").html()))%10,4),2);
         $("#clear_value").val(0);
     }
     check_num();
 }
 
 function show_loss(obj_id){
+    if (obj_id == "input"){
+        $("thead #code_num,tbody #code_num").css("display",'none');
+        $(".at_client_con table td[id*='reason']").css("display",'');
+    }
     $(".at_client_con table td[id*='"+obj_id+"']").css("display",'block');
     if (obj_id == "input" && "block" == $("#return_order").css("display")){
         $(".at_client_con table td[id*='"+obj_id+"']").each(function(){
@@ -286,18 +295,18 @@ function show_loss(obj_id){
 
 function return_check(e){
     var clear_per = $("#clear_per")[0];
-    var hidden_pay = limit_float($.trim($("#hidden_pay").html()));
-    var total = limit_float($.trim( $("#loss_"+e.id.split("_")[1]).val()));
+    var hidden_pay = round($.trim($("#hidden_pay").html()),4);
+    var total = round($.trim( $("#loss_"+e.id.split("_")[1]).val()),4);
     var cards = $("#sv_card_used span[id*='"+e.id.split("_")[1] +"_']").find(":checkbox");
     clear_per.checked = false;
     if (e.checked){
         $(e).parent().siblings().css("background","#ebebe3");
-        $("#due_pay").html(limit_float(hidden_pay-total));
-        $("#left_pay,#due_money").html(limit_float(hidden_pay-total));
+        $("#due_pay").html(round(hidden_pay-total,2));
+        $("#left_pay,#due_money").html(round(hidden_pay-total,2));
         if (hidden_pay==total){
             clear_per.disabled = true;
         }
-        $("#hidden_pay").html(limit_float(hidden_pay-total));
+        $("#hidden_pay").html(round(hidden_pay-total,2));
         var  this_value = $("#in_"+e.id.split("_")[1]).val(0).attr("disabled",true);
         set_reward(this_value[0])
         if (cards.length >0){
@@ -310,9 +319,9 @@ function return_check(e){
         }
     }else{
         $(e).parent().siblings().css("background","");
-        $("#due_pay").html(limit_float(hidden_pay+total));
-        $("#left_pay,#due_money").html(limit_float(hidden_pay+total));
-        $("#hidden_pay").html(limit_float(hidden_pay+total));
+        $("#due_pay").html(round(hidden_pay+total,2));
+        $("#left_pay,#due_money").html(round(hidden_pay+total,2));
+        $("#hidden_pay").html(round(hidden_pay+total,2));
         $("#in_"+e.id.split("_")[1]).attr("disabled",false);
         if ((hidden_pay+total)>0){
             clear_per.disabled = false;
@@ -326,11 +335,11 @@ function return_check(e){
 
 function set_reward(e){
     var clear_per = $("#clear_per")[0];
-    var hidden_pay = limit_float($.trim($("#hidden_pay").html()));
-    var still_pay = limit_float($.trim($("#hipay_"+e.id.split("_")[1]).val()));
-    var loss = limit_float($.trim($("#loss_"+e.id.split("_")[1]).val()));
+    var hidden_pay = round($.trim($("#hidden_pay").html()),4);
+    var still_pay = round($.trim($("#hipay_"+e.id.split("_")[1]).val()),4);
+    var loss = round($.trim($("#loss_"+e.id.split("_")[1]).val()),4);
     var this_value = 0 ;
-    var  price = limit_float($.trim(e.value));
+    var  price = round($.trim(e.value),2);
     if (!isNaN(price) && price > 0){
         this_value = price;
     }
@@ -340,10 +349,10 @@ function set_reward(e){
         tishi_alert("优惠金额超过本单金额！");
         return false;
     }else{
-        $("#hipay_"+e.id.split("_")[1]).val(limit_float(this_value));
-        $("#due_pay").html(limit_float(hidden_pay+still_pay-this_value));
-        $("#left_pay,#due_money").html(limit_float(hidden_pay+still_pay-this_value));
-        $("#hidden_pay").html(limit_float(hidden_pay+still_pay-this_value));
+        $("#hipay_"+e.id.split("_")[1]).val(round(this_value,2));
+        $("#due_pay").html(round(hidden_pay+still_pay-this_value,2));
+        $("#left_pay,#due_money").html(round(hidden_pay+still_pay-this_value,2));
+        $("#hidden_pay").html(round(hidden_pay+still_pay-this_value,2));
         if ((hidden_pay+still_pay-this_value)<= 10){
             clear_per.disabled = true;
         }else{
@@ -356,8 +365,8 @@ function set_reward(e){
 }
 
 function set_change(pay_type){
-    var pay_cash = limit_float($.trim($("#cash_"+pay_type).val()));
-    var left_pay = limit_float($.trim($("#left_pay").html()));
+    var pay_cash = round($.trim($("#cash_"+pay_type).val()),4);
+    var left_pay = round($.trim($("#left_pay").html()),4);
     $("#change_"+pay_type).val(0);
     if (isNaN(pay_cash) || pay_cash <0){
         $("#cash_"+pay_type).val(0);
@@ -368,15 +377,15 @@ function set_change(pay_type){
             tishi_alert("实收金额不足！");
             return false;
         }else{
-            $("#change_"+pay_type).val(limit_float(pay_cash-left_pay));
+            $("#change_"+pay_type).val(round(pay_cash-left_pay,2));
             return true;
         }
     }
 }
 
 function set_card(pay_type){
-    var pay_cash = limit_float($.trim($("#cash_"+pay_type).val()));
-    var left_pay = limit_float($.trim($("#left_pay").html()));
+    var pay_cash = round($.trim($("#cash_"+pay_type).val()),2);
+    var left_pay = round($.trim($("#left_pay").html()),4);
     if (isNaN(pay_cash) || pay_cash < 0){
         pay_cash = 0;
     }
@@ -390,7 +399,7 @@ function set_card(pay_type){
 }
 
 function confirm_pay_order(store_id,c_id,n_id){
-    var left_pay = limit_float($.trim($("#left_pay").html()));
+    var left_pay = round($.trim($("#left_pay").html()),2);
     var pay_order = set_pay_order();
     if (!check_num()){ //判断储值卡的金额是否符合
         return false;
@@ -401,13 +410,13 @@ function confirm_pay_order(store_id,c_id,n_id){
     }else{
         var pay_type = $("#pay_type li[class='hover']").attr("id");
         var second_parm = "";
-        var pay_cash = limit_float($.trim($("#cash_"+pay_type).val()));
+        var pay_cash = round($.trim($("#cash_"+pay_type).val()),2);
         if(parseInt(pay_type) == 0){   //如果使用现金支付
             if (!set_change(pay_type)){
                 tishi_alert("实收金额不足！");
                 return false;
             }
-            second_parm = limit_float($.trim($("#change_"+pay_type).val()));
+            second_parm = round($.trim($("#change_"+pay_type).val()),2);
         }
         if(parseInt(pay_type) == 1){   //如果使用刷卡支付
             set_card(pay_type);
@@ -435,13 +444,13 @@ function confirm_pay_order(store_id,c_id,n_id){
                 pay_cash : pay_cash,
                 second_parm : second_parm
             }
+            $("#confirm_order,#spinner_user").toggle();
             set_confirm(store_id,c_id,n_id,t_data);
         }
     }
 }
 
 function set_confirm(store_id,c_id,n_id,t_data){
-    $("#confirm_order").attr("onclick","").attr("title","正在处理。。。");
     var url = "/stores/"+store_id+"/set_stores/pay_order";
     $.ajax({
         type:"post",
@@ -467,9 +476,9 @@ function single_order_print(store_id){
 
 function calulate_v(pay_type){
     if (parseInt(pay_type) == 0){
-        var pay_cash = limit_float($.trim($("#cash_"+pay_type).val()));
-        var left_pay = limit_float($.trim($("#left_pay").html()));
-        var  v = limit_float(pay_cash>left_pay ? pay_cash-left_pay : 0);
+        var pay_cash = round($.trim($("#cash_"+pay_type).val()),4);
+        var left_pay = round($.trim($("#left_pay").html()),4);
+        var  v = round(pay_cash>left_pay ? pay_cash-left_pay : 0,2);
         $("#cash_"+pay_type).val(pay_cash)
         $("#change_"+pay_type).val(v);
     }
@@ -511,7 +520,7 @@ function show_edit(store_id,card_id){
 
 function auth_car_num(e,store_id){
     var old_c = $("#old_customer").val();
-    if(e.value !="" && e.value.length == 7 && old_c != e.value ){
+    if(e.value !=""  && old_c != e.value && e.value.length == 7){
         $("#submit_item,#submit_spinner").toggle();
         var url = "/stores/"+store_id+"/set_stores/search_info";
         var data ={
@@ -524,6 +533,9 @@ function auth_car_num(e,store_id){
             data: data
         })
     }else{
+        if($.trim(e.value) !="" && $.trim(e.value) != "无牌" && $.trim(e.value).length != 7 ){
+            tishi_alert("车牌有误！");
+        }
         $("#bill_user_info input").removeAttr("readonly");
     }
 }
@@ -647,7 +659,7 @@ function put_add(e,e_id,storage,name,total_price,price){
                     $("#checked_item").val(left_item.join(","));
                 }else{
                     $("#"+same_id ).attr("checked",false);
-                    tishi_alert("已从打折卡添加！");
+                    tishi_alert("已添加！");
                 }
             }
         }
@@ -666,9 +678,16 @@ function add_item(e_id,storage,name,total_price,price){
        <td id='price'>"+price+"</td><td>\n\<a href='javascript:void(0)' class='addre_a' style='font-size:15px;' onclick='del_num(this)'>-</a>\n\
        <span style='margin:5px;'><input type='text' class='addre_input' value='1' readonly /></span><a href='javascript:void(0)' \n\
        class='addre_a' style='font-size:15px;' onclick='add_num(this)'>+</a></td><td id='t_price'>"+price +"</td><td>"+types_name+"</td>\n\
-       <td><a href='javascript:void(0)'>删除</a></td></tr>");
+       <td><a href='javascript:void(0)'onclick='del_self(this)';>删除</a></td></tr>");
     $("#total_price").html(change_dot(round(total_price,2)+round(price,2),2));
 }
+
+function del_self(e){
+    var total_price = $('#total_price').html();
+    var e_id = $(e).parent().parent().attr("id");
+    del_item(e_id,total_price);
+}
+
 
 function del_item(e_id,total_price){
     var checked_item = $("#checked_item").val().split(",");
@@ -686,6 +705,7 @@ function del_item(e_id,total_price){
     $("#total_price").html(change_dot(round(total_price,2)-round(e_price,2),2));
     $("#table_item #"+e_id).remove();
     $("#"+e_id +" :checkbox").attr("checked",false);
+    $("#"+e_id).attr("checked",false);
     for(var k=0;k<checked_item.length;k++){
         if(checked_item[k] != e_id){
             left_item.push(checked_item[k]);
@@ -696,7 +716,7 @@ function del_item(e_id,total_price){
 
 function search_card(store_id){
     var e = $("#car_num")[0];
-    if (e.value !="" && e.value.length == 7){
+    if (e.value !="" && e.value.length == 7 ){
         $("#old_customer").val("");
         auth_car_num(e,store_id);
     }
@@ -705,32 +725,154 @@ function search_card(store_id){
 function submit_item(store_id){
     var e = $("#car_num")[0];
     var checked_item = $("#checked_item").val();
-    if (e.value !="" && e.value.length == 7){
+    var c_name = $("#c_name").val();
+    var c_number = $("#c_number").val();
+    var other_way = $("#other_way").val();
+    var c_group = $("#c_group").val();
+    var c_address = $("#c_address").val();
+    var check_phone = false;
+    if (e.value !="" && (e.value.length == 7 || $.trim(e.value) == "无牌") ){
         if (checked_item != "" && checked_item.length > 4){
+            if(c_number != "" && c_number.length != 11){
+                tishi_alert("手机号码不正确！");
+                return false;
+            }
             if(confirm("确认提交订单?")){
-                $("#submit_item,#submit_spinner").toggle();
                 var items = checked_item.split(",");
                 var sub_items = {};
                 var url = "/stores/"+store_id+"/set_stores/submit_item";
                 var data ={
-                    car_num : e.value
+                    car_num : e.value,
+                    customer : {}
+                }
+                data["customer"]["name"]=c_name;
+                data["customer"]["mobilephone"]= c_number;
+                data["customer"]["other_way"]= other_way;
+                data["customer"]["address"]= c_address;
+                if(c_group != "" && c_group.length !=0){
+                    data["customer"]["group_name"]= c_group;
                 }
                 for(var i=0; i< items.length;i++){
+                    if (parseInt(items[i].split("_")[1])==1 && (c_number == "" || c_number.length == 0)){
+                        check_phone = true;
+                    }
                     sub_items[items[i]] = $("#table_item #"+items[i] +" :text").val();
                 }
-                data["sub_items"] = sub_items;
-                $.ajax({
-                    type:"post",
-                    url:url,
-                    dataType: "script",
-                    data: data
-                })
+                if (check_phone){
+                    tishi_alert("购买储值卡需要客户手机号！")
+                }else{
+                    if (c_number != "" && c_number.length != 0){
+                        if(confirm("请确认手机号 "+c_number)){
+                            $("#submit_item,#submit_spinner").toggle();
+                            data["sub_items"] = sub_items;
+                            $.ajax({
+                                type:"post",
+                                url:url,
+                                dataType: "script",
+                                data: data
+                            })
+                        }
+                    }else{
+                        $("#submit_item,#submit_spinner").toggle();
+                        data["sub_items"] = sub_items;
+                        $.ajax({
+                            type:"post",
+                            url:url,
+                            dataType: "script",
+                            data: data
+                        })
+                    }
+                }
             }
         }else{
             tishi_alert("请选择项目！")
         }
-        
     }else{
         tishi_alert("车牌号码不正确！")
     }
 }
+
+function edit_deduct(order_id,store_id){
+    var url = "/stores/"+store_id+"/set_stores/edit_deduct";
+    var data ={
+        order_id : order_id
+    }
+    $.ajax({
+        type:"post",
+        url:url,
+        dataType: "script",
+        data: data
+    })
+}
+
+function post_deduct(store_id,order_id){
+    var url = "/stores/"+store_id+"/set_stores/post_deduct";
+    var data = {
+        ids:{},
+        order_id : order_id
+    };
+    var ok = true;
+    var wrong_id = null;
+    var total_tech = $("#tech_order_popup :text");
+    for(var i =0;i<total_tech.length;i++){
+        data["ids"][total_tech[i].id]=total_tech[i].value;
+        if (isNaN(total_tech[i].value)){
+            wrong_id = total_tech[i].id;
+            ok = false;
+            break;
+        }
+    }
+    if (ok){
+        if(confirm("确认更改提成金额吗？")){
+            $.ajax({
+                type:"post",
+                url:url,
+                dataType: "json",
+                data: data,
+                success : function(data){
+                    if (data.status==0){
+                        tishi_alert("修改成功！");
+                        $("#edit_deduct .close").trigger("click");
+                    }else{
+                        tishi_alert("修改失败！");
+                    }
+                }
+            })
+        }
+    }else{
+        tishi_alert("数据有误!");
+        $("#tech_order_popup #" +wrong_id).focus();
+    }
+}
+
+function auth_number(e,store_id){
+    if (e.value != "" && e.value.length == 11 ){
+        var url = "/stores/"+store_id+"/set_stores/search_num";
+        var old_number = $("#old_number").val();
+        if (e.value != old_number){
+            var data ={
+                mobilephone : e.value
+            }
+            $.ajax({
+                type:"post",
+                url:url,
+                dataType: "json",
+                data: data,
+                success :function(data){
+                    if (data.status==1){
+                        $("#c_number").css("background-color","chartreuse");
+                        $("#c_number").attr("title","客户可用！");
+                    }else{
+                        var customer = data.customer;
+                        $("#c_number").css("background-color","red");
+                        if (customer.mobilephone!=null && customer.mobilephone.length==11){
+                            $("#c_number").attr("title","客户可以已存在，姓名："+customer.name+" 地址："+customer.address);
+                            $("#old_number").val(customer.mobilephone);
+                        }
+                    }
+                }
+            })
+        }
+    }
+}
+

@@ -191,7 +191,7 @@ class ComplaintsController < ApplicationController
       from  customers c   inner join customer_num_relations cnr on c.id=cnr.customer_id
       inner join car_nums cn on cnr.car_num_id=cn.id inner join car_models cm on cn.car_model_id=cm.id
       inner join car_brands cb on cm.car_brand_id=cb.id left join orders o on c.id=o.customer_id and o.status in (?) and o.store_id=?
-      where csr.store_id=? and c.status=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
+      where c.store_id=? and c.status=?", [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]],@store_id,
         @store_id, Customer::STATUS[:NOMAL]]
       if brand
         c_sql[0] += " and cb.id=?"
@@ -203,7 +203,7 @@ class ComplaintsController < ApplicationController
     end
     if recent_cons
       c_sql = ["select c.id,c.name,c.mobilephone,c.property,c.is_vip, sum(o.price) oprice,max(o.created_at) last_con_time
-      from inner join customers c  inner join orders o on c.id=o.customer_id where c.store_id=? and c.status=?  and o.status in (?)
+      from customers c  inner join orders o on c.id=o.customer_id where c.store_id=? and c.status=?  and o.status in (?)
       and o.store_id=?", @store_id, Customer::STATUS[:NOMAL], [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], @store_id]
       if recent_cons.to_i == 1  #当天消费的
         c_sql[0] += " and DATE_FORMAT(o.created_at,'%Y-%m-%d')=?"
@@ -259,8 +259,6 @@ class ComplaintsController < ApplicationController
       c_sql[0] += " and (sum(o.price) is null or sum(o.price)<?)"
       c_sql << amount_con_end.to_i
     end
-    
-    
     @customers = Customer.paginate_by_sql(c_sql,:page => params[:page], :per_page => 10)
 
     respond_to do |f|

@@ -26,7 +26,14 @@
           <ul>
             <li><strong>开单时间：</strong><%=  order.created_at.nil? ? "--" : order.created_at.strftime("%Y-%m-%d %H:%M")%></li>
             <li><strong>接待员：</strong><%= @staffs[order.front_staff_id] %></li>
-            <li><strong>技师：</strong><%=[@staffs[order.cons_staff_id_1],@staffs[order.cons_staff_id_2]].compact.uniq.join("、")%></li>
+            <li><strong>技师：</strong>
+              <%if @tech_orders[order.id].nil? || @tech_orders[order.id].map(&:staff_id).compact.blank?%>
+                --
+              <%else%>
+                <%= @tech_orders[order.id].map(&:staff_id).map{|i|@staffs[i]}.join("、")%>
+                <span class="red" style="cursor: pointer;" onclick="edit_deduct(<%=order.id%>,<%=params[:store_id]%>)">(可编辑)</span>
+              <%end%>
+            </li>
             <li><strong>工位：</strong><%= @stations[order.s_id].nil? ? "--":@stations[order.s_id] %></li>
             <li><strong>车牌：</strong><%=  order.c_num  %></li>
             <li><strong>客户姓名：</strong><%=  order.c_name  %></li>

@@ -137,14 +137,14 @@ function before_center(t){
     var doc_width = $(document).width();
     var layer_height = $(t).height();
     var layer_width = $(t).width();
-    $(".maskOne").css({
-        display:'block',
-        height:(layer_height+mouse_position+100)<doc_height ? doc_height: layer_height+100+50+mouse_position/2
-    });
     $(t).css('z-index',120);
     $(t).css('top',mouse_position/2+100+"px");
     $(t).css('left',(doc_width-layer_width)/2);
     $(t).css('display','block');
+    $(".maskOne").css({
+        display:'block',
+        height:(layer_height+mouse_position+100)<doc_height ? doc_height+100 : layer_height+mouse_position+100+50
+    });
     $(t + " .close").click(function(){
         $(t).css('display','none');
         $(".maskOne").css('display','none');
@@ -259,4 +259,19 @@ function change_dot(x,e)
 
 function set_default_value(e,get_value){
     $(get_value).val(e.value);
+}
+
+function set_default_to_pic(e){
+    return (e.files[0].size/1024).toFixed(0) > 200;
+}
+
+//点击 显示和隐藏提示框
+function show_complaint(t) {
+    $("#"+t+"_s").show();
+    $("#"+t+"_h").hide();
+}
+
+function hide_complaint(t) {
+    $("#"+t+"_s").hide();
+    $("#"+t+"_h").show();
 }

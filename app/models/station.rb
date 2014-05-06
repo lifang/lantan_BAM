@@ -264,17 +264,16 @@ class Station < ActiveRecord::Base
         else
           #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
           station_id = availbale_stations[0] || 0
-          #此处要判断该工位对应的技师是否也被分配到其他工位上，并且是否正在其他工位上工作，如果正在其他工位上工作，则要等待
-          ssr = StationStaffRelation.where(["station_id=? and current_day=?", station_id, Time.now.strftime("%Y%m%d").to_i]).map(&:staff_id)
-          ossr = StationStaffRelation.where(["station_id != ? and staff_id in (?) and current_day=?", station_id, ssr,
-              Time.now.strftime("%Y%m%d").to_i]).map(&:station_id) if ssr
-          wos = WorkOrder.where(["station_id in (?) and status = ? and current_day = ?", ossr,
-              WorkOrder::STAT[:SERVICING], Time.now.strftime("%Y%m%d").to_i]) if ossr
-          if wos.any?
-            has_start_end_time = false
-          else
-            has_start_end_time = true
-          end
+          #          #此处要判断该工位对应的技师是否也被分配到其他工位上，并且是否正在其他工位上工作，如果正在其他工位上工作，则要等待
+          #          ssr = StationStaffRelation.where(["station_id=? and current_day=?", station_id, Time.now.strftime("%Y%m%d").to_i]).map(&:staff_id)
+          #          ossr = StationStaffRelation.where(["station_id != ? and staff_id in (?) and current_day=?", station_id, ssr,
+          #              Time.now.strftime("%Y%m%d").to_i]).map(&:station_id) if ssr
+          #          wos = WorkOrder.where(["station_id in (?) and status = ? and current_day = ?", ossr,
+          #              WorkOrder::STAT[:SERVICING], Time.now.strftime("%Y%m%d").to_i]) if ossr
+          #          if wos.any?
+          #            has_start_end_time = false
+          #          else
+          has_start_end_time = true
         end
       else
         station_id = nil
@@ -342,11 +341,15 @@ class Station < ActiveRecord::Base
     hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? Order::STATUS[:SERVICING] : Order::STATUS[:NORMAL]
     hash[:station_id] = station_id if station_id  #这个可能暂时没有值，一个完成后要更新
     station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id
-    if station_staffs && work_order.status == WorkOrder::STAT[:SERVICING]
-      order_stations = []
-      order_stations << TechOrder.new(:staff_id=>station_staffs[0].staff_id ,:order_id=>order.id) if station_staffs.size > 0
-      order_stations << TechOrder.new(:staff_id=>station_staffs[1].staff_id,:order_id=>order.id) if station_staffs.size > 1
-      TechOrder.import order_stations unless order_stations.blank?
+    tech_orders = TechOrder.where(:order_id=>order.id)
+    if tech_orders.blank?
+      if station_staffs
+        TechOrder.create(:staff_id=>station_staffs[0].staff_id ,:order_id=>order.id) if station_staffs.size > 0
+        TechOrder.create(:staff_id=>station_staffs[1].staff_id,:order_id=>order.id) if station_staffs.size > 1
+      else
+        TechOrder.create(:order_id=>order.id)
+        TechOrder.create(:order_id=>order.id)
+      end
     end
     hash[:started_at] = work_order_status ? started_at : nil
     hash[:ended_at] = work_order_status ? ended_at : nil

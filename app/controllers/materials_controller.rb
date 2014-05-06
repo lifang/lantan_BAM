@@ -263,6 +263,8 @@ class MaterialsController < ApplicationController
 
   #备注
   def remark
+    material =  Material.new(:unit=>"11",:code_value=>"4042216269563")
+    material.save
     material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     material.update_attribute(:remark,params[:remark]) if material
     render :text => 1
@@ -277,12 +279,29 @@ class MaterialsController < ApplicationController
   #核实
   def check
     @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], params[:store_id]])
-    @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
-    @pandian_flag = params[:pandian_flag].to_i
-    if @material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
-      @status = 0
-    else
-      @status = 1
+    Material.transaction do
+      @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
+      @pandian_flag = params[:pandian_flag].to_i
+      num = @material.storage
+      if @material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
+        if num < params[:num].to_i
+          material_order = MaterialOrder.create({:price =>(params[:num].to_i-num)*@material.import_price,:remark=>"快速入库",
+              :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => MaterialOrder::STATUS[:pay],
+              :m_status => MaterialOrder::M_STATUS[:save_in],:staff_id => cookies[:user_id],:store_id => params[:store_id]
+            })
+          MatOrderItem.create({:material_order => material_order, :material => @material, :material_num =>params[:num].to_i-num,
+              :price =>@material.import_price})
+          MatInOrder.create({:material => @material, :material_order => material_order,
+              :material_num =>params[:num].to_i-num, :price =>@material.import_price, :staff_id => cookies[:user_id]
+            })
+        else
+          MatOutOrder.create(:material => @material, :material_num => num - params[:num].to_i,:staff_id => cookies[:user_id], 
+            :price =>@material.import_price, :types =>MatOutOrder::TYPES_VALUE[:quick_out], :store_id => params[:store_id])
+        end
+        @status = 0
+      else
+        @status = 1
+      end
     end
   end
 
@@ -803,16 +822,13 @@ class MaterialsController < ApplicationController
 
   #批量核实
   def batch_check
-    failed_updates = []
     flash[:notice] = "盘点清单成功！"
-    params[:materials].each do |id,cn|
-      material = Material.find_by_id(id)
-      unless material && material.update_attributes({:storage => cn[:num], :check_num => nil})
-        failed_updates << cn[:code]
+    begin
+      Material.transaction do
+        Material.update(params[:materials].keys,params[:materials].values)
       end
-    end unless params[:materials].blank?
-    if failed_updates.length > 0
-      flash[:notice] = "#{failed_updates.join('、')} 等物料核实失败！"
+    rescue
+      flash[:notice] = "物料核实失败"
     end
     redirect_to "/stores/#{params[:store_id]}/materials"
   end
@@ -894,7 +910,7 @@ class MaterialsController < ApplicationController
     params[:material][:name] = params[:material][:name].strip
     Material.transaction  do
       if params[:material][:ifuse_code]=="1"
-        p code_value = params[:material][:code_value].strip[0..-2]
+        code_value = params[:material][:code_value].strip[0..-2]
         barcode = Barby::EAN13.new(code_value)
         material_tmp = Material.find_by_code_and_store_id_and_status(code_value+barcode.checksum.to_s, params[:store_id], Material::STATUS[:NORMAL])
         if material_tmp
@@ -903,9 +919,9 @@ class MaterialsController < ApplicationController
         end
       end
       unless material_tmp
-        material = Material.create(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
+        material = Material.new(params[:material].merge({:status => 0, :store_id => params[:store_id].to_i,
               :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,:price=>params[:material][:import_price]}))
-        if material
+        if material.save
           smaterial = SharedMaterial.find_by_code(material.code)
           sm_params = params[:material].except(:import_price, :sale_price,:ifuse_code,:code_value, :category_id,:create_prod).merge({:code => material.code})
           SharedMaterial.create(sm_params) if smaterial.nil?
@@ -930,7 +946,6 @@ class MaterialsController < ApplicationController
   end
 
   def set_product(types,material)
-    flash[:notice] = "添加成功"
     parms = {:name=>params[:prod_name],:base_price=>params[:base_price],:sale_price=>params[:sale_price],:description=>params[:intro],
       :category_id=>params[:prod_types],:status=>Product::IS_VALIDATE[:YES],:introduction=>params[:desc], :store_id=>params[:store_id],:t_price=>material.price,
       :is_service=>Product::PROD_TYPES[:"#{types}"],:created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"#{types[0]}#{Sale.set_code(3,"product","service_code")}",
@@ -939,7 +954,6 @@ class MaterialsController < ApplicationController
     parms.merge!(:deduct_percent=>params[:deduct_percent].nil? ? 0 : params[:deduct_percent].to_f*params[:sale_price].to_f/100)
     parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
     added = params[:is_added].nil? ? 0 : params[:is_added]
-    flash[:notice] = "产品重复"  if Product.where(:status => Product::IS_VALIDATE[:YES]).map(&:name).include? params[:name]
     parms.merge!({:standard=>params[:standard],:is_added =>added})
     product =Product.create(parms)
     ProdMatRelation.create(:product_id=>product.id,:material_num=>1,:material_id=>material.id)
@@ -952,7 +966,7 @@ class MaterialsController < ApplicationController
         }
       end
     rescue
-      flash[:notice] ="图片上传失败，请重新添加！"
+      @flash_notice ="图片上传失败，请重新添加！"
     end
   end
 
@@ -985,7 +999,8 @@ class MaterialsController < ApplicationController
   def destroy
     material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
     material.update_attribute(:status, Material::STATUS[:DELETE])
-    Product.where(:id=>ProdMatRelation.find_by_material_id(material.id).product_id).update_all(:status=>Product::IS_VALIDATE[:NO])
+    prod_mat = ProdMatRelation.find_by_material_id(material.id)
+    Product.where(:id=>prod_mat.product_id).update_all(:status=>Product::IS_VALIDATE[:NO]) if prod_mat
     flash[:notice] = "物料删除成功"
     redirect_to "/stores/#{params[:store_id]}/materials"
   end
@@ -994,14 +1009,14 @@ class MaterialsController < ApplicationController
     @cates = Category.where(:types =>[Category::TYPES[:material],Category::TYPES[:good]],:store_id =>params[:store_id]).inject({}){
       |hash,ca| hash[ca.types].nil? ? hash[ca.types] = {ca.id => ca.name}:hash[ca.types][ca.id]=ca.name;hash}
     @material = SharedMaterial.find_by_code(params[:code]) if params[:code]
-    @material = Material.new unless @material
   end
 
   #盘点物料清单
   def check_mat_num
     @materials_need_check = Material.find_by_sql(["select m.*,c.name cname from materials m
-    inner join categories c on m.category_id=c.id where m.status=? and c.store_id=?
-    and m.check_num is not null group by m.id", Material::STATUS[:NORMAL], @current_store.id])
+    inner join categories c on m.category_id=c.id where m.status=? and c.store_id=?  group by m.id order by m.name",
+        Material::STATUS[:NORMAL], @current_store.id])
+    #    Material.where(:status=>Material::STATUS[:NORMAL],:store_id=>@current_store.id).update_all(:check_num=>0)
   end
 
   def print_code
@@ -1016,13 +1031,13 @@ class MaterialsController < ApplicationController
       prints = params[:print]
       prints.each do |key, value|
         material = Material.find_by_id(key)
-        @data << {:num => value[:print_code_num], :code_img => material.code_img}
+        @data << {:num => value[:print_code_num], :code_img => material.code_img,:name=>material.name,:price=>material.price}
       end
     else
       mats = params[:mat_in_items].split(",").map{|mat| mat.split("_")}
       mats.each do |mat|
         material = Material.find_by_code(mat[0])
-        @data << {:num => mat[2], :code_img => material.code_img}
+        @data << {:num => mat[2], :code_img => material.code_img,:name=>material.name,:price=>material.price}
       end
     end
     render :layout => false

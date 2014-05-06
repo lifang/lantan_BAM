@@ -16,7 +16,7 @@
   <body>
     <div class="head">
       <div class="box position_re">
-        <div class="logo1"><span>V2.3</span></div>
+        <div class="logo1"><span>V2.3.1</span></div>
         <div class="login">你好：<%= cookies[:user_name] %> | <a href="javascript:void(0)" id="edit_password">修改密码</a> | <a href="/logout">退出</a></div>
         <div class="name">
           <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= params[:store_id] %>)"/></span>
@@ -49,7 +49,11 @@
             <li><a href="/stores/<%= params[:store_id] %>/set_stores/cash_register" class="m_eight">收银</a></li>
           <% end %>
           <% if permissions_on_menus?(:base_datas) %>
-            <li><a href="/stores/<%= params[:store_id] %>/finance_reports"  class="m_nine">财务管理</a></li>
+            <li><a href="/stores/<%= params[:store_id] %>/finance_reports"  class="m_nine">财务管理</a>
+              <% warns = warn_account(0.8,5,0) %>
+              <% if warns > 0 %><a href="/stores/<%=params[:store_id]%>/finance_reports/pay_account" class="message"
+                   style="right: 30px;" title="挂账客户提醒<%= warns%>条"><%= warns %></a><% end %>
+            </li>
           <% end %>
         </ul>
         <div class="clear"></div>
@@ -87,5 +91,32 @@
       <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=603252795&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:2822148527:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
     </div>
     <!--浮动QQ客服代码结束-->
+
+    <div class="help">
+      <p class="help_tit">系统更新小贴士</p>
+      <ul>
+        <li><p>1.增加后台业务开单</p></li>
+        <li><p>2.财务管理新增其他收入</p></li>
+        <li><p>3.往来管理新增挂账提醒</p></li>
+        <li><p>4.车牌限制7位，可以使用“无牌”作为车牌</p></li>
+        <li><p>5.供应商增加搜索功能</p></li>
+        <li><p>6.技师提成的调整：pad端可以修改工位技师，后台已收款可以调整每个技师的提成。</p></li>
+        <li><p>7.营销管理中图片上传限制为200kb,提高上传速度</p></li>
+        <li><p>8.收银新增支持三联打印功能</p></li>
+        <li><p>9.工位可以绑定需要施工的产品</p></li>
+      </ul>
+    </div>
+    <script type="text/javascript">
+      $(function(){
+        $('.help').click(function(){
+          $(this).toggleClass("hover");
+          if($(this).hasClass("hover")){
+            $(this).find("ul").show(300);
+          }else{
+            $(this).find("ul").hide(300);
+          }
+        })
+      })
+    </script>
   </body>
 </html>

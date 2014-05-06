@@ -16,25 +16,22 @@
         <div><input type="button" class="search_btn" value="查询" onclick="edit_add_products_search(<%= @store.id %>, this)"/></div>
       </div>
       <fieldset class="popup_body_fieldset">
-        <legend class="popup_body_title">查询结果</legend>
-        <div class="popup_body_result">
-          <ul>
-          </ul>
-        </div>
+        <legend class="popup_body_title">查询结果 | <input type="checkbox"  onclick="select_all(this)" id="select_all_edit" disabled>全选</input></legend>
+        <div class="popup_body_result"><ul></ul></div>
       </fieldset>
       <div class="pq"></div>
       <fieldset class="popup_body_fieldset">
         <legend class="popup_body_title"><span class="red">*</span>已选择</legend>
         <div class="popup_body_result" id="edit_selected_products_div">
           <% @products.each do |p| %>
-          <div id="edit_product_<%= p.pid %>_div" name="edit_p_div">
-            <em><%= p.pname %></em>
-            <span>
-              <input type="text" name="edit_p_text" value="<%= p.discount %>"class="addre_input"/>
-            </span>
+            <div id="edit_product_<%= p.pid %>_div" name="edit_p_div">
+              <em><%= p.pname %></em>
+              <span>
+                <input type="text" name="edit_p_text" value="<%= p.discount %>"class="addre_input"/>
+              </span>
               <a href="javascript:void(0)" class="remove_a" onclick="edit_cancel_product(<%= p.pid %>)">删除</a>
               <input type="hidden" name="edit_p_hidden" id="edit_hidden_<%= p.pid %>" value="<%= p.pid %>"/>
-          </div>
+            </div>
           <% end %>
         </div>
       </fieldset>

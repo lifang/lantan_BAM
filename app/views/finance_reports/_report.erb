@@ -31,12 +31,12 @@
       <thead>
         <tr class="hbg">
           <td width="5%"><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
-          <td width="15%">单号</td>
+          <td width="20%">单号</td>
           <td width="10%">客户</td>
           <td width="10%">服务金额</td>
           <td width="15%">商品金额</td>
           <td width="10%">优惠</td>
-          <td width="10%">付款方式</td>
+          <td width="20%">付款方式</td>
           <td width="10%">小计</td>
         </tr>
       </thead>
@@ -45,7 +45,8 @@
           <%order = @orders[0]%>
           <tr>
             <td><input type="checkbox" id="line_<%= order.id %>" value="<%= order.id %>" /></td>
-            <td><%= order.code %></td>
+            <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
+                :remote => "true", "data-type" => "script", :class => "other_a" %></td>
             <td><%= order.c_name %></td>
             <% service = @order_price[Product::PROD_TYPES[:SERVICE]]
             service_price = (service && service[order.id] ? service[order.id] : 0).round(2)
@@ -72,12 +73,12 @@
       <thead>
         <tr class="hbg">
           <td width="5%"><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
-          <td width="15%">单号</td>
+          <td width="20%">单号</td>
           <td width="10%">客户</td>
           <td width="10%">服务金额</td>
           <td width="15%">商品金额</td>
           <td width="10%">优惠</td>
-          <td width="10%">付款方式</td>
+          <td width="20%">付款方式</td>
           <td width="10%">小计</td>
         </tr>
       </thead>
@@ -86,7 +87,8 @@
           <% @orders.each do |order| %>
             <tr>
               <td><input type="checkbox" id="line_<%= order.id %>" value="<%= order.id %>" /></td>
-              <td><%= order.code %></td>
+              <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
+                  :remote => "true", "data-type" => "script", :class => "other_a" %></td>
               <td><%= order.c_name %></td>
               <% service = @order_price[Product::PROD_TYPES[:SERVICE]]
               service_price = (service && service[order.id] ? service[order.id] : 0).round(2)

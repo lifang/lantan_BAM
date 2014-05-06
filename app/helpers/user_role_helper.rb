@@ -50,6 +50,7 @@ module UserRoleHelper
       model_roles.each do |m|
         model_name = m.model_name
         if model_role[model_name.to_sym]
+          p model_role[model_name.to_sym].to_i
           model_role[model_name.to_sym] = model_role[model_name.to_sym].to_i|m.num.to_i
         else
           model_role[model_name.to_sym] = m.num.to_i

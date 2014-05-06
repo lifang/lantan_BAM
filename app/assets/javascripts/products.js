@@ -84,7 +84,7 @@ function add_product(e){
             var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
             var img_name = this.value.substring(this.value.lastIndexOf("\\")).toLowerCase();
             var g_name = img_name.substring(1,img_name.length);
-            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0])){
+            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0]) || set_default_to_pic(this)){
                 img_f = true
             }else{
                 $(this).attr("name","img_url["+this.id+"]");
@@ -92,7 +92,7 @@ function add_product(e){
         }     
     })
     if(img_f){
-        tishi_alert("请选择"+pic_format+"格式的图片，且名称不能包含非法字符" );
+        tishi_alert("图片格式必须是："+pic_format+"，名称不能包含非法字符，单个大小不能超过200KB;" );
         return false
     }
     $("#desc").val(serv_editor.html());
@@ -177,7 +177,7 @@ function edit_serv(e){
             var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
             var img_name = this.value.substring(this.value.lastIndexOf("\\")).toLowerCase();
             var g_name = img_name.substring(1,img_name.length);
-            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0])){
+            if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0]) || set_default_to_pic(this)){
                 img_f = true
             }else{
                 $(this).attr("name","img_url["+this.id+"]");
@@ -185,7 +185,7 @@ function edit_serv(e){
         }
     })
     if(img_f){
-        tishi_alert("请选择"+pic_format+"格式的图片，且名称不能包含非法字符" );
+        tishi_alert("图片格式必须是："+pic_format+"，名称不能包含非法字符，大小不超过200KB。" );
         return false
     }
     if (point=="" || point.length==0 || isNaN(parseFloat(point)) || parseFloat(point)<0){

@@ -26,12 +26,12 @@ class Staff < ActiveRecord::Base
   #总部员工职务
   STAFF_MENUS_AND_ROLES = {           #创建门店时创建的管理员将获取前台的所有权限
     :customers => 32767,
-    :materials => 2147483647,
-    :staffs => 65535,
-    :datas => 524287,
+    :materials => 8589934591,
+    :staffs => 131071,
+    :datas => 4194303,
     :stations => 3,
     :sales => 4194303,
-    :base_datas => 16383,
+    :base_datas =>32767,
     :pay_cash => 1,
     :finances => 1
   }

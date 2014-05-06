@@ -98,12 +98,12 @@ function create_dcard_valid(obj){     //新建打折卡验证
         tishi_alert("请输入打折卡名称!");
     }else if(get_str_len(name)>36){
         tishi_alert("打折卡名称最多36个字符!");
-    }else if(price=="" || isNaN(price) || parseInt(price)<=0){
+    }else if(price=="" || isNaN(price) || parseInt(price)<0){
         tishi_alert("请输入正确的打折卡金额!");
     }else if(len<=0){
         tishi_alert("至少选择一个项目!");
-    }else if((img!="" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
-        tishi_alert("请选择正确的图片格式,格式为:"+img_format);
+    }else if((img!="" || img.length!=0) && ((img_format.indexOf(img_type.substring(1,img_type.length))==-1 || set_default_to_pic($("#dcard_img")[0])))){
+        tishi_alert("图片大小不超过200KB,格式必须是:"+img_format);
     }else if((img!="" || img.length!=0) && pattern.test(g_name.split(".")[0])){
         tishi_alert("图片名称包含非法字符!");
     }else if(desc==""){
@@ -227,12 +227,12 @@ function edit_dcard_valid(obj){     //编辑打折卡验证
         tishi_alert("请输入打折卡名称!");
     }else if(get_str_len(name)>36){
         tishi_alert("打折卡名称最多36个字符!");
-    }else if(price=="" || isNaN(price) || parseInt(price)<=0){
+    }else if(price=="" || isNaN(price) || parseInt(price)<0){
         tishi_alert("请输入正确的打折卡金额!");
     }else if(len<=0){
         tishi_alert("至少选择一个项目!");
-    }else if((img!= "" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
-        tishi_alert("请选择正确的图片格式,格式为:"+img_format);
+    }else if((img!= "" || img.length!=0) && (set_default_to_pic($("#edit_dcard_img")[0] || img_format.indexOf(img_type.substring(1,img_type.length))==-1 ))){
+        tishi_alert("图片不能超过200KB,格式必须是:"+img_format);
     }else if((img!= "" || img.length!=0) && pattern.test(g_name.split(".")[0])){
         tishi_alert("图片名称包含非法字符!");
     }else if(desc==""){
@@ -297,3 +297,19 @@ function get_str_len(str){      //获取名称长度
     return a;
 }
 
+function select_all(e){
+    var all_checked = $(e).parent().parent().find("li :checkbox");
+    for(var i=0;i<all_checked.length;i++){
+        if (e.checked){
+            if (!all_checked[i].checked){
+                all_checked[i].checked = true;
+                $(all_checked[i]).trigger("onclick");
+            }
+        }else{
+            if (all_checked[i].checked){
+                all_checked[i].checked = false;
+                $(all_checked[i]).trigger("onclick");
+            }
+        }
+    }
+}

@@ -67,7 +67,7 @@ class Material < ActiveRecord::Base
     #{sql[0]} and #{sql[1]} and types = 3 and store_id = #{store_id} group by material_id  #{sql[2]}) and m.status !=#{Material::STATUS[:DELETE]} and m.store_id = #{store_id} and #{sql[3]} and created_at < '#{start_date} 00:00:00';")
   end
 
-  #private
+  private
   
   def generate_barcode
     if self.ifuse_code=="0"

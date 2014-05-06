@@ -21,7 +21,7 @@
       </div>
       <div class="collect">
         <ul>
-          <li>工资支出总额：<span id="total_num"><%=@total%></span>元</li>
+          <li>工资支出总额：<span id="total_num"><%=@total.round(2)%></span>元</li>
         </ul>
       </div>
       <div class="clear"></div>
@@ -34,10 +34,10 @@
                 <th>部门</th>
                 <th>职务</th>
                 <th>基本工资</th>
-                <th>提成</th>
-                <th>补贴</th>
                 <th>社保</th>
                 <th>工资合计</th>
+                <th>提成</th>
+                <th>补贴</th>
                 <th>奖励</th>
                 <th>扣款</th>
                 <th>加班</th>
@@ -62,10 +62,14 @@
                   end
                 %>
                   <td class="base_salary_text"><%=details[10] %></td>
-                  <td><%=  details[0]%></td>
-                  <td><%= details[1] %></td>
                   <td><%= details[4] %></td>
                   <td><%= details[5] %></td>
+                  <td>
+                    <span id="deduct_show"><%= details[0] %></span>
+                    <input id="deduct_input" type="text" value="<%=details[0]%>" class="data_input_s reward_num_input" style="display: none;"/>
+                  </td>
+                  <td> <span id="reward_fee_show"><%= details[1] %></span>
+                    <input id="reward_fee_input" type="text" value="<%=details[1]%>" class="data_input_s reward_num_input" style="display: none;"/></td>
                   <td>
                     <span id="reward_show"><%= details[2] %></span>
                     <input id="reward_input" type="text" value="<%=details[2]%>" class="data_input_s reward_num_input" style="display: none;"/>

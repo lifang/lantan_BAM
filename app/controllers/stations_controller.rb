@@ -117,29 +117,43 @@ class StationsController < ApplicationController
         if params[:types] == "complete_pay" && work_order.status == WorkOrder::STAT[:WAIT_PAY]
           Order.transaction do
             begin
+              point,deduct,t_deduct =0,0,0
               #如果有套餐卡，则更新状态
               c_pcard_relations = CPcardRelation.find_all_by_order_id(order.id)
-              c_pcard_relations.each do |cpr|
-                cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
-              end unless c_pcard_relations.blank?
+              unless c_pcard_relations.blank?
+                c_pcard_relations.each do |cpr|
+                  cpr.update_attribute(:status, CPcardRelation::STATUS[:NORMAL])
+                end
+                pcard = PackageCard.where(:id=>c_pcard_relations).select("ifnull(sum(deduct_percent+deduct_price),0) deduct,
+                ifnull(sum(prod_point),0) point").first
+                point += pcard.point
+                deduct += pcard.deduct
+              end
               #如果有买储值卡，则更新状态
               csvc_relations = CSvcRelation.where(:order_id => order.id)
               csvc_relations.each{|csvc_relation| csvc_relation.update_attributes({:status => CSvcRelation::STATUS[:valid], :is_billing =>false})}
               if c_pcard_relations.present? || csvc_relations.present?
                 is_vip = true
               end
-              order.update_attributes({:status=>Order::STATUS[:BEEN_PAYMENT],:is_free=>false})
+             
               OrderPayType.create(:order_id => order.id, :pay_type => OrderPayType::PAY_TYPES[:CASH], :price => order.price)
               wo = WorkOrder.find_by_order_id(order.id)
               wo.update_attribute(:status, WorkOrder::STAT[:COMPLETE]) if wo and wo.status==WorkOrder::STAT[:WAIT_PAY]
+              order_infos = Order.joins(:order_prod_relations=>:product).select("ifnull(sum((deduct_price+deduct_percent)*pro_num),0) d_sum,
+               ifnull(sum((techin_price+techin_percent)*pro_num),0) t_sum,sum(products.prod_point*order_prod_relations.pro_num) point").
+                where(:"orders.id"=>order.id).first
+              if order_infos
+                point += order_infos.point
+                deduct += order_infos.d_sum
+                t_deduct += order_infos.t_sum
+              end
               #生成积分的记录
               if (customer && customer.is_vip) || is_vip
-                points = Order.joins(:order_prod_relations=>:product).select("products.prod_point*order_prod_relations.pro_num point").
-                  where("orders.id=#{order.id}").inject(0){|sum,porder|(porder.point.nil? ? 0 :porder.point)+sum}+
-                  PackageCard.find(c_pcard_relations.map(&:package_card_id)).map(&:prod_point).compact.inject(0){|sum,pcard|sum+pcard}
-                Point.create(:customer_id=>customer.customer_id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>points,:types=>Point::TYPES[:INCOME])
-                customer.update_attributes({:total_point=>points+(customer.total_point.nil? ? 0 : customer.total_point),:is_vip=>is_vip})
+                Point.create(:customer_id=>customer.customer_id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>point,:types=>Point::TYPES[:INCOME])
+                customer.update_attributes({:total_point=>point+(customer.total_point.nil? ? 0 : customer.total_point),:is_vip=>is_vip})
               end
+              order.update_attributes({:status=>Order::STATUS[:BEEN_PAYMENT],:is_free=>false,:front_deduct=>deduct})
+              order.tech_orders.update_attributes(:own_deduct=>t_deduct/order.tech_orders.length) unless order.tech_orders.blank?
               #生成出库记录
               order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id,
               m.price m_price FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on

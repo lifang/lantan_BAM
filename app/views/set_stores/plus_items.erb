@@ -20,7 +20,7 @@
       <div class="billTotal">
         <span>金额总计：</span>
         <span id="total_price"><%= 0.round(2) %></span>
-        <button class="blue_btn"onclick="submit_item(<%=params[:store_id]%>)" id="submit_item" >结算</button>
+        <button class="blue_btn"onclick="submit_item(<%=params[:store_id]%>)" id="submit_item" >开单</button>
         <%= image_tag "ajax-loader.gif", :id => "submit_spinner", :style => "display:none;" %>
         <button class="blue_btn" title="卡类（套餐卡和打折卡）" onclick="search_card(<%=params[:store_id]%>)">重载卡类</button>
       </div>

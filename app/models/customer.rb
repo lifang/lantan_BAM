@@ -226,6 +226,71 @@ class Customer < ActiveRecord::Base
     end
   end
 
+
+  def self.card_infos(customer_ids,store_id)
+    prods,pcard,save_card,discount_card = [],{},{},{}
+    cps = CPcardRelation.joins(:package_card).where(:"package_cards.store_id"=>store_id,:"c_pcard_relations.status"=>CPcardRelation::STATUS[:NORMAL],
+      :customer_id=>customer_ids).select("customer_id,name,c_pcard_relations.id c_id,content,package_cards.id p_id,package_cards.name p_name,
+    date_format(c_pcard_relations.ended_at,'%Y-%m-%d %H:%i:%S') time").where("date_format(c_pcard_relations.ended_at,'%Y-%m-%d') >= '#{Time.now.strftime('%Y-%m-%d')}'").group_by{|i|i.customer_id}
+    cps.values.flatten.each do |cp|
+      if cp.content
+        cp.content.split(",").each do |p|
+          content = p.split("-")
+          if content[2].to_i >0
+            prods << content[0].to_i
+          end
+        end
+      end
+    end unless cps.values.flatten.blank?
+    total_prms = ProdMatRelation.joins([:material,:product]).where(:product_id=>prods,:"products.is_service"=>Product::PROD_TYPES[:PRODUCT]).
+      select("materials.storage-material_num num,product_id,material_id").inject({}){|h,p|h[p.product_id]=p.num;h}
+    pcard_prod = PcardProdRelation.where(:package_card_id=>cps.values.flatten.map(&:p_id)).inject({}){|h,p|h["#{p.product_id}_#{p.package_card_id}"]=p.product_num;h}
+    cps.each.each do |customer_id,cprs|
+      pcard[customer_id] = []
+      cprs.each do |cp|
+        cons = []
+        cp.content.split(",").each do |p|
+          is_abled = false
+          content = p.split("-")
+          if total_prms[content[0].to_i].nil? || content[2].to_i >0
+            is_abled = true
+          else
+            if total_prms[content[0].to_i] && total_prms[content[0].to_i] >=0
+              is_abled = true
+            end
+          end
+          cons << {:name =>content[1],:total_num=>pcard_prod["#{content[0].to_i}_#{cp.p_id}"],:left_num=>content[2].to_i,:status=>is_abled}
+        end if cp.content
+        pcard[customer_id] << {:content=>cons,:card_name=>cp.p_name,:end_time=>cp.time,:c_id=>cp.c_id}
+      end  unless cprs.blank?
+    end unless cps.blank?
+    sv_cards = CSvcRelation.joins(:sv_card).select("c_svc_relations.*,sv_cards.name,sv_cards.description intro,sv_cards.types").
+      where(:status=>CSvcRelation::STATUS[:valid],:customer_id=>customer_ids).group_by{|i|{:customer_id=>i.customer_id,:types=>i.types}}
+    svcard_use_records = SvcardUseRecord.where(:c_svc_relation_id=>sv_cards.select{|k,v|k[:types] == SvCard::FAVOR[:SAVE]}.values.flatten.map(&:id)).group_by{|i|i.c_svc_relation_id}
+    sv_cards.each do |k,v|
+      v.each do |card|
+        if k[:types] == SvCard::FAVOR[:DISCOUNT]
+          if discount_card[k[:customer_id]].nil?
+            discount_card[k[:customer_id]]=[{:name=>card.name,:intro=>card.intro,:time=>card.created_at.strftime("%Y-%m-%d %H:%M:%S")}]
+          else
+            discount_card[k[:customer_id]] << {:name=>card.name,:intro=>card.intro,:time=>card.created_at.strftime("%Y-%m-%d %H:%M:%S")}
+          end
+        elsif k[:types] == SvCard::FAVOR[:SAVE]
+          records = []
+          svcard_use_records[card.id].each do |record|
+            records << {:use_price=>record.use_price,:left_price=>record.left_price,:time=>record.created_at.strftime("%Y-%m-%d"),:content=>record.content}
+          end if svcard_use_records[card.id]
+          if save_card[k[:customer_id]].nil?
+            save_card[k[:customer_id]]=[{:name=>card.name,:time=>card.created_at.strftime("%Y-%m-%d %H:%M:%S"),:total_price=>card.total_price,:id_card=>card.id_card,:contents=>records}]
+          else
+            save_card[k[:customer_id]] << {:name=>card.name,:time=>card.created_at.strftime("%Y-%m-%d %H:%M:%S"),:total_price=>card.total_price,:id_card=>card.id_card,:contents=>records}
+          end
+        end
+      end
+    end
+    {:pcard=>pcard,:save_card=>save_card,:discount_card=>discount_card}
+  end
+
   
   private
   def encrypt(string)

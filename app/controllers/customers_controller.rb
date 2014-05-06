@@ -54,6 +54,7 @@ class CustomersController < ApplicationController
     if params[:new_name] and params[:mobilephone]
       customer = Customer.where(:status=>Customer::STATUS[:NOMAL],:mobilephone=>params[:mobilephone].strip,
         :store_id=>params[:store_id].to_i).first
+      customer_num_relation = []
       if customer
         flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
         unless params[:selected_cars].blank?
@@ -61,16 +62,15 @@ class CustomersController < ApplicationController
             car_num = sc.split("-")[0]
             car_model = sc.split("-")[1].to_i
             buy_year = sc.split("-")[2].to_i
-            car_num_record = CarNum.find_by_num(car_num)
+            car_num_record = CarNum.where(:num=>car_num).first
             if car_num_record
               cnr = CustomerNumRelation.find_by_car_num_id_and_customer_id(car_num_record.id, customer.id)
-              unless cnr
-                CustomerNumRelation.delete_all(["car_num_id = ?", car_num_record.id])
-                CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => customer.id)
+              if cnr.nil?
+                customer_num_relation << CustomerNumRelation.new(:car_num_id => car_num_record.id, :customer_id => customer.id)
               end
             else
               car_num_record = CarNum.create(:num => car_num, :buy_year => buy_year, :car_model_id => car_model)
-              CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => customer.id)
+              customer_num_relation << CustomerNumRelation.new(:car_num_id => car_num_record.id, :customer_id => customer.id)
             end
           end
         end
@@ -94,9 +94,8 @@ class CustomersController < ApplicationController
             car_num = sc.split("-")[0]
             car_model = sc.split("-")[1].to_i
             buy_year = sc.split("-")[2].to_i
-            car_num_record = CarNum.find_by_num(car_num)
+            car_num_record = CarNum.where(:num=>car_num).first
             if car_num_record
-              CustomerNumRelation.delete_all(["car_num_id = ?", car_num_record.id])
               CustomerNumRelation.create(:car_num_id => car_num_record.id, :customer_id => new_customer.id)
             else
               car_num_record = CarNum.create(:num => car_num, :buy_year => buy_year, :car_model_id => car_model)
@@ -234,11 +233,9 @@ class CustomersController < ApplicationController
     distance = params["car_distance_#{car_num_id}"].to_i
     car_num = CarNum.find_by_num(params["car_num_#{car_num_id}"].strip)
     if car_num.nil? or car_num.id == current_car_num.id
-      current_car_num.update_attributes(:num => params["car_num_#{car_num_id}"].strip,
-        :buy_year => params["buy_year_#{car_num_id}"].to_i, :car_model_id => params["car_models_#{car_num_id}"].to_i,
-        :distance => distance)
+      current_car_num.update_attributes(:num => params["car_num_#{car_num_id}"].strip,:distance => distance,
+        :buy_year => params["buy_year_#{car_num_id}"].to_i, :car_model_id => params["car_models_#{car_num_id}"].to_i)
     else
-      CustomerNumRelation.delete_all(["car_num_id = ?", car_num.id])
       CustomerNumRelation.create(:car_num_id => car_num.id, :customer_id => customer_id.to_i)
     end
     flash[:notice] = "车牌号码信息修改成功。"

@@ -41,8 +41,8 @@ LantanBAM::Application.routes.draw do
         get "fee_manage","revenue_report","fee_report","pay_account","payable_account","manage_account"
         post "fee_manage","show_fee","fee_report","load_account","complete_account","pay_account","manage_account"
         post "payable_account","revenue_report","cost_price","analysis_price","create_assets","manage_assets","show_asset"
-        post "update_asset"
-        get "cost_price","analysis_price","manage_assets"
+        post "update_asset","other_fee","load_prod"
+        get "cost_price","analysis_price","manage_assets","other_fee"
         delete "destroy"
       end
     end
@@ -208,8 +208,9 @@ LantanBAM::Application.routes.draw do
 
     resources :set_stores do
       collection do
-        get "select_cities","cash_register","complete_pay","print_paper","single_print","plus_items"
-        post "load_order","pay_order","edit_svcard","search_item","search_info","submit_item"
+        get "select_cities","cash_register","complete_pay","print_paper","single_print","plus_items","three_line_print"
+        post "load_order","pay_order","edit_svcard","search_item","search_info","submit_item","edit_deduct"
+        post "post_deduct","search_num"
       end
     end
     resources :station_datas do
@@ -329,7 +330,7 @@ LantanBAM::Application.routes.draw do
         post :customer_pcards, :package_make_order, :pcard_make_order_commit, :pcard_order_info
         post :make_order2, :complaint, :quickly_make_order, :pay_order_no_auth
         post :make_order,:update_customer,:update_tech
-        post :search, :sync_orders_and_customer
+        post :search, :sync_orders_and_customer,:get_customer_info
         post :new_index_list, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order, :cancel_order
       end
     end

@@ -160,7 +160,8 @@ function load_types(store_id){
                 sale_name : name
             }
         });
-    }else{
+    }
+    else{
         tishi_alert("请选择类型或填写名称！");
     }
 }
@@ -294,8 +295,8 @@ function check_add(e){
     var pic_format =["png","gif","jpg","bmp"]
     var img_name = img.substring(img.lastIndexOf("\\")).toLowerCase();
     var pic_type =img.substring(img.lastIndexOf(".")).toLowerCase()
-    if ((img != "" || img.length !=0) && pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1){
-        tishi_alert("请选择正确格式的图片,正确格式是："+pic_format )
+    if ((img != "" || img.length !=0) && (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || set_default_to_pic($("#sale_img")[0]))){
+        tishi_alert("图片大小不超过200KB,格式必须是："+pic_format )
         return false;
     } 
     var g_name = img_name.substring(1,img_name.length);

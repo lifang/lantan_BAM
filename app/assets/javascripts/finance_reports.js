@@ -3,15 +3,23 @@
 
 function search_finance(e,store_id){
     var p_type = [];
+    var p_name = [];
     var parm = {};
     var customer_n =$("#customer_n").val()
     var cate_n = $("#cate_n option:selected").val();
     var pay_type = $("#order_types :checked");
+    var prod_name = $("#product_names :checked");
     for(var i=0;i < pay_type.length;i++){
         p_type.push(pay_type[i].value);
     }
     if (p_type.length != 0){
         parm["pay_type"]= p_type.join(",");
+    }
+    for(var n=0;n < prod_name.length;n++){
+        p_name.push(prod_name[n].value);
+    }
+    if (p_name.length != 0){
+        parm["prod_name"]= p_name.join(",");
     }
     if (cate_n != "" && cate_n.length !=0){
         parm["category_id"] = cate_n;
@@ -115,11 +123,9 @@ function send_account(store_id,action,parm){
     var first_time = $("#c_first").val();
     var last_time = $("#c_last").val();
     var url = "/stores/"+store_id+"/finance_reports/";
-    var type = "post";
+    var type = "get";
     if (action != "search_finance"){
         url += action;
-    }else{
-        type = "get";
     }
     if (first_time != "" && first_time.length != 0){
         parm["first_time"] = first_time;
@@ -393,5 +399,50 @@ function destroy(url,parm){
         }
     }
     )
+
+}
+
+function other_fee(e,store_id){
+    var parm = {};
+    var customer_n =$("#customer_n").val()
+    var card_type = $("#card_types option:selected").val();
+    if (card_type != "" && card_type.length !=0){
+        parm["card_type"] = card_type;
+    }
+    if (customer_n != "" && customer_n.length != 0){
+        parm["customer_name"] = customer_n;
+    }
+    set_search(e,store_id,"other_fee",parm)
+}
+
+function load_prod(store_id){
+    var category_id = $("#cate_n option:selected").val();
+    if (category_id != "" && category_id.length >0){
+        $("#submit_spinner").css("display","");
+        var url = "/stores/"+store_id+"/finance_reports/load_prod";
+        var parm = {
+            category_id : category_id
+        }
+        $.ajax({
+            type:"post",
+            url: url,
+            dataType: "json",
+            data: parm,
+            success : function(data){
+                var  products = data.products;
+                var total_li = "";
+                for(var item in products){
+                    total_li += "<input type='checkbox' id='prod_name_"+ item +"' value='"+ item+"' >"+ products[item]+"</input>&nbsp&nbsp&nbsp&nbsp"
+                }
+                if (total_li == ""){
+                    $("#product_names").html("暂无相关产品/服务");
+                }else{
+                    total_li += "<br/>"
+                    $("#product_names").html(total_li);
+                }
+                $("#submit_spinner").css("display","none");
+            }
+        })
+    }
 
 }

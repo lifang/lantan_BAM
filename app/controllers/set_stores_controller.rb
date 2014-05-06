@@ -1,6 +1,6 @@
 #encoding: utf-8
 class SetStoresController < ApplicationController
-  layout "role" ,:except =>["print_paper","single_print"]
+  layout "role" ,:except =>["print_paper","single_print","three_line_print"]
   before_filter :sign?, :except => [:update]
   require 'will_paginate/array'
   
@@ -62,9 +62,10 @@ class SetStoresController < ApplicationController
     @pays = OrderPayType.where(:order_id=>orders.map(&:id)).select("sum(price) total_price,pay_type").group("pay_type").inject(Hash.new){
       |hash,pay|hash[pay.pay_type] = pay.total_price;hash}
     @orders = orders.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
-    p @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
+    @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
     @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
-    staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
+    @tech_orders = TechOrder.where(:order_id=>@orders.map(&:id)).group_by{|i|i.order_id}
+    staff_ids = (@orders.map(&:front_staff_id)|@tech_orders.values.flatten.map(&:staff_id)).compact.uniq
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @stations = Station.find(@orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
@@ -150,6 +151,19 @@ class SetStoresController < ApplicationController
     @order_pays = OrderPayType.search_pay_types(order.id)
   end
 
+  def three_line_print
+    @store = Store.find params[:store_id]
+    @customer = Customer.find params[:c_id]
+    @car_num = CarNum.find params[:n_id]
+    @orders = Order.where(:id=>params[:o_id].split(',').compact.uniq)
+    staff_ids = @orders.map(&:cons_staff_id_1).compact.uniq
+    staff_ids.delete 0
+    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
+    @order_pays = OrderPayType.pay_order_types(@orders.map(&:id))
+  end
+
+
   def edit_svcard
     CSvcRelation.find(params[:card_id]).update_attributes(:id_card=>params[:number])
     render :json=>{:card_id=>params[:card_id],:number=>params[:number]}
@@ -218,12 +232,20 @@ class SetStoresController < ApplicationController
         sql2 << "%#{content.strip.gsub(/[%_]/){|x| '\\' + x}}%"
       end
       p_cards = PackageCard.find_by_sql(sql2)
+      pmrs = PcardMaterialRelation.joins(:material).select("package_card_id p_id,material_id m_id,storage-material_num result").
+        where(:package_card_id =>p_cards.map(&:id)).group("package_card_id").inject({}){|h,p|h[p.p_id]=p.result;h}
       unless p_cards.blank?
         card_fields = Product.find_by_sql("select group_concat(name,':',pr.product_num,'次')  name,pr.package_card_id s_id from
          products p inner join pcard_prod_relations pr on pr.product_id=p.id where p.status=#{Product::IS_VALIDATE[:YES]} and
          pr.package_card_id in (#{p_cards.map(&:id).join(',')}) group by pr.package_card_id").inject({}){|h,s|h[s.s_id]=s.name.force_encoding('utf-8');h}
         p_cards.each do |p_card|
-          suit_pcard << {:name=>p_card.name,:price=>p_card.price,:id=>p_card.id,:suit_field =>card_fields[p_card.id],:type=>2,:status=>params[:checked_item].include?("#{type}_#{2}_#{p_card.id}")}
+          if pmrs[p_card.id].nil?
+            suit_pcard << {:name=>p_card.name,:price=>p_card.price,:id=>p_card.id,:suit_field =>card_fields[p_card.id],:type=>2,:status=>params[:checked_item].include?("#{type}_#{2}_#{p_card.id}")}
+          else
+            if pmrs[p_card.id] >= 0
+              suit_pcard << {:name=>p_card.name,:price=>p_card.price,:id=>p_card.id,:suit_field =>card_fields[p_card.id],:type=>2,:status=>params[:checked_item].include?("#{type}_#{2}_#{p_card.id}")}
+            end
+          end
         end
       end
       @suitable[2] = suit_pcard unless suit_pcard.blank?
@@ -231,37 +253,46 @@ class SetStoresController < ApplicationController
       buy_type =  5
       @cates = Category.where(:types=>type,:store_id=>store_id).inject({}){|h,c|h[c.id]=c.name;h}.merge!(Product::PACK_SERVIE)
       sql = "select p.* from  products p inner join  categories c on c.id=p.category_id where p.store_id=#{store_id} and p.status=#{Product::IS_VALIDATE[:YES]} "
-      if type == Category::ITEM_NAMES[:PROD] #如果是产品
-        buy_type =  6
-        sql += " and c.types=#{Category::TYPES[:good]}"
-      elsif type == Category::ITEM_NAMES[:SERVICE]
-        sql += " and (c.types=#{Category::TYPES[:service]} or p.category_id=#{Product::PACK[:PACK]}) "
-      end
       unless content.nil? || content.empty? || content == ""
         sql += " and p.name like '%#{content.strip.gsub(/[%_]/){|x| '\\' + x}}%'"
       end
-      result = Product.find_by_sql(sql).group_by{|i|i.category_id}
-      total_prms = ProdMatRelation.joins(:material).where(:product_id=>result.values.flatten.map(&:id)).select(
-        "ifnull(FLOOR(materials.storage/material_num),0) num,product_id,material_id").group_by{|i|i.product_id}
-      result.each do |k,prod_servs|
-        suit_storage = []
-        prod_servs.each do |r|
-          if total_prms[r.id]
-            available = true
-            available_num = []
-            total_prms[r.id].each do |prm|
-              if prm.num <= 0
-                available = false
-                break
+      if type == Category::ITEM_NAMES[:PROD] #如果是产品
+        buy_type =  6
+        sql += " and c.types=#{Category::TYPES[:good]}"
+        result = Product.find_by_sql(sql).group_by{|i|i.category_id}
+        total_prms = ProdMatRelation.joins(:material).where(:product_id=>result.values.flatten.map(&:id)).select(
+          "ifnull(FLOOR(materials.storage/material_num),0) num,product_id,material_id").group_by{|i|i.product_id}
+        result.each do |k,prod_servs|
+          suit_storage = []
+          prod_servs.each do |r|
+            if total_prms[r.id]
+              available = true
+              available_num = []
+              total_prms[r.id].each do |prm|
+                if prm.num <= 0
+                  available = false
+                  break
+                end
+                available_num << prm.num
               end
-              available_num << prm.num
-            end
-            if available
-              suit_storage << {:storage=>available_num.min,:name=>r.name,:price=>r.sale_price,:id=>r.id,:type=>buy_type,:status=>params[:checked_item].include?("#{k}_#{type}_#{r.id}")}
+              if available
+                suit_storage << {:storage=>available_num.min,:name=>r.name,:price=>r.sale_price,:id=>r.id,:type=>buy_type,:status=>params[:checked_item].include?("#{k}_#{type}_#{r.id}")}
+              end
             end
           end
+          @suitable[k] = suit_storage unless suit_storage.blank?
         end
-        @suitable[k] = suit_storage unless suit_storage.blank?
+      elsif type == Category::ITEM_NAMES[:SERVICE]
+        sql += " and c.types=#{Category::TYPES[:service]} and  single_types=#{Product::SINGLE_TYPE[:SIN]}"
+        result = Product.find_by_sql(sql).group_by{|i|i.category_id}
+        result.each do |k,prod_servs|
+          suit_storage = []
+          prod_servs.each do |r|
+            suit_storage << {:storage=>999,:name=>r.name,:price=>r.sale_price,:id=>r.id,:type=>buy_type,
+              :status=>params[:checked_item].include?("#{k}_#{type}_#{r.id}")}
+          end
+          @suitable[k] = suit_storage unless suit_storage.blank?
+        end
       end
     end
   end
@@ -290,10 +321,20 @@ class SetStoresController < ApplicationController
         if car_num.nil?
           car_num = CarNum.create(:num=>@num)
         end
-        @customer = Customer.new(:status => Customer::STATUS[:NOMAL], :property => Customer::PROPERTY[:PERSONAL],
-          :allowed_debts => Customer::ALLOWED_DEBTS[:NO],:store_id=>params[:store_id])
-        @customer.save
-        @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
+        if @customer
+          @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
+        else
+          property = Customer::PROPERTY[:PERSONAL]
+          if params[:customer][:group_name]
+            property = Customer::PROPERTY[:GROUP]
+          end
+          @customer = Customer.new(params[:customer].merge({ :property => property,
+                :status => Customer::STATUS[:NOMAL], :allowed_debts => Customer::ALLOWED_DEBTS[:NO],:store_id=>params[:store_id]}))
+          @customer.save
+          @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
+        end
+      else
+        Customer.find(@customer.id).update_attributes(params[:customer])
       end
       total_info,total_prod = {},{}
       params[:sub_items].map do |info,num|
@@ -307,11 +348,10 @@ class SetStoresController < ApplicationController
           total_prod[2].nil? ? total_prod[2] = [split_info[2] ] : total_prod[2] << split_info[2]
         end
       end
-      p msg = CSvcRelation.create_item(total_info,total_prod,@customer,car_num,cookies[:user_id],params[:store_id].to_i)
-      @msg = msg.join(" ")
+      @msg = CSvcRelation.create_item(total_info,total_prod,@customer,car_num,cookies[:user_id],params[:store_id].to_i)
     end
     #    rescue
-    #      msg = "开单失败"
+    #      @msg = [["开单失败"],false]
     #    end
   end
 
@@ -319,5 +359,34 @@ class SetStoresController < ApplicationController
     Customer.joins(:customer_num_relations=>:car_num).where(:"car_nums.num"=>num,:"customers.store_id"=>store_id).
       select("customers.id,name,mobilephone,other_way,address,group_name").where(:status=>Customer::STATUS[:NOMAL]).first
   end
-  
+
+  def edit_deduct
+    @tech_orders = TechOrder.where(:order_id=>params[:order_id])
+    @staffs = Staff.find(@tech_orders.map(&:staff_id)).inject({}){|h,s|h[s.id]=s.name;h}
+    @order = Order.find(params[:order_id])
+  end
+
+  def post_deduct
+    begin
+      status = 0
+      total_deduct = params[:ids].values.inject(0){|num,n|num+n.to_i}
+      Order.find(params[:order_id]).update_attributes(:technician_deduct=>total_deduct)
+      tech_orders = TechOrder.find(params[:ids].keys)
+      tech_orders.each do |tech_order|
+        deduct = params[:ids]["#{tech_order.id}"]
+        tech_order.update_attributes(:own_deduct=>deduct)
+      end
+    rescue
+      status = 1
+    end
+    render :json=>{:status=>status}
+  end
+
+
+  def search_num
+    status = 0
+    customer = Customer.where(:mobilephone=>params[:mobilephone],:store_id=>params[:store_id]).first
+    status=1  if customer.nil?
+    render :json=>{:status=>status,:customer=>customer}
+  end
 end

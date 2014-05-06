@@ -1,5 +1,6 @@
 <div class="main">
   <div class="box">
+    <%= render :partial => "warn_account_tips" %>
     <div class="data_box">
       <div class="tab_head">
         <ul>
@@ -18,7 +19,7 @@
           <div style="float:right;"><button class="search_btn" style="padding:-1px 0;" onclick="pay_account(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button></div>
         </div>
         <div  id="account">
-        <%= render :partial=>'pay_account',:object=>Account::TYPES[:CUSTOMER] %>
+          <%= render :partial=>'pay_account',:object=>Account::TYPES[:CUSTOMER] %>
         </div>
       </div>
     </div>

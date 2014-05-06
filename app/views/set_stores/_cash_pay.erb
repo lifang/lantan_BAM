@@ -16,7 +16,7 @@
       <thead>
         <tr class="hbg">
           <td style="display: none" id="return_order">退单</td>
-          <td>订单号</td>
+          <td id="code_num">订单号</td>
           <td>项目</td>
           <td>数量</td>
           <td>单价</td>
@@ -24,34 +24,36 @@
           <td>已优惠</td>
           <td>小计</td>
           <td style="display: none" id="input_loss">优惠</td>
+          <td style="display: none" id="reason">优惠备注</td>
         </tr>
       </thead>
       <tbody>
         <% @orders.each do |order| %>
           <tr>
-            <% loss =limit_float(@order_pays[order.id].nil? ? 0 : @order_pays[order.id].to_f)  %>
-            <%  fact = limit_float(order.price>loss ? order.price-loss : 0)%>
+            <% loss = (@order_pays[order.id].nil? ? 0 : @order_pays[order.id]).round(2)  %>
+            <%  fact = (order.price>loss ? order.price-loss : 0).round(2)%>
             <td style="display: none" id="return_order_<%=order.id%>">
               <input type="hidden" value="<%= fact  %>" id="loss_<%= order.id %>" />
               <input type="checkbox" id="l_<%=order.id%>" onclick="return_check(this)" />
             </td>
-            <td><%= order.code %></td>
+            <td id="code_num"><%= order.code %></td>
             <% if @order_prods[order.id] %>
               <% prod = @order_prods[order.id][0] %>
               <td><%= prod.name %></td>
               <td><%= prod.pro_num %></td>
-              <td><%= limit_float(prod.price) %></td>
+              <td><%= prod.price.round(2) %></td>
             <%else%>
               <td><%= "--" %></td>
               <td><%= "--" %></td>
               <td><%= "--" %></td>
             <%end%>
-            <td><%= limit_float(order.price) %></td>
+            <td><%= order.price.round(2) %></td>
             <td><%= loss %></td>
             <td><%= fact %></td>
             <td style="display: none" id="input_<%= order.id %>">
               <input type="text" value="0" id="in_<%= order.id %>" size="5px" onblur="set_reward(this)"/>
               <input type="hidden" value="0" id="hipay_<%=order.id%>" /></td>
+            <td style="display: none" id="reason_<%= order.id %>"><input type="text" value="" size="30px" /></td>
           </tr>
         <% end %>
       </tbody>
@@ -60,8 +62,7 @@
 </div>
 <%total = @orders.map(&:price).inject(0){|sum,num|sum+num} %>
 <%reward = @order_pays.select{|k,v| @orders.map(&:id).include? k}.values.inject(0){|sum,num|sum+num}%>
-<% fact_fee = limit_float(total > reward ? (total-reward) : 0) %>
-<div class="due_pay_money"><span>应收：</span><span id="due_money"><%=fact_fee%></span></div>
+<div class="due_pay_money"><span>应收：</span><span id="due_money"><%=(total > reward ? total-reward : 0).round(2)%></span></div>
 <div id="sv_card_used">
   <% @sv_card.each do |card| %>
     <div class="accountsTab_pay" >
@@ -76,7 +77,7 @@
         </div>
       </div>
       <div class="accountsTab_pay_item">
-        <label>可用余额：<span id="left_<%= card.id %>"><%= limit_float(card.left_price) %></span></label>
+        <label>可用余额：<span id="left_<%= card.id %>"><%=  card.left_price.round(2) %></span></label>
       </div>
       <div class="accountsTab_pay_item">
         <label>本单：</label><input onblur="check_num()" value="0" type="text" id="order_<%=card.id%>" disabled />
@@ -89,14 +90,14 @@
 </div>
 <div class="deal_money">
   <ul>
-    <li>应付金额：<span id="due_pay"><%= fact_fee%></span>
-      <span id="hidden_pay" style="display:none"><%=fact_fee%></span>
+    <li>应付金额：<span id="due_pay"><%= (total > reward ? total-reward : 0).round(2)%></span>
+      <span id="hidden_pay" style="display:none"><%=(total > reward ? total-reward : 0).round(2)%></span>
       <span style="float: right;display: none;"><input id="clear_per" type="checkbox"  onclick="change_pay(this)"
-                                                       <%if fact_fee <=10 %> disabled <%end%> />抹零</span>
+                                                       <%if (total > reward ? total-reward : 0).round(2) <=10 %> disabled <%end%> />抹零</span>
       <input type="hidden" value="0" id="clear_value" />
     </li>
     <li>付款总计：<span id="total_pay"><%=0%></span></li>
-    <li>待付金额：<span id="left_pay"><%=fact_fee%></span></li>
+    <li>待付金额：<span id="left_pay"><%= (total > reward ? total-reward : 0).round(2)%></span></li>
     <li><a href="javascript:void(0)" class="deal_money_btn" id="due_over" onclick="check_post(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)" style="display: none">可以结账</a></li>
   </ul>
 </div>
@@ -138,8 +139,11 @@
     </div>
   </div>
   <div class="btn_box">
+    <%= image_tag "ajax-loader.gif", :id => "spinner_user", :style => "display:none;" %>
     <button class="confirm_btn" id="confirm_order" onclick="confirm_pay_order(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)">确定</button>
-    <input type="checkbox" id="is_biling">发票</input></div>
+    <input type="checkbox" id="is_biling">发票</input>
+    <input type="checkbox" id="is_print" checked>打印小票</input>
+    <input type="checkbox" id="is_order" checked>打印单据</input></div>
 </div>
 
 <script type="text/javascript">

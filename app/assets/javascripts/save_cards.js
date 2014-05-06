@@ -26,8 +26,8 @@ function create_save_card_valid(obj){
         tishi_alert("储值卡名称最长36个字符!");
     }else if(checked_len<=0){
         tishi_alert("至少选择一个项目!")
-    }else if((img!="" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
-        tishi_alert("请选择正确的图片格式,格式为:"+img_format);
+    }else if((img!="" || img.length!=0) && (img_format.indexOf(img_type.substring(1,img_type.length))==-1 || set_default_to_pic($("#scard_img")[0]))){
+        tishi_alert("图片不能超过200KB,格式必须是:"+img_format);
     }else if((img!="" || img.length!=0) && pattern.test(g_name.split(".")[0])){
         tishi_alert("图片名称包含非法字符!");
     }else if(s_money==""){
@@ -77,9 +77,9 @@ function update_save_card_valid(obj){
         tishi_alert("至少选择一个项目!");
     }else if(get_str_len(name)>36){
         tishi_alert("储值卡名称最多36个字符!");
-    }else if((img!="" || img.length!=0) && img_format.indexOf(img_type.substring(1,img_type.length))==-1){
-        tishi_alert("请选择正确的图片格式,格式为:"+img_format);
-    }else if((img!="" || img.length!=0) && pattern.test(g_name.split(".")[0])){
+    }else if((img!="" || img.length!=0) && (img_format.indexOf(img_type.substring(1,img_type.length))==-1 || set_default_to_pic($("#edit_scard_img")[0]))){
+        tishi_alert("图片不能超过200KB,格式必须是:"+img_format);
+    }else if((img!="" || img.length!=0) && pattern.test(g_name.split(".")[0]) ){
         tishi_alert("图片名称包含非法字符!");
     }else if(s_money==""){
         tishi_alert("请输入充值金额!");

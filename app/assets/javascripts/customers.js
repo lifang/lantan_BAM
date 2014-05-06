@@ -65,15 +65,7 @@ $(function(){
     });
 })
 
-function show_complaint(t) {
-    $("#"+t+"_s").show();
-    $("#"+t+"_h").hide();
-}
 
-function hide_complaint(t) {
-    $("#"+t+"_s").hide();
-    $("#"+t+"_h").show();
-}
 
 
 function choose_brand(capital_div, car_brands, car_models) {
@@ -125,7 +117,7 @@ function choose_model(car_brands, car_models) {
 }
 
 function check_car_num() {
-    if ($.trim($("#new_car_num").val()) != "") {
+    if ($.trim($("#new_car_num").val()) != "" && $.trim($("#new_car_num").val()).length == 7) {
         $.ajax({
             async:true,
             dataType:'json',
@@ -145,7 +137,7 @@ function check_car_num() {
 }
 
 function check_e_car_num(c_num_id) {
-    if ($.trim($("#car_num_" + c_num_id).val()) != "") {
+    if ($.trim($("#car_num_" + c_num_id).val()) != "" && $.trim($("#car_num_" + c_num_id).val()).length ==7 ) {
         $.ajax({
             async:true,
             dataType:'json',
@@ -211,7 +203,7 @@ function edit_car_num(car_num_id) {
         tishi_alert("请输入汽车购买年份");
         return false;
     }
-    if ($.trim($("#car_num_" + car_num_id).val()) == "") {
+    if ($.trim($("#car_num_" + car_num_id).val()) == "" || $.trim($("#car_num_" + car_num_id).val()).length != 7) {
         tishi_alert("请输入车牌号码");
         return false;
     }
@@ -220,8 +212,8 @@ function edit_car_num(car_num_id) {
         return false;
     }
     if($.trim($("#car_distance_"+car_num_id).val())!="" && (isNaN($.trim($("#car_distance_"+car_num_id).val())) || parseInt($.trim($("#car_distance_"+car_num_id).val()))<0)){
-         tishi_alert("请输入正确的行驶里程");
-         return false;
+        tishi_alert("请输入正确的行驶里程");
+        return false;
     }
     return true;
 }

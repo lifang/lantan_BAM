@@ -47,7 +47,7 @@
         <th width="80">成本价(元)</th>
         <th width="80">进货价(元)</th>
         <th width="100">零售价(元)</th>
-        <th width="80">盘点实数</th>
+        <th width="80">入库数量</th>
         <th width="160">操作</th>
       </tr>
     </thead>
@@ -69,12 +69,11 @@
           <td><%= permission?(:materials, :show_sale) ? material.price : 0 %></td>
           <td><%= material.import_price %></td>
           <td><%= material.sale_price %></td>
-          <td class="check_num_field"><%= text_field_tag "materials[#{material.id}][num]",material.check_num, :id =>"check_num_#{material.id}", :style =>"width:50px;" %></td>
+          <td class="check_num_field"><%= text_field_tag "materials[#{material.id}][num]",0, :id =>"check_num_#{material.id}", :style =>"width:50px;" %></td>
           <td class="operation">
             <% if permission?(:materials, :mat_mark) %>
               <%= link_to "备注", "/stores/#{params[:store_id]}/materials/#{material.id}/get_remark", :remote => true, 'data-type' => 'script' %>
             <% end %>
-            <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this, '')" %><% end %>
             <% if permission?(:materials, :mat_edit) %><%= link_to "编辑", edit_store_material_path(params[:store_id], material.id), :remote => true, 'data-type' => 'script' %><% end %>
             <% if permission?(:materials, :delete) %>
               <% if  material.storage <= 0%>
@@ -89,6 +88,7 @@
             <% else %>
               <% if permission?(:materials, :ignore) %><%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %><% end %>
             <% end %>
+            <% if permission?(:materials, :check) %><%= link_to_function "快速出入库","check_material_num(#{material.id},#{@current_store.id}, this, '')" %><% end %>
           </td>
         </tr>
       <% end %>
@@ -108,7 +108,7 @@
         <th width="80">成本价(元)</th>
         <th width="80">进货价(元)</th>
         <th width="100">零售价（元）</th>
-        <th width="80">盘点实数</th>
+        <th width="80">入库数量</th>
         <th width="160">操作</th>
       </tr>
     </thead>
@@ -130,12 +130,11 @@
           <td><%= permission?(:materials, :show_sale) ? material.price : 0 %></td>
           <td><%= material.import_price %></td>
           <td><%= material.sale_price %></td>
-          <td class="check_num_field"><%= text_field_tag "materials[#{material.id}][num]",material.check_num, :id =>"check_num_#{material.id}", :style =>"width:50px;" %></td>
+          <td class="check_num_field"><%= text_field_tag "materials[#{material.id}][num]",0, :id =>"check_num_#{material.id}", :style =>"width:50px;" %></td>
           <td class="operation">
             <% if permission?(:materials, :mat_mark) %>
               <%= link_to "备注", "/stores/#{params[:store_id]}/materials/#{material.id}/get_remark", :remote => true, 'data-type' => 'script' %>
             <% end %>
-            <% if permission?(:materials, :check) %><%= link_to_function "核实","check_material_num(#{material.id},#{@current_store.id}, this, '')" %><% end %>
             <% if permission?(:materials, :mat_edit) %><%= link_to "编辑", edit_store_material_path(params[:store_id], material.id), :remote => true, 'data-type' => 'script' %><% end %>
             <% if permission?(:materials, :delete) %>
               <% if  material.storage <= 0%>
@@ -150,6 +149,7 @@
             <% else %>
               <% if permission?(:materials, :ignore) %><%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %><% end %>
             <% end %>
+            <% if permission?(:materials, :check) %><%= link_to_function "快速出入库","check_material_num(#{material.id},#{@current_store.id}, this, '')" %><% end %>
           </td>
         </tr>
       <% end %>

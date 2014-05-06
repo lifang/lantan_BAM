@@ -6,7 +6,7 @@ class Order < ActiveRecord::Base
   has_many :work_orders
   belongs_to :car_num
   has_many :c_pcard_relations
-  belongs_to :c_svc_relation
+  has_many :c_svc_relations
   belongs_to :customer
   belongs_to :sale
   has_many :revisit_order_relations
@@ -81,7 +81,7 @@ class Order < ActiveRecord::Base
     customer_condition_sql = condition_sql
     customer_params_arr = params_arr.collect { |p| p }
     unless is_vip.nil? or is_vip == "-1"
-      customer_condition_sql += " and csr.is_vip = ? "
+      customer_condition_sql += " and cu.is_vip = ? "
       customer_params_arr << is_vip.to_i
     end
     unless is_birthday.nil?
@@ -117,7 +117,7 @@ class Order < ActiveRecord::Base
       price, is_vip, is_birthday)
     customer_sql = "select DISTINCT(cu.id) cu_id, cu.name from customers cu
       inner join orders o on o.customer_id = cu.id 
-      where cu.status = #{Customer::STATUS[:NOMAL]} and csr.store_id = #{store_id.to_i} and cu.name is not null
+      where cu.status = #{Customer::STATUS[:NOMAL]} and cu.store_id = #{store_id.to_i} and cu.name is not null
      and cu.mobilephone is not null and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
@@ -1176,7 +1176,7 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
       pns.each do |pn|
         pn[2] = pn[2].to_i + opr.product_num if pn[0].to_i == opr.product_id
       end if pns
-      cpr.update_attribute(:content,pns.map{|pn| pn.join("-")}.join(",")) if cpr
+      cpr.update_attribute({:content=>pns.map{|pn| pn.join("-")}.join(","),:status=>CPcardRelation::STATUS[:NORMAL]}) if cpr
     end unless oprs.blank?
   end
 

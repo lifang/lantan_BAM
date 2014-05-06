@@ -55,7 +55,7 @@
   <div class="releaseDiv_l">活动图片：</div>
   <div class="releaseDiv_r">
     <input type="hidden" value=""  name="file_size" id="file_size" />
-    <input type="file" name="img_url" id="img_url" onchange="$('#file_size').val(this.files[0].size.toFixed(2))"  size="50px"/>
+    <input type="file" name="img_url" id="img_url" onchange="$('#file_size').val(this.width)"  size="50px"/>
     <span class="show_pic" >
       <%=  @sale.img_url.nil? ? "" : @sale.img_url.split("/")[-1] %>
     </span>

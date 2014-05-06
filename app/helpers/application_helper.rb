@@ -210,7 +210,8 @@ module ApplicationHelper
     orders.map{|order|
       work_order = WorkOrder.find_by_order_id(order.id)
       service_name = Order.find_by_sql("select p.name p_name from orders o inner join order_prod_relations opr on opr.order_id=o.id inner join
-            products p on p.id=opr.product_id where p.is_service=#{Product::PROD_TYPES[:SERVICE]} and o.id = #{order.id}").map(&:p_name).compact.uniq
+            products p on p.id=opr.product_id where (p.is_service=#{Product::PROD_TYPES[:SERVICE]} or p.is_added =#{Product::IS_ADDED[:YES]})
+           and o.id = #{order.id}").map(&:p_name).compact.uniq
       order[:wo_started_at] = (work_order && work_order.started_at && work_order.started_at.strftime("%Y-%m-%d %H:%M:%S")) || ""
       order[:wo_ended_at] = (work_order && work_order.ended_at && work_order.ended_at.strftime("%Y-%m-%d %H:%M:%S")) || ""
       order[:car_num] = order.car_num.try(:num)
@@ -277,4 +278,34 @@ module ApplicationHelper
     stores = StoreChainsRelation.find_by_sql(sql).map(&:store_id) #获取该门店所有的连锁店
     stores.any? ? stores : [store_id]
   end
+  
+
+
+  def warn_account(percent,day,third_v)
+    acc = third_v == [] ? [] : 0
+    order_accounts = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
+      :"orders.store_id"=>params[:store_id]).select("ifnull(sum(order_pay_types.price),0) total_price,
+      date_format(min(order_pay_types.created_at),'%Y-%m-%d') min_time,orders.customer_id").group("orders.customer_id")
+    unless order_accounts.blank?
+      customers = Customer.where(:id=>order_accounts.map(&:customer_id)).inject({}){|h,c|h[c.id]=c;h}
+      order_accounts.each do |account|
+        if customers[account.customer_id]
+          if customers[account.customer_id].check_type == Customer::CHECK_TYPE[:MONTH]
+            time = account.min_time.to_datetime+customers[account.customer_id].check_time.months-day.days
+          else
+            time = account.min_time.to_datetime+customers[account.customer_id].check_time.weeks-day.days
+          end
+          if  account.total_price >= customers[account.customer_id].debts_money*percent  or time.strftime("%Y-%m-%d") <= Time.now.strftime("%Y-%m-%d")
+            if third_v == []
+              acc << account
+            elsif third_v ==0
+              acc += 1
+            end
+          end
+        end
+      end
+    end
+    acc
+  end
+
 end

@@ -119,7 +119,7 @@ function check_material_num(m_id, store_id, obj, pandian_flag){                 
     if(check_num.match(reg1)==null){
         tishi_alert("请输入有效数字");
     }else{
-        if(confirm("确定核实的库存？")){
+        if(confirm("确定核实的入库数量？")){
             $.ajax({
                 url:"/materials/"+m_id + "/check",
                 dataType:"script",
@@ -890,10 +890,10 @@ function checkMaterial(obj){              //编辑物料验证
     }
     if (parseInt($("#create_prod").val())==1){
         var pattern = new RegExp("[=-]")
-        var name=$("#prod_name").val();
-        var base=$("#base_price").val();
-        var t_price =$("#t_price").val();
-        var sale=$("#sale_price").val();
+        var name=$.trim($("#prod_name").val());
+        var base= $.trim($("#base_price").val());
+        var t_price = $.trim($("#t_price").val());
+        var sale= $.trim($("#sale_price").val());
         var standard =$("#standard").val();
         var point =$("#prod_point").val();
         var pic_format =["png","gif","jpg","bmp"];
@@ -935,7 +935,7 @@ function checkMaterial(obj){              //编辑物料验证
                 var pic_type =this.value.substring(this.value.lastIndexOf(".")).toLowerCase();
                 var img_name = this.value.substring(this.value.lastIndexOf("\\")).toLowerCase();
                 var g_name = img_name.substring(1,img_name.length);
-                if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0])){
+                if (pic_format.indexOf(pic_type.substring(1,pic_type.length))== -1 || pattern.test(g_name.split(".")[0]) || set_default_to_pic(this)){
                     img_f = true
                 }else{
                     $(this).attr("name","img_url["+this.id+"]");
@@ -1501,23 +1501,26 @@ function submit_code(obj,store_id){
 
 function enableNextInput(obj, flag){
     if(flag){
-        $(obj).parent().next().attr('disabled', false);
+        $("#ifuse_code #use_existed_code").attr('disabled', false);
     }else{
-        $(obj).parents(".item").next().find("#use_existed_code").attr('disabled', true);
+        $("#ifuse_code #use_existed_code").attr('disabled', true);
     }
 }
 
 function search_material_barcode(store_id, obj){
     var code = $(obj).parent().prev().find(".search-barcode").val();
-    $.ajax({
-        url: "/materials/search_by_code",
-        dataType:"script",
-        data:{
-            code : code,
-            store_id : store_id
-        },
-        success:function(data,status){}
-    });
+    if(code != "" && code.length > 0){
+        $.ajax({
+            url: "/materials/search_by_code",
+            dataType:"script",
+            data:{
+                code : code,
+                store_id : store_id
+            }
+        });
+    }else{
+        tishi_alert("请输入条形码！");
+    }
 }
 
 function back_good_records_button(store_id){
@@ -1620,4 +1623,28 @@ function back_good_validate(store_id){      //退货确定按钮验证
         })
     }
             
+}
+
+function add_m(e){
+    var num = $.trim($(e).parent().find(":text").val());
+    if (isNaN(parseInt(num))){
+        num = 0;
+    }else{
+        num = parseInt(num)
+    }
+    $(e).parent().find(":text").val(num+1);
+}
+
+function del_m(e){
+    var num = $.trim($(e).parent().find(":text").val());
+    if (isNaN(parseInt(num))){
+        num = 0;
+    }else{
+        num = parseInt(num)
+    }
+    if(num >=1){
+        $(e).parent().find(":text").val(num-1);
+    }else{
+        $(e).parent().find(":text").val(num);
+    }
 }

@@ -20,6 +20,7 @@ class FinanceReportsController < ApplicationController
     end
     if params[:category_id]
       sql += " and products.category_id=#{params[:category_id]}"
+      sql += " and products.id in (#{params[:prod_name]})"   if params[:prod_name]
       p_orders = Order.joins([:car_num,:customer,:order_prod_relations =>:product]).select("orders.*,customers.mobilephone phone,
      customers.name c_name,customers.group_name,car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>
           params[:store_id]).where(sql).order("orders.updated_at desc")
@@ -144,9 +145,10 @@ class FinanceReportsController < ApplicationController
     if @end_time != "0"
       sql += " and date_format(order_pay_types.created_at,'%Y-%m-%d')<='#{@end_time}'"
     end
-    p @pay_orders = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE]).
+    @pay_orders = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE]).
       where(sql).select("code,order_pay_types.price p_price,customer_id,car_num_id,date_format(order_pay_types.created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.customer_id}
-    @customers = Customer.find(@pay_orders.keys).inject({}){|h,c|h[c.id]=c;h}
+    @get_accounts = warn_account(0.8,5,[])
+    @customers = Customer.find((@get_accounts.map(&:customer_id)|@pay_orders.keys).uniq.compact).inject({}){|h,c|h[c.id]=c;h}
     @account = Account.where(:supply_id=>@pay_orders.keys).inject({}){|h,c|h[c.supply_id]=c;h}
     respond_to do |format|
       format.html
@@ -158,11 +160,11 @@ class FinanceReportsController < ApplicationController
   def load_account
     if params[:rend].to_i == Account::TYPES[:CUSTOMER]
       @customer = Customer.find(params[:customer_id])
-      p @pay_orders = OrderPayType.joins(:order=>[:customer,:car_num]).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
+      @pay_orders = OrderPayType.joins(:order=>[:customer,:car_num]).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
         :"orders.store_id"=>params[:store_id],:"orders.customer_id"=>@customer.id).select("code,order_pay_types.price p_price,num,order_pay_types.id p_id,date_format(order_pay_types.created_at,'%Y-%m-%d %H:%m') time")
     else
       @customer = Supplier.find(params[:customer_id])
-      p @pay_orders = MaterialOrder.where(:status=>MaterialOrder::STATUS[:no_pay],:store_id=>params[:store_id],:supplier_id=>params[:customer_id]).
+      @pay_orders = MaterialOrder.where(:status=>MaterialOrder::STATUS[:no_pay],:store_id=>params[:store_id],:supplier_id=>params[:customer_id]).
         select("code,price p_price,id p_id,date_format(created_at,'%Y-%m-%d %H:%m') time,date_format(arrival_at,'%Y-%m-%d %H:%m') arrival,carrier")
     end
     @account = Account.where(:store_id=>params[:store_id],:supply_id=>@customer.id,:types=>params[:rend].to_i).first
@@ -214,8 +216,7 @@ class FinanceReportsController < ApplicationController
       end
       parm = {:pay_recieve =>params[:pay_recieve].to_f,:trade_amt=>params[:trade_amt],:balance=>params[:left_account] }
       account.update_attributes(parm)
-      @account = Account.where(:supply_id=>@pay_orders.keys).inject({}){|h,c|h[c.supply_id]=c;h}
-   
+      @account = Account.where(:supply_id=>@pay_orders.keys).inject({}){|h,c|h[c.supply_id]=c;h}  
     end
   end
 
@@ -367,6 +368,57 @@ class FinanceReportsController < ApplicationController
     eval(params[:action_record].split("_").inject(String.new){|str,name| str + name.capitalize}).where(:id=>params[:id],:store_id=>params[:store_id]).update_all(:status=>ApplicationHelper::MODEL_STATUS[:DELETE])
     render :json=>{:msg_type=>0}
   end
-  
+
+  def other_fee
+    #    p  request.post?
+    @title = "其他收入"
+    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
+    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
+    sql,orders = "1=1",[]
+    if @start_time != "0"
+      sql += " and date_format(orders.updated_at,'%Y-%m-%d')>='#{@start_time}'"
+    end
+    if @end_time != "0"
+      sql += " and date_format(orders.updated_at,'%Y-%m-%d')<='#{@end_time}'"
+    end
+    if params[:customer_name]
+      sql += " and customers.name like '%#{params[:customer_name].gsub(/[%_]/){|x| '\\' + x}}%'"
+    end
+    if params[:card_type].nil?
+      orders << Order.joins([:car_num,:customer,:c_svc_relations=>:sv_card]).select("orders.*,customers.mobilephone phone,customers.name c_name,customers.group_name,
+     car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>params[:store_id],:"sv_cards.types"=>SvCard::FAVOR[:SAVE]).where(sql).order("orders.updated_at desc")
+      orders << Order.joins([:car_num,:customer,:c_pcard_relations=>:package_card]).select("orders.*,customers.mobilephone phone,customers.name c_name,customers.group_name,
+     car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>params[:store_id]).where(sql).order("orders.updated_at desc")
+    else
+      if OrderPayType::PAY_TYPES[:SV_CARD] == params[:card_type].to_i
+        orders << Order.joins([:car_num,:customer,:c_svc_relations=>:sv_card]).select("orders.*,customers.mobilephone phone,customers.name c_name,customers.group_name,
+        car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>params[:store_id],:"sv_cards.types"=>SvCard::FAVOR[:SAVE]).where(sql).order("orders.updated_at desc")
+      end
+      if OrderPayType::PAY_TYPES[:PACJAGE_CARD] == params[:card_type].to_i
+        orders << Order.joins([:car_num,:customer,:c_pcard_relations=>:package_card]).select("orders.*,customers.mobilephone phone,customers.name c_name,customers.group_name,
+     car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>params[:store_id]).where(sql).order("orders.updated_at desc")
+      end
+    end
+    unless orders.flatten.blank?
+      @pays = OrderPayType.search_pay_types(orders.flatten.map(&:id))
+      @orders = orders.flatten.paginate(:page=>params[:page],:per_page=>Constant::LITE_PAGE)
+      @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
+      @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
+      staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
+      staff_ids.delete 0
+      @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    else
+      @pays,@orders = {},[]
+    end
+    respond_to do |format|
+      format.html
+      format.js
+    end
+  end
+
+
+  def load_prod
+    render :json=> {:products=>Product.is_normal.where(:category_id=>params[:category_id]).inject({}){|h,p|h[p.id]=p.name;h}}
+  end
 
 end

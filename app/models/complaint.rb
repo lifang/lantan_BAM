@@ -240,7 +240,7 @@ class Complaint < ActiveRecord::Base
 
   def self.consumer_t(store_id,sear,created=nil,ended=nil,sex=nil,car_model=nil,year=nil,name=nil,price=nil)
     sql = "select o.created_at,o.code,m.name,n.buy_year,o.id,o.price from orders o inner join customers c on c.id=o.customer_id inner join
-    car_nums n on o.car_num_id=n.id inner join car_models m on m.id=n.car_model_id  where store_id=? and o.id in (#{sear.uniq.join(",")})
+    car_nums n on o.car_num_id=n.id inner join car_models m on m.id=n.car_model_id  where o.store_id=? and o.id in (#{sear.uniq.join(",")})
     and o.status in (#{Order::STATUS[:BEEN_PAYMENT]},#{Order::STATUS[:FINISHED]}) "
     conditions = ["",store_id]
     unless created.nil? || created =="" || created.length==0

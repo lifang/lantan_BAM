@@ -20,7 +20,7 @@
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store_id]), :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印条形码",print_code_store_materials_path(params[:store_id]),:remote => true, 'data-type' => 'script', :class => "",:target => "_blank" %><% end %>
-    <% if permission?(:materials, :check_all) %><%= link_to "盘点清单", "/stores/#{params[:store_id]}/check_mat_num", :remote => true, 'data-type'=>'script' %><% end %>
+    <% if permission?(:materials, :check_all) %><%= link_to "库存比对", "/stores/#{params[:store_id]}/check_mat_num", :remote => true, 'data-type'=>'script' %><% end %>
     <% if permission?(:materials, :material_loss_add) %><%= link_to "新建库存报损", mat_loss_store_materials_path(params[:store_id]), :class => "", :remote => true, 'data-type'=>'script', :target => "_blank" %><% end %>
   </div>
   <div class="clear"></div>
@@ -60,11 +60,12 @@
   </div>
 </div>
 <div class="mask"></div>
+<div class="maskOne"></div>
 <!--tab-->
 <div class="tab_popup beizhu_tab" id="remark_div">
 </div>
 <!--盘点-->
-<div class="tab_popup" id="batch_check_tab"></div>
+<div class="tab_popup" id="batch_check_tab" style="width:800px"></div>
 
 <!--打印条形码-->
 <div class="tab_popup print_code_tab" id="print_code_tab"></div>
@@ -197,7 +198,8 @@
 <div class="tab_popup" id="MaterialsLoss">
 </div>
 
-<div class="tab_popup" id="material_div">
+<div  id="material_div">
+
 </div>
 
 <div class="tab_popup" id="tuihuo_div">     <!--退货form-->

@@ -3,8 +3,8 @@ class MatOutOrder < ActiveRecord::Base
   belongs_to :material
   belongs_to :material_order
 
-  TYPES = {0 => "消耗", 1 => "调拨", 2 => "赠送", 3 => "销售"}
-  TYPES_VALUE = {:cost => 0, :transfer => 1, :send => 2, :sale => 3}
+  TYPES = {0 => "消耗", 1 => "调拨", 2 => "赠送", 3 => "销售",4=>"快速出库"}
+  TYPES_VALUE = {:cost => 0, :transfer => 1, :send => 2, :sale => 3,:quick_out =>4}
 
   def self.out_list store_id,types=nil,name=nil,code=nil
     sql = ["select materials.*,o.material_num,s.name staff_name,o.price out_price,o.created_at out_time,o.types out_types,c.name cname

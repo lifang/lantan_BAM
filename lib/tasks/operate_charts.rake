@@ -134,18 +134,7 @@ task(:import_new_data_sh => :environment) do
   p "the run time is #{(Time.now.to_i - time)/3600.0}"
 end
 
-#储值卡增加编号
-task(:add_id_card => :environment) do
-  time = Time.now.to_i
-  CSvcRelation.joins(:customer=>:stores).select("c_svc_relations.id,store_id").inject({}){|h,s|
-    h[s.store_id].nil? ? h[s.store_id] =[s.id] : h[s.store_id] << s.id;h
-  }.each {|c_svc,v|
-    CSvcRelation.find(v).each_with_index do |cs,index|
-      cs.update_attributes(:id_card=>add_length(5,index+1))
-    end
-  }
-  p "the run time is #{(Time.now.to_i - time)/60.0}"
-end
+
 
 def self.add_length(len,str)
   return "0"*(len-"#{str}".length)+"#{str}"
@@ -253,4 +242,15 @@ task(:update_store_id_to_customers => :environment) do
   p "the run time is #{(Time.now.to_i - time)/60.0}"
 end
 
-
+#储值卡增加编号
+task(:add_id_card => :environment) do
+  time = Time.now.to_i
+  CSvcRelation.joins(:customer).select("c_svc_relations.id,store_id").inject({}){|h,s|
+    h[s.store_id].nil? ? h[s.store_id] =[s.id] : h[s.store_id] << s.id;h
+  }.each {|c_svc,v|
+    CSvcRelation.find(v).each_with_index do |cs,index|
+      cs.update_attributes(:id_card=>add_length(5,index+1))
+    end
+  }
+  p "the run time is #{(Time.now.to_i - time)/60.0}"
+end

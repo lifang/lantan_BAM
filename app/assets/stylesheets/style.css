@@ -389,6 +389,7 @@ textarea {
     padding: 0 10px;
     color: #FFF;
     display: inline-block;
+    cursor: pointer;
 }
 a.compile_btn { width: 100px;}
 
@@ -1427,3 +1428,13 @@ a.compile_btn { width: 100px;}
 
 .card_register { font-size: 12px; margin-bottom: 10px;  border: 1px #CCCCCC solid;}
 .order_card li { display: inline-block; margin-right: 4px;}
+
+.help {
+    padding: 5px;
+    position: fixed;
+    top: 200px;
+    background: #930205;
+}
+.help_tit { color: #f2f2f2; font-size: 16px; width: 16px; font-weight: bold; text-shadow: 0 0 3px rgba(0,0,0,0.7); float: left;}
+.help ul { display: none; float: left; margin-left: 10px; width: 250px; background: #f2f2f2; padding: 3px 6px; border-radius: 3px;}
+.help li p { line-height: 20px; color: #3c3c3c; text-indent: 14px;}

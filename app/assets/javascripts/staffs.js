@@ -404,24 +404,34 @@ $(document).ready(function(){
         var work_fee = $(this).parents('tr').find("#work_input").val();
         var manage_fee = $(this).parents('tr').find("#manage_input").val();
         var tax_fee = $(this).parents('tr').find("#tax_input").val();
+        var deduct_num = $(this).parents('tr').find("#deduct_input").val();
+        var reward_fee = $(this).parents('tr').find("#reward_fee_input").val();
         var total_num = $("#total_num").html();
-        if($.trim(reward_num) == "" || isNaN(reward_num) ){
+        if($.trim(deduct_num) == "" || isNaN(parseFloat(deduct_num)) ){
             tishi_alert("请输入提成金额");
             return false;
         }
-        if($.trim(voilate_fee) == "" || isNaN(voilate_fee)){
+        if($.trim(reward_fee) == "" || isNaN(parseFloat(reward_fee)) ){
+            tishi_alert("请输入补贴金额");
+            return false;
+        }
+        if($.trim(reward_num) == "" || isNaN(parseFloat(reward_num)) ){
+            tishi_alert("请输入奖励金额");
+            return false;
+        }
+        if($.trim(voilate_fee) == "" || isNaN(parseFloat(voilate_fee))){
             tishi_alert("请输入扣款金额");
             return false;
         }
-        if($.trim(work_fee) == "" || isNaN(work_fee)){
+        if($.trim(work_fee) == "" || isNaN(parseFloat(work_fee))){
             tishi_alert("请输入加班金额");
             return false;
         }
-        if($.trim(manage_fee) == "" || isNaN(manage_fee)){
+        if($.trim(manage_fee) == "" || isNaN(parseFloat(manage_fee))){
             tishi_alert("请输入考核金额");
             return false;
         }
-        if($.trim(tax_fee) == "" || isNaN(tax_fee)){
+        if($.trim(tax_fee) == "" || isNaN(parseFloat(tax_fee))){
             tishi_alert("请输入所得税");
             return false;
         }
@@ -436,6 +446,8 @@ $(document).ready(function(){
                 work_fee : work_fee,
                 manage_fee : manage_fee,
                 tax_fee : tax_fee,
+                deduct_num : deduct_num,
+                reward_fee : reward_fee,
                 current_month : this.name,
                 total : total_num
             },
@@ -448,6 +460,8 @@ $(document).ready(function(){
                 this_obj.parents('tr').find("#manage_show").html(data.salary.manage_fee);
                 this_obj.parents('tr').find("#tax_show").html(data.salary.tax_fee);
                 this_obj.parents('tr').find("#fact").html(data.salary.fact_fee);
+                this_obj.parents('tr').find("#deduct_show").html(data.deduct_num);
+                this_obj.parents('tr').find("#reward_fee_show").html(data.reward_fee);
                 this_obj.parents('tr').find("span[id$='show']").show();
                 this_obj.parents('tr').find("input[id$='input']").hide();
                 $("#total_num").html(data.total);

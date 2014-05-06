@@ -23,10 +23,6 @@
     <a href="/stores/<%= params[:store_id] %>/market_manages/stored_card_record"
        class="<%= action_name == "stored_card_record" ? "hover" : '' %> fontSize14">储值卡消费记录</a>
   <% end %>
-  <% if permission?(:datas, :everyday) %>
-    <a href="/stores/<%= params[:store_id] %>/market_manages/daily_consumption_receipt"
-       class="<%= action_name == "daily_consumption_receipt" ? "hover" : '' %>">销售单据</a>
-     <% end %>
      <% if permission?(:datas, :duiz) %>
     <a href="/stores/<%= params[:store_id] %>/market_manages/stored_card_bill"
        class="<%= action_name == "stored_card_bill" ? "hover" : '' %>">储值卡对账单</a>

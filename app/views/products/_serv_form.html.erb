@@ -58,7 +58,8 @@
         <%end unless @img_urls.blank?%>
       </ul>
     <% end %>
-    <a href="javascript:void(0)" class="compile_btn" onclick="before_center('.add_img');">添加图片</a><span>*添加新图片会使已上传图片被删除，请为图片做好备份</span>
+    <a href="javascript:void(0)" class="compile_btn" onclick="before_center('.add_img');">添加图片</a>
+    <span>*添加新图片会使已上传图片被删除，请为图片做好备份，单个图片大小不超过200KB。</span>
   </div>
 </div>
 <div class="clear"></div>
@@ -68,7 +69,7 @@
       <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
     <label>百分点：</label>
     <input name="deduct_percent" id="deduct_percent" type="text" <%if @service.deduct_percent==0.0 && @service.deduct_price != 0.0%> disabled<%else%>
-             value="<%= (@service.deduct_percent.nil? ? 0 :@service.deduct_percent)/(@service.sale_price.nil? ? 1 : @service.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>
+             value="<%= @service.deduct_percent/(@service.sale_price<1 ? 1 : @service.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>
   </div>
   <div class="item item_w"><span class="item_radio_b">
       <input name="deduct_type" type="radio" <% if @service.deduct_price && @service.deduct_price != 0.0 %>checked<%end%>
@@ -84,7 +85,7 @@
     <label>百分点：</label>
     <input name="techin_percent" id="techin_percent" type="text"
            <% if @service.techin_percent==0.0 && @service.techin_price != 0.0 %> disabled <%else%>
-             value="<%= (@service.techin_percent.nil? ? 0 :@service.techin_percent)/(@service.sale_price.nil? ? 1 : @service.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>
+             value="<%= @service.techin_percent/(@service.sale_price < 1 ? 1 : @service.sale_price)*100 %>" <%end%>  class="item_areaInput_s"/>
   </div>
   <div class="item item_w" id="techin_t"><span class="item_radio_b">
       <input name="techin_type" type="radio" <% if @service.techin_price && @service.techin_price != 0.0 %>checked<%end%>

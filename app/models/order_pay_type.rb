@@ -7,12 +7,15 @@ class OrderPayType < ActiveRecord::Base
   PAY_TYPES_NAME = {0 => "现金", 1 => "银行卡", 2 => "储值卡", 3 => "套餐卡", 4 => "活动优惠", 5 => "免单", 6 => "打折卡",7=>"优惠",8=>"抹零",9=>"挂账"}
   LOSS = [PAY_TYPES[:SALE],PAY_TYPES[:DISCOUNT_CARD],PAY_TYPES[:FAVOUR],PAY_TYPES[:CLEAR]]
   PAY_STATUS = {:UNCOMPLETE =>1,:COMPLETE =>0} #1 挂账未结账  0  已结账
+  PAY_NAME = {0=>"已付",1=>"未付"}
   FAVOUR = [PAY_TYPES[:SALE],PAY_TYPES[:IS_FREE],PAY_TYPES[:DISCOUNT_CARD],PAY_TYPES[:FAVOUR],PAY_TYPES[:CLEAR]]
   FINCANCE_TYPES = {0 => "现金", 1 => "银行卡", 2 => "储值卡", 3 => "套餐卡", 5 => "免单", 6 => "打折卡",9=>"挂账"}
+  OTHER_TYPES = {2 => "储值卡",3=> "套餐卡"}
+
   
   def self.order_pay_types(orders)
     return OrderPayType.find(:all, :conditions => ["order_id in (?)", orders]).inject(Hash.new){|hash,t|
-      hash[t.order_id].nil? ? hash[t.order_id] = [PAY_TYPES_NAME[t.pay_type]] : hash[t.order_id] << PAY_TYPES_NAME[t.pay_type];
+      hash[t.order_id].nil? ? hash[t.order_id] = [t.pay_type ==PAY_TYPES[:HANG] ? PAY_TYPES_NAME[t.pay_type]+"(#{PAY_NAME[t.pay_status]})" : PAY_TYPES_NAME[t.pay_type]] : hash[t.order_id] << (t.pay_type ==PAY_TYPES[:HANG] ? PAY_TYPES_NAME[t.pay_type]+"(#{PAY_NAME[t.pay_status]})" : PAY_TYPES_NAME[t.pay_type]);
       hash[t.order_id]=hash[t.order_id].uniq;hash}
   end
 
@@ -37,7 +40,7 @@ class OrderPayType < ActiveRecord::Base
   end
 
   def self.deal_order(param)
-    customer = Customer.where(:store_id=>param[:store_id],:customer_id=>param[:customer_id]).first
+    customer = Customer.where(:store_id=>param[:store_id],:id=>param[:customer_id]).first
     is_vip,may_pay = false,true
     order_pay_types,orders,svcard_use_record = [],[],[]
     card_price,msg,is_billing = {},"付款成功！",param[:pay_order][:is_billing].to_i
@@ -133,8 +136,9 @@ class OrderPayType < ActiveRecord::Base
               if param[:pay_order][:return_ids]
                 loss = param[:pay_order][:loss_ids].select{|k,v| !param[:pay_order][:return_ids].include? k}
               end
+              loss_reason = param[:pay_order][:loss_reason]
               loss.each do |k,v|
-                order_pay_types <<  OrderPayType.new(:order_id=>k,:price=>v.to_f.round(2),:pay_type=>OrderPayType::PAY_TYPES[:FAVOUR])
+                order_pay_types <<  OrderPayType.new(:order_id=>k,:price=>v.to_f.round(2),:pay_type=>OrderPayType::PAY_TYPES[:FAVOUR],:second_parm=>loss_reason[k])
               end unless loss.empty?
             end
             cash_price = param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH].nil? ? 0 : limit_float(param[:pay_cash].to_f - param[:second_parm].to_f)
@@ -147,7 +151,6 @@ class OrderPayType < ActiveRecord::Base
               deducts[order.o_id] = deducts[order.o_id].nil? ? [order.d_sum,order.t_sum] : [deducts[order.o_id][0]+order.d_sum,order.t_sum]
               order_points[order.o_id] = order_points[order.o_id].nil? ? order.point : order_points[order.o_id]+order.point
             } #分别表示销售提成和技师提成
-
             orders.each do |o|
               pp = {:product_id => order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].p_id,
                 :product_num => order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].pro_num}
@@ -209,14 +212,15 @@ class OrderPayType < ActiveRecord::Base
                 deduct = {:front_deduct => deducts[o.id][0],:technician_deduct => deducts[o.id][1]}
                 tech_orders =  o.tech_orders
                 tech_orders.update_all(:own_deduct =>deduct[:technician_deduct]/tech_orders.length ) unless tech_orders.blank?
+                order_parm.merge!(deduct)
               end
               work_order = o.work_orders[0]
               if work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY]
                 work_order.update_attributes(:status=>WorkOrder::STAT[:COMPLETE])
               end
-              o.update_attributes(order_parm.merge!(deduct)) #更新订单 提成 等信息
+              o.update_attributes(order_parm) #更新订单 提成 等信息
             end   #更新完订单状态
-
+            OrderPayType.import order_pay_types unless order_pay_types.blank?
             if param[:pay_order] && param[:pay_order][:text]   #使用储值卡更新储值卡余额，并将更新新买储值卡的状态
               CSvcRelation.find(param[:pay_order][:text].keys).each do |c_relation|
                 use_price = param[:pay_order][:text][:"#{c_relation.id}"].to_f
@@ -234,17 +238,18 @@ class OrderPayType < ActiveRecord::Base
                   :left_price=>only_price,:content=>total_name[c_relation.id].nil? ? "" : total_name[c_relation.id].compact.uniq.join("、"))
               end
             end
-            #新买打折卡 储值卡 更新状态为可用
-            CSvcRelation.select("*").where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid]).update_all :status => CSvcRelation::STATUS[:valid], :is_billing => is_billing
             #如果是新买储值卡则生成购买记录
             CSvcRelation.joins(:sv_card).select("*").where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid],:"sv_cards.types"=>SvCard::FAVOR[:SAVE]).each {|csr|
-              svcard_use_record <<   SvcardUseRecord.new(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,:left_price =>csr.left_price.round(2), :content => "购买"+"#{csr.name}")
+              svcard_use_record << SvcardUseRecord.new(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,:left_price =>csr.left_price.round(2), :content => "购买"+"#{csr.name}")
               is_vip = true
             } 
             SvcardUseRecord.import svcard_use_record unless svcard_use_record.blank?
+            #新买打折卡 储值卡 更新状态为可用
+            CSvcRelation.select("*").where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid]).update_all :status => CSvcRelation::STATUS[:valid], :is_billing => is_billing
             if (customer && customer.is_vip) || is_vip    #积分  积分记录
               points = order_points.values.compact.inject(0){|sum,n|sum+n}
-              customer.update_attributes({:total_point=>points+customer.total_point,:is_vip=>is_vip})
+              t_point = customer.total_point.nil? ? 0 : customer.total_point
+              customer.update_attributes({:total_point=>points+t_point,:is_vip=>is_vip})
               t_point = order_points.inject([]){|arr,p| arr << Point.new(:customer_id=>param[:customer_id],
                   :target_id=>p[0],:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>p[1],:types=>Point::TYPES[:INCOME]) }
               Point.import t_point  unless t_point.blank?

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140325173203) do
+ActiveRecord::Schema.define(:version => 20140429072936) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -400,6 +400,14 @@ ActiveRecord::Schema.define(:version => 20140325173203) do
 
   add_index "jv_syncs", ["current_day"], :name => "index_jv_syncs_on_current_day"
 
+  create_table "logs", :force => true do |t|
+    t.string   "title"
+    t.text     "content"
+    t.integer  "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "m_order_types", :force => true do |t|
     t.integer  "material_order_id"
     t.integer  "pay_types"
@@ -730,7 +738,7 @@ ActiveRecord::Schema.define(:version => 20140325173203) do
     t.boolean  "is_auto_revist"
     t.integer  "auto_time"
     t.text     "revist_content"
-    t.integer  "prod_point"
+    t.integer  "prod_point",                                     :default => 0
     t.string   "description"
     t.decimal  "deduct_price",   :precision => 20, :scale => 2,  :default => 0.0
     t.decimal  "deduct_percent", :precision => 20, :scale => 2,  :default => 0.0
@@ -959,24 +967,24 @@ ActiveRecord::Schema.define(:version => 20140325173203) do
   add_index "roles", ["updated_at"], :name => "index_roles_on_updated_at"
 
   create_table "salaries", :force => true do |t|
-    t.decimal  "deduct_num",                   :precision => 21, :scale => 1
-    t.decimal  "reward_num",                   :precision => 21, :scale => 1
-    t.decimal  "total",                        :precision => 21, :scale => 1
+    t.decimal  "deduct_num",     :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "reward_num",     :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "total",          :precision => 21, :scale => 1, :default => 0.0
     t.integer  "current_month"
     t.integer  "staff_id"
     t.integer  "satisfied_perc"
     t.datetime "created_at"
-    t.boolean  "status",                                                      :default => false
+    t.boolean  "status",                                        :default => false
     t.datetime "updated_at"
-    t.float    "reward_fee",                                                  :default => 0.0
-    t.float    "secure_fee",                                                  :default => 0.0
-    t.float    "voilate_fee",                                                 :default => 0.0
-    t.decimal  "fact_fee",                     :precision => 21, :scale => 1
-    t.decimal  "work_fee",                     :precision => 21, :scale => 1
-    t.float    "manage_fee",                                                  :default => 0.0
-    t.float    "tax_fee",                                                     :default => 0.0
-    t.boolean  "is_edited",                                                   :default => false
-    t.float    "base_salary",    :limit => 20
+    t.decimal  "reward_fee",     :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "secure_fee",     :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "voilate_fee",    :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "fact_fee",       :precision => 21, :scale => 1, :default => 0.0
+    t.decimal  "work_fee",       :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "manage_fee",     :precision => 20, :scale => 2, :default => 0.0
+    t.decimal  "tax_fee",        :precision => 20, :scale => 2, :default => 0.0
+    t.boolean  "is_edited",                                     :default => false
+    t.decimal  "base_salary",    :precision => 21, :scale => 1, :default => 0.0
   end
 
   add_index "salaries", ["current_month"], :name => "index_salaries_on_current_month"
