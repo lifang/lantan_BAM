@@ -1,12 +1,18 @@
 <div class="h_finnace_title">
-  <ul title="<%=  @pays.select{|k,v| OrderPayType::FINCANCE_TYPES.keys.include? k}.map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe%>">本期销售收入&nbsp&nbsp&nbsp
+  <ul title="<%=  @pays.select{|k,v| OrderPayType::FINCANCE_TYPES.keys.include? k}.map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe%>">
+    销售收入&nbsp&nbsp&nbsp
     <% pay_reward = @pays.select{|k,v| !OrderPayType::FINCANCE_TYPES.keys.include? k}.values.compact %>
     <% unless pay_reward.blank? %>
       <li>优惠：<span><%= pay_reward.inject(0){|sum,n|sum+n}.round(2)%></span></li>
     <% end %>
     <% li_arr = [];
     @pays.select{|k,v| OrderPayType::FINCANCE_TYPES.keys.include? k}.map{|k,v|li_arr << "<li>#{OrderPayType::PAY_TYPES_NAME[k]}:<span>#{v.to_f.round(2)}</span></li>"}%>
-    <%= li_arr[0..4].join("&nbsp&nbsp").html_safe %>
+    <%= li_arr[0..4].join("&nbsp&nbsp").html_safe %><br/>
+    <% if controller.action_name=="return_order" %>退单金额
+      <%@return_price.each do |return_price|%>
+        <li><%=Order::REUTR_NAME[return_price.return_type]%>：<span><%= return_price.total_price%></span></li>
+      <% end unless @return_price.blank?   %>
+    <%end%>
   </ul>
 </div>
 <% unless @orders.blank? %>
@@ -29,7 +35,7 @@
           <div class="merchant">
             <ul>
               <li><strong>接待员：</strong><%= @staffs[order.front_staff_id] %></li>
-              <li><strong>技师：</strong><%=[@staffs[order.cons_staff_id_1],@staffs[order.cons_staff_id_2]].compact.uniq.join("、")%></li>
+              <li><strong>技师：</strong><%=@tech_orders[order.id].nil? ? "--" : @tech_orders[order.id]%></li>
               <li><strong>开单时间：</strong><%=  order.created_at.nil? ? "--" : order.created_at.strftime("%Y-%m-%d %H:%M")%></li>
               <li><strong>付款时间：</strong><%=  order.updated_at.nil? ? "--" : order.updated_at.strftime("%Y-%m-%d %H:%M")%></li>
               <li><strong>车牌：</strong><%=  order.c_num  %></li>
@@ -62,7 +68,22 @@
               </tbody>
             </table>
             <div class="accounts">
-              <ul><li>总计：<%= fact %></li></ul>
+              <ul>
+                <li><% if controller.action_name=="return_order" %>
+                    <span style="background-color: #00ffff">退单详情：
+                      <%@return_orders[order.id].each do |return_order|%>
+                        <%=Order::REUTR_NAME[return_order.return_type]%>：<span><%= return_order.return_price%>
+                          <% if return_order.pro_num %>
+                            退单数量 ：<%= return_order.pro_num %>
+                          <%end%>
+                          <% if return_order.return_direct %>
+                            商品去向 ：<%= Order::DIRECT[return_order.return_direct] %>
+                          <%end%>
+                        </span>
+                      <%end if @return_orders[order.id] %></span>
+                  <%end%>
+                  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp总计：<%= fact %></li>
+              </ul>
             </div>
           </div>
         </div>
@@ -71,11 +92,11 @@
   <% end %>
   <div class="pageTurn">
     <%unless  @orders.blank?%>
-      <%#if params[:method] == "get" %>
-        <%= will_paginate @orders,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
-      <%#else%>
-        <%#=  will_paginate_remote(@orders , "first_time=#{@start_time}&last_time=#{@end_time}&customer_name=#{params[:customer_name]}&card_type=#{params[:card_type]}",{:url => "/stores/#{params[:store_id]}/finance_reports/other_fee"}) %>
-      <%#end%>
+    <%#if params[:method] == "get" %>
+      <%= will_paginate @orders,:class=>"pageTurn",:previous_label=>"上一页",:next_label=>"下一页" %>
+    <%#else%>
+    <%#=  will_paginate_remote(@orders , "first_time=#{@start_time}&last_time=#{@end_time}&customer_name=#{params[:customer_name]}&card_type=#{params[:card_type]}",{:url => "/stores/#{params[:store_id]}/finance_reports/other_fee"}) %>
+    <%#end%>
     <%end%>
   </div>
 <%end%>

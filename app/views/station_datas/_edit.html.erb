@@ -29,9 +29,9 @@
           <div class="item_rbox">
             <dl>
               <% @services.each do |k,v| %>
-                <dt><%=@categories[k] %></dt>
+              <dt><input type="checkbox" onclick="$(this).parent().parent().find('#<%=k%> input').attr('checked',this.checked);" /><%=@categories[k] %></dt>
                 <%v.each do |p|%>
-                  <dd><input type="checkbox" name="edit_product_ids[]" value="<%= p.id %>"
+              <dd id="<%=k%>"><input type="checkbox" name="edit_product_ids[]" value="<%= p.id %>"
                              <% if @has_services.include?(p.id) %>checked<% end %> /><%= p.name %></dd>&nbsp;&nbsp;
                   <%end%>
                 <% end unless @services.blank? %>

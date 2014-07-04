@@ -43,3 +43,7 @@
 }
 .x { width: 10px; height: 10px; background: url(/assets/x.png) no-repeat 0 0; }
 .close { width: 13px; height: 13px; background: url(/assets/close.jpg) no-repeat ; }
+
+.info_box { padding: 10px 80px 10px 120px; background: url(/assets/info-blue.png) no-repeat 50px 5px; background-size: 50px 50px;}
+.info_box p { line-height: 24px; margin: 5px;}
+.info_box p.title { line-height: 24px; font-size: 18px; font-weight: bold;}

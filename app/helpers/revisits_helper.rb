@@ -1,2 +1,0 @@
-module RevisitsHelper
-end

@@ -12,11 +12,26 @@ class CreateStores < ActiveRecord::Migration
       t.string :img_url
       t.datetime :opened_at
       t.float :account  #门店账户余额
-
+      t.decimal :close_reason
+      t.integer :city_id
+      t.integer :status
+      t.integer :material_low #设置该门店的库存数量预警值，当低于该值时，显示缺货警告
+      t.string :code
+      t.integer :edition_lv
+      t.string :limited_password
+      t.string :cash_auth, :default => 0
+      t.string :auto_send,:default=>1
+      t.boolean :is_chain
+      t.decimal :message_fee,:precision=>"10,2",:default=>0
+      t.boolean :owe_warn
+      t.string :send_list
 
       t.timestamps
     end
 
     add_index :stores, :created_at
+    add_index :stores, :city_id
+    add_index :stores, :status
+    add_index :stores, :edition_lv
   end
 end

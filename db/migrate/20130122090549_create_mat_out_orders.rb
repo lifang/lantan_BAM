@@ -7,6 +7,7 @@ class CreateMatOutOrders < ActiveRecord::Migration
       t.integer :material_num
       t.float :price
       t.integer :material_order_id
+      t.integer :types,:limit=>1
 
       t.datetime :created_at
     end

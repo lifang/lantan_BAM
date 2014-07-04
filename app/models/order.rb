@@ -13,13 +13,14 @@ class Order < ActiveRecord::Base
   has_many :o_pcard_relations
   has_many :complaints
   has_many :tech_orders
+  has_many :return_orders
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
   STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6,
     :RETURN => 7, :COMMIT => 8, :PCARD_PAY => 9}
   STATUS_NAME = {0 => "等待中", 1 => "服务中", 2 => "等待付款", 3 => "已经付款", 4 => "免单", 5 => "已删除" , 6 => "未分配工位",
-    7 =>"退单", 8 => "已确认，未付款(后台付款)", 9 => "套餐卡下单,等待付款"}
-  #0 正常未进行  1 服务中  2 等待付款  3 已经付款  4 已结束  5已删除  6未分配工位 7 退单
+    7 =>"取消订单", 8 => "已确认，未付款(后台付款)", 9 => "套餐卡下单,等待付款"}
+  #0 正常未进行  1 服务中  2 等待付款  3 已经付款  4 已结束  5已删除  6未分配工位 7 取消订单
   CASH =[STATUS[:NORMAL],STATUS[:SERVICING],STATUS[:WAIT_PAYMENT],STATUS[:COMMIT]]
   OVER_CASH = [STATUS[:BEEN_PAYMENT],STATUS[:FINISHED],STATUS[:RETURN]]
   PRINT_CASH = [STATUS[:BEEN_PAYMENT],STATUS[:FINISHED]]
@@ -32,8 +33,10 @@ class Order < ActiveRecord::Base
   VALID_STATUS = [STATUS[:BEEN_PAYMENT], STATUS[:FINISHED]]
   O_RETURN = {:WASTE => 0, :REUSE => 1}  #  退单时 0 为报损 1 为回库
   DIRECT = {0=>"报损", 1=>"回库"}
-  IS_RETURN = {:YES=>1,:NO=>0} #0  成功交易  1退货
-  RETURN = {0 =>"成功交易" , 1 => "已退单"}
+  IS_RETURN = {:YES =>2,:NO =>0,:PART =>1} #0  成功交易  1部分退单 2 全部退单
+  RETURN = {0 =>"成功交易" ,1=>"部分退单", 2 => "全部退单"}
+  RETURN_TYPES = {:SAVE =>0,:CASH =>1,:PCARD =>2}
+  REUTR_NAME = {0 =>"退到储值卡",1 =>"现金",2 =>"退到套餐卡"}
 
   #组装查询order的sql语句
   def self.generate_order_sql(started_at, ended_at, is_visited)
@@ -117,8 +120,8 @@ class Order < ActiveRecord::Base
       price, is_vip, is_birthday)
     customer_sql = "select DISTINCT(cu.id) cu_id, cu.name from customers cu
       inner join orders o on o.customer_id = cu.id 
-      where cu.status = #{Customer::STATUS[:NOMAL]} and cu.store_id = #{store_id.to_i} and cu.name is not null
-     and cu.mobilephone is not null and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
+      where cu.status = #{Customer::STATUS[:NOMAL]} and cu.store_id = #{store_id.to_i} and LENGTH(TRIM(cu.name))>=1
+     and LENGTH(TRIM(cu.mobilephone))=11 and o.store_id = #{store_id.to_i} and o.status in (#{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}) "
     condition_sql = self.generate_order_sql(started_at, ended_at, is_visited)[0]
     params_arr = self.generate_order_sql(started_at, ended_at, is_visited)[1]
     customer_condition_sql = self.generate_customer_sql(condition_sql, params_arr, store_id, started_at, ended_at, is_visited,
@@ -139,8 +142,8 @@ class Order < ActiveRecord::Base
     #wo_status不在（2,3,4,5）o.status 在（0,1,2,3,4）
     return Order.find_by_sql(["select o.id, c.num, o.status, wo.id wo_id, wo.status wo_status,o.c_pcard_relation_id from orders o inner join car_nums c on c.id=o.car_num_id
       inner join customers cu on cu.id=o.customer_id left join work_orders wo on wo.order_id = o.id
-and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
-      where o.status in (#{STATUS[:NORMAL]}, #{STATUS[:SERVICING]}, #{STATUS[:WAIT_PAYMENT]}, #{STATUS[:BEEN_PAYMENT]}, #{STATUS[:FINISHED]}, #{STATUS[:PCARD_PAY]})
+     and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]}, #{WorkOrder::STAT[:END]})
+      where o.status not in (#{STATUS[:DELETED]}, #{STATUS[:INNORMAL]}, #{STATUS[:RETURN]})
       and DATE_FORMAT(o.created_at, '%Y%m%d')=DATE_FORMAT(NOW(), '%Y%m%d') and cu.status=? and o.store_id = ? order by o.status", Customer::STATUS[:NOMAL], store_id])
   end
 
@@ -381,10 +384,10 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
   end
 
   def self.one_order_info(order_id)
-    return Order.find_by_sql(["select o.*, c.name front_s_name, c1.name cons_s_name1,c3.name return_name,
-      c2.name cons_s_name2, o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2, o.customer_id,o.status
-      from orders o left join staffs c on c.id = o.front_staff_id left join staffs c1 on c1.id = o.cons_staff_id_1
-      left join staffs c2 on c2.id = o.cons_staff_id_2 left join staffs c3 on c3.id = o.return_staff_id where o.id = ?", order_id]).first
+    return Order.find_by_sql(["select o.*, c.name front_s_name, c3.name return_name,
+      o.front_staff_id, o.cons_staff_id_1, o.cons_staff_id_2, o.customer_id,o.status
+      from orders o left join staffs c on c.id = o.front_staff_id  left join staffs c3 on c3.id =
+      o.return_staff_id where o.id = ?", order_id]).first
   end
 
   #arr = [车牌和用户信息，选择的产品和服务，相关的活动，相关的打折卡，选择的套餐卡，状态，总价]
@@ -1056,12 +1059,12 @@ and wo.status not in (#{WorkOrder::STAT[:COMPLETE]},#{WorkOrder::STAT[:CANCELED]
           end
           #生成出库记录
           order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id,
-          m.price m_price FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
+          m.price m_price,m.detailed_list FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
           p.id = opr.product_id inner join prod_mat_relations pmr on pmr.product_id = p.id inner join materials m
            on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and o.status in (?) and o.id = ?", [STATUS[:BEEN_PAYMENT], STATUS[:FINISHED]], order.id])
           order_mat_infos.each do |omi|
             MatOutOrder.create({:material_id => omi.m_id, :staff_id => omi.front_staff_id, :material_num => omi.material_num,
-                :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => store_id})
+                :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => store_id,:detailed_list=>omi.detailed_list})
           end
           #更新订单提成
           hash[:front_deduct],hash[:technician_deduct] = 0,0

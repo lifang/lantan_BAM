@@ -5,7 +5,7 @@
  * Time: 下午1:16
  * To change this template use File | Settings | File Templates.
  */
- var reg1 =  /^\d+$/;
+var reg1 =  /^\d+$/;
 function add_role(store_id){
     popup("#add_role");
     $("#role_input").attr("value","");
@@ -62,12 +62,13 @@ function blur_role(obj,store_id){
             data:"name="+ $.trim($(obj).val())+"&store_id=" + store_id,
             success:function(data,status){
                 if(data['status']=="0")
-                  {   
-                      tishi_alert("角色编辑成功")
-                      $("#a_role_"+role_id).html($.trim($(obj).val()));}
+                {
+                    tishi_alert("角色编辑成功")
+                    $("#a_role_"+role_id).html($.trim($(obj).val()));
+                }
                 else{
-                   tishi_alert("当前角色不存在")
-                  }
+                    tishi_alert("当前角色不存在")
+                }
             },
             error:function(data){
                 tishi_alert(data);
@@ -117,7 +118,9 @@ function search_staff(store_id){
         url:"/stores/"+store_id+"/roles/staff",
         dataType:"script",
         type:"GET",
-        data: {name : $.trim($("#name").val())},
+        data: {
+            name : $.trim($("#name").val())
+        },
         success:function(){
                  
         },
@@ -198,7 +201,7 @@ function new_station_valid(obj){ //新建工控机验证
         tishi_alert("至少选择一个服务项目!");
     }else{
         $(obj).parents("form").submit();
-        //$(obj).attr("disabled", "disabled");
+    //$(obj).attr("disabled", "disabled");
     }
 }
 
@@ -218,16 +221,45 @@ function edit_station_valid(obj){ //编辑工控机验证
         tishi_alert("至少选择一个服务项目!");
     }else{
         $(obj).parents("form").submit();
-        //$(obj).attr("disabled", "disabled");
+    //$(obj).attr("disabled", "disabled");
     }
 }
 
 function handleController(obj){            //修改是否有工控机修改采集器编号可否输入
-   if($(obj).attr("checked")=="checked"){
-       $(".controller_input label").prepend("<span class='red'>*</span>");
-       $(".controller_input input").removeAttr("disabled");
-   }else{
-       $(".controller_input span").remove();
-       $(".controller_input input").attr("disabled", "disabled");
-   }
+    if($(obj).attr("checked")=="checked"){
+        $(".controller_input label").prepend("<span class='red'>*</span>");
+        $(".controller_input input").removeAttr("disabled");
+    }else{
+        $(".controller_input span").remove();
+        $(".controller_input input").attr("disabled", "disabled");
+    }
+}
+
+
+function check_advert(){
+    var content = $.trim($("#content").val());
+    var last_time = $("#last_time").val();
+    if (content == "" || content.length == 0){
+        tishi_alert("请输入广告内容！")
+    }else{
+        if (parseInt(last_time)==0){
+            tishi_alert("广告显示时间不能等于0");
+        }else{
+            $("#advert_form").submit(); 
+        }
+    }
+}
+
+
+function pay_fee(store_id){
+    var pay_fee = $("#pay_fee").val();
+    if (parseFloat(pay_fee) >= 10){
+        $("#alipay_tab .close").trigger("click");
+        show_center("#confirm_tab");
+        window.open("/stores/"+store_id+"/messages/alipay_charge?pay_fee="+pay_fee,"_target");
+
+    }else{
+        tishi_alert("充值金额有误，最低金额为10元！");
+    }
+   
 }

@@ -3,13 +3,14 @@ module ApplicationHelper
   require 'net/http'
   require "uri"
   require 'openssl'
+  require 'socket'
   include Constant
   include UserRoleHelper
   include Oauth2Helper
   include CustomersHelper
+  include MessagesHelper
 
   MODEL_STATUS = {:NORMAL => 0,:DELETE =>1} #0 正常 1 删除
-
   def sign?
     deny_access unless signed_in?
   end
@@ -36,10 +37,10 @@ module ApplicationHelper
     @notices = Customer.find_by_sql("select DISTINCT(c.id), c.name from customers c
       left join customer_store_relations csr on csr.customer_id = c.id
       where c.status = #{Customer::STATUS[:NOMAL]} 
-      and csr.store_id in(#{StoreChainsRelation.return_chain_stores(params[:store_id].to_i).join(",")}) 
+      and c.store_id in(#{StoreChainsRelation.return_chain_stores(params[:store_id].to_i).join(",")}) 
       and c.birthday is not null and
-      ((month(now())*30 + day(now()))-(month(c.birthday)*30 + day(c.birthday))) <= 0
-      and ((month(now())*30 + day(now()))-(month(c.birthday)*30 + day(c.birthday))) > -7")
+      ((month(now())*30 + day(now()))-(month(c.birthday)*30 + day(c.birthday))) between  -7
+      and 0")
   end
 
   def staff_names
@@ -126,8 +127,8 @@ module ApplicationHelper
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
-    request= Net::HTTP::Get.new(route)
-    back_res =http.request(request)
+    request = Net::HTTP::Get.new(route)
+    back_res = http.request(request)
     return JSON back_res.body
   end
 
@@ -207,15 +208,16 @@ module ApplicationHelper
 
   #
   def combin_orders(orders)
+    work_orders = WorkOrder.where(:order_id=>orders.map(&:id)).inject({}){|h,w|h[w.order_id]=w;h}
+    service_names = Order.joins(:order_prod_relations=>:product).where( :"orders.id"=>orders.map(&:id)).
+      where("products.is_service=#{Product::PROD_TYPES[:SERVICE]} or is_added=#{Product::IS_ADDED[:YES]}").
+      select("group_concat(products.name) service_name,orders.id order_id").group("orders.id").inject({}){|h,w|h[w.order_id]=w.service_name;h}
     orders.map{|order|
-      work_order = WorkOrder.find_by_order_id(order.id)
-      service_name = Order.find_by_sql("select p.name p_name from orders o inner join order_prod_relations opr on opr.order_id=o.id inner join
-            products p on p.id=opr.product_id where (p.is_service=#{Product::PROD_TYPES[:SERVICE]} or p.is_added =#{Product::IS_ADDED[:YES]})
-           and o.id = #{order.id}").map(&:p_name).compact.uniq
+      work_order = work_orders[order.id]
       order[:wo_started_at] = (work_order && work_order.started_at && work_order.started_at.strftime("%Y-%m-%d %H:%M:%S")) || ""
       order[:wo_ended_at] = (work_order && work_order.ended_at && work_order.ended_at.strftime("%Y-%m-%d %H:%M:%S")) || ""
       order[:car_num] = order.car_num.try(:num)
-      order[:service_name] = service_name.join(",")
+      order[:service_name] = service_names[order.id]
       order[:cost_time] = work_order.try(:cost_time)
       order[:station_id] = work_order.try(:station_id)
       order[:order_id] = order.try(:id)
@@ -224,6 +226,17 @@ module ApplicationHelper
     orders
   end
 
+
+  def mkdir(dir_name,file_name)
+    pwd = Constant::LOCAL_DIR
+    date = Time.now.strftime("%Y-%m-%d")
+    total_dir = [dir_name,date,""]
+    total_dir.each_with_index do |dir,index|
+      dir_path = "#{pwd}/"+total_dir[0..index].join("/")
+      Dir.mkdir(dir_path)  unless File.directory?(dir_path)
+    end
+    "#{pwd}"+total_dir.join("/")+file_name+".txt"
+  end
 
   def check_str(str)
     no_ch = str.gsub(/[\u4e00-\u9fa5]/,"").bytesize
@@ -245,7 +258,7 @@ module ApplicationHelper
 
   #保留金额的两位小数
   def limit_float(num)
-    return (num*100).to_i/100.0
+    return num.nil? ? 0 : (num*100).to_i/100.0
   end
 
   def js_hash(hash)
@@ -289,7 +302,7 @@ module ApplicationHelper
     unless order_accounts.blank?
       customers = Customer.where(:id=>order_accounts.map(&:customer_id)).inject({}){|h,c|h[c.id]=c;h}
       order_accounts.each do |account|
-        if customers[account.customer_id]
+        if customers[account.customer_id] and customers[account.customer_id].check_time
           if customers[account.customer_id].check_type == Customer::CHECK_TYPE[:MONTH]
             time = account.min_time.to_datetime+customers[account.customer_id].check_time.months-day.days
           else
@@ -308,4 +321,93 @@ module ApplicationHelper
     acc
   end
 
+
+  def turn_js_hash(k_vs)
+    hash ={}
+    k_vs.each do |k,v|
+      vs = {}
+      v.each do |k1,v1|
+        vs["#{k1}"] = "#{v1}"
+      end
+      hash["#{k}"]= "#{vs}"
+    end
+    return "#{hash}".gsub("=>",":")
+  end
+
+  #发送短信的功能
+  def send_message_request(message_arr,send_num)
+    times = message_arr.length%send_num == 0 ? message_arr.length/send_num-1 : message_arr.length/send_num
+    (0..times).each do |time|
+      start_num = time*send_num
+      end_num = (time+1)*send_num-1
+      msg_hash = {:resend => 0, :list => message_arr[start_num..end_num] ,:size => message_arr[start_num..end_num].length}
+      jsondata = JSON msg_hash
+      message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
+      create_get_http(Constant::MESSAGE_URL, message_route)
+    end
+  end
+
+  #统一发送短信的方式和相关数据  目前仅限于单条发送和费用的计算
+  def message_data(store_id,send_message,customer,car_num,msg_types) #customer有时是staff
+    message_arrs,store,m_msg = [],Store.find(store_id),""
+    piece = send_message.length%70==0 ? send_message.length/70 : send_message.length/70+1
+    this_price = piece*Constant::MSG_PRICE
+    phone = customer.attributes["mobilephone"] ||= customer.attributes["phone"]
+    if phone and (store.message_fee-this_price) > Constant::OWE_PRICE
+      status = SendMessage::STATUS[:FINISHED]
+      m_parm = {:store_id =>store_id, :content =>send_message,:send_at => Time.now,:types=>msg_types}
+      if store.send_list and store.send_list.split(",").include?("#{msg_types}")
+        message_arrs << {:content =>send_message, :msid => "#{customer.id}", :mobile =>phone}
+        send_message_request(message_arrs,1)
+        store.warn_store(this_price) #提示门店费用信息
+        m_msg = "短信发送成功"
+        m_parm.merge!({:total_num=>piece,:total_fee=>piece*Constant::MSG_PRICE})
+      else
+        m_msg = "短信功能已关闭，请手动发送，如需开通请到开关设置打开！"
+        status = SendMessage::STATUS[:WAITING]
+      end
+      parms = {:customer_id=>customer.id,:car_num_id=>car_num,:phone=>phone,:store_id=>store_id,:status=>status}
+      message_record = MessageRecord.create(m_parm.merge({:status=>status}))
+      SendMessage.create(parms.merge({:content=>send_message,:types=>SendMessage::TYPES[:OTHER],
+            :send_at=>Time.now.strftime('%Y-%m-%d %H:%M:%S'),:message_record_id => message_record.id}))
+    else
+      m_msg = "余额不足"  #使用新的变量m_msg防止多次提醒
+    end
+    return m_msg
+  end
+
+
+  #统一发送短信的方式和相关数据  目前仅限于多条发送发送和费用的计算
+  def multiple_message_data(store_id,m_arrs,msg_types,m_content) #customer有时是staff
+    send_messages,message_arrs,store,m_msg,t_piece = [],[],Store.find(store_id),"",0
+    status = SendMessage::STATUS[:WAITING]
+    status = SendMessage::STATUS[:FINISHED]  if store.send_list and store.send_list.split(",").include?("#{msg_types}")
+    message_record = MessageRecord.create(:store_id =>store_id, :content => m_content,:types=>msg_types,:status => status,:send_at => Time.now)
+    m_arrs.each do |m_arr|
+      content = URI.unescape(m_arr[:content])
+      t_piece += content.length%70==0 ? content.length/70 : content.length/70+1
+      send_messages << SendMessage.new(:message_record_id => message_record.id, :customer_id =>m_arr[:msid],:types=>SendMessage::TYPES[:OTHER],
+        :content => content, :phone =>m_arr[:mobile],:send_at => Time.now, :status => status,:store_id=>store_id)
+    end
+    this_price = t_piece*Constant::MSG_PRICE
+    if  (store.message_fee-this_price) > Constant::OWE_PRICE
+      if store.send_list and store.send_list.split(",").include?("#{msg_types}")
+        send_num = 2100/m_content.length
+        send_message_request(message_arrs,send_num) #此处传递m_content用于计算大致的可发送条数
+        store.warn_store(this_price) #提示门店费用信息
+        message_record.update_attributes({:total_num=>t_piece,:total_fee=>t_piece*Constant::MSG_PRICE})
+        m_msg = "短信发送成功"
+      else
+        m_msg = "短信功能已关闭，请手动发送，如需开通请到开关设置打开！"
+      end
+      SendMessage.import send_messages unless send_messages.blank?
+    else
+      message_record.destroy
+      m_msg = "余额不足"  #使用新的变量防止多次提醒
+    end
+    return m_msg
+  end
+
+  
 end
+

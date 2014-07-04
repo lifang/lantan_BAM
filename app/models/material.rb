@@ -37,6 +37,11 @@ class Material < ActiveRecord::Base
   IS_IGNORE = {:YES => 1, :NO => 0} #是否忽略库存预警， 1是 0否
   DEFAULT_MATERIAL_LOW = 0    #默认库存预警为0
   scope :normal, where(:status => STATUS[:NORMAL])
+  CHECK_STATUS = {0=>"未盘点",1=>"已盘点"}
+  CHECK_NAME = {:UNCOMPLETE =>0,:OVER =>1}
+  MAT_RECORD = {0=>"少于库存数",1=>"多于库存数",2=>"相同"}
+  RECORD_NAME = {:LESS =>0,:MORE =>1,:EQUAL =>2}
+
 
   def self.materials_list store_id,types=nil,name=nil,code=nil
     sql = ["select m.*, c.name cname from materials m inner join categories c on m.category_id=c.id

@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  pay_price: 9.99
+  pay_types: 1
+  pay_status: 1
+  left_price: 9.99
+
+two:
+  pay_price: 9.99
+  pay_types: 1
+  pay_status: 1
+  left_price: 9.99

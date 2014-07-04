@@ -122,15 +122,15 @@ class ComplaintsController < ApplicationController
         inner join car_nums cn on cnr.car_num_id=cn.id
         inner join car_models cm on cn.car_model_id=cm.id
         inner join car_brands cb on cm.car_brand_id=cb.id
-        where cnr.customer_id in (?)", customers.map(&:id).uniq]) if customers.map(&:id).any?
-      @brands_hash = brands.inject({}){|h,b|
+        where cnr.customer_id in (?)", customers.map(&:id).uniq]).inject({}){|h,b|
         if h[b.id].nil?
           h[b.id] = 1
         else
           h[b.id] += 1
         end;
         h
-      }.sort{|a,b|b[1] <=> a[1]} if brands.any?
+      } if customers.map(&:id).any?
+      @brands_hash = brands.sort{|a,b|b[1] <=> a[1]} if brands
       @other = @brands_hash[4..@brands_hash.length-1].inject(0){|i,b| i += b[1];i} if @brands_hash && @brands_hash.length > 4
 
       #消费金额
@@ -271,7 +271,7 @@ class ComplaintsController < ApplicationController
   def complaint_detail
     @store = Store.find_by_id(params[:store_id])
     @complaint = @store.complaints.includes(:order).find_by_id(params[:id])
-    @staff_names = Staff.where(:id => [@complaint.staff_id_1, @complaint.staff_id_2].compact).map(&:name).join(", ")
+   @staff_name = TechOrder.joins(:staff).where(:order_id=>@complaint.order_id).select("staffs.name s_name").map(&:s_name).join("、")
     @violation_rewards = ViolationReward.find_by_sql("select vr.*, s.name name from violation_rewards vr inner join staffs s on vr.staff_id = s.id where target_id = #{ @complaint.id}")
   end
 

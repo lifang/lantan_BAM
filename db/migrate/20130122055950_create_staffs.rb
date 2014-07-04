@@ -22,7 +22,20 @@ class CreateStaffs < ActiveRecord::Migration
       t.float :deduct_percent
       t.boolean :status, :default => 0
       t.integer :store_id
-
+      t.string :encrypted_password
+      t.string :username
+      t.string :salt
+      t.boolean :is_score_ge_salary, :default => false
+      t.integer :status, :limit => 1  #员工状态
+      t.integer :working_stats #在职状态 0试用 1正式
+      t.decimal :probation_salary,:precision=>"20,2",:default=>0  #试用薪资
+      t.boolean :is_deduct #是否提成
+      t.integer :probation_days  #试用期(天)
+      t.string :validate_code
+      t.integer :department_id
+      t.decimal :secure_fee,:precision=>"20,2",:default=>0
+      t.decimal :reward_fee,:precision=>"20,2",:default=>0
+      t.datetime :last_login
       t.timestamps
     end
 
@@ -32,5 +45,6 @@ class CreateStaffs < ActiveRecord::Migration
     add_index :staffs, :level
     add_index :staffs, :type_of_w
     add_index :staffs, :position
+    add_index :staffs, :username
   end
 end

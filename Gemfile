@@ -27,7 +27,7 @@ gem 'execjs', '1.4.0'
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'
-#gem 'iconv'
+gem 'iconv'
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 
@@ -54,4 +54,4 @@ end
 
 #gem 'rmagick', '2.13.1'
 #gem 'barby', '0.5.1'
-
+#gem 'macaddr','1.7.1'

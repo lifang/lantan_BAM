@@ -15,10 +15,14 @@
           <ul>
             <li>单号：<%= order.code %></li>
             <li>付款方式：<%=  if order.status == Order::STATUS[:RETURN]
-                "已退单"
+                "已取消"
               else
-                @pay_types[order.id].nil? ? "--"  :
-                  @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe
+                if order.return_types!= Order::IS_RETURN[:NO]
+                  Order::RETURN[order.return_types]
+                else
+                  @pay_types[order.id].nil? ? "--"  :
+                    @pay_types[order.id].map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe
+                end
               end%></li>
           </ul>
         </div>
@@ -27,10 +31,10 @@
             <li><strong>开单时间：</strong><%=  order.created_at.nil? ? "--" : order.created_at.strftime("%Y-%m-%d %H:%M")%></li>
             <li><strong>接待员：</strong><%= @staffs[order.front_staff_id] %></li>
             <li><strong>技师：</strong>
-              <%if @tech_orders[order.id].nil? || @tech_orders[order.id].map(&:staff_id).compact.blank?%>
+              <%if @tech_orders[order.id].nil?%>
                 --
               <%else%>
-                <%= @tech_orders[order.id].map(&:staff_id).map{|i|@staffs[i]}.join("、")%>
+                <%= @tech_orders[order.id]%>
                 <span class="red" style="cursor: pointer;" onclick="edit_deduct(<%=order.id%>,<%=params[:store_id]%>)">(可编辑)</span>
               <%end%>
             </li>

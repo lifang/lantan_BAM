@@ -5,6 +5,7 @@
       <td>已使用项目</td>
       <td>剩余项目</td>
       <td>使用期限</td>
+      <td>操作</td>
     </tr>
   </thead>
   <tbody>
@@ -38,6 +39,9 @@
               </tbody></table>
           </td>
           <td><%= cpr.ended_at.strftime('%Y-%m-%d') if cpr.ended_at %></td>
+          <td>
+            <button type="button" class="compile_btn" onclick="return_order(<%= cpr.o_id %>, <%= @customer.id %>)">退卡</button>
+          </td>
         </tr>
       <% end %>
     <% end %>

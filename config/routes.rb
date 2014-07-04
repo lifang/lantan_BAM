@@ -1,10 +1,5 @@
 LantanBAM::Application.routes.draw do
 
-  get "finance_reports/index"
-
-  get "data_manages/index"
-
-
   resources :syncs do
     get "upload_file"
     collection do
@@ -36,13 +31,21 @@ LantanBAM::Application.routes.draw do
   match "phone_login" => "logins#phone_login"
   match "manage_content" => "logins#manage_content"
   resources :stores do
+    resources :check_materials do
+      collection do
+        get :check_record,:submit_check,:file_list
+        post :batch_check,:submit_check,:submit_xls
+      end
+    end
+    resources :adverts do
+    end
     resources :finance_reports do
       collection do
         get "fee_manage","revenue_report","fee_report","pay_account","payable_account","manage_account"
-        post "fee_manage","show_fee","fee_report","load_account","complete_account","pay_account","manage_account"
+        post "fee_manage","show_fee","fee_report","load_account","pay_account","manage_account"
         post "payable_account","revenue_report","cost_price","analysis_price","create_assets","manage_assets","show_asset"
-        post "update_asset","other_fee","load_prod"
-        get "cost_price","analysis_price","manage_assets","other_fee"
+        post "update_asset","other_fee","load_prod","return_order"
+        get "cost_price","analysis_price","manage_assets","other_fee","complete_account","return_order"
         delete "destroy"
       end
     end
@@ -109,7 +112,7 @@ LantanBAM::Application.routes.draw do
           "print","cuihuo","cancel_order","page_outs","page_ins","page_back_records","page_head_orders","page_supplier_orders",
           "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
-          "mat_loss_delete","mat_loss","back_good","back_good_search","back_good_commit", "reflesh_low_materials"
+          "mat_loss_delete","mat_loss","back_good","back_good_search","back_good_commit", "reflesh_low_materials","print_mat"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
           "mat_loss_add","modify_code"
       end
@@ -166,6 +169,7 @@ LantanBAM::Application.routes.draw do
     resources :welcomes do
       collection do
         post "edit_store_name", "update_staff_password"
+        post "info_detail"
       end
     end
     resources :customers do
@@ -185,8 +189,11 @@ LantanBAM::Application.routes.draw do
     end
     resources :messages do
       collection do
-        post "search"
-        get "search_list"
+        post "search","set_message","alipay_compete"
+        get "search_list","send_list","send_detailed","send_alipay","alipay_charge"
+      end
+      member do
+        get "load_message"
       end
     end
 

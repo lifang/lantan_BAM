@@ -8,18 +8,15 @@ function search_finance(e,store_id){
     var customer_n =$("#customer_n").val()
     var cate_n = $("#cate_n option:selected").val();
     var pay_type = $("#order_types :checked");
-    var prod_name = $("#product_names :checked");
+    var prod_name = $("#cate_name").val();
     for(var i=0;i < pay_type.length;i++){
         p_type.push(pay_type[i].value);
     }
     if (p_type.length != 0){
         parm["pay_type"]= p_type.join(",");
     }
-    for(var n=0;n < prod_name.length;n++){
-        p_name.push(prod_name[n].value);
-    }
-    if (p_name.length != 0){
-        parm["prod_name"]= p_name.join(",");
+    if (prod_name != "" && prod_name.length !=0){
+        parm["prod_name"]= prod_name;
     }
     if (cate_n != "" && cate_n.length !=0){
         parm["category_id"] = cate_n;
@@ -291,11 +288,11 @@ function set_time(e,store_id,action){
     $(e).attr("onclick","");
     var time = 3;
     var local_timer=setInterval(function(){
-        e.innerHTML="查 &nbsp&nbsp&nbsp&nbsp询("+time+")";
+        e.innerHTML="查&nbsp&nbsp询("+time+")";
         if (time <=0){
             $(e).attr("onclick",action+"(this,"+store_id+")");
             window.clearInterval(local_timer);
-            e.innerHTML="查 &nbsp&nbsp&nbsp&nbsp询";
+            e.innerHTML="查&nbsp&nbsp询";
         }
         time -= 1;
     },1000)
@@ -415,34 +412,28 @@ function other_fee(e,store_id){
     set_search(e,store_id,"other_fee",parm)
 }
 
-function load_prod(store_id){
+function load_prod(){
     var category_id = $("#cate_n option:selected").val();
     if (category_id != "" && category_id.length >0){
-        $("#submit_spinner").css("display","");
-        var url = "/stores/"+store_id+"/finance_reports/load_prod";
-        var parm = {
-            category_id : category_id
-        }
-        $.ajax({
-            type:"post",
-            url: url,
-            dataType: "json",
-            data: parm,
-            success : function(data){
-                var  products = data.products;
-                var total_li = "";
-                for(var item in products){
-                    total_li += "<input type='checkbox' id='prod_name_"+ item +"' value='"+ item+"' >"+ products[item]+"</input>&nbsp&nbsp&nbsp&nbsp"
-                }
-                if (total_li == ""){
-                    $("#product_names").html("暂无相关产品/服务");
-                }else{
-                    total_li += "<br/>"
-                    $("#product_names").html(total_li);
-                }
-                $("#submit_spinner").css("display","none");
-            }
-        })
+        $("#cate_name").attr("disabled",false);
+    }else{
+        $("#cate_name").val("").attr("disabled",true);
     }
+}
 
+function return_order(e,store_id){
+    var parm = {};
+    var prod_name = $("#cate_name").val();
+    var customer_n =$("#customer_n").val()
+    var cate_n = $("#cate_n option:selected").val();
+    if (customer_n != "" && customer_n.length != 0){
+        parm["customer_name"] = customer_n;
+    }
+    if (prod_name != "" && prod_name.length !=0){
+        parm["prod_name"]= prod_name;
+    }
+    if (cate_n != "" && cate_n.length !=0){
+        parm["category_id"] = cate_n;
+    }
+    set_search(e,store_id,"return_order",parm)
 }

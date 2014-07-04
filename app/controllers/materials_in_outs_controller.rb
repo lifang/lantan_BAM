@@ -55,6 +55,7 @@ class MaterialsInOutsController < ApplicationController
         material = Material.find(mat_out_order.material_id)
         material.storage -= mat_out_order.material_num
         material.save
+        mat_out_order.update_attribute(:detailed_list,material.detailed_list)
       end
     end
     flash[:notice] = '商品已成功出库！'

@@ -100,24 +100,51 @@ class RevisitsController < ApplicationController
   def send_mess
     if params[:deal_status].to_i == SendMessage::STATUS[:FINISHED]
       message_arr,store = [],Store.find(params[:store_id])
-      send_messages = SendMessage.where(:id=>params[:send_ids]).group_by{|i| i.customer_id}
-      customers = Customer.find(send_messages.keys).inject({}){|h,c|h[c.id]=c;h}
-      send_messages.each { |k,v|
-        strs,customer = [],customers[k]
-        v.each_with_index {|str,index| strs << "#{index+1}.#{str.content}" }
-        if customer
-          content ="#{customer.name}\t女士/男士,您好,#{store.name}的美容小贴士提醒您:\n" + strs.join("\r\n")
-          message_arr << {:content => content.gsub(/([   ])/,"\t"), :msid => "#{customer.id}", :mobile =>customer.mobilephone}
-        end
-      }
-      msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
-      jsondata = JSON msg_hash
+      send_messages = SendMessage.where(:id=>params[:send_ids]).group_by{|i| {:c_id=>i.customer_id,:m_id=>i.message_record_id}}
+      customers = Customer.find(send_messages.keys.inject([]){|arr,h|arr << h[:c_id]}.compact.uniq).inject({}){|h,c|h[c.id]=c;h}
+      m_records,s_messages,this_price,records = {},{},0,[]
       begin
-        message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
-        Product.create_message_http(Constant::MESSAGE_URL, message_route)
-        SendMessage.where(:id=>params[:send_ids]).update_all(:status=>params[:deal_status])
+        Order.transaction do  #通过transaction控制发送失败时的状态
+          send_messages.each { |k,v|
+            strs,customer = [],customers[k[:c_id]]
+            if customer
+              if k[:m_id].nil?
+                v.each_with_index {|str,index|strs << "#{index+1}.#{str.content}" }
+                content ="#{customer.name}\t女士/男士,您好,#{store.name}的美容小贴士提醒您:\n" + strs.join("\r\n")
+                piece = content.length%70==0 ? content.length/70 : content.length/70+1
+                message_record = MessageRecord.create({:store_id =>customer.store_id, :content =>content,:send_at => Time.now,
+                    :types=>MessageRecord::M_TYPES[:AUTO_REVIST],:total_num=>piece,:total_fee=>piece*Constant::MSG_PRICE,:status=>SendMessage::STATUS[:FINISHED]})
+                this_price += piece*Constant::MSG_PRICE
+                records << message_record.id
+                v.each {|message|s_messages[message.id]={:message_record_id=>message_record.id,:status=>params[:deal_status]}}
+                message_arr << {:content => content.gsub(/([   ])/,"\t"), :msid => "#{customer.id}", :mobile =>customer.mobilephone}
+              else
+                piece = 0
+                v.each do |record|
+                  s_messages[record.id]={:status=>params[:deal_status]}
+                  content = record.content
+                  piece += content.length%70==0 ? content.length/70 : content.length/70+1
+                  this_price += piece*Constant::MSG_PRICE
+                  message_arr << {:content => content.gsub(/([   ])/,"\t"), :msid => "#{customer.id}", :mobile =>customer.mobilephone}
+                end
+                m_records[k[:m_id]]={:total_num=>piece,:total_fee=>piece*Constant::MSG_PRICE,:status=>SendMessage::STATUS[:FINISHED]}
+              end
+            end
+          }
+          if  (store.message_fee-this_price) > Constant::OWE_PRICE
+            send_message_request(message_arr,20)
+            SendMessage.update(s_messages.keys,s_messages.values)
+            MessageRecord.update(m_records.keys,m_records.values)
+            store.warn_store(this_price) #提示门店费用信息
+            @msg = "发送成功！"
+          else
+            MessageRecord.delete_all(:id=>records)
+            @msg = "余额不足！"
+          end
+        end
       rescue
         SendMessage.where(:id=>params[:send_ids]).update_all(:status=>SendMessage::STATUS[:FAIL])
+        @msg = "发送失败！"
       end
     else
       SendMessage.where(:id=>params[:send_ids]).update_all(:status=>params[:deal_status])

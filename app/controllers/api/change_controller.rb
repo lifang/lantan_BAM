@@ -30,15 +30,13 @@ class Api::ChangeController < ApplicationController
 
   def send_code
     csvc_relaion = CSvcRelation.find_by_id(params[:cid].to_i)
-    c_phone = csvc_relaion.customer.mobilephone
-    if csvc_relaion && c_phone
+    c_phone = csvc_relaion.customer
+    if csvc_relaion
       begin
         csvc_relaion.update_attribute(:verify_code, proof_code(6).downcase)
         send_message = "#{csvc_relaion.sv_card.name}的余额为#{csvc_relaion.left_price}，本次验证码：#{csvc_relaion.verify_code}。"
-        message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{c_phone.strip}&Content=#{URI.escape(send_message)}&Exno=0"
-        create_get_http(Constant::MESSAGE_URL, message_route)
+        msg = message_data(c_phone.store_id,send_message,c_phone,nil,MessageRecord::M_TYPES[:CHANGE_SV])
         msg_type = 0
-        msg = "发送成功"
       rescue
         msg_type =1
         msg = "发送失败"

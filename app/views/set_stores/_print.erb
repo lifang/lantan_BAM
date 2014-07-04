@@ -52,10 +52,16 @@
         <%@order_pays.each do |k,v|%>
           <p><span class="span1"><%=OrderPayType::PAY_TYPES_NAME[k]%>：</span><span class="prod_span3"><%=v.to_f.round(2)%></span></p>
         <%end%>
-        <% if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH] and controller.action_name == "print_paper"%>
+        <% if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH]%>
           <p><span class="span1">实收：</span><span class="prod_span3"><%=@cash_pay.pay_cash.to_f.round(2)%></span></p>
           <p><span class="span1">找零：</span><span class="prod_span3"><%=@cash_pay.second_parm.to_f.round(2)%></span></p>
         <%end%>
+        <p>
+          <span class="span1">备注：</span><br/>
+          <%@favour_notices.each_with_index do |notice,index|%>
+            <span><%= "#{index+1}."+notice.second_parm%></span><br/>
+          <%end unless @favour_notices.blank? %>
+        </p>
       </div>
       <div class="solid"></div>
       <span class="time"><%=Time.now.strftime("%Y.%m.%d")%></span>

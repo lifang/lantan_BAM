@@ -1,112 +1,122 @@
 <div class="tab_popup" id="related_order_partial" style="z-index:101 !important">
   <div class="popup_box">
-    <h1>相关<%= @order.return_types == Order::IS_RETURN[:YES] ? "退单" : "订单" %><a href="javascript:void(0)" class="close">关闭</a></h1>
+    <h1>相关订单<a href="javascript:void(0)" class="close">关闭</a></h1>
     <div class="popup_body">
       <div class="popup_body_area">
-        <% if @order.return_types != Order::IS_RETURN[:YES] %>
-          <div class="data_body_p">
-            <span>订单编号： <%= @order.code %></span>
-            <span>消费时间：<%= @order.created_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
-            <span>接待人员：<%= @order.front_s_name %></span>
-            <span>施工人员：
-              <% if @order.cons_s_name1 or @order.cons_s_name2 %>
-                <%= (@order.cons_s_name1 +  "、") if @order.cons_s_name1 %>
-                <%= @order.cons_s_name2 if @order.cons_s_name2 %>
-              <% else %>--
-              <% end %>
-            </span>
-          </div>
-        <%else%>
-          <div class="seeProDiv">
-            <div class="seeProDiv_l">退单号(原单号)：</div>
-            <div class="seeProDiv_r"><%=  @order.nil? ? "" : @order.code  %></div>
-          </div>
-          <div class="seeProDiv">
-            <div class="seeProDiv_l">接单人员：</div>
-            <div class="seeProDiv_r"><%= @order.front_s_name %></div>
-          </div>
-          <div class="seeProDiv">
-            <div class="seeProDiv_l">退单时间：</div>
-            <div class="seeProDiv_r"><%=(@order.nil? || @order.updated_at.nil?) ? "" : @order.updated_at.strftime("%Y-%m-%d") %></div>
-          </div>
-          <div class="seeProDiv">
-            <div class="seeProDiv_l">原消费时间：</div>
-            <div class="seeProDiv_r"><%=(@order.nil? || @order.created_at.nil?) ? "" : @order.created_at.strftime("%Y-%m-%d") %></div>
-          </div>
-        <% end %>
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
-          <thead>
-            <tr class="hbg">
-              <% if  @order.return_types == Order::IS_RETURN[:YES] %>
-                <td>退单状态</td><%end%>
-              <td>服务项目</td>
-              <td>数量</td>
-              <td>单价(元)</td>
-            </tr>
-          </thead>
-          <tbody>
-            <% @order_prods[@order.id].each do |v| %>
-              <tr>
-                <% if @order.return_types == Order::IS_RETURN[:YES] %>
-                  <td><input type="checkbox" disabled
-                             <%if v.return_types == Order::IS_RETURN[:YES] %>checked<% end  %> /></td>
-                  <% end %>
-                <td><%= v.name %></td>
-                <td><%= v.pro_num %></td>
-                <td><%= v.price %></td>
-              </tr>
-            <% end if @order_prods[@order.id] %>
-            <% if @sale %>
-              <tr>
-                <td colspan="3">
-                  参加活动：<%= @sale.name %>&nbsp;<%= Sale::DISC_TYPES_NAME[@sale.disc_types] %>&nbsp;
-                  <%= format("%.2f", @order_pay_types[OrderPayType::PAY_TYPES[:SALE]][0].total_price) if @order_pay_types and @order_pay_types[OrderPayType::PAY_TYPES[:SALE]] %>
-                </td>
-              </tr>
-            <% end %>
-            <% if @order_pay_types and @order_pay_types[OrderPayType::PAY_TYPES[:PACJAGE_CARD]] %>
-              <tr><td colspan="3">使用套餐卡<%= @order_pay_types[OrderPayType::PAY_TYPES[:PACJAGE_CARD]][0].total_num.to_i %>次</td></tr>
-            <% end %>
-            <% if @order_pay_types and @order_pay_types[OrderPayType::PAY_TYPES[:DISCOUNT_CARD]] %>
-              <tr><td colspan="3">使用打折卡优惠<%= format("%.2f", @order_pay_types[OrderPayType::PAY_TYPES[:DISCOUNT_CARD]][0].total_price) %>元</td></tr>
-            <% end %>
-          </tbody>
-        </table>
-        <% if @order.return_types == Order::IS_RETURN[:YES] %>
-          <div class="seeProDiv">
-            <div class="seeProDiv_l">退单原因：</div>
-            <div class="seeProDiv_r"><%=  Customer::RETURN_REASON[@order.return_reason] %></div>
-          </div>
-          <div class="seeProDiv">
-            <div class="seeProDiv_l">退单金额：</div>
-            <div class="seeProDiv_r"><%= @order.return_fee %></div>
-          </div>
-          <div class="seeProDiv">
-            <div class="seeProDiv_l">商品去向：</div>
-            <div class="seeProDiv_r"><%= Order::DIRECT[@order.return_direct]%></div>
-          </div
-          <div class="seeProDiv">
-            <div class="seeProDiv_l">操作员：</div>
-            <div class="seeProDiv_r"><%=@order.return_name%></div>
-          </div>
-        <% end %>
-        <div class="clear"></div>
-        <div class="otherWay">
-          <div class="amount">
-            总计(元)：<%= format("%.2f", @order.price) %>&nbsp;&nbsp;<% if @order.is_free %>(本次免单)<% end %>
-            <% if @order.status == Order::STATUS[:NORMAL] %>
-              <input value="取消订单" class="confirm_btn" onclick="handle_order(<%=@order.id  %>,'cancel')" type="button"  />
-            <% else  %>
-              <% work_order = @order.work_orders[0] %>
-              <% if  work_order && work_order.status == WorkOrder::STAT[:WAIT_PAY] %>
-                <input value="结束付款" class="confirm_btn" onclick="handle_order(<%=@order.id  %>,'complete_pay')" type="button"  />
-              <%elsif work_order && work_order.status == WorkOrder::STAT[:SERVICING] %>
-                <input value="结束施工" class="confirm_btn" onclick="handle_order(<%=@order.id  %>,'complete_work')" type="button"  />
-              <% end %>
-            <% end %>
+        <div class="data_item_list">
+          <div class="di_list_r" style="padding: 0 10px 0 15px;">
+            <div class="register">
+              <div class="orderGoods">
+                <ul>
+                  <li>
+                    <% if @order.status == Order::STATUS[:BEEN_PAYMENT] or @order.status == Order::STATUS[:FINISHED] %>
+                      付款方式：<%= @pay_types.blank? ? "--"  : @pay_types.map{|k,v|"#{OrderPayType::PAY_TYPES_NAME[k]}:#{v.to_f.round(2)}"}.join("&nbsp&nbsp&nbsp").html_safe%>
+                    <% else %>
+                      状态：<%= Order::STATUS_NAME[@order.status] %>
+                    <%end%>
+                  </li></ul>
+              </div>
+              <div class="merchant">
+                <ul>
+                  <li>单号：<%= @order.code %></li>
+                  <li><strong>开单时间：</strong><%=  @order.created_at.nil? ? "--" : @order.created_at.strftime("%Y-%m-%d %H:%M")%></li>
+                  <li>车牌：<%=  @order.c_num  %></li>
+                  <li><strong>接待员：</strong><%= @staffs[@order.front_staff_id] %></li>
+                  <li><strong>技师：</strong>
+                    <%if  @tech_orders[@order.id].nil?%>
+                      --
+                    <%else%>
+                      <%= @tech_orders[@order.id]%>
+                    <%end%>
+                  </li>
+                  <li><strong>工位：</strong><%= @order.s_name.nil? ? "--":@order.s_name %></li>
+                  <li><strong>客户姓名：</strong><%=  @order.c_name  %></li>
+                  <li><strong>手机号码：</strong><%= @order.phone %></li>
+                  <li><strong>单位：</strong><%= @order.group_name.nil? ? "--" : @order.group_name %></li>
+                </ul>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+                  <thead>
+                    <tr class="hbg">
+                      <td>项目</td>
+                      <td>数量</td>
+                      <td>单价</td>
+                      <td>优惠</td>
+                      <td>合计</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% loss = limit_float(@pay_types.blank? ? 0 : @pay_types.select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n}) %>
+                    <%  fact = limit_float(@order.price>loss ? @order.price-loss : 0)%>
+                    <%@order_prods[@order.id].each do |prod|%>
+                      <tr>
+                        <td><%= prod.name %></td>
+                        <td><%= prod.pro_num %></td>
+                        <td><%= limit_float(prod.price) %></td>
+                        <td><%=  loss  %></td>
+                        <td><%= fact %></td>
+                      </tr>
+                    <% end if @order_prods[@order.id] %>
+                  </tbody>
+                </table>
+                <div class="accounts">
+                  <ul>
+                    <li>总计：<%= fact %><% if @order.is_free  %>(<span style="color:#3333ff">本次免单</span>)
+                      <%elsif @order.return_types!= Order::IS_RETURN[:NO]%>(
+                        <span class="title_box">
+                          <a href="#"><%=Order::RETURN[@order.return_types]%></a>
+                          <%unless @return_orders.blank?%>
+                          <span class="title_txt">-------------退单详情------------
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+                              <thead>
+                                <tr class="hbg">
+                                  <td>退单方式</td>
+                                  <td>金额</td>
+                                  <td>数量</td>
+                                  <td>处理</td>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <%@return_orders.each do |r_order|%>
+                                  <tr>
+                                    <td><%= Order::REUTR_NAME[r_order.return_type]%></td>
+                                    <td><%= r_order.return_price.nil? ? "--" : r_order.return_price  %></td>
+                                    <td><%= r_order.pro_num.nil? ? "--" : r_order.pro_num %></td>
+                                    <td><%= r_order.return_direct.nil? ? "--" : Order::DIRECT[r_order.return_direct]  %></td>
+                                  </tr>
+                                <% end  %>
+                              </tbody>
+                            </table>
+                          </span>
+                        <% end %>
+                      </span>)<% end %>
+                    <% if @order.status == Order::STATUS[:BEEN_PAYMENT] or @order.status == Order::STATUS[:FINISHED] %>
+                      <% if @order_prods[@order.id] && @order.return_types == Order::IS_RETURN[:NO] %>
+                        <% if @order_prods[@order.id][0].item_types == 4  %>
+                          <input value="退单" class="confirm_btn" onclick="tishi_alert('<a href=\'/stores/<%=params[:store_id]%>/customers/<%=@order.customer_id%>\' target=\'_blank\'>请到储值卡收支记录退卡</a>');" type="button"  />
+                        <%elsif @order_prods[@order.id][0].item_types == 2  %>
+                          <input value="退单" class="confirm_btn" onclick="tishi_alert('<a href=\'/stores/<%=params[:store_id]%>/customers/<%=@order.customer_id%>\' target=\'_blank\'>请到套餐卡记录退卡</a>');" type="button"  />
+                          <a href="javascript:void(0)" onclick="tishi_alert('<a href=\'/stores/<%=params[:store_id]%>/customers/<%=@order.customer_id%>\' target=\'_blank\'>请到套餐卡记录退卡</a>');">退单</a>
+                        <%else%>
+                          <input value="退单" class="confirm_btn" onclick="return_order(<%= @order.id %>, <%= @order.customer_id %>)" type="button"  />
+                        <% end %>
+                      <% end %>
+                    <%else%>
+                      <% if @order.status == Order::STATUS[:NORMAL] or @order.status == Order::STATUS[:SERVICING] %>
+                        <input value="取消订单" class="confirm_btn" onclick="handle_order(<%=@order.id  %>,'cancel')" type="button"  />
+                      <%end%>
+                      <input value="去付款" class="confirm_btn" onclick="window.open('/stores/<%= @order.store_id%>/set_stores/cash_register','_blank')" type="button"  />
+                    <%end%>
+                    <% if  @order.w_status && @order.w_status == WorkOrder::STAT[:SERVICING] %>
+                      <input value="结束施工" class="confirm_btn" onclick="handle_order(<%=@order.id  %>,'complete_work')" type="button"  />
+                    <%end%>
+                    </li></ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+<div id="return_order" class="tab_popup"></div>

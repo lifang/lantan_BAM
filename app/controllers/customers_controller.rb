@@ -44,9 +44,15 @@ class CustomersController < ApplicationController
   end
 
   def destroy
-    @customer = Customer.find(params[:id].to_i)
-    @customer.update_attributes(:status => Customer::STATUS[:DELETED])
-    flash[:notice] = "删除成功。"
+    customer = Customer.find(params[:id].to_i)
+    hang_orders = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
+      :orders=>{:store_id=>params[:store_id],:customer_id=>customer.id}).count
+    if hang_orders > 1
+      flash[:notice] = "该客户有挂账未结清，删除失败。"
+    else
+      customer.update_attributes(:status => Customer::STATUS[:DELETED])
+      flash[:notice] = "删除成功。"
+    end
     redirect_to request.referer
   end
 
@@ -114,18 +120,24 @@ class CustomersController < ApplicationController
       customer = Customer.find(params[:id].to_i)
       mobile_c = Customer.where(:status=>Customer::STATUS[:NOMAL],:mobilephone=>params[:mobilephone].strip,
         :store_id=>params[:store_id].to_i).first
+      hang_orders = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
+        :orders=>{:store_id=>params[:store_id],:customer_id=>customer.id}).count
       if mobile_c and mobile_c.id != customer.id
         flash[:notice] = "手机号码#{params[:mobilephone].strip}在系统中已经存在。"
       else
-        customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
-          :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
-          :address => params[:address], :property => params[:edit_property].to_i,
-          :group_name => params[:edit_property].to_i==Customer::PROPERTY[:PERSONAL] ? nil : params[:edit_group_name].strip,
-          :allowed_debts => params[:edit_allowed_debts].to_i,:is_vip => params[:is_vip],
-          :debts_money => params[:edit_allowed_debts].to_i==Customer::ALLOWED_DEBTS[:NO] ? nil : params[:edit_debts_money].to_f,
-          :check_type => params[:edit_check_type].nil? ? nil : params[:edit_check_type].to_i,
-          :check_time => params[:edit_check_time_month].nil? ? (params[:edit_check_time_week].nil? ? nil : params[:edit_check_time_week].to_i) :  params[:edit_check_time_month].to_i)
-        flash[:notice] = "客户信息更新成功。"
+        if hang_orders > 1 and customer.allowed_debts == Customer::ALLOWED_DEBTS[:YES] and params[:edit_allowed_debts].to_i==Customer::ALLOWED_DEBTS[:NO]
+          flash[:notice] = "该客户有挂账未结清，更新失败。"
+        else
+          customer.update_attributes(:name => params[:new_name].strip, :mobilephone => params[:mobilephone].strip,
+            :other_way => params[:other_way].strip, :sex => params[:sex], :birthday => params[:birthday],
+            :address => params[:address], :property => params[:edit_property].to_i,
+            :group_name => params[:edit_property].to_i==Customer::PROPERTY[:PERSONAL] ? nil : params[:edit_group_name].strip,
+            :allowed_debts => params[:edit_allowed_debts].to_i,:is_vip => params[:is_vip],
+            :debts_money => params[:edit_allowed_debts].to_i==Customer::ALLOWED_DEBTS[:NO] ? nil : params[:edit_debts_money].to_f,
+            :check_type => params[:edit_check_type].nil? ? nil : params[:edit_check_type].to_i,
+            :check_time => params[:edit_check_time_month].nil? ? (params[:edit_check_time_week].nil? ? nil : params[:edit_check_time_week].to_i) :  params[:edit_check_time_month].to_i)
+          flash[:notice] = "客户信息更新成功。"
+        end
       end
     end
     redirect_to request.referer
@@ -141,20 +153,13 @@ class CustomersController < ApplicationController
   def single_send_message
     unless params[:content].strip.empty? or params[:m_customer_id].nil?
       MessageRecord.transaction do
-        message_record = MessageRecord.create(:store_id => params[:store_id].to_i, :content => params[:content].strip,
-          :status => MessageRecord::STATUS[:SENDED], :send_at => Time.now)
         customer = Customer.find(params[:m_customer_id].to_i)
         content = params[:content].strip.gsub("%name%", customer.name).gsub(" ", "")
-        SendMessage.create(:message_record_id => message_record.id, :customer_id => customer.id,
-          :content => content, :phone => customer.mobilephone,
-          :send_at => Time.now, :status => MessageRecord::STATUS[:SENDED])
-        begin
-          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{customer.mobilephone}&Content=#{URI.escape(content)}&Exno=0"
-          create_get_http(Constant::MESSAGE_URL, message_route)
-        rescue
-          flash[:notice] = "短信通道忙碌，请稍后重试。"
-        end
-        flash[:notice] = "短信发送成功。"
+        #        begin
+        flash[:notice] = message_data(params[:store_id],content,customer,nil,MessageRecord::M_TYPES[:SINGLE_MSG])
+        #        rescue
+        #          flash[:notice] = "短信通道忙碌，请稍后重试。"
+        #        end
       end
     end
     redirect_to request.referer
@@ -177,6 +182,9 @@ class CustomersController < ApplicationController
     @revisits = Revisit.one_customer_revists(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, 1)
     comp_page = params[:comp_page] ? params[:comp_page] : 1
     @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, Constant::PER_PAGE, comp_page)
+    @tech_orders = {}
+    TechOrder.joins(:staff).where(:order_id=>@complaints.map(&:o_id)).select("staffs.name s_name,order_id").
+      group_by{|i|i.order_id}.each{|k,v| @tech_orders[k] = v.map(&:s_name).join("、");}
     svc_card_records_method(@customer.id)  #储值卡记录
     p_card = @customer.pcard_records(params[:store_id])
     @c_pcard_relations = p_card[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if p_card[1] #套餐卡记录
@@ -221,6 +229,9 @@ class CustomersController < ApplicationController
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
     @complaints = Complaint.one_customer_complaint(params[:store_id].to_i, @customer.id, 10, params[:page])
+    @tech_orders = {}
+    TechOrder.joins(:staff).where(:order_id=>@complaints.map(&:o_id)).select("staffs.name s_name,order_id").
+      group_by{|i|i.order_id}.each{|k,v| @tech_orders[k] = v.map(&:s_name).join("、");}
     respond_to do |format|
       format.js
     end
@@ -299,48 +310,142 @@ class CustomersController < ApplicationController
   end
 
   def return_order
-    @order = Order.find(params[:o_id])
-    @product_hash = OrderProdRelation.s_order_products(@order.id)
-    @staffs = Staff.find([@order.try(:front_staff_id),@order.try(:cons_staff_id_1),@order.try(:cons_staff_id_2)]).inject(Hash.new){
-      |hash,staff| hash[staff.id] = staff.name;hash
-    }
+    @order = Order.joins(:customer).joins("left join work_orders w on w.order_id=orders.id left join stations s on s.id=w.station_id
+    left join car_nums c on c.id=orders.car_num_id").select("orders.*,s.name s_name,c.num c_num,customers.name c_name,
+    customers.mobilephone phone,customers.group_name").where(:orders=>{:id=>params[:o_id]}).first
+    @pay_types = OrderPayType.search_pay_types(params[:o_id])
+    @order_prods = OrderProdRelation.order_products(params[:o_id])
+    @tech_orders = TechOrder.where(:order_id=>params[:o_id]).group_by{|i|i.order_id}
+    staff_ids = ([@order.front_staff_id]|@tech_orders.values.flatten.map(&:staff_id)).compact.uniq
+    staff_ids.delete 0
+    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @tech_orders.each{|order_id,tech_orders| @tech_orders[order_id] = tech_orders.map{|tech|@staffs[tech.staff_id]}.join("、")}
   end
 
   def operate_order
-    params[:types].split(",").each {|types|
-      params[:"#{types}"].split(",").each do |type_id|
-        m_model = types.split("#")
-        model_name =  m_model[1] == "service" ? "product" : m_model[1]
-        eval(m_model[0].split(".")[0].split("_").inject(String.new){|str,name| str + name.capitalize}).where({:order_id=>params[:order_id],
-            :"#{model_name}_id"=> type_id}).first.update_attributes(:return_types=>Order::IS_RETURN[:YES])
-      end }
     order = Order.find(params[:order_id])
-    order.update_attributes(:return_reason=>params[:reason],:return_types=>Order::IS_RETURN[:YES],:price => (order.price.nil? ? 0 : order.price) - params[:account].to_f,
-      :return_fee => params[:account].to_f,:return_direct => params[:direct],:return_staff_id =>cookies[:user_id])
-    materials = {}
-    if  params[:types].index("product")
-      prod_nums = OrderProdRelation.where("order_id= #{order.id} and product_id in (#{params[:"order_prod_relation#product"]})").inject(Hash.new) {|hash,prod|
-        hash[prod.product_id] = prod.pro_num;hash
-      }
-      ProdMatRelation.where("product_id in (#{params[:"order_prod_relation#product"]})").each{|mat|
-        materials[mat.material_id].nil? ?  materials[mat.material_id] = mat.material_num*prod_nums[mat.product_id] : materials[mat.material_id] += mat.material_num*prod_nums[mat.product_id]
-      }
+    msg = "#{order.code}退单成功"
+    over = true
+    begin
+      Order.transaction do
+        customer = Customer.find order.customer_id
+        order_parm = {:return_reason=>params[:reason],:return_staff_id =>cookies[:user_id]}
+        return_parm = {:order_id=>order.id,:order_code=>order.code,:abled_price=>params[:return_fee],
+          :pro_types=>params[:item_types],:store_id=>order.store_id}
+        if params[:item_types].to_i == 0
+          order_parm.merge!(:return_direct => params[:direct])
+          return_parm.merge!(:pro_num=>params[:return_num],:return_direct => params[:direct])
+          if params[:direct].to_i == Order::O_RETURN[:REUSE]  #增加物料
+            order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
+            unless order_products.empty?  #如果是产品,则减掉要加回来
+              materials = Material.find_by_sql(["select m.id, pmr.product_id from materials m inner join prod_mat_relations pmr
+                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
+                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
+              materials.each do |m|
+                mat = Material.find(m.id)
+                mat.update_attributes(:storage =>mat.storage + params[:return_num].to_i)
+              end unless materials.blank?
+            end
+          else
+            material_id = ProdMatRelation.find(params[:product_id]).material_id
+            MaterialLoss.create(:loss_num =>params[:return_num],:staff_id => cookies[:user_id],
+              :store_id=>order.store_id,:material_id => material_id,:remark=>"退单报损")
+          end
+        end
+        return_types = Order::IS_RETURN[:YES]
+        if (params[:item_types].to_i == 0 or params[:item_types].to_i == 1) and  params[:max_num].to_i != params[:return_num].to_i
+          return_types = Order::IS_RETURN[:PART]
+        end
+        order_parm.merge!(:return_types=>return_types)
+        if  params[:fact_type]
+          store = Store.find order.store_id
+          message = "#{customer.name},您好，您在#{store.name}办理的退单，"
+          if params[:fact_type].to_i == 1
+            reutrn_fee = 0
+            if params[:sv_fee] #0 是储值卡  所写金额要退回到客户卡中，不过是匹配到的第一张卡
+              ReturnOrder.create(return_parm.merge(:return_type=>0,:return_price=>params[:sv_fee]))
+              reutrn_fee += params[:sv_fee].to_i
+              sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:"sv_cards.types"=>SvCard::FAVOR[:SAVE],
+                :customer_id=>order.customer_id,:"c_svc_relations.status"=>CSvcRelation::STATUS[:valid]).
+                select("c_svc_relations.*,svcard_prod_relations.category_id c_id")
+              category_id = Product.find(order.order_prod_relations[0].product_id).category_id
+              c_svc_relation_id = nil
+              sv_cards.each do |sv_card|
+                if sv_card.c_id && sv_card.c_id.split(",").include?("#{category_id}")
+                  c_svc_relation_id = sv_card.id
+                  break
+                end
+              end  unless sv_cards.blank?
+              if c_svc_relation_id.nil?   #如果查询不到合适的购买记录从而提示信息
+                msg = "未查询到可退储值卡"
+                over = false
+              else
+                customer_savecard = CSvcRelation.find(c_svc_relation_id)
+                sv_card = SvCard.find customer_savecard.sv_card_id
+                SvcardUseRecord.create(:c_svc_relation_id =>c_svc_relation_id, :types => SvcardUseRecord::TYPES[:IN],
+                  :use_price => params[:sv_fee], :left_price => customer_savecard.left_price + params[:sv_fee].to_i,:content => "退单退费")
+                customer_savecard.update_attribute("left_price", customer_savecard.left_price + params[:sv_fee].to_i)
+                message += "已退#{params[:sv_fee].to_i}元到储值卡#{sv_card.name}中，当前余额为#{customer_savecard.left_price}元。"
+                message_data(order.store_id,message,customer,nil,MessageRecord::M_TYPES[:BACK_SV])
+              end
+            end
+            if params[:cash_fee] #1 是现金
+              ReturnOrder.create(return_parm.merge(:return_type=>1,:return_price=>params[:cash_fee]))
+              reutrn_fee += params[:cash_fee].to_i
+            end
+            order_parm.merge!(:return_fee =>reutrn_fee)
+          end
+          if params[:fact_type].to_i == 0  #退回套餐卡次数
+            ReturnOrder.create(return_parm.merge(:return_type=>2)) #2 套餐卡
+            oprs = OPcardRelation.find_all_by_order_id(order.id)
+            oprs.each do |opr|
+              cpr = CPcardRelation.find_by_id(opr.c_pcard_relation_id)
+              package_card = PackageCard.find(cpr.package_card_id)
+              product = Product.find(opr.product_id)
+              if cpr
+                pns = cpr.content.split(",").map{|pn| pn.split("-")}
+                pns.each do |pn|
+                  pn[2] = pn[2].to_i + params[:return_num].to_i if pn[0].to_i == opr.product_id
+                end
+                cpr.update_attributes({:content=>pns.map{|pn| pn.join("-")}.join(","),:status=>CPcardRelation::STATUS[:NORMAL]})
+                message += "已退产品/服务#{product.name}到套餐卡#{package_card.name}中,数量为#{params[:return_num]}。卡内剩余次数为："
+                message += pns.map{|pn| "#{pn[1]}#{pn[2]}次"}.join(",")+"。"
+                message_data(order.store_id,message,customer,nil,MessageRecord::M_TYPES[:BACK_PCARD])
+              end
+            end unless oprs.blank?
+          end
+
+          if params[:fact_type].to_i == 2
+            if params[:item_types].to_i == 2  #套餐卡
+              order.c_pcard_relations.update_all(:status=>CPcardRelation::STATUS[:INVALID])
+              package_cards = PackageCard.find(order.c_pcard_relations.map(&:package_card_id))
+              message += "套餐卡#{package_cards.map(&:name).join(',')}已办理退卡，欢迎选购其他卡类。"
+              message_data(order.store_id,message,customer,nil,MessageRecord::M_TYPES[:RETURN_PCARD])
+            end
+            if params[:item_types].to_i == 3 or  params[:item_types].to_i == 4 #打折卡和储值卡
+              order.c_svc_relations.update_all(:status=>CSvcRelation::STATUS[:invalid])
+              if params[:item_types].to_i == 4
+                c_svc_relations = SvCard.find(order.c_svc_relations.map(&:sv_card_id))
+                message += "储值卡#{c_svc_relations.map(&:name).join(',')}已办理退卡，欢迎选购其他卡类。"
+                message_data(order.store_id,message,customer,nil,MessageRecord::M_TYPES[:RETURN_SV])
+              end
+            end
+            order_parm.merge!(:return_fee =>params[:cash_fee])
+            ReturnOrder.create(return_parm.merge(:return_type=>1,:return_price=>params[:cash_fee])) #1 现金
+          end
+        end
+        if over
+          order.update_attributes(order_parm)
+          work_order = order.work_orders[0]
+          if work_order && WorkOrder::NO_END.include?(work_order.status)
+            work_order.update_attributes(:status=>WorkOrder::STAT[:CANCELED])
+          end
+        end
+      end
+    rescue
+      msg = "#{order.code}退单失败"
     end
-    if  params[:types].index("package_card")
-      PcardMaterialRelation.where("package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each{|mat|
-        materials[mat.material_id].nil? ?  materials[mat.material_id] = mat.material_num : materials[mat.material_id] += mat.material_num
-      }
-      CPcardRelation.where("order_id = #{params[:order_id]} and package_card_id in (#{params[:"c_pcard_relation#package_card"]})").each {|card| card.update_attributes(:status=>PackageCard::STAT[:INVALID])}
-    end
-    if   params[:types].index("sv_card")
-      CSvcRelation.where("order_id = #{params[:order_id]} and sv_card_id in (#{params[:"c_svc_relation#sv_card"]})").each {|card| card.update_attributes(:status=>CSvcRelation::STATUS[:invalid])}
-    end
-    if params[:direct].to_i == Order::O_RETURN[:REUSE]
-      Material.find(materials.keys).each {|mat| mat.update_attributes(:storage => mat.storage+ materials[mat.id])}
-    else
-      materials.each {|k,v|MaterialLoss.create(:loss_num=>v,:staff_id => cookies[:user_id],:store_id=>order.store_id,:material_id => k)}
-    end
-    render :json =>{:msg=>order.code}
+    render :json =>{:msg=>msg}
   end
 
   def add_car_get_datas #添加车辆 查找
@@ -384,9 +489,9 @@ class CustomersController < ApplicationController
   
   def svc_card_records_method(customer_id)
     #储值卡记录
-    @svcard_records = SvcardUseRecord.paginate_by_sql(["select sur.*,sc.name sc_name  from svcard_use_records sur
+    @svcard_records = SvcardUseRecord.paginate_by_sql(["select sur.*,sc.name sc_name,csr.order_id  from svcard_use_records sur
       inner join c_svc_relations csr on csr.id = sur.c_svc_relation_id inner join sv_cards sc on csr.sv_card_id = sc.id
-    where csr.customer_id = ? and csr.status = 1 order by sur.created_at desc", customer_id], :page => params[:page],
+    where csr.customer_id = ? and csr.status = 1 order by sur.c_svc_relation_id,sur.created_at asc", customer_id], :page => params[:page],
       :per_page => Constant::PER_PAGE)
     @srs = @svcard_records.group_by{|sr|sr.c_svc_relation_id} if @svcard_records
   end

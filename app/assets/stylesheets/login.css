@@ -49,7 +49,7 @@ button { font-family:"微软雅黑"; cursor: pointer; border: none;}
 	color: #930205;
 }
 .losePassWord_list input {
-	width: 220px; 
+	width: 120px;
 	height: 24px; 
 	line-height: 24px; 
 	border: 1px #CCCCCC solid;	

@@ -19,7 +19,7 @@
                   <option value="<%= key %>" <%if params[:prod_types] == key%> selected<%end%> ><%= value %></option>
                 <% end unless @cates.empty?%>
               </select></div>
-            <div style="float:right;"><button class="search_btn" onclick="analysis_price(this,<%=params[:store_id]%>)">查 &nbsp&nbsp&nbsp&nbsp询</button></div>
+            <div style="float:right;"><button class="search_btn" onclick="analysis_price(this,<%=params[:store_id]%>)">查&nbsp&nbsp询</button></div>
           </div>
           <div class="data_item" id="prod_service">
             <%=  render "prod_service"%>

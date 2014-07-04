@@ -42,7 +42,7 @@ textarea {
 
 
 /*tab提示*/
-.tab_popup.tab_alert { width: 500px;}
+.tab_popup.tab_alert { width: 500px; }
 .alert_h { width: 400px; margin: 20px auto; line-height: 24px; font-size: 16px; color:#930205; text-align: center;}
 /*协议*/
 .agreement_text { width: 600px; height: 400px; margin: 0 auto; overflow-y: auto; font-size: 12px;}
@@ -850,7 +850,6 @@ a.compile_btn { width: 100px;}
 .group_x {
     width: 13px;
     height: 13px;
-    display: block;
     background: url(/assets/x.png) no-repeat;
     text-indent: -999px;
     overflow: hidden;
@@ -859,6 +858,7 @@ a.compile_btn { width: 100px;}
     right: -13px;
     display: none;
 }
+
 
 .group_func {
     display: none;
@@ -1036,7 +1036,7 @@ a.compile_btn { width: 100px;}
 .item input[type="text"].input_sss, .input_sss { width: 60px;}
 .input_s80 { width: 80px;}
 
-.item_rbox { padding: 10px; border: 1px #CCCCCC solid; overflow: auto; height: 150px;}
+.item_rbox { padding: 10px; border: 1px #CCCCCC solid; overflow: auto; height: 250px;}
 .item_rbox dl { margin-bottom: 10px; overflow: hidden;}
 .item_rbox dt { color:#930205; line-height: 24px;}
 .item_rbox dd { display: inline-block; margin: 5px; background: #ededed; padding: 5px;}
@@ -1436,5 +1436,68 @@ a.compile_btn { width: 100px;}
     background: #930205;
 }
 .help_tit { color: #f2f2f2; font-size: 16px; width: 16px; font-weight: bold; text-shadow: 0 0 3px rgba(0,0,0,0.7); float: left;}
-.help ul { display: none; float: left; margin-left: 10px; width: 250px; background: #f2f2f2; padding: 3px 6px; border-radius: 3px;}
+.help ul { top: 120px; display: none; float: left; margin-left: 10px; width: 250px; background: #f2f2f2; padding: 3px 6px; border-radius: 3px;}
 .help li p { line-height: 20px; color: #3c3c3c; text-indent: 14px;}
+.help li a { display: block; line-height: 20px; color: #44f; text-indent: 14px; text-decoration: underline;}
+
+.rollingNews { position: relative; width: 475px; height: 32px; margin: 10px auto; overflow: hidden; text-align: center; background: #c9383b; color: #fff;}
+.rollingNews ul { position: absolute; width: 100%;}
+.rollingNews li {
+    padding: 4px 10px;
+    line-height: 24px;
+    height: 24px;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#930205), to(#c9383b));
+    background: -moz-linear-gradient(top, #930205,#c9383b);
+    background: -ms-linear-gradient(top,  #930205 0%,#c9383b 100%);
+    background: linear-gradient(top,  #930205 0%,#c9383b 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#930205",endColorstr="#c9383b",GradientType=0);
+}
+.rollingNews li .newIcon { float: left; background: url(/assets/rollingNews.png) no-repeat; width: 24px; height: 24px; background-size: 24px 24px; padding-right: 10px;}
+.weixin{
+    width: 130px;
+    height: 100px;
+    overflow: hidden;
+    float: left;
+    padding-left: 30px;
+    color: #FFF;
+}
+
+/* 气泡提示框*/
+.title_box { position:relative; padding: 5px;}
+.title_txt {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    line-height: 20px;
+    padding: 5px;
+    position: absolute;
+    bottom: 25px;
+    right: 0;
+    display: none;
+    width: 240px;
+    text-indent: 20px;
+    background: #eee;
+}
+.title_box:hover .title_txt { display: block;}
+
+.red_li { background: url(/assets/red.png) no-repeat;}
+.green_li { background: url(/assets/green.png) no-repeat;}
+
+/*消费信息详情*/
+.two_table_area { margin: 10px 20px; overflow: hidden; border-bottom: 1px dashed #333;}
+.table_div { width: 450px; float: left; margin: 5px 15px; position: relative;}
+.table_head { width: 100%; border: 1px solid #9c9c9c; padding: 0 39px; color: #9c9c9c; line-height: 28px; position: absolute; background: #f0f4f7; }
+.table_main { width: 370px; margin: 5px 40px; line-height: 28px; border-collapse: collapse;}
+.table_main tbody {}
+.table_main td { text-align: center; border-bottom: 1px solid #333;}
+.table_head th:first-child,.table_main td:first-child { text-align: left;}
+.table_head th:last-child,.table_main td:last-child { text-align: right;}
+
+/* 充值*/
+.info_box { padding: 10px 80px 10px 120px; background: url(/assets/info-blue.png) no-repeat 50px 5px; background-size: 50px 50px;}
+.info_box p { line-height: 24px; margin: 5px;}
+.info_box p.title { line-height: 24px; font-size: 18px; font-weight: bold;}
+

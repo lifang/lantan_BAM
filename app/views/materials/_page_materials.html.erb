@@ -88,7 +88,7 @@
             <% else %>
               <% if permission?(:materials, :ignore) %><%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %><% end %>
             <% end %>
-            <% if permission?(:materials, :check) %><%= link_to_function "快速出入库","check_material_num(#{material.id},#{@current_store.id}, this, '')" %><% end %>
+            <% if permission?(:materials, :check) %><%= link_to_function "快速入库","check_material_num(#{material.id},#{@current_store.id}, this, '')" %><% end %>
           </td>
         </tr>
       <% end %>
@@ -149,7 +149,7 @@
             <% else %>
               <% if permission?(:materials, :ignore) %><%= link_to_function "忽略","set_ignore(#{material.id},#{@current_store.id},this)" %><% end %>
             <% end %>
-            <% if permission?(:materials, :check) %><%= link_to_function "快速出入库","check_material_num(#{material.id},#{@current_store.id}, this, '')" %><% end %>
+            <% if permission?(:materials, :check) %><%= link_to_function "快速入库","check_material_num(#{material.id},#{@current_store.id}, this, '')" %><% end %>
           </td>
         </tr>
       <% end %>

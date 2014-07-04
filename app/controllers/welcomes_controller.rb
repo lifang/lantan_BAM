@@ -8,6 +8,9 @@ class WelcomesController < ApplicationController
     @staff = Staff.find_by_id(cookies[:user_id])
     cookies[:store_name] = {:value => store.name, :path => "/", :secure => false} if store
     #cookies[:store_id] = {:value => store.id, :path => "/", :secure => false} if store
+    @warns = warn_account(0.8,5,0)
+    @show_index = Log.where(:show_index=>Log::SHOW_INDEX[:YES],:status=>Log::STATUS[:NOMARL]).first
+    @roll_news = Log.where(:roll=>Log::ROLL[:YES],:status=>Log::STATUS[:NOMARL],:store_types=>[0,store.id]).order("store_types desc")
     render :index, :layout => false
   end
 
@@ -49,6 +52,10 @@ class WelcomesController < ApplicationController
     else
       @notice = "请输入正确的旧密码！"
     end
+  end
+
+  def info_detail
+    @log = Log.find(params[:log_id])
   end
 
 end

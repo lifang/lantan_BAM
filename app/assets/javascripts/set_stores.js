@@ -488,9 +488,9 @@ function edit_id_svcard(store_id,card_id){
     var url = "/stores/"+store_id+"/set_stores/edit_svcard";
     var number = $("#id_card").val();
     var pattern = new RegExp("[0-9]")
-    if(number =="" || number.length <4 || !pattern.test(number)){
+    if(number =="" || number.length <7 || !pattern.test(number)){
         $(".tab_alert").css("z-index",121);
-        tishi_alert("卡号至少为四位数字");
+        tishi_alert("卡号至少为八位数字");
         return false;
     }else{
         $.ajax({
@@ -753,7 +753,7 @@ function submit_item(store_id){
                     data["customer"]["group_name"]= c_group;
                 }
                 for(var i=0; i< items.length;i++){
-                    if (parseInt(items[i].split("_")[1])==1 && (c_number == "" || c_number.length == 0)){
+                    if ((parseInt(items[i].split("_")[1])==1 ||  parseInt(items[i].split("_")[1])==2)  &&  (c_number == "" || c_number.length != 11)){
                         check_phone = true;
                     }
                     sub_items[items[i]] = $("#table_item #"+items[i] +" :text").val();

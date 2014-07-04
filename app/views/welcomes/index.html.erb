@@ -15,8 +15,9 @@
 
   <body>
     <div class="head">
+      <div class="weixin"><img src="/assets/qrcode.png" style="width:100px;height:100px;" /></div>
       <div class="box position_re">
-        <div class="logo1"><span>V2.3.1</span></div>
+        <div class="logo1"><span>V2.3.3</span></div>
         <div class="login">你好：<%= cookies[:user_name] %> | <a href="javascript:void(0)" id="edit_password">修改密码</a> | <a href="/logout">退出</a></div>
         <div class="name">
           <span style="display:none;"><input name="" type="text" class="nameInput" onblur="edit_store_name(this, <%= params[:store_id] %>)"/></span>
@@ -24,13 +25,20 @@
         </div>
       </div>
     </div>
+    <div class="rollingNews">
+      <ul currentNum="1">
+        <%@roll_news.each do |roll|%>
+          <li onclick="info_detail(<%= roll.id %>,<%= params[:store_id] %>)"><span class="newIcon"></span><%= roll.title %></li>
+        <%end%>
+      </ul>
+    </div>
     <div class="main">
       <div class="module">
         <ul>
           <% if permissions_on_menus?(:stations)%><li><a href="/stores/<%= params[:store_id] %>/stations" class="m_one">现场管理</a></li><% end %>
           <% if permissions_on_menus?(:customers)%><li><a href="/stores/<%= params[:store_id] %>/customers" class="m_two">客户管理</a>
               <% if (@complaints.length + @notices.length) > 0 %><a href="/stores/<%= params[:store_id] %>/customers" class="message" title="投诉和通知信息<%=(@complaints.length + @notices.length)%>条"><%= @complaints.length + @notices.length %></a><% end %>
-              <% if @send_msg.length  > 0 %><a href="/stores/<%=params[:store_id]%>/revisits" class="message" style="right: 30px;" title="回访和提醒信息<%=@send_msg.length%>条"><%= @send_msg.length %></a><% end %></li><% end %>
+              <% if @send_msg.length  > 0 %><a href="/stores/<%=params[:store_id]%>/revisits" class="message" style="right: 30px;" title="回访和提醒信息<%=  @send_msg.length%>条"><%= @send_msg.length %></a><% end %></li><% end %>
             <% if permissions_on_menus?(:materials)%>
             <li>
               <a href="/stores/<%= params[:store_id] %>/materials" class="m_three">库存管理</a>
@@ -50,9 +58,8 @@
           <% end %>
           <% if permissions_on_menus?(:base_datas) %>
             <li><a href="/stores/<%= params[:store_id] %>/finance_reports"  class="m_nine">财务管理</a>
-              <% warns = warn_account(0.8,5,0) %>
-              <% if warns > 0 %><a href="/stores/<%=params[:store_id]%>/finance_reports/pay_account" class="message"
-                   style="right: 30px;" title="挂账客户提醒<%= warns%>条"><%= warns %></a><% end %>
+              <% if @warns > 0 %><a href="/stores/<%=params[:store_id]%>/finance_reports/pay_account" class="message"
+                   style="right: 30px;" title="挂账客户提醒<%= @warns%>条"><%= @warns %></a><% end %>
             </li>
           <% end %>
         </ul>
@@ -64,7 +71,7 @@
 
     <!--修改账户密码-->
     <div class="mask"></div>
-    <div class="tab_popup" style="display:none;z-index:10;" id="edit_password_area">
+    <div class="tab_popup" style="display:none;z-index:11;" id="edit_password_area">
       <div class="popup_box">
         <h1>修改密码<a href="javascript:void(0)" class="close">关闭</a></h1>
         <div class="popup_body">
@@ -83,40 +90,65 @@
         </div>
       </div>
     </div>
+    <div class="mask"></div>
+    <div class="tab_popup" style="display:none;" id="update_info">
+    </div>
     <!--浮动QQ客服代码开始 -->
     <div class="online_qq">
       <div></div>
       <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=294220952&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:2568830556:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
-      <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=910189861&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:1942918740:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
-      <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=603252795&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:2822148527:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
+      <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=15990196687&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:1942918740:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
+      <p><a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=15990196687&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:1942918740:41" alt="点击这里给我发消息" title="点击这里给我发消息"/></a></p>
     </div>
     <!--浮动QQ客服代码结束-->
-
     <div class="help">
       <p class="help_tit">系统更新小贴士</p>
-      <ul>
-        <li><p>1.增加后台业务开单</p></li>
-        <li><p>2.财务管理新增其他收入</p></li>
-        <li><p>3.往来管理新增挂账提醒</p></li>
-        <li><p>4.车牌限制7位，可以使用“无牌”作为车牌</p></li>
-        <li><p>5.供应商增加搜索功能</p></li>
-        <li><p>6.技师提成的调整：pad端可以修改工位技师，后台已收款可以调整每个技师的提成。</p></li>
-        <li><p>7.营销管理中图片上传限制为200kb,提高上传速度</p></li>
-        <li><p>8.收银新增支持三联打印功能</p></li>
-        <li><p>9.工位可以绑定需要施工的产品</p></li>
-      </ul>
+      <% if @show_index %>
+        <ul>
+          <li><a href="javascript:void(0)" onclick="info_detail(<%= @show_index.id %>,<%= params[:store_id] %>)"><%= @show_index.title %></a></li>
+          <li><p><%= @show_index.content.html_safe %></p></li>
+        </ul>
+      <% end %>
     </div>
+
     <script type="text/javascript">
       $(function(){
-        $('.help').click(function(){
-          $(this).toggleClass("hover");
-          if($(this).hasClass("hover")){
-            $(this).find("ul").show(300);
-          }else{
-            $(this).find("ul").hide(300);
-          }
+        /* 帮助hlep */
+        function helpshow(){
+          $(".help ul").show(500);
+        }
+        function helphide(){
+          $(".help ul").hide(500);
+        }
+        var showtimer;
+        $(".help").mouseenter(function(){
+          clearTimeout(showtimer);
+          helpshow();
+        })
+        $(".help").mouseleave(function(){
+          showtimer=setTimeout(helphide(),500);
         })
       })
+
+      /* 首页滚动新闻 */
+      $(function(){
+        //单行应用@Mr.Think
+        var _wrap =$('.rollingNews ul');//定义滚动区域
+        var _interval=3000;//定义滚动间隙时间
+        var _moving;//需要清除的动画
+        _wrap.hover(function(){
+          clearInterval(_moving);//当鼠标在滚动区域中时,停止滚动
+        },function(){
+          _moving=setInterval(function(){
+            var _field=_wrap.find('li:first');//此变量不可放置于函数起始处,li:first取值是变化的
+            var _h=_field.height();//取得每次滚动高度
+
+            _field.animate({marginTop:-_h+'px'},600,function(){//通过取负margin值,隐藏第一行
+              _field.css('marginTop',0).appendTo(_wrap);//隐藏后,将该行的margin值置零,并插入到最后,实现无缝滚动
+            })
+          },_interval)//滚动间隔时间取决于_interval
+        }).trigger('mouseleave');//函数载入时,模拟执行mouseleave,即自动滚动
+      });
     </script>
   </body>
 </html>

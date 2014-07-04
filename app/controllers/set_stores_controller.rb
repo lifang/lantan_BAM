@@ -68,6 +68,7 @@ class SetStoresController < ApplicationController
     staff_ids = (@orders.map(&:front_staff_id)|@tech_orders.values.flatten.map(&:staff_id)).compact.uniq
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @tech_orders.each{|order_id,tech_orders| @tech_orders[order_id] = tech_orders.map{|tech|@staffs[tech.staff_id]}.join("、")}
     @stations = Station.find(@orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
   end
 
@@ -78,9 +79,11 @@ class SetStoresController < ApplicationController
     @order_prods = OrderProdRelation.order_products(orders.map(&:id))
     @orders = orders.group_by{|i|{:c_name=>i.c_name,:c_num=>i.c_num,:tel=>i.mobilephone,:g_name=>i.group_name,:c_id=>i.c_id,:n_id=>i.n_id} }
     @order_pays = OrderPayType.search_pay_order(orders.map(&:id))
-    staff_ids = (orders.map(&:cons_staff_id_1)|orders.map(&:cons_staff_id_2)|orders.map(&:front_staff_id)).compact.uniq
+    @techs = TechOrder.where(:order_id=>orders.map(&:id)).group_by{|i|i.order_id}
+    staff_ids = (@techs.values.flatten.map(&:staff_id)|orders.map(&:front_staff_id)).compact.uniq
     staff_ids.delete 0  #莫名其妙多出来staff_id为0的数据 没找到原因  目前只能排除掉
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @techs.each{|order_id,tech_orders| @techs[order_id] = tech_orders.map{|tech|@staffs[tech.staff_id]}.join("、")}
     @stations = Station.find(orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
   end
 
@@ -119,7 +122,7 @@ class SetStoresController < ApplicationController
   end
 
   def pay_order
-    @may_pay = OrderPayType.deal_order(request.parameters)
+    @may_pay = deal_order(request.parameters)
     about_cash(params[:store_id])  if @may_pay[0]
   end
 
@@ -128,14 +131,14 @@ class SetStoresController < ApplicationController
     @customer = Customer.find params[:c_id]
     @car_num = CarNum.find params[:n_id]
     @orders = Order.where(:id=>params[:o_id].split(',').compact.uniq)
-    staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
+    @tech_orders = TechOrder.where(:order_id=>params[:o_id].split(',').compact.uniq)
+    staff_ids = ([@orders.map(&:front_staff_id)]|@tech_orders.map(&:staff_id)).compact.uniq
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
     @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
-    if @order_pays.keys.include? OrderPayType::PAY_TYPES[:CASH]
-      @cash_pay =OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
-    end
+    @cash_pay = OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
+    @favour_notices = OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:FAVOUR])
   end
 
   def single_print
@@ -144,11 +147,13 @@ class SetStoresController < ApplicationController
     order = @orders.first
     @customer = Customer.find order.customer_id
     @car_num = CarNum.find order.car_num_id
-    staff_ids = [order.cons_staff_id_1,order.cons_staff_id_2,order.front_staff_id].compact.uniq
+    staff_ids = ([order.front_staff_id]|@orders.tech_orders.map(&:staff_id)).compact.uniq
     staff_ids.delete 0
     @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(order.id)
     @order_pays = OrderPayType.search_pay_types(order.id)
+    @cash_pay = OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
+    @favour_notices = OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:FAVOUR])
   end
 
   def three_line_print
@@ -311,48 +316,48 @@ class SetStoresController < ApplicationController
   end
 
   def submit_item
-    #    begin
-    Order.transaction do
-      store_id = chain_store(params[:store_id])
-      @num = params[:car_num]
-      @customer = search_customer(@num,store_id)
-      car_num = CarNum.where(:num =>@num).first
-      if @customer.nil?
-        if car_num.nil?
-          car_num = CarNum.create(:num=>@num)
-        end
-        if @customer
-          @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
-        else
-          property = Customer::PROPERTY[:PERSONAL]
-          if params[:customer][:group_name]
-            property = Customer::PROPERTY[:GROUP]
+    begin
+      Order.transaction do
+        store_id = chain_store(params[:store_id])
+        @num = params[:car_num]
+        @customer = search_customer(@num,store_id)
+        car_num = CarNum.where(:num =>@num).first
+        if @customer.nil?
+          if car_num.nil?
+            car_num = CarNum.create(:num=>@num)
           end
-          @customer = Customer.new(params[:customer].merge({ :property => property,
-                :status => Customer::STATUS[:NOMAL], :allowed_debts => Customer::ALLOWED_DEBTS[:NO],:store_id=>params[:store_id]}))
-          @customer.save
-          @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
+          if @customer
+            @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
+          else
+            property = Customer::PROPERTY[:PERSONAL]
+            if params[:customer][:group_name]
+              property = Customer::PROPERTY[:GROUP]
+            end
+            @customer = Customer.new(params[:customer].merge({ :property => property,
+                  :status => Customer::STATUS[:NOMAL], :allowed_debts => Customer::ALLOWED_DEBTS[:NO],:store_id=>params[:store_id]}))
+            @customer.save
+            @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
+          end
+        else
+          Customer.find(@customer.id).update_attributes(params[:customer])
         end
-      else
-        Customer.find(@customer.id).update_attributes(params[:customer])
-      end
-      total_info,total_prod = {},{}
-      params[:sub_items].map do |info,num|
-        split_info = info.split("_")
-        total_info[split_info[1].to_i].nil? ?  total_info[split_info[1].to_i]={info=>num.to_i} : total_info[split_info[1].to_i][info] = num.to_i
-        if  CSvcRelation::SEL_PROD.include? split_info[1].to_i  #购买的包含产品的时候
-          total_prod[0].nil? ? total_prod[0] = [split_info[2] ] : total_prod[0] << split_info[2]
-        elsif CSvcRelation::SEL_SV.include? split_info[1].to_i #购买的包含储值卡 打折卡
-          total_prod[1].nil? ? total_prod[1] = [split_info[2] ] : total_prod[1] << split_info[2]
-        elsif split_info[1].to_i == CSvcRelation::SEL_METHODS[:PCARD] #购买的包含摊餐卡
-          total_prod[2].nil? ? total_prod[2] = [split_info[2] ] : total_prod[2] << split_info[2]
+        total_info,total_prod = {},{}
+        params[:sub_items].map do |info,num|
+          split_info = info.split("_")
+          total_info[split_info[1].to_i].nil? ?  total_info[split_info[1].to_i]={info=>num.to_i} : total_info[split_info[1].to_i][info] = num.to_i
+          if  CSvcRelation::SEL_PROD.include? split_info[1].to_i  #购买的包含产品的时候
+            total_prod[0].nil? ? total_prod[0] = [split_info[2] ] : total_prod[0] << split_info[2]
+          elsif CSvcRelation::SEL_SV.include? split_info[1].to_i #购买的包含储值卡 打折卡
+            total_prod[1].nil? ? total_prod[1] = [split_info[2] ] : total_prod[1] << split_info[2]
+          elsif split_info[1].to_i == CSvcRelation::SEL_METHODS[:PCARD] #购买的包含摊餐卡
+            total_prod[2].nil? ? total_prod[2] = [split_info[2] ] : total_prod[2] << split_info[2]
+          end
         end
+        @msg = create_item(total_info,total_prod,@customer,car_num,cookies[:user_id],params[:store_id].to_i)
       end
-      @msg = CSvcRelation.create_item(total_info,total_prod,@customer,car_num,cookies[:user_id],params[:store_id].to_i)
+    rescue
+      @msg = [["开单失败"],false]
     end
-    #    rescue
-    #      @msg = [["开单失败"],false]
-    #    end
   end
 
   def search_customer(num,store_id)

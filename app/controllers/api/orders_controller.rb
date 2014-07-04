@@ -27,13 +27,15 @@ class Api::OrdersController < ApplicationController
             left join departments b on d.dpt_id=b.id
             where s.username = ? and s.status in (?)", params[:user_name], Staff::VALID_STATUS]).first   
     info = ""
-    if  staff.nil? or !staff.has_password?(params[:user_password])
+    store = staff.store
+    if store.nil? or  staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
-    elsif staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
-      info = "用户不存在"
+    elsif store.status != Store::STATUS[:OPENED]
+      info = "#{store.close_reason}"
     else
       cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
       cookies[:user_name]={:value =>staff.name, :path => "/", :secure  => false}
+      staff.update_attributes(:last_login=>Time.now.strftime("%Y-%m-%d %H:%M:%S"))
       session_role(cookies[:user_id])
       info = ""
       store = Store.find_by_id(staff.store_id)
@@ -492,12 +494,13 @@ class Api::OrdersController < ApplicationController
 
   #员工登录,如果登录成功，返回正在施工中的订单
   def login_and_return_construction_order
-    staff = Staff.find_by_username(params[:username])
-    if staff.nil? || !staff.has_password?(params[:user_password])
+    staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:username], Staff::VALID_STATUS])
+    store = staff.store if staff
+    if store.nil? || staff.nil? || !staff.has_password?(params[:user_password])
       #用户名或者密码错误
       render :json => {:status => 0}
-    elsif !Staff::VALID_STATUS.include?(staff.status) || staff.store.nil? || staff.store.status != Store::STATUS[:OPENED]
-      render :json => {:status => 3, :message => "该用户不存在"}
+    elsif  staff.store.status != Store::STATUS[:OPENED]
+      render :json => {:status => 3, :message => "#{store.close_reason}"}
     else
       #登录成功
       phone_inventory = staff_phone_inventory_permission?([:staffs, :phone_inventory], staff.id) ? 1 : 0

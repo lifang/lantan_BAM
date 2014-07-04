@@ -247,7 +247,7 @@ class MarketManagesController < ApplicationController
 
   def gross_profit
     orders = Order.includes(:order_prod_relations,:c_pcard_relations =>
-        {:package_card => {:pcard_prod_relations => :product}}).
+        {:package_card => {:pcard_material_relations => :material}}).
       where(:status => Order::VALID_STATUS, :store_id => params[:store_id]).
       where("date_format(created_at,'%Y-%m-%d') = curdate()").
       select("distinct orders.*").

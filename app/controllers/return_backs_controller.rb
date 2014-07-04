@@ -37,7 +37,6 @@ class ReturnBacksController < ApplicationController
               true, order_ids]).group_by {|item| item.order_id }
           msg_arr = []
           stations.each do |s|
-            puts  s_w_os.to_json
             msg = ""
             num = 0
             if s_w_os[s.id] and order_products[s_w_os[s.id].order_id].any?
@@ -66,11 +65,13 @@ class ReturnBacksController < ApplicationController
               end
             end
             msg = "\n    欢迎光临    \n\n" if msg == ""
-            puts "msg===#{msg}"
             msg_arr << msg
           end
         end
         message = msg_arr.join("?")
+        file = File.open(Constant::LOCAL_DIR + "led.txt","a+")
+        file.write("\r\n--#{params[:code]}#{message}--#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}\r\n".force_encoding("UTF-8"))
+        file.close
       end
     rescue
     end

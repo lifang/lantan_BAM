@@ -33,7 +33,10 @@
               <label>是否上架：</label><input name="material[create_prod]" id="create_prod" type="checkbox" value="0"
                                          <% if @material.create_prod   %> checked disabled <%end%>
                                          onclick='$("#c_prod").css("display",this.checked ? "block" : "none");this.value=this.checked ? 1 : 0;' /></div>
-              <%= render "prod_material" %>
+            <div class="item_textarea">
+              <label>物料清单：</label><textarea name="material[detailed_list]" id="detailed_list" cols="" rows="" class="width_textarea"><%=@material.detailed_list.gsub("<br/>","\r\n")  %></textarea>
+            </div>
+            <%= render "prod_material" %>
           </div>
         </div>
         <div class="btn_box"><button type="button" onclick="checkMaterial(this)" id="material_ce_bn" class="confirm_btn">确定</button></div>

@@ -41,38 +41,7 @@ class Product < ActiveRecord::Base
   PACK ={:PACK => 0}
 
 
-  #根据回访要求发送客户短信，会查询所有的门店信息发送,设置的时间为每天的11:30和8点半左右，每天两次执行
-  def self.revist_message()
-    store_ids,customer_ids,message_arr = [],[],[]
-    condition = Time.now.strftime("%H").to_i<12 ? "date_format(send_messages.send_at,'%Y-%m-%d %H') between '#{Time.now.beginning_of_day.strftime("%Y-%m-%d %H")}'
-    and '#{Time.now.strftime('%Y-%m-%d')+" 11"}'" : "date_format(send_messages.send_at,'%Y-%m-%d %H') between '#{Time.now.strftime('%Y-%m-%d')+" 12"}' and '#{Time.now.end_of_day.strftime("%Y-%m-%d %H")}'"
-    send_messages = SendMessage.joins(:store).where(condition+" and auto_send=#{Store::AUTO_SEND[:YES]}").group_by{|i|store_ids << i.store_id;customer_ids << i.customer_id;{:c_id=>i.customer_id,:s_id=>i.store_id}}
-    unless send_messages.empty?
-      customers = Customer.find(customer_ids).inject({}){|h,c|h[c.id]=c;h}
-      stores = Store.find(store_ids).inject({}){|h,s|h[s.id]=s.name;h}
-      send_messages.each { |k,v|
-        strs = []
-        v.each_with_index {|str,index| strs << "#{index+1}.#{str.content}" }
-        if customers[k[:c_id]] && stores[k[:s_id]]
-          content ="#{customers[k[:c_id]].name}\t女士/男士,您好,#{stores[k[:s_id]]}的美容小贴士提醒您:\n" + strs.join("\r\n")
-          message_arr << {:content => content.gsub(/([   ])/,"\t"), :msid => "#{customers[k[:c_id]].id}", :mobile =>customers[k[:c_id]].mobilephone}
-        end
-      }
-      p message_arr
-      msg_hash = {:resend => 0, :list => message_arr ,:size => message_arr.length}
-      jsondata = JSON msg_hash
-      begin
-        message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
-        message_route
-        p create_message_http(Constant::MESSAGE_URL, message_route)
-        SendMessage.where(condition+" and store_id in (#{store_ids.join(',')})").update_all :status=>SendMessage::STATUS[:FINISHED]
-        p "success"
-      rescue
-        p "error"
-        SendMessage.where(condition+" and store_id in (#{store_ids.join(',')})").update_all :status=>SendMessage::STATUS[:FAIL]
-      end
-    end
-  end
+  
 
 
   #付款完成生成订单的时候更新订单回访记录

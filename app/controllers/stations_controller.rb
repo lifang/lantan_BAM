@@ -106,7 +106,7 @@ class StationsController < ApplicationController
     if order
       customer = order.customer
       is_vip = false
-      if params[:types] == "cancel" && order.status == Order::STATUS[:NORMAL]
+      if params[:types] == "cancel" && (order.status == Order::STATUS[:NORMAL] or order.status == Order::STATUS[:SERVICING] )
         order.return_order_pacard_num
         order.return_order_materials
         order.rearrange_station
@@ -156,13 +156,13 @@ class StationsController < ApplicationController
               order.tech_orders.update_attributes(:own_deduct=>t_deduct/order.tech_orders.length) unless order.tech_orders.blank?
               #生成出库记录
               order_mat_infos = Order.find_by_sql(["SELECT o.id o_id, o.front_staff_id, p.id p_id, opr.pro_num material_num, m.id m_id,
-              m.price m_price FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
+              m.price m_price,m.detailed_list FROM orders o inner join order_prod_relations opr on o.id = opr.order_id inner join products p on
               p.id = opr.product_id inner join prod_mat_relations pmr on pmr.product_id = p.id inner join materials m
               on m.id = pmr.material_id where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and o.status in (?) and o.id = ?",
                   [Order::STATUS[:BEEN_PAYMENT], Order::STATUS[:FINISHED]], order.id])
               order_mat_infos.each do |omi|
                 MatOutOrder.create({:material_id => omi.m_id, :staff_id => omi.front_staff_id, :material_num => omi.material_num,
-                    :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => order.store_id})
+                    :price => omi.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id => order.store_id,:detailed_list=>omi.detailed_list})
               end
               msg = "成功结束付款！"
             rescue

@@ -5,7 +5,11 @@ class CreateOrderProdRelations < ActiveRecord::Migration
       t.integer :order_id
       t.integer :product_id
       t.integer :pro_num   #产品数量
-      t.float :price   #价格
+      t.decimal :price,:precision=>"20,2",:default=>0   #价格
+      t.decimal :t_price,:precision=>"20,2",:default=>0
+      t.decimal :total_price,:precision=>"20,2",:default=>0
+      t.integer :return_types,:default=>0
+ 
 
     end
 

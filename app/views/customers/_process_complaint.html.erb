@@ -31,9 +31,9 @@
             <div class="seeProDiv_l">责任人：</div>
             <div class="seeProDiv_rWidth">
               <span><input type="radio" id="c_staff_id" name="c_staff_id" value="<%= @order.front_staff_id %>" /> <%= @order.front_s_name %>(接待)</span>
-              <% if @order.cons_staff_id_1 and @order.cons_staff_id_1 %>
+              <% unless @tech_orders.blank? %>
                 <span><input type="radio" id="c_staff_id" name="c_staff_id"
-                             value="<%= @order.cons_staff_id_1 %>,<%= @order.cons_staff_id_2 %>" /> <%= @order.cons_s_name1 %>、<%= @order.cons_s_name2 %>（技师）
+                             value="<%=  @tech_orders.map(&:staff_id).join(',') %>" /> <%= @tech_orders.map(&:s_name).join("、") %>（技师）
                 </span>
               <% end %>
             </div>

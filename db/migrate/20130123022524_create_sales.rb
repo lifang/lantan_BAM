@@ -13,6 +13,10 @@ class CreateSales < ActiveRecord::Migration
       t.integer :car_num           #折扣数量
       t.integer :everycar_times   #每辆车的打折次数
       t.string :img_url
+      t.boolean :is_subsidy
+      t.string :sub_content
+      t.string :code
+      t.string :description
 
       t.timestamps
     end
@@ -20,5 +24,6 @@ class CreateSales < ActiveRecord::Migration
     add_index :sales, :status
     add_index :sales, :store_id
     add_index :sales, :created_at
+    add_index :sales, :code
   end
 end

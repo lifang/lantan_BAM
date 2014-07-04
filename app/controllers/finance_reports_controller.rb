@@ -6,6 +6,7 @@ class FinanceReportsController < ApplicationController
   def index
     @title = "主营收入"
     @category = Category.where(:store_id=>params[:store_id],:types=>Category::DATA_TYPES).inject({}){|h,c|h[c.id]=c.name;h}
+    @category.merge!(0=>"打折卡")
     @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
     @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
     sql,orders,del_ids = "1=1",[],[]
@@ -19,11 +20,19 @@ class FinanceReportsController < ApplicationController
       sql += " and customers.name like '%#{params[:customer_name].gsub(/[%_]/){|x| '\\' + x}}%'"
     end
     if params[:category_id]
-      sql += " and products.category_id=#{params[:category_id]}"
-      sql += " and products.id in (#{params[:prod_name]})"   if params[:prod_name]
-      p_orders = Order.joins([:car_num,:customer,:order_prod_relations =>:product]).select("orders.*,customers.mobilephone phone,
-     customers.name c_name,customers.group_name,car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>
-          params[:store_id]).where(sql).order("orders.updated_at desc")
+      if params[:category_id].to_i == 0
+        sql += " and sv_cards.types=#{SvCard::FAVOR[:DISCOUNT]}"
+        sql += " and sv_cards.name like  '%#{params[:prod_name]}%'"   if params[:prod_name]
+        p_orders = Order.joins([:car_num,:customer,:c_svc_relations=>:sv_card]).select("orders.*,customers.mobilephone phone,
+        customers.name c_name,customers.group_name,car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>
+            params[:store_id]).where(sql).order("orders.updated_at desc")
+      else
+        sql += " and products.category_id=#{params[:category_id]}"
+        sql += " and products.name like  '%#{params[:prod_name]}%'"   if params[:prod_name]
+        p_orders = Order.joins([:car_num,:customer,:order_prod_relations =>:product]).select("orders.*,customers.mobilephone phone,
+       customers.name c_name,customers.group_name,car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>
+            params[:store_id]).where(sql).order("orders.updated_at desc")
+      end
     else
       p_orders = Order.joins([:car_num,:customer]).select("orders.*,customers.mobilephone phone,customers.name c_name,customers.group_name,
      car_nums.num c_num,customers.id c_id").where(:status=>Order::OVER_CASH,:store_id=>params[:store_id]).where(sql).order("orders.updated_at desc")
@@ -43,9 +52,11 @@ class FinanceReportsController < ApplicationController
       @orders = orders.paginate(:page=>params[:page],:per_page=>Constant::LITE_PAGE)
       @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
       @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
-      staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
+      @tech_orders = TechOrder.where(:order_id=>@orders.map(&:id)).group_by{|i|i.order_id}
+      staff_ids = (@tech_orders.values.flatten.map(&:staff_id)|@orders.map(&:front_staff_id)).compact.uniq
       staff_ids.delete 0
       @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+      @tech_orders.each{|order_id,tech_orders| @tech_orders[order_id] = tech_orders.map{|tech|@staffs[tech.staff_id]}.join("、")}
     else
       @pays,@orders = {},[]
     end
@@ -249,7 +260,7 @@ class FinanceReportsController < ApplicationController
     if params[:account_name] && params[:account_name] != "" && params[:account_name].length != 0
       sql +=  " and name like '%#{params[:account_name].strip.gsub(/[%_]/){|x| '\\' + x}}%'"
     end
-    p @accounts = Account.joins("inner join customers c on c.id=accounts.supply_id").where(sql).select("c.name,c.group_name,accounts.*").group_by{|i|i.types}
+    @accounts = Account.joins("inner join customers c on c.id=accounts.supply_id").where(sql).select("c.name,c.group_name,accounts.*").group_by{|i|i.types}
     @accounts.merge!(Account.joins("inner join suppliers s on s.id=accounts.supply_id").where(sql).select("s.name,accounts.*").group_by{|i|i.types})
     respond_to do |format|
       format.html
@@ -346,7 +357,7 @@ class FinanceReportsController < ApplicationController
 
   def update_asset
     FixedAsset.where(:id=>params[:asset_id]).update_all(:status=>FixedAsset::STATUS[:INVALID] )
-    p @asset = FixedAsset.where(:id=>params[:asset_id]).select("fixed_assets.*,round(pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*(pay_amount/share_month),2) left_value").first
+     @asset = FixedAsset.where(:id=>params[:asset_id]).select("fixed_assets.*,round(pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*(pay_amount/share_month),2) left_value").first
     @n_staffs = Staff.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.name;h}
     @defines = Category.where(:types=>Category::TYPES[:ASSETS]).inject({}){|h,s|h[s.id]=s.name;h}
     @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month : params[:first_time].to_datetime
@@ -404,9 +415,11 @@ class FinanceReportsController < ApplicationController
       @orders = orders.flatten.paginate(:page=>params[:page],:per_page=>Constant::LITE_PAGE)
       @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
       @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
-      staff_ids = (@orders.map(&:cons_staff_id_1)|@orders.map(&:cons_staff_id_2)|@orders.map(&:front_staff_id)).compact.uniq
+      @tech_orders = TechOrder.where(:order_id=>@orders.map(&:id)).group_by{|i|i.order_id}
+      staff_ids = (@tech_orders.values.flatten.map(&:staff_id)|@orders.map(&:front_staff_id)).compact.uniq
       staff_ids.delete 0
       @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+      @tech_orders.each{|order_id,tech_orders| @tech_orders[order_id] = tech_orders.map{|tech|@staffs[tech.staff_id]}.join("、")}
     else
       @pays,@orders = {},[]
     end
@@ -419,6 +432,68 @@ class FinanceReportsController < ApplicationController
 
   def load_prod
     render :json=> {:products=>Product.is_normal.where(:category_id=>params[:category_id]).inject({}){|h,p|h[p.id]=p.name;h}}
+  end
+
+
+  def return_order
+    @category = Category.where(:store_id=>params[:store_id],:types=>Category::DATA_TYPES).inject({}){|h,c|h[c.id]=c.name;h}
+    @category.merge!({0=>"打折卡",-1=>"储值卡",-2=>"套餐卡"})
+    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
+    @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
+    sql,orders = "1=1",[]
+    if @start_time != "0"
+      sql += " and date_format(return_orders.updated_at,'%Y-%m-%d')>='#{@start_time}'"
+    end
+    if @end_time != "0"
+      sql += " and date_format(return_orders.updated_at,'%Y-%m-%d')<='#{@end_time}'"
+    end
+    if params[:customer_name]
+      sql += " and customers.name like '%#{params[:customer_name].gsub(/[%_]/){|x| '\\' + x}}%'"
+    end
+    if params[:category_id]
+      if params[:category_id].to_i == 0
+        sql += " and sv_cards.types=#{SvCard::FAVOR[:DISCOUNT]}"
+        sql += " and sv_cards.name like  '%#{params[:prod_name]}%'"   if params[:prod_name]
+        orders = ReturnOrder.joins(:order=>[:car_num,:customer,:c_svc_relations=>:sv_card]).select("orders.*,customers.mobilephone phone,
+        customers.name c_name,customers.group_name,car_nums.num c_num,customers.id c_id").where(:store_id=>params[:store_id]).where(sql).order("return_orders.updated_at desc")
+      elsif params[:category_id].to_i == -1
+        sql += " and sv_cards.types=#{SvCard::FAVOR[:SAVE]}"
+        sql += " and sv_cards.name like  '%#{params[:prod_name]}%'"   if params[:prod_name]
+        orders = ReturnOrder.joins(:order=>[:car_num,:customer,:c_svc_relations=>:sv_card]).select("orders.*,customers.mobilephone phone,
+        customers.name c_name,customers.group_name,car_nums.num c_num,customers.id c_id").where(:store_id=>params[:store_id]).where(sql).order("return_orders.updated_at desc")
+      elsif params[:category_id].to_i == -2
+        sql += " and sv_cards.name like  '%#{params[:prod_name]}%'"   if params[:prod_name]
+        orders = ReturnOrder.joins(:order=>[:car_num,:customer,:c_pcard_relations]).select("orders.*,customers.mobilephone phone,
+        customers.name c_name,customers.group_name,car_nums.num c_num,customers.id c_id").where(:store_id=>params[:store_id]).where(sql).order("return_orders.updated_at desc")
+      else
+        sql += " and products.category_id=#{params[:category_id]}"
+        sql += " and products.name like  '%#{params[:prod_name]}%'"   if params[:prod_name]
+        orders = ReturnOrder.joins(:order=>[:car_num,:customer,:order_prod_relations =>:product]).select("orders.*,customers.mobilephone phone,
+       customers.name c_name,customers.group_name,car_nums.num c_num,customers.id c_id").where(:store_id=>params[:store_id]).where(sql).order("return_orders.updated_at desc")
+      end
+    else
+      orders = ReturnOrder.joins(:order=>[:car_num,:customer]).select("orders.*,customers.mobilephone phone,customers.name c_name,customers.group_name,
+     car_nums.num c_num,customers.id c_id").where(:store_id=>params[:store_id]).where(sql).order("return_orders.updated_at desc")
+    end
+    unless orders.blank?
+      @pays = OrderPayType.search_pay_types(orders.map(&:id))
+      @orders = orders.paginate(:page=>params[:page],:per_page=>Constant::LITE_PAGE)
+      @return_orders = ReturnOrder.where(:order_id=>@orders.map(&:id)).group_by{|i|i.order_id}
+      @return_price = ReturnOrder.where(:order_id=>orders.map(&:id)).group("return_type").select("ifnull(sum(return_price),0) total_price,return_type")
+      @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
+      @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
+      @tech_orders = TechOrder.where(:order_id=>@orders.map(&:id)).group_by{|i|i.order_id}
+      staff_ids = (@tech_orders.values.flatten.map(&:staff_id)|@orders.map(&:front_staff_id)).compact.uniq
+      staff_ids.delete 0
+      @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+      @tech_orders.each{|order_id,tech_orders| @tech_orders[order_id] = tech_orders.map{|tech|@staffs[tech.staff_id]}.join("、")}
+    else
+      @pays,@orders = {},[]
+    end
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
 
 end

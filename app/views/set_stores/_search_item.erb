@@ -13,7 +13,7 @@
           <% if params[:item_id].to_i != Category::ITEM_NAMES[:CARD] %>
           <span style="width:80px;<%if object[:type]== 5 %>display:none<%end%>" >库存：<label id="storage"><%=object[:storage]%></label></span>
           <%end%>
-          <span style="width:90px;" >￥：<label id="price"><%=object[:price]%></label></span>
+          <span style="width:90px;color:blue;" >￥：<label id="price"><%=object[:price]%></label></span>
           <input type="checkbox" id="<%=k%>_<%=object[:type]%>_<%=object[:id]%>" <%if object[:status]%>checked<%end%> onclick="add_cart(this)" />
         </div>
       <% end %>

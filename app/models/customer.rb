@@ -202,7 +202,7 @@ class Customer < ActiveRecord::Base
   def pcard_records(store_id)
     #当前客户的套餐卡
     c_pcards  = CPcardRelation.joins(:package_card).select("c_pcard_relations.id c_id,package_cards.id k_id,package_cards.name,
-    c_pcard_relations.content, c_pcard_relations.ended_at").where(:"c_pcard_relations.status"=>CPcardRelation::STATUS[:NORMAL],
+    c_pcard_relations.content, c_pcard_relations.ended_at,c_pcard_relations.order_id o_id").where(:"c_pcard_relations.status"=>CPcardRelation::STATUS[:NORMAL],
       :customer_id=>self.id,:"package_cards.store_id"=>store_id)
     already_used_count = {}
     p_pcards = PcardProdRelation.joins(:package_card).select("package_cards.id p_id,product_id,product_num").
@@ -252,14 +252,14 @@ class Customer < ActiveRecord::Base
         cp.content.split(",").each do |p|
           is_abled = false
           content = p.split("-")
-          if total_prms[content[0].to_i].nil? || content[2].to_i >0
-            is_abled = true
-          else
-            if total_prms[content[0].to_i] && total_prms[content[0].to_i] >=0
+          if content[2].to_i >0
+            if total_prms[content[0].to_i].nil?
+              is_abled = true
+            elsif  total_prms[content[0].to_i] >=0
               is_abled = true
             end
           end
-          cons << {:name =>content[1],:total_num=>pcard_prod["#{content[0].to_i}_#{cp.p_id}"],:left_num=>content[2].to_i,:status=>is_abled}
+          cons << {:name =>content[1],:total_num=>pcard_prod["#{content[0].to_i}_#{cp.p_id}"],:left_num=>content[2].to_i,:status=>is_abled,:prod_id=>content[0].to_i}
         end if cp.content
         pcard[customer_id] << {:content=>cons,:card_name=>cp.p_name,:end_time=>cp.time,:c_id=>cp.c_id}
       end  unless cprs.blank?
@@ -278,7 +278,7 @@ class Customer < ActiveRecord::Base
         elsif k[:types] == SvCard::FAVOR[:SAVE]
           records = []
           svcard_use_records[card.id].each do |record|
-            records << {:use_price=>record.use_price,:left_price=>record.left_price,:time=>record.created_at.strftime("%Y-%m-%d"),:content=>record.content}
+            records << {:use_price=>record.use_price,:left_price=>record.left_price,:time=>record.created_at.strftime("%Y-%m-%d"),:content=>record.content,:types=>record.types}
           end if svcard_use_records[card.id]
           if save_card[k[:customer_id]].nil?
             save_card[k[:customer_id]]=[{:name=>card.name,:time=>card.created_at.strftime("%Y-%m-%d %H:%M:%S"),:total_price=>card.total_price,:id_card=>card.id_card,:contents=>records}]

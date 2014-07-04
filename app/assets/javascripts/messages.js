@@ -45,6 +45,7 @@ function check_message() {
         tishi_alert("请您填写需要发送的内容。");
         return false;
     }
+    $("#send_message").attr("disabled",true);
     return true;
 }
 

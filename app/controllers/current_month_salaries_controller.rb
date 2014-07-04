@@ -27,16 +27,13 @@ class CurrentMonthSalariesController < ApplicationController
 
   def show
     @statistics_date = params[:statistics_date]
-    @staff = Staff.find_by_id(params[:id])
+    @staff = Staff.find(params[:id])
     @departs = Department.where(:id=>[@staff.department_id,@staff.position].compact).inject(Hash.new){|hash,de|hash[de.id]=de.name;hash}
-    if @staff.type_of_w == Staff::S_COMPANY[:TECHNICIAN]
-      @salary_details = TechOrder.joins(:order).where(:staff_id=>@staff.id,:"orders.status"=>Order::PRINT_CASH).where("date_format(orders.created_at,'%Y-%m')='#{@statistics_date}'")
-      .select("own_deduct t_deduct,orders.created_at,orders.code,orders.id,orders.price")
-    else
-      @salary_details = Order.where("front_staff_id=#{params[:id]} and date_format(created_at,'%Y-%m')='#{@statistics_date}'").
-        where(:status=>Order::PRINT_CASH).select("id,created_at,code,front_deduct t_deduct,price")
+    if @staff.is_deduct
+      @salary_details = Order.joins("left join tech_orders t on t.order_id=orders.id").where(:status=>Order::PRINT_CASH).
+        where("date_format(orders.created_at,'%Y-%m')='#{@statistics_date}' and (front_staff_id=#{@staff.id} or t.staff_id=#{@staff.id})").
+        select("orders.id,orders.created_at,orders.code,ifnull(front_deduct+own_deduct,0) t_deduct,price")
     end
-
     @order_prods = OrderProdRelation.order_products(@salary_details.map(&:id))
     @score = MonthScore.where(:store_id=>params[:store_id],:current_month=>(@statistics_date.delete "-").to_i,:staff_id=>@staff.id).first
     @salary  = Salary.where(:staff_id=>@staff.id,:current_month=>(@statistics_date.delete "-").to_i).first

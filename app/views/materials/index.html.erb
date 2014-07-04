@@ -20,7 +20,7 @@
     <% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(0)", :class => "dh_btn" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印库存清单",print_store_materials_path(params[:store_id]), :class => "",:target => "_blank" %><% end %>
     <% if permission?(:materials, :print) %><%= link_to "打印条形码",print_code_store_materials_path(params[:store_id]),:remote => true, 'data-type' => 'script', :class => "",:target => "_blank" %><% end %>
-    <% if permission?(:materials, :check_all) %><%= link_to "库存比对", "/stores/#{params[:store_id]}/check_mat_num", :remote => true, 'data-type'=>'script' %><% end %>
+    <% if permission?(:materials, :check_all) %><%= link_to "库存盘点", "/stores/#{params[:store_id]}/check_materials",:target=>"_blank" %><% end %>
     <% if permission?(:materials, :material_loss_add) %><%= link_to "新建库存报损", mat_loss_store_materials_path(params[:store_id]), :class => "", :remote => true, 'data-type'=>'script', :target => "_blank" %><% end %>
   </div>
   <div class="clear"></div>
@@ -31,7 +31,7 @@
       <li>入库记录</li>
       <li>向总部订货记录</li>
       <li>向供应商订货记录</li>
-      <li>库存报损</li>
+      <li>库存损溢</li>
       <li>退货记录</li>
     </ul>
   </div>
@@ -149,7 +149,10 @@
           <div class="search"><%= hidden_field_tag "selected_items" %>
             <div><%= label_tag "staff","申请人：" %><%= select_tag "staff", options_from_collection_for_select(@staffs,"id","name") %></div>
             <div><%= label_tag "out_types"," 出库类型：" %>
-                <%= select("mat_out", "types", MatOutOrder::TYPES.invert.to_a, { :prompt => "选择出库类型" }) %>
+              <%= select("mat_out", "types", MatOutOrder::TYPES.invert.to_a, { :prompt => "选择出库类型" }) %>
+            </div>
+            <div><%= label_tag "chuku_remark"," 备注：" %>
+              <input name="remark" id="chuku_remark" />
             </div>
           </div>
         </div>
@@ -215,6 +218,7 @@
 <% if @mat_in %>
       $("a.am_btn").click();
 <% end %>
+    odd_even();
   })
 </script>
 

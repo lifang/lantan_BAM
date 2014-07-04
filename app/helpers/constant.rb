@@ -198,10 +198,10 @@ module Constant
   USERNAME = "XCRJ"
   PASSWORD = "123456"
   
-  SERVER_PATH = "http://192.168.1.250:3001"
-  HEAD_OFFICE_API_PATH = "http://192.168.1.250:3002/"
-#  SERVER_PATH = "http://lantan.icar99.com/"
-#  HEAD_OFFICE_API_PATH = "http://manage.icar99.com/"
+  SERVER_PATH = "http://192.168.0.250:3001/"
+  HEAD_OFFICE_API_PATH = "http://192.168.0.250:3002/"
+  #  SERVER_PATH = "http://lantan.icar99.com/"
+  #  HEAD_OFFICE_API_PATH = "http://manage.icar99.com/"
 
   #   SERVER_PATH = "http://bam.gankao.co"
   #  #  SERVER_PATH = "http://192.168.1.100:3001"
@@ -233,4 +233,17 @@ module Constant
 
   #工作订单
   WORK_ORDER_PATH = LOCAL_DIR + "work_order_data/"
+
+  #支付宝
+  PAGE_WAY="https://www.alipay.com/cooperate/gateway.do"
+  NOTIFY_URL="http://notify.alipay.com/trade/notify_query.do"
+  PARTNER_KEY="3goqmgklinxngzq0j9ge7bxxh0jwrd0f"
+  PARTNER="2088801819580851"
+  SELLER_EMAIL=" 539807006@qq.com"
+  CALLBACK_URL="http://localhost:3001/messages/alipay_compete"
+  NONSYNCH_URL="http://localhost:3001/user/alipays/over_pay"
+
+  MSG_PRICE = 0.06
+  OWE_PRICE = -3
+  OWE_WARN = {:NONE =>0,:DONE => 1}
 end

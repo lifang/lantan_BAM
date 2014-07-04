@@ -42,8 +42,7 @@
                     <td><%= order.code %></td>
                     <td><%= @stations[order.s_id].nil? ? "--" : @stations[order.s_id] %></td>
                     <td><%= @staffs[order.front_staff_id] %></td>
-                    <% tech = [@staffs[order.cons_staff_id_1],@staffs[order.cons_staff_id_2]].compact.uniq %>
-                    <td><%=  tech.blank? ? "--" : tech.join("、")%></td>
+                    <td><%= @techs[order.id].nil? ? "--" : @techs[order.id]%></td>
                     <% prod = @order_prods[order.id] && @order_prods[order.id][0] %>
                     <% if prod %>
                       <%  o_prod = @order_prods[order.id][0]%>

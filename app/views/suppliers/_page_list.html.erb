@@ -42,7 +42,7 @@
         <td><%=s.check_type.to_i==Supplier::CHECK_TYPE[:DAY] ? "----" : s.check_time %></td>
         <td><%= s.email %></td>
         <td><%= s.address %></td>
-        <td><% if permission?(:materials, :dinghuo) %><%= link_to_function "订货", "dinghuo(#{s.id})" %><% end %>
+        <td>
           <% if permission?(:materials, :edit_supplier) %><%= link_to "修改",edit_store_supplier_path(params[:store_id], s.id), :remote => true, "data-type" => "script" %><% end %>
           <% if permission?(:materials, :del_supplier) %><%= link_to "删除", "/stores/#{params[:store_id]}/suppliers/#{s.id}", :method => "delete", :confirm => "确定要删除供应商？" %><% end %></td>
       </tr>

@@ -16,12 +16,9 @@
         <td width="15%" class="wordBreak"><%= complaint.created_at.strftime("%Y-%m-%d %H:%M:%S") if complaint.created_at %></td>
         <td width="15%" class="wordBreak"><%= complaint.reason.truncate(10) if complaint.reason%></td>
         <td width="15%" class="wordBreak"><%= complaint.suggestion.truncate(10) if complaint.suggestion%></td>
-        <td width="15%" class="wordBreak"><% if complaint.st_name1 or complaint.st_name2  %>
-            <%= complaint.st_name1 if complaint.st_name1 %><%= "，" + complaint.st_name2 if complaint.st_name2 %>
-          <% else %>--
-          <% end %>
+        <td width="14%" class="wordBreak"><%= @tech_orders[complaint.o_id].nil? ? "--" :@tech_orders[complaint.o_id] %>
         </td>
-        <td width="15%" class="wordBreak">
+        <td width="16%" class="wordBreak">
           <%= link_to "#{complaint.code}", "/orders/#{complaint.o_id}/order_info" ,
             :remote => "true", "data-type" => "script", :class => "other_a" %>
         </td>

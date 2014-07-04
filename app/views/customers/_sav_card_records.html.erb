@@ -27,6 +27,7 @@
         </td>
         <td width="15%">
           <button type="button" class="compile_btn" onclick="change_pcard_pwd(<%= k %>, '<%= v[0].sc_name %>')">修改密码</button>
+          <button type="button" class="compile_btn" onclick="return_order(<%= v[0].order_id %>, <%= @customer.id %>)">退卡</button>
         </td>
       </tr>
     <%end if @srs %>

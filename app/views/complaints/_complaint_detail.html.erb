@@ -13,7 +13,7 @@
   </div>
   <div class="seeProDiv">
     <div class="seeProDiv_l">责任人：</div>
-    <div class="seeProDiv_r"><%= @staff_names.blank? ? "---" : @staff_names %></div>
+    <div class="seeProDiv_r"><%=  @staff_name == "" ? "--" : @staff_name %></div>
   </div>
   <div class="seeProDiv">
     <div class="seeProDiv_l">相关订单：</div>

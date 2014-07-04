@@ -1,6 +1,5 @@
 class AddReturnTypesToOrderProdRelations < ActiveRecord::Migration
   def change
-    add_column :order_prod_relations, :return_types, :integer,:default=>0
     add_column :c_pcard_relations, :return_types, :integer,:default=>0
     add_column :c_svc_relations, :return_types, :integer,:default=>0
     add_column :orders, :return_types, :integer,:default=>0

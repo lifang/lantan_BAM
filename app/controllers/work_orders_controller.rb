@@ -65,18 +65,19 @@ class WorkOrdersController < ApplicationController
 
   def login
     staff = Staff.find(:first, :conditions => ["username = ? and status in (?)",params[:user_name], Staff::VALID_STATUS])
+    store = staff.store if staff
     info = ""
-    if  staff.nil? or !staff.has_password?(params[:user_password])
+    if  store.nil? or staff.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
       status = 2
-    elsif staff.store.nil? or staff.store.status != Store::STATUS[:OPENED]
-      info = "用户不存在"
+    elsif store.status != Store::STATUS[:OPENED]
+      info = "#{store.close_reason}"
       status = 1
     else
       status = 0
       stations_count = Station.where("store_id =? and status not in (?) ",staff.store_id, [Station::STAT[:WRONG], Station::STAT[:DELETED]]).count
     end
-    render :json => {:store_id => staff.present? ? staff.store_id : 0, :status => status, :stations_count => stations_count || 0}
+    render :json => {:store_id => staff.present? ? staff.store_id : 0, :status => status, :stations_count => stations_count || 0,:info=>info}
   end
 
 end

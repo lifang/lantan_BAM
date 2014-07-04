@@ -242,6 +242,16 @@ task(:update_store_id_to_customers => :environment) do
   p "the run time is #{(Time.now.to_i - time)/60.0}"
 end
 
+
+
+
+#---下次更新需更改状态--- 05/10记
+task(:last_login => :environment) do
+  time = Time.now.to_i
+  Staff.update_all(:last_login=>Time.now.strftime("%Y-%m-%d %H:%M:%S"))
+  p "update staff's time of last login run time #{(Time.now.to_i - time)/3600.0}"
+end
+
 #储值卡增加编号
 task(:add_id_card => :environment) do
   time = Time.now.to_i
@@ -249,8 +259,17 @@ task(:add_id_card => :environment) do
     h[s.store_id].nil? ? h[s.store_id] =[s.id] : h[s.store_id] << s.id;h
   }.each {|c_svc,v|
     CSvcRelation.find(v).each_with_index do |cs,index|
-      cs.update_attributes(:id_card=>add_length(5,index+1))
+      cs.update_attributes(:id_card=>add_length(8,index+1))
     end
   }
   p "the run time is #{(Time.now.to_i - time)/60.0}"
+end
+
+
+task(:change_msg => :environment) do
+  time = Time.now.to_i
+  MessageRecord.delete_all
+  SendMessage.delete_all
+  Store.update_all(:send_list=>MessageRecord::SET_MESSAGE.keys.join(","))
+  p "update store's functions to send message to customers run time #{(Time.now.to_i - time)/3600.0}"
 end

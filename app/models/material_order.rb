@@ -23,7 +23,7 @@ class MaterialOrder < ActiveRecord::Base
     status
   end
 
-   def self.set_code(len)
+  def self.set_code(len)
     chars =  (0..9).to_a
     code_array = []
     1.upto(len) {code_array << chars[rand(chars.length)]}
@@ -31,13 +31,7 @@ class MaterialOrder < ActiveRecord::Base
   end
 
   def self.material_order_code(store_id, time=nil)
-    store = store_id.to_s
-    if store_id < 10
-      store =   "00" + store_id.to_s
-    elsif store_id < 100
-      store =    "0" + store_id.to_s
-    end
-    store + (time.nil? ? Time.now.strftime("%Y%m%d%H%M%S") : DateTime.parse(time).strftime("%Y%m%d%H%M%S"))+set_code(2)
+    (time.nil? ? Time.now.strftime("%Y%m%d%H%M%S") : DateTime.parse(time).strftime("%Y%m%d%H%M%S"))+set_code(3)
   end
 
   #  def self.supplier_order_records page, per_page, store_id

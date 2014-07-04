@@ -389,7 +389,7 @@ function submit_out_order(form_id){
         if(parseFloat($(this).val()) > storage){
             tishi_alert("【"+name+"】出库量请输入小于库存量的值");
             a = false;
-        }else if(parseFloat($(this).val()) <= 0){
+        }else if(parseFloat($(this).val()) < 0){
             tishi_alert("【"+name+"】出库量请输入大于0的值");
             a = false;
         }
@@ -404,7 +404,12 @@ function submit_out_order(form_id){
             $.ajax({
                 url:$("#"+form_id).attr("action"),
                 dataType:"json",
-                data:"staff="+$("#staff").val()+"&selected_items="+$("#selected_items").val()+"&types="+$("#mat_out_types").val(),
+                data:{
+                    staff : $("#staff").val(),
+                    selected_items : $("#selected_items").val(),
+                    types : $("#mat_out_types").val(),
+                    remark : $("#chuku_remark").val()
+                },
                 type:"POST",
                 success:function(data,status){
                     if(data["status"]==0){
@@ -1623,28 +1628,4 @@ function back_good_validate(store_id){      //退货确定按钮验证
         })
     }
             
-}
-
-function add_m(e){
-    var num = $.trim($(e).parent().find(":text").val());
-    if (isNaN(parseInt(num))){
-        num = 0;
-    }else{
-        num = parseInt(num)
-    }
-    $(e).parent().find(":text").val(num+1);
-}
-
-function del_m(e){
-    var num = $.trim($(e).parent().find(":text").val());
-    if (isNaN(parseInt(num))){
-        num = 0;
-    }else{
-        num = parseInt(num)
-    }
-    if(num >=1){
-        $(e).parent().find(":text").val(num-1);
-    }else{
-        $(e).parent().find(":text").val(num);
-    }
 }

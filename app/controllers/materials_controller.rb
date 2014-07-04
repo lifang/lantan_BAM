@@ -7,7 +7,7 @@ class MaterialsController < ApplicationController
   #  require 'barby/barcode/ean_13'
   #  require 'barby/outputter/custom_rmagick_outputter'
   #  require 'barby/outputter/rmagick_outputter'
-  layout "storage", :except => [:print]
+  layout "storage", :except => [:print,:check_mat_num,:print_mat]
   respond_to :json, :xml, :html
   before_filter :sign?,:except=>["alipay_complete"]
   before_filter :material_order_tips, :only =>[:index, :receive_order, :tuihuo, :check]
@@ -283,21 +283,17 @@ class MaterialsController < ApplicationController
       @material = Material.find_by_id_and_store_id(params[:id], params[:store_id])
       @pandian_flag = params[:pandian_flag].to_i
       num = @material.storage
-      if @material.update_attributes(:storage => params[:num].to_i, :check_num => nil)
-        if num < params[:num].to_i
-          material_order = MaterialOrder.create({:price =>(params[:num].to_i-num)*@material.import_price,:remark=>"快速入库",
-              :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => MaterialOrder::STATUS[:pay],
-              :m_status => MaterialOrder::M_STATUS[:save_in],:staff_id => cookies[:user_id],:store_id => params[:store_id]
-            })
-          MatOrderItem.create({:material_order => material_order, :material => @material, :material_num =>params[:num].to_i-num,
-              :price =>@material.import_price})
-          MatInOrder.create({:material => @material, :material_order => material_order,
-              :material_num =>params[:num].to_i-num, :price =>@material.import_price, :staff_id => cookies[:user_id]
-            })
-        else
-          MatOutOrder.create(:material => @material, :material_num => num - params[:num].to_i,:staff_id => cookies[:user_id], 
-            :price =>@material.import_price, :types =>MatOutOrder::TYPES_VALUE[:quick_out], :store_id => params[:store_id])
-        end
+      if @material.update_attributes(:storage => params[:num].to_i+num, :check_num => nil)
+        import_price = @material.import_price.nil? ? @material.price : @material.import_price
+        material_order = MaterialOrder.create({:price =>(params[:num].to_i)*import_price,:remark=>"快速入库",
+            :code => MaterialOrder.material_order_code(params[:store_id].to_i), :status => MaterialOrder::STATUS[:pay],
+            :m_status => MaterialOrder::M_STATUS[:save_in],:staff_id => cookies[:user_id],:store_id => params[:store_id]
+          })
+        MatOrderItem.create({:material_order => material_order, :material => @material, :material_num =>params[:num].to_i,
+            :price =>@material.import_price,:detailed_list=>@material.detailed_list})
+        MatInOrder.create({:material => @material, :material_order => material_order,
+            :material_num =>params[:num].to_i, :price =>@material.import_price, :staff_id => cookies[:user_id]
+          })
         @status = 0
       else
         @status = 1
@@ -345,7 +341,7 @@ class MaterialsController < ApplicationController
 
   #出库
   def out_order
-    status = MatOutOrder.new_out_order params[:selected_items],params[:store_id],params[:staff], params[:types]
+    status = MatOutOrder.new_out_order params[:selected_items],params[:store_id],params[:staff], params[:types],params[:remark]
     render :json => {:status => status}
   end
 
@@ -385,7 +381,7 @@ class MaterialsController < ApplicationController
                 end
               end
               mat_order_item = MatOrderItem.create({:material_order => material_order, :material => m, :material_num => item.split("_")[1],
-                  :price => s_price})   if m
+                  :price => s_price,:detailed_list=>m.detailed_list})   if m
 
               mat_code_items["mat_order_items_#{index}"] = {:material_order_id => material_order.id, :material_id => m.id, :material_num => mat_order_item.material_num,:price => s_price,:m_code =>m.code} if m
             end
@@ -820,18 +816,6 @@ class MaterialsController < ApplicationController
     end
   end
 
-  #批量核实
-  def batch_check
-    flash[:notice] = "盘点清单成功！"
-    begin
-      Material.transaction do
-        Material.update(params[:materials].keys,params[:materials].values)
-      end
-    rescue
-      flash[:notice] = "物料核实失败"
-    end
-    redirect_to "/stores/#{params[:store_id]}/materials"
-  end
 
   #设置库存预警数目
   def set_material_low_commit
@@ -908,6 +892,7 @@ class MaterialsController < ApplicationController
 
   def create
     params[:material][:name] = params[:material][:name].strip
+    params[:material][:detailed_list] = params[:material][:detailed_list].strip.gsub("\r\n","<br/>")
     Material.transaction  do
       if params[:material][:ifuse_code]=="1"
         code_value = params[:material][:code_value].strip[0..-2]
@@ -923,7 +908,7 @@ class MaterialsController < ApplicationController
               :storage => 0, :material_low => Material::DEFAULT_MATERIAL_LOW,:price=>params[:material][:import_price]}))
         if material.save
           smaterial = SharedMaterial.find_by_code(material.code)
-          sm_params = params[:material].except(:import_price, :sale_price,:ifuse_code,:code_value, :category_id,:create_prod).merge({:code => material.code})
+          sm_params = params[:material].except(:import_price, :sale_price,:ifuse_code,:code_value, :category_id,:create_prod,:detailed_list).merge({:code => material.code})
           SharedMaterial.create(sm_params) if smaterial.nil?
           @status = 0
           @flash_notice = "物料创建成功!"
@@ -985,6 +970,7 @@ class MaterialsController < ApplicationController
     params[:material][:name] = params[:material][:name].strip
     params[:material][:category_id] = params[:material][:types]
     params[:material][:types] = nil
+    params[:material][:detailed_list] = params[:material][:detailed_list].strip.gsub("\r\n","<br/>")
     @cname = Category.find_by_id(params[:material][:category_id].to_i).name
     if @material.update_attributes(params[:material])
       @status = 0
@@ -1011,13 +997,7 @@ class MaterialsController < ApplicationController
     @material = SharedMaterial.find_by_code(params[:code]) if params[:code]
   end
 
-  #盘点物料清单
-  def check_mat_num
-    @materials_need_check = Material.find_by_sql(["select m.*,c.name cname from materials m
-    inner join categories c on m.category_id=c.id where m.status=? and c.store_id=?  group by m.id order by m.name",
-        Material::STATUS[:NORMAL], @current_store.id])
-    #    Material.where(:status=>Material::STATUS[:NORMAL],:store_id=>@current_store.id).update_all(:check_num=>0)
-  end
+
 
   def print_code
     @store_id = params[:store_id]
@@ -1144,6 +1124,15 @@ class MaterialsController < ApplicationController
     @low_materials = Material.where(["status = ? and store_id = ? and storage<=material_low
                                     and is_ignore = ?", Material::STATUS[:NORMAL],params[:store_id].to_i, Material::IS_IGNORE[:NO]])
   end
+
+  def print_mat
+    @mat_out = MatOutOrder.find(params[:mat_id])
+    @store = Store.find(params[:store_id])
+    
+  end
+
+
+
   protected
   
   def make_search_sql
