@@ -27,7 +27,7 @@ gem 'execjs', '1.4.0'
 gem 'jquery-rails', '~> 2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'
-gem 'iconv'
+#gem 'iconv'
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 
@@ -45,8 +45,8 @@ group :test do
   # Pretty printed test output
   gem 'turn', '0.8.2', :require => false
 end
-#gem 'mechanize', '2.0.1'
-#gem 'hpricot', '0.8.4'
+gem 'mechanize', '2.0.1'
+gem 'hpricot', '0.8.4'
 #gem "bullet", :group => "development"
 #group :development do
 #  gem "better_errors"

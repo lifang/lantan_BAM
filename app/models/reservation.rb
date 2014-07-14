@@ -5,7 +5,8 @@ class Reservation < ActiveRecord::Base
   belongs_to :car_num
   has_many :res_prod_relation, :dependent => :destroy
 
-  STATUS = {:normal => 0, :cancel => 2, :confirmed => 1}
+  STATUS = {:normal => 0, :cancel => 2, :confirmed => 1} #0  正常 1  确认预约 2 删除
+  TYPES = {:PURPOSE =>0,:RESER => 1} #0 意向单 1 预约单
 
   def self.store_reservations store_id
     stime = " and r.created_at >= CURDATE() "

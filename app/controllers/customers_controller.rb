@@ -153,13 +153,13 @@ class CustomersController < ApplicationController
   def single_send_message
     unless params[:content].strip.empty? or params[:m_customer_id].nil?
       MessageRecord.transaction do
-        customer = Customer.find(params[:m_customer_id].to_i)
-        content = params[:content].strip.gsub("%name%", customer.name).gsub(" ", "")
-        #        begin
-        flash[:notice] = message_data(params[:store_id],content,customer,nil,MessageRecord::M_TYPES[:SINGLE_MSG])
-        #        rescue
-        #          flash[:notice] = "短信通道忙碌，请稍后重试。"
-        #        end
+        begin
+          customer = Customer.find(params[:m_customer_id].to_i)
+          content = params[:content].strip.gsub("%name%", customer.name).gsub(" ", "")
+          flash[:notice] = message_data(params[:store_id],content,customer,nil,MessageRecord::M_TYPES[:SINGLE_MSG])
+        rescue
+          flash[:notice] = "短信通道忙碌，请稍后重试。"
+        end
       end
     end
     redirect_to request.referer
@@ -169,13 +169,11 @@ class CustomersController < ApplicationController
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
     @car_nums = CarNum.find_by_sql(["select c.id c_id, c.num, c.distance distance, cb.name b_name, cm.name m_name, cb.id b_id, cr.customer_id,
-        cm.id m_id, c.buy_year,cb.capital_id
-        from car_nums c left join car_models cm on cm.id = c.car_model_id
-        left join car_brands cb on cb.id = cm.car_brand_id
-        inner join customer_num_relations cr on cr.car_num_id = c.id
+        cm.id m_id, c.buy_year,cb.capital_id,c.distance from car_nums c left join car_models cm on cm.id = c.car_model_id
+        left join car_brands cb on cb.id = cm.car_brand_id inner join customer_num_relations cr on cr.car_num_id = c.id
         where cr.customer_id = ?", @customer.id])
     order_page = params[:rev_page] ? params[:rev_page] : 1
-    @orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id, 10, order_page)
+    @orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id, 20, order_page)
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
     @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
@@ -189,6 +187,7 @@ class CustomersController < ApplicationController
     p_card = @customer.pcard_records(params[:store_id])
     @c_pcard_relations = p_card[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if p_card[1] #套餐卡记录
     @already_used_count = p_card[0]
+    @c_svc = CSvcRelation.joins(:sv_card).where(:customer_id=>@customer.id,:status=>CSvcRelation::STATUS[:valid],:sv_cards=>{:types=>SvCard::FAVOR[:SAVE]})
   end
   
   def order_prods

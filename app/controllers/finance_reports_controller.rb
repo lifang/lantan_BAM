@@ -357,7 +357,7 @@ class FinanceReportsController < ApplicationController
 
   def update_asset
     FixedAsset.where(:id=>params[:asset_id]).update_all(:status=>FixedAsset::STATUS[:INVALID] )
-     @asset = FixedAsset.where(:id=>params[:asset_id]).select("fixed_assets.*,round(pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*(pay_amount/share_month),2) left_value").first
+    @asset = FixedAsset.where(:id=>params[:asset_id]).select("fixed_assets.*,round(pay_amount-TIMESTAMPDIFF(MONTH,fee_date,now())*(pay_amount/share_month),2) left_value").first
     @n_staffs = Staff.where(:store_id=>params[:store_id]).inject({}){|h,s|h[s.id]=s.name;h}
     @defines = Category.where(:types=>Category::TYPES[:ASSETS]).inject({}){|h,s|h[s.id]=s.name;h}
     @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month : params[:first_time].to_datetime
@@ -494,6 +494,16 @@ class FinanceReportsController < ApplicationController
       format.html
       format.js
     end
+  end
+
+  def print_report
+    @orders = Order.joins([:car_num,:customer,:order_prod_relations=>:product]).joins("left join work_orders w on w.order_id=orders.id").
+      select("orders.*,customers.mobilephone phone,customers.name c_name,customers.group_name,car_nums.num c_num,w.station_id s_id,
+      customers.id c_id,products.is_service,products.name p_name").where(:status=>Order::PRINT_CASH,:store_id=>params[:store_id]).
+      where("date_format(orders.updated_at,'%Y-%m-%d')>='#{params[:c_first]}' and date_format(orders.updated_at,'%Y-%m-%d')<='#{params[:c_last]}' ").order("orders.updated_at desc")
+    @pays = OrderPayType.search_pay_types(@orders.map(&:id))
+    @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
+    render :layout => false
   end
 
 end

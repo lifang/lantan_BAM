@@ -27,8 +27,8 @@ class Api::OrdersController < ApplicationController
             left join departments b on d.dpt_id=b.id
             where s.username = ? and s.status in (?)", params[:user_name], Staff::VALID_STATUS]).first   
     info = ""
-    store = staff.store
-    if store.nil? or  staff.nil? or !staff.has_password?(params[:user_password])
+    store = staff.store if staff
+    if staff.nil? or store.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
     elsif store.status != Store::STATUS[:OPENED]
       info = "#{store.close_reason}"

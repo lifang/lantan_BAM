@@ -30,7 +30,6 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
       <thead>
         <tr class="hbg">
-          <td width="5%"><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
           <td width="20%">单号</td>
           <td width="10%">客户</td>
           <td width="10%">服务金额</td>
@@ -44,7 +43,6 @@
         <%unless @orders.blank? %>
           <%order = @orders[0]%>
           <tr>
-            <td><input type="checkbox" id="line_<%= order.id %>" value="<%= order.id %>" /></td>
             <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
                 :remote => "true", "data-type" => "script", :class => "other_a" %></td>
             <td><%= order.c_name %></td>
@@ -72,7 +70,6 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
       <thead>
         <tr class="hbg">
-          <td width="5%"><input type="checkbox" title="全选" onclick='set_value(this)' /></td>
           <td width="20%">单号</td>
           <td width="10%">客户</td>
           <td width="10%">服务金额</td>
@@ -86,7 +83,6 @@
         <%unless @orders.blank? %>
           <% @orders.each do |order| %>
             <tr>
-              <td><input type="checkbox" id="line_<%= order.id %>" value="<%= order.id %>" /></td>
               <td><%= link_to "#{order.code}", "/orders/#{order.id}/order_info" ,
                   :remote => "true", "data-type" => "script", :class => "other_a" %></td>
               <td><%= order.c_name %></td>

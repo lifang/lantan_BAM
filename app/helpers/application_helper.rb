@@ -9,6 +9,7 @@ module ApplicationHelper
   include Oauth2Helper
   include CustomersHelper
   include MessagesHelper
+  include LoginsHelper
 
   MODEL_STATUS = {:NORMAL => 0,:DELETE =>1} #0 正常 1 删除
   def sign?
@@ -35,7 +36,6 @@ module ApplicationHelper
       where c.store_id = ? and c.status = ? ", params[:store_id].to_i, Complaint::STATUS[:UNTREATED]])
     
     @notices = Customer.find_by_sql("select DISTINCT(c.id), c.name from customers c
-      left join customer_store_relations csr on csr.customer_id = c.id
       where c.status = #{Customer::STATUS[:NOMAL]} 
       and c.store_id in(#{StoreChainsRelation.return_chain_stores(params[:store_id].to_i).join(",")}) 
       and c.birthday is not null and
@@ -337,14 +337,16 @@ module ApplicationHelper
   #发送短信的功能
   def send_message_request(message_arr,send_num)
     times = message_arr.length%send_num == 0 ? message_arr.length/send_num-1 : message_arr.length/send_num
+    response = []
     (0..times).each do |time|
       start_num = time*send_num
       end_num = (time+1)*send_num-1
       msg_hash = {:resend => 0, :list => message_arr[start_num..end_num] ,:size => message_arr[start_num..end_num].length}
       jsondata = JSON msg_hash
       message_route = "/send_packet.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&jsondata=#{jsondata}&Exno=0"
-      create_get_http(Constant::MESSAGE_URL, message_route)
+      response << create_get_http(Constant::MESSAGE_URL, message_route)
     end
+    response
   end
 
   #统一发送短信的方式和相关数据  目前仅限于单条发送和费用的计算
@@ -353,7 +355,7 @@ module ApplicationHelper
     piece = send_message.length%70==0 ? send_message.length/70 : send_message.length/70+1
     this_price = piece*Constant::MSG_PRICE
     phone = customer.attributes["mobilephone"] ||= customer.attributes["phone"]
-    if phone and (store.message_fee-this_price) > Constant::OWE_PRICE
+    if phone and (store.message_fee-this_price) >= Constant::OWE_PRICE
       status = SendMessage::STATUS[:FINISHED]
       m_parm = {:store_id =>store_id, :content =>send_message,:send_at => Time.now,:types=>msg_types}
       if store.send_list and store.send_list.split(",").include?("#{msg_types}")
@@ -371,7 +373,7 @@ module ApplicationHelper
       SendMessage.create(parms.merge({:content=>send_message,:types=>SendMessage::TYPES[:OTHER],
             :send_at=>Time.now.strftime('%Y-%m-%d %H:%M:%S'),:message_record_id => message_record.id}))
     else
-      m_msg = "余额不足"  #使用新的变量m_msg防止多次提醒
+      m_msg = "短信余额不足，未发送。。。"  #使用新的变量m_msg防止多次提醒
     end
     return m_msg
   end
@@ -390,7 +392,7 @@ module ApplicationHelper
         :content => content, :phone =>m_arr[:mobile],:send_at => Time.now, :status => status,:store_id=>store_id)
     end
     this_price = t_piece*Constant::MSG_PRICE
-    if  (store.message_fee-this_price) > Constant::OWE_PRICE
+    if  (store.message_fee-this_price) >= Constant::OWE_PRICE
       if store.send_list and store.send_list.split(",").include?("#{msg_types}")
         send_num = 2100/m_content.length
         send_message_request(message_arrs,send_num) #此处传递m_content用于计算大致的可发送条数
@@ -403,9 +405,16 @@ module ApplicationHelper
       SendMessage.import send_messages unless send_messages.blank?
     else
       message_record.destroy
-      m_msg = "余额不足"  #使用新的变量防止多次提醒
+      m_msg = "短信余额不足，未发送。。。"  #使用新的变量防止多次提醒
     end
     return m_msg
+  end
+
+  def get_dir_list(path)   #获取目录列表
+    list = Dir.entries(path)
+    list.delete('.')
+    list.delete('..')
+    return list
   end
 
   

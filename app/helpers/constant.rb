@@ -220,6 +220,7 @@ module Constant
   PRODUCT = "PRODUCT"
   SERVICE = "SERVICE"
   UNNEED_UPDATE = ['sync','item','model','jv_sync']  #不更新的表
+  UNDELETE_UPDATE = ["category","role_model_relation","role","staff","store_chains_relation","department","role_menu_relation"]  #不删除的表
   DATE_START =  "2013-01"
 
   PIC_SIZE =1024  #按kb计算
@@ -235,11 +236,11 @@ module Constant
   WORK_ORDER_PATH = LOCAL_DIR + "work_order_data/"
 
   #支付宝
-  PAGE_WAY="https://www.alipay.com/cooperate/gateway.do"
-  NOTIFY_URL="http://notify.alipay.com/trade/notify_query.do"
-  PARTNER_KEY="3goqmgklinxngzq0j9ge7bxxh0jwrd0f"
-  PARTNER="2088801819580851"
-  SELLER_EMAIL=" 539807006@qq.com"
+  PAGE_WAY = "https://www.alipay.com/cooperate/gateway.do"
+  NOTIFY_URL = "http://notify.alipay.com/trade/notify_query.do"
+  PARTNER_KEY = "3goqmgklinxngzq0j9ge7bxxh0jwrd0f"
+  PARTNER = "2088801819580851"
+  SELLER_EMAIL = "539807006@qq.com"
   CALLBACK_URL="http://localhost:3001/messages/alipay_compete"
   NONSYNCH_URL="http://localhost:3001/user/alipays/over_pay"
 

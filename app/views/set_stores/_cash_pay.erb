@@ -98,7 +98,8 @@
     </li>
     <li>付款总计：<span id="total_pay"><%=0%></span></li>
     <li>待付金额：<span id="left_pay"><%= (total > reward ? total-reward : 0).round(2)%></span></li>
-    <li><a href="javascript:void(0)" class="deal_money_btn" id="due_over" onclick="check_post(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)" style="display: none">可以结账</a></li>
+    <li><%= image_tag "ajax-loader.gif", :id => "spinner_due_over", :style => "display:none;" %>
+      <a href="javascript:void(0)" class="deal_money_btn" id="due_over" onclick="check_post(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)" style="display: none">可以结账</a></li>
   </ul>
 </div>
 <div class="accountsTab_way">
@@ -141,6 +142,7 @@
   <div class="btn_box">
     <%= image_tag "ajax-loader.gif", :id => "spinner_user", :style => "display:none;" %>
     <button class="confirm_btn" id="confirm_order" onclick="confirm_pay_order(<%=params[:store_id]%>,<%=@customer.id%>,<%=@car_num.id%>)">确定</button>
+    <button class="confirm_btn" id="print_orders" onclick="window.open('/stores/'+<%=params[:store_id]%>+'/set_stores/print_paper?c_id=<%=params[:customer_id]%>&n_id=<%=params[:car_num_id]%>&o_id=<%=@orders.map(&:id).join(',')  %>','_blank','height=520,width=625,left=10,top=100');">打印小票</button>
     <input type="checkbox" id="is_biling">发票</input>
     <input type="checkbox" id="is_print" checked>打印小票</input>
     <input type="checkbox" id="is_order">打印单据</input></div>

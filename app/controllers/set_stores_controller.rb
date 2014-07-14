@@ -66,8 +66,7 @@ class SetStoresController < ApplicationController
     @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
     @tech_orders = TechOrder.where(:order_id=>@orders.map(&:id)).group_by{|i|i.order_id}
     staff_ids = (@orders.map(&:front_staff_id)|@tech_orders.values.flatten.map(&:staff_id)).compact.uniq
-    staff_ids.delete 0
-    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @staffs = Staff.where(:id =>staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @tech_orders.each{|order_id,tech_orders| @tech_orders[order_id] = tech_orders.map{|tech|@staffs[tech.staff_id]}.join("、")}
     @stations = Station.find(@orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
   end
@@ -81,8 +80,7 @@ class SetStoresController < ApplicationController
     @order_pays = OrderPayType.search_pay_order(orders.map(&:id))
     @techs = TechOrder.where(:order_id=>orders.map(&:id)).group_by{|i|i.order_id}
     staff_ids = (@techs.values.flatten.map(&:staff_id)|orders.map(&:front_staff_id)).compact.uniq
-    staff_ids.delete 0  #莫名其妙多出来staff_id为0的数据 没找到原因  目前只能排除掉
-    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @staffs = Staff.where(:id =>staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @techs.each{|order_id,tech_orders| @techs[order_id] = tech_orders.map{|tech|@staffs[tech.staff_id]}.join("、")}
     @stations = Station.find(orders.map(&:station_id).compact.uniq).inject(Hash.new){|hash,s|hash[s.id]=s.name;hash}
   end
@@ -131,10 +129,8 @@ class SetStoresController < ApplicationController
     @customer = Customer.find params[:c_id]
     @car_num = CarNum.find params[:n_id]
     @orders = Order.where(:id=>params[:o_id].split(',').compact.uniq)
-    @tech_orders = TechOrder.where(:order_id=>params[:o_id].split(',').compact.uniq)
-    staff_ids = ([@orders.map(&:front_staff_id)]|@tech_orders.map(&:staff_id)).compact.uniq
-    staff_ids.delete 0
-    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @tech_orders = TechOrder.joins(:staff).where(:order_id=>params[:o_id].split(',').compact.uniq).select("staffs.name,order_id").group_by{|i|i.order_id}
+    @staffs = Staff.where(:id=>([@orders.map(&:front_staff_id)]).compact.uniq).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(@orders.map(&:id))
     @order_pays = OrderPayType.search_pay_types(@orders.map(&:id))
     @cash_pay = OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first

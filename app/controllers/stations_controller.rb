@@ -150,7 +150,7 @@ class StationsController < ApplicationController
               #生成积分的记录
               if (customer && customer.is_vip) || is_vip
                 Point.create(:customer_id=>customer.customer_id,:target_id=>order.id,:target_content=>"购买产品/服务/套餐卡获得积分",:point_num=>point,:types=>Point::TYPES[:INCOME])
-                customer.update_attributes({:total_point=>point+(customer.total_point.nil? ? 0 : customer.total_point),:is_vip=>is_vip})
+                customer.update_attributes({:total_point=>point+(customer.total_point.nil? ? 0 : customer.total_point),:is_vip=>Customer::IS_VIP[:VIP]})
               end
               order.update_attributes({:status=>Order::STATUS[:BEEN_PAYMENT],:is_free=>false,:front_deduct=>deduct})
               order.tech_orders.update_attributes(:own_deduct=>t_deduct/order.tech_orders.length) unless order.tech_orders.blank?

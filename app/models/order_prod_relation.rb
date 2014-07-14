@@ -50,7 +50,7 @@ class OrderProdRelation < ActiveRecord::Base
   end
 
   #pad上点击确认下单之后，生产一条订单记录及其与prodcuts关联的记录
-  def self.make_record p_id, p_num, staff_id, cus_id, car_num_id, store_id
+  def self.make_record p_id, p_num, staff_id, cus_id, car_num_id, store_id,purpose_price=nil
     Order.transaction do
       product = Product.find_by_id(p_id)
       status = 1
@@ -82,13 +82,13 @@ class OrderProdRelation < ActiveRecord::Base
           order_parm = {
             :code => MaterialOrder.material_order_code(store_id),
             :car_num_id => car_num_id,:status => Order::STATUS[:WAIT_PAYMENT],:store_id => store_id,
-            :price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : product.sale_price.to_f*p_num,
+            :price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : purpose_price.nil? ? product.sale_price.to_f*p_num : purpose_price.to_f*p_num,
             :is_billing => false,:front_staff_id =>staff_id,:customer_id => cus_id,:is_visited => Order::IS_VISITED[:NO],
             :types => Order::TYPES[:SERVICE],:auto_time => product.is_auto_revist ? Time.now + product.auto_time.to_i.hours : nil}
           order = Order.create(order_parm)
           relation_parm = {:order_id => order.id,:product_id => p_id,:pro_num => p_num,
-            :price => product.single_types == Product::SINGLE_TYPE[:DOUB] ?  0 : product.sale_price,
-            :total_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : product.sale_price.to_f*p_num,
+            :price => product.single_types == Product::SINGLE_TYPE[:DOUB] ?  0 : purpose_price.nil? ? product.sale_price : purpose_price,
+            :total_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : purpose_price.nil? ? product.sale_price.to_f*p_num : purpose_price.to_f*p_num,
             :t_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ?  0 : product.t_price.to_f*p_num}
           OrderProdRelation.create(relation_parm)
           m.update_attribute("storage", m.storage - p_num * pmr.material_num) unless product.is_service

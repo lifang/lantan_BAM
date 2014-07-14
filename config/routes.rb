@@ -45,7 +45,7 @@ LantanBAM::Application.routes.draw do
         post "fee_manage","show_fee","fee_report","load_account","pay_account","manage_account"
         post "payable_account","revenue_report","cost_price","analysis_price","create_assets","manage_assets","show_asset"
         post "update_asset","other_fee","load_prod","return_order"
-        get "cost_price","analysis_price","manage_assets","other_fee","complete_account","return_order"
+        get "cost_price","analysis_price","manage_assets","other_fee","complete_account","return_order","print_report"
         delete "destroy"
       end
     end
@@ -110,7 +110,7 @@ LantanBAM::Application.routes.draw do
       collection do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_back_records","page_head_orders","page_supplier_orders",
-          "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore",
+          "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore","print_out",
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
           "mat_loss_delete","mat_loss","back_good","back_good_search","back_good_commit", "reflesh_low_materials","print_mat"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
@@ -345,7 +345,7 @@ LantanBAM::Application.routes.draw do
     resources :change do
       collection do
         get :sv_records
-        post :change_pwd,:send_code,:use_svcard
+        post :change_pwd,:send_code,:use_svcard,:change_to_order,:cancel_reserv
       end
     end
   end

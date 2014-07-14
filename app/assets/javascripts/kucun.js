@@ -1306,6 +1306,8 @@ function search_materials(tab_name, store_id, obj, mat_in_flag){
     var mat_name = $.trim($(obj).parents(".search").find("#search_material_name").val());
     var mat_type = $.trim($(obj).parents(".search").find("#search_material_type").val());
     var mo_code = $.trim($(obj).parents(".search").find("#material_order_code").val());
+    var first_time = $.trim($(obj).parents(".search").find("#c_first").val());
+    var last_time = $.trim($(obj).parents(".search").find("#c_last").val());
     $.ajax({
         url: "/stores/"+store_id+"/materials/search_materials",
         dataType: "script",
@@ -1317,7 +1319,9 @@ function search_materials(tab_name, store_id, obj, mat_in_flag){
             mat_type : mat_type,
             store_id : store_id,
             mat_in_flag : mat_in_flag,
-            mo_code : mo_code
+            mo_code : mo_code,
+            last_time : last_time,
+            first_time : first_time
         }
     })
 }
@@ -1628,4 +1632,13 @@ function back_good_validate(store_id){      //退货确定按钮验证
         })
     }
             
+}
+
+
+function print_out(tab_name,store_id, obj){
+    var mat_type = $.trim($(obj).parents(".search").find("#search_material_type").val());
+    var first_time = $.trim($(obj).parents(".search").find("#c_first").val());
+    var last_time = $.trim($(obj).parents(".search").find("#c_last").val());
+    window.open('/stores/'+store_id+'/materials/print_out?first_time='+first_time+
+        "&last_time="+last_time+"&mat_type="+mat_type+"&tab_name="+tab_name,"_blank")
 }

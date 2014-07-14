@@ -437,3 +437,9 @@ function return_order(e,store_id){
     }
     set_search(e,store_id,"return_order",parm)
 }
+
+function print_report(obj,store_id){
+    var c_first = $.trim($(obj).parents(".search").find("#c_first").val());
+    var c_last = $.trim($(obj).parents(".search").find("#c_last").val());
+    window.open("/stores/"+store_id+"/finance_reports/print_report?c_first="+c_first+"&c_last="+c_last);
+}

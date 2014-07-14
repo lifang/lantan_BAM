@@ -18,7 +18,7 @@ class CreatePackageCards < ActiveRecord::Migration
       t.string :description
       t.decimal :deduct_price,:precision=>"20,2",:default=>0
       t.decimal :deduct_percent,:precision=>"20,2",:default=>0
-      t.decimal :sale_percent, :"decimal(20,16)",:default=>1
+      t.decimal :sale_percent,:precision=>"20,16",:default=>1
       t.boolean :auto_warn,:default=>0
       t.integer :time_warn
       t.string :con_warn

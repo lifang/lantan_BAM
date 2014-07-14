@@ -175,13 +175,6 @@ class Station < ActiveRecord::Base
     return hashs.inect(Hash.new) {|hash,con|con.each{|k,v|  hash["#{k}"]="#{v}" };hash}.gsub("=>",":")
   end
 
-  #获取目录列表
-  def self.get_dir_list(path)
-    list = Dir.entries(path)
-    list.delete('.')
-    list.delete('..')
-    return list
-  end
 
   def self.filter_dir(store_id)
     path_dir = Constant::LOCAL_DIR

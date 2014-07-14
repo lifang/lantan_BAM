@@ -1,35 +1,75 @@
-<div class="data_body_title">
-  <div class="data_body_p">
-    <span>客户姓名：<%= @customer.name %></span>
-    <span>手机号码：<%= @customer.mobilephone %></span>
-    <span>其他联系方式：<%= @customer.other_way %></span>
-    <span>生日：<%= @customer.birthday.strftime("%Y-%m-%d") if @customer.birthday %></span>
-    <span>地址：<%= @customer.address %></span>
-
-    <% if permission?(:customers, :edit) %><span><button type="button" class="compile_btn" onclick="javascript:edit_customer()">编辑</button></span><% end %>
-            <button type="button" class="compile_btn" onclick="add_cars()">添加车辆</button>
-  </div>
-  <ul class="data_body_ul">
-    <% @car_nums.each do |car| %>
-    <li>
-      <span>车牌号码：<%= car.num %></span>&nbsp;&nbsp;
-      <span>品牌：<%= car.b_name %>——<%= car.m_name %></span>&nbsp;&nbsp;
-      <span>购买年份：<%= car.buy_year %></span>
-      <% if permission?(:customers, :edit_car_num) %>
-      <span>
-        <button type="button" class="compile_btn" 
-                onclick="javascript:edit_car_num_f('<%= car.c_id %>')">编辑</button>
-      </span>
-      <% end %>
-      <% if permission?(:customers, :delete_car_num) %>
-      <span>
-        <button class="compile_btn" type="button"
-                onclick="javascript:if(confirm('您确定要删除当前车牌号码与当前客户的关系吗？')){window.location.href='/customers/<%= car.c_id %>_<%= car.customer_id %>/delete_car_num'}">删除</button>
-      </span>
-      <% end %>
-      <%= render :partial => "/customers/edit_car_num", :object => car %>     
-    </li>
+<div class="way_menu">
+  <a href="/stores/<%= @store.id %>/customers/" class="back_a" title="客户列表">客户列表</a>客户详情
+  <div style="float: right;">
+    <% if permission?(:customers, :edit) %>
+      <button type="button" class="compile_btn" onclick="javascript:edit_customer()">编辑</button>
     <% end %>
-  </ul>
-   <%= render :partial => "/customers/add_car" %>
+    <button type="button" class="blue_btn" onclick="add_cars()">添加车辆</button>
+  </div>
+</div>
+<div class="data_body_title" style="margin-bottom: 10px;">
+  <table class="data_body_table" style="border-top: 2px solid #b9b9b9;">
+    <tr>
+      <th>客户姓名</th>
+      <th>客户代码</th>
+      <th>手机号码</th>
+      <th>性别</th>
+      <th>生日</th>
+      <th>属性</th>
+      <th>类别</th>
+      <th>级别</th>
+      <th>联系地址</th>
+      <th>单位名称</th>
+    </tr>
+    <tr>
+      <td><%=@customer.name%></td>
+      <td><%= "--" %></td>
+      <td><%= @customer.mobilephone %></td>
+      <td><%=  Staff::N_SEX[@customer.sex ? 1 : 0]  %></td>
+      <td><%=  @customer.birthday.nil? ? "--" : @customer.birthday.strftime("%Y-%m-%d") %></td>
+      <td><%=@customer.property.to_i==Customer::PROPERTY[:PERSONAL] ? "个人客户" : (@customer.property.to_i==Customer::PROPERTY[:GROUP] ? "单位客户" : "未知")%></td>
+      <td>类别</td>
+      <td>级别</td>
+      <td><%= @customer.address %></td>
+      <td><%=  @customer.property.to_i==Customer::PROPERTY[:GROUP] ? @customer.group_name: "--"%></td>
+    </tr>
+  </table>
+  <table class="data_body_table">
+    <tr>
+      <th width="20%">资产信息</th>
+      <th>车辆信息</th>
+    </tr>
+    <tr>
+      <td style="border-right: 1px solid #e3e3e3;">
+        <ul style="text-indent: 20px;">
+          <li>储值卡<p class="t_f"><a <% if @srs.blank? %>class="false" <%else%>class="true"<%end%>></a></p></li>
+          <li>套餐卡<p class="t_f"><a <% if @c_pcard_relations.blank? %>class="false" <%else%>class="true"<%end%>></a></p></li>
+          <li>打折卡<p class="t_f"><a <% if @c_svc.blank? %>class="false" <%else%>class="true"<%end%>></a></p></li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <% @car_nums.each do |car| %>
+            <li>
+              <label style="width: 62px;">车牌号：</label><span style="width: 80px;"><%= car.num %></span>
+              <label style="width: 55px;">品牌：</label><span style="width: 175px;"><%= [car.b_name,car.m_name].compact.join("--") %></span>
+              <label style="width: 75px;">购车年份：</label><span style="width: 40px;"><%= car.buy_year %></span>
+              <label style="width: 75px;">行驶里程：</label><span style="width: 70px;"><%=car.distance%></span>
+              <% if permission?(:customers, :edit_car_num) %>
+                <button type="button" class="compile_btn"
+                        onclick="javascript:edit_car_num_f('<%= car.c_id %>')">编辑</button>
+                      <% end %>
+                      <% if permission?(:customers, :delete_car_num) %>
+                <button class="compile_btn" type="button"
+                        onclick="javascript:if(confirm('您确定要删除当前车牌号码与当前客户的关系吗？')){window.location.href='/customers/<%= car.c_id %>_<%= car.customer_id %>/delete_car_num'}">删除</button>
+                      <% end %>
+                      <%= render :partial => "/customers/edit_car_num", :object => car %>
+            </li>
+          <%end%>
+        </ul>
+      </td>
+    </tr>
+  </table>
+  <%= render :partial => "/customers/add_car" %>
+
 </div>

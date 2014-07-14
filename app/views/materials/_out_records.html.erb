@@ -89,7 +89,7 @@
         <td><%= out.sale_price %></td>
         <td><%= out.out_time.strftime("%Y-%m-%d %H:%M") unless out.out_time.nil?%></td>
         <td class="operation">
-          <a href="javascript:void(0)" title="<%=out.d_list%>" onclick="window.open('/stores/'+<%=params[:store_id]%>+'/materials/print_mat?mat_id=<%=out.out_id%>','_blank','height=520,width=625,left=10,top=100');">打印出库单</a></td>
+          <a href="javascript:void(0)" title="<%=out.d_list%>" onclick="window.open('/stores/'+<%=params[:store_id]%>+'/materials/print_mat?mat_id=<%=out.out_id%>','_blank','height=520,width=625,left=10,top=100');">打印物料清单</a></td>
       </tr>
     <% end %>
   </tbody>

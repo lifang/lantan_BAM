@@ -64,7 +64,7 @@ class Api::LoginsController < ApplicationController
     img_url = params[:image]
     path = "#{Rails.root}/public/recongte_pics/"
     t_value = []
-    Product.get_dir_list(path).sort.each {|f| FileUtils.remove_file path+f  }
+    get_dir_list(path).sort.each {|f| FileUtils.remove_file path+f  }
     File.open(path+ img_url.original_filename, "wb")  {|f|  f.write(img_url.read) }
     Zip::ZipFile.open(path+"#{img_url.original_filename}"){ |zipFile|
       zipFile.each do |file|

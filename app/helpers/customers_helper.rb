@@ -453,7 +453,7 @@ module CustomersHelper
             if (customer && customer.is_vip) || is_vip    #积分  积分记录
               points = order_points.values.compact.inject(0){|sum,n|sum+n}
               t_point = customer.total_point.nil? ? points : customer.total_point+points
-              customer.update_attributes({:total_point=>t_point,:is_vip=>is_vip})
+              customer.update_attributes({:total_point=>t_point,:is_vip=>Customer::IS_VIP[:VIP]})
               Point.import order_points.inject([]){|arr,p| arr << Point.new(:customer_id=>param[:customer_id],:point_num=>p[1],
                   :target_id=>p[0],:target_content=>"购买产品/服务/套餐卡获得积分",:types=>Point::TYPES[:INCOME]) }
             end
@@ -463,7 +463,6 @@ module CustomersHelper
               :"orders.id"=>order_ids).inject([]){|arr,m| arr << MatOutOrder.new({:material_id =>m.m_id, :staff_id =>m.f_id,:material_num => m.m_num,
                   :price => m.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id =>param[:store_id],:detailed_list=>m.detailed_list})}
             CPcardRelation.where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]
-
             customer_p = Customer.find(orders.map(&:customer_id)).inject({}){|h,c|h[c.id]=c.mobilephone;h}
             messages = []
             revist.each {|k,v|k_type = k.split("_");order =send_orders[k_type[0].to_i];send_time = k_type[1].to_i == SendMessage::TYPES[:REVIST] ? order.auto_time : order.warn_time;

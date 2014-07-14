@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140630062421) do
+ActiveRecord::Schema.define(:version => 20140714050105) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -55,6 +55,7 @@ ActiveRecord::Schema.define(:version => 20140630062421) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "store_id"
+    t.decimal  "price",        :precision => 20, :scale => 2, :default => 0.0
   end
 
   add_index "back_good_records", ["material_id"], :name => "index_back_good_records_on_material_id"
@@ -936,6 +937,15 @@ ActiveRecord::Schema.define(:version => 20140630062421) do
     t.datetime "created_at"
     t.integer  "customer_id"
     t.datetime "updated_at"
+    t.integer  "types"
+    t.integer  "prod_types"
+    t.integer  "prod_id"
+    t.decimal  "prod_price",                :precision => 20, :scale => 2, :default => 0.0
+    t.integer  "prod_num"
+    t.decimal  "deduct_num",                :precision => 5,  :scale => 2, :default => 0.0
+    t.integer  "staff_id"
+    t.integer  "order_id"
+    t.string   "code",        :limit => 45
   end
 
   add_index "reservations", ["car_num_id"], :name => "index_reservations_on_car_num_id"
@@ -1207,15 +1217,13 @@ ActiveRecord::Schema.define(:version => 20140630062421) do
   add_index "staffs", ["type_of_w"], :name => "index_staffs_on_type_of_w"
   add_index "staffs", ["username"], :name => "index_staffs_on_username"
 
-  create_table "station_service_relations", :force => true do |t|
-    t.integer  "station_id"
-    t.integer  "product_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "station_service_relations", ["product_id"], :name => "index_station_service_relations_on_product_id"
-  add_index "station_service_relations", ["station_id"], :name => "index_station_service_relations_on_station_id"
+# Could not dump table "station_service_relations" because of following ActiveRecord::StatementInvalid
+#   Interrupt: :           SELECT t.constraint_type, k.column_name
+          FROM information_schema.table_constraints t
+          JOIN information_schema.key_column_usage k
+          USING (constraint_name, table_schema, table_name)
+          WHERE t.table_schema = DATABASE()
+            AND t.table_name   = 'station_service_relations'
 
   create_table "station_staff_relations", :force => true do |t|
     t.integer  "station_id"
@@ -1310,13 +1318,13 @@ ActiveRecord::Schema.define(:version => 20140630062421) do
     t.string   "code"
     t.integer  "edition_lv"
     t.string   "limited_password"
-    t.integer  "cash_auth",                                                    :default => 0
-    t.integer  "auto_send",                                                    :default => 1
+    t.integer  "cash_auth",                                       :default => 0
+    t.integer  "auto_send",                                       :default => 1
     t.boolean  "is_chain"
     t.string   "close_reason"
     t.string   "send_list"
-    t.decimal  "message_fee",                   :precision => 10, :scale => 2, :default => 0.0
-    t.integer  "owe_warn",         :limit => 1,                                :default => 0
+    t.decimal  "message_fee",      :precision => 10, :scale => 2, :default => 0.0
+    t.boolean  "owe_warn",                                        :default => false
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"

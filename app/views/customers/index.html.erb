@@ -4,47 +4,34 @@
     <% if permission?(controller.controller_name.to_sym, :show) %>
       <div class="search">
         <%= form_for :customer ,:url=>"/stores/#{@store.id}/customers/search", :method => "post" do %>
-          <div><label>客户属性：</label>
-            <select id="c_property" name="c_property">
-              <option value="-1" <% if session[:c_property].to_i == -1 %>selected<% end %>>全部</option>
-              <option value="0" <% if !session[:c_property].nil? && session[:c_property].to_i == 0 %>selected<% end %>>个人客户</option>
-              <option value="1" <% if !session[:c_property].nil? && session[:c_property].to_i == 1 %>selected<% end %>>单位客户</option>
-            </select>
-          </div>
           <div><label>客户名称：</label><input type="text" name="name" id="name" value="<%= session[:name] %>"/></div>
           <div><label>车牌号码：</label><input type="text" name="car_num" id="car_num" value="<%= session[:car_num] %>"/></div>
           <div><label>手机号码：</label><input type="text" name="phone" id="phone" value="<%= session[:phone] %>"/></div>
-          <div><label>最近消费客户：</label>
+          <div><label>消费时间：</label>
             <input type="text" name="started_at" id="started_at" value="<%= session[:started_at] %>"
                    class="Wdate" readonly onClick="WdatePicker();"/>&nbsp;到&nbsp;
             <input type="text" name="ended_at" id="ended_at" value="<%= session[:ended_at] %>"
                    class="Wdate" readonly onClick="WdatePicker();"/></div>
-          <div>
-            <label>性别：</label>
-            <select name="c_sex">
-              <option value="-1" <% if session[:c_sex].to_i==-1 %>selected<% end %>>全部</option>
-              <option value="1" <% if !session[:c_sex].nil? && session[:c_sex].to_i==1 %>selected<% end %>>男</option>
-              <option value="0" <% if !session[:c_sex].nil? && session[:c_sex].to_i==0 %>selected<% end %>>女</option>
-            </select>
-          </div>
-          <div><input type="checkbox" name="is_vip" id="is_vip" value="1" <% if session[:is_vip] %>checked<% end %>/>会员</div>
           <input type="hidden" name="store_id" id="store_id" value="<%= @store.id %>" />
           <div><button type="submit" class="search_btn">查询</button></div>
         <% end %>
       </div>
     <% end %>
 
-    <div class="data_body_title">
+    <div class="data_body_title myd">
       <h2 class="data_body_h">
-        上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints"><%= "#{satisfy[0]}%" %></a>&nbsp;&nbsp;&nbsp;
-        上月门店不满意度 ：<a href="/stores/<%= @store.id %>/complaints"><%= "#{satisfy[1]}%" %></a>
+        上月门店满意度 ：<a href="/stores/<%= @store.id %>/complaints" style="color: #3cd439"><%= "#{satisfy[0]}%" %></a>&nbsp;&nbsp;&nbsp;
+        上月门店不满意度 ：<a href="/stores/<%= @store.id %>/complaints" style="color: #f42f3c"><%= "#{satisfy[1]}%" %></a>
       </h2>
-      <p class="data_body_p">客户数量：<span class="red"><%= @customers.total_entries if @customers %></span>位</p>
+      <p class="data_body_p" style="float: right;">客户数量：<span class="red"><%= @customers.total_entries if @customers %></span>位</p>
     </div>
-    <div class="data_menu">
-      <% if permission?(controller.controller_name.to_sym, :create) %>
-        <a href="javascript:void(0)" onclick="javascript:show_new_customer()">新建客户</a>
-      <% end %></div>
+    <div class="data_menu_box">
+      <span class="hover">全部客户</span>
+      <span>个人客户</span>
+      <div class="data_menu">
+        <% if permission?(controller.controller_name.to_sym, :create) %>
+          <a href="javascript:void(0)" onclick="javascript:show_new_customer()">新建客户</a>
+        <% end %></div></div>
     <div class="clear"></div>
     <div class="data_body">
       <div>
@@ -109,3 +96,4 @@
   </div>
 </div>
 <div id="process"></div>
+

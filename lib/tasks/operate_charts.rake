@@ -273,3 +273,9 @@ task(:change_msg => :environment) do
   Store.update_all(:send_list=>MessageRecord::SET_MESSAGE.keys.join(","))
   p "update store's functions to send message to customers run time #{(Time.now.to_i - time)/3600.0}"
 end
+
+#用户删除制定门店的信息
+task(:delete_infos => :environment) do
+  time = Time.now.to_i
+  TechOrder.delete_infos(2)
+end

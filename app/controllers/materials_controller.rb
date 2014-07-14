@@ -21,10 +21,12 @@ class MaterialsController < ApplicationController
     #@h_types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], 0])
     @material_losses = MaterialLoss.loss_list(@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @materials_storages = Material.materials_list(@current_store.id).paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
-    out_arr = MatOutOrder.out_list(@current_store.id)
+    @start_time =  Time.now.beginning_of_month.strftime("%Y-%m-%d")
+    @end_time =  Time.now.strftime("%Y-%m-%d")
+    out_arr = MatOutOrder.out_list(@current_store.id,@start_time,@end_time)
     @out_records = out_arr[0].paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @out_arr = [out_arr[1], out_arr[2]]
-    in_arr = MatInOrder.in_list(@current_store.id)
+    in_arr = MatInOrder.in_list(@current_store.id,@start_time,@end_time)
     @in_records = in_arr[0].paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     @in_arr = [in_arr[1], in_arr[2]]
     @type = 0
@@ -76,12 +78,12 @@ class MaterialsController < ApplicationController
       .paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
     elsif  @tab_name == 'in_records'
       @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
-      in_arr = MatInOrder.in_list(@current_store.id, @mat_type.to_i, @mat_name, @mat_code)
+      in_arr = MatInOrder.in_list(@current_store.id,params[:first_time],params[:last_time], @mat_type.to_i, @mat_name, @mat_code)
       @in_records = in_arr[0].paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
       @in_arr = [in_arr[1], in_arr[2]]
     elsif @tab_name == 'out_records'
       @types = Category.where(["types = ? and store_id = ?", Category::TYPES[:material], @current_store.id])
-      out_arr = MatOutOrder.out_list(@current_store.id, @mat_type.to_i, @mat_name, @mat_code)
+      out_arr = MatOutOrder.out_list(@current_store.id,params[:first_time],params[:last_time], @mat_type.to_i, @mat_name, @mat_code)
       @out_records = out_arr[0].paginate(:per_page => Constant::PER_PAGE, :page => params[:page])
       @out_arr = [out_arr[1], out_arr[2]]
     end
@@ -448,11 +450,9 @@ class MaterialsController < ApplicationController
     supp = params[:supplier_id]
     good_type = params[:good_type]
     sql = "select sum(moi.material_num) mnum,moi.material_id mid, mo.supplier_id msuid, m.name mname, m.storage mstorage, c.name cname
-                                           from material_orders mo inner join mat_order_items moi
-                                           on mo.id=moi.material_order_id inner join materials m
-                                           on moi.material_id=m.id inner join categories c on m.category_id=c.id
-                                           where mo.supplier_id=#{supp} and mo.m_status=#{MaterialOrder::M_STATUS[:save_in]}
-                                           and c.id=#{good_type}"
+          from material_orders mo inner join mat_order_items moi on mo.id=moi.material_order_id inner join materials m
+          on moi.material_id=m.id inner join categories c on m.category_id=c.id where mo.supplier_id=#{supp} and
+         mo.m_status=#{MaterialOrder::M_STATUS[:save_in]} and c.id=#{good_type}"
     unless params[:good_name].strip.empty? || params[:good_name].strip == ""
       good_name = params[:good_name].strip.gsub(/[%_]/){|x|'\\' + x}
       sql += " and m.name like '%#{good_name}%'"
@@ -1129,6 +1129,19 @@ class MaterialsController < ApplicationController
     @mat_out = MatOutOrder.find(params[:mat_id])
     @store = Store.find(params[:store_id])
     
+  end
+
+  def print_out
+    if params[:tab_name] == 'in_records'
+      in_arr = MatInOrder.in_list(params[:store_id],params[:first_time],params[:last_time], @mat_type.to_i)
+      @in_records = in_arr[0]
+      @in_arr = [in_arr[1], in_arr[2]]
+    elsif params[:tab_name] == 'out_records'
+      out_arr = MatOutOrder.out_list(params[:store_id],params[:first_time],params[:last_time], @mat_type.to_i)
+      @out_records = out_arr[0]
+      @out_arr = [out_arr[1], out_arr[2]]
+    end
+    render :layout => false
   end
 
 

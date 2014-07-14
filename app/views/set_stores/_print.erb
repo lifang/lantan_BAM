@@ -32,9 +32,9 @@
           <div class="dashed"></div>
           <p><label>ID:</label><span><%=order.code%></span></p>
           <p><label>开单员：</label><span><%=@staffs[order.front_staff_id]%></span></p>
-          <% tech = [@staffs[order.cons_staff_id_1],@staffs[order.cons_staff_id_2]].compact.uniq %>
+          <% tech = @tech_orders[order.id] %>
           <%unless tech.blank? %>
-            <p><label>技师：</label><span><%=tech.join("、")%></span></p>
+            <p><label>技师：</label><span><%=tech.map(&:name).join("、")%></span></p>
           <% end %>
           <%  o_prod = @order_prods[order.id][0]%>
           <div class="dashed"><span class="lineTxt"><%=o_prod.p_types%></span></div>

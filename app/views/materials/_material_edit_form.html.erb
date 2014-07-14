@@ -34,7 +34,7 @@
                                          <% if @material.create_prod   %> checked disabled <%end%>
                                          onclick='$("#c_prod").css("display",this.checked ? "block" : "none");this.value=this.checked ? 1 : 0;' /></div>
             <div class="item_textarea">
-              <label>物料清单：</label><textarea name="material[detailed_list]" id="detailed_list" cols="" rows="" class="width_textarea"><%=@material.detailed_list.gsub("<br/>","\r\n")  %></textarea>
+              <label>物料清单：</label><textarea name="material[detailed_list]" id="detailed_list" cols="" rows="" class="width_textarea"><%=@material.detailed_list.nil? ? "" : @material.detailed_list.gsub("<br/>","\r\n")  %></textarea>
             </div>
             <%= render "prod_material" %>
           </div>

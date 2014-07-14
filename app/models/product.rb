@@ -69,13 +69,6 @@ class Product < ActiveRecord::Base
     return JSON back_res.body
   end
 
-  def self.get_dir_list(path)
-    #获取目录列表
-    list = Dir.entries(path)
-    list.delete('.')
-    list.delete('..')
-    return list
-  end
 
   def self.recgnite_pic(dir,file)
     file_path = dir+file.name

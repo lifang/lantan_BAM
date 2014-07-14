@@ -169,17 +169,25 @@ function check_num(){
     return true;
 }
 
+//可以付款功能
 function check_post(store_id,c_id,n_id){
     if (!check_num()){ //判断储值卡的金额是否符合
         return false;
     }
-    $("#due_over").attr("onclick","").attr("title","正在处理。。。");
     var url = "/stores/"+store_id+"/set_stores/pay_order"
     var pay_order = set_pay_order();
     if (pay_order[0]){
         tishi_alert("储值卡密码不能为空");
         return false;
     }else{
+        var time = 3;
+        var local_timer=setInterval(function(){
+            if (time <=0){
+                $("#due_over").attr("onclick","check_post("+store_id+","+c_id+","+n_id+")");
+                window.clearInterval(local_timer);
+            }
+            time -= 1;
+        },1000)
         $.ajax({
             type:"post",
             url:url,
@@ -348,7 +356,8 @@ function set_reward(e){
     if (this_value > loss){
         tishi_alert("优惠金额超过本单金额！");
         return false;
-    }else{
+    }
+    else{
         $("#hipay_"+e.id.split("_")[1]).val(round(this_value,2));
         $("#due_pay").html(round(hidden_pay+still_pay-this_value,2));
         $("#left_pay,#due_money").html(round(hidden_pay+still_pay-this_value,2));
@@ -626,7 +635,8 @@ function put_add(e,e_id,storage,name,total_price,price){
         if (total_item == "" || total_item.length ==0){
             $("#checked_item").val(e_id);
             add_item(e_id,storage,name,total_price,price);
-        }else{
+        }
+        else{
             var  is_new = true;
             var same_id = e_id;
             var pid = e_id.split("_");
@@ -663,7 +673,8 @@ function put_add(e,e_id,storage,name,total_price,price){
                 }
             }
         }
-    }else{
+    }
+    else{
         del_item(e_id,total_price);
     }
 }

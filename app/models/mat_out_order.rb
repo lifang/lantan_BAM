@@ -6,7 +6,7 @@ class MatOutOrder < ActiveRecord::Base
   TYPES = {0 => "消耗", 1 => "调拨", 2 => "赠送", 3 => "销售",4=>"快速出库"}
   TYPES_VALUE = {:cost => 0, :transfer => 1, :send => 2, :sale => 3,:quick_out =>4}
 
-  def self.out_list store_id,types=nil,name=nil,code=nil
+  def self.out_list store_id,first_time,last_time,types=nil,name=nil,code=nil
     sql = ["select materials.*,o.material_num,s.name staff_name,o.price out_price,o.created_at out_time,o.types out_types,
      c.name cname,o.id out_id,o.detailed_list d_list from mat_out_orders o inner join materials on materials.id=o.material_id
      inner join categories c on materials.category_id=c.id inner join staffs s on s.id=o.staff_id where c.types=? and
@@ -24,7 +24,8 @@ class MatOutOrder < ActiveRecord::Base
       sql[0] += " and materials.code=?"
       sql << code
     end
-    sql[0] += " order by o.created_at desc"
+
+    sql[0] += " and date_format(o.created_at,'%Y-%m-%d') between '#{first_time}' and '#{last_time}' order by o.created_at desc"
     records = Material.find_by_sql(sql)
     arr = []
     arr << records

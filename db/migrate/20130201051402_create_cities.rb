@@ -4,6 +4,7 @@ class CreateCities < ActiveRecord::Migration
       t.integer :order_index
       t.string :name
       t.integer :parent_id
+      t.timestamps
     end
 
     add_index :cities, :parent_id

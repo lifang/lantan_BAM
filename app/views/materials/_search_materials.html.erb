@@ -3,11 +3,18 @@ mo_search ||= false
 %>
 <div class="search">
   <% if mo_search %>
-  <div>
-    <label>订货单号：</label>
-    <%= select("material_order", "code", @material_orders_not_all_in.collect {|mo| [ mo.code, mo.id ] }, { :prompt =>"请选择" }) %>
-  </div>
+    <div>
+      <label>订货单号：</label>
+      <%= select("material_order", "code", @material_orders_not_all_in.collect {|mo| [ mo.code, mo.id ] }, { :prompt =>"请选择" }) %>
+    </div>
   <% end %>
+  <% if tab_name == "out_records" || tab_name == "in_records" %>
+    <div><label>时间：</label>
+      <input id="c_first" type="text"  onclick="WdatePicker({preLoad:true,maxDate:'<%=Time.now.strftime("%Y-%m-%d")%>',isShowClear:false})" readonly class="Wdate"
+             value="<%=@start_time%>"/> 到
+      <input id="c_last" type="text" onclick="WdatePicker({preLoad:true,maxDate:'<%=Time.now.strftime("%Y-%m-%d")%>',isShowClear:false})" readonly class="Wdate"
+             value="<%= @end_time %>" /></div>
+    <%end%>
   <div>
     <label>物料类别：</label>
     <select id="search_material_type">
@@ -25,7 +32,13 @@ mo_search ||= false
     <label>条形码：</label>
     <input type="text" id="search_material_code" value="<%= @mat_code %>"/>
   </div>
+
   <div>
     <button class="search_btn" onclick="search_materials('<%= tab_name %>',<%= @current_store.id %>, this, <%= mat_in_flag %>)">查询</button>
   </div>
+  <% if tab_name == "out_records" || tab_name == "in_records"%>
+    <div>
+      <button class="search_btn" onclick="print_out('<%= tab_name %>',<%= @current_store.id %>, this)">打印</button>
+    </div>
+  <%end%>
 </div>

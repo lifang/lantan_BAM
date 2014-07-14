@@ -24,6 +24,7 @@ class Customer < ActiveRecord::Base
   ALLOWED_DEBTS = {:NO => 0, :YES => 1}   #是否允许欠账
   CHECK_TYPE = {:MONTH => 0, :WEEK => 1}  #结算类型 按月/周结算
 
+
   def self.search_customer(c_property, car_num, started_at, ended_at, name, phone, c_sex, is_vip, page, store_id)
     base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.mark, cu.property,cu.is_vip from customers cu
         left join customer_num_relations cnr on cnr.customer_id = cu.id
@@ -77,7 +78,7 @@ class Customer < ActiveRecord::Base
     condition_sql += " group by ca.id " if need_group_by
     params_arr[0] = base_sql + condition_sql
     params_arr[0] += " order by cu.created_at desc"
-    return Customer.paginate_by_sql(params_arr, :per_page => 10, :page => page)
+    return Customer.paginate_by_sql(params_arr, :per_page => 20, :page => page)
   end
 
   def self.auto_generate_customer_type

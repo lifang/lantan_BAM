@@ -35,14 +35,6 @@ class Sync < ActiveRecord::Base
     flog.close
   end
 
-  #获取目录下的所有文件
-  def self.get_dir_list(path)
-    #获取目录列表
-    list = Dir.entries(path)
-    list.delete('.')
-    list.delete('..')
-    return list
-  end
 
   #将文件压缩进zip
   def self.input_zip(file_path,store_id,sync_time)
