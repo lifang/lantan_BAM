@@ -121,7 +121,7 @@ module ApplicationHelper
   end
 
   def create_get_http(url,route)
-    uri = URI.parse(url)
+    uri = URI.parse(URI.encode(url))
     http = Net::HTTP.new(uri.host, uri.port)
     if uri.port==443
       http.use_ssl = true
@@ -129,6 +129,7 @@ module ApplicationHelper
     end
     request = Net::HTTP::Get.new(route)
     back_res = http.request(request)
+    p back_res.code
     return JSON back_res.body
   end
 
@@ -250,10 +251,7 @@ module ApplicationHelper
   end
 
   def send_msg
-    from_date  = (Time.now-3.days).strftime("%Y-%m-%d")
-    end_date = (Time.now+3.days).strftime("%Y-%m-%d")
-    @send_msg = SendMessage.where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]]).
-      where("date_format(send_at,'%Y-%m-%d') >= '#{from_date}' and date_format(send_at,'%Y-%m-%d') <='#{end_date}'")
+    @send_msg = SendMessage.where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]])
   end
 
   #保留金额的两位小数
@@ -349,24 +347,36 @@ module ApplicationHelper
     response
   end
 
+
   #统一发送短信的方式和相关数据  目前仅限于单条发送和费用的计算
   def message_data(store_id,send_message,customer,car_num,msg_types) #customer有时是staff
-    message_arrs,store,m_msg = [],Store.find(store_id),""
+    store,m_msg = Store.find(store_id),""
     piece = send_message.length%70==0 ? send_message.length/70 : send_message.length/70+1
     this_price = piece*Constant::MSG_PRICE
     phone = customer.attributes["mobilephone"] ||= customer.attributes["phone"]
     if phone and (store.message_fee-this_price) >= Constant::OWE_PRICE
       status = SendMessage::STATUS[:FINISHED]
       m_parm = {:store_id =>store_id, :content =>send_message,:send_at => Time.now,:types=>msg_types}
-      if store.send_list and store.send_list.split(",").include?("#{msg_types}")
-        message_arrs << {:content =>send_message, :msid => "#{customer.id}", :mobile =>phone}
-        send_message_request(message_arrs,1)
-        store.warn_store(this_price) #提示门店费用信息
-        m_msg = "短信发送成功"
-        m_parm.merge!({:total_num=>piece,:total_fee=>piece*Constant::MSG_PRICE})
-      else
-        m_msg = "短信功能已关闭，请手动发送，如需开通请到开关设置打开！"
-        status = SendMessage::STATUS[:WAITING]
+      begin
+        if store.send_list and store.send_list.split(",").include?("#{msg_types}")
+          message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{phone}&Content=#{URI.escape(send_message)}&Exno=0"
+          response = create_get_http(Constant::MESSAGE_URL, message_route)
+          if response["code"] == "9001"
+            store.warn_store(this_price) #提示门店费用信息
+            m_msg = "短信发送成功"
+            m_parm.merge!({:total_num=>piece,:total_fee=>piece*Constant::MSG_PRICE})
+          else
+            m_msg = "短信发送失败"
+            status = SendMessage::STATUS[:WAITING]
+          end
+        else
+          m_msg = "短信功能已关闭，请手动发送，如需开通请到开关设置打开！"
+          status = SendMessage::STATUS[:WAITING]
+        end
+      rescue
+        #        status = SendMessage::STATUS[:WAITING]
+        #        #      rescue Errno::ETIMEDOUT
+        #        #      rescue EOFError
       end
       parms = {:customer_id=>customer.id,:car_num_id=>car_num,:phone=>phone,:store_id=>store_id,:status=>status}
       message_record = MessageRecord.create(m_parm.merge({:status=>status}))
@@ -393,16 +403,20 @@ module ApplicationHelper
     end
     this_price = t_piece*Constant::MSG_PRICE
     if  (store.message_fee-this_price) >= Constant::OWE_PRICE
-      if store.send_list and store.send_list.split(",").include?("#{msg_types}")
-        send_num = 2100/m_content.length
-        send_message_request(message_arrs,send_num) #此处传递m_content用于计算大致的可发送条数
-        store.warn_store(this_price) #提示门店费用信息
-        message_record.update_attributes({:total_num=>t_piece,:total_fee=>t_piece*Constant::MSG_PRICE})
-        m_msg = "短信发送成功"
-      else
-        m_msg = "短信功能已关闭，请手动发送，如需开通请到开关设置打开！"
+      begin
+        if store.send_list and store.send_list.split(",").include?("#{msg_types}")
+          send_num = 2100/m_content.length
+          send_message_request(message_arrs,send_num) #此处传递m_content用于计算大致的可发送条数
+          store.warn_store(this_price) #提示门店费用信息
+          message_record.update_attributes({:total_num=>t_piece,:total_fee=>t_piece*Constant::MSG_PRICE})
+          m_msg = "短信发送成功"
+        else
+          m_msg = "短信功能已关闭，请手动发送，如需开通请到开关设置打开！"
+        end
+        SendMessage.import send_messages unless send_messages.blank?
+      rescue
+        status = SendMessage::STATUS[:WAITING]
       end
-      SendMessage.import send_messages unless send_messages.blank?
     else
       message_record.destroy
       m_msg = "短信余额不足，未发送。。。"  #使用新的变量防止多次提醒

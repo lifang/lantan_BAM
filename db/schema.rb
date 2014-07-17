@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140714050105) do
+ActiveRecord::Schema.define(:version => 20140714075503) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -263,9 +263,9 @@ ActiveRecord::Schema.define(:version => 20140714050105) do
     t.boolean  "sex"
     t.datetime "birthday"
     t.string   "address"
-    t.boolean  "is_vip",             :default => false
+    t.integer  "is_vip",             :limit => 1, :default => 0
     t.string   "mark"
-    t.boolean  "status",             :default => false
+    t.boolean  "status",                          :default => false
     t.integer  "types"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -273,14 +273,15 @@ ActiveRecord::Schema.define(:version => 20140714050105) do
     t.string   "username"
     t.string   "salt"
     t.integer  "total_point"
-    t.integer  "property",           :default => 0
+    t.integer  "property",                        :default => 0
     t.string   "group_name"
-    t.integer  "allowed_debts",      :default => 0
+    t.integer  "allowed_debts",                   :default => 0
     t.float    "debts_money"
     t.integer  "check_type"
     t.integer  "check_time"
     t.integer  "store_id"
     t.string   "openid"
+    t.boolean  "show_vip"
   end
 
   add_index "customers", ["birthday"], :name => "index_customers_on_birthday"
@@ -1217,13 +1218,15 @@ ActiveRecord::Schema.define(:version => 20140714050105) do
   add_index "staffs", ["type_of_w"], :name => "index_staffs_on_type_of_w"
   add_index "staffs", ["username"], :name => "index_staffs_on_username"
 
-# Could not dump table "station_service_relations" because of following ActiveRecord::StatementInvalid
-#   Interrupt: :           SELECT t.constraint_type, k.column_name
-          FROM information_schema.table_constraints t
-          JOIN information_schema.key_column_usage k
-          USING (constraint_name, table_schema, table_name)
-          WHERE t.table_schema = DATABASE()
-            AND t.table_name   = 'station_service_relations'
+  create_table "station_service_relations", :force => true do |t|
+    t.integer  "station_id"
+    t.integer  "product_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "station_service_relations", ["product_id"], :name => "index_station_service_relations_on_product_id"
+  add_index "station_service_relations", ["station_id"], :name => "index_station_service_relations_on_station_id"
 
   create_table "station_staff_relations", :force => true do |t|
     t.integer  "station_id"

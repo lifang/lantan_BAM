@@ -16,8 +16,8 @@
       <th>性别</th>
       <th>生日</th>
       <th>属性</th>
-      <th>类别</th>
-      <th>级别</th>
+      <th>挂账</th>
+      <th>VIP</th>
       <th>联系地址</th>
       <th>单位名称</th>
     </tr>
@@ -25,11 +25,11 @@
       <td><%=@customer.name%></td>
       <td><%= "--" %></td>
       <td><%= @customer.mobilephone %></td>
-      <td><%=  Staff::N_SEX[@customer.sex ? 1 : 0]  %></td>
+      <td><%=  Constant::SEX_NAME[@customer.sex ? 1 : 0]  %></td>
       <td><%=  @customer.birthday.nil? ? "--" : @customer.birthday.strftime("%Y-%m-%d") %></td>
       <td><%=@customer.property.to_i==Customer::PROPERTY[:PERSONAL] ? "个人客户" : (@customer.property.to_i==Customer::PROPERTY[:GROUP] ? "单位客户" : "未知")%></td>
-      <td>类别</td>
-      <td>级别</td>
+      <td><%= @customer.allowed_debts == Customer::ALLOWED_DEBTS[:YES] ? "是" : "否" %></td>
+      <td><%= @customer.show_vip ? "是" : "否" %></td>
       <td><%= @customer.address %></td>
       <td><%=  @customer.property.to_i==Customer::PROPERTY[:GROUP] ? @customer.group_name: "--"%></td>
     </tr>

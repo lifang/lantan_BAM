@@ -18,7 +18,8 @@
           </select></span>
       </div>
       <div class="due_pay_money"><span style="padding-left: 20px;">充值：<input type="text" id="in_account" value="0" style="height:30px;font-size: 25px;width:100px;" />元</span>
-        <span style="float: right;padding-right: 10px;"><button  class="confirm_btn" style="height:33px;width:80px;font-size: 20px;" onclick="complete_account(<%=params[:store_id]%>,<%=@customer.id%>,<%=params[:rend]%>)">确 定</button></span></div>
+        <span style="float: right;padding-right: 10px;">
+          <button  class="confirm_btn" style="height:33px;width:80px;font-size: 20px;" onclick="complete_account(<%=params[:store_id]%>,<%=@customer.id%>,<%=params[:rend]%>)">确 定</button></span></div>
       <div class="accountsTab_client">
         <div class="at_client_con">
           <ul>
@@ -74,11 +75,13 @@
                       <td><%= p_order.time %></td>
                       <% if  params[:rend].to_i== Account::TYPES[:CUSTOMER]  %>
                         <td><%= p_order.num%></td>
+                        <td><span style="color:red;"><%= p_order.p_price %></span></td>
                       <%else%>
-                        <td><%= p_order.arrival.nil? ? "--" :p_order.arrival %></td>
-                        <td><%= p_order.carrier.nil? ? "--" : p_order.carrier %></td>
+                        <td><%= p_order.arrival ||= "--" %></td>
+                        <td><%= p_order.carrier ||= "--" %></td>
+                        <td><span style="color:red;" title="<%= p_order.remark %>"><%= p_order.p_price %></span></td>
                       <%end%>
-                      <td><span style="color:red;"><%= p_order.p_price %></span></td>
+
                     </tr>
                   <% end %>
                 </tbody>

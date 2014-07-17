@@ -90,4 +90,4 @@
     </tbody>
   </table>
 
-<%= will_paginate_remote(@in_records,"mat_code=#{@mat_code}&mat_name=#{@mat_name}&mat_type=#{@mat_type}",{:url => page_ins_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @in_records.size > 0 %>
+<%= will_paginate_remote(@in_records,"mat_code=#{@mat_code}&mat_name=#{@mat_name}&mat_type=#{@mat_type}&first_time=#{@start_time}&last_time=#{@end_time}",{:url => page_ins_store_materials_url(params[:store_id]),:class => "pageTurn",:prev_label => "上一页",:next_label => "下一页",:renderer => "RemotePaginateHelper::LinkRenderer"}) if @in_records.size > 0 %>

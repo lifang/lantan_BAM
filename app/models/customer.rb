@@ -7,16 +7,15 @@ class Customer < ActiveRecord::Base
   has_many :send_messages
   has_many :c_svc_relations
   has_many :reservations
-  has_many :customer_store_relations
   has_many :orders
-  has_many :stores, :through => :customer_store_relations
+  belongs_to :store
   attr_accessor :password
   validates :password, :allow_nil => true, :length =>{:within=>6..20, :message => "密码长度必须在6-20位之间"}
 
   #客户状态
   STATUS = {:NOMAL => 0, :DELETED => 1} #0 正常  1 删除
   #客户类型
-  IS_VIP = {:NORMAL => 0, :VIP => 1} #0 常态客户 1 会员卡客户
+  IS_VIP = {:NORMAL => 0, :VIP => 1,:SUP_VIP => 2} #0 常态客户 1 会员卡客户
   TYPES = {:GOOD => 0, :NORMAL => 1, :STRESS => 2} #1 优质客户  2 一般客户  3 重点客户
   C_TYPES = {0 => "优质客户", 1 => "一般客户", 2 => "重点客户"}
   RETURN_REASON = { 0 => "质量问题", 1 => "服务态度", 2 => "拍错买错",3 => "效果不好，不喜欢",4 => "操作失误", 5 => "其他"}

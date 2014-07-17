@@ -1574,8 +1574,11 @@ function back_good_search(store_id){
 function back_good_select(mat,obj){
     var c_name = mat.cname;
     if($(obj).attr("checked")=="checked"){
-        $("#back_good_tbody").append("<tr id=back_good_tr"+mat.mid+"><input type='hidden' name='good_id' value='"+mat.mid+"'/><input type='hidden' name='supp_id' value='"+mat.msuid+"'><td>"+mat.mname+"</td><td>"+c_name+"</td><td>"+mat.mstorage+
-            "</td><td>"+parseInt(mat.mnum)+"</td><td><input type='text' name='back_good_count' style='width:50px' value='1'></td><td><a href='javascript:void(0)' onclick='back_good_remove_tr("+mat.mid+")'>删除</a></td></tr>")
+        $("#back_good_tbody").append("<tr id=back_good_tr"+mat.mid+"><input type='hidden' name='good_id' value='"+mat.mid+"'/>\n\
+        <input type='hidden' name='supp_id' value='"+mat.msuid+"'><td>"+mat.mname+"</td><td>"+c_name+"</td><td>"+mat.mstorage+
+            "</td><td>"+parseInt(mat.mnum)+"</td><td><input type='text' name='back_good_count' style='width:50px' value='1'></td>\n\
+            <td><input type='text' name='back_good_price' style='width:50px' value='"+ mat.import_price+"'></td>\n\
+           <td><a href='javascript:void(0)' onclick='back_good_remove_tr("+mat.mid+")'>删除</a></td></tr>")
     }else{
         $("#back_good_tr"+mat.mid).remove();
     }
@@ -1596,10 +1599,19 @@ function back_good_validate(store_id){      //退货确定按钮验证
             return false;
         }
     });
+    $("input[name='back_good_price']").each(function(){
+        var price = $.trim($(this).val())
+        if (price == "" || price.length==0 || isNaN(parseFloat(price)) || parseFloat(price)<=0){
+            tishi_alert("请输入正确的退货价格，价格必须为大于零！");
+            flag = false;
+            return false;
+        }
+    });
     $("#back_good_tbody tr").each(function(){
         var storage = parseInt($(this).find("td:nth-child(5)").text());
         var num = parseInt($(this).find("td:nth-child(6)").text());
         var back_num = parseInt($(this).find("td:nth-child(7) input").val());
+        var back_price = parseInt($(this).find("td:nth-child(8) input").val());
         if(back_num > num || back_num > storage){
             tishi_alert("退货量不能大于库存量或者订货量!");
             flag = false;
@@ -1607,7 +1619,7 @@ function back_good_validate(store_id){      //退货确定按钮验证
         }else{
             var id = $(this).find("input[name='good_id']")[0].value;
             var su_id = $(this).find("input[name='supp_id']")[0].value;
-            data.push(id+"-"+back_num+"-"+su_id);
+            data.push(id+"-"+back_num+"-"+su_id+"-"+back_price);
         }
     })
     if(flag){
@@ -1620,14 +1632,14 @@ function back_good_validate(store_id){      //退货确定按钮验证
             },
             success:function(data){
                 if(data==1){
-                    tishi_alert("提交成功!")
+                    tishi_alert("退货成功!")
                     window.location.reload();
                 }else{
                     tishi_alert("无数据!");
                 }
             },
             error:function(data){
-                tishi_alert("提交错误!");
+                tishi_alert("退货失败!");
             }
         })
     }

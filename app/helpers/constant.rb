@@ -247,4 +247,8 @@ module Constant
   MSG_PRICE = 0.06
   OWE_PRICE = -3
   OWE_WARN = {:NONE =>0,:DONE => 1}
+
+  #系统中性别
+  SEX = {:FEMALE => 0,:MALE => 1}
+  SEX_NAME = {0 => "女",1=>"男"}
 end

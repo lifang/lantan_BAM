@@ -168,11 +168,18 @@ function complete_account(store_id,c_id,rend){
             }
         }
     }
-    if ((parseFloat(left_account)+parseFloat(in_account)) >= parseFloat(due_account)){
-        if (total_ids.length == 0){
-            tishi_alert("请选择应付订单！");
-        }else{
-            if(confirm('应付金额：'+due_account+"，余额："+left_account+(in_a ? "，充值金额："+in_account : "")+",确认付款吗？")){
+    if (total_ids.length == 0){
+        if(confirm("确认只充值"+ in_account+"元，暂不结账吗？")){
+            parm["pay_type"] = pay_type;
+            parm["staff_id"] = staff_id;
+            parm["pay_recieve"] = account;
+            parm["trade_amt"] = -1;
+            parm["left_account"] = parseFloat(left_account)+parseFloat(in_account);
+            send_account(store_id,"complete_account",parm)
+        }
+    }else{
+        if ((parseFloat(left_account)+parseFloat(in_account)) >= parseFloat(due_account)){
+            if(confirm('应付金额：'+due_account+"元，余额："+left_account+(in_a ? "元，充值金额："+in_account : "")+"元,确认付款吗？")){
                 parm["pay_type"] = pay_type;
                 parm["staff_id"] = staff_id;
                 parm["pay_recieve"] = account;
@@ -180,12 +187,10 @@ function complete_account(store_id,c_id,rend){
                 parm["left_account"] = parseFloat(left_account)+parseFloat(in_account)- parseFloat(due_account);
                 send_account(store_id,"complete_account",parm)
             }
+        }else{
+            tishi_alert("金额不足！");
         }
-
-    }else{
-        tishi_alert("金额不足！");
     }
-
 }
 
 function check_account(){

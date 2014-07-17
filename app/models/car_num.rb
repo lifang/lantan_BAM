@@ -7,17 +7,21 @@ class CarNum < ActiveRecord::Base
   has_many :reservations
 
   def self.get_customer_info_by_carnum(store_id, car_num)
-    sql = ["select c.id customer_id,c.name,c.mobilephone,c.other_way email,c.birthday birth,c.property property,c.group_name group_name,
-      c.sex,cn.buy_year year,cn.distance distance, cn.id car_num_id,cn.num,cm.name model_name,cb.name brand_name
-      from customer_num_relations cnr
+    sql = ["select c.id customer_id,c.name,c.mobilephone,c.other_way email, c.property property,c.group_name group_name,
+      c.sex,date_format('c.birthday','%Y-%m-%d') birth,cn.buy_year year,cn.distance distance, cn.id car_num_id,cn.num,
+     cm.name model_name,cb.name brand_name from customer_num_relations cnr
       inner join car_nums cn on cn.id=cnr.car_num_id and cn.num= ?
       inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}
       and c.store_id in (?) left join car_models cm on cm.id=cn.car_model_id
       left join car_brands cb on cb.id=cm.car_brand_id ", car_num, StoreChainsRelation.return_chain_stores(store_id)]
     customer = CustomerNumRelation.find_by_sql sql
-    customer = customer[0]
-    customer.birth = customer.birth.strftime("%Y-%m-%d")  if customer && customer.birth
-    customer
+    customer[0]
+  end
+
+
+  def self.search_customer(num,store_id)
+    Customer.joins(:customer_num_relations=>:car_num).where(:"car_nums.num"=>num,:"customers.store_id"=>store_id).
+      select("customers.id,name,mobilephone,other_way,address,group_name").where(:status=>Customer::STATUS[:NOMAL]).first
   end
 
   def self.get_customer_info_by_phone(store_id, phone)

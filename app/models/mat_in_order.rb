@@ -8,7 +8,7 @@ class MatInOrder < ActiveRecord::Base
     sql = ["select materials.*,o.material_num,s.name staff_name,o.price out_price,o.created_at out_time,mo.code order_code,c.name cname
       from mat_in_orders o inner join materials on materials.id=o.material_id inner join categories c on materials.category_id=c.id
       inner join staffs s on s.id=o.staff_id left join material_orders mo on mo.id=o.material_order_id where c.types=? and c.store_id=?
-      and materials.status=?", Category::TYPES[:material], store_id,
+      and materials.status=? and date_format(o.created_at,'%Y-%m-%d') between '#{first_time}' and '#{last_time}'", Category::TYPES[:material], store_id,
       Material::STATUS[:NORMAL]]
     unless types.nil? || types==0 || types==-1
       sql[0] += " and c.id=?"
@@ -22,7 +22,7 @@ class MatInOrder < ActiveRecord::Base
       sql[0] += " and materials.code=?"
       sql << code
     end
-    sql[0] += " and date_format(o.created_at,'%Y-%m-%d') between '#{first_time}' and '#{last_time}' order by o.created_at desc"
+    sql[0] += " order by o.created_at desc"
     records = Material.find_by_sql(sql)
     arr = []
     arr << records

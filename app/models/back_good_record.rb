@@ -3,11 +3,11 @@ class BackGoodRecord < ActiveRecord::Base
   belongs_to :supplier
   belongs_to :material
   def self.back_list store_id,type=nil,name=nil,code=nil,supp=nil
-    sql = ["select bgr.*,m.name mname,m.code mcode,c.name cname, s.name sname,m.import_price
+    sql = ["select bgr.*,m.name mname,m.code mcode,c.name cname, s.name sname,bgr.price b_price
             from back_good_records bgr inner join materials m on bgr.material_id = m.id
             inner join categories c on m.category_id=c.id
             inner join suppliers s on bgr.supplier_id=s.id
-            where bgr.store_id = ?", store_id]
+            where bgr.store_id = ? order by bgr.created_at desc", store_id]
     unless type.nil? || type==0 || type==-1
       sql[0] += " and c.id=?"
       sql << type

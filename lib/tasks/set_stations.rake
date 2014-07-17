@@ -45,7 +45,7 @@ namespace :daily do
     Staff.joins(:store).where(:stores=>{:status=>Store::STATUS[:OPENED]},:staffs=>{:status=>Staff::STATUS[:normal]}).
       select("store_id,date_format(ifnull(max(last_login),now()),'%Y-%m-%d') login_time").group("store_id").each {|store|
       closed_store << store.store_id if store.login_time.to_datetime.advance(:days => 10) < Time.now; }
-    Store.where(:id=>closed_store).update_all(:status=>Store::STATUS[:CLOSED],:close_reason=>"门店已关闭，请联系技术人员！") unless closed_store
+    Store.where(:id=>closed_store).update_all(:status=>Store::STATUS[:CLOSED],:close_reason=>"门店已关闭，请联系技术人员！") unless closed_store.blank?
     p "#{Time.now.strftime('%Y-%m-%d')} closed store's number is #{closed_store.length},and ids' #{closed_store}"
   end
 

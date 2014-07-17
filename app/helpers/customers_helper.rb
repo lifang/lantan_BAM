@@ -28,7 +28,7 @@ module CustomersHelper
     end
 
     if  total_info[SEL_METHODS[:SV]]
-      send_message = "#{customer.name}：您好，您购买的储值卡"
+      send_message = "您好，您购买的储值卡"
       total_info[SEL_METHODS[:SV]].each do |sv,num|
         s = sv.split("_")
         order = Order.create(order_parm.merge({:code => MaterialOrder.material_order_code(store_id),:types => Order::TYPES[:SAVE],

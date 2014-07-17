@@ -141,11 +141,10 @@ class SetStoresController < ApplicationController
     @store = Store.find params[:store_id]
     @orders = Order.where(:store_id=>params[:store_id],:id=>params[:order_id])
     order = @orders.first
+    @tech_orders = TechOrder.joins(:staff).where(:order_id=>order.id).select("staffs.name,order_id").group_by{|i|i.order_id}
     @customer = Customer.find order.customer_id
     @car_num = CarNum.find order.car_num_id
-    staff_ids = ([order.front_staff_id]|@orders.tech_orders.map(&:staff_id)).compact.uniq
-    staff_ids.delete 0
-    @staffs = Staff.find(staff_ids).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
+    @staffs = Staff.where(:id=>order.front_staff_id).inject(Hash.new){|hash,staff|hash[staff.id]=staff.name;hash}
     @order_prods = OrderProdRelation.order_products(order.id)
     @order_pays = OrderPayType.search_pay_types(order.id)
     @cash_pay = OrderPayType.where(:order_id=>@orders.map(&:id),:pay_type=>OrderPayType::PAY_TYPES[:CASH]).first
@@ -176,7 +175,7 @@ class SetStoresController < ApplicationController
     if params[:num] && params[:num].length
       store_id = chain_store(params[:store_id])
       @num = params[:num]
-      @customer = search_customer(@num,store_id)
+      @customer = CarNum.search_customer(@num,store_id)
       if @customer
         pp = CSvcRelation.search_card(@customer.id,params[:store_id])
         @pcard =  pp[2]
@@ -301,7 +300,7 @@ class SetStoresController < ApplicationController
   def search_info
     store_id = chain_store(params[:store_id])
     @num = params[:car_num]
-    @customer = search_customer(@num,store_id)
+    @customer = CarNum.search_customer(@num,store_id)
     @suit_cards = []
     if @customer
       pp = CSvcRelation.search_card(@customer.id,params[:store_id])
@@ -316,24 +315,14 @@ class SetStoresController < ApplicationController
       Order.transaction do
         store_id = chain_store(params[:store_id])
         @num = params[:car_num]
-        @customer = search_customer(@num,store_id)
+        @customer = CarNum.search_customer(@num,store_id)
         car_num = CarNum.where(:num =>@num).first
         if @customer.nil?
-          if car_num.nil?
-            car_num = CarNum.create(:num=>@num)
-          end
-          if @customer
-            @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
-          else
-            property = Customer::PROPERTY[:PERSONAL]
-            if params[:customer][:group_name]
-              property = Customer::PROPERTY[:GROUP]
-            end
-            @customer = Customer.new(params[:customer].merge({ :property => property,
-                  :status => Customer::STATUS[:NOMAL], :allowed_debts => Customer::ALLOWED_DEBTS[:NO],:store_id=>params[:store_id]}))
-            @customer.save
-            @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
-          end
+          property = Customer::PROPERTY[params[:customer][:group_name].nil? ? :PERSONAL : :GROUP ]
+          @customer = Customer.new(params[:customer].merge({ :property => property,
+                :status => Customer::STATUS[:NOMAL], :allowed_debts => Customer::ALLOWED_DEBTS[:NO],:store_id=>params[:store_id]}))
+          car_num = CarNum.create(:num=>@num)  if car_num.nil?
+          @customer.customer_num_relations.create({:customer_id => @customer.id, :car_num_id => car_num.id})
         else
           Customer.find(@customer.id).update_attributes(params[:customer])
         end
@@ -354,11 +343,6 @@ class SetStoresController < ApplicationController
     rescue
       @msg = [["开单失败"],false]
     end
-  end
-
-  def search_customer(num,store_id)
-    Customer.joins(:customer_num_relations=>:car_num).where(:"car_nums.num"=>num,:"customers.store_id"=>store_id).
-      select("customers.id,name,mobilephone,other_way,address,group_name").where(:status=>Customer::STATUS[:NOMAL]).first
   end
 
   def edit_deduct

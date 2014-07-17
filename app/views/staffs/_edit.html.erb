@@ -10,8 +10,8 @@
           </div>
           <div class="item">
             <label>性别：</label>
-            <%= f.radio_button :sex, 0, :checked => f.object.sex ? false : true %> 男&nbsp;&nbsp;
-            <%= f.radio_button :sex, 1, :checked => f.object.sex ? true : false %> 女
+            <%= f.radio_button :sex, Constant::SEX[:MALE], :checked => f.object.sex ?  true : false %> 男&nbsp;&nbsp;
+            <%= f.radio_button :sex, Constant::SEX[:FEMALE], :checked => f.object.sex ? false : true %> 女
           </div>
           <div class="item">
             <label>部门：</label>

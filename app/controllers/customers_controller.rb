@@ -47,7 +47,7 @@ class CustomersController < ApplicationController
     customer = Customer.find(params[:id].to_i)
     hang_orders = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE],
       :orders=>{:store_id=>params[:store_id],:customer_id=>customer.id}).count
-    if hang_orders > 1
+    if hang_orders >= 1
       flash[:notice] = "该客户有挂账未结清，删除失败。"
     else
       customer.update_attributes(:status => Customer::STATUS[:DELETED])
@@ -92,7 +92,7 @@ class CustomersController < ApplicationController
           :sex => params[:sex], :birthday => params[:birthday].strip, :address => params[:address].strip,
           :status => Customer::STATUS[:NOMAL], :types => Customer::TYPES[:NORMAL], :username => name, :property => property,
           :group_name => group_name, :allowed_debts => allowed_debts, :debts_money => debts_money, :check_type => check_type,
-          :check_time => check_time,:store_id=>params[:store_id],:is_vip => params[:is_vip])
+          :check_time => check_time,:store_id=>params[:store_id],:is_vip => params[:is_vip],:show_vip=>params[:show_vip])
         new_customer.encrypt_password
         new_customer.save
         unless params[:selected_cars].blank?
@@ -116,7 +116,7 @@ class CustomersController < ApplicationController
   end
 
   def update
-    if params[:new_name] and params[:mobilephone]
+    if params[:new_name] and params[:mobilephone] 
       customer = Customer.find(params[:id].to_i)
       mobile_c = Customer.where(:status=>Customer::STATUS[:NOMAL],:mobilephone=>params[:mobilephone].strip,
         :store_id=>params[:store_id].to_i).first
@@ -134,7 +134,7 @@ class CustomersController < ApplicationController
             :group_name => params[:edit_property].to_i==Customer::PROPERTY[:PERSONAL] ? nil : params[:edit_group_name].strip,
             :allowed_debts => params[:edit_allowed_debts].to_i,:is_vip => params[:is_vip],
             :debts_money => params[:edit_allowed_debts].to_i==Customer::ALLOWED_DEBTS[:NO] ? nil : params[:edit_debts_money].to_f,
-            :check_type => params[:edit_check_type].nil? ? nil : params[:edit_check_type].to_i,
+            :check_type => params[:edit_check_type].nil? ? nil : params[:edit_check_type].to_i,:show_vip=>params[:show_vip],
             :check_time => params[:edit_check_time_month].nil? ? (params[:edit_check_time_week].nil? ? nil : params[:edit_check_time_week].to_i) :  params[:edit_check_time_month].to_i)
           flash[:notice] = "客户信息更新成功。"
         end
@@ -187,7 +187,7 @@ class CustomersController < ApplicationController
     p_card = @customer.pcard_records(params[:store_id])
     @c_pcard_relations = p_card[1].paginate(:page => params[:page] || 1, :per_page => Constant::PER_PAGE) if p_card[1] #套餐卡记录
     @already_used_count = p_card[0]
-    @c_svc = CSvcRelation.joins(:sv_card).where(:customer_id=>@customer.id,:status=>CSvcRelation::STATUS[:valid],:sv_cards=>{:types=>SvCard::FAVOR[:SAVE]})
+    @c_svc = CSvcRelation.joins(:sv_card).where(:customer_id=>@customer.id,:status=>CSvcRelation::STATUS[:valid],:sv_cards=>{:types=>SvCard::FAVOR[:DISCOUNT]})
   end
   
   def order_prods

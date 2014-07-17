@@ -93,7 +93,7 @@ class MessagesController < ApplicationController
     @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
     sql = "date_format(send_at,'%Y-%m-%d')>='#{@start_time}' and date_format(send_at,'%Y-%m-%d')<='#{@end_time}' "
     sql +=  (params[:types] and params[:types] != "") ? " and types=#{params[:types]} and status=#{MessageRecord::STATUS[:SENDED]}" : " and status=#{MessageRecord::STATUS[:SENDED]}"
-    @message_records =  MessageRecord.where(:store_id=>params[:store_id]).where(sql).paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
+    @message_records =  MessageRecord.where(:store_id=>params[:store_id]).where(sql).order("created_at desc").paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @total_num = MessageRecord.where(:store_id=>params[:store_id]).where(sql).sum("total_fee")
     render :layout=>"role"
   end

@@ -214,7 +214,8 @@ class Api::NewAppOrdersController < ApplicationController
         #如果是新的车牌，则要创建一个空白的客户和车牌，以及客户-门店、客户-车牌关联记录
         customer = Customer.create(:status => Customer::STATUS[:NOMAL], :property => Customer::PROPERTY[:PERSONAL],
           :allowed_debts => Customer::ALLOWED_DEBTS[:NO],:store_id=>params[:store_id])
-        car_num = CarNum.create(:num => params[:num])
+        car_num = CarNum.where(:num =>params[:num]).first
+        car_num = CarNum.create(:num => params[:num]) if car_num.nil?
         customer.customer_num_relations.create({:customer_id => customer.id, :car_num_id => car_num.id})
         customer.save
         is_new_cus = 1
@@ -298,8 +299,7 @@ class Api::NewAppOrdersController < ApplicationController
                     CSvcRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id,:sv_card_id => card.id,
                       :order_id => order.id, :status => CSvcRelation::STATUS[:invalid], :password => Digest::MD5.hexdigest(create_code(6)),
                       :total_price => money.base_price+money.more_price, :left_price => money.base_price+money.more_price,
-                      :id_card=>add_string(8,CSvcRelation.joins(:customer=>:stores).where(:"customers.store_id"=>params[:store_id]).count+1))
-              
+                      :id_card=>add_string(8,CSvcRelation.joins(:customer=>:store).where(:"customers.store_id"=>params[:store_id]).count+1))
                     arr = []
                     money.category_id.split(",").each do |i|
                       i_hash = {}
@@ -320,16 +320,12 @@ class Api::NewAppOrdersController < ApplicationController
              from pcard_prod_relations ppr inner join products p on ppr.product_id=p.id where ppr.package_card_id=?", card.id])
                 pstr = ""
                 b,c = [],[]
-                m_types = MessageRecord::M_TYPES[:BUY_PCARD]
-                send_message = "#{customer.name}：您好，您购买的套餐卡:"
                 pitems.each do |pi|
                   b << "#{pi.id}-#{pi.name}-#{pi.num}"
-                  send_message += "#{pi.name}#{pi.num}次，"
                   c << {:proid => pi.id, :proname => pi.name, :pro_left_count => pi.num, :selected => 1, :pprice => pi.sale_price}
                 end
                 pstr = b.join(",")
                 ended_at = card.date_types==PackageCard::TIME_SELCTED[:PERIOD] ? card.ended_at : Time.now + card.date_month.to_i.days
-                send_message += "有效期截至#{ended_at.strftime("%Y-%m-%d")}。"
                 CPcardRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id,
                   :package_card_id => card.id, :ended_at => ended_at.strftime("%Y-%m-%d")+" 23:59:59", :status => CPcardRelation::STATUS[:INVALID], :content => pstr,
                   :price => card.price, :order_id => order.id)
@@ -349,7 +345,6 @@ class Api::NewAppOrdersController < ApplicationController
         if status ==1
           #获取所有的车品牌/型号
           capital_arr = status==0 ? [] : Capital.get_all_brands_and_models
-         
           p = []
           unless product.nil?
             p << {:id => product.id, :name => product.name, :count => pram_str[1].to_i,
@@ -414,7 +409,8 @@ class Api::NewAppOrdersController < ApplicationController
       if customer.nil?
         #如果是新的车牌，则要创建一个空白的客户和车牌，以及客户-门店、客户-车牌关联记录
         customer = Customer.create(:status => Customer::STATUS[:NOMAL],:store_id => store_id)
-        car_num = CarNum.create(:num => num)
+        car_num = CarNum.where(:num =>params[:num]).first
+        car_num = CarNum.create(:num => params[:num]) if car_num.nil?
         customer.customer_num_relations.create({:customer_id => customer.id, :car_num_id => car_num.id})
         customer.save
         is_new_cus = 1
@@ -883,7 +879,7 @@ class Api::NewAppOrdersController < ApplicationController
           customer_savecard = CSvcRelation.find_by_id(params[:csrid].to_i)
           sv_card = customer_savecard.sv_card
           if customer_savecard
-            if customer_savecard.password==Digest::MD5.hexdigest(params[:password].strip)
+            if customer_savecard.password  == Digest::MD5.hexdigest(params[:password].strip)
               if customer_savecard.left_price >= total_price
                 SvcardUseRecord.create(:c_svc_relation_id => customer_savecard.id, :types => SvcardUseRecord::TYPES[:OUT],
                   :use_price => total_price, :left_price => customer_savecard.left_price - total_price,:content => "#{total_price}付费")
@@ -893,7 +889,6 @@ class Api::NewAppOrdersController < ApplicationController
                 customer_savecard.update_attribute("status", CSvcRelation::STATUS[:invalid])  if customer_savecard.left_price <=0
                 send_message = "#{customer.name}，您好，您的储值卡#{sv_card.name}使用#{total_price}元，剩余#{customer_savecard.left_price}元。"
                 m_types = MessageRecord::M_TYPES[:USE_SV]
-
                 status = 1
               else
                 msg = "余额不足!"
@@ -967,7 +962,6 @@ class Api::NewAppOrdersController < ApplicationController
                   send_message = "#{customer.name}：您好，您购买的储值卡#{card.name},余额为#{csr.left_price}元，密码是#{arr[-1].strip}，请您尽快付款使用。"
                   SvcardUseRecord.create(:c_svc_relation_id => csr.id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,
                     :left_price => csr.left_price, :content => "购买"+"#{save_c.name}")
-
                   is_vip = true if csr && !customer.is_vip
                 end
               end
@@ -976,7 +970,12 @@ class Api::NewAppOrdersController < ApplicationController
               pid = arr[1].to_i
               acontent,acount = [],true
               prod_id,pname = nil,nil
-              selected_prods = arr.inject({}){|h, s| prod_id=s.split("=")[0].to_i;  h[s.split("=")[0].to_i] = s.split("=")[1].to_i if s.split("=")[1];h }  #[2-5,56-1]
+              selected_prods = arr.inject({}){|h, s|
+                if s.split("=")[1]
+                  prod_id=s.split("=")[0].to_i
+                  h[s.split("=")[0].to_i] = s.split("=")[1].to_i
+                end
+                h }  #[2-5,56-1]
               if arr[2].to_i==0 #如果是用户已有的套餐卡,则要扣除购买的产品对应的数量
                 cprid = arr[-1].to_i
                 cpr = CPcardRelation.find_by_id(cprid)
@@ -1002,8 +1001,7 @@ class Api::NewAppOrdersController < ApplicationController
                 acount=false if cccount > 0
               end
               pcard = PackageCard.find_by_id(cpr.package_card_id)
-              send_message = ""
-              #                "#{customer.name}：您好，您的套餐卡#{pcard.name}".force_encoding("ASCII-8BIT").force_encoding("UTF-8")
+              send_message = "#{customer.name}：您好，您的套餐卡#{pcard.name}".force_encoding("ASCII-8BIT").force_encoding("UTF-8")
               cpr_parm = {:content => acontent.join(","), :customer_id => customer.id}
               cpr.update_attributes(cpr_parm.merge(:status=>acount ? CPcardRelation::STATUS[:NOTIME] : CPcardRelation::STATUS[:NORMAL]))
               m_types = MessageRecord::M_TYPES[:BUY_PCARD]
@@ -1154,17 +1152,17 @@ class Api::NewAppOrdersController < ApplicationController
             arr = prod.split("_")
             pid = arr[1].to_i
             selected_prods = arr.inject({}){|a, s|   #[2-5,56-1]
-              if !s.split("=")[1].nil?
+              unless s.split("=")[1].nil?
                 apid = s.split("=")[0].to_i
                 apcount = s.split("=")[1].to_i
                 a[apid] = apcount
               end;
               a
             }
-            cprid = arr[-1].to_i
-            cpr = CPcardRelation.find_by_id(cprid)
-            pcard = PackageCard.find_by_id(cpr.package_card_id)
             if arr[2].to_i==0 #如果是用户已有的套餐卡,则要扣除购买的产品对应的数量
+              cprid = arr[-1].to_i
+              cpr = CPcardRelation.find_by_id(cprid)
+              pcard = PackageCard.find_by_id(cpr.package_card_id)
               cpr_content = cpr.content.split(",") #[2-产品1-22,56-服务2-3, 17-产品2-3]
               a,yes = [],true
               send_message = "#{customer.name}：您好，您的套餐卡#{pcard.name}  "
@@ -1546,12 +1544,12 @@ class Api::NewAppOrdersController < ApplicationController
       customers = Customer.joins(:customer_num_relations=>:car_num).joins("left join car_models m on m.id=car_nums.car_model_id left join
      car_brands b on b.id=m.car_brand_id").where(:"car_nums.num"=>car_num_phone,:"customers.store_id"=>store_id).select("car_nums.id n_id,customers.id,
      customers.name c_name,mobilephone,sex,date_format(customers.birthday,'%Y-%m-%d') birth,buy_year,address,group_name,
-     distance,property,num,concat(b.name,'-',m.name) m_name").where(:status=>Customer::STATUS[:NOMAL])
+     distance,property,num,b.name b_name,m.name m_name").where(:status=>Customer::STATUS[:NOMAL])
     else
       customers = Customer.joins(:customer_num_relations=>:car_num).joins("left join car_models m on m.id=car_nums.car_model_id left join
       car_brands b on b.id=m.car_brand_id").where(:"customers.mobilephone"=>car_num_phone,:"customers.store_id"=>store_id).
         select("car_nums.id n_id,customers.id,customers.name c_name,mobilephone,sex,date_format(customers.birthday,'%Y-%m-%d') birth,
-       buy_year,address,group_name,distance,property,num,concat(b.name,'-',m.name) m_name").where(:status=>Customer::STATUS[:NOMAL])
+       buy_year,address,group_name,distance,property,num,b.name b_name,m.name m_name").where(:status=>Customer::STATUS[:NOMAL])
     end
     records,uncomplete ={},{}
     unless customers.blank?
@@ -1559,7 +1557,7 @@ class Api::NewAppOrdersController < ApplicationController
       orders = Order.joins("left join work_orders w on w.order_id=orders.id left join complaints c on c.order_id=orders.id").
         where(:"orders.store_id"=>params[:store_id],:customer_id=>customers.map(&:id),:car_num_id=>customers.map(&:n_id)).select("orders.id,
        w.station_id t_id,orders.customer_id,w.status w_status,date_format(orders.created_at,'%Y-%m-%d %H:%i') time,orders.status,c.id v_id,
-      w.id w_id,orders.code,front_staff_id s_id,orders.price o_price").order("orders.created_at").group_by{|i|{:status=>i.status,:customer_id=>i.customer_id}}
+      w.id w_id,orders.code,front_staff_id s_id,orders.price o_price").order("orders.created_at desc").group_by{|i|{:status=>i.status,:customer_id=>i.customer_id}}
       orders.select{|k,v|Order::PRINT_CASH.include? k[:status]}.each  {|k,v|
         records[k[:customer_id]].nil? ?  records[k[:customer_id]] = v  : records[k[:customer_id]]<< v;records[k[:customer_id]]=records[k[:customer_id]].flatten}
       orders.select{|k,v|Order::CASH.include? k[:status]}.each  {|k,v|

@@ -15,6 +15,9 @@
     <%end%>
   <%end%>
 <%end%>
+<% if params[:show_btn] && params[:show_btn].to_i == 1 %>
+  $("#confirm_order,#spinner_user").toggle();
+<%end%>
 tishi_alert("<%=@may_pay[1]%>");
 
 

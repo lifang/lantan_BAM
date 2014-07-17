@@ -132,7 +132,6 @@ class Api::ChangeController < ApplicationController
         card_content = PcardProdRelation.find_by_sql("select group_concat(p.id,'-',p.name,'-',ppr.product_num) content from
          pcard_prod_relations ppr  inner join products p on ppr.product_id=p.id where ppr.package_card_id= #{reserv.prod_id}").first.content
         pmrs = PcardMaterialRelation.joins(:material).select("package_card_id p_id,material_id m_id,storage-material_num result").first
-        
         if pmrs.nil? || ((pmrs && pmrs.result >= 0) && card_content) #如果套餐卡未绑定物料 或者 剩余库存大于0 且有内容的才可以购买
           time = pcard.is_auto_revist ? Time.now + pcard.auto_time.to_i.hours : nil
           price = reserv.types == Reservation::TYPES[:PURPOSE] ? reserv.prod_price : pcard.price

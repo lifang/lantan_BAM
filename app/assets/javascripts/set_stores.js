@@ -180,7 +180,7 @@ function check_post(store_id,c_id,n_id){
         tishi_alert("储值卡密码不能为空");
         return false;
     }else{
-        var time = 3;
+        var time = 5;
         var local_timer=setInterval(function(){
             if (time <=0){
                 $("#due_over").attr("onclick","check_post("+store_id+","+c_id+","+n_id+")");
@@ -188,6 +188,7 @@ function check_post(store_id,c_id,n_id){
             }
             time -= 1;
         },1000)
+        $("#due_over").attr("onclick","");
         $.ajax({
             type:"post",
             url:url,
@@ -451,7 +452,8 @@ function confirm_pay_order(store_id,c_id,n_id){
                 pay_order : pay_order[1],
                 pay_type : pay_type,
                 pay_cash : pay_cash,
-                second_parm : second_parm
+                second_parm : second_parm,
+                show_btn : 1
             }
             $("#confirm_order,#spinner_user").toggle();
             set_confirm(store_id,c_id,n_id,t_data);

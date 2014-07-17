@@ -20,7 +20,6 @@
   %>
     <li><%= "产品统计：<span>#{product.round(2)}</span>&nbsp&nbsp".html_safe %></li>
     <li><%= "服务统计：<span>#{service.round(2)}</span>&nbsp&nbsp".html_safe %></li>
-    <br/>
     <%=  @pays.select{|k,v| OrderPayType::FINCANCE_TYPES.keys.include? k}.map{|k,v| "<li>#{OrderPayType::PAY_TYPES_NAME[k]}:<span>#{v.to_f.round(2)}</span></li>"}.join("&nbsp&nbsp").html_safe %>
     <li>优惠：<span><%= @pays.select{|k,v| !OrderPayType::FINCANCE_TYPES.keys.include? k}.values.compact.inject(0){|sum,n|sum+n}.round(2)%></span></li>
   </ul>

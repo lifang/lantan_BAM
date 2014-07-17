@@ -1,4 +1,4 @@
-// JavaScript Document
+ // JavaScript Document
 //登录默认值
 function focusBlur(e){
     $(e).focus(function(){
