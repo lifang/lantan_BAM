@@ -1,3 +1,7 @@
+ if RUBY_VERSION =~ /1.9/
+  Encoding.default_external = Encoding::UTF_8
+  Encoding.default_internal = Encoding::UTF_8
+end 
 source 'http://ruby.taobao.org/'
 
 gem 'rails', '3.1.2'
@@ -23,11 +27,15 @@ end
 gem "mongrel", "~> 1.2.0.pre2"
 gem 'json', '1.7.6'
 gem 'execjs', '1.4.0'
-#gem 'therubyracer', '0.11.4'
-gem 'jquery-rails', '~> 2.1.0'
+gem 'jquery-rails', '2.1.0'
 gem 'spreadsheet', '0.6.5.5'
 gem 'remotipart', '~> 1.0'
-#gem 'iconv'
+gem 'iconv'
+
+# group :production do
+ gem 'libv8', '~> 3.11.8.17'
+ gem 'therubyracer', :platform => :ruby
+#end
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 
@@ -55,3 +63,4 @@ gem 'hpricot', '0.8.4'
 #gem 'rmagick', '2.13.1'
 #gem 'barby', '0.5.1'
 #gem 'macaddr','1.7.1'
+ 

@@ -1,4 +1,3 @@
- // JavaScript Document
 //登录默认值
 function focusBlur(e){
     $(e).focus(function(){
@@ -22,18 +21,26 @@ $(function(){
 
 //切换
 $(function() {
+    change_tab_li();
+})
+
+function change_tab_li(){
     $('div.tab_head li').bind('click',function(){
         $(this).addClass('hover').siblings().removeClass('hover');
         var index = $('div.tab_head li').index(this);
         $('div.data_body > div').eq(index).show().siblings().hide();
     });
-})
+}
 
 //偶数行变色
 $(function(){
+    odd_even();
+});
+
+function odd_even(){
     $(".data_table > tbody > tr:odd").addClass("tbg");
     $(".data_tab_table > tbody > tr:odd").addClass("tbg");
-});
+}
 
 //弹出层
 function popup(t){
@@ -76,8 +83,9 @@ $(function(){
 
 //向选择框添加产品服务
 function add_this(e,name){
-    var child="<div id='"+e.value+"'><em>"+name +"</em><a href='javascript:void(0)' class='addre_a'  \n\
-   onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a><span><input name='sale_prod["+e.value +"]' \n\
+    var child="<div id='"+e.value+"'><em>"+name +"</em><input id='prod_price' value='"+ e.id+"' type='hidden' />\n\
+   <a href='javascript:void(0)' class='addre_a' onclick=\"add_one(\'"+e.value +"\')\" id='add_one"+e.value +"'>+</a>\n\
+   <span><input name='sale_prod["+e.value +"]' \n\
     type='text' class='addre_input' value='1' id='add_p"+e.value +"' /></span><a href='javascript:void(0)' class='addre_a' \n\
     id='delete_one"+e.value+"'>-</a><a href='javascript:void(0)' class='remove_a' \n\
     onclick='$(this).parent().remove();if($(\"#prod_"+ e.value+"\").length!=0){$(\"#prod_"+ e.value+"\")[0].checked=false;}'>删除</a></div>";
@@ -209,14 +217,14 @@ function tishi_alert(message){
         jQuery('.tab_alert').fadeTo("slow",0);
     }, time*1000);
     setTimeout(function(){
-        $(".tab_alert").css('display','none');
+        jQuery(".tab_alert").css('display','none');
     }, time*1000);
     var local_timer=setInterval(function(){
         time -= 1;
-        $("#time").html(time);
+        jQuery("#time").html(time);
         if (time <=0){
+            jQuery("#time").html("");
             window.clearInterval(local_timer);
-            $("#time").html("")
         }
     },1000)
 }
@@ -242,10 +250,7 @@ function hide_mask(t){
 //	$(".table_box_h").css("paddingRight",div_w-table_w)
 //})
 
-function odd_even(){
-    $(".data_table > tbody > tr:odd").addClass("tbg");
-    $(".data_tab_table > tbody > tr:odd").addClass("tbg");
-}
+
 
 function round(v,e){
     var t=1;
@@ -431,16 +436,12 @@ function operate_order(order_id,e){
 
 //退单功能
 function return_order(o_id,c_id){
-    $.ajax({
-        async:true,
-        dataType: "script",
-        type: "post",
-        url: "/customers/return_order",
-        data: {
-            o_id : o_id,
-            c_id : c_id
-        }
-    })
+    var url = "/customers/return_order";
+    var data = {
+        o_id : o_id,
+        c_id : c_id
+    }
+    request_ajax(url,data,"post")
 }
 
 //开启关闭短信功能

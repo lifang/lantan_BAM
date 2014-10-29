@@ -259,7 +259,7 @@ class ComplaintsController < ApplicationController
       c_sql[0] += " and (sum(o.price) is null or sum(o.price)<?)"
       c_sql << amount_con_end.to_i
     end
-    @customers = Customer.paginate_by_sql(c_sql,:page => params[:page], :per_page => 10)
+    @customers = Customer.paginate_by_sql(c_sql,:page => params[:page], :per_page => Constant::PER_PAGE)
 
     respond_to do |f|
       f.html

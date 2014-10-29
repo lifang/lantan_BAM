@@ -114,20 +114,11 @@ function set_staff_role(staff_id,r_ids){
 }
 
 function search_staff(store_id){
-    $.ajax({
-        url:"/stores/"+store_id+"/roles/staff",
-        dataType:"script",
-        type:"GET",
-        data: {
-            name : $.trim($("#name").val())
-        },
-        success:function(){
-                 
-        },
-        error:function(){
-            tishi_alert("error");
-        }
-    });
+    var url = "/stores/"+store_id+"/roles/staff";
+    var data = {
+        name : $.trim($("#name").val())
+    }
+    request_ajax(url,data)
 }
 
 function del_role(role_id,store_id){
@@ -184,56 +175,7 @@ function selectAll(obj){
         $(obj).parent().next().find("input[type='checkbox']").attr("checked", false)
     }
 }
-//这边是工位的开始
-function new_station_valid(obj){ //新建工控机验证
-    var product = $("input[name='product_ids[]']:checked").length;
-    var name = $("#station_name").val();
-    var code = $("#station_code").val();
-    var has_controller = $("#station_has_controller").attr("checked")=="checked";
-    var station_code = $.trim($("#station_collector_code").val());
-    if(name==""){
-        tishi_alert("工控机名称不能为空!");
-    }else if(code==""){
-        tishi_alert("工控机编号不能为空!");
-    }else if(has_controller && station_code==""){
-        tishi_alert("采集器编号不能为空!")
-    }else if(product==0){
-        tishi_alert("至少选择一个服务项目!");
-    }else{
-        $(obj).parents("form").submit();
-    //$(obj).attr("disabled", "disabled");
-    }
-}
 
-function edit_station_valid(obj){ //编辑工控机验证
-    var product = $("input[name='edit_product_ids[]']:checked").length;
-    var name = $("#edit_station_name").val();
-    var code = $("#edit_station_code").val();
-    var has_controller = $("#edit_station_has_controller").attr("checked")=="checked";
-    var station_code = $.trim($("#edit_station_collector_code").val());
-    if(name==""){
-        tishi_alert("工控机名称不能为空!");
-    }else if(code==""){
-        tishi_alert("工控机编号不能为空!");
-    }else if(has_controller && station_code==""){
-        tishi_alert("采集器编号不能为空!")
-    }else if(product==0){
-        tishi_alert("至少选择一个服务项目!");
-    }else{
-        $(obj).parents("form").submit();
-    //$(obj).attr("disabled", "disabled");
-    }
-}
-
-function handleController(obj){            //修改是否有工控机修改采集器编号可否输入
-    if($(obj).attr("checked")=="checked"){
-        $(".controller_input label").prepend("<span class='red'>*</span>");
-        $(".controller_input input").removeAttr("disabled");
-    }else{
-        $(".controller_input span").remove();
-        $(".controller_input input").attr("disabled", "disabled");
-    }
-}
 
 
 function check_advert(){

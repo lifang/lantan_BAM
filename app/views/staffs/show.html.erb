@@ -8,7 +8,8 @@
           <span>部门：<%= @departs[@staff.position]%></span>
           <span>等级：<%= Staff::LEVELS[@staff.level] %></span>
           <span>职务：<%=@departs[@staff.department_id]%></span>
-          <% if permission?(:staffs, :edit_show_staff) %><a href="javascript:void(0)" id="staff_detail">详情</a><% end %></div>
+          <% if permission?(:staffs, :edit_show_staff) %>
+          <a href="javascript:void(0)" id="staff_detail" onclick="show_staff(<%=@staff.id%>,<%=@staff.store_id%>)">详情</a><% end %></div>
       </div>
       <div class="clear"></div>
       <div class="tab_head">
@@ -22,20 +23,6 @@
       </div>
       <div class="data_body" id="ajax_paginate">
         <div>
-          <div class="search">
-            <input type="hidden" id="staff_id" value="<%= @staff.id %>"/>
-            <input type="hidden" id="store_id" value="<%= @store.id %>"/>
-            <div><label>时间：</label>
-              <input name="" type="text" id="start_at" class="Wdate" readonly onClick="WdatePicker();"/> 到
-              <input name="" type="text" id="end_at" class="Wdate" readonly onClick="WdatePicker();"/>
-            </div>
-            <div><label>统计方式：
-                <input name="cal_style" class="cal_style" type="radio" value="day" checked/>日&nbsp;&nbsp;
-                <input name="cal_style" class="cal_style" type="radio" value="week"/>周&nbsp;&nbsp;
-                <input name="cal_style" class="cal_style" type="radio" value="month"/>月</label>
-            </div>
-            <div><button class="search_btn" id="search_work_record">查询</button></div>
-          </div>
           <div id="work_record_tab">
             <%= render :partial => "work_record_tab" %>
           </div>

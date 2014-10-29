@@ -22,18 +22,21 @@ class Customer < ActiveRecord::Base
   PROPERTY = {:PERSONAL => 0, :GROUP => 1}  #客户属性 0个人 1集团客户
   ALLOWED_DEBTS = {:NO => 0, :YES => 1}   #是否允许欠账
   CHECK_TYPE = {:MONTH => 0, :WEEK => 1}  #结算类型 按月/周结算
+  
+  TAB_LIST = {1=>"单位客户",0=>"个人客户",2=>"套餐卡客户",3=>"储值卡客户",4=>"VIP客户"}
+  LIST_NAME = {:GROUP =>1,:PERSONAL =>0,:PCARD =>2,:SV_CARD =>3,:VIP =>4}
 
+  
+  #加载客户的手机号和姓名
+  def self.load_customers(ids)
+    Customer.where(:id=>ids).select("id,name,mobilephone").inject({}){|h,c|h[c.id]=c;h}
+  end
 
-  def self.search_customer(c_property, car_num, started_at, ended_at, name, phone, c_sex, is_vip, page, store_id)
-    base_sql = "select DISTINCT(cu.id), cu.name, cu.mobilephone, cu.mark, cu.property,cu.is_vip from customers cu
-        left join customer_num_relations cnr on cnr.customer_id = cu.id
-        left join car_nums ca on ca.id = cnr.car_num_id "
-    condition_sql = "where cu.status = #{STATUS[:NOMAL]} "
+  def self.search_customer(car_num, started_at, ended_at, name, phone,  store_id)
+    base_sql = "select cu.* from customers cu left join customer_num_relations cnr on
+     cnr.customer_id = cu.id left join car_nums ca on ca.id = cnr.car_num_id "
+    condition_sql = "where cu.status = #{STATUS[:NOMAL]} and cu.store_id = #{store_id} "
     params_arr = [""]
-    unless c_property.nil? or c_property.to_i == -1
-      condition_sql += " and cu.property = ? "
-      params_arr << c_property.to_i
-    end
     unless name.nil? or name.strip.empty?
       condition_sql += " and cu.name like ? "
       params_arr << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
@@ -42,42 +45,26 @@ class Customer < ActiveRecord::Base
       condition_sql += " and cu.mobilephone = ? "
       params_arr << phone.strip
     end
-    unless c_sex.nil? or c_sex.to_i == -1
-      condition_sql += " and cu.sex = ?"
-      params_arr << c_sex.to_i
-    end
-    unless is_vip.nil? or is_vip.strip.empty?
-      condition_sql += " and cu.store_id = ? "
-      params_arr << store_id.to_i
-      condition_sql += " and cu.is_vip = ? "
-      params_arr << is_vip.to_i
-    else
-      condition_sql += " and cu.store_id in(?) "
-      params_arr << StoreChainsRelation.return_chain_stores(store_id)
-    end
     unless car_num.nil? or car_num.strip.empty?
       condition_sql += " and ca.num like ? "
       params_arr << "%#{car_num.strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     is_has_order = false
-    need_group_by = false
     unless started_at.nil? or started_at.strip.empty?
       is_has_order = true
-      need_group_by = true
-      base_sql += " inner join orders o on o.car_num_id = ca.id "
+      base_sql += " left join orders o on o.car_num_id = ca.id "
       condition_sql += " and o.created_at >= ? "
       params_arr << started_at.strip
     end
     unless ended_at.nil? or ended_at.strip.empty?
-      need_group_by = true
-      base_sql += " inner join orders o on o.car_num_id = ca.id " unless is_has_order
+      base_sql += " left join orders o on o.car_num_id = ca.id " unless is_has_order
       condition_sql += " and o.created_at <= ?"
       params_arr << ended_at.strip.to_date + 1.days
     end
-    condition_sql += " group by ca.id " if need_group_by
+    condition_sql += " group by cu.id "
     params_arr[0] = base_sql + condition_sql
     params_arr[0] += " order by cu.created_at desc"
-    return Customer.paginate_by_sql(params_arr, :per_page => 20, :page => page)
+    return Customer.find_by_sql(params_arr)
   end
 
   def self.auto_generate_customer_type

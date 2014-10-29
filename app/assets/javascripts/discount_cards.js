@@ -14,16 +14,13 @@ function add_products_search(store_id, obj){    //新建打折卡 查询服务�
         var id = $(this).find("input[name='p_hidden']").val();
         arr.push(id);
     })
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/discount_cards/add_products_search",
-        dataType: "script",
-        data: {
-            type : type,
-            name : name,
-            arr : arr
-        }
-    })
+    var  url= "/stores/"+store_id+"/discount_cards/add_products_search";
+    var data = {
+        type : type,
+        name : name,
+        arr : arr
+    }
+    request_ajax(url,data)
 }
 
 function selected_product(obj, name){       //选中产品或服务
@@ -33,7 +30,8 @@ function selected_product(obj, name){       //选中产品或服务
             <span><input type='text' value='1' name='p_text' class='addre_input'/></span>\n\
            <a href='javascript:void(0)' class='remove_a' onclick='\n\
            cancel_product("+id+")'>删除</a><input type='hidden' id='hidden_"+id+"' name='p_hidden' value='"+id+"'/></div>");
-    }else{
+    }
+    else{
         $("#product_"+id+"_div").remove();
     }
 }
@@ -96,7 +94,8 @@ function create_dcard_valid(obj){     //新建打折卡验证
     }
     if(name==""){
         tishi_alert("请输入打折卡名称!");
-    }else if(get_str_len(name)>36){
+    }
+    else if(get_str_len(name)>36){
         tishi_alert("打折卡名称最多36个字符!");
     }else if(price=="" || isNaN(price) || parseInt(price)<0){
         tishi_alert("请输入正确的打折卡金额!");
@@ -114,25 +113,19 @@ function create_dcard_valid(obj){     //新建打折卡验证
 }
 
 function edit_discount_card(cid, store_id){     //编辑打折卡按钮
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/discount_cards/edit",
-        dataType: "script",
-        data: {
-            cid : cid
-        }
-    })
+    var url = "/stores/"+store_id+"/discount_cards/edit";
+    var data = {
+        cid : cid
+    }
+    request_ajax(url,data)
 }
 
 function edit_dcard_add_products(cid, store_id){   //编辑打折卡添加按钮
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/discount_cards/edit_dcard_add_products",
-        dataType: "script",
-        data: {
-            cid : cid
-        }
-    })
+    var url = "/stores/"+store_id+"/discount_cards/edit_dcard_add_products";
+    var data = {
+        cid : cid
+    }
+    request_ajax(url,data)
 }
 
 function edit_add_products_search(store_id, obj){    //编辑打折卡 查询服务或产品
@@ -143,16 +136,13 @@ function edit_add_products_search(store_id, obj){    //编辑打折卡 查询服
         var id = $(this).find("input[name='edit_p_hidden']").val();
         arr.push(id);
     })
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/discount_cards/edit_add_products_search",
-        dataType: "script",
-        data: {
-            type : type,
-            name : name,
-            arr : arr
-        }
-    })
+    var url = "/stores/"+store_id+"/discount_cards/edit_add_products_search";
+    var data = {
+        type : type,
+        name : name,
+        arr : arr
+    }
+    request_ajax(url,data)
 }
 
 function edit_selected_product(obj, name){       //编辑-选中产品或服务

@@ -28,7 +28,7 @@
           <tr>
             <td width="10%" class="wordBreak"><input type="checkbox" value="<%=revist.id%>" /></td>
             <td width="10%" class="wordBreak"><%= @car_nums[revist.car_num_id] %></td>
-            <td width="10%" class="wordBreak"><%= @s_custs[revist.customer_id] %></td>
+            <td width="10%" class="wordBreak"><%= revist.name %></td>
             <td width="25%" class="wordBreak" title="<%=revist.content%>"><%= revist.content[0..20]+"..." %></td>
             <td width="10%" class="wordBreak"><%= SendMessage::SATS_NAMES[revist.status] %></td>
             <td width="15%" class="wordBreak"><%= SendMessage::TYPES_NAMES[revist.types] %></td>

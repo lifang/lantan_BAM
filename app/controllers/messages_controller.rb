@@ -1,6 +1,6 @@
 #encoding: utf-8
 class MessagesController < ApplicationController
-  before_filter :sign?, :except => ["alipay_compete"]
+  before_filter :sign?, :except => ["alipay_compete","wechat_msg"]
   layout "customer"
   respond_to :html, :xml, :json
   @@m = Mutex.new
@@ -76,7 +76,7 @@ class MessagesController < ApplicationController
 
   def set_message
     store = Store.find(params[:store_id])
-    send_list = store.send_list.split(",")
+    send_list = store.send_list.nil? ? [] : store.send_list.split(",")
     if params[:m_status] and params[:m_index]
       if params[:m_status].to_i == 0
         send_list.delete(params[:m_index])
@@ -89,7 +89,7 @@ class MessagesController < ApplicationController
   end
   
   def send_detailed
-    @start_time = params[:first_time].nil? || params[:first_time] == "" ? Time.now.beginning_of_month.strftime("%Y-%m-%d") : params[:first_time]
+    @start_time = params[:first_time].nil? || params[:first_time] == "" ? (Time.now - Constant::PRE_DAY.days).strftime("%Y-%m-%d") : params[:first_time]
     @end_time = params[:last_time].nil? || params[:last_time] == "" ? Time.now.strftime("%Y-%m-%d") : params[:last_time]
     sql = "date_format(send_at,'%Y-%m-%d')>='#{@start_time}' and date_format(send_at,'%Y-%m-%d')<='#{@end_time}' "
     sql +=  (params[:types] and params[:types] != "") ? " and types=#{params[:types]} and status=#{MessageRecord::STATUS[:SENDED]}" : " and status=#{MessageRecord::STATUS[:SENDED]}"
@@ -185,6 +185,25 @@ class MessagesController < ApplicationController
     else
       render :text=>"success"
     end
+  end
+
+  #微信发送短信的接口
+  def wechat_msg
+    #    begin
+    content = "尊敬的用户您好,您的本次活动验证码为:#{params[:code]}"
+    customer = Customer.where(:name=>"微信用户").where("store_id is null").first
+    if customer
+      customer.update_attribute(:mobilephone,params[:phone])
+    else
+      customer = Customer.create(:name=>"微信用户",:mobilephone=>params[:phone])
+    end
+    msg = message_data(params[:store_id],content,customer,nil,MessageRecord::M_TYPES[:WECHAT])
+    status = 1
+    #    rescue
+    #      msg = "加载失败，稍候重试"
+    #      status = 0
+    #    end
+    render :json=>{:msg =>msg,:status =>status}
   end
   
 end

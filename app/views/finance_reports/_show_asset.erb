@@ -32,10 +32,10 @@
       </div>
       <div class="seeProDiv">
         <div class="seeProDiv_l">折旧金额：</div>
-        <div class="seeProDiv_r"><%= @asset.share_month.nil? ? "--" : (@asset.amount/@asset.share_month).round(2) %></div>
+        <div class="seeProDiv_r"><%= @asset.share_month.nil? ? "--" : (@asset.pay_amount/@asset.share_month).round(2) %></div>
       </div>
       <div class="seeProDiv">
-        <div class="seeProDiv_l">资产总值：</div>
+        <div class="seeProDiv_l">资产总价：</div>
         <div class="seeProDiv_r"><%= @asset.amount %></div>
       </div>
       <div class="seeProDiv">

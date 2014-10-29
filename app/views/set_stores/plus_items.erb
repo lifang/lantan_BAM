@@ -27,22 +27,26 @@
     </div>
   </div>
 </div>
-<div>
-  <div class="serviceClassBar" id="search_item">
-    <ul>
-      <%Category::SEARCH_ITEMS.each do |k,v|%>
-        <li <%if k == 0%> class="hover" <%end%> id="<%=k%>"
-                          onclick="$(this).addClass('hover').siblings().removeClass('hover')"><%= v %></li>
-                        <%end%>
-    </ul>
-    <div class="searchBox">
-      <input type="text" id="item_name" />
-      <button class="search_btn" onclick="search_item(<%=params[:store_id]%>)" id="item_btn">查询</button>
-      <%= image_tag "ajax-loader.gif", :id => "spinner_user", :style => "display:none;" %>
-    </div>
+<div class="tab_popup" id="customer_popup" style="width:675px;">
+  <div class="popup_box" style="width:675px;">
+    <h1>确认车牌的客户信息<a href="javascript:void(0);" class="close">关闭</a></h1>
+    <div class="popup_body" id="confirm_customer"></div>
   </div>
-  <div class="cardDtl"></div>
 </div>
+<div class="serviceClassBar" id="search_item">
+  <ul>
+    <%Category::SEARCH_ITEMS.each do |k,v|%>
+      <li <%if k == 0%> class="hover" <%end%> id="<%=k%>"
+                        onclick="$(this).addClass('hover').siblings().removeClass('hover')"><%= v %></li>
+                      <%end%>
+  </ul>
+  <div class="searchBox">
+    <input type="text" id="item_name" />
+    <button class="search_btn" onclick="search_item(<%=params[:store_id]%>)" id="item_btn">查询</button>
+    <%= image_tag "ajax-loader.gif", :id => "spinner_user", :style => "display:none;" %>
+  </div>
+</div>
+<div class="cardDtl"></div>
 
 <div style=" position: fixed; top: 100px; left: 22px; width: 150px; height: 200px;" id="discount_card">
   <%= render "customer_cards" %>

@@ -20,7 +20,7 @@ class CreateStaffs < ActiveRecord::Migration
       t.integer :deduct_at   #提成开始数量
       t.integer :deduct_end  #提成结束数量
       t.float :deduct_percent
-      t.boolean :status, :default => 0
+      t.integer :status, :default => 0
       t.integer :store_id
       t.string :encrypted_password
       t.string :username

@@ -44,14 +44,15 @@ class Material < ActiveRecord::Base
 
 
   def self.materials_list store_id,types=nil,name=nil,code=nil
-    sql = ["select m.*, c.name cname from materials m inner join categories c on m.category_id=c.id
+    sql = ["select m.*, c.name  cname,ifnull(storage*sale_price,0) total_price from materials m inner join categories c on m.category_id=c.id
       where c.types=? and c.store_id=? and m.status=?", Category::TYPES[:material], store_id, Material::STATUS[:NORMAL]]
     unless types.nil? || types==0 || types==-1
       sql[0] += " and c.id=?"
       sql << types
     end
     unless name.nil? || name.strip.empty?
-      sql[0] += " and m.name like ?"
+      sql[0] += " and m.name like ? or m.remark like ?"
+      sql << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
       sql << "%#{name.strip.gsub(/[%_]/){|x| '\\' + x}}%"
     end
     unless code.nil? || code.strip.empty?
@@ -96,6 +97,23 @@ class Material < ActiveRecord::Base
       self.update_attributes(:code => self.code+barcode.checksum.to_s, :code_img => "/barcode/#{Time.now.strftime("%Y%m")}/#{self.id}.png")
     rescue
       self.errors[:barby] << "条形码图片生成失败！"
+    end
+  end
+
+  #更新库存并生成出库记录
+  def self.update_storage(material_id,result_storage,staff,remark,types,order=nil)
+    Material.transaction do
+      material = Material.find_by_id(material_id)
+      used_stoage = material.storage-result_storage
+      material.update_attribute("storage",result_storage)
+      if used_stoage > 0
+        MatOutOrder.create(:material => material, :material_num => used_stoage,
+          :staff_id => staff, :price => material.price, :types => types.nil? ? MatOutOrder::TYPES_VALUE[:sale] : types,
+          :store_id => material.store_id,:remark=>remark,:detailed_list=>material.detailed_list,:order_id=>order.nil? ? nil : order.id)
+      elsif used_stoage < 0
+        MatInOrder.create({:material => material, :material_order_id => nil,
+            :material_num =>-used_stoage , :price => material.import_price, :staff_id =>staff,:remark=>remark })
+      end
     end
   end
 

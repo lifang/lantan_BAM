@@ -175,7 +175,11 @@
           </div>
           <div class="item_textarea">
             <label>上传照片：</label>
-            <%= f.file_field :photo, :class => "file" %>
+            <%= f.file_field :photo, :class => "file"%>
+          </div>
+          <div class="item">
+            <label>登录系统：</label>
+            <input type="checkbox" name="is_access" />
           </div>
         </div>
         <%= f.hidden_field :status, :value => 0 %>

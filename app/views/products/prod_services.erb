@@ -81,6 +81,10 @@
                       <% if permission?(:sales, :add_service) %>
                         <%= link_to (!service.commonly_used ? "常用" : "不常用"), commonly_used_store_product_path(params[:store_id], service.id), :remote => true, 'data-type' => "script", :method => :post, :class => "see_btn", :id => service.id %>
                       <% end %>
+                      <% if permission?(:sales, :edit_service) %>
+                        <a href="javascript:void(0)"
+                           onclick="on_weixin('Product','<%=  service.id %>',this)" title="<%= service.on_weixin ?  '不' : '' %>在微信上推荐该套餐卡"><%= service.on_weixin ?  '不' : '' %>推荐</a>
+                         <% end %>
                     </td>
                   </tr>
                 <% end %>
@@ -148,6 +152,10 @@
                         <% if permission?(:sales, :add_service) %>
                           <%= link_to (!service.commonly_used ? "常用" : "不常用"), commonly_used_store_product_path(params[:store_id], service.id), :remote => true, 'data-type' => "script", :method => :post, :class => "see_btn", :id => service.id %>
                         <% end %>
+                        <% if permission?(:sales, :edit_service) %>
+                          <a href="javascript:void(0)"
+                             onclick="on_weixin('Product','<%=  service.id %>',this)" title="<%= service.on_weixin ?  '不' : '' %>在微信上推荐该套餐卡"><%= service.on_weixin ?  '不' : '' %>推荐</a>
+                           <% end %>
                       </td>
                     </tr>
                   <% end %>

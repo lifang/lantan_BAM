@@ -5,7 +5,7 @@ class ProductsController < ApplicationController
   layout 'sale'
 
   def index
-    sql = ["select service_code code,p.name,sale_price,t_price,base_price,p.id,p.store_id,prod_point,c.name c_name
+    sql = ["select service_code code,p.name,sale_price,t_price,base_price,p.id,p.store_id,prod_point,c.name c_name,on_weixin
     from products p inner join categories c on p.category_id=c.id where c.store_id=#{params[:store_id]} and p.status=#{Product::IS_VALIDATE[:YES]}
     and c.types=#{Category::TYPES[:good]}"]
     count_sql = "categories.store_id=#{params[:store_id]} and products.status=#{Product::IS_VALIDATE[:YES]} and
@@ -38,8 +38,8 @@ class ProductsController < ApplicationController
 
 
   def prod_services
-    @services = Product.paginate_by_sql("select p.id, service_code code,prod_point,p.store_id,p.name,base_price,show_on_ipad,cost_time,t_price,sale_price,
-    staff_level level1,staff_level_1 level2,commonly_used,c.name c_name from products p inner join categories c on c.id=p.category_id where c.store_id=#{params[:store_id]}
+    @services = Product.paginate_by_sql("select p.id, service_code code,prod_point,p.store_id,p.name,base_price,cost_time,t_price,sale_price,
+    staff_level level1,staff_level_1 level2,commonly_used,c.name c_name,on_weixin from products p inner join categories c on c.id=p.category_id where c.store_id=#{params[:store_id]}
     and c.types=#{Category::TYPES[:service]} and p.status=#{Product::IS_VALIDATE[:YES]} and p.single_types=#{Product::SINGLE_TYPE[:SIN]}
     order by p.created_at desc", :page => params[:page], :per_page => Constant::PER_PAGE)
     @total = Product.joins(:category).where("categories.store_id=#{params[:store_id]} and categories.types=#{Category::TYPES[:service]}
@@ -79,11 +79,12 @@ class ProductsController < ApplicationController
     end
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
-        params[:img_url].each_with_index {|img,index|
-          url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
-          ImageUrl.create(:product_id=>product.id,:img_url=>url)
-          product.update_attributes({:img_url=>url}) if index == 0
-        }
+        image_urls = []
+        params[:img_url].each {|k,img|
+          image_urls <<  ImageUrl.new(:product_id=>product.id,
+            :img_url=>Sale.upload_img(img,product,Constant::P_PICSIZE << "#{types.downcase}_pics",k))}
+        ImageUrl.import image_urls
+        product.update_attributes({:img_url=>image_urls[0].img_url})
       end
     rescue
       flash[:notice] ="图片上传失败，请重新添加！"
@@ -136,12 +137,12 @@ class ProductsController < ApplicationController
     end
     begin
       if params[:img_url] and !params[:img_url].keys.blank?
-        product.image_urls.inject(Array.new) {|arr,mat| mat.destroy}
-        params[:img_url].each_with_index {|img,index|
-          url=Sale.upload_img(img[1],product.id,"#{types.downcase}_pics",product.store_id,Constant::P_PICSIZE,img[0])
-          ImageUrl.create(:product_id=>product.id,:img_url=>url)
-          product.update_attributes({:img_url=>url}) if index == 0
-        }
+        ImageUrl.delete_all(:product_id => product.id)
+        image_urls = []
+        params[:img_url].each {|k,img|image_urls << ImageUrl.new(:product_id=>product.id,
+            :img_url=>Sale.upload_img(img,product,Constant::P_PICSIZE << "#{types.downcase}_pics",k))}
+        ImageUrl.import image_urls
+        product.update_attributes({:img_url=>image_urls[0].img_url})
       end
     rescue
       flash[:notice] ="图片上传失败，请重新添加图片！"
@@ -248,8 +249,7 @@ class ProductsController < ApplicationController
     flash[:notice] = "添加成功"
     parms = {:name=>params[:name],:category_id=>Product::PACK[:PACK],:status=>Product::IS_VALIDATE[:YES],:is_service=>Product::PROD_TYPES[:SERVICE],
       :created_at=>Time.now.strftime("%Y-%M-%d"), :service_code=>"S#{Sale.set_code(3,"product","service_code")}",:is_auto_revist=>params[:auto_revist],
-      :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB],
-      :show_on_ipad=>Product::SHOW_ON_IPAD[:NO]}
+      :auto_time=>params[:time_revist],:store_id=>params[:store_id],:revist_content=>params[:con_revist],:single_types=>Product::SINGLE_TYPE[:DOUB]}
     parms.merge!(:techin_price=>params[:techin_price].nil? ? 0 :params[:techin_price] )
     parms.merge!({:techin_percent=>params[:techin_percent].nil? ? 0 : params[:techin_percent].to_f*params[:sale_price].to_f/100})
     parms.merge!({:cost_time=>params[:cost_time],:staff_level=>params[:level1],:staff_level_1=>params[:level2]})

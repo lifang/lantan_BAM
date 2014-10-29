@@ -19,7 +19,7 @@ class MaterialLoss < ActiveRecord::Base
   #      :page => page,:per_page => per_page)
   #  end
   def self.loss_list store_id,types=nil,name=nil,code=nil
-    sql = ["select ml.id, ml.loss_num,ml.store_id, m.code, m.name, m.status, m.types, m.unit, m.price, m.sale_price,m.remark,
+    sql = ["select ml.id, ml.loss_num,ml.store_id, m.code, m.name, m.status, m.types, m.unit, m.price, m.sale_price,ml.remark,
     s.name staff_name, c.name cname,ml.types m_types from material_losses ml inner join materials m on ml.material_id=m.id inner join categories c
     on m.category_id=c.id inner join staffs s on ml.staff_id=s.id where m.status=? and c.store_id=? and c.types=?",
       Material::STATUS[:NORMAL], store_id, Category::TYPES[:material]]

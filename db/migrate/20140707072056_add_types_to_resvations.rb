@@ -9,5 +9,6 @@ class AddTypesToResvations < ActiveRecord::Migration
     add_column :reservations, :staff_id, :integer   #意向单洽谈人
     add_column :reservations, :order_id, :integer   #意向单转成的订单的id
     add_column :reservations, :code, :string   #单号
+    add_column :reservations, :customer_id, :integer   #客户编号
   end
 end

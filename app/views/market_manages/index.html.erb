@@ -16,9 +16,9 @@
   <div id="on_time">数据加载中。。。</div>
   <div style="display:none;" id="over_time">数据加载中。。。</div>
   <script type="text/javascript">
-    load_sale("/stores/<%= params[:store_id] %>/market_manages/load_goal");
+    request_ajax("/stores/<%= params[:store_id] %>/market_manages/load_goal");
     setTimeout(function(){
-      load_sale("/stores/<%= params[:store_id] %>/market_manages/load_over");
+      request_ajax("/stores/<%= params[:store_id] %>/market_manages/load_over");
     },2000)
   </script>
 </div>

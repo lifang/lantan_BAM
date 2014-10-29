@@ -33,19 +33,33 @@ class LoginsController < ApplicationController
       @user_name = params[:user_name]
       render 'index', :layout => false
     else
-      @staff.update_attributes(:last_login=>Time.now.strftime("%Y-%m-%d %H:%M:%S"))
-      cookies[:user_id]={:value =>@staff.id, :path => "/", :secure  => false}
-      cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => false}
-      session_role(cookies[:user_id])
-      file_path = mkdir("login_ip_logs","ip_log")
-      file = File.open(file_path,"a+")
-      ip = request.headers["HTTP_X_REAL_IP"] || request.remote_ip
-      info = create_get_http("http://ip.taobao.com","/service/getIpInfo.php?ip=#{ip}")["data"]
-      position = "#{info["country"]}-#{info["area"]}-#{info["region"]}-#{info["city"]}--#{info["isp"]}"
-      file.write("\r\n登录ip:#{ip}-- 时间#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}  登录用户：#{@staff.name} 门店ID:#{@staff.store_id}  门店地址：#{Store.find(@staff.store_id).address}  所属区域：#{position} \r\n".force_encoding("UTF-8"))
-      file.close
-      #if has_authority?
-      redirect_to "/stores/#{@staff.store_id}/welcomes"
+      if @staff.status != Staff::STATUS[:normal]
+        @user_name = params[:user_name]
+        render 'index', :layout => false
+      else
+        file_path = mkdir("login_ip_logs","ip_log")
+        file = File.open(file_path,"a+")
+        ip = request.headers["HTTP_X_REAL_IP"] || request.remote_ip
+        info = create_get_http("http://ip.taobao.com","/service/getIpInfo.php?ip=#{ip}")["data"]
+        position = "#{info["country"]}-#{info["area"]}-#{info["region"]}-#{info["city"]}--#{info["isp"]}"
+        city = store.city
+        region = City.find store.city.parent_id if store.city.parent_id != 0
+        if city.name =~ /#{info["city"]+"-"+info["region"]}/ || (region && region.name =~ /#{info["region"]}/  )
+          file.write("\r\n登录ip:#{ip}-- 时间#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}  登录用户：#{@staff.name} 门店ID:#{@staff.store_id}  门店地址：#{store.address}  所属区域：#{position} \r\n".force_encoding("UTF-8"))
+          file.close
+          @staff.update_attributes(:last_login=>Time.now.strftime("%Y-%m-%d %H:%M:%S"))
+          cookies[:user_id]={:value =>@staff.id, :path => "/", :secure  => false}
+          cookies[:user_name]={:value =>@staff.name, :path => "/", :secure  => false}
+          session_role(cookies[:user_id])
+          flash.now[:notice] = "为系统安全，请修改密码！" if @staff.has_password?(@staff.phone)
+          #if has_authority?
+          redirect_to "/stores/#{@staff.store_id}/welcomes"
+        else
+          flash.now[:notice] = "登录区域有误，请核实后重新尝试！"
+          @user_name = params[:user_name]
+          render 'index', :layout => false
+        end
+      end
       #else
       #  cookies.delete(:user_id)
       #  cookies.delete(:user_name)

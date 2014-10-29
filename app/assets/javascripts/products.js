@@ -1,31 +1,16 @@
-//添加产品
-function add_prod(store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/add_prod"
-    });
-}
-
 //编辑产品
 function edit_prod(id,store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+store_id+"/products/"+ id+"/edit_prod"
-    });
+    prod_request(id,store_id,"edit_prod")
 }
 
 //显示产品
 function show_prod(id,store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/show_prod"
-    });
+    prod_request(id,store_id,"show_prod")
+}
+
+function prod_request(id,store_id,action){
+    var url = "/stores/"+store_id+"/products/"+ id;
+    request_ajax(url+"/"+action,'',"post")
 }
 
 //添加或者编辑产品
@@ -103,32 +88,17 @@ function add_product(e){
 
 //显示服务
 function show_service(store_id,id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/show_serv"
-    });
+    prod_request(id,store_id,"show_serv")
 }
 
 // 添加服务
 function add_service(store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/add_serv"
-    });
+    request_ajax("/stores/"+ store_id+"/products/add_serv",'',"post")
 }
 
 //编辑服务
 function edit_service(store_id,id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/edit_serv"
-    });
+    prod_request(id,store_id,"edit_serv")
 }
 
 //添加或者编辑服务
@@ -213,17 +183,13 @@ function edit_serv(e){
 function load_material(store_id){
     var types=$("#sale_types option:checked").val();
     var name=$("#sale_name").val();
+    var url = "/stores/"+ store_id+"/products/load_material";
+    var data = {
+        mat_types : types,
+        mat_name : name
+    }
     if (types != "" || name != ""){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/products/load_material",
-            data : {
-                mat_types : types,
-                mat_name : name
-            }
-        });
+        request_ajax(url,data,"post")
     }else{
         tishi_alert("请选择类型或填写名称！");
     }
@@ -241,25 +207,17 @@ function show_mat(){
 }
 
 function prod_delete(id,store_id){
+    var url = "/stores/"+ store_id+"/products/"+ id+"/prod_delete";
     if (confirm("确定删除该产品吗？")){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/products/"+ id+"/prod_delete"
-        });
+        request_ajax(url,'',"post")
     }
   
 }
 
 function serve_delete(id,store_id){
+    var url="/stores/"+ store_id+"/products/"+ id+"/serve_delete";
     if (confirm("确定删除该服务吗？")){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/products/"+ id+"/serve_delete"
-        });
+        request_ajax(url,'',"post")
     }
 }
 
@@ -300,22 +258,12 @@ function change_input(front,back){
 
 // 添加服务
 function add_package(store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/add_package"
-    });
+    request_ajax("/stores/"+ store_id+"/products/add_package",'',"post")
 }
 
 //编辑服务
 function edit_pack(store_id,id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/products/"+ id+"/edit_pack"
-    });
+    prod_request(id,store_id,"edit_pack")
 }
 
 //添加或者编辑服务

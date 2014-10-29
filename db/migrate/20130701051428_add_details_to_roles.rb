@@ -9,7 +9,6 @@ class AddDetailsToRoles< ActiveRecord::Migration
     add_column :goal_sale_types, :created_at, :datetime
     add_column :image_urls, :created_at, :datetime
     add_column :m_order_types, :created_at, :datetime
-    add_column :mat_order_items, :created_at, :datetime
     add_column :menus, :created_at, :datetime
     add_column :order_prod_relations, :created_at, :datetime
     add_column :pcard_prod_relations, :created_at, :datetime

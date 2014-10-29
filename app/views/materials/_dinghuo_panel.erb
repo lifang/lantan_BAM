@@ -48,10 +48,8 @@
           <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_tab_table">
             <thead>
               <tr class="hbg">
-
                 <td>物料名称</td>
                 <td>物料类别</td>
-                <td>成本价</td>
                 <td>零售价</td>
                 <td>订货量</td>
                 <td>总价</td>
@@ -65,7 +63,8 @@
           </div>
         </div>
         <div class="fukuan_btn">
-          <span><button class="confirm_btn" onclick="submit_material_order('order_form',this)" type="button">确定</button></span>
+          <span><button class="confirm_btn" id="submit_material" onclick="submit_material_order('order_form',this)" type="button">确定</button>
+            <%= image_tag "ajax-loader.gif", :id => "submit_spinner", :style => "display:none;" %></span>
           <span><button class="cancel_btn" onclick="hide_mask($('#fukuan_tab'))" type="button">取消</button></span>
         </div>
         <div class="clear"></div>

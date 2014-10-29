@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140714075503) do
+ActiveRecord::Schema.define(:version => 20141023081642) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "types"
@@ -149,6 +149,17 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
   add_index "car_nums", ["created_at"], :name => "index_car_nums_on_created_at"
   add_index "car_nums", ["num"], :name => "index_car_nums_on_num"
   add_index "car_nums", ["updated_at"], :name => "index_car_nums_on_updated_at"
+
+  create_table "carts", :force => true do |t|
+    t.integer  "target_types"
+    t.integer  "target_id"
+    t.integer  "customer_id"
+    t.integer  "store_id"
+    t.integer  "terget_num"
+    t.decimal  "terget_price", :precision => 10, :scale => 0
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "categories", :force => true do |t|
     t.string   "name"
@@ -433,6 +444,25 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
 
   add_index "jv_syncs", ["current_day"], :name => "index_jv_syncs_on_current_day"
 
+  create_table "knowledge_types", :force => true do |t|
+    t.string   "name"
+    t.integer  "store_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "knowleges", :force => true do |t|
+    t.string   "title"
+    t.integer  "knowledge_type_id"
+    t.string   "description"
+    t.text     "content"
+    t.string   "img_url"
+    t.integer  "store_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean  "on_weixin",         :default => false
+  end
+
   create_table "logs", :force => true do |t|
     t.string   "title"
     t.text     "content"
@@ -478,6 +508,7 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.integer  "staff_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "remark"
   end
 
   add_index "mat_in_orders", ["created_at"], :name => "index_mat_in_orders_on_created_at"
@@ -513,6 +544,7 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.integer  "store_id"
     t.text     "remark"
     t.text     "detailed_list"
+    t.integer  "order_id"
   end
 
   add_index "mat_out_orders", ["created_at"], :name => "index_mat_out_orders_on_created_at"
@@ -791,6 +823,7 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.boolean  "auto_warn",                                      :default => false
     t.integer  "time_warn"
     t.string   "con_warn"
+    t.boolean  "on_weixin",                                      :default => false
   end
 
   add_index "package_cards", ["created_at"], :name => "index_package_cards_on_created_at"
@@ -900,7 +933,7 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.text     "revist_content"
     t.integer  "prod_point",                                    :default => 0
     t.decimal  "deduct_price",   :precision => 20, :scale => 2, :default => 0.0
-    t.boolean  "show_on_ipad",                                  :default => true
+    t.boolean  "on_weixin",                                     :default => false
     t.boolean  "commonly_used",                                 :default => false
     t.integer  "category_id"
     t.boolean  "is_added",                                      :default => false
@@ -1106,6 +1139,7 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.string   "sub_content"
     t.string   "code"
     t.string   "description"
+    t.boolean  "on_weixin",       :default => false
   end
 
   add_index "sales", ["code"], :name => "index_sales_on_code"
@@ -1142,6 +1176,17 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "detailed_list"
+  end
+
+  create_table "sm_checks", :force => true do |t|
+    t.integer  "store_id"
+    t.integer  "sale_id"
+    t.string   "mobilephone"
+    t.string   "open_id"
+    t.string   "valid_code"
+    t.integer  "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "staff_gr_records", :force => true do |t|
@@ -1265,6 +1310,7 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.integer  "staff_level"
     t.integer  "staff_level1"
     t.string   "code"
+    t.boolean  "locked",            :default => false
   end
 
   add_index "stations", ["status"], :name => "index_stations_on_status"
@@ -1328,6 +1374,10 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.string   "send_list"
     t.decimal  "message_fee",      :precision => 10, :scale => 2, :default => 0.0
     t.boolean  "owe_warn",                                        :default => false
+    t.string   "app_id"
+    t.string   "app_secret"
+    t.string   "recommand_prods"
+    t.text     "store_intro"
   end
 
   add_index "stores", ["city_id"], :name => "index_stores_on_city_id"
@@ -1365,6 +1415,7 @@ ActiveRecord::Schema.define(:version => 20140714075503) do
     t.integer  "store_id"
     t.integer  "use_range"
     t.integer  "status",                                     :default => 1
+    t.boolean  "on_weixin",                                  :default => false
   end
 
   add_index "sv_cards", ["types"], :name => "index_sv_cards_on_types"

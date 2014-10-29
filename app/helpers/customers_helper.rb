@@ -77,10 +77,7 @@ module CustomersHelper
             send_message += "#{name}#{single_card.split('-')[2]}次，"
           end
           send_message += "有效期截至#{ended_at.strftime("%Y-%m-%d")}。"
-          if pmrs[card.id]
-            material = Material.find_by_id(pmrs[card.id][1])
-            material.update_attribute("storage",pmrs[card.id][0])
-          end
+          Material.update_storage(pmrs[card.id][1],pmrs[card.id][0],user_id,"购买套餐卡扣掉库存",nil,order)  if pmrs[card.id] #更新库存并生成出库记录
         else
           msg << "#{card.name} 库存不足！"
           redirect = false
@@ -322,20 +319,22 @@ module CustomersHelper
                 if (ca.ci and ca.ci.split(',').include? "#{prod_ids[o.id]}") or (ca.pid and ca.pid.split(',').include? "#{sv_pcard[o.id]}")
                   t_price += o_price[o.id]
                   sort_orders << o
-                  sv_prod[o.id].nil? ? sv_prod[o.id] = [ca.id] : sv_prod[o.id] << ca.id
+                  sv_prod[o.id] ||= []
+                  sv_prod[o.id] << ca.id
                 end
               end
               if card_price[ca.s_id] > t_price
                 is_suit = true
                 break
               end
-              total_card = limit_float(total_card+card_price[ca.s_id])
             end
-            if is_suit or (total_card+clear_value) > (o_price.values.inject(0){|num,p|num+p})
+            if is_suit or card_price.values.compact.reduce(:+) > o_price.values.compact.reduce(:+)
               may_pay,msg = false,"储值卡付款超过可付额度！"
             end
           end
           if may_pay
+            total_card = card_price.values.compact.reduce(:+)
+            total_card ||= 0
             if param[:pay_order] && param[:pay_order][:loss_ids]  #如果有优惠
               loss = param[:pay_order][:loss_ids]
               loss = param[:pay_order][:loss_ids].select{|k,v| !param[:pay_order][:return_ids].include? k}  if param[:pay_order][:return_ids]
@@ -361,54 +360,39 @@ module CustomersHelper
               price = o_price[o.id].to_f.round(2)
               if price > 0
                 if price <= total_card
-                  order_pay_types <<  OrderPayType.new({:order_id=>o.id,:price=>price,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
+                  order_pay_types <<  OrderPayType.new({:order_id=>o.id,:price=>limit_float(price),:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
                   sv_prod[o.id].each do |ca|
                     name = order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name
-                    total_name[ca].nil? ? total_name[ca] =[name] : total_name[ca] << name
-                    total_name[ca].nil? ? total_name[ca] =[pcard_name[o.id]] : total_name[ca] << pcard_name[o.id]
+                    total_name[ca] ||= []
+                    total_name[ca] << name
+                    total_name[ca] << pcard_name[o.id]
                   end unless sv_prod[o.id].nil?
                   total_card = limit_float(total_card-price)
                   total_card=0 if total_card <0
                 else
-                  if price <= (total_card+clear_value)
-                    #                    OrderPayType.create({:order_id=>o.id,:price=>limit_float(clear_value),:pay_type=>OrderPayType::PAY_TYPES[:CLEAR]}.merge(pp))
-                    order_pay_types <<  OrderPayType.new({:order_id=>o.id,:price=>limit_float(price-clear_value),:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
+                  if total_card >0
+                    order_pay_types <<  OrderPayType.new({:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
                     sv_prod[o.id].each do |ca|
                       name = order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name
-                      total_name[ca].nil? ? total_name[ca] =[name] : total_name[ca] << name
-                      total_name[ca].nil? ? total_name[ca] =[pcard_name[o.id]] : total_name[ca] << pcard_name[o.id]
+                      total_name[ca] ||= []
+                      total_name[ca] << name
+                      total_name[ca] << pcard_name[o.id]
                     end unless sv_prod[o.id].nil?
-                    total_card = limit_float(total_card-price)
-                    clear_value = 0
-                    total_card=0 if total_card <0
-                  else
-                    if clear_value>0
-                      order_pay_types <<  OrderPayType.new({:order_id=>o.id,:price=>clear_value,:pay_type=>OrderPayType::PAY_TYPES[:CLEAR]}.merge(pp))
-                    end
-                    if total_card >0
-                      order_pay_types <<  OrderPayType.new({:order_id=>o.id,:price=>total_card,:pay_type=>OrderPayType::PAY_TYPES[:SV_CARD]}.merge(pp))
-                      sv_prod[o.id].each do |ca|
-                        name = order_prod_ids[o.id].nil? ? nil : order_prod_ids[o.id].name
-                        total_name[ca].nil? ? total_name[ca] =[name] : total_name[ca] << name
-                        total_name[ca].nil? ? total_name[ca] =[pcard_name[o.id]] : total_name[ca] << pcard_name[o.id]
-                      end unless sv_prod[o.id].nil?
-                    end
-                    parms = {:order_id=>o.id,:price=>limit_float(price-total_card-clear_value),:pay_type=>param[:pay_type].to_i}
-                    if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
-                      parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
-                      cash_price = limit_float(cash_price-(price-total_card-clear_value))
-                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
-                      parms.merge!(:second_parm=>param[:second_parm])
-                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
-                      parms.merge!(pp)
-                      order_parm[:status]=Order::STATUS[:FINISHED]
-                    elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
-                      parms.merge!(:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE])
-                    end
-                    order_pay_types <<  OrderPayType.new(parms)
-                    clear_value = 0 if clear_value>0
-                    total_card =0 if total_card >0
                   end
+                  parms = pp.merge({:order_id=>o.id,:price=>limit_float(price-total_card-clear_value),:pay_type=>param[:pay_type].to_i})
+                  if param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CASH]
+                    parms.merge!(:pay_cash=>param[:pay_cash],:second_parm=>param[:second_parm])
+                    cash_price = limit_float(cash_price-(price-total_card-clear_value))
+                  elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:CREDIT_CARD]
+                    parms.merge!(:second_parm=>param[:second_parm])
+                  elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:IS_FREE]
+                    parms.merge!(pp)
+                    order_parm[:status]=Order::STATUS[:FINISHED]
+                  elsif param[:pay_type].to_i == OrderPayType::PAY_TYPES[:HANG]  #挂账的话就把要付的钱设置为支付金额
+                    parms.merge!(:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE])
+                  end
+                  order_pay_types <<  OrderPayType.new(parms)
+                  total_card =0 if total_card >0
                 end
               end
               if deducts[o.id]
@@ -445,7 +429,8 @@ module CustomersHelper
               message_data(param[:store_id],message,customer,nil,MessageRecord::M_TYPES[:USE_SV])
             end
           
-            SvcardUseRecord.import CSvcRelation.joins(:sv_card).select("sv_cards.name,c_svc_relations.id c_id,c_svc_relations.left_price").where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid],:"sv_cards.types"=>SvCard::FAVOR[:SAVE]).inject([]) {|arr,csr|
+            SvcardUseRecord.import CSvcRelation.joins(:sv_card).select("sv_cards.name,c_svc_relations.id c_id,c_svc_relations.left_price").
+              where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CSvcRelation::STATUS[:invalid],:"sv_cards.types"=>SvCard::FAVOR[:SAVE]).inject([]) {|arr,csr|
               is_vip = true; arr << SvcardUseRecord.new(:c_svc_relation_id => csr.c_id, :types => SvcardUseRecord::TYPES[:IN], :use_price => 0,:left_price =>csr.left_price.round(2), :content => "购买"+"#{csr.name}")
             }   #如果是新买储值卡则生成购买记录
             #新买打折卡 储值卡 更新状态为可用
@@ -457,11 +442,7 @@ module CustomersHelper
               Point.import order_points.inject([]){|arr,p| arr << Point.new(:customer_id=>param[:customer_id],:point_num=>p[1],
                   :target_id=>p[0],:target_content=>"购买产品/服务/套餐卡获得积分",:types=>Point::TYPES[:INCOME]) }
             end
-            #生成出库记录
-            MatOutOrder.import  Order.joins(:order_prod_relations=>{:product=>{:prod_mat_relations=>:material}}).select("material_id m_id,
-            front_staff_id f_id,material_num m_num,materials.price m_price,materials.detailed_list").where(:"products.is_service"=>Product::PROD_TYPES[:PRODUCT],
-              :"orders.id"=>order_ids).inject([]){|arr,m| arr << MatOutOrder.new({:material_id =>m.m_id, :staff_id =>m.f_id,:material_num => m.m_num,
-                  :price => m.m_price, :types => MatOutOrder::TYPES_VALUE[:sale], :store_id =>param[:store_id],:detailed_list=>m.detailed_list})}
+
             CPcardRelation.where(:customer_id=>param[:customer_id],:order_id=>orders.map(&:id),:status=>CPcardRelation::STATUS[:INVALID]).update_all :status =>CPcardRelation::STATUS[:NORMAL]
             customer_p = Customer.find(orders.map(&:customer_id)).inject({}){|h,c|h[c.id]=c.mobilephone;h}
             messages = []

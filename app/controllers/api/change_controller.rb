@@ -131,7 +131,7 @@ class Api::ChangeController < ApplicationController
         pcard = PackageCard.find(reserv.prod_id)
         card_content = PcardProdRelation.find_by_sql("select group_concat(p.id,'-',p.name,'-',ppr.product_num) content from
          pcard_prod_relations ppr  inner join products p on ppr.product_id=p.id where ppr.package_card_id= #{reserv.prod_id}").first.content
-        pmrs = PcardMaterialRelation.joins(:material).select("package_card_id p_id,material_id m_id,storage-material_num result").first
+        pmrs = PcardMaterialRelation.joins(:material).where(:package_card_id=>reserv.prod_id).select("package_card_id p_id,material_id m_id,storage-material_num result").first
         if pmrs.nil? || ((pmrs && pmrs.result >= 0) && card_content) #如果套餐卡未绑定物料 或者 剩余库存大于0 且有内容的才可以购买
           time = pcard.is_auto_revist ? Time.now + pcard.auto_time.to_i.hours : nil
           price = reserv.types == Reservation::TYPES[:PURPOSE] ? reserv.prod_price : pcard.price
@@ -147,10 +147,7 @@ class Api::ChangeController < ApplicationController
             send_message += "#{name}#{single_card.split('-')[2]}次，"
           end
           send_message += "有效期截至#{ended_at.strftime("%Y-%m-%d")}。"
-          if pmrs
-            material = Material.find_by_id(pmrs.m_id)
-            material.update_attribute("storage",pmrs.result)
-          end
+          Material.update_storage(pmrs.m_id,pmrs.result,params[:user_id],"pad销售套餐卡扣物料",nil,order) if pmrs #更新库存并生成出库记录
         else
           msg =  "#{pcard.name} 库存不足！"
           status = 0
@@ -183,7 +180,7 @@ class Api::ChangeController < ApplicationController
   #取消意向单或者预约单
   def cancel_reserv
     begin
-      Reservation.where(:store_id=>params[:store_id],:id=>params[:v_id]).update_all status: Reservation::STATUS[:cancel ]
+      Reservation.where(:store_id=>params[:store_id],:id=>params[:v_id].split(",")).update_all status: Reservation::STATUS[:cancel ]
       status = 1
       msg = "取消成功"
     rescue
@@ -192,4 +189,140 @@ class Api::ChangeController < ApplicationController
     end
     render :json=>{:status=>status, :msg=> msg}
   end
+  
+
+  def get_quickly_service
+    render :json=>{:services =>Product.services(params[:store_id])}  #常用服务
+  end
+
+  def load_reserv
+    reservs = Reservation.total_reserv(params[:store_id],Reservation::TYPES[:RESER])
+    customers = Customer.load_customers(reservs.map(&:customer_id).compact.uniq)
+    car_nums = CarNum.load_car_num(reservs.map(&:car_num_id).compact.uniq)
+    reserv_prods = {}
+    reservs.group_by{|i|i.prod_types}.each {|k,v|
+      model = k < 2 ? Product : (k == 2 ? PackageCard : SvCard)
+      reserv_prods[k]= model.where(:id=>v.map(&:prod_id).compact.uniq).inject({}){|h,prod|
+        h[prod.id]={:name=>prod.name,:price=>prod.attributes["price"]||=prod.attributes["sale_price"],
+          :img_url=>prod.img_url.nil? ? "" : prod.img_url.gsub("img#{prod.id}","img#{prod.id}_#{Constant::P_PICSIZE[1]}")};h}
+    }
+    render :json=>{:reservs =>reservs,:customers=>customers,:car_nums=>car_nums,:reserv_prods=>reserv_prods}  #常用服务
+  end
+  
+  def change_status
+    status = 0
+    begin
+      station = Station.where(:id=>params[:station_id]).first
+      station.locked = params[:lock]
+      if station.save
+        status = 1 
+      end
+    rescue
+    end
+    render :json=>{:status=>status}
+  end
+
+
+  #根据实际情况调换工位
+  def change_station
+    #参数 "(work_order_id)_(station_id),(work_order_id)_(station_id)", store_id
+    status = 0
+    msg = ""
+    if params[:wo_station_ids]
+      WorkOrder.transaction do
+        wo_station_ids = params[:wo_station_ids].split(",")
+        flag = 0
+        wo_station_ids.each do |ws|
+          wid,sid = ws.split("_")
+          wo = WorkOrder.find_by_id(wid)
+          station = Station.find_by_id(sid)
+          if station.status != Station::STAT[:NORMAL]
+            flag = 1
+            status = 1
+            msg = "#{station.name}异常，暂时无法服务!"
+          else
+            station_prods = StationServiceRelation.where(["station_id=?", station.id]).map(&:product_id) #获取要调换到的那个工位所支持的服务
+            order = wo.order
+            opr = order.order_prod_relations.map(&:product_id)
+            serv_ids = Product.where(["is_service=? and id in (?)", Product::PROD_TYPES[:SERVICE], opr]).map(&:id)
+            station_staffs = StationStaffRelation.load_relation(station.store_id,station.id)
+            if station_prods & serv_ids != serv_ids
+              flag = 1
+              status = 1
+              msg = "#{station.name}不支持该服务!"
+            elsif station_staffs.length < 2
+              flag = 1
+              status = 1
+              msg = "#{station.name}技师不足!"
+            end
+          end
+        end
+        if flag == 0
+          order_stations = []
+          wo_station_ids.each do |wo_station|
+            wo_id,station_id = wo_station.split("_")
+            wo = WorkOrder.find_by_id(wo_id)
+            time = wo.cost_time.nil? ? 0 : wo.cost_time
+            current_time = Time.now
+            ended_at =   current_time + time*60
+            status = wo && wo.update_attributes({:station_id=>station_id.to_i,:status=>WorkOrder::STAT[:SERVICING],:started_at => current_time, :ended_at => ended_at}) ? 0 : 1
+            if status == 0
+              order = wo.order
+              station_staffs = StationStaffRelation.load_relation(order.store_id,station_id)
+              order.update_attributes(:station_id => wo.station_id) if order
+              TechOrder.where(:order_id=>order.id).delete_all
+              staff_ids = station_staffs.map(&:staff_id)
+              staff_ids.map {|staff_id|
+                order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>order.id,:own_deduct=>order.technician_deduct/staff_ids.length)}
+            end
+          end
+          TechOrder.import order_stations unless order_stations.blank?
+        end
+      end
+      work_orders = working_orders params[:store_id]
+    else
+      status = 1
+    end
+    render :json => {:status => status, :msg => msg, :orders => work_orders}
+  end
+
+
+  def update_customer
+    status = 0
+#    begin
+      customers = []
+      Customer.transaction do
+        car_parm = {:car_model_id => params[:brand].nil? || params[:brand].split("_")[1].nil? ? nil : params[:brand].split("_")[1].to_i,
+          :buy_year =>  params[:year], :distance => params[:cdistance].nil? ? nil : params[:cdistance].to_i}
+        customer_parm  = {:name => params[:userName].nil? ? nil : params[:userName].strip, :mobilephone => params[:phone].nil? ? nil : params[:phone].strip,
+          :birthday => params[:birth].nil? || params[:birth].strip=="" ? nil : params[:birth].strip.to_datetime, :sex => params[:sex].to_i,
+          :property => params[:cproperty].to_i, :group_name => params[:cproperty].to_i==0 ? nil : params[:cgroup_name]}
+        if params[:c_id].to_i == -1 or params[:c_id].to_i == 0
+          customers = Customer.where(:mobilephone=>params[:phone],:store_id=>params[:store_id],:status=>Customer::STATUS[:NOMAL]).select("id,name,group_name,address")
+          if params[:c_id].to_i == -1 &&  customers.length >=1
+            status = 2
+          else
+            customer = Customer.find_by_id_and_store_id(params[:customer_id].to_i,params[:store_id].to_i)
+            car_num = CarNum.find_by_id(params[:car_num_id].to_i)
+            car_num.update_attributes(car_parm)
+            customer.update_attributes(customer_parm)
+          end
+        else #当选择已存在的客户时  需要修改订单归属 将车牌绑定到已选择客户
+          customer = Customer.find_by_id_and_store_id(params[:c_id].to_i,params[:store_id].to_i)
+          car_num = CarNum.find_by_id(params[:car_num_id].to_i)
+          car_num.update_attributes(car_parm)
+          customer.update_attributes(customer_parm)
+          Order.where(:store_id=>params[:store_id].to_i,:customer_id=>params[:customer_id].to_i,:car_num_id=>car_num.id).update_all(:customer_id=>customer)
+          CustomerNumRelation.where(:customer_id=>params[:customer_id],:car_num_id=>car_num.id).delete_all
+          customer.customer_num_relations.create({:customer_id => customer.id, :car_num_id => car_num.id})
+          Reservation.where(:car_num_id=>car_num.id).update_all(:customer_id=>customer.id)
+        end
+      end
+#    rescue
+#      status = 1
+#    end
+    render :json => {:status => status,:customers=>customers}
+  end
+
+
 end

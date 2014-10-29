@@ -17,6 +17,16 @@ LantanBAM::Application.routes.draw do
       post "adjust_types"
     end
   end
+  resources :messages do
+    collection do
+      get "wechat_msg"
+    end
+  end
+  resources :package_cards do
+    collection do
+      post "on_weixin"
+    end
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -31,6 +41,17 @@ LantanBAM::Application.routes.draw do
   match "phone_login" => "logins#phone_login"
   match "manage_content" => "logins#manage_content"
   resources :stores do
+
+    resources :micro_stores do
+      collection do
+        get :upload_content
+        post :create_know
+      end
+      member do
+        post :edit_know
+      end
+    end
+
     resources :check_materials do
       collection do
         get :check_record,:submit_check,:file_list
@@ -75,7 +96,7 @@ LantanBAM::Application.routes.draw do
     end
     resources :stations do
       collection do
-        get "show_detail","show_video","see_video","search_video", "simple_station"
+        get "show_detail","show_video","see_video","search_video", "simple_station","set_tech"
         post "search","collect_info"
       end
     end
@@ -110,11 +131,11 @@ LantanBAM::Application.routes.draw do
       collection do
         get "out","search","order","page_materials","search_head_orders","search_supplier_orders","alipay",
           "print","cuihuo","cancel_order","page_outs","page_ins","page_back_records","page_head_orders","page_supplier_orders",
-          "search_supplier_orders","pay_order","update_notices","check_nums","material_order_pay","set_ignore","print_out",
+          "search_supplier_orders","pay_order","update_notices","material_order_pay","set_ignore","print_out",
           "cancel_ignore","search_materials","page_materials_losses","set_material_low_count_commit","print_code",
           "mat_loss_delete","mat_loss","back_good","back_good_search","back_good_commit", "reflesh_low_materials","print_mat"
         post "out_order","material_order","add","alipay_complete","mat_in","batch_check","set_material_low_commit","output_barcode",
-          "mat_loss_add","modify_code"
+          "mat_loss_add","modify_code","check_nums"
       end
       member do
         get "mat_order_detail","get_remark" ,"receive_order","tuihuo","set_material_low_count"
@@ -174,8 +195,8 @@ LantanBAM::Application.routes.draw do
     end
     resources :customers do
       collection do
-        post "search", "customer_mark", "single_send_message", "add_car"
-        get "search_list", "add_car_get_datas"
+        post  "customer_mark", "single_send_message", "add_car"
+        get "search", "add_car_get_datas","select_order"
       end
       member do
         get "order_prods", "revisits", "complaints", "sav_card_records", "pc_card_records"
@@ -336,16 +357,17 @@ LantanBAM::Application.routes.draw do
       collection do
         post :customer_pcards, :package_make_order, :pcard_make_order_commit, :pcard_order_info
         post :make_order2, :complaint, :quickly_make_order, :pay_order_no_auth
-        post :make_order,:update_customer,:update_tech
+        post :update_customer,:make_order,:update_tech
         post :search, :sync_orders_and_customer,:get_customer_info
-        post :new_index_list, :order_infom, :change_station,:work_order_finished,:order_info, :pay_order, :cancel_order
+        post :new_index_list, :order_infom,:work_order_finished,:order_info, :pay_order, :cancel_order
       end
     end
 
     resources :change do
       collection do
         get :sv_records
-        post :change_pwd,:send_code,:use_svcard,:change_to_order,:cancel_reserv
+        post :update_customer,:change_pwd,:send_code,:use_svcard,:change_to_order,:cancel_reserv,:get_quickly_service
+        post :load_reserv,:change_status, :change_station
       end
     end
   end

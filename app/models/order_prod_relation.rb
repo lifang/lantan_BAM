@@ -91,10 +91,10 @@ class OrderProdRelation < ActiveRecord::Base
             :total_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ? 0 : purpose_price.nil? ? product.sale_price.to_f*p_num : purpose_price.to_f*p_num,
             :t_price => product.single_types == Product::SINGLE_TYPE[:DOUB] ?  0 : product.t_price.to_f*p_num}
           OrderProdRelation.create(relation_parm)
-          m.update_attribute("storage", m.storage - p_num * pmr.material_num) unless product.is_service
+          Material.update_storage(m.id,m.storage - p_num * pmr.material_num,staff_id,"销售产品出库",nil,order) unless product.is_service #更新库存并生成出库记录
           if product.is_service || product.is_added
             arrange_time = Station.arrange_time(store_id,[p_id],order)
-            hash = Station.create_work_order(arrange_time[0], store_id,order, {}, arrange_time[2], product.cost_time.to_i*p_num)
+            hash = Station.create_work_order(arrange_time, order, product.cost_time.to_i*p_num)
             order.update_attributes(hash)
           end
         end

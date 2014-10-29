@@ -8,40 +8,53 @@ class CustomersController < ApplicationController
   before_filter :customer_tips, :except => [:get_car_brands]
 
   def index
-    session[:c_property] = nil
-    session[:car_num] = nil
-    session[:started_at] = nil
-    session[:ended_at] = nil
-    session[:name] = nil
-    session[:phone] = nil
-    session[:c_sex] = nil
-    session[:is_vip] = nil
-
     @store = Store.find_by_id(params[:store_id]) || not_found
-    @customers = Customer.search_customer(params[:c_property], params[:car_num], params[:started_at], params[:ended_at],
-      params[:name], params[:phone], params[:c_sex], params[:is_vip], params[:page], params[:store_id].to_i) if @store
-    @car_nums = Customer.customer_car_num(@customers) if @customers
+    @customers = Customer.search_customer(params[:car_num], params[:started_at], params[:ended_at],
+      params[:name], params[:phone],  params[:store_id].to_i)
+    @t_customers = {}
+    @customers.group_by{|i|i.property}.sort.reverse.each{|cu|@t_customers[cu[0]]=cu[1].paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)}
+    vip_customer = @customers.group_by{|i|i.show_vip}
+    pcard_customers = CPcardRelation.joins(:package_card).where(:status=>CPcardRelation::STATUS[:NORMAL],
+      :"package_cards.store_id"=>@store.id).map(&:customer_id).compact.uniq
+    save_customers = CSvcRelation.joins(:sv_card).where(:sv_cards=>{:store_id=>@store.id,:types=>SvCard::FAVOR[:SAVE]},
+      :status=>CSvcRelation::STATUS[:valid]).map(&:customer_id).compact.uniq
+    pcard,sv_card =[],[]
+    @customers.each {|customer|
+      pcard  << customer if pcard_customers.include?(customer.id)
+      sv_card << customer if save_customers.include?(customer.id)
+    }
+    @t_customers[Customer::LIST_NAME[:PCARD]] = pcard.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE) unless pcard.blank?
+    @t_customers[Customer::LIST_NAME[:SV_CARD]] = sv_card.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE) unless sv_card.blank?
+    @t_customers[Customer::LIST_NAME[:VIP]] = vip_customer[true].paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE) if vip_customer[true]
+    @car_nums = Customer.customer_car_num(@customers)
   end
 
   def search
-    session[:c_property] = params[:c_property]
-    session[:car_num] = params[:car_num]
-    session[:started_at] = params[:started_at]
-    session[:ended_at] = params[:ended_at]
-    session[:name] = params[:name]
-    session[:phone] = params[:phone]
-    session[:c_sex] = params[:c_sex]
-    session[:is_vip] = params[:is_vip]
-    redirect_to "/stores/#{params[:store_id]}/customers/search_list"
+    @store = Store.find_by_id(params[:store_id]) || not_found
+    @customers = Customer.search_customer(params[:car_num], params[:started_at], params[:ended_at],
+      params[:name], params[:phone], params[:store_id].to_i)
+    @car_nums = Customer.customer_car_num(@customers)
+    @t_customers, pcard,sv_card ={},[],[]
+    if  params[:types].to_i == Customer::LIST_NAME[:GROUP] || params[:types].to_i == Customer::LIST_NAME[:PERSONAL]
+      customers = @customers.group_by{|i|i.property}
+      @t_customers[params[:types].to_i] = customers[params[:types].to_i].paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE) if customers[params[:types].to_i]
+    elsif params[:types].to_i == Customer::LIST_NAME[:PCARD] #套餐卡用户的翻页
+      pcard_customers = CPcardRelation.joins(:package_card).where(:status=>CPcardRelation::STATUS[:NORMAL],
+        :"package_cards.store_id"=>@store.id).map(&:customer_id).compact.uniq
+      @customers.each {|customer| pcard  << customer if pcard_customers.include?(customer.id) }
+      @t_customers[Customer::LIST_NAME[:PCARD]] = pcard.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE) unless pcard.blank?
+    elsif params[:types].to_i == Customer::LIST_NAME[:SV_CARD]
+      save_customers = CSvcRelation.joins(:sv_card).where(:sv_cards=>{:store_id=>@store.id,:types=>SvCard::FAVOR[:SAVE]},
+        :status=>CSvcRelation::STATUS[:valid]).map(&:customer_id).compact.uniq
+      @customers.each {|customer| sv_card << customer if save_customers.include?(customer.id)}
+      @t_customers[Customer::LIST_NAME[:SV_CARD]] = sv_card.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE) unless sv_card.blank?
+    elsif params[:types].to_i == Customer::LIST_NAME[:VIP]
+      vip_customer = @customers.group_by{|i|i.show_vip}
+      @t_customers[Customer::LIST_NAME[:VIP]] = vip_customer[true].paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE) if vip_customer[true]
+    end
+
   end
 
-  def search_list
-    @store = Store.find(params[:store_id].to_i)
-    @customers = Customer.search_customer(session[:c_property], session[:car_num], session[:started_at], session[:ended_at],
-      session[:name], session[:phone], session[:c_sex], session[:is_vip], params[:page], params[:store_id].to_i) if @store
-    @car_nums = Customer.customer_car_num(@customers) if @customers
-    render "index"
-  end
 
   def destroy
     customer = Customer.find(params[:id].to_i)
@@ -116,7 +129,7 @@ class CustomersController < ApplicationController
   end
 
   def update
-    if params[:new_name] and params[:mobilephone] 
+    if params[:new_name] and params[:mobilephone]
       customer = Customer.find(params[:id].to_i)
       mobile_c = Customer.where(:status=>Customer::STATUS[:NOMAL],:mobilephone=>params[:mobilephone].strip,
         :store_id=>params[:store_id].to_i).first
@@ -173,7 +186,8 @@ class CustomersController < ApplicationController
         left join car_brands cb on cb.id = cm.car_brand_id inner join customer_num_relations cr on cr.car_num_id = c.id
         where cr.customer_id = ?", @customer.id])
     order_page = params[:rev_page] ? params[:rev_page] : 1
-    @orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id, 20, order_page)
+     @total_orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id)
+    @orders =  @total_orders.paginate(:per_page => 20, :page => order_page)
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
     @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
@@ -193,7 +207,15 @@ class CustomersController < ApplicationController
   def order_prods
     @store = Store.find(params[:store_id].to_i)
     @customer = Customer.find(params[:id].to_i)
-    @orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id, 10, params[:page])
+    if params[:car_num_id]
+      @total_orders = Order.find_by_sql(["select * from orders where status in (#{Order::PRINT_CASH.join(',')}) and store_id = ? and customer_id = ?
+        and car_num_id= ? order by created_at desc",  @store.id, @customer.id,params[:car_num_id].to_i])
+      @orders =  @total_orders.paginate(:per_page => 20, :page => params[:page])
+    else
+      @total_orders = Order.one_customer_orders(Order::PRINT_CASH.join(','), params[:store_id].to_i, @customer.id)
+      @orders =  @total_orders.paginate(:per_page => 20,  :page => params[:page])
+    end
+   
     @product_hash = OrderProdRelation.order_products(@orders)
     @order_pay_type = OrderPayType.order_pay_types(@orders)
     @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
@@ -334,22 +356,6 @@ class CustomersController < ApplicationController
         if params[:item_types].to_i == 0
           order_parm.merge!(:return_direct => params[:direct])
           return_parm.merge!(:pro_num=>params[:return_num],:return_direct => params[:direct])
-          if params[:direct].to_i == Order::O_RETURN[:REUSE]  #增加物料
-            order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
-            unless order_products.empty?  #如果是产品,则减掉要加回来
-              materials = Material.find_by_sql(["select m.id, pmr.product_id from materials m inner join prod_mat_relations pmr
-                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
-                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys])
-              materials.each do |m|
-                mat = Material.find(m.id)
-                mat.update_attributes(:storage =>mat.storage + params[:return_num].to_i)
-              end unless materials.blank?
-            end
-          else
-            material_id = ProdMatRelation.find(params[:product_id]).material_id
-            MaterialLoss.create(:loss_num =>params[:return_num],:staff_id => cookies[:user_id],
-              :store_id=>order.store_id,:material_id => material_id,:remark=>"退单报损")
-          end
         end
         return_types = Order::IS_RETURN[:YES]
         if (params[:item_types].to_i == 0 or params[:item_types].to_i == 1) and  params[:max_num].to_i != params[:return_num].to_i
@@ -362,7 +368,6 @@ class CustomersController < ApplicationController
           if params[:fact_type].to_i == 1
             reutrn_fee = 0
             if params[:sv_fee] #0 是储值卡  所写金额要退回到客户卡中，不过是匹配到的第一张卡
-              ReturnOrder.create(return_parm.merge(:return_type=>0,:return_price=>params[:sv_fee]))
               reutrn_fee += params[:sv_fee].to_i
               sv_cards = CSvcRelation.joins(:sv_card=>:svcard_prod_relations).where(:"sv_cards.types"=>SvCard::FAVOR[:SAVE],
                 :customer_id=>order.customer_id,:"c_svc_relations.status"=>CSvcRelation::STATUS[:valid]).
@@ -386,6 +391,7 @@ class CustomersController < ApplicationController
                 customer_savecard.update_attribute("left_price", customer_savecard.left_price + params[:sv_fee].to_i)
                 message += "已退#{params[:sv_fee].to_i}元到储值卡#{sv_card.name}中，当前余额为#{customer_savecard.left_price}元。"
                 message_data(order.store_id,message,customer,nil,MessageRecord::M_TYPES[:BACK_SV])
+                ReturnOrder.create(return_parm.merge(:return_type=>0,:return_price=>params[:sv_fee]))
               end
             end
             if params[:cash_fee] #1 是现金
@@ -439,6 +445,22 @@ class CustomersController < ApplicationController
           if work_order && WorkOrder::NO_END.include?(work_order.status)
             work_order.update_attributes(:status=>WorkOrder::STAT[:CANCELED])
           end
+          if params[:item_types].to_i == 0
+            if params[:direct].to_i == Order::O_RETURN[:REUSE]  #增加物料
+              order_products = order.order_prod_relations.group_by { |opr| opr.product_id }
+              unless order_products.empty?  #如果是产品,则减掉要加回来
+                Material.find_by_sql(["select m.id, pmr.product_id from materials m inner join prod_mat_relations pmr
+                on pmr.material_id = m.id inner join products p on p.id = pmr.product_id
+                where p.is_service = #{Product::PROD_TYPES[:PRODUCT]} and pmr.product_id in (?)", order_products.keys]).each do |m|
+                   Material.update_storage(m.id,m.storage + params[:return_num].to_i,cookies[:user_id],"退单回库物料",nil,order)
+                end
+              end
+            else
+              material_id = ProdMatRelation.where(:product_id=>params[:product_id]).first.material_id
+              MaterialLoss.create(:loss_num =>params[:return_num],:staff_id => cookies[:user_id],
+                :store_id=>order.store_id,:material_id => material_id,:remark=>"退单报损")
+            end
+          end
         end
       end
     rescue
@@ -483,6 +505,19 @@ class CustomersController < ApplicationController
       flash[:notice] = "添加成功!"
     end
     redirect_to "/stores/#{params[:store_id]}/customers/#{cid}"
+  end
+
+
+  def select_order
+    @store = Store.find(params[:store_id].to_i)
+    @customer = Customer.find(params[:customer_id].to_i)
+    order_page = params[:rev_page] ? params[:rev_page] : 1
+    @total_orders = Order.find_by_sql(["select * from orders where status in (#{Order::PRINT_CASH.join(',')}) and store_id = ? and customer_id = ?
+        and car_num_id= ? order by created_at desc",  @store.id, @customer.id,params[:car_num_id]])
+    @orders =  @total_orders.paginate(:per_page => 20, :page => order_page)
+    @product_hash = OrderProdRelation.order_products(@orders)
+    @order_pay_type = OrderPayType.order_pay_types(@orders)
+    @pay_types = OrderPayType.pay_order_types(@orders.map(&:id))
   end
   private
   

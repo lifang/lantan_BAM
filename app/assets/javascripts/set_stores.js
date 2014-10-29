@@ -50,6 +50,7 @@ function select_city(province_id,store_id){
 }
 
 function load_register(store_id){
+    var url = "/stores/"+store_id+"/set_stores/cash_register";
     $("#cash_refresh").removeAttr("onclick");
     var time = 60;
     var local_timer=setInterval(function(){
@@ -61,31 +62,26 @@ function load_register(store_id){
         }
         time -= 1;
     },1000)
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_stores/cash_register",
-        dataType: "script"
-    })
+    request_ajax(url)
 }
 
 function load_search(store_id){
     var c_time = $("#c_first").val();
     var s_time = $("#c_last").val();
+    var c_num = $("#c_num").val();
+    var url = "/stores/"+store_id+"/set_stores/complete_pay";
+    var data = {
+        first : c_time,
+        last : s_time,
+        c_num : c_num
+    }
     if (c_time != "" && c_time.length !=0 && s_time != "" && s_time.length !=0){
         if (c_time > s_time){
             tishi_alert("开始时间必须小于结束时间");
             return false;
         }
     }
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_stores/complete_pay",
-        dataType: "script",
-        data:{
-            first : c_time,
-            last : s_time
-        }
-    })
+    request_ajax(url,data)
 }
 
 function show_current(e){
@@ -100,21 +96,13 @@ function show_current(e){
 
 function pay_this_order(store_id,c_id,n_id){
     var url = "/stores/"+store_id+"/set_stores/load_order"
-    $.ajax({
-        type:"post",
-        url: url,
-        dataType: "script",
-        data:{
-            customer_id : c_id,
-            car_num_id : n_id
-        }
-    })
+    var data = {
+        customer_id : c_id,
+        car_num_id : n_id
+    }
+    request_ajax(url,data,"post")
 }
 
-
-function show_hihglight(e){
-    $('#'+e.id).find('span').toggleClass('highlight');
-}
 
 
 function check_sum(card_id,e){
@@ -189,16 +177,12 @@ function check_post(store_id,c_id,n_id){
             time -= 1;
         },1000)
         $("#due_over").attr("onclick","");
-        $.ajax({
-            type:"post",
-            url:url,
-            dataType: "script",
-            data:{
-                customer_id : c_id,
-                car_num_id : n_id,
-                pay_order : pay_order[1]
-            }
-        })
+        var data = {
+            customer_id : c_id,
+            car_num_id : n_id,
+            pay_order : pay_order[1]
+        }
+        request_ajax(url,data,"post")
     }
 }
 
@@ -258,8 +242,6 @@ function set_pay_order(){
         pay_order["clear_value"] = clear_value;
     }
     pay_order["is_billing"] = $("#is_biling")[0].checked ? 1 : 0;
-    pay_order["is_print"] = $("#is_print")[0].checked ? 1 : 0;
-    pay_order["is_order"] = $("#is_order")[0].checked ? 1 : 0;
     return [is_password,pay_order]
 }
 
@@ -456,20 +438,12 @@ function confirm_pay_order(store_id,c_id,n_id){
                 show_btn : 1
             }
             $("#confirm_order,#spinner_user").toggle();
-            set_confirm(store_id,c_id,n_id,t_data);
+            var url = "/stores/"+store_id+"/set_stores/pay_order";
+            request_ajax(url,t_data,"post","script");
         }
     }
 }
 
-function set_confirm(store_id,c_id,n_id,t_data){
-    var url = "/stores/"+store_id+"/set_stores/pay_order";
-    $.ajax({
-        type:"post",
-        url:url,
-        dataType: "script",
-        data: t_data
-    })
-}
 
 function single_order_print(store_id){
     var print_nums = $(".di_list_l input[id*='print_']:checkbox:checked");
@@ -477,12 +451,25 @@ function single_order_print(store_id){
         tishi_alert("请选择打印订单");
         return false;
     }
-    if (print_nums.length >1){
-        tishi_alert("订单只能选择一个");
+    var nums = [];
+    var customer_id = 0;
+    var suit = false;
+    for(var i=0;i<print_nums.length;i++){
+        nums.push(print_nums[i].value);
+        if (i==0){
+            customer_id = $(print_nums[i]).parent().attr("id");
+        }
+        if(customer_id != $(print_nums[i]).parent().attr("id")){
+            suit = true
+        }
+    }
+    if (suit){
+        tishi_alert("只能打印一个客户的小票");
         return false;
     }
-    window.open("/stores/"+store_id+"/set_stores/single_print?order_id="+print_nums.val(),'_blank', 'height=520,width=625,left=10,top=100');
+    window.open("/stores/"+store_id+"/set_stores/single_print?order_id="+nums.join(','),'_blank', 'height=520,width=625,left=10,top=100');
 }
+
 
 
 function calulate_v(pay_type){
@@ -537,12 +524,7 @@ function auth_car_num(e,store_id){
         var data ={
             car_num : e.value
         }
-        $.ajax({
-            type:"post",
-            url:url,
-            dataType: "script",
-            data: data
-        })
+        request_ajax(url,data,"post")
     }else{
         if($.trim(e.value) !="" && $.trim(e.value) != "无牌" && $.trim(e.value).length != 7 ){
             tishi_alert("车牌有误！");
@@ -562,12 +544,7 @@ function search_item(store_id){
         checked_item : checked_item.split(",")
     }
     $("#spinner_user,#item_btn").toggle();
-    $.ajax({
-        type:"post",
-        url:url,
-        dataType: "script",
-        data: data
-    })
+    request_ajax(url,data,"post")
 }
 
 
@@ -593,6 +570,8 @@ function add_num(e){
     var total_price = $("#total_price").html();
     if (parseInt(max) > parseInt(num)){
         $(e).parent().find("input").val(parseInt(num)+1);
+        alert(single_price);
+        alert(parseInt(num)+1);
         $(e).parent().parent().find("#t_price").html(change_dot(single_price*(parseInt(num)+1))); //小计价格
         $("#total_price").html(change_dot(round(total_price,2)+round(single_price,2),2)); //设置总价
         if (parseInt(max) == (parseInt(num)+1)){
@@ -743,7 +722,12 @@ function submit_item(store_id){
     var other_way = $("#other_way").val();
     var c_group = $("#c_group").val();
     var c_address = $("#c_address").val();
+    var customer_id = $("input[name='customer_types']:checked").val();
+    var car_model_id = $("#add_car_models option:selected").val();
+    var buy_year = $("#add_car_buy_year option:selected").val();
+    var distance = $("#add_car_distance").val();
     var check_phone = false;
+    var check_card =  false;
     if (e.value !="" && (e.value.length == 7 || $.trim(e.value) == "无牌") ){
         if (checked_item != "" && checked_item.length > 4){
             if(c_number != "" && c_number.length != 11){
@@ -756,7 +740,14 @@ function submit_item(store_id){
                 var url = "/stores/"+store_id+"/set_stores/submit_item";
                 var data ={
                     car_num : e.value,
-                    customer : {}
+                    customer_id : customer_id,
+                    customer : {},
+                    car_info : {}
+                }
+                if (parseInt(customer_id) > 0){
+                    data["car_info"]["car_model_id"]= car_model_id;
+                    data["car_info"]["buy_year"]= buy_year;
+                    data["car_info"]["distance"]= distance;
                 }
                 data["customer"]["name"]=c_name;
                 data["customer"]["mobilephone"]= c_number;
@@ -769,31 +760,28 @@ function submit_item(store_id){
                     if ((parseInt(items[i].split("_")[1])==1 ||  parseInt(items[i].split("_")[1])==2)  &&  (c_number == "" || c_number.length != 11)){
                         check_phone = true;
                     }
+                    if (parseInt(customer_id) > 0 && (parseInt(items[i].split("_")[1])==3 ||parseInt(items[i].split("_")[1])==4) ){
+                        check_card = true
+                    }
                     sub_items[items[i]] = $("#table_item #"+items[i] +" :text").val();
                 }
                 if (check_phone){
                     tishi_alert("购买储值卡需要客户手机号！")
                 }else{
-                    if (c_number != "" && c_number.length != 0){
+                    if (check_card){
+                        tishi_alert("合并客户不能使用当前车牌的卡类信息！");
+                        return false;
+                    }
+                    if (c_number != "" && c_number.length == 11){
                         if(confirm("请确认手机号 "+c_number)){
                             $("#submit_item,#submit_spinner").toggle();
                             data["sub_items"] = sub_items;
-                            $.ajax({
-                                type:"post",
-                                url:url,
-                                dataType: "script",
-                                data: data
-                            })
+                            request_ajax(url,data,"post")
                         }
                     }else{
                         $("#submit_item,#submit_spinner").toggle();
                         data["sub_items"] = sub_items;
-                        $.ajax({
-                            type:"post",
-                            url:url,
-                            dataType: "script",
-                            data: data
-                        })
+                        request_ajax(url,data,"post")
                     }
                 }
             }
@@ -810,12 +798,7 @@ function edit_deduct(order_id,store_id){
     var data ={
         order_id : order_id
     }
-    $.ajax({
-        type:"post",
-        url:url,
-        dataType: "script",
-        data: data
-    })
+    request_ajax(url,data,"post")
 }
 
 function post_deduct(store_id,order_id){
@@ -858,6 +841,7 @@ function post_deduct(store_id,order_id){
     }
 }
 
+
 function auth_number(e,store_id){
     if (e.value != "" && e.value.length == 11 ){
         var url = "/stores/"+store_id+"/set_stores/search_num";
@@ -869,23 +853,25 @@ function auth_number(e,store_id){
             $.ajax({
                 type:"post",
                 url:url,
-                dataType: "json",
-                data: data,
-                success :function(data){
-                    if (data.status==1){
-                        $("#c_number").css("background-color","chartreuse");
-                        $("#c_number").attr("title","客户可用！");
-                    }else{
-                        var customer = data.customer;
-                        $("#c_number").css("background-color","red");
-                        if (customer.mobilephone!=null && customer.mobilephone.length==11){
-                            $("#c_number").attr("title","客户可以已存在，姓名："+customer.name+" 地址："+customer.address);
-                            $("#old_number").val(customer.mobilephone);
-                        }
-                    }
-                }
+                dataType: "script",
+                data: data
             })
         }
     }
 }
 
+
+function confirm_btn(){
+    var customer = $("input[name='customer_types']:checked")[0];
+    if (customer.value != "0"){
+        var customer_name = $(customer).parents("tr").find("td").eq(1).html();
+        var group_name = $(customer).parents("tr").find("td").eq(2).html();
+        var address = $(customer).parents("tr").find("td").eq(3).html();
+        $("#c_group").val(group_name);
+        $("#c_address").val(address);
+        $("#c_name").val(customer_name);
+    }else{
+        $("#c_group,#c_address,#c_name").val("");
+    }
+    $('#customer_popup .close').trigger('click');
+}

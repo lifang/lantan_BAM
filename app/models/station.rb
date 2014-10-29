@@ -11,7 +11,12 @@ class Station < ActiveRecord::Base
   STAT = {:WRONG =>0,:LACK =>1,:NORMAL =>2,:NO_SERVICE =>3, :DELETED => 4} #0 故障 1 缺少技师 2 正常 3 无服务
   STAT_NAME = {0=>"故障",1=>"缺少技师",2=>"正常",3=>"缺少服务项目"}
   VALID_STATUS = [STAT[:WRONG], STAT[:NORMAL], STAT[:LACK], STAT[:NO_SERVICE]]
+  scope :is_normal,lambda{|store_id| where(:store_id => store_id,:status=>[STAT[:NORMAL], STAT[:LACK], STAT[:NO_SERVICE]])}
   scope :can_show, where(:status => VALID_STATUS)
+  scope :this_store,lambda{|store_id|where(:store_id=>store_id)}
+  scope  :normal,where(:status => STAT[:NORMAL])
+  LOCK = {:NO=>0,:YES=>1}
+  scope :no_locked,where(:locked=>LOCK[:NO])
   IS_CONTROLLER = {:YES=>1,:NO=>0} #定义是否拥有工控机
   PerPage = 10
   validates :name, :presence => true
@@ -74,8 +79,7 @@ class Station < ActiveRecord::Base
         # 相应等级无staff的删除  并将符合筛选条件但没选中的staff 删除等级
       end
     }
-    StationStaffRelation.find_all_by_current_day(Time.now.strftime("%Y%m%d")).each {|station| station.destroy}
-    p s_levels
+    StationStaffRelation.delete_all(:store_id =>store_id)
     s_levels.each  {|station_id,staffs|
       if staffs.include?(nil)
         Station.find(station_id).update_attributes(:status=>Station::STAT[:LACK])
@@ -96,7 +100,7 @@ class Station < ActiveRecord::Base
     o_staffs = {}  #已分配技师的工位
     o_tech =[] #已分配工位的技师
     t_staffs ={}
-    StationStaffRelation.joins(:staff).where("current_day=#{Time.now.strftime("%Y%m%d").to_i} and station_staff_relations.store_id=#{store_id}").select("staffs.level,station_staff_relations.*").each{
+    StationStaffRelation.joins(:staff).where("station_staff_relations.store_id=#{store_id}").select("staffs.level,station_staff_relations.*").each{
       |staff|o_tech << staff.staff_id;o_staffs[staff.station_id].nil? ? o_staffs[staff.station_id] = staff.level : o_staffs.delete(staff.station_id);
       t_staffs[staff.station_id].nil? ? t_staffs[staff.station_id] = [staff.level] : t_staffs[staff.station_id] << staff.level}
     unless o_tech.include? h_staff  #如果该员工已分配工位则不再分配
@@ -144,20 +148,20 @@ class Station < ActiveRecord::Base
       end
       if s_levels[h_level] && !s_levels[h_level].blank?
         if  o_staffs.keys.blank? #当工位都没有分配的时候
-          StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
+          StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:store_id=>store_id)
           Station.find(s_levels[h_level][0]).update_attributes(:status=>Station::STAT[:LACK])
         else #已分配的工位
           is_half = true
           s_levels[h_level].each{|station|
             if o_staffs.keys.include? station
-              StationStaffRelation.create(:station_id=>station,:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
+              StationStaffRelation.create(:station_id=>station,:staff_id=>h_staff,:store_id=>store_id)
               Station.find(station).update_attributes(:status=>Station::STAT[:NORMAL])
               is_half = false
               break
             end
           }
           if  is_half  #已分配工位中不包含当前级别的技师
-            StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store_id)
+            StationStaffRelation.create(:station_id=>s_levels[h_level][0],:staff_id=>h_staff,:store_id=>store_id)
             Station.find(s_levels[h_level][0]).update_attributes(:status=>Station::STAT[:LACK])
           end
         end
@@ -181,7 +185,7 @@ class Station < ActiveRecord::Base
     dirs=["#{Constant::VIDEO_DIR}/","#{store_id}/"]
     dirs.each_with_index {|dir,index| Dir.mkdir path_dir+dirs[0..index].join   unless File.directory? path_dir+dirs[0..index].join }
     video_path ="/public/"+dirs.join
-    paths=get_dir_list("#{Rails.root}"+video_path)
+    paths= TechOrder.get_dir_list("#{Rails.root}"+video_path)
     video_hash ={}
     paths.each do |path|
       mtime =File.stat("#{Rails.root}"+video_path+path).mtime.strftime("%Y-%m-%d")
@@ -196,15 +200,14 @@ class Station < ActiveRecord::Base
 
   #返回满足条件的工位
   def self.return_station_arr(prod_ids, store_id)
-    station_arr = []
-    station_prod_ids = []
+    station_arr,station_prod_ids = [],[]
     prod_ids = prod_ids.collect{|p| p.to_i }
-    ssrs = StationStaffRelation.select("count(*) s_id,station_id").where(:current_day => Time.now.strftime("%Y%m%d").to_i, :store_id => store_id).group("station_id")
-    station_id = ssrs.inject([]){|h, s|h << s.station_id if s.s_id == 2;h}
-    stations = Station.includes(:station_service_relations).where(:"stations.store_id" => store_id, :"stations.status" => Station::STAT[:NORMAL], :"station_service_relations.station_id" => station_id)
-    (stations || []).each do |station|
-      if station.station_service_relations
-        prods = station.station_service_relations.collect{|r| r.product_id }  #找出每个工位支持的服务
+    station_id = StationStaffRelation.select("station_id").where(:store_id =>store_id).group("station_id").having("count(*)>=1").map(&:station_id)
+    prod_stations = StationServiceRelation.select("product_id,station_id").joins(:product).where(:station_id=>station_id).group_by{|i|i.station_id}
+    Station.includes(:station_service_relations).where(:stations=>{:store_id => store_id,
+        :status => Station::STAT[:NORMAL], :id => station_id}).no_locked.each do |station|
+      if prod_stations && prod_stations[station.id].length > 0
+        prods = prod_stations[station.id].map(&:product_id)  #找出每个工位支持的服务
         station_prod_ids << prods
         station_arr << station if (prods & prod_ids).sort == prod_ids.sort  #如果这个工位支持所有需要的服务
       end
@@ -220,11 +223,6 @@ class Station < ActiveRecord::Base
     station_prod_ids = infos[1] #当前所有工位所支持的全部服务
     if station_arr.present?
       station_flag = 1 #有对应工位对应
-      #所有工位当前的技师
-      station_staffs = StationStaffRelation.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d").to_i)
-      if station_staffs.blank?
-        station_flag = 3      #没有技师
-      end
     else
       if((station_prod_ids.flatten & prod_ids).sort == prod_ids.sort) && (!station_prod_ids.include?(prod_ids))
         station_flag = 2 #一个订单要使用多个工位
@@ -240,10 +238,8 @@ class Station < ActiveRecord::Base
       work_order = WorkOrder.joins(:order).where(:orders => {:car_num_id => order.car_num_id},
         :work_orders => {:status => WorkOrder::STAT[:SERVICING], :store_id => store_id,
           :current_day => Time.now.strftime("%Y%m%d").to_i}).order("ended_at desc").first
-      if work_order #5
-        if station_arr.map(&:id).include?(work_order.station_id) #[1,3] 5  # 看看同一辆车之前在的工位能不能施工现在下单的服务
-          station_id = work_order.station_id
-        end
+      if work_order && station_arr.map(&:id).include?(work_order.station_id) #[1,3] 5  # 看看同一辆车之前在的工位能不能施工现在下单的服务
+        station_id = work_order.station_id
       end
     end
     if station_id == 0
@@ -251,23 +247,9 @@ class Station < ActiveRecord::Base
       busy_stations = WorkOrder.where(:station_id => station_arr, :current_day => Time.now.strftime("%Y%m%d"),      
         :store_id =>store_id, :status => [WorkOrder::STAT[:WAIT], WorkOrder::STAT[:SERVICING]]).map(&:station_id)
       availbale_stations = station_arr.map(&:id) - busy_stations
-      if availbale_stations.present?
-        if order && work_order #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
-          station_id = nil
-        else
-          #如果不是同一辆车，则排在不同的工位上，置station_id和开始结束时间
-          station_id = availbale_stations[0] || 0
-          #          #此处要判断该工位对应的技师是否也被分配到其他工位上，并且是否正在其他工位上工作，如果正在其他工位上工作，则要等待
-          #          ssr = StationStaffRelation.where(["station_id=? and current_day=?", station_id, Time.now.strftime("%Y%m%d").to_i]).map(&:staff_id)
-          #          ossr = StationStaffRelation.where(["station_id != ? and staff_id in (?) and current_day=?", station_id, ssr,
-          #              Time.now.strftime("%Y%m%d").to_i]).map(&:station_id) if ssr
-          #          wos = WorkOrder.where(["station_id in (?) and status = ? and current_day = ?", ossr,
-          #              WorkOrder::STAT[:SERVICING], Time.now.strftime("%Y%m%d").to_i]) if ossr
-          #          if wos.any?
-          #            has_start_end_time = false
-          #          else
-          has_start_end_time = true
-        end
+      if availbale_stations.present? && (order.nil? ||work_order.nil? ) #如果是同一辆车，需要排在不同的工位上的话，不置station_id和开始结束时间
+        station_id = availbale_stations[0] || 0
+        has_start_end_time = true
       else
         station_id = nil
       end
@@ -276,40 +258,21 @@ class Station < ActiveRecord::Base
   end
   
   def self.turn_old_to_new
-    work_records,total_con = [],[]
-    StationStaffRelation.delete_all(:current_day=>Time.now.strftime("%Y%m%d"))
+    work_records = []
     WorkRecord.delete_all(:current_day=>Time.now.strftime("%Y-%m-%d"))
     stores = Store.where(:status=>Store::STATUS[:OPENED])
-    infos = StationStaffRelation.where(:current_day=>[Time.now.strftime("%Y%m%d"),Time.now.yesterday.strftime("%Y%m%d")],:store_id=>stores.map(&:id)).group_by{
-      |s| "#{s.current_day}_#{s.store_id}"}
-    staffs = Staff.where(:status=>Staff::STATUS[:normal],:store_id=>stores.map(&:id))
-    tech_staffs = staffs.group_by{|i|"#{i.type_of_w}_#{i.store_id}"}
-    work_r_staffs = staffs.group_by{|i|i.store_id}
-    stores.each do |store|
-      today_info = infos["#{Time.now.strftime("%Y%m%d")}_#{store.id}"]
-      yesterday_info = infos["#{Time.now.yesterday.strftime("%Y%m%d")}_#{store.id}"]
-      if today_info.nil?
-        if yesterday_info.nil?
-          tech_staffs["#{Staff::S_COMPANY[:TECHNICIAN]}_#{store.id}"].each do |staff|
-            Station.set_station(store.id,staff.id,staff.level)
-          end unless tech_staffs["#{Staff::S_COMPANY[:TECHNICIAN]}_#{store.id}"].nil?
-        else
-          p "#{store.id}--#{yesterday_info.length}"
-          yesterday_info.each {|info|
-            total_con << StationStaffRelation.new({:station_id=>info.station_id,:staff_id=>info.staff_id,:current_day=>Time.now.strftime("%Y%m%d"),:store_id=>store.id})
-          }
-        end
-      end   #自动分配技师
-      work_r_staffs[store.id].each do |staff|   #生成员工记录
-        work_records << WorkRecord.new({:current_day=>Time.now.strftime("%Y-%m-%d"),:attendance_num=>1,:staff_id=>staff.id,:store_id=>store.id})
-      end unless work_r_staffs[store.id].nil?
-    end
+    work_r_staffs = Staff.where(:status=>Staff::STATUS[:normal],:store_id=>stores.map(&:id)).group_by{|i|i.store_id}
+    work_r_staffs.each do |store_id,staffs|   #生成员工记录
+      staffs.each do |staff|
+        work_records << WorkRecord.new({:current_day=>Time.now.strftime("%Y-%m-%d"),:attendance_num=>1,:staff_id=>staff.id,:store_id=>store_id})
+      end
+    end unless work_r_staffs.nil?
     WorkRecord.import work_records, :timestamps=>true unless work_records.blank?
-    StationStaffRelation.import total_con, :timestamps=>true unless total_con.blank?
   end
 
-  #根据，订单，工位，门店id排空工位
-  def self.create_work_order(station_id, store_id,order, hash, work_order_status, cost_time)
+  #根据，订单，工位，门店id排空工位 arrange 0 station_id 2 status 1 flag
+  def self.create_work_order(arrange_time,order, cost_time)
+    station_id = arrange_time[0]
     started_at = Time.now
     ended_at = started_at + cost_time.minutes
     wo_time = WkOrTime.find_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id
@@ -323,29 +286,21 @@ class Station < ActiveRecord::Base
         :order_id => order.id,
         :current_day => Time.now.strftime("%Y%m%d"),
         :station_id => station_id || nil,
-        :store_id => store_id,
-        :status => (work_order_status ? WorkOrder::STAT[:SERVICING] : WorkOrder::STAT[:WAIT]),
-        :started_at => work_order_status ? started_at : nil,
-        :ended_at => work_order_status ? ended_at : nil,
+        :store_id => order.store_id,
+        :status => (arrange_time[2] ? WorkOrder::STAT[:SERVICING] : WorkOrder::STAT[:WAIT]),
+        :started_at => arrange_time[2] ? started_at : nil,
+        :ended_at => arrange_time[2] ? ended_at : nil,
         :cost_time => cost_time
       })
 
-    hash ||= {}
+    hash = {}
     hash[:status] = (work_order.status == WorkOrder::STAT[:SERVICING]) ? Order::STATUS[:SERVICING] : Order::STATUS[:NORMAL]
     hash[:station_id] = station_id if station_id  #这个可能暂时没有值，一个完成后要更新
-    station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i if station_id
+    hash[:started_at] = arrange_time[2] ? started_at : nil
+    hash[:ended_at] = arrange_time[2] ? ended_at : nil
+    station_staffs = StationStaffRelation.load_relation(order.store_id,station_id) if station_id
     tech_orders = TechOrder.where(:order_id=>order.id)
-    if tech_orders.blank?
-      if station_staffs
-        TechOrder.create(:staff_id=>station_staffs[0].staff_id ,:order_id=>order.id) if station_staffs.size > 0
-        TechOrder.create(:staff_id=>station_staffs[1].staff_id,:order_id=>order.id) if station_staffs.size > 1
-      else
-        TechOrder.create(:order_id=>order.id)
-        TechOrder.create(:order_id=>order.id)
-      end
-    end
-    hash[:started_at] = work_order_status ? started_at : nil
-    hash[:ended_at] = work_order_status ? ended_at : nil
+    station_staffs.each { |st| TechOrder.create(:staff_id=>st.staff_id ,:order_id=>order.id)}   if tech_orders.blank? && station_staffs
 
     return hash
   end

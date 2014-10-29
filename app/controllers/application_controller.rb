@@ -25,6 +25,7 @@ class ApplicationController < ActionController::Base
       :layout => nil,
       :status   => "404 Not Found")
   end
+  
 
 
 end

@@ -7,7 +7,7 @@ class PackageCardsController < ApplicationController
 
   def index
     session[:pcard],session[:car_num],session[:c_name],session[:created_at],session[:ended_at]=nil,nil,nil,nil,nil
-    @cards =PackageCard.paginate_by_sql("select name,img_url,started_at,prod_point,ended_at,id,date_types,date_month from package_cards where
+    @cards =PackageCard.paginate_by_sql("select name,img_url,started_at,prod_point,ended_at,id,date_types,date_month,on_weixin from package_cards where
     store_id=#{params[:store_id]} and status =#{PackageCard::STAT[:NORMAL]}", :page => params[:page], :per_page => Constant::PER_PAGE)
     unless @cards.blank?
       @prods,@materials = {},{}
@@ -43,7 +43,7 @@ class PackageCardsController < ApplicationController
         PcardMaterialRelation.create(:package_card_id=>pcard.id,:material_id=>params[:material_types],:material_num=>params[:material_num])
       end
       begin
-        pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+        pcard.update_attributes(:img_url=>Sale.upload_img(params[:img_url],pcard,Constant::C_PICSIZE))  if params[:img_url]
       rescue
         flash[:notice] ="图片上传失败，请重新添加！"
       end
@@ -60,16 +60,15 @@ class PackageCardsController < ApplicationController
     @cards= @p_cards.paginate(:page=>params[:page],:per_page=>Constant::PER_PAGE)
     @card_fee = @p_cards.inject(0) {|num,card| num+card.price }
     @pcards = @p_cards.inject(Array.new) {|p_hash,card| p_hash << [card.p_id,card.p_name];p_hash.uniq }
-    p @pcards
     #content中存放使用情况 将所有产品或服务以字符串组合存放，包含 产品id,name,剩余次数
   end #销售记录
 
   #加载产品或者服务类型
   def pcard_types
-    sql = "select id,name from products where  store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]}"
+    sql = "select id,name,ifnull(sale_price,0) price from products where  store_id=#{params[:store_id]} and status=#{Product::IS_VALIDATE[:YES]}"
     sql += " and category_id=#{params[:sale_types]}" if params[:sale_types] != "" || params[:sale_types].length !=0
     sql += " and name like '%#{params[:sale_name]}%'" if params[:sale_name] != "" || params[:sale_name].length !=0
-    @products=Product.find_by_sql(sql)
+    @products = Product.find_by_sql(sql)
   end
 
   #添加套餐卡
@@ -106,7 +105,7 @@ class PackageCardsController < ApplicationController
     end
     flash[:notice] = "套餐卡更新成功"
     begin
-      parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard.id,Constant::PCARD_PICS,pcard.store_id,Constant::C_PICSIZE))  if params[:img_url]
+      parms.merge!(:img_url=>Sale.upload_img(params[:img_url],pcard,Constant::C_PICSIZE))  if params[:img_url]
     rescue
       flash[:notice] ="图片上传失败，请重新添加！"
     end
@@ -147,6 +146,20 @@ class PackageCardsController < ApplicationController
     materials = Material.select("id,name").where(:store_id=>params[:store_id],:category_id=>params[:id]).
       where(:status=>Material::STATUS[:NORMAL]).inject(Hash.new){|hash,material|hash[material.id]=material.name;hash}
     render :json=>materials
+  end
+
+  #设置在微信上面显示的产品，服务，套餐卡和打折卡，储值卡等
+  def on_weixin
+    begin
+      status =1
+      obj = eval(params[:model]).find(params[:object_id])
+      obj.toggle!(:on_weixin)
+      on_weixin = obj.on_weixin
+    rescue
+      status = 0
+      on_weixin = false
+    end
+    render :json=>{:status=>status,:change=>on_weixin}
   end
   
 end

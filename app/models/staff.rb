@@ -41,7 +41,9 @@ class Staff < ActiveRecord::Base
   STATUS_NAME = {0 => "在职", 1 => "请假", 2 => "休假", 3 => "离职", 4 => "删除"}
   scope :normal, where(:status => STATUS[:normal])
   scope :valid, where(:status => VALID_STATUS)
+  scope :tech_job,where(:type_of_w => S_COMPANY[:TECHNICIAN])
   scope :not_deleted, where("status != #{STATUS[:deleted]}")
+  scope :this_store,lambda{|store_id|where(:store_id => store_id)}
 
   S_HEAD = {:BOSS=>0,:MANAGER =>2,:NORMAL=>1} #0老板 2 店长 1员工
   N_HEAD = {1=>"员工",0=>"老板", 2=>"店长"}
@@ -56,7 +58,7 @@ class Staff < ActiveRecord::Base
 
 
   #分页页数
-  PerPage = 10
+  PerPage = 20
 
   def staff_not_deleted?
     status != STATUS[:deleted]

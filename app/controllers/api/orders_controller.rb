@@ -26,24 +26,50 @@ class Api::OrdersController < ApplicationController
     staff = Staff.find_by_sql(["select s.*,d.name dname,b.name bname from staffs s left join departments d on s.department_id=d.id
             left join departments b on d.dpt_id=b.id
             where s.username = ? and s.status in (?)", params[:user_name], Staff::VALID_STATUS]).first   
-    info = ""
+    info,load_data = "",{}
     store = staff.store if staff
     if staff.nil? or store.nil? or !staff.has_password?(params[:user_password])
       info = "用户名或密码错误"
     elsif store.status != Store::STATUS[:OPENED]
       info = "#{store.close_reason}"
     else
-      cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
-      cookies[:user_name]={:value =>staff.name, :path => "/", :secure  => false}
-      staff.update_attributes(:last_login=>Time.now.strftime("%Y-%m-%d %H:%M:%S"))
-      session_role(cookies[:user_id])
-      info = ""
-      store = Store.find_by_id(staff.store_id)
-      staff = {:user_id => staff.id, :store_id => staff.store_id, :position => staff.dname,
-        :department => staff.bname, :username => staff.username, :name => staff.name,
-        :photo => staff.photo.nil? ? nil : staff.photo, :cash_auth => store.cash_auth, :store_name => store.name}
+      if staff.status != Staff::STATUS[:normal]
+        info = "您已不是在职状态，请联系门店管理人员"
+      else
+        cookies[:user_id]={:value => staff.id, :path => "/", :secure  => false}
+        cookies[:user_name]={:value =>staff.name, :path => "/", :secure  => false}
+        staff.update_attributes(:last_login=>Time.now.strftime("%Y-%m-%d %H:%M:%S"))
+        session_role(cookies[:user_id])
+        store = Store.find_by_id(staff.store_id)
+        work_records = WorkRecord.where(:current_day=>Time.now.strftime("%Y-%m-%d").to_datetime,:store_id=>store.id).inject({}){|h,w|h[w.staff_id]=w.attend_types;h}
+        t_staffs = Staff.where(:type_of_w=>Staff::S_COMPANY[:TECHNICIAN],:store_id=>store.id).valid.select("id,name").inject([]){|arr,s|arr << {:name=>s.name,:id=>s.id,:status=>WorkRecord::ATTEND_YES.include?(work_records[s.id]) ? 1 : 0 }}
+        if params[:version] && params[:version]== "2.4"
+          #获取所有的车品牌/型号
+          capital_arr = Capital.get_all_brands_and_models
+          #stations_count => 工位数目
+          station_ids = Station.is_normal(store.id).select("id, name,locked")
+          #预约单
+          load_data[:staff] = {:user_id => staff.id, :store_id => staff.store_id, :position => staff.dname,
+            :department => staff.bname, :username => staff.username, :name => staff.name,
+            :photo => staff.photo.nil? ? nil : staff.photo, :cash_auth => store.cash_auth, :store_name => store.name}
+          load_data[:total_staffs] = t_staffs
+          load_data[:car_info] = capital_arr
+          load_data[:services] = Product.services(store.id)  #常用服务
+          load_data[:station_ids] = station_ids
+          load_data[:pay_pwd] = store.limited_password
+        else
+          staff = {:user_id => staff.id, :store_id => staff.store_id, :position => staff.dname,
+            :department => staff.bname, :username => staff.username, :name => staff.name,
+            :photo => staff.photo.nil? ? nil : staff.photo, :cash_auth => store.cash_auth, :store_name => store.name}
+        end
+      end
     end
-    render :json => {:staff => staff, :info => info}.to_json
+    if params[:version] && params[:version]=="2.4"
+      render :json => {:load_data => load_data, :info => info}.to_json
+    else
+      render :json => {:staff => staff, :info => info}.to_json
+    end
+    
   end
   #根据车牌号查询客户
   def search_car
@@ -532,14 +558,6 @@ class Api::OrdersController < ApplicationController
     staff = Staff.find_by_id(params[:staff_id])
     if staff
       current_day = Time.now.strftime("%Y%m%d")
-      #      stations = Station.includes(:station_staff_relations => :staff).
-      #        where("staffs.id = #{staff.id}").
-      #        where("station_staff_relations.store_id = #{staff.store_id}").
-      #        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
-      #        where("stations.status = #{Station::STAT[:NORMAL]}")
-      #      wo = nil
-      #      sta = nil
-      #stations.each do |station|
       work_order = WorkOrder.joins([:order => :car_num], :station => {:station_staff_relations => :staff}).
         where("work_orders.store_id = #{staff.store_id}").
         where("work_orders.status = #{WorkOrder::STAT[:SERVICING]}").
@@ -547,7 +565,6 @@ class Api::OrdersController < ApplicationController
         where("work_orders.current_day = #{current_day}").
         where("staffs.id = #{staff.id}").
         where("station_staff_relations.store_id = #{staff.store_id}").
-        where("station_staff_relations.current_day = #{Time.now.strftime("%Y%m%d").to_i}").
         select("work_orders.*,car_nums.num as car_num").first
       if work_order
         work_order["coutdown"] = work_order.ended_at - Time.now
@@ -555,15 +572,7 @@ class Api::OrdersController < ApplicationController
           joins(:order_prod_relations => :order).select("name")
         product_names = products.map(&:name).join(",")
         work_order["product_names"] = product_names
-        #          wo = work_order
-        #          sta = station
-        #          break
       end
-      #end
-      #      else
-      #        work_order = nil
-      #      end
-      #      render :json => {:status => 1, :work_order => wo, :station => sta}
       render :json => {:status => 1, :work_order => work_order, :station => work_order.nil? ? nil : work_order.station}
     else
       render :json => {:status => 0}

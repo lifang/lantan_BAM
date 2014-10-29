@@ -5,7 +5,7 @@
       <%unless @orders.empty?%>
         <div class="tab_head">
           <ul>
-            <span class="data">销售单：<%= @orders.values.flatten.map(&:earn_price).inject(0){|sum,t|sum+t}.round(2)%>&nbsp;&nbsp;元</span>
+            <span class="data">毛利统计：<%= @orders.values.flatten.map(&:earn_price).inject(0){|sum,t|sum+t}.round(2)%>&nbsp;&nbsp;元</span>
           </ul>
         </div>
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">

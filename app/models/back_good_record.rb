@@ -7,7 +7,7 @@ class BackGoodRecord < ActiveRecord::Base
             from back_good_records bgr inner join materials m on bgr.material_id = m.id
             inner join categories c on m.category_id=c.id
             inner join suppliers s on bgr.supplier_id=s.id
-            where bgr.store_id = ? order by bgr.created_at desc", store_id]
+            where bgr.store_id = ? ", store_id]
     unless type.nil? || type==0 || type==-1
       sql[0] += " and c.id=?"
       sql << type
@@ -24,6 +24,7 @@ class BackGoodRecord < ActiveRecord::Base
       sql[0] += " and bgr.supplier_id=?"
       sql << supp
     end
+    sql[0] += " order by bgr.created_at desc"
     records = BackGoodRecord.find_by_sql(sql)
     return records
   end

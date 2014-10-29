@@ -103,7 +103,7 @@
     <select  id="time_revist" name="time_revist" <%unless @service.is_auto_revist%>disabled <%end%>>
       <option value="">请选择</option>
       <% Product::REVIST_TIME.each do |key| %>
-        <option value="<%= key %>" id="<%=key%>" <%if @service.auto_time ==key%> selected<%end%> ><%= key %>小时</option>
+        <option value="<%= key %>" id="<%=key%>" <%if @service.auto_time ==key%> selected<%end%> ><%= key/24 %>*24小时</option>
       <% end %>
     </select>
   </div>

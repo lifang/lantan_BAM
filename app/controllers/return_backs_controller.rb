@@ -33,8 +33,8 @@ class ReturnBacksController < ApplicationController
           order_ids = work_orders.map{|w| w.order_id }
           order_products = Product.find_by_sql(["select p.name, opr.order_id from products p
           inner join order_prod_relations opr
-          on opr.product_id = p.id where p.is_service = ? and opr.order_id in (?) order by p.id ",
-              true, order_ids]).group_by {|item| item.order_id }
+          on opr.product_id = p.id where  opr.order_id in (?) order by p.id ",
+              order_ids]).group_by {|item| item.order_id }
           msg_arr = []
           stations.each do |s|
             msg = ""
@@ -50,7 +50,7 @@ class ReturnBacksController < ApplicationController
                 msg = " "*4 + s_w_os[s.id].car_num + " "*4 + "\n"
                 name_length = 0
                 n = 0
-                pro.name.unpack("U*").each { |ca| 
+                pro.name.unpack("U*").each { |ca|
                   if name_length <=14
                     name_length += ca<127 ? 1 : 2
                     n += 1
@@ -69,9 +69,6 @@ class ReturnBacksController < ApplicationController
           end
         end
         message = msg_arr.join("?")
-        file = File.open(Constant::LOCAL_DIR + "led.txt","a+")
-        file.write("\r\n--#{params[:code]}#{message}--#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}\r\n".force_encoding("UTF-8"))
-        file.close
       end
     rescue
     end

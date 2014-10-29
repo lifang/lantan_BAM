@@ -1,12 +1,9 @@
 function market_new(store_id,types){     //营销-新建产品/服务类别
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_functions/market_new",
-        dataType: "script",
-        data: {
-            types : types
-        }
-    })
+    var url = "/stores/"+store_id+"/set_functions/market_new";
+    var data = {
+        types : types
+    }
+    request_ajax(url,data)
 }
 
 function new_market_commit(store_id, types){   //营销-新建产品/服务类别 提交
@@ -14,7 +11,7 @@ function new_market_commit(store_id, types){   //营销-新建产品/服务类�
     if(name==""){
         tishi_alert("名字不能为空!")
     }else if(get_str_len(name)>16){
-         tishi_alert("名字长度不能超过16个字符!")
+        tishi_alert("名字长度不能超过16个字符!")
     }
     else{
         $.ajax({
@@ -33,14 +30,11 @@ function new_market_commit(store_id, types){   //营销-新建产品/服务类�
                     tishi_alert("新建失败!");
                 }else{
                     tishi_alert("新建成功!");
-                    $.ajax({
-                        type: "get",
-                        url: "/stores/"+store_id+"/set_functions",
-                        dataType: "script",
-                        data: {
-                            init : "market_init"
-                        }
-                    })
+                    var url = "/stores/"+store_id+"/set_functions";
+                    var t_data = {
+                        init : "market_init"
+                    }
+                    request_ajax(url,t_data)
                 }
             }
         })
@@ -48,14 +42,11 @@ function new_market_commit(store_id, types){   //营销-新建产品/服务类�
 }
 
 function market_edit(id, store_id){   //营销-编辑服务/产品
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_functions/market_edit",
-        dataType: "script",
-        data: {
-            market_id : id
-        }
-    })
+    var url = "/stores/"+store_id+"/set_functions/market_edit";
+    var data = {
+        market_id : id
+    }
+    request_ajax(url,data)
 }
 
 function edit_market_commit(id, store_id){    //营销-编辑服务/产品 提交
@@ -80,14 +71,11 @@ function edit_market_commit(id, store_id){    //营销-编辑服务/产品 提�
                     tishi_alert("编辑失败!");
                 }else{
                     tishi_alert("编辑成功!");
-                    $.ajax({
-                        type: "get",
-                        url: "/stores/"+store_id+"/set_functions",
-                        dataType: "script",
-                        data: {
-                            init : "market_init"
-                        }
-                    })
+                    var url = "/stores/"+store_id+"/set_functions";
+                    var t_data = {
+                        init : "market_init"
+                    }
+                    request_ajax(url,t_data)
                 }
             }
         })
@@ -95,11 +83,8 @@ function edit_market_commit(id, store_id){    //营销-编辑服务/产品 提�
 }
 
 function storage_new(store_id){     //库存-新建物料类别
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_functions/storage_new",
-        dataType: "script"
-    })
+    var url = "/stores/"+store_id+"/set_functions/storage_new";
+    request_ajax(url)
 }
 
 function new_storage_commit(store_id){  //库存-新建物料类别 提交
@@ -123,14 +108,11 @@ function new_storage_commit(store_id){  //库存-新建物料类别 提交
                     tishi_alert("创建失败!")
                 }else{
                     tishi_alert("创建成功!");
-                    $.ajax({
-                        type: "get",
-                        url: "/stores/"+store_id+"/set_functions",
-                        dataType: "script",
-                        data: {
-                            init : "storage_init"
-                        }
-                    })
+                    var url = "/stores/"+store_id+"/set_functions";
+                    var t_data = {
+                        init : "storage_init"
+                    }
+                    request_ajax(url,t_data)
                 }
             }
         })
@@ -138,14 +120,11 @@ function new_storage_commit(store_id){  //库存-新建物料类别 提交
 }
 
 function edit_storage(id, store_id){    //库存-编辑物料类别
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_functions/storage_edit",
-        dataType: "script",
-        data: {
-            storage_id : id
-        }
-    })
+    var url = "/stores/"+store_id+"/set_functions/storage_edit";
+    var data = {
+        storage_id : id
+    }
+    request_ajax(url,data)
 }
 
 function edit_storage_commit(id, store_id){      //库存-编辑物料类别 提交
@@ -170,14 +149,11 @@ function edit_storage_commit(id, store_id){      //库存-编辑物料类别 提
                     tishi_alert("编辑失败!");
                 }else{
                     tishi_alert("编辑成功!");
-                    $.ajax({
-                        type: "get",
-                        url: "/stores/"+store_id+"/set_functions",
-                        dataType: "script",
-                        data: {
-                            init : "storage_init"
-                        }
-                    })
+                    var url = "/stores/"+store_id+"/set_functions";
+                    var t_data = {
+                        init : "storage_init"
+                    }
+                    request_ajax(url,t_data)
                 }
             }
         })
@@ -185,11 +161,8 @@ function edit_storage_commit(id, store_id){      //库存-编辑物料类别 提
 }
 
 function depart_new(store_id){      //组织架构-新建部门
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_functions/depart_new",
-        dataType: "script"
-    })
+    var url = "/stores/"+store_id+"/set_functions/depart_new"
+    request_ajax(url)
 }
 
 function depart_new_commit(store_id){   //组织架构-新建部门 提交
@@ -213,14 +186,11 @@ function depart_new_commit(store_id){   //组织架构-新建部门 提交
                     tishi_alert("创建失败!");
                 }else{
                     tishi_alert("创建成功!");
-                    $.ajax({
-                        type: "get",
-                        url: "/stores/"+store_id+"/set_functions",
-                        dataType: "script",
-                        data: {
-                            init : "depart_init"
-                        }
-                    })
+                    var url = "/stores/"+store_id+"/set_functions";
+                    var t_data = {
+                        init : "depart_init"
+                    }
+                    request_ajax(url,t_data)
                 }
             }
         })
@@ -228,14 +198,11 @@ function depart_new_commit(store_id){   //组织架构-新建部门 提交
 }
 
 function sibling_depart_new(store_id, lv){      //组织架构-新建同级部门
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_functions/sibling_depart_new",
-        dataType: "script",
-        data: {
-            lv : lv
-        }
-    })
+    var url = "/stores/"+store_id+"/set_functions/sibling_depart_new";
+    var data = {
+        lv : lv
+    }
+    request_ajax(url,data)
 }
 
 function sibling_depart_new_commit(store_id, lv){   //组织架构-新建同级部门 提交
@@ -260,14 +227,11 @@ function sibling_depart_new_commit(store_id, lv){   //组织架构-新建同级�
                     tishi_alert("创建失败!");
                 }else{
                     tishi_alert("创建成功!");
-                    $.ajax({
-                        type: "get",
-                        url: "/stores/"+store_id+"/set_functions",
-                        dataType: "script",
-                        data: {
-                            init : "depart_init"
-                        }
-                    })
+                    var url = "/stores/"+store_id+"/set_functions";
+                    var t_data = {
+                        init : "depart_init"
+                    }
+                    request_ajax(url,t_data)
                 }
             }
         })
@@ -275,14 +239,11 @@ function sibling_depart_new_commit(store_id, lv){   //组织架构-新建同级�
 }
 
 function depart_edit(store_id, depart_id){  //组织架构-编辑部门
-    $.ajax({
-        type: "get",
-        url: "/stores/"+store_id+"/set_functions/depart_edit",
-        dataType: "script",
-        data: {
-            depart_id : depart_id
-        }
-    })
+    var url = "/stores/"+store_id+"/set_functions/depart_edit";
+    var data = {
+        depart_id : depart_id
+    }
+    request_ajax(url,data)
 }
 
 function position_new(store_id, dpt_id){    //组织架构-新建职务
@@ -498,13 +459,15 @@ function depart_del(store_id, did){
             type: "get",
             url: "/stores/"+store_id+"/set_functions/depart_del",
             dataType: "json",
-            data: {did : did},
+            data: {
+                did : did
+            },
             success: function(data){
                 if(data.status==0){
                     tishi_alert("删除失败!");
                 }else{
                     tishi_alert("删除成功!");
-                     $.ajax({
+                    $.ajax({
                         type: "get",
                         url: "/stores/"+store_id+"/set_functions",
                         dataType: "script",

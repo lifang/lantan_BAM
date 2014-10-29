@@ -3,9 +3,9 @@
   <div class="box">
     <div class="data_box">
       <div class="second_menu">
-        <a href="/stores/<%= params[:store_id] %>/discount_cards">打折卡</a>
-        <a href="/stores/<%= params[:store_id] %>/save_cards">储值卡</a>
         <a href="/stores/<%= params[:store_id] %>/package_cards" class="hover">套餐卡</a>
+        <a href="/stores/<%= params[:store_id] %>/save_cards">储值卡</a>
+        <a href="/stores/<%= params[:store_id] %>/discount_cards">打折卡</a>
       </div>
       <div class="data_menu">
         <% if permission?(:sales, :add_p_card) %><a href="javascript:void(0)" class="add_btn" onclick="add_pcard('<%=params[:store_id] %>')">添加套餐卡</a><% end %>
@@ -81,8 +81,12 @@
                         <% end %>
                       </table>
                     </td>
-                    <td>
+                    <td class="operation">
                       <% if permission?(:sales, :edit_p_card) %><a href="javascript:void(0)" onclick="edit_pcard('<%=card.id %>','<%=params[:store_id] %>')">编辑</a><% end %>
+                      <% if permission?(:sales, :edit_p_card) %>
+                        <a href="javascript:void(0)"
+                           onclick="on_weixin('PackageCard','<%=  card.id %>',this)" title="<%= card.on_weixin ?  '不' : '' %>在微信上推荐该套餐卡"><%= card.on_weixin ?  '不' : '' %>推荐</a>
+                         <% end %>
                     </td>
                   </tr>
                 <% end %>
@@ -153,8 +157,12 @@
                           <% end %>
                         </table>
                       </td>
-                      <td>
+                      <td class="operation">
                         <% if permission?(:sales, :edit_p_card) %><a href="javascript:void(0)" onclick="edit_pcard('<%=card.id %>','<%=params[:store_id] %>')">编辑</a><% end %>
+                        <% if permission?(:sales, :edit_p_card) %>
+                          <a href="javascript:void(0)"
+                             onclick="on_weixin('PackageCard','<%=  card.id %>',this)" title="<%= card.on_weixin ?  '不' : '' %>在微信上推荐该套餐卡"><%= card.on_weixin ?  '不' : '' %>推荐</a>
+                           <% end %>
                       </td>
                     </tr>
                   <% end %>

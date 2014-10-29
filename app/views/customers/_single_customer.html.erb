@@ -52,10 +52,12 @@
           <% @car_nums.each do |car| %>
             <li>
               <label style="width: 62px;">车牌号：</label><span style="width: 80px;"><%= car.num %></span>
-              <label style="width: 55px;">品牌：</label><span style="width: 175px;"><%= [car.b_name,car.m_name].compact.join("--") %></span>
+              <label style="width: 45px;">品牌：</label><span style="width: 125px;"><%= [car.b_name,car.m_name].compact.join("--") %></span>
               <label style="width: 75px;">购车年份：</label><span style="width: 40px;"><%= car.buy_year %></span>
-              <label style="width: 75px;">行驶里程：</label><span style="width: 70px;"><%=car.distance%></span>
+              <label style="width: 75px;">行驶里程：</label><span style="width: 40px;"><%=car.distance%></span>
               <% if permission?(:customers, :edit_car_num) %>
+               <button type="button" class="compile_btn"
+                        onclick="select_order(<%= @store.id %>,'<%= car.c_id %>',<%= @customer.id %>)">消费记录</button>
                 <button type="button" class="compile_btn"
                         onclick="javascript:edit_car_num_f('<%= car.c_id %>')">编辑</button>
                       <% end %>

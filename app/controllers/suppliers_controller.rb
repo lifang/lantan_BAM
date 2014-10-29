@@ -68,10 +68,9 @@ class SuppliersController < ApplicationController
 
   def check
     suppliers = Supplier.where(:store_id=>params[:store_id]).map(&:cap_name).compact
-    p cap_name = params[:name].split(" ").join("").split("").compact.map{|n|n.pinyin[0][0] if n.pinyin[0]}.compact.join("")
+    cap_name = params[:name].split(" ").join("").split("").compact.map{|n|n.pinyin[0][0] if n.pinyin[0]}.compact.join("")
     msg_type = 0
     msg_type =1   if suppliers.include? cap_name
-    p msg_type
     render :json=>{:msg_type=>msg_type,:cap_name=>cap_name}
   end
   

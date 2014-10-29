@@ -34,6 +34,12 @@
 <% if permission?(:materials, :mat_search) %>
   <%= render :partial => 'search_materials', :locals => {:tab_name => "materials"} %>
 <% end %>
+<div class="collect">
+  <ul>
+    <li>物料总记录：<span><%= @materials.length %></span>条</li>
+    <li>物料销售总额：<span><%= @materials.map(&:total_price).compact.reduce(:+).round(2) %></span></li>
+  </ul>
+</div>
 <div class="table_box_h">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table" id="materials_tab_table">
     <thead>

@@ -30,7 +30,8 @@ function check_customer() {
         }else{
             return false;
         }
-    }else{
+    }
+    else{
         if ($("#new_c_form").length > 0) {
             $("#new_c_form button").attr("disabled", "true");
         }
@@ -247,31 +248,23 @@ $(document).ready(function(){
     $(".process_violation").live("click", function(){
         var store_id = $(this).attr("name");
         var id = $(this).attr("id");
-        $.ajax({
-            async:true,
-            type : 'get',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/violation_rewards/"+ id +"/edit",
-            data : {
-                id : id,
-                store_id : store_id
-            }
-        });
-        return false;
+
+        var url = "/stores/"+ store_id+"/violation_rewards/"+ id +"/edit";
+        var data = {
+            id : id,
+            store_id : store_id
+        }
+        request_ajax(url,data)
     });
 })
 
 function show_revisit_detail(revisit_id,store_id){   //显示投诉详情
-    $.ajax({
-        async:true,
-        dataType: "script",
-        type: "get",
-        url: "/customers/show_revisit_detail",
-        data: {
-            r_id : revisit_id,
-            store_id : store_id
-        }
-    })
+    var url = "/customers/show_revisit_detail";
+    var data = {
+        r_id : revisit_id,
+        store_id : store_id
+    }
+    request_ajax(url,data)
 }
 
 function print_orders(store_id){
@@ -289,3 +282,24 @@ function print_orders(store_id){
     
 }
 
+function search_customer(store_id){
+    var url = "/stores/"+store_id+"/customers/";
+    var data = {
+        name : $("#name").val(),
+        car_num : $("#car_num").val(),
+        phone : $("#phone").val(),
+        started_at : $("#started_at").val(),
+        ended_at : $("#ended_at").val()
+    }
+    $(".search_btn,#submit_spinner").toggle();
+    request_ajax(url,data)
+}
+
+function select_order(store_id,car_num_id,customer_id){
+    var url = "/stores/"+store_id+"/customers/select_order";
+    var data = {
+        car_num_id : car_num_id,
+        customer_id : customer_id
+    }
+    request_ajax(url,data)
+}

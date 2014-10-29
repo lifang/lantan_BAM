@@ -74,17 +74,12 @@ function change_tab(e,k){
 function show_fee(fee_id,store_id){
     var url = "/stores/"+store_id+"/finance_reports/show_fee";
     var position = $(".tab_before .hover").attr("id");
-    var parm = {
+    var data = {
         store_id:store_id,
         fee_id:fee_id,
         position : position
     }
-    $.ajax({
-        type:"post",
-        url: url,
-        dataType: "script",
-        data: parm
-    })
+    request_ajax(url,data,"post")
 }
 
 function fee_report(e,store_id){
@@ -94,16 +89,11 @@ function fee_report(e,store_id){
 
 function load_account(c_id,s_id,rend){
     var url = "/stores/"+s_id+"/finance_reports/load_account";
-    var parm = {
+    var data = {
         customer_id : c_id,
         rend : rend
     };
-    $.ajax({
-        type:"post",
-        url: url,
-        dataType: "script",
-        data: parm
-    })
+    request_ajax(url,data,"post")
 }
 
 function set_search(e,store_id,action,parm){
@@ -134,12 +124,7 @@ function send_account(store_id,action,parm){
     }else{
         parm["last_time"] = 0;
     }
-    $.ajax({
-        type:type,
-        url: url,
-        dataType: "script",
-        data: parm
-    })
+    request_ajax(url,parm,type)
 }
 
 
@@ -275,18 +260,9 @@ function manage_account(e,store_id){
         account_name : account_name
     };
     set_time(e,store_id,action)
-    set_request(url,type,parm)
+    request_ajax(url,parm,type)
 }
 
-//设置ajax提交
-function set_request(url,type,parm){
-    $.ajax({
-        type:type,
-        url: url,
-        dataType: "script",
-        data: parm
-    })
-}
 
 //设置提交按钮的倒计时
 function set_time(e,store_id,action){
@@ -355,12 +331,7 @@ function show_asset(asset_id,store_id){
         store_id:store_id,
         asset_id:asset_id
     }
-    $.ajax({
-        type:"post",
-        url: url,
-        dataType: "script",
-        data: parm
-    })
+    request_ajax(url,parm,"post")
 }
 
 function set_over(asset_id,store_id){

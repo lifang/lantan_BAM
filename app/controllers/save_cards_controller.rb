@@ -9,11 +9,11 @@ class SaveCardsController < ApplicationController   #储值卡
     @types = Category.where(["store_id = ? and types in (?)", @store.id, [Category::TYPES[:good], Category::TYPES[:service]]])
     @sv_cards = SvCard.find_by_sql(["select sc.id sid, sc.name sname, sc.img_url surl, sc.price sprice,
      sc.description sdesc, sc.use_range srange, spr.base_price bprice, spr.more_price mprice, spr.category_id cid,
-    spr.pcard_ids p_id from sv_cards sc left join svcard_prod_relations spr on sc.id=spr.sv_card_id where sc.store_id=?
+    spr.pcard_ids p_id,on_weixin from sv_cards sc left join svcard_prod_relations spr on sc.id=spr.sv_card_id where sc.store_id=?
      and sc.status=? and sc.types=? order by sc.created_at desc",@store.id, SvCard::STATUS[:NORMAL], SvCard::FAVOR[:SAVE]]).
       paginate(:page => params[:page] ||= 1, :per_page =>Constant::PER_PAGE)
     @cname = Category.select("id,name").where(:store_id => @store.id).inject(Hash.new) { |hash, c|hash[c.id]=c.name;hash}
-    p @pname = @pcard.inject({}){|h,p|h[p.id]=p.name;h}
+    @pname = @pcard.inject({}){|h,p|h[p.id]=p.name;h}
   end
 
   def create

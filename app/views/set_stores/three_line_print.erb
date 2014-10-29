@@ -37,11 +37,11 @@
   <col width="20%" />
   <tr>
     <td>车牌号：</td>
-    <td><label><%=  @car_num.num%></label></td>
+    <td><label><%=  @car_num.map(&:num).join(" ")%></label></td>
     <td>车型：</td>
-    <td><label><%= CarModel.find(@car_num.car_model_id).name   if @car_num and @car_num.car_model_id   %></label></td>
+    <td><label><%= CarModel.where(:id=>@car_num.map(&:car_model_id)).map(&:name).join(" ")  %></label></td>
     <td>进厂里程：</td>
-    <td><label><%=@car_num.distance  %></label></td>
+    <td><label><%=@car_num.map(&:distance).join(" ")  %></label></td>
   </tr>
   <tr>
     <td>联系人：</td>
@@ -78,7 +78,7 @@
     <% sum += fact %>
     <%  prod = @order_prods[order.id][0] %>
     <tr id="order_<%=order.id%>">
-      <td style="text-align:center"><%=prod.name  %></td>
+      <td style="text-align:center"><input type="text" value="<%= prod.name %>" style="border: 0px;" /></td>
       <td style="text-align:center"><input type="text" value="<%= prod.pro_num %>" id="num_<%=order.id%>" style="border: 0px;" onblur="sum_price(this)"/></td>
       <td style="text-align:center"><input type="text" value="<%= prod.price %>" id="price_<%=order.id%>" style="border: 0px;" onblur="sum_price(this)"/></td>
       <td style="text-align:center"><input type="text" value="<%= loss.round(2) %>" id="reward_<%=order.id%>" style="border: 0px;" onblur="sum_price(this)"/></td>

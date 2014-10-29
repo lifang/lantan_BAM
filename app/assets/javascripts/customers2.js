@@ -158,25 +158,7 @@ function add_cars(){
     popup("#add_car_div");
 }
 
-function add_car_get_datas(type,obj, store_id){
-    var ob = $(obj).val();
-    if(type==0 && ob==""){
-        $("#add_car_brands").html("<option value=''>--</option>");
-        $("#add_car_models").html("<option value=''>--</option>");
-    }else if(type==1 && ob==""){
-        $("#add_car_models").html("<option value=''>--</option>");
-    }else{
-        $.ajax({
-            url: "/stores/"+store_id+"/customers/add_car_get_datas",
-            type: "get",
-            dataType: "script",
-            data:{
-                type : type,
-                id : ob
-            }
-        })
-    }
-}
+
 
 function add_car_valid(obj){
     if($.trim($("#add_car_num").val())=="" || $.trim($("#add_car_num").val()).length != 7){
@@ -233,7 +215,8 @@ function change_pcard_pwd_commit(){
         tishi_alert("请输入新密码!");
     }else if(t.test(npwd)==false){
         tishi_alert("密码长度必须为6位,且必须为0~9的整数!");
-    }else if(rpwd==""){
+    }
+    else if(rpwd==""){
         tishi_alert("请输入确认密码!");
     }else if(t.test(rpwd)==false){
         tishi_alert("密码长度必须为6位,且必须为0~9的整数!");

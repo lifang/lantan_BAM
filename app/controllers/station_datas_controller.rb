@@ -1,6 +1,6 @@
 #encoding: utf-8
 class StationDatasController < ApplicationController
-  layout "role"
+  layout "station"
   before_filter :sign?
   before_filter :find_store
 
@@ -12,7 +12,7 @@ class StationDatasController < ApplicationController
     @categories = Category.where(["types = ? and store_id = ? ", Category::TYPES[:service], @store.id]).inject({}){|hash,c|hash[c.id]=c.name;hash};
     @services = @categories.empty? ? {} : Product.is_normal.where(:category_id => @categories.keys).group_by { |p| p.category_id }
     pack_serv = Product.is_normal.where(:category_id => Product::PACK[:PACK],:store_id=>@store.id)
-   need_product = Product.joins(:category).is_normal.where(:is_service => Product::PROD_TYPES[:PRODUCT],:is_added=>Product::IS_ADDED[:YES],:store_id=>@store.id)
+    need_product = Product.joins(:category).is_normal.where(:is_service => Product::PROD_TYPES[:PRODUCT],:is_added=>Product::IS_ADDED[:YES],:store_id=>@store.id)
     unless pack_serv.blank?
       @categories.merge!(Product::PACK_SERVIE)
       @services.merge!(Product::PACK[:PACK]=>pack_serv)
@@ -29,17 +29,16 @@ class StationDatasController < ApplicationController
   def create
     name = params[:station_name].strip
     code = params[:station_code].strip
-    has_controller = params[:station_has_controller].to_i
-    collector_code = params[:station_collector_code].nil? ? nil : params[:station_collector_code].strip
     products = params[:product_ids]
+    station_services = []
     s = Station.where(["code = ? and store_id = ? and status != ?", code, @store.id, Station::STAT[:DELETED]])
     if s.blank?
-      station = Station.new(:name => name, :code => code, :store_id => @store.id, :status => Station::STAT[:NORMAL],
-        :is_has_controller => has_controller==0 ? false : true, :collector_code => collector_code)
+      station = Station.new(:name => name, :code => code, :store_id => @store.id, :status =>params[:status])
       if station.save
         products.each do |p|
-          StationServiceRelation.create(:station_id => station.id, :product_id => p.to_i)
+          station_services << StationServiceRelation.new(:station_id => station.id, :product_id => p.to_i)
         end
+        StationServiceRelation.import station_services
         @status = 1
       else
         @status = 0
@@ -72,19 +71,18 @@ class StationDatasController < ApplicationController
   def update
     name = params[:edit_station_name].strip
     code = params[:edit_station_code].strip
-    has_controller = params[:edit_station_has_controller].to_i
-    collector_code = params[:edit_station_collector_code].nil? ? nil : params[:edit_station_collector_code].strip
     products = params[:edit_product_ids]
     id = params[:id].to_i
+    station_services = []
     s = Station.where(["id != ? and code = ? and store_id = ? and status != ?", id, code, @store.id, Station::STAT[:DELETED]])
     if s.blank?
       station = Station.find_by_id(id)
-      if station.update_attributes(:name => name, :code => code, :store_id => @store.id,
-          :is_has_controller => has_controller==0 ? false : true, :collector_code => collector_code)
+      if station.update_attributes(:name => name, :code => code, :store_id => @store.id,:status => params[:edit_status])
         StationServiceRelation.delete_all(:station_id => id)
         products.each do |p|
-          StationServiceRelation.create(:station_id => id, :product_id => p.to_i)
+          station_services << StationServiceRelation.new(:station_id => station.id, :product_id => p.to_i)
         end
+        StationServiceRelation.import station_services
         @status = 1
       else
         @status = 0

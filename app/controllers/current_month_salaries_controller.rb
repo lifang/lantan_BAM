@@ -8,7 +8,7 @@ class CurrentMonthSalariesController < ApplicationController
 
   def index
     @statistics_date = params[:statistics_date] ||= DateTime.now.months_ago(1).strftime("%Y-%m")
-    @staffs = Staff.find_by_sql("select s.* from staffs s  where s.store_id = #{@store.id} and s.status != #{Staff::STATUS[:deleted]}")
+    @staffs = Staff.find_by_sql("select s.* from staffs s  where s.store_id = #{@store.id} and s.status != #{Staff::STATUS[:deleted]} and type_of_w is not null")
     salary = Salary.where(:current_month=>(@statistics_date.delete '-').to_i,:staff_id=>@staffs.map(&:id))
     @current_month = salary.inject(Hash.new){|hash,month| hash[month.staff_id] = month;hash}
     @total = salary.map(&:fact_fee).inject(0){|num,s|num+s}
@@ -29,14 +29,14 @@ class CurrentMonthSalariesController < ApplicationController
     @statistics_date = params[:statistics_date]
     @staff = Staff.find(params[:id])
     @departs = Department.where(:id=>[@staff.department_id,@staff.position].compact).inject(Hash.new){|hash,de|hash[de.id]=de.name;hash}
-    if @staff.is_deduct
-      @salary_details = Order.joins("left join tech_orders t on t.order_id=orders.id").where(:status=>Order::PRINT_CASH).
-        where("date_format(orders.created_at,'%Y-%m')='#{@statistics_date}' and (front_staff_id=#{@staff.id} or t.staff_id=#{@staff.id})").
-        select("orders.id,orders.created_at,orders.code,ifnull(front_deduct+own_deduct,0) t_deduct,price")
-    end
-    @order_prods = OrderProdRelation.order_products(@salary_details.map(&:id))
     @score = MonthScore.where(:store_id=>params[:store_id],:current_month=>(@statistics_date.delete "-").to_i,:staff_id=>@staff.id).first
     @salary  = Salary.where(:staff_id=>@staff.id,:current_month=>(@statistics_date.delete "-").to_i).first
+    @salary_details = (Order.where(:status=>Order::PRINT_CASH).where("date_format(orders.created_at,'%Y-%m')='#{@statistics_date}' and front_staff_id=#{@staff.id}").
+      select("orders.id,orders.created_at,orders.code,ifnull(front_deduct,0) t_deduct,price") << Order.joins(:tech_orders).where(:status=>Order::PRINT_CASH).
+      where("date_format(orders.created_at,'%Y-%m')='#{@statistics_date}' and  staff_id=#{@staff.id}").
+      select("orders.id,orders.created_at,orders.code,ifnull(own_deduct,0) t_deduct,price")).flatten
+
+    @order_prods = OrderProdRelation.order_products(@salary_details.map(&:id))
   end
 
   private

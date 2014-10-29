@@ -22,10 +22,6 @@
               <%= text_field_tag 'material[sale_price]', @material.sale_price,:onkeyup=>"set_default_value(this,'#base_price,#sale_price');" %>
             </div>
             <div class="item">
-              <label><span class='red'>*</span>进货价：</label>
-              <%= text_field_tag 'material[import_price]', permission?(:materials, :show_sale) ? @material.import_price : 0 %>
-            </div>
-            <div class="item">
               <label><span class='red'>*</span>规格：</label>
               <%= text_field_tag 'material[unit]', @material.unit,  :placeholder => "件" %>
             </div>

@@ -4,6 +4,7 @@ class WelcomesController < ApplicationController
   before_filter :customer_tips,:material_order_tips,:get_voilate_reward, :except => [:edit_store_name, :update_staff_password]
 
   def index
+
     store = Store.find_by_id(params[:store_id].to_i)
     @staff = Staff.find_by_id(cookies[:user_id])
     cookies[:store_name] = {:value => store.name, :path => "/", :secure => false} if store

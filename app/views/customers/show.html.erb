@@ -2,8 +2,10 @@
   <div class="data_box">
     <%= render :partial => "single_customer" %>
     <div class="clear"></div>
-    <div class="data_menu">
-      <a href="javascript:void(0)" onclick="print_orders(<%= @store.id %>)">打印</a>
+    <div class="data_menu" style="width:300px;">
+      <span style="float: left;"> <label>消费总额：</label><span id="total_sum"><%=  @total_orders.map(&:price).compact.reduce(:+)%></span></span>
+      &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+      <a href="javascript:void(0)" style="float: right;" onclick="print_orders(<%= @store.id %>)">打印</a>
     </div>
     <div class="tab_head">
       <ul>

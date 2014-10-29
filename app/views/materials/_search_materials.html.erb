@@ -28,11 +28,22 @@ mo_search ||= false
     <label>物料名称：</label>
     <input type="text" id="search_material_name" value="<%= @mat_name %>"/>
   </div>
-  <div>
-    <label>条形码：</label>
-    <input type="text" id="search_material_code" value="<%= @mat_code %>"/>
-  </div>
-
+  <% if tab_name == "out_records"%>
+    <div>
+      <label>出库类型：</label>
+      <select id="out_types">
+        <option value="">全部</option>
+        <%MatOutOrder::TYPES.each do |k,v|%>
+          <option value="<%= k %>" <% if @out_types.to_i == k %>selected<% end %>><%= v %></option>
+        <%end%>
+      </select>
+    </div>
+  <%else%>
+    <div>
+      <label>条形码：</label>
+      <input type="text" id="search_material_code" value="<%= @mat_code %>"/>
+    </div>
+  <%end%>
   <div>
     <button class="search_btn" onclick="search_materials('<%= tab_name %>',<%= @current_store.id %>, this, <%= mat_in_flag %>)">查询</button>
   </div>

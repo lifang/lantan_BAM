@@ -63,11 +63,11 @@
               <%elsif  @nums[station.id].nil? %>
                 <div class="siteCar free_station" title="查看水、气、施工情况">空闲</div>
                 <% s_id = @staff_ids[station.id] %>
-                <div class="site_teacher" title="<%= "#{@staffs[s_id[0]]}、#{@staffs[s_id[1]]}" %>">技师：<%= "#{@staffs[s_id[0]]}、#{@staffs[s_id[1]]}" %></div>
+                <div class="site_teacher" title="<%= @staff_ids[station.id] %>">技师：<%= truncate_u(@staff_ids[station.id],8,"...") %></div>
               <% else %>
                 <% s_id = @staff_ids[station.id] %>
                 <div class="siteCar" title="查看水、气、施工情况" onclick="request_order(<%= @nums[station.id][1] %>)"><%=  @nums[station.id][0]  %></div>
-                <div class="site_teacher" title="<%= "#{@staffs[s_id[0]]}、#{@staffs[s_id[1]]}" %>">技师：<%= "#{@staffs[s_id[0]]}、#{@staffs[s_id[1]]}" %></div>
+                <div class="site_teacher" title="<%= @staff_ids[station.id] %>">技师：<%= truncate_u(@staff_ids[station.id],8,"...") %></div>
                 <%time = @times[station.id].nil? ? 0 : @times[station.id].to_i %>
                 <script type="text/javascript">
                   time<%=station.id  %> = <%=  time%>

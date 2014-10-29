@@ -36,6 +36,9 @@
       </table>
     </div>
     <div class="clear"></div>
-    <div class="btn_box"><button type="button" class="confirm_btn" onclick="back_good_validate(<%= @store_id %>)">确定</button></div>
+    <div class="btn_box">
+      <button type="button" id="submit_back" class="confirm_btn" onclick="back_good_validate(<%= @store_id %>)">确定</button>
+      <%= image_tag "ajax-loader.gif", :id => "submit_spinner", :style => "display:none;" %>
+    </div>
   </div>
 </div>

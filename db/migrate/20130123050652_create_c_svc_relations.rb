@@ -8,6 +8,10 @@ class CreateCSvcRelations < ActiveRecord::Migration
       t.float :left_price
       t.string :id_card  #客户身份证
       t.boolean :is_billing  #是否已开据发票
+      t.string :password
+      t.integer :order_id
+      t.boolean :status
+      t.string :verify_code
       t.datetime :created_at
     end
 

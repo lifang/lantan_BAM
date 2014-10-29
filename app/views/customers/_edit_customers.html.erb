@@ -69,7 +69,7 @@
           </div>
           <div class="item">
             <label>VIP：</label>&nbsp;
-            <input type="checkbox" name="show_vip" value="0" onclick="$(this).val(this.checked ? 1 : 0)"/>&nbsp;VIP:
+            <input type="checkbox" name="show_vip" value="<%= @customer.show_vip ? 1 : 0   %>" <%if @customer.show_vip%>checked<%end%> onclick="$(this).val(this.checked ? 1 : 0)"/>&nbsp;VIP
           </div>
           <div class="item_textarea">
             <label>地址：</label><textarea name="address" id="address" cols="" rows="" class="width_textarea"><%= @customer.address %></textarea>

@@ -12,10 +12,9 @@ class RevisitsController < ApplicationController
     session[:is_price] = "1"
     session[:price] = nil
     @store = Store.find(params[:store_id].to_i)
-    @send_msg = SendMessage.where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]]).
+    @send_msg = SendMessage.joins(:customer).select("send_messages.*,name").where(:store_id=>params[:store_id],:status=>[SendMessage::STATUS[:WAITING],SendMessage::STATUS[:FAIL]]).
       order('types,car_num_id,customer_id')
-    @car_nums = CarNum.find(@send_msg.map(&:car_num_id)).inject({}){|h,c|h[c.id]=c.num;h}
-    @s_custs = Customer.find(@send_msg.map(&:customer_id)).inject({}){|h,c|h[c.id]=c.name;h}
+    @car_nums = CarNum.where(:id=>@send_msg.map(&:car_num_id)).inject({}){|h,c|h[c.id]=c.num;h}
     @customers = Order.get_order_customers(@store.id, (Time.now - 15.days).to_date.to_s, Time.now.to_date.to_s, nil, "1",
       "3", "1", "500", nil, nil, params[:page])
   end

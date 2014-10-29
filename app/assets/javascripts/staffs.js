@@ -478,22 +478,8 @@ $(document).ready(function(){
         return false;
     });
 
-    //员工详情
-    $("#staff_detail").click(function(){
-        var staff_id = $("#staff_id").val();
-        var store_id = $("#store_id").val();
-        $.ajax({
-            async:true,
-            type : 'get',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/staffs/"+ staff_id +"/edit",
-            data : {
-                staff_id : staff_id,
-                store_id : store_id
-            }
-        });
-        return false;
-    });
+
+
 
     //店长打分页面
     $("#manage_score_btn").click(function(){
@@ -693,4 +679,18 @@ function load_work(){
     $("#staff_department_id option").css("display","none").removeAttr("selected");
     $("#staff_department_id #"+depart_id).css("display","");
     $("#staff_department_id #"+depart_id).first().attr("selected",true);
+}
+
+//员工详情=>详情
+function show_staff(staff_id,store_id){
+    $.ajax({
+        async:true,
+        type : 'get',
+        dataType : 'script',
+        url : "/stores/"+ store_id+"/staffs/"+ staff_id +"/edit",
+        data : {
+            staff_id : staff_id,
+            store_id : store_id
+        }
+    });
 }

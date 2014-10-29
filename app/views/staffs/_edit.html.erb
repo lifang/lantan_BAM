@@ -111,6 +111,10 @@
               <% end %>
             </span>
           </div>
+          <div class="item">
+            <label>登录系统：</label>
+            <input type="checkbox" name="is_access" value="1" <% unless @staff.encrypted_password.nil? %> checked<%end%> />
+          </div>
         </div>
         <div class="btn_box">
           <button class="confirm_btn" id="edit_staff_btn" type="button">编辑</button></div>

@@ -1,8 +1,4 @@
 <div class="second_menu">
-  <% if permission?(:datas, :lirun) %>
-    <a href="/stores/<%=params[:store_id]%>/market_manages/gross_profit"
-       <% if  params[:action]=="gross_profit"%> class="hover"<%end%>>毛利统计</a>
-     <% end %>
      <% if permission?(:datas, :mubiao) %>
     <a href="/stores/<%=params[:store_id]%>/market_manages/"
        <% if  controller.controller_name == "market_manages" && params[:action]=="index"%> class="hover"<%end%>>目标销售额</a>

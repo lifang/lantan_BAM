@@ -6,9 +6,14 @@ class CarNum < ActiveRecord::Base
   belongs_to :customer
   has_many :reservations
 
+
+  def self.load_car_num(ids)
+    CarNum.where(:id=>ids).select("id,num").inject({}){|h,c|h[c.id]=c.num;h}
+  end
+
   def self.get_customer_info_by_carnum(store_id, car_num)
     sql = ["select c.id customer_id,c.name,c.mobilephone,c.other_way email, c.property property,c.group_name group_name,
-      c.sex,date_format('c.birthday','%Y-%m-%d') birth,cn.buy_year year,cn.distance distance, cn.id car_num_id,cn.num,
+      c.sex,date_format(c.birthday,'%Y-%m-%d') birth,cn.buy_year year,cn.distance distance, cn.id car_num_id,cn.num,
      cm.name model_name,cb.name brand_name from customer_num_relations cnr
       inner join car_nums cn on cn.id=cnr.car_num_id and cn.num= ?
       inner join customers c on c.id=cnr.customer_id and c.status=#{Customer::STATUS[:NOMAL]}

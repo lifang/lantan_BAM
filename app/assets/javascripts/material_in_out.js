@@ -60,8 +60,8 @@ function changeNum(obj){
 
 function hideInput(obj){
     var ori_num = $(obj).val();
-     $(obj).parent("td").hide();
-     $(obj).parent("td").siblings(".mat_item_num").text(ori_num).show();
+    $(obj).parent("td").hide();
+    $(obj).parent("td").siblings(".mat_item_num").text(ori_num).show();
 }
 
 function removeRow(obj, print_flag){
@@ -78,86 +78,78 @@ function removeRow(obj, print_flag){
 
 function checkNums(store_id){
     var form_action_url = "/stores/"+ store_id +"/create_materials_in"
-    var saved_mat_mos = "";
-    var notice = "";
+    var mat_mos = {};
+    var material_order_id = "";
     var mat_in_length = $(".mat-out-list").find("tr").length - 1;
     if(mat_in_length==-1){
         tishi_alert('请选择物料！');
+        return false;
     }
     var f = true;
     $(".mat-out-list").find("tr").each(function(index){
+        material_order_id = this.id;
         var mat_code = $(this).find(".mat_code").text();
-        var mo_code = $(this).find(".mo_code").text();
         var num = $.trim($(this).find(".mat_item_num").val());
-//        var input_num = $(this).find("#material_num").val();
-        if(num.match(reg1)==null){
-          tishi_alert("请输入正确的数字！")
-          f = false;
+        if (mat_mos[material_order_id] == null){
+            mat_mos[material_order_id] = {}
         }
-
-       if(f){
-        var each_item = "";
-        each_item += mat_code + "_";
-        each_item += mo_code + "_";
-        each_item += num;
-        saved_mat_mos += each_item + ",";
+        mat_mos[material_order_id][mat_code]=num;
+        if(num.match(reg1)==null){
+            tishi_alert("请输入正确的数字！")
+            f = false;
+        }
+    });
+    if(f){
         $.ajax({
             url:"/stores/" + store_id + "/materials/check_nums",
-            dataType:"text",
-            type:"GET",
+            dataType:"json",
+            type:"post",
             data:{
-                barcode: mat_code,
-                mo_code: mo_code,
-                num: num,
-                store_id: store_id
+                mat_mos: mat_mos
             },
             success:function(data){
-                if(data=="1")
-                {
-                    notice += "条形码为" + mat_code + ", 订货单号为" + mo_code + "的物料入库数目已经大于订单中的商品数目，仍然要入库吗？"+ '\n';
-                }
-                if(mat_in_length == index && saved_mat_mos != ""){
-                    if(notice=="" || confirm(notice))
-                    {
-                        $.ajax({
-                            url: form_action_url,
-                            dataType:"json",
-                            type:"POST",
-                            data:{
-                                mat_in_items: saved_mat_mos, mat_in_create: 1
-                            },
-                            success:function(data2){
-                                if(data2['status']=="1")
-                                {
-                                    tishi_alert("入库成功！");
-                                    window.location.href = "/stores/" + store_id + "/materials";
-                                }else{
-                                    tishi_alert("入库失败！");
-                                }
+                if(data.notice){
+                    $.ajax({
+                        url: form_action_url,
+                        dataType:"json",
+                        type:"POST",
+                        data:{
+                            mat_in_items: data.mat_info,
+                            material_order_id : data.material_order_id
+                        },
+                        success:function(data2){
+                            if(data2['status']=="1")
+                            {
+                                tishi_alert("入库成功！");
+                                window.location.href = "/stores/" + store_id + "/materials";
+                            }else{
+                                tishi_alert("入库失败！");
                             }
-                        });
-                    }
+                        }
+                    });
+                }else{
+                    tishi_alert(data.msg,5);
                 }
-               
+                  
             }
         });
-       }
-    });
+    }
+
 }
 
 
 function checkMatOutNum(obj){
     var f = true;
     $(".mat-out-list").find("tr").each(function(index){
-      var out_num = parseInt($(this).find(".mat_item_num").text());
-      var mat_storage = parseInt($(this).find(".material_storage").text());
-      var mat_name = $(this).find(".mat_name").text();
-      if(out_num > mat_storage){
-          tishi_alert("【" + mat_name + "】出库量(" + out_num +")大于库存量("+ mat_storage+")");
-          $(this).remove();
-      }
+        var out_num = parseInt($(this).find(".mat_item_num").text());
+        var mat_storage = parseInt($(this).find(".material_storage").text());
+        var mat_name = $(this).find(".mat_name").text();
+        if(out_num > mat_storage){
+            tishi_alert("【" + mat_name + "】出库量(" + out_num +")大于库存量("+ mat_storage+")");
+            $(this).remove();
+        }
     })
-   if($("#mat_out_types").val()==""){
+    if($("#mat_out_types").val()==""){
         tishi_alert("请选择出库类型")
         f = false;
     }

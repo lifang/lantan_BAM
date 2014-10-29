@@ -8,6 +8,8 @@ class PackageCard < ActiveRecord::Base
 
   STAT = {:INVALID =>0,:NORMAL =>1}  #0 为失效或删除  1 为正常使用
   TIME_SELCTED = {:PERIOD =>0,:END_TIME =>1} #0 时间段  1  有效时间长度
+  scope :on_weixin, lambda{|store_id| where(:store_id => store_id,:on_weixin => true,:status=>STAT[:NORMAL])}
+  
   #查询卡信息
   def self.search_pcard(store_id,pcard=nil,car_num=nil,c_name=nil,created_at=nil,ended_at=nil)
     conditions = [""]
@@ -31,4 +33,6 @@ class PackageCard < ActiveRecord::Base
     conditions[0] = sql
     return CPcardRelation.find_by_sql(conditions)
   end
+
+
 end

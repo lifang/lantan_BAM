@@ -9,3 +9,4 @@
 //= require jquery.remotipart
 //= require main
 //= require common
+//= require common_use

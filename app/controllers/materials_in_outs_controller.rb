@@ -5,15 +5,6 @@ class MaterialsInOutsController < ApplicationController
   before_filter :find_store
   layout "mat_in_out", :except => [:create_materials_in]
 
-  def index
-  end
-  
-  def materials_in
-  end
-
-  def materials_out
-  end
-
   def get_material
     material = Material.normal.find_by_code_and_store_id(params[:code], @store.id)
     if material.nil?
@@ -33,11 +24,12 @@ class MaterialsInOutsController < ApplicationController
 
   def create_materials_in
     status = 1
-    @mat_in_list = parse_mat_in_list(params['mat_in_items'], params['mat_in_create'])
+    #    begin
+    @mat_in_list = parse_mat_in_list(params['mat_in_items'])
+    #    rescue
+    #      status = 0
+    #    end
     respond_to do |format|
-      format.html{
-        render :pandian
-      }
       format.json{
         render :json => {:status => status}
       }
@@ -45,21 +37,22 @@ class MaterialsInOutsController < ApplicationController
   end
   
   def create_materials_out
-    if params['material_order'].nil?
+    begin
+      params['material_order'].values.each do |mo|
+        mat_out_order = MatOutOrder.create(mo.merge(params[:mat_out]).merge({:store_id => @store.id}))
+        if mat_out_order.save
+          material = Material.find(mat_out_order.material_id)
+          material.storage -= mat_out_order.material_num
+          material.save
+          mat_out_order.update_attribute(:detailed_list,material.detailed_list)
+        end
+      end
+      flash[:notice] = '商品已成功出库！'
+      redirect_to "/materials_in_outs"
+    rescue
       flash[:notice] = '请录入商品！'
       redirect_to "/stores/#{@store.id}/materials_out" and return
     end
-    params['material_order'].values.each do |mo|
-      mat_out_order = MatOutOrder.create(mo.merge(params[:mat_out]).merge({:store_id => @store.id}))
-      if mat_out_order.save
-        material = Material.find(mat_out_order.material_id)
-        material.storage -= mat_out_order.material_num
-        material.save
-        mat_out_order.update_attribute(:detailed_list,material.detailed_list)
-      end
-    end
-    flash[:notice] = '商品已成功出库！'
-    redirect_to "/materials_in_outs"
   end
 
   def save_cookies
@@ -133,35 +126,39 @@ class MaterialsInOutsController < ApplicationController
     @store = Store.find_by_id(params[:store_id])
   end
 
-  def parse_mat_in_list(mat_in_items, mat_in_flag)
-    mat_in_orders = []
-    mat_in_items.split(",").each do |mat_in_item|
-      mii = mat_in_item.split("_")
-      mat_code = mii[0]
-      mo_code = mii[1]
-      num = mii[2]
-      material = Material.find_by_code_and_status_and_store_id mat_code,Material::STATUS[:NORMAL],@store.id
-      material_order = MaterialOrder.find_by_code mo_code
-
-      mat_in_orders << {:mo_code => mo_code, :mat_code => mat_code, :num => num, :mat_unit => material.unit,
-        :mat_name => material.name}
-      if mat_in_flag == "1"
-        mat_in_order = MatInOrder.create({:material => material, :material_order => material_order,
-            :material_num => num, :price => material.price, :staff_id => cookies[:user_id]
-          })
-        if mat_in_order.save
-          if material_order.check_material_order_status
-            material_order.m_status = 3
-            material_order.save
-          end
-          storage_price = material.storage.to_i * material.price
-          p avg_price = (material_order.price + storage_price)*1.0/(material.storage.to_i+mat_in_order.material_num)
-          material.update_attributes(:storage=>material.storage.to_i + mat_in_order.material_num,:price=>avg_price.round(2))
-          Product.find(material.prod_mat_relations[0].product_id).update_attributes(:t_price=>avg_price.round(2))  if material.create_prod
+  def parse_mat_in_list(mat_in_items)
+    MatInOrder.transaction do 
+      mat_in_order = []
+      material_orders = MaterialOrder.where(:id=>mat_in_items.keys).inject({}){|h,m|h[m.id]=m;h}
+      mat_in_items.each do |k,v|
+        materials = Material.where(:id=>v.keys)
+        mat_price = {}
+        materials.each do |material|
+          num = v["#{material.id}"].to_i
+          mat_in_order <<  MatInOrder.new({:material => material, :material_order_id => k,
+              :material_num =>num , :price => material.import_price, :staff_id => cookies[:user_id],:remark=>"订货单#{material_orders[k.to_i].code}入库记录" })
+          storage_price = material.storage.to_i * material.price #库存的总价值
+          ruku_price = num * material.import_price #入库的总价值
+          avg_price = (ruku_price + storage_price)*1.0/(material.storage.to_i+num) #加权之后的成本价
+          material.update_attributes(:storage=>material.storage.to_i + num,:price=>avg_price.round(2))
+          mat_price[material.id]=avg_price.round(2)  if material.create_prod
         end
-      end 
-    
-    end unless mat_in_items.blank?
-    mat_in_orders
+        prod_mat = ProdMatRelation.joins(:product).where(:material_id=>mat_price.keys,:"products.is_service"=>Product::PROD_TYPES[:PRODUCT]).inject({}){|h,p|h[p.product_id]={:t_price=>mat_price[p.material_id]};h}
+        Product.update(prod_mat.keys,prod_mat.values)  #更新物料对应的产品的成本价
+      end
+      MatInOrder.import mat_in_order
+      MatOrderItem.where(:material_order_id=>mat_in_items.keys).inject({}) {|h,m|
+        if  h[m.material_order_id].nil?
+          h[m.material_order_id]={m.material_id=>m.material_num}
+        else
+          h[m.material_order_id][m.material_id]=m.material_num
+        end;h}.each do |k,v|
+        full = true
+        MatInOrder.where(:material_id => v.keys, :material_order_id =>k).select("sum(material_num) num,material_id").group("material_id").each{  |mat_in|
+          full = false if mat_in.num < v[mat_in.material_id]
+        }
+        material_orders[k].update_attributes(:m_status => 3) if full and material_orders[k]
+      end
+    end
   end
 end

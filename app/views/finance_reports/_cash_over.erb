@@ -18,6 +18,9 @@
 <% unless @orders.blank? %>
   <% @orders.each do|order| %>
     <div class="data_item_list">
+      <% if controller.action_name !="return_order" %>
+        <div class="di_list_l" id="<%= order.c_id %>"><input id="print_<%=order.id%>" type="checkbox" value="<%=order.id%>" /></div>
+      <%end%>
       <div class="di_list_r">
         <div class="register">
           <div class="finnace_single_title">

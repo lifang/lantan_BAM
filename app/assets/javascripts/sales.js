@@ -149,17 +149,13 @@ function public_sale(sale_id,store_id){
 function load_types(store_id){
     var types=$("#sale_types option:checked").val();
     var name=$("#sale_name").val();
+    var url = "/stores/"+ store_id+"/sales/load_types";
+    var data = {
+        sale_types : types,
+        sale_name : name
+    }
     if (types != "" || name != ""){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/sales/load_types",
-            data : {
-                sale_types : types,
-                sale_name : name
-            }
-        });
+        request_ajax(url,data,"post")
     }
     else{
         tishi_alert("请选择类型或填写名称！");
@@ -170,17 +166,13 @@ function load_types(store_id){
 function pcard_types(store_id){
     var types=$("#t_prod #sale_types option:checked").val();
     var name=$("#t_prod #sale_name").val();
+    var url = "/stores/"+ store_id+"/package_cards/pcard_types";
+    var data = {
+        sale_types : types,
+        sale_name : name
+    }
     if (types != "" || name != ""){
-        $.ajax({
-            async:true,
-            type : 'post',
-            dataType : 'script',
-            url : "/stores/"+ store_id+"/package_cards/pcard_types",
-            data : {
-                sale_types : types,
-                sale_name : name
-            }
-        });
+        request_ajax(url,data,"post");
     }else{
         tishi_alert("请选择类型或填写名称！");
     }
@@ -188,22 +180,14 @@ function pcard_types(store_id){
 
 //添加套餐卡
 function add_pcard(store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+ store_id+"/package_cards/add_pcard"
-    });
+    var url = "/stores/"+ store_id+"/package_cards/add_pcard";
+    request_ajax(url,'',"post");
 }
 
 //编辑套餐卡
 function edit_pcard(id,store_id){
-    $.ajax({
-        async:true,
-        type : 'post',
-        dataType : 'script',
-        url : "/stores/"+store_id+"/package_cards/"+ id+"/edit_pcard"
-    });
+    var url = "/stores/"+store_id+"/package_cards/"+ id+"/edit_pcard";
+    request_ajax(url,'',"post");
 }
 function check_add(e){
     var name=$("#name").val();
@@ -276,7 +260,7 @@ function check_add(e){
         return false;
     }
     var is_num=false
-    $("#add_products input").each(function(){
+    $("#add_products .addre_input").each(function(){
         if(isNaN(parseInt(this.value)) || parseInt(this.value)<=0){
             is_num=true
         }
@@ -447,4 +431,14 @@ function change_input(front,back){
 
 function set_value(e){
     $("input[id^='line']").attr('checked',e.checked)
+}
+
+function cal_price(update_id){
+    var price = 0;
+    $("#add_products div").each(function(){
+        var prod_price = parseInt($.trim($(this).find("#prod_price").val()));
+        var num = parseFloat($.trim($(this).find(":text").val()));
+        price += prod_price *num
+    })
+    $(update_id).val(price.toFixed(2));
 }

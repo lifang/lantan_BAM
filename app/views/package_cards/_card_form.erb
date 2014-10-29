@@ -20,11 +20,13 @@
   </div>
 </div>
 <div class="item">
-  <label><span class="red">*</span>套餐卡名称：</label><input name="name" id="name" type="text" value="<%= @pcard.name %>" />
+  <label><span class="red">*</span>套餐卡名称：</label>
+  <input name="name" id="name" type="text" value="<%= @pcard.name %>" />
 </div>
 <div class="item">
   <label><span class="red">*</span>套餐价格：</label>
-  <input name="price" id="price" type="text" value="<%= @pcard.price %>" <%unless @pcard.new_record?%> readonly <%end%> />
+  <input name="price" id="price" type="text" value="<%= @pcard.price %>" style="width:80px;" <%unless @pcard.new_record?%> readonly <%end%> />
+  <%if @pcard.new_record?%><a href="javascript:void(0)" class="remove_a" onclick="cal_price('#price')" >计算总价</a><%end%>
 </div>
 <div class="item_textarea"><span class="item_radio">
     <input name="deduct_type" type="radio" checked onclick="change_input('#deduct_price','#deduct_percent')" /></span>
@@ -60,7 +62,7 @@
   <label>套餐卡配图：</label>
   <input type="file" name="img_url" id="sale_img"  class="file" size="50px" /><span class="show_pic" >
     <img src="<%=  @pcard.img_url.nil? ? "" : @pcard.img_url.gsub("img#{@pcard.id}","img#{@pcard.id}_#{Constant::C_PICSIZE[2]}") %>" />
-  图片大小不超过200KB。</span>
+    图片大小不超过200KB。</span>
 </div>
 <div class="clear"></div>
 <div class="item_blockArea">
@@ -104,12 +106,11 @@
 <div class="card_content" id="t_prod">
   <%= render :partial=>"/sales/sale_search",:object=>[Product::PACK_SERVIE.merge(@cates[Category::TYPES[:good]]).merge(@cates[Category::TYPES[:service]]),"pcard_types"] %>
 </div>
-
-<% if @material %>
+<% unless @pcard.new_record? %>
   <script type="text/javascript">
     $("#pcard_material").trigger("onchange");
     $("#material_num").attr("disabled",false);
-    $("#m_types").val(<%= @material.id %>);
+    $("#m_types").val(<%= @material.nil? ? "" : @material.id  %>);
     $("#sale_types").parent().parent().find(".search_btn").removeAttr("onclick").attr("disabled",true);
     $("#add_products input").attr("readonly",true);
     $("#add_products a").removeAttr("onclick").attr("disabled",true);

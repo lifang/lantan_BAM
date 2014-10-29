@@ -1,18 +1,12 @@
 function search_check_materials(store_id,parm,action){
     var parms = parm.split(";");
     var agvs = {};
-    var data_type = arguments[3] ?  arguments[3] : "script";
-    var type = arguments[4] ?  arguments[4] : "get";
     for(var i=0;i<parms.length;i++){
         agvs[parms[i].substr(1)] = get_value(parms[i]);
     }
     $("#check_btn,#spinner_user").toggle();
-    $.ajax({
-        url:"/stores/"+ store_id+action,
-        dataType:data_type,
-        type: type,
-        data: agvs
-    })
+    var url = "/stores/"+ store_id+action
+    request_ajax(url,agvs)
 }
 
 //目前仅支持input，checkbox和select
@@ -50,28 +44,21 @@ function submit_check(store_id){
         if(records != {}){
             if(confirm("确认提交核对吗？")){
                 $("#check_btns,#spinner_user1").toggle();
-                $.ajax({
-                    url:"/stores/"+ store_id+"/check_materials/submit_check",
-                    dataType:"script",
-                    type: "post",
-                    data: {
-                        records :records,
-                        check_status : check_status
-                    }
-                });
+                var url = "/stores/"+ store_id+"/check_materials/submit_check"
+                var data ={
+                    records :records,
+                    check_status : check_status
+                }
+                request_ajax(url,data,"post")
             }
         }
     }
 }
 
 function submit_xls(store_id,check_ids){
-    alert(check_ids);
-    $.ajax({
-        url:"/stores/"+ store_id+"/check_materials/submit_xls",
-        dataType:"script",
-        type: "post",
-        data: {
-            check_ids :check_ids
-        }
-    })
+    var url= "/stores/"+ store_id+"/check_materials/submit_xls";
+    var data = {
+        check_ids :check_ids
+    }
+    request_ajax(url,data,"post")
 }

@@ -10,6 +10,7 @@ module ApplicationHelper
   include CustomersHelper
   include MessagesHelper
   include LoginsHelper
+  include MessagesHelper
 
   MODEL_STATUS = {:NORMAL => 0,:DELETE =>1} #0 正常 1 删除
   def sign?
@@ -334,7 +335,7 @@ module ApplicationHelper
 
   #发送短信的功能
   def send_message_request(message_arr,send_num)
-    times = message_arr.length%send_num == 0 ? message_arr.length/send_num-1 : message_arr.length/send_num
+    times = message_arr.length%send_num == 0 ? message_arr.length/send_num-1 <0 ? 0 : message_arr.length/send_num-1 : message_arr.length/send_num
     response = []
     (0..times).each do |time|
       start_num = time*send_num
@@ -361,6 +362,10 @@ module ApplicationHelper
         if store.send_list and store.send_list.split(",").include?("#{msg_types}")
           message_route = "/send.do?Account=#{Constant::USERNAME}&Password=#{Constant::PASSWORD}&Mobile=#{phone}&Content=#{URI.escape(send_message)}&Exno=0"
           response = create_get_http(Constant::MESSAGE_URL, message_route)
+          file_path = mkdir("send_logs","send_log")
+          file = File.open(file_path,"a+")
+          file.write("\r\n#{response}\r\n".force_encoding("UTF-8"))
+          file.close
           if response["code"] == "9001"
             store.warn_store(this_price) #提示门店费用信息
             m_msg = "短信发送成功"
@@ -391,7 +396,7 @@ module ApplicationHelper
 
   #统一发送短信的方式和相关数据  目前仅限于多条发送发送和费用的计算
   def multiple_message_data(store_id,m_arrs,msg_types,m_content) #customer有时是staff
-    send_messages,message_arrs,store,m_msg,t_piece = [],[],Store.find(store_id),"",0
+    send_messages,store,m_msg,t_piece = [],Store.find(store_id),"",0
     status = SendMessage::STATUS[:WAITING]
     status = SendMessage::STATUS[:FINISHED]  if store.send_list and store.send_list.split(",").include?("#{msg_types}")
     message_record = MessageRecord.create(:store_id =>store_id, :content => m_content,:types=>msg_types,:status => status,:send_at => Time.now)
@@ -406,7 +411,11 @@ module ApplicationHelper
       begin
         if store.send_list and store.send_list.split(",").include?("#{msg_types}")
           send_num = 2100/m_content.length
-          send_message_request(message_arrs,send_num) #此处传递m_content用于计算大致的可发送条数
+          response = send_message_request(m_arrs,send_num) #此处传递m_content用于计算大致的可发送条数
+          file_path = mkdir("send_logs","send_log")
+          file = File.open(file_path,"a+")
+          file.write("\r\n#{response}\r\n".force_encoding("UTF-8"))
+          file.close
           store.warn_store(this_price) #提示门店费用信息
           message_record.update_attributes({:total_num=>t_piece,:total_fee=>t_piece*Constant::MSG_PRICE})
           m_msg = "短信发送成功"
@@ -429,6 +438,19 @@ module ApplicationHelper
     list.delete('.')
     list.delete('..')
     return list
+  end
+
+  # 中英文混合字符串截取
+  def truncate_u(text, length = 30, truncate_string = "......")
+    l=0
+    char_array=text.unpack("U*")
+    char_array.each_with_index do |c,i|
+      l = l+ (c<127 ? 0.5 : 1)
+      if l>=length
+        return char_array[0..i].pack("U*")+(i<char_array.length-1 ? truncate_string : "")
+      end
+    end
+    return text
   end
 
   

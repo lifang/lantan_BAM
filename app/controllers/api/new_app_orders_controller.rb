@@ -7,17 +7,20 @@ class Api::NewAppOrdersController < ApplicationController
   def new_index_list
     #参数store_id
     status = 0
-    #orders => 车位施工情况
-    #订单分组
+    #orders => 车位施工情况   #订单分组
     work_orders = working_orders params[:store_id]
-    #获取所有的车品牌/型号
-    capital_arr = Capital.get_all_brands_and_models
-    #stations_count => 工位数目
-    station_ids = Station.where("store_id =? and status not in (?) ",params[:store_id], [Station::STAT[:WRONG], Station::STAT[:DELETED]]).select("id, name")
-    work_records = WorkRecord.where(:current_day=>Time.now.strftime("%Y-%m-%d").to_datetime,:store_id=>params[:store_id]).inject({}){|h,w|h[w.staff_id]=w.attend_types;h}
-    t_staffs = Staff.where(:type_of_w=>Staff::S_COMPANY[:TECHNICIAN],:store_id=>params[:store_id]).valid.select("id,name").inject([]){|arr,s|arr << {:name=>s.name,:id=>s.id,:status=>WorkRecord::ATTEND_YES.include?(work_records[s.id]) ? 1 : 0 }}
-    services = Product.is_service.is_normal.commonly_used.where(:store_id => params[:store_id]).select("id, name, sale_price as price")
-    render :json => {:status => status, :orders => work_orders, :station_ids => station_ids, :services => services,:total_staffs=>t_staffs,:used_staffs=>work_orders[:used_staffs], :car_info => capital_arr}
+    if params[:version] && params[:version]=="2.4"
+      reserv_count = Reservation.is_normal(params[:store_id],Reservation::TYPES[:RESER]).count
+      render :json => {:status => status, :orders => work_orders,:reserv_count=>reserv_count}
+    else
+      capital_arr = Capital.get_all_brands_and_models
+      #stations_count => 工位数目
+      station_ids = Station.where("store_id =? and status not in (?) ",params[:store_id], [Station::STAT[:WRONG], Station::STAT[:DELETED]]).select("id, name")
+      work_records = WorkRecord.where(:current_day=>Time.now.strftime("%Y-%m-%d").to_datetime,:store_id=>params[:store_id]).inject({}){|h,w|h[w.staff_id]=w.attend_types;h}
+      t_staffs = Staff.where(:type_of_w=>Staff::S_COMPANY[:TECHNICIAN],:store_id=>params[:store_id]).valid.select("id,name").inject([]){|arr,s|arr << {:name=>s.name,:id=>s.id,:status=>WorkRecord::ATTEND_YES.include?(work_records[s.id]) ? 1 : 0 }}
+      services = Product.is_service.is_normal.commonly_used.where(:store_id => params[:store_id]).select("id, name, sale_price as price")
+      render :json => {:status => status, :orders => work_orders, :station_ids => station_ids, :services => services,:total_staffs=>t_staffs,:used_staffs=>work_orders[:used_staffs], :car_info => capital_arr}
+    end
   end
 
   #产品、服务、卡类搜索
@@ -26,13 +29,13 @@ class Api::NewAppOrdersController < ApplicationController
     content = params[:search_text]
     #name = content.empty? || content=="" ? "and 1=1" : " and p.name like %#{content.gsub(/[%_]/){|x| '\\' + x}}%"
     store_id = params[:store_id].to_i
-    result = []   
+    result = []
     sql = [""]
     if type==0  #如果是产品
       sql[0] = "select p.*, m.storage storage from categories c inner join products p on c.id=p.category_id
         inner join prod_mat_relations pmr on p.id=pmr.product_id
         inner join materials m on pmr.material_id=m.id
-        where c.types=? and c.store_id=? and p.status=? and m.storage>0"
+        where c.types=? and c.store_id=? and p.status=?"
       sql << Category::TYPES[:good] << store_id << Product::IS_VALIDATE[:YES]
       unless content.nil? || content.empty? || content == ""
         sql[0] += " and p.name like ?"
@@ -154,7 +157,7 @@ class Api::NewAppOrdersController < ApplicationController
       }
 
       #获取该门店所有的套餐卡及其所关联的物料
-      sql2 = ["select p.* from package_cards p 
+      sql2 = ["select p.* from package_cards p
         where p.store_id=? and ((p.date_types=?) or (p.date_types=? and NOW()<=p.ended_at)) and p.status=?",
         store_id, PackageCard::TIME_SELCTED[:END_TIME],
         PackageCard::TIME_SELCTED[:PERIOD], PackageCard::STAT[:NORMAL]]
@@ -178,7 +181,7 @@ class Api::NewAppOrdersController < ApplicationController
           a[:point] = p.prod_point.to_s
           name_and_num = PcardProdRelation.find_by_sql(["select ppr.product_num, p.name from pcard_prod_relations ppr inner join products p on
          ppr.product_id=p.id where ppr.package_card_id=?", p.id])
-          str2 += name_and_num.inject([]){|h, n|h << n.name.to_s+"-"+n.product_num.to_s+"次";h}.join("\n") if name_and_num       
+          str2 += name_and_num.inject([]){|h, n|h << n.name.to_s+"-"+n.product_num.to_s+"次";h}.join("\n") if name_and_num
           a[:products] = name_and_num.inject([]){|h, n|h << {:name => n.name.to_s, :num => n.product_num.to_s+"次"};h} if name_and_num
           a[:desc] = str2
           h << a;
@@ -280,7 +283,7 @@ class Api::NewAppOrdersController < ApplicationController
                   CSvcRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id,
                     :sv_card_id => card.id, :order_id => order.id, :status => CSvcRelation::STATUS[:invalid])
                   items = SvcardProdRelation.find_by_sql(["select spr.product_discount, p.name, p.id, p.sale_price from svcard_prod_relations spr
-            inner join products p on spr.product_id=p.id where spr.sv_card_id=?", card.id])
+                           inner join products p on spr.product_id=p.id where spr.sv_card_id=?", card.id])
                   arr = []
                   items.each do |i|
                     i_hash = {}
@@ -297,9 +300,9 @@ class Api::NewAppOrdersController < ApplicationController
                   money = card.svcard_prod_relations.first
                   if money.category_id
                     CSvcRelation.create(:customer_id => is_new_cus==0 ? customer.customer_id : customer.id,:sv_card_id => card.id,
-                      :order_id => order.id, :status => CSvcRelation::STATUS[:invalid], :password => Digest::MD5.hexdigest(create_code(6)),
-                      :total_price => money.base_price+money.more_price, :left_price => money.base_price+money.more_price,
-                      :id_card=>add_string(8,CSvcRelation.joins(:customer=>:store).where(:"customers.store_id"=>params[:store_id]).count+1))
+                      :order_id => order.id, :status => CSvcRelation::STATUS[:invalid],:total_price => money.base_price+money.more_price,
+                      :left_price => money.base_price+money.more_price,
+                      :id_card=>add_string(8,CSvcRelation.joins(:customer).where(:"customers.store_id"=>params[:store_id]).count+1))
                     arr = []
                     money.category_id.split(",").each do |i|
                       i_hash = {}
@@ -331,7 +334,7 @@ class Api::NewAppOrdersController < ApplicationController
                   :price => card.price, :order_id => order.id)
                 pmr = PcardMaterialRelation.find_by_package_card_id(card.id)
                 material = Material.find_by_id(pmr.material_id) if pmr
-                material.update_attribute("storage", material.storage - pmr.material_num) if material
+                Material.update_storage(pmrs.material_id,material.storage - pmr.material_num,params[:user_id],"pad销售套餐卡扣物料",nil,order) if material #更新库存并生成出库记录
                 p_cards << {:pid => card.id, :pname => card.name, :pprice => card.price, :ptype => 2, :is_new => 1,
                   :show_price => card.price, :products => c}
               end
@@ -355,21 +358,15 @@ class Api::NewAppOrdersController < ApplicationController
         work_orders = working_orders params[:store_id]
         normal_return = { :orders => work_orders, :msg => msg, :product => p, :sales => sales,:sv_cards => sv_cards,
           :p_cards => p_cards, :save_cards => save_cards.nil? ? [] : save_cards, :car_info => capital_arr,:prod_type => prod_type}
-      else
-        if pram_str[2].to_i == 2
-          if pram_str[3].to_i == 0
-            prod_types = 3   #打折卡
-          elsif pram_str[3].to_i == 1
-            prod_types = 4  #储值卡
-          elsif pram_str[3].to_i == 2
-            prod_types = 2  #套餐卡
-          end
-        else
-          prod_types = pram_str[2].to_i
-        end
-        Reservation.create(:code=>MaterialOrder.material_order_code(params[:store_id]),:car_num_id=>is_new_cus==0 ? customer.car_num_id : car_num.id,:customer_id=>is_new_cus==0 ? customer.customer_id : customer.id,
-          :store_id=>params[:store_id],:res_time=>Time.now.strftime("%Y-%m-%d %H:%i"),:types=>Reservation::TYPES[:PURPOSE],:prod_types=>prod_types,
-          :prod_id =>pram_str[0].to_i,:prod_price =>pram_str[-1],:prod_num => pram_str[1].to_i,:staff_id=>params[:user_id],:status=>Reservation::STATUS[:normal] )
+      elsif params[:is_purpose_order].to_i > 0 #0 产品 1 服务 2 套餐卡 3 打折卡 4 储值卡
+        prod_types =  pram_str[2].to_i != 2 ? pram_str[2].to_i : pram_str[3].to_i == 2 ? 2 : pram_str[3].to_i+3
+        types = params[:is_purpose_order].to_i == 1 ? Reservation::TYPES[:PURPOSE] : Reservation::TYPES[:RESER]
+        Reservation.create(:code=>MaterialOrder.material_order_code(params[:store_id]),
+          :car_num_id=>is_new_cus==0 ? customer.car_num_id : car_num.id,
+          :customer_id=>is_new_cus==0 ? customer.customer_id : customer.id,
+          :store_id=>params[:store_id],:res_time=>Time.now,:types=>types,:prod_types=>prod_types,
+          :prod_id =>pram_str[0].to_i,:prod_price =>pram_str[-1],:prod_num => pram_str[1].to_i,
+          :staff_id=>params[:user_id],:status=>Reservation::STATUS[:normal] )
         normal_return = {}
       end
       order_infos = {
@@ -383,7 +380,7 @@ class Api::NewAppOrdersController < ApplicationController
         :cnum_id => is_new_cus==0 ? customer.car_num_id : car_num.id,
         :cmodel => is_new_cus==0 ? customer.model_name : nil,
         :cbrand => is_new_cus==0 ? customer.brand_name : nil,
-        :cbirthday => is_new_cus==0 ? (customer.birth.nil? ? nil : customer.birth) : nil,
+        :cbirthday => (is_new_cus==1 || customer.birth.nil?)  ?  nil : customer.birth,
         :cbuyyear => is_new_cus==0 ? customer.year : nil,
         :cdistance => is_new_cus==0 ? customer.distance : nil,
         :oid => order.nil? ? nil : order.id,
@@ -430,7 +427,7 @@ class Api::NewAppOrdersController < ApplicationController
     Order.transaction do
       orders.each do |o|
         status = o["status"].to_i #0取消订单，1已付款
-        order = Order.find_by_id(o["order_id"].to_i)       
+        order = Order.find_by_id(o["order_id"].to_i)
         if status==0    #0取消订单
           oprs = order.order_prod_relations
           oprs.each do |opr|    #如果有对应的物料，则要将这些物料对应的数量补上
@@ -444,7 +441,7 @@ class Api::NewAppOrdersController < ApplicationController
               mater.update_attribute("storage", mater.storage+(pnum * mnum))
             end if pmrs
           end if oprs
-          order.update_attributes(:status  => Order::STATUS[:RETURN])          
+          order.update_attributes(:status  => Order::STATUS[:RETURN])
         elsif status==1 #已付款
           customer = Customer.find_by_id(o["customer_id"].to_i)
           customer.update_attributes(:name => o["userName"].nil? ? nil : o["userName"].strip, :mobilephone => o["phone"].nil? ? nil : o["phone"].strip,
@@ -578,66 +575,7 @@ class Api::NewAppOrdersController < ApplicationController
     end
   end
 
-  #根据实际情况调换工位
-  def change_station
-    #参数 "(work_order_id)_(station_id),(work_order_id)_(station_id)", store_id
-    status = 0
-    msg = ""
-    if params[:wo_station_ids]
-      WorkOrder.transaction do
-        wo_station_ids = params[:wo_station_ids].split(",")
-        flag = 0
-        wo_station_ids.each do |ws|
-          wid,sid = ws.split("_")
-          wo = WorkOrder.find_by_id(wid)
-          station = Station.find_by_id(sid)
-          if station.status != Station::STAT[:NORMAL]
-            flag = 1
-            status = 1
-            msg = "#{station.name}异常，暂时无法服务!"
-          else
-            station_prods = StationServiceRelation.where(["station_id=?", station.id]).map(&:product_id) #获取要调换到的那个工位所支持的服务
-            order = wo.order
-            opr = order.order_prod_relations.map(&:product_id)
-            serv_ids = Product.where(["is_service=? and id in (?)", Product::PROD_TYPES[:SERVICE], opr]).map(&:id)
-            station_staffs = StationStaffRelation.where(["station_id = ? and current_day = ? ", station.id, Time.now.strftime("%Y%m%d").to_i])
-            if station_prods & serv_ids != serv_ids
-              flag = 1
-              status = 1
-              msg = "#{station.name}不支持该服务!"
-            elsif station_staffs.length < 2
-              flag = 1
-              status = 1
-              msg = "#{station.name}技师不足!"
-            end
-          end
-        end
-        if flag == 0
-          order_stations = []
-          wo_station_ids.each do |wo_station|
-            wo_id,station_id = wo_station.split("_")
-            wo = WorkOrder.find_by_id(wo_id)
-            status = wo && wo.update_attribute(:station_id, station_id.to_i) ? 0 : 1
-            if status == 0
-              station_staffs = StationStaffRelation.find_all_by_station_id_and_current_day station_id, Time.now.strftime("%Y%m%d").to_i
-              order = wo.order
-              order.update_attributes(:station_id => wo.station_id) if order
-              TechOrder.where(:order_id=>order.id).delete_all
-              staff_ids = station_staffs.map(&:staff_id)
-              staff_ids.each do |staff_id|
-                order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>order.id,:own_deduct=>order.technician_deduct/staff_ids.length)
-              end
-            end
-          end
-          TechOrder.import order_stations unless order_stations.blank?
-        end
-      end
-      work_orders = working_orders params[:store_id]
-    else
-      status = 1
-    end
-    render :json => {:status => status, :msg => msg, :orders => work_orders}
-  end
+  
 
   #施工完成 -> 等待付款
   def work_order_finished
@@ -1100,8 +1038,8 @@ class Api::NewAppOrdersController < ApplicationController
         techin_price = 0
         sale_id = 0
         prods.each do |prod|  #1_47_255=20
+          arr = prod.split("_")
           if prod.split("_")[0].to_i==0 #如果有产品
-            arr = prod.split("_")
             product = Product.find_by_id(arr[1].to_i)
             deduct_price = deduct_price + (product.deduct_price.to_f + product.deduct_percent.to_f) * arr[2].to_i
             techin_price = techin_price + (product.techin_price.to_f + product.techin_percent.to_f) * arr[2].to_i
@@ -1115,7 +1053,6 @@ class Api::NewAppOrdersController < ApplicationController
               end
             end
           elsif prod.split("_")[0].to_i==2  #如果有优惠卡 2_322_0_0_16=200_128
-            arr = prod.split("_")
             sid = arr[1].to_i
             if arr[2].to_i==0 #如果是打折卡
               arr.each do |a|
@@ -1137,26 +1074,28 @@ class Api::NewAppOrdersController < ApplicationController
                   csr.update_attributes(:customer_id => customer.id)
                   c_svc_relation_id << csr.id
                 end
-              elsif  arr[2].to_i==1 && arr[3].to_i==1 #如果是新买的储值卡，则更新储值卡-用户关联关系
-                csr = CSvcRelation.where(["customer_id=? and sv_card_id=? and order_id=? and status=?", ocid, sid,
-                    order.id, CSvcRelation::STATUS[:invalid]]).first
-                if csr.nil?
-                  status = 0
-                  msg = "数据错误!"
-                else
-                  csr.update_attributes(:customer_id => customer.id, :password => Digest::MD5.hexdigest(arr[-1].strip))
-                end
+              end
+            elsif  arr[2].to_i==1 && arr[3].to_i==1 #如果是新买的储值卡，则更新储值卡-用户关联关系
+              csr = CSvcRelation.where(["customer_id=? and sv_card_id=? and order_id=? and status=?", ocid, sid,
+                  order.id, CSvcRelation::STATUS[:invalid]]).first
+              if csr.nil?
+                status = 0
+                msg = "数据错误!"
+              else
+                sv_card = SvCard.find(sid)
+                send_message = "#{customer.name}：您好，您购买的储值卡#{sv_card.name},余额为#{csr.left_price}元，密码是#{arr[-1].strip}，请您尽快付款使用。"
+                csr.update_attributes(:customer_id => customer.id, :password => Digest::MD5.hexdigest(arr[-1].strip))
+                message_data(customer.store_id,send_message,customer,nil,MessageRecord::M_TYPES[:BUY_SV])
               end
             end
           elsif prod.split("_")[0].to_i==3  #如果是套餐卡
-            arr = prod.split("_")
             pid = arr[1].to_i
             selected_prods = arr.inject({}){|a, s|   #[2-5,56-1]
               unless s.split("=")[1].nil?
                 apid = s.split("=")[0].to_i
                 apcount = s.split("=")[1].to_i
                 a[apid] = apcount
-              end;
+              end
               a
             }
             if arr[2].to_i==0 #如果是用户已有的套餐卡,则要扣除购买的产品对应的数量
@@ -1192,26 +1131,6 @@ class Api::NewAppOrdersController < ApplicationController
               c_pcard_relation_id << cpr.id
               o_status = Order::STATUS[:BEEN_PAYMENT]
             elsif arr[2].to_i==1  #如果是用户刚买的套餐卡，则要扣掉刚买的产品，并且生成客户-套餐卡关系
-              #              pcard = PackageCard.find_by_id(pid)
-              #              #pmr = PcardMaterialRelation.find_by_package_card_id(pid)
-              #              #              material = Material.find_by_id(pmr.material_id) if pmr
-              #              #              material.update_attribute("storage", material.storage - pmr.material_num) if material
-              #              deduct_price = deduct_price + (pcard.deduct_price.to_f + pcard.deduct_percent.to_f)
-              #              cpr = CPcardRelation.where(["customer_id=? and package_card_id=? and status=? and order_id=?", ocid,
-              #                  pid, CPcardRelation::STATUS[:INVALID], order.id]).first
-              #              cpr_content = cpr.content.split(",")
-              #              a = []
-              #              (cpr_content ||[]).each do |cc|
-              #                ccid = cc.split("-")[0].to_i
-              #                ccname = cc.split("-")[1]
-              #                cccount = cc.split("-")[2].to_i
-              #                if selected_prods[ccid]
-              #                  a << "#{ccid}-#{ccname}-#{cccount - selected_prods[ccid]}"
-              #                else
-              #                  a << "#{ccid}-#{ccname}-#{cccount}"
-              #                end
-              #                       end
-              #                    cpr.update_attributes(:content => a.join(","), :customer_id => customer.id)
             end
           
             (selected_prods).each do |k, v|
@@ -1241,49 +1160,33 @@ class Api::NewAppOrdersController < ApplicationController
 
   #取消订单
   def cancel_order
-    begin
-      Order.transaction do
-        order = Order.find_by_id(params[:order_id].to_i)
-        work_order = order.work_orders[0]
-        unless Order::OVER_CASH.include?(order.status) || (work_order && [WorkOrder::STAT[:COMPLETE],WorkOrder::STAT[:WAIT_PAY]].include?(work_order.status))
-          cpr = CPcardRelation.find_by_status_and_order_id(CPcardRelation::STATUS[:INVALID], order.id)
-          oprs = OrderProdRelation.where(["order_id=?", order.id])
-          if cpr
-            pmr = PcardMaterialRelation.find_by_package_card_id(cpr.package_card_id)
-            m = Material.find_by_id(pmr.material_id) if pmr
-            m.update_attribute("storage", m.storage + pmr.material_num) if m
-          elsif oprs.any?
-            oprs.each do |opr|
-              product = Product.find_by_id(opr.product_id)
-              if !product.is_service
-                pmr = ProdMatRelation.find_by_product_id(product.id)
-                m = Material.find_by_id(pmr.material_id) if pmr
-                m.update_attribute("storage", m.storage.to_i + (pmr.material_num.to_i * opr.pro_num.to_i)) if m
-              end
-            end
+    Order.transaction do
+      order = Order.find_by_id(params[:order_id].to_i)
+      work_order = order.work_orders[0]
+      cpr = CPcardRelation.find_by_status_and_order_id(CPcardRelation::STATUS[:INVALID], order.id)
+      oprs = OrderProdRelation.where(["order_id=?", order.id])
+      if cpr
+        pmr = PcardMaterialRelation.joins(:material).where(:package_card_id=>cpr.package_card_id).
+          select("sum(materials.storage,material_num) result,material_id").first
+        Material.update_storage(pmr.material_id,pmr.result,order.front_staff_id,"pad销售套餐卡退卡返回物料",nil) if pmr #更新库存并生成出库记录
+      elsif oprs.any?
+        oprs.each do |opr|
+          product = Product.find_by_id(opr.product_id)
+          if !product.is_service
+            pmr = ProdMatRelation.joins(:material).where(:product_id =>product.id).
+              select("sum(materials.storage,material_num*pro_num) result,material_id").first
+            Material.update_storage(pmr.material_id,pmr.result,order.front_staff_id,"pad销售产品退卡返回物料",nil) if pmr #更新库存并生成出库记录
           end
-          if order.update_attributes(:status => Order::STATUS[:RETURN], :return_types => Order::IS_RETURN[:YES])
-            if params[:type].to_i == 1
-              work_order.arrange_station
-            end
-            work_order.update_attribute("status", WorkOrder::STAT[:CANCELED])
-            work_orders = working_orders params[:store_id]
-            render :json => {:status => 0, :msg => "取消成功!", :orders => work_orders}
-          end
-        else
-          msg = "取消失败!"
-          if work_order && [WorkOrder::STAT[:COMPLETE],WorkOrder::STAT[:WAIT_PAY]].include?(work_order.status)
-            msg += "施工已完成"
-          else
-            msg += "订单已付款"
-          end
-          work_orders = working_orders params[:store_id]
-          render :json => {:status => 1, :msg =>msg, :orders => work_orders}
         end
       end
-    rescue
-      work_orders = working_orders params[:store_id]
-      render :json => {:status => 1, :msg => "取消失败!", :orders => work_orders}
+      if order.update_attributes(:status => Order::STATUS[:RETURN], :return_types => Order::IS_RETURN[:YES])
+        if params[:type].to_i == 1
+          work_order.arrange_station
+        end
+        order.work_orders.inject([]){|h,wo| wo.update_attribute("status", WorkOrder::STAT[:CANCELED])}
+        work_orders = working_orders params[:store_id]
+        render :json => {:status => 1, :msg => "退单成功!", :orders => work_orders}
+      end
     end
   end
   
@@ -1467,9 +1370,9 @@ class Api::NewAppOrdersController < ApplicationController
           oprs.each do |opr|
             product = Product.find_by_id(opr.product_id)
             if !product.is_service
-              pmr = ProdMatRelation.find_by_product_id(product.id)
-              m = Material.find_by_id(pmr.material_id) if pmr
-              m.update_attribute("storage", m.storage.to_i + (pmr.material_num.to_i * opr.pro_num.to_i)) if m
+              pmr = ProdMatRelation.joins(:material).where(:product_id =>product.id).
+                select("sum(materials.storage,material_num*pro_num) result,material_id").first
+              Material.update_storage(pmr.material_id,pmr.result,order.front_staff_id,"pad销售产品退卡返回物料",nil,order) if pmr #更新库存并生成出库记录
             end
           end if oprs
           array,cpr_parm =  [],{}
@@ -1495,16 +1398,9 @@ class Api::NewAppOrdersController < ApplicationController
     render :json => {:status => status, :msg => msg, :orders => work_orders}
   end
 
-  def working_orders (store_id)
-    orders = Order.working_orders store_id.to_i
-    orders = combin_orders(orders)
-    orders = new_app_order_by_status(orders)
-    orders
-  end
-
   def update_customer
+    status = 1
     begin
-      status = 1
       Customer.transaction do
         customer = Customer.find_by_id_and_store_id(params[:customer_id].to_i,params[:store_id].to_i)
         car_num = CarNum.find_by_id(params[:car_num_id].to_i)
@@ -1519,16 +1415,21 @@ class Api::NewAppOrdersController < ApplicationController
     end
     render :json => {:status => status}
   end
+  
 
   def update_tech
     begin
-      TechOrder.where(:order_id=>params[:order_id]).delete_all
-      order_deduct = Order.find(params[:order_id]).technician_deduct
-      order_stations = []
+      order = Order.find(params[:order_id])
+      work_order = WorkOrder.where(:order_id => order.id).first
+      order_stations,station_staffs = [],[]
       params[:techIDStr].split(",").each do |staff_id|
-        order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>params[:order_id],:own_deduct=>order_deduct/params[:techIDStr].split(",").length)
+        order_stations << TechOrder.new(:staff_id=>staff_id,:order_id=>params[:order_id],:own_deduct=>order.technician_deduct/params[:techIDStr].split(",").length)
+        station_staffs << StationStaffRelation.new(:station_id =>work_order.station_id,:staff_id => staff_id,:store_id => order.store_id )
       end
-      TechOrder.import order_stations unless order_stations.blank?
+      TechOrder.where(:order_id=>params[:order_id]).delete_all
+      TechOrder.import order_stations
+      StationStaffRelation.delete_all(:store_id =>order.store_id, :station_id => work_order.station_id)
+      StationStaffRelation.import station_staffs
       status = 0
     rescue
       status = 1
@@ -1540,22 +1441,15 @@ class Api::NewAppOrdersController < ApplicationController
     store_id = chain_store(params[:store_id])
     car_num_phone = params[:carNumOrPhone]
     status = 1
-    if params[:type].to_i == 0
-      customers = Customer.joins(:customer_num_relations=>:car_num).joins("left join car_models m on m.id=car_nums.car_model_id left join
+    customer = Customer.joins(:customer_num_relations=>:car_num).joins("left join car_models m on m.id=car_nums.car_model_id left join
      car_brands b on b.id=m.car_brand_id").where(:"car_nums.num"=>car_num_phone,:"customers.store_id"=>store_id).select("car_nums.id n_id,customers.id,
-     customers.name c_name,mobilephone,sex,date_format(customers.birthday,'%Y-%m-%d') birth,buy_year,address,group_name,
-     distance,property,num,b.name b_name,m.name m_name").where(:status=>Customer::STATUS[:NOMAL])
-    else
-      customers = Customer.joins(:customer_num_relations=>:car_num).joins("left join car_models m on m.id=car_nums.car_model_id left join
-      car_brands b on b.id=m.car_brand_id").where(:"customers.mobilephone"=>car_num_phone,:"customers.store_id"=>store_id).
-        select("car_nums.id n_id,customers.id,customers.name c_name,mobilephone,sex,date_format(customers.birthday,'%Y-%m-%d') birth,
-       buy_year,address,group_name,distance,property,num,b.name b_name,m.name m_name").where(:status=>Customer::STATUS[:NOMAL])
-    end
+     customers.name c_name,mobilephone,sex,date_format(ifnull(customers.birthday,now()),'%Y-%m-%d') birth,buy_year,address,group_name,
+     distance,property,num,b.name b_name,m.name m_name").where(:status=>Customer::STATUS[:NOMAL]).first
     records,uncomplete ={},{}
-    unless customers.blank?
+    if customer
       status = 0
       orders = Order.joins("left join work_orders w on w.order_id=orders.id left join complaints c on c.order_id=orders.id").
-        where(:"orders.store_id"=>params[:store_id],:customer_id=>customers.map(&:id),:car_num_id=>customers.map(&:n_id)).select("orders.id,
+        where(:"orders.store_id"=>params[:store_id],:customer_id=>customer.id,:car_num_id=>customer.n_id).select("orders.id,
        w.station_id t_id,orders.customer_id,w.status w_status,date_format(orders.created_at,'%Y-%m-%d %H:%i') time,orders.status,c.id v_id,
       w.id w_id,orders.code,front_staff_id s_id,orders.price o_price").order("orders.created_at desc").group_by{|i|{:status=>i.status,:customer_id=>i.customer_id}}
       orders.select{|k,v|Order::PRINT_CASH.include? k[:status]}.each  {|k,v|
@@ -1564,9 +1458,9 @@ class Api::NewAppOrdersController < ApplicationController
         uncomplete[k[:customer_id]].nil? ?  uncomplete[k[:customer_id]] = v  : uncomplete[k[:customer_id]]<< v;uncomplete[k[:customer_id]]=uncomplete[k[:customer_id]].flatten}
       tech_orders = TechOrder.where(:order_id=>orders.values.flatten.map(&:id).uniq.compact).group_by{|i|i.order_id}.inject({}){|h,k_v|h[k_v[0]]=k_v[1].map(&:staff_id);h}
       order_prod = OrderProdRelation.order_products(orders.values.flatten.map(&:id).uniq.compact)
-      cards = Customer.card_infos(customers.map(&:id),store_id)
+      cards = Customer.card_infos(customer.id,store_id)
       reserv_staffs = []
-      reservs = Reservation.where(:customer_id=>customers.map(&:id),:store_id=>store_id,:status=>Reservation::STATUS[:normal]).
+      reservs = Reservation.where(:customer_id=>customer.id,:store_id=>store_id,:status=>Reservation::STATUS[:normal],:car_num_id=>customer.n_id).
         select("date_format(res_time,'%Y-%m-%d %H:%i') time,types,customer_id,staff_id,prod_types,prod_id,prod_price,prod_num,id,code").map {|reserv|
         model = reserv.prod_types < 2 ? Product : (reserv.prod_types == 2 ? PackageCard : SvCard)
         prod = model.find(reserv.prod_id)
@@ -1579,7 +1473,7 @@ class Api::NewAppOrdersController < ApplicationController
       pay_types = OrderPayType.order_pay_types(records.values.flatten.map(&:id))
       pay_orders = {}
       OrderPayType.pay_order_types(records.values.flatten.map(&:id)).each {|k,types|pay_orders[k]=types.select{|k,v|OrderPayType::LOSS.include? k}.values.inject(0){|sum,n|sum+n}}
-      render :json=>{:customers =>customers,:status=>status,:records=>records,:order_prods =>order_prod,:staffs=>staffs,
+      render :json=>{:customers =>customer,:status=>status,:records=>records,:order_prods =>order_prod,:staffs=>staffs,
         :uncomplete=>uncomplete,:tech_orders=>tech_orders,:pay_types=>pay_types,:cards=>cards,:pay_orders=>pay_orders,:reservs =>reservs }
     else
       render :json=>{:status=>status}

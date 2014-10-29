@@ -14,6 +14,7 @@ class Order < ActiveRecord::Base
   has_many :complaints
   has_many :tech_orders
   has_many :return_orders
+  has_many :mat_out_orders
 
   IS_VISITED = {:YES => 1, :NO => 0} #1 已访问  0 未访问
   STATUS = {:NORMAL => 0, :SERVICING => 1, :WAIT_PAYMENT => 2, :BEEN_PAYMENT => 3, :FINISHED => 4, :DELETED => 5, :INNORMAL => 6,
@@ -132,9 +133,9 @@ class Order < ActiveRecord::Base
     return customer_condition_sql[2].blank? ? [] : Customer.find_by_sql(condition_arr)
   end
 
-  def self.one_customer_orders(status, store_id, customer_id, pre_page, page)
-    @orders = Order.paginate_by_sql(["select * from orders where status in (#{status}) and store_id = ? and customer_id = ?
-        order by created_at desc",  store_id, customer_id], :per_page => pre_page, :page => page)
+  def self.one_customer_orders(status, store_id, customer_id)
+    @orders = Order.find_by_sql(["select * from orders where status in (#{status}) and store_id = ? and customer_id = ?
+        order by created_at desc",  store_id, customer_id])
   end
 
   #正在进行中的订单

@@ -48,22 +48,6 @@ class Store < ActiveRecord::Base
   IS_CHAIN = {:YES => 1,:NO => 0} #是否有关联的连锁店
 
   CASH_AUTH = {:NO => 0, :YES => 1} #是否有在pad上收银的权限
-  def self.upload_img(img_url,store_id,pic_types,pics_size,img_code=nil)
-    path = Constant::LOCAL_DIR
-    dirs=["/#{pic_types}","/#{store_id}"]
-    dirs.each_with_index {|dir,index| Dir.mkdir path+dirs[0..index].join   unless File.directory? path+dirs[0..index].join }
-    file=img_url.original_filename
-    filename="#{dirs.join}/#{img_code}img#{store_id}."+ file.split(".").reverse[0]
-    File.open(path+filename, "wb")  {|f|  f.write(img_url.read) }
-    img = MiniMagick::Image.open path+filename,"rb"
-    pics_size.each do |size|
-      new_file="#{dirs.join}/#{img_code}img#{store_id}_#{size}."+ file.split(".").reverse[0]
-      resize = size > img["width"] ? img["width"] : size
-      height = img["height"].to_f*resize/img["width"].to_f > 345 ?  345 : resize
-      img.run_command("convert #{path+filename}  -resize #{resize}x#{height} #{path+new_file}")
-    end
-    return filename
-  end
 
   def warn_store(this_price)
     store_parm = {:message_fee=>self.message_fee-this_price}

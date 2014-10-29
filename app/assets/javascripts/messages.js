@@ -63,6 +63,11 @@ function selectAllCustomers(obj){
 function send_message(store_id,status){
     var msg = $("#tbody_revist :checkbox");
     var send_ids = [];
+    var url = "/stores/"+store_id+"/revisits/send_mess";
+    var data = {
+        deal_status : status,
+        send_ids : send_ids
+    }
     for(var i=0;i<msg.length;i++){
         if (msg[i].checked){
             send_ids.push(msg[i].value);
@@ -72,15 +77,7 @@ function send_message(store_id,status){
         tishi_alert("请选择回访或者提醒信息！");
         return false;
     }else{
-        $.ajax({
-            type: "post",
-            url: "/stores/"+store_id+"/revisits/send_mess",
-            dataType: "script",
-            data: {
-                deal_status : status,
-                send_ids : send_ids
-            }
-        })
+        request_ajax(url,data,"post")
     }
     
 }

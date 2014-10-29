@@ -34,5 +34,9 @@ class OrderPayType < ActiveRecord::Base
       |hash,o| hash[o.order_id].nil? ? hash[o.order_id]={o.pay_type=>o.sum} : hash[o.order_id][o.pay_type]=o.sum;hash}
   end
 
+  def self.customer_pay_types(orders)
+    OrderPayType.joins(:order).select(" ifnull(sum(order_pay_types.price),0) sum,pay_type,customer_id c_id ").where(:order_id=>orders).group('c_id,pay_type').inject(Hash.new){
+      |hash,o|hash[o.c_id].nil? ?  hash[o.c_id]={o.pay_type=>o.sum} : hash[o.c_id][o.pay_type]=o.sum ;hash}
+  end
   
 end

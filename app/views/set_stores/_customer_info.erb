@@ -8,7 +8,8 @@
            style="background-color:<%if @customer.mobilephone.length ==11 %>chartreuse<%else%>red<%end%>;"
            value="<%= @customer.mobilephone %>" readonly <%end%>
          onblur="auth_number(this,<%=params[:store_id]%>)" />
-  <label>其他联系方式</label>
+  <button class="blue_btn" title="选择车牌所属用户" id="add_c_btn" style="display: none" onclick="before_center('#customer_popup')" >添加车牌</button>
+  <label style="width:50px">备注</label>
   <input type="text" id="other_way" <% if @customer %>  value="<%= @customer.other_way %>" readonly <%end%> />
 </p>
 <p>
@@ -20,3 +21,4 @@
 <input type="hidden" id="old_customer" value="<%= @num %>" />
 <input type="hidden" id="old_number" <% if @customer and @customer.mobilephone %> value="<%= @customer.mobilephone %>" <%end%> />
 <input type="hidden" id="checked_item" />
+<input type="hidden" id="my_number" <% if @customer and @customer.mobilephone %> value="<%= @customer.mobilephone %>" <%end%> />

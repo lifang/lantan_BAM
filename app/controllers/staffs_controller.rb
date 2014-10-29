@@ -7,8 +7,8 @@ class StaffsController < ApplicationController
   before_filter :search_work_record, :only => :show
 
   def index
-    @staffs_names = @store.staffs.not_deleted.select("id, name")
-    @staffs = @store.staffs.not_deleted.paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
+    @staffs_names = @store.staffs.not_deleted.where("type_of_w is not null").select("id, name")
+    @staffs = @store.staffs.not_deleted.where("type_of_w is not null").paginate(:page => params[:page] ||= 1, :per_page => Constant::PER_PAGE)
     @staff_scores_hash = MonthScore.select("sum(sys_score) sys_score,staff_id").where("current_month = #{DateTime.now.months_ago(1).strftime("%Y%m")}
    and store_id = ?", @store.id).group("staff_id").inject(Hash.new){|hash,month| hash[month.staff_id] = month;hash}
     @violations = ViolationReward.joins(:staff).where(:status => false).where("staffs.store_id=#{@store.id}").select("violation_rewards.*,staffs.name").group_by{|i| i.types }
@@ -38,10 +38,10 @@ class StaffsController < ApplicationController
 
   def create
     params[:staff][:username] = params[:staff][:phone]
-    params[:staff][:password] = params[:staff][:phone]
+    params[:staff][:password] = params[:staff][:phone] if params[:is_access] &&  params[:is_access].to_i ==1
     params[:staff][:status] = Staff::STATUS[:normal]
     @staff = @store.staffs.new(params[:staff])
-    @staff.encrypt_password
+    @staff.encrypt_password if params[:is_access] &&  params[:is_access].to_i ==1
     photo = params[:staff][:photo]
     encrypt_name = random_file_name(photo.original_filename) if photo
     @staff.photo = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
@@ -88,6 +88,13 @@ class StaffsController < ApplicationController
     photo = params[:staff][:photo]
     encrypt_name = random_file_name(photo.original_filename) if photo
     params[:staff][:photo] = "/uploads/#{@store.id}/#{@staff.id}/"+encrypt_name+"_#{Constant::STAFF_PICSIZE.first}."+photo.original_filename.split(".").reverse[0] unless photo.nil?
+    if params[:is_access] &&  params[:is_access].to_i ==1 && @staff.encrypted_password.nil?
+      params[:staff][:password] = params[:staff][:phone]
+      @staff.encrypt_password
+    else
+      params[:staff][:encrypted_password] = nil
+      params[:staff][:salt] = nil
+    end
     @staff.attributes = params[:staff]
     notice = @staff.status_changed? ? "员工在职状态已经改变，请注意检查员工的工作状态" : ""
     if @staff && @staff.save
@@ -103,8 +110,7 @@ class StaffsController < ApplicationController
   end
 
   def destroy
-    @staff = @store.staffs.find_by_id(params[:id])
-    @staff.update_attribute(:status,Staff::STATUS[:deleted] ) if @staff
+    Staff.update(params[:id],status: Staff::STATUS[:deleted])
     flash[:notice] = "成功删除员工"
     redirect_to store_staffs_path(@store)
   end
@@ -132,22 +138,13 @@ class StaffsController < ApplicationController
   def search_work_record
     @staff = Staff.find_by_id(params[:id])
     @tab = params[:tab]
-    if @tab.nil? || @tab.eql?("work_record_tab")
-      @cal_style = params[:cal_style]
-      start_at = (params[:start_at].nil? || params[:start_at].empty?) ? "1 = 1" : "current_day >= '#{params[:start_at]}'"
-      end_at = (params[:end_at].nil? || params[:end_at].empty?) ? "1 = 1" : "date_format(current_day, '%Y-%m-%d') <= '#{params[:end_at]}'"
-      if @cal_style.nil? || @cal_style.empty? || @cal_style.eql?("day")
-        @work_records = @staff.work_records.where(start_at).where(end_at).order("current_day desc").
-          paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
-      end
-      if @cal_style.eql?("week") || @cal_style.eql?("month")
-        base_sql = Staff.search_work_record_sql
-        @work_records = @staff.work_records.select(base_sql).
-          where(start_at).where(end_at).group("#{@cal_style}(current_day)").order("current_day desc").
-          paginate(:page => params[:page] ||= 1, :per_page => Staff::PerPage)
-      end
-    end
 
+    if @tab.nil? || @tab.eql?("work_record_tab")
+      @work_records = WorkRecord.where(:staff_id=>@staff).where("current_day <=date_add(now(), interval 1 year)").
+        select("count(*) num,date_format(current_day,'%Y-%m') time,attend_types").
+        group("time,attend_types").order("time desc").inject({}){|h,w|h[w.time].nil? ? h[w.time]={w.attend_types =>w.num} : h[w.time][w.attend_types]=w.num;h }
+      #      if @cal_style.eql?("week") || @cal_style.eql?("month")
+    end
   end
 
   def send_message(staff)

@@ -48,6 +48,8 @@
                     <%end%>
                     <% if permission?(:sales, :edit_sale) %><a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">编辑</a><% end %>
                     <a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>" target="_blank">预览</a>
+                      <a href="javascript:void(0)"
+                           onclick="on_weixin('Sale','<%=  sale.id %>',this)" title="<%= sale.on_weixin ?  '不' : '' %>在微信上推荐该套餐卡"><%= sale.on_weixin ?  '不' : '' %>推荐</a>
                   </td>
                 </tr>
               <% end %>
@@ -88,6 +90,8 @@
                       <%end%>
                       <% if permission?(:sales, :edit_sale) %><a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>/edit">编辑</a><% end %>
                       <a href="/stores/<%= params[:store_id] %>/sales/<%= sale.id %>" target="_blank">预览</a>
+                       <a href="javascript:void(0)"
+                           onclick="on_weixin('Sale','<%=  sale.id %>',this)" title="<%= sale.on_weixin ?  '不' : '' %>在微信上推荐该套餐卡"><%= sale.on_weixin ?  '不' : '' %>推荐</a>
                     </td>
                   </tr>
                 <% end %>

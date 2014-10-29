@@ -101,7 +101,7 @@ class FinanceReportsController < ApplicationController
     if @end_time != "0"
       sql += " and date_format(m.month,'%Y-%m')<='#{@end_time.strftime("%Y-%m")}'"
     end
-    p @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE],:status=>Fee::STATUS[:NORMAL]).
+    @fees = Fee.joins("inner join money_details m on m.parent_id=fees.id").where(sql).where(:"m.types"=>MoneyDetail::TYPES[:FEE],:status=>Fee::STATUS[:NORMAL]).
       select("fees.*,m.amount m_amount").group_by{|i|i.types}
     @customers = Staff.find(@fees.values.flatten.map(&:operate_staffid)).inject({}){|h,c|h[c.id]=c.name;h}
     respond_to do |format|
@@ -157,7 +157,7 @@ class FinanceReportsController < ApplicationController
       sql += " and date_format(order_pay_types.created_at,'%Y-%m-%d')<='#{@end_time}'"
     end
     @pay_orders = OrderPayType.joins(:order).where(:pay_type=>OrderPayType::PAY_TYPES[:HANG],:pay_status=>OrderPayType::PAY_STATUS[:UNCOMPLETE]).
-      where(sql).select("code,order_pay_types.price p_price,customer_id,car_num_id,date_format(order_pay_types.created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.customer_id}
+      where(sql).select("code,ifnull(order_pay_types.price,0) p_price,customer_id,car_num_id,date_format(order_pay_types.created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.customer_id}
     @get_accounts = warn_account(0.8,5,[])
     @customers = Customer.find((@get_accounts.map(&:customer_id)|@pay_orders.keys).uniq.compact).inject({}){|h,c|h[c.id]=c;h}
     @account = Account.where(:supply_id=>@pay_orders.keys).inject({}){|h,c|h[c.supply_id]=c;h}
@@ -226,7 +226,7 @@ class FinanceReportsController < ApplicationController
             trade_amt = 0
           end
           @pay_orders = MaterialOrder.where(:status=>MaterialOrder::STATUS[:no_pay]).where(sql).select("code,price p_price,supplier_id,
-    date_format(created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.supplier_id}
+          date_format(created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.supplier_id}
           suppliers = @pay_orders.keys
           suppliers.delete 0
           @customers = Supplier.find(suppliers).inject({0=>Supplier.new(:name=>"总部")}){|h,c|h[c.id]=c;h}
@@ -251,7 +251,7 @@ class FinanceReportsController < ApplicationController
     if @end_time != "0"
       sql += " and date_format(created_at,'%Y-%m-%d')<='#{@end_time}'"
     end
-    p @pay_orders = MaterialOrder.where(:status=>MaterialOrder::STATUS[:no_pay]).where(sql).select("code,price p_price,supplier_id,
+    @pay_orders = MaterialOrder.where(:status=>MaterialOrder::STATUS[:no_pay]).where(sql).select("code,ifnull(price,0) p_price,supplier_id,
     date_format(created_at,'%Y-%m-%d %H:%m') time").group_by{|i|i.supplier_id}
     suppliers = @pay_orders.keys
     suppliers.delete 0
@@ -347,11 +347,16 @@ class FinanceReportsController < ApplicationController
   def create_assets
     assets = params[:assets].merge({:code => "ZC#{Time.now.strftime("%Y%m%d")}#{add_string(3,FixedAsset.where(:store_id=>params[:store_id]).count+1)}",:store_id=>params[:store_id],:status=>FixedAsset::STATUS[:NORMAL]})
     asset = FixedAsset.create(assets)
+    fee_parm ={:name=>"#{asset.name}折旧费",:pay_date=>asset.pay_date,:fee_date=>asset.fee_date,:types=>8,:payment_type=>asset.payment_type,
+      :share_month=>asset.share_month,:operate_staffid=>asset.operate_staffid,:create_staffid=>asset.create_staffid,:amount=>asset.pay_amount,
+      :store_id=>asset.store_id}
+    fee = Fee.create(fee_parm.merge({:code => "ZC#{Time.now.strftime("%Y%m%d")}#{add_string(3,Fee.where(:store_id=>params[:store_id],:types=>8).count+1)}"}))
     money_detail = []
     date = asset.pay_date.to_date
     (1..assets[:share_month].to_i).each do |i|
       money = asset.pay_amount.to_f/assets[:share_month].to_i
       money_detail << MoneyDetail.new({:types=>MoneyDetail::TYPES[:ASSET],:parent_id=>asset.id,:month=>date.strftime("%Y-%m-%d"),:amount=>money,:store_id=>params[:store_id]})
+      money_detail << MoneyDetail.new({:types=>MoneyDetail::TYPES[:FEE],:parent_id=>fee.id,:month=>date.strftime("%Y-%m-%d"),:amount=>money,:created_at=>date})
       date = date.next_month
     end
     MoneyDetail.import money_detail
